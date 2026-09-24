@@ -1,0 +1,20 @@
+Loading weights:   0%|          | 0/76 [00:00<?, ?it/s]Loading weights: 100%|██████████| 76/76 [00:00<00:00, 1822.19it/s]
+loaded EleutherAI/pythia-70m params=70,426,624 (config 70,426,624, body 18,915,328) sanity_nll=3.2192 in 1.7s mps_alloc=0.26G driver=1.04G peak_driver=1.04G
+loss self-check hf=2.97847 answer_only=2.97845
+loss mutants {'no_shift': 11.343619346618652, 'prompt_labelled': 3.5288522243499756} (must all differ from 2.97847)
+probe step 0 {'step': 0, 'LW': 0.5, 'TS': 0.5, 'NU': 1.0} mps_alloc=0.26G driver=1.09G peak_driver=1.09G
+step 0 loss 2.8561 gnorm 259.17 lr 4.52e-06 2s mps_alloc=0.99G driver=2.13G peak_driver=2.13G
+step 1 loss 2.2160 gnorm 222.26 lr 4.91e-06 3s mps_alloc=0.99G driver=2.13G peak_driver=2.13G
+step 2 loss 2.3259 gnorm 305.51 lr 3.45e-06 5s mps_alloc=0.99G driver=2.13G peak_driver=2.13G
+step 3 loss 1.5529 gnorm 221.40 lr 1.19e-06 6s mps_alloc=0.99G driver=2.09G peak_driver=2.13G
+step 4 loss 1.7866 gnorm 145.22 lr 0.00e+00 7s mps_alloc=0.99G driver=2.09G peak_driver=2.13G
+probe step 5 {'step': 5, 'LW': 0.0, 'TS': 0.5, 'NU': 1.0}
+scored new/plain: 2 items in 0s mps_alloc=0.99G driver=2.08G peak_driver=2.13G
+scored extra/plain: 2 items in 0s mps_alloc=0.99G driver=2.08G peak_driver=2.13G
+scored old/plain: 2 items in 0s mps_alloc=0.99G driver=2.08G peak_driver=2.13G
+scored uprobe/plain: 2 items in 0s mps_alloc=0.99G driver=2.08G peak_driver=2.13G
+scored khard/plain: 2 items in 0s mps_alloc=0.99G driver=2.08G peak_driver=2.13G
+scored kbig/plain: 2 items in 0s mps_alloc=0.99G driver=2.08G peak_driver=2.13G
+scored cross/plain: 2 items in 0s mps_alloc=0.99G driver=2.08G peak_driver=2.13G
+scored dev/plain: 2 items in 0s mps_alloc=0.99G driver=2.08G peak_driver=2.13G
+DONE EleutherAI/pythia-70m dry total 10s peak_driver=2.131G lock_in_step=None loss_finite=True

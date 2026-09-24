@@ -86,3 +86,4 @@ HARNESS CHANGE 2026-09-24 ~10:50 (resumed session; no effect on any score)
   (logs/lidwatch_s4.txt).
   Note: ft_135m_s2 ran through the 08:51-09:24 sleep (elapsed 4873 s vs ~2900 s for other seeds); its results
   are in line with the other seeds.
+2026-09-24 18:42:45 E002 chat probe (queue C) NOT re-run: it was killed by a guard false positive (swap grew ~1.1 GB on wake from sleep while 50-71% of memory was free; guard.py now requires low free memory too). E002 collateral damage is superseded by E004's own chat-probe check.

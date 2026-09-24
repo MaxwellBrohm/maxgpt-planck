@@ -1,0 +1,142 @@
+E003: correction floor (the same test as E002 on much smaller public BASE models; LEDGER P-001 follow-up, P-046)
+Mac M5 24 GB, one model process at a time through code/guard.py (E002's guard, copied byte-for-byte). E002 was not modified.
+
+QUESTION
+E002: 400 short fine-tuning steps on correction dialogues taught SmolLM2-135M-Instruct (106M body) to use the latest
+value after a correction (5/5 seeds pass the pre-registered rule, pending audit). E003 asks at what BODY size
+(non-embedding parameters) that stops working, with the pass rule, items and training recipe held fixed.
+Max's priority (2026-09-24): models of 30M total parameters and under, so the queue runs smallest first.
+
+PRE-REGISTERED BEFORE ANY REAL RUN (written 2026-09-24 13:41; no E003 model has been loaded; the queue waits for
+E002 to finish before its first job)
+
+Models (base language models, no chat template), parameters from config.json (code/params.py), each count checked
+against the tensor shapes stored in the downloaded weight file (params.py --verify: all 9 match):
+  model                         total        embedding    body (axis)   body/total  layers d_model  ctx cfg / trained
+  roneneldan/TinyStories-1M      3,745,984    3,347,520      398,464      0.106      8      64     2048 / 512
+  EleutherAI/pythia-14m         14,067,712   12,877,824    1,189,888      0.085      6     128     2048 / 2048
+  roneneldan/TinyStories-3M      8,278,400    6,695,040    1,583,360      0.191      8     128     2048 / 512
+  EleutherAI/pythia-31m         30,494,720   25,755,648    4,739,072      0.155      6     256     2048 / 2048
+  roneneldan/TinyStories-8M     19,702,528   13,390,080    6,312,448      0.320      8     256     2048 / 512
+  EleutherAI/pythia-70m         70,426,624   51,511,296   18,915,328      0.269      6     512     2048 / 2048
+  roneneldan/TinyStories-33M    68,514,048   40,170,240   28,343,808      0.414      4     768     2048 / 512
+  EleutherAI/pythia-160m       162,322,944   77,266,944   85,056,000      0.524     12     768     2048 / 2048
+  (E002) SmolLM2-135M-Instruct 134,515,008   28,311,552  106,203,456      0.790     30     576     8192
+  embedding = token embedding + untied output head (Pythia) + learned position table (GPT-Neo, 2048 x d).
+  Pythia's body counts equal the Pythia paper's non-embedding counts (70m 18,915,328; 160m 85,056,000).
+  Queue order = body order (above). The first five rows are the models of about 30M total and under.
+
+Context and item length (re-measured with each tokenizer; validate_e003.py --tok, logs/validate_e003.json):
+  The four Pythia models share one tokenizer, the four TinyStories models share one (GPT-Neo/GPT-2 BPE).
+  Longest scored sequence: Pythia 626 tokens, TinyStories 605 (SmolLM2 was 620). Every item fits the 2048
+  positions of every model, so no item is dropped, truncated or redrawn: the item mix is identical to E002.
+  Training stream: max 784 (Pythia) / 756 (TinyStories); at --max-len 768 about 1 in 20,000 Pythia examples is
+  redrawn (E002: 1 in ~6,400); the d>=8 first-mentioned-gold share is 0.361 kept vs 0.361 all, for both tokenizers.
+  CAVEAT, TinyStories only: the models were pretrained on 512-token sequences (the TinyStories-33M card says
+  context_length=512; the other cards say nothing and are assumed the same). Positions 512+ never received a
+  pretraining gradient. With the GPT-2 tokenizer 101/192 LW10 items, 26/64 TS10 items and 0/64 NU10 items are
+  longer than 512 tokens (dev draw: 103/192, 29/64, 0/64). The fine-tune trains positions up to ~756 (6.7% of
+  training examples are longer than 512). E002's rule is kept (all items, nothing rejected), and a DIAGNOSTIC is
+  pre-registered: the three pass-rule cells split by fits <= 512 / over 512, plus "the pass rule on fitting items
+  only" as a secondary label (never the verdict). The dry run also logs the mean norm of the position-table rows
+  0-511 / 512-767 / 768-2047. TinyStories is also narrow-domain text with alternating 256-token local attention,
+  so the TinyStories ladder is a secondary ladder; the Pythia ladder (same 300B tokens, same tokenizer, same
+  2048 context) is the clean one for the floor.
+
+Items, render, grader, pass rule: identical to E002.
+  Items: E002's modules copied byte-for-byte (logs/copied_from_E002.sha256). validate_e003.py checks that every
+  E003 eval set renders to the SAME prompts as E002's scored SmolLM2-135M baseline records (hash, order, variant,
+  distance: new 1728, extra 192, old 1116, uprobe 576, khard 80, kbig 441, cross 384; 0 differ).
+  Render: plain "User:/Assistant:" only. Base models have no chat template, so E002's chat-render sets are not
+  scored; E002's pass rule was always plain-only.
+  An item is right only if the gold's summed log-prob is strictly above every other in-context candidate (ties,
+  NaN or missing scores fail: an empty answer scores 0; a plausible wrong answer scores 0).
+  Per seed: LW10 >= 0.8 AND TS10 >= 0.8 AND NU10 >= 0.8 (LW10 = same_k1+k2+k3 at d10, both families, n=192;
+  TS10 = twoslot d10, n=64; NU10 = noupd d10, n=64). A model passes when a strict majority of its seeds pass
+  (2 of 3). Lock-in step as E002 (in-training probe, seed-777 draw, every 50 steps).
+
+Training: identical to E002 135M except the learning rate. 400 optimizer steps, AdamW wd 0, 20 warmup steps then
+cosine to 0, grad clip 1.0, fp32 weights and optimizer, loss on answer tokens only, micro-batch 4 x accumulation 4
+(effective 16), gradient checkpointing, --max-len 768 with redraw (never truncate). Training data stream
+Random(1000 * seed + 17): seeds 1-3 see the same example order E002's seeds 1-3 saw.
+  Code change: the answer-only loss now uses model.base_model and model.get_output_embeddings() (E002's used the
+  Llama-only model.model / model.lm_head). Every training run checks it against the HF loss on a real batch and
+  exits on a mismatch; the dry run also checks that two wrong losses (no shift; prompt tokens labelled) do NOT
+  match, so the check is not vacuous.
+
+LEARNING-RATE SEARCH (fixed now, before any run)
+  Why: E002's 5e-5 may be far too low for 1-30M models.
+  Runs: seed 0 only, 400 steps, same recipe, one run per LR:
+    grid {5e-05, 3e-04, 1e-03} for every model, plus 3e-03 for the three models with d_model <= 128
+    (TinyStories-1M, TinyStories-3M, pythia-14m; the task suggested TinyStories-1M/3M, pythia-14m has the same
+    width as TinyStories-3M and a smaller body, so it gets the same grid).
+  Selection data: a SEPARATE dev draw of the pass-rule items: items_new.build(n_scen=32, distances=(10,),
+  seed=3003), variants same_k1/2/3, twoslot, noupd = 320 items (LW 192, TS 64, NU 64). No dev prompt equals any
+  eval or probe prompt, no dev dialogue equals an eval dialogue (checked). The LR-search runs score the dev draw
+  only and never the eval items.
+  Rule (code/pick_lr.py): eligible = finished, 400 finite training losses, 320 dev items scored. Score =
+  min(LW, TS, NU) on dev at d10; ties broken by the higher mean of the three, then by the SMALLER LR.
+  One extension, at most once per model: if the pick is the largest LR of the grid and its dev min is < 0.8, run
+  the next half-decade LR (1e-03 -> 3e-03, 3e-03 -> 1e-02) with the same seed-0 dev-only protocol and pick again
+  over all runs, never extending further. No eligible run -> no scored seeds, reported as "no usable LR".
+  Scored runs: 3 FRESH seeds (1, 2, 3) at the chosen LR, full eval sets, weights saved to weights/ (gitignored,
+  scratch). Seed 0 is used only for selection, so the scored seeds carry no selection bias.
+
+Baselines first: every untouched model is scored (eval sets + dev draw) before any fine-tuning run.
+
+Reported (as E002, plain render): the pass-rule cells and verdict; controls at d0/4/10 (same_k1-3, twoslot, noupd,
+noupd_incid, keyorig, keycorr, pos, neutral, paired all5); E002's POST-HOC crossed control (cross_A, cross_B,
+cross_pair); the old battery families (latest-wins d4-10, owner pair, two-hop pair, perspective pair); uprobe;
+khard open; closed-book knowledge change vs the untouched model on the same items, paired with 95% CIs (kbig 441,
+khard40, kbig_new 401, K_closedbook60); lock-in step; the LR-search table.
+
+Reading (fixed now):
+  - The floor = the smallest body at which a model passes. Within the Pythia ladder this is a clean size effect
+    for this recipe (400 steps, this data). The TinyStories ladder is read with its caveats above.
+  - Secondary label, not the verdict: "per-object tracking" = pass AND crossed pair at d10 >= 0.8 on most seeds.
+    A pass without it means the model may use "a correction marker wins, else the first value" (E002 reading).
+  - A model that fails at every LR: not learnable in 400 steps with this recipe at that size. That is NOT proof of
+    a capacity limit (more steps, curriculum or a state mechanism could still work).
+  - Non-monotone results across sizes are reported as they come; no model or seed is re-run to smooth them.
+  - Knowledge: when a model's untouched kbig accuracy is near chance (< 0.6), its knowledge change is reported but
+    read as uninformative.
+  - A pass here would make a 1-30M body a candidate for Planck's correction behavior; a floor between two sizes
+    says where to spend the from-scratch budget.
+
+Tests (no model loaded; logs/validate_e003.txt/.json, logs/mutation_e003.txt/.json):
+  validate_e003.py (--tok): E002's model-free suite unchanged (graders: empty, tie, NaN and wrong answers fail;
+  pass-rule boundary; d10-only; plain-only; majority; lock-in; paired CI; oracles on the real items; leaks;
+  held-out wording; training-stream shortcuts: first-mentioned right 0.356, last-mentioned 0.398, latest rule 1.0),
+  plus: copies unchanged, item identity with E002, dev draw composition and disjointness, dev oracles, the LR pick
+  rule on 13 synthetic cases, the analysis on oracle records (empty and wrong answers fail, crossed pair needs both,
+  knowledge sign, length split), parameter formulas vs weight files, the queue's arguments (LR search on dev only,
+  seeds 1 2 3 on eval only, E002's batch settings), the loss-check comparator, tokenization per family.
+  Result: validate_e003.py --tok 0 failures. mutation_e003.py --tok: 37 of 37 mutants killed (none by a crash;
+  two first-round survivors fixed the tests: the LR-pick "mean instead of min" case did not separate the two, and an
+  analysis check crashed instead of failing), unmutated suite green. One first-round mutant (dev seed = eval seed)
+  was ill-posed: the dev build draws d10 only, so its stream differs; it was replaced by "dev reuses eval items".
+  Queue control flow simulated with stub jobs (scratch, not kept): dry-run failure skips only that model, an LR
+  extension runs once and is followed by the final pick, "NONE" skips the seeds, a memory kill writes
+  "QUEUE STOPPED: <reason>" and ends the queue, the normal end writes "QUEUE E003 DONE".
+
+Dry run (first job for every model, 5 steps padded to 768, 2 items per set): parameter count vs config (a mismatch
+is logged as PARAM MISMATCH in logs/queue.txt), loading info (a parameter missing from the checkpoint is fatal:
+it would be random), the untied Pythia head is not the input embedding, sanity NLL < 8 nats/token on one plain
+sentence (random head ~10.8), HF-loss self-check and the two loss mutants, finite scores, and the scorer's tie and
+gold-only cases. A failed dry run skips that model's later jobs.
+
+QUEUE (code/queue_e003.sh; one line per job in logs/queue.txt; ends with "QUEUE E003 DONE" or "QUEUE STOPPED: ...")
+  0. waits until no process matches queue_e002b.sh, E002's ft_test.py, gen_probe.py, run_chat.py (or another guard
+     model script), then 60 s more with the condition still true
+  A. 8 dry runs, B. 8 baselines, C. per model (smallest body first): LR search, pick, 3 seeds, analyze_e003.py
+  Stops itself on a memory-related guard verdict (free_memory*, swap_grew*, preflight*, memory_never*), as E002.
+  Ceilings (active seconds): dry 900; base 1800-3000; LR run 3600-5400; scored 3600-5400 (by model size).
+  Estimated durations AFTER E002 ends (from E002's 135M timings scaled by body and layer count; the dry runs
+  measure the real step times, logged as s_per_step): dry runs + baselines ~40 min; TinyStories-1M ~45 min,
+  pythia-14m ~45, TinyStories-3M ~45, pythia-31m ~45, TinyStories-8M ~50 (the five models of about 30M total and
+  under: ~4 h 10 min from the queue start), pythia-70m ~75, TinyStories-33M ~80, pythia-160m ~3 h 30 min;
+  total ~10 h (plausible range 6-15 h), plus up to one extension LR run per model.
+
+DEVIATIONS: none yet.
+
+2026-09-24 14:15:33 DEFERRED by Claude after the E002 audit: the queue stopped at base_ts33m (a guard false positive: a shell whose text named a model script counted as a model job; guard.py fixed to count only real Python processes). Baselines exist for ts1m, p14m, ts3m, p31m, ts8m, p70m. The LR search and seeds are deferred: E002's audit showed these items can be passed by a wording-match shortcut, and E004 tests the real skill on the same tiny ladder. If E004's tiny models fail, E003 is run as the easy-version diagnostic.

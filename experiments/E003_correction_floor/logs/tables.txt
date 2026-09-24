@@ -1,0 +1,72 @@
+E003 correction floor: size ladder (body = non-embedding parameters; pass rule and seeds as E002)
+
+model                                 body        total | base LW/TS/NU     | LR     | seeds pass | verdict | mean LW10 TS10 NU10 | cross_pair@10 | kbig dAcc
+roneneldan/TinyStories-1M          398,464    3,745,984 | 0.44/0.33/0.44 | None   | 0/0        |   -     | None  None  None  | -             | -
+EleutherAI/pythia-14m            1,189,888   14,067,712 | 0.20/0.33/0.97 | None   | 0/0        |   -     | None  None  None  | -             | -
+roneneldan/TinyStories-3M        1,583,360    8,278,400 | 0.40/0.34/0.48 | None   | 0/0        |   -     | None  None  None  | -             | -
+EleutherAI/pythia-31m            4,739,072   30,494,720 | 0.24/0.27/0.69 | None   | 0/0        |   -     | None  None  None  | -             | -
+roneneldan/TinyStories-8M        6,312,448   19,702,528 | 0.38/0.33/0.50 | None   | 0/0        |   -     | None  None  None  | -             | -
+EleutherAI/pythia-70m           18,915,328   70,426,624 | 0.29/0.38/0.64 | None   | 0/0        |   -     | None  None  None  | -             | -
+roneneldan/TinyStories-33M      28,343,808   68,514,048 |   (none)        | None   | 0/0        |   -     | None  None  None  | -             | -
+EleutherAI/pythia-160m          85,056,000  162,322,944 |   (none)        | None   | 0/0        |   -     | None  None  None  | -             | -
+(E002) SmolLM2-135M-Instruct   106,203,456  134,515,008 | (see E002)        | 5e-05  | 5/5        | PASS    |
+
+== roneneldan/TinyStories-1M  body 398,464  total 3,745,984  (seeds: none)
+  run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
+  base   | 0.44  0.33  0.44  fail | 0.61    0.56      0.58      0.64  0.61      0.00    | 0.43      0.00      0.06       0.03     | -      | (baseline)
+  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  plain d0/d4/d10 base: same_k1 0.56/0.45/0.56; same_k2 0.34/0.25/0.34; same_k3 0.39/0.36/0.41; twoslot 0.38/0.31/0.33; noupd 0.44/0.55/0.44; noupd_incid 0.45/0.47/0.61; keyorig 0.53/0.45/0.56; keycorr 0.55/0.45/0.58; pos 0.52/0.44/0.64; neutral 0.64/0.48/0.61
+  POST-HOC (E002) crossed base: cross_A 0.27/0.25/0.25; cross_B 0.22/0.33/0.41; cross_pair 0.00/0.02/0.00
+  uprobe base: Uneutral|d0 0.42; Uneutral|d10 0.31; Uneutral|d4 0.45; Usame|d0 0.43; Usame|d10 0.36; Usame|d4 0.31; khard open 0.40
+  DIAGNOSTIC length split base: LW10|fits<=512 0.52 (n=91); LW10|over512 0.37 (n=101); TS10|fits<=512 0.37 (n=38); TS10|over512 0.27 (n=26); NU10|fits<=512 0.44 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+
+== EleutherAI/pythia-14m  body 1,189,888  total 14,067,712  (seeds: none)
+  run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
+  base   | 0.20  0.33  0.97  fail | 1.00    0.00      1.00      0.41  0.53      0.00    | 0.17      0.00      0.00       0.00     | -      | (baseline)
+  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  plain d0/d4/d10 base: same_k1 0.38/0.38/0.25; same_k2 0.42/0.33/0.25; same_k3 0.42/0.30/0.09; twoslot 0.33/0.30/0.33; noupd 0.97/0.92/0.97; noupd_incid 1.00/1.00/1.00; keyorig 0.00/0.00/0.00; keycorr 1.00/1.00/1.00; pos 0.77/0.58/0.41; neutral 0.56/0.47/0.53
+  POST-HOC (E002) crossed base: cross_A 0.44/0.34/0.30; cross_B 0.47/0.48/0.27; cross_pair 0.22/0.14/0.05
+  uprobe base: Uneutral|d0 0.45; Uneutral|d10 0.44; Uneutral|d4 0.45; Usame|d0 0.31; Usame|d10 0.26; Usame|d4 0.35; khard open 1.00
+
+== roneneldan/TinyStories-3M  body 1,583,360  total 8,278,400  (seeds: none)
+  run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
+  base   | 0.40  0.34  0.48  fail | 0.59    0.52      0.52      0.47  0.52      0.00    | 0.39      0.06      0.00       0.00     | -      | (baseline)
+  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  plain d0/d4/d10 base: same_k1 0.50/0.45/0.52; same_k2 0.45/0.28/0.34; same_k3 0.44/0.25/0.33; twoslot 0.27/0.34/0.34; noupd 0.52/0.55/0.48; noupd_incid 0.44/0.56/0.59; keyorig 0.52/0.47/0.52; keycorr 0.55/0.47/0.52; pos 0.50/0.44/0.47; neutral 0.56/0.48/0.52
+  POST-HOC (E002) crossed base: cross_A 0.25/0.31/0.31; cross_B 0.25/0.19/0.20; cross_pair 0.00/0.00/0.00
+  uprobe base: Uneutral|d0 0.50; Uneutral|d10 0.45; Uneutral|d4 0.46; Usame|d0 0.43; Usame|d10 0.49; Usame|d4 0.43; khard open 0.40
+  DIAGNOSTIC length split base: LW10|fits<=512 0.46 (n=91); LW10|over512 0.34 (n=101); TS10|fits<=512 0.37 (n=38); TS10|over512 0.31 (n=26); NU10|fits<=512 0.48 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+
+== EleutherAI/pythia-31m  body 4,739,072  total 30,494,720  (seeds: none)
+  run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
+  base   | 0.24  0.27  0.69  fail | 1.00    0.00      0.98      0.34  0.59      0.00    | 0.15      0.03      0.00       0.00     | -      | (baseline)
+  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  plain d0/d4/d10 base: same_k1 0.80/0.50/0.33; same_k2 0.58/0.19/0.12; same_k3 0.69/0.27/0.27; twoslot 0.45/0.22/0.27; noupd 0.48/0.78/0.69; noupd_incid 1.00/1.00/1.00; keyorig 0.00/0.00/0.00; keycorr 1.00/1.00/0.98; pos 0.94/0.55/0.34; neutral 0.69/0.39/0.59
+  POST-HOC (E002) crossed base: cross_A 0.61/0.25/0.30; cross_B 0.67/0.48/0.19; cross_pair 0.34/0.11/0.08
+  uprobe base: Uneutral|d0 0.42; Uneutral|d10 0.48; Uneutral|d4 0.41; Usame|d0 0.58; Usame|d10 0.06; Usame|d4 0.34; khard open 1.00
+
+== roneneldan/TinyStories-8M  body 6,312,448  total 19,702,528  (seeds: none)
+  run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
+  base   | 0.38  0.33  0.50  fail | 0.48    0.50      0.50      0.42  0.42      0.00    | 0.39      0.00      0.03       0.03     | -      | (baseline)
+  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  plain d0/d4/d10 base: same_k1 0.38/0.45/0.48; same_k2 0.28/0.33/0.39; same_k3 0.31/0.27/0.27; twoslot 0.30/0.44/0.33; noupd 0.50/0.52/0.50; noupd_incid 0.77/0.59/0.48; keyorig 0.23/0.39/0.50; keycorr 0.61/0.56/0.50; pos 0.45/0.55/0.42; neutral 0.41/0.44/0.42
+  POST-HOC (E002) crossed base: cross_A 0.25/0.28/0.19; cross_B 0.30/0.27/0.22; cross_pair 0.05/0.03/0.02
+  uprobe base: Uneutral|d0 0.47; Uneutral|d10 0.44; Uneutral|d4 0.48; Usame|d0 0.60; Usame|d10 0.43; Usame|d4 0.48; khard open 0.38
+  DIAGNOSTIC length split base: LW10|fits<=512 0.47 (n=91); LW10|over512 0.30 (n=101); TS10|fits<=512 0.37 (n=38); TS10|over512 0.27 (n=26); NU10|fits<=512 0.50 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+
+== EleutherAI/pythia-70m  body 18,915,328  total 70,426,624  (seeds: none)
+  run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
+  base   | 0.29  0.38  0.64  fail | 1.00    0.00      1.00      0.50  0.62      0.00    | 0.06      0.00      0.03       0.12     | -      | (baseline)
+  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  plain d0/d4/d10 base: same_k1 0.70/0.53/0.55; same_k2 0.42/0.19/0.19; same_k3 0.50/0.23/0.14; twoslot 0.53/0.41/0.38; noupd 0.48/0.72/0.64; noupd_incid 0.98/1.00/1.00; keyorig 0.06/0.00/0.00; keycorr 1.00/1.00/1.00; pos 0.69/0.39/0.50; neutral 0.64/0.44/0.62
+  POST-HOC (E002) crossed base: cross_A 0.48/0.42/0.28; cross_B 0.81/0.36/0.61; cross_pair 0.36/0.14/0.17
+  uprobe base: Uneutral|d0 0.47; Uneutral|d10 0.47; Uneutral|d4 0.42; Usame|d0 0.41; Usame|d10 0.16; Usame|d4 0.32; khard open 1.00
+
+== roneneldan/TinyStories-33M  body 28,343,808  total 68,514,048  (seeds: none)
+  run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
+  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+
+== EleutherAI/pythia-160m  body 85,056,000  total 162,322,944  (seeds: none)
+  run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
+  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+

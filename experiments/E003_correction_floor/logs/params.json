@@ -1,0 +1,250 @@
+[
+ {
+  "model": "roneneldan/TinyStories-1M",
+  "total": 3745984,
+  "embedding": 3347520,
+  "body": 398464,
+  "tok_emb": 3216448,
+  "out_head": 0,
+  "pos_emb": 131072,
+  "layers": 8,
+  "d": 64,
+  "vocab": 50257,
+  "n_ctx": 2048,
+  "verify": {
+   "stored_total": 3745984,
+   "stored_embedding": 3347520,
+   "stored_body": 398464,
+   "match": true,
+   "emb_tensors": [
+    "transformer.wpe.weight",
+    "transformer.wte.weight"
+   ],
+   "skipped_buffers": [
+    "transformer.h.0.attn.attention.masked_bias",
+    "transformer.h.1.attn.attention.masked_bias",
+    "transformer.h.2.attn.attention.masked_bias"
+   ],
+   "tied_head_in_file": []
+  }
+ },
+ {
+  "model": "EleutherAI/pythia-14m",
+  "total": 14067712,
+  "embedding": 12877824,
+  "body": 1189888,
+  "tok_emb": 6438912,
+  "out_head": 6438912,
+  "pos_emb": 0,
+  "layers": 6,
+  "d": 128,
+  "vocab": 50304,
+  "n_ctx": 2048,
+  "verify": {
+   "stored_total": 14067712,
+   "stored_embedding": 12877824,
+   "stored_body": 1189888,
+   "match": true,
+   "emb_tensors": [
+    "embed_out.weight",
+    "gpt_neox.embed_in.weight"
+   ],
+   "skipped_buffers": [],
+   "tied_head_in_file": []
+  }
+ },
+ {
+  "model": "roneneldan/TinyStories-3M",
+  "total": 8278400,
+  "embedding": 6695040,
+  "body": 1583360,
+  "tok_emb": 6432896,
+  "out_head": 0,
+  "pos_emb": 262144,
+  "layers": 8,
+  "d": 128,
+  "vocab": 50257,
+  "n_ctx": 2048,
+  "verify": {
+   "stored_total": 8278400,
+   "stored_embedding": 6695040,
+   "stored_body": 1583360,
+   "match": true,
+   "emb_tensors": [
+    "transformer.wpe.weight",
+    "transformer.wte.weight"
+   ],
+   "skipped_buffers": [
+    "transformer.h.0.attn.attention.masked_bias",
+    "transformer.h.1.attn.attention.masked_bias",
+    "transformer.h.2.attn.attention.masked_bias"
+   ],
+   "tied_head_in_file": []
+  }
+ },
+ {
+  "model": "EleutherAI/pythia-31m",
+  "total": 30494720,
+  "embedding": 25755648,
+  "body": 4739072,
+  "tok_emb": 12877824,
+  "out_head": 12877824,
+  "pos_emb": 0,
+  "layers": 6,
+  "d": 256,
+  "vocab": 50304,
+  "n_ctx": 2048,
+  "verify": {
+   "stored_total": 30494720,
+   "stored_embedding": 25755648,
+   "stored_body": 4739072,
+   "match": true,
+   "emb_tensors": [
+    "embed_out.weight",
+    "gpt_neox.embed_in.weight"
+   ],
+   "skipped_buffers": [],
+   "tied_head_in_file": []
+  }
+ },
+ {
+  "model": "roneneldan/TinyStories-8M",
+  "total": 19702528,
+  "embedding": 13390080,
+  "body": 6312448,
+  "tok_emb": 12865792,
+  "out_head": 0,
+  "pos_emb": 524288,
+  "layers": 8,
+  "d": 256,
+  "vocab": 50257,
+  "n_ctx": 2048,
+  "verify": {
+   "stored_total": 19702528,
+   "stored_embedding": 13390080,
+   "stored_body": 6312448,
+   "match": true,
+   "emb_tensors": [
+    "transformer.wpe.weight",
+    "transformer.wte.weight"
+   ],
+   "skipped_buffers": [
+    "transformer.h.0.attn.attention.masked_bias",
+    "transformer.h.1.attn.attention.masked_bias",
+    "transformer.h.2.attn.attention.masked_bias"
+   ],
+   "tied_head_in_file": []
+  }
+ },
+ {
+  "model": "EleutherAI/pythia-70m",
+  "total": 70426624,
+  "embedding": 51511296,
+  "body": 18915328,
+  "tok_emb": 25755648,
+  "out_head": 25755648,
+  "pos_emb": 0,
+  "layers": 6,
+  "d": 512,
+  "vocab": 50304,
+  "n_ctx": 2048,
+  "verify": {
+   "stored_total": 70426624,
+   "stored_embedding": 51511296,
+   "stored_body": 18915328,
+   "match": true,
+   "emb_tensors": [
+    "embed_out.weight",
+    "gpt_neox.embed_in.weight"
+   ],
+   "skipped_buffers": [
+    "gpt_neox.layers.0.attention.masked_bias",
+    "gpt_neox.layers.0.attention.rotary_emb.inv_freq",
+    "gpt_neox.layers.1.attention.masked_bias"
+   ],
+   "tied_head_in_file": []
+  }
+ },
+ {
+  "model": "roneneldan/TinyStories-33M",
+  "total": 68514048,
+  "embedding": 40170240,
+  "body": 28343808,
+  "tok_emb": 38597376,
+  "out_head": 0,
+  "pos_emb": 1572864,
+  "layers": 4,
+  "d": 768,
+  "vocab": 50257,
+  "n_ctx": 2048,
+  "verify": {
+   "stored_total": 68514048,
+   "stored_embedding": 40170240,
+   "stored_body": 28343808,
+   "match": true,
+   "emb_tensors": [
+    "transformer.wpe.weight",
+    "transformer.wte.weight"
+   ],
+   "skipped_buffers": [
+    "transformer.h.0.attn.attention.masked_bias",
+    "transformer.h.1.attn.attention.masked_bias",
+    "transformer.h.2.attn.attention.masked_bias"
+   ],
+   "tied_head_in_file": []
+  }
+ },
+ {
+  "model": "EleutherAI/pythia-160m",
+  "total": 162322944,
+  "embedding": 77266944,
+  "body": 85056000,
+  "tok_emb": 38633472,
+  "out_head": 38633472,
+  "pos_emb": 0,
+  "layers": 12,
+  "d": 768,
+  "vocab": 50304,
+  "n_ctx": 2048,
+  "verify": {
+   "stored_total": 162322944,
+   "stored_embedding": 77266944,
+   "stored_body": 85056000,
+   "match": true,
+   "emb_tensors": [
+    "embed_out.weight",
+    "gpt_neox.embed_in.weight"
+   ],
+   "skipped_buffers": [
+    "gpt_neox.layers.0.attention.masked_bias",
+    "gpt_neox.layers.0.attention.rotary_emb.inv_freq",
+    "gpt_neox.layers.1.attention.masked_bias"
+   ],
+   "tied_head_in_file": []
+  }
+ },
+ {
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "total": 134515008,
+  "embedding": 28311552,
+  "body": 106203456,
+  "tok_emb": 28311552,
+  "out_head": 0,
+  "pos_emb": 0,
+  "layers": 30,
+  "d": 576,
+  "vocab": 49152,
+  "n_ctx": 8192,
+  "verify": {
+   "stored_total": 134515008,
+   "stored_embedding": 28311552,
+   "stored_body": 106203456,
+   "match": true,
+   "emb_tensors": [
+    "model.embed_tokens.weight"
+   ],
+   "skipped_buffers": [],
+   "tied_head_in_file": []
+  }
+ }
+]

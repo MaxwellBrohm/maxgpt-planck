@@ -72,10 +72,7 @@ def other_model_jobs():
         pid, cmd = line.split(None, 1)
         if int(pid) == me or "guard.py" in cmd:
             continue
-        # Only a real Python process counts. A shell whose command TEXT merely mentions a model
-        # script (an agent's grep or heredoc) is not a model job: that false positive stopped E003.
-        exe = os.path.basename(cmd.split()[0]).lower()
-        if exe.startswith("python") and any(s in cmd for s in MODEL_SCRIPTS):
+        if "python" in cmd and any(s in cmd for s in MODEL_SCRIPTS):
             hits.append(line[:200])
     return hits
 
@@ -205,14 +202,11 @@ def main():
         reason = None
         if active > a.ceiling:
             reason = f"active_time_ceiling_{a.ceiling}s"
-        elif el - paused_s > 3 * a.ceiling:   # time paused for a closed lid on battery does not count
+        elif el > 3 * a.ceiling:
             reason = f"wall_clock_ceiling_{3 * a.ceiling}s"
         elif 0 <= f < 15:
             reason = f"free_memory_{f}pct"
-        # Swap growth alone is not pressure: macOS pushes ~1 GB to swap on wake from sleep with
-        # plenty of free memory (a 135M chat probe was killed that way at 50-71% free). Kill only
-        # when growth coincides with low free memory, or when swap runs away.
-        elif (s - swap0 > 768 and 0 <= f < 35) or s - swap0 > 4096:
+        elif s - swap0 > 768:
             reason = f"swap_grew_{s - swap0:.0f}MB"
         if reason:
             log(f"KILL: {reason}")

@@ -1,0 +1,32 @@
+{
+ "name": "base_ts33m",
+ "cmd": [
+  "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+  "-B",
+  "e003_ft_test.py",
+  "roneneldan/TinyStories-33M",
+  "--bs",
+  "4",
+  "--accum",
+  "4",
+  "--max-len",
+  "768",
+  "--grad-ckpt",
+  "--seed",
+  "0",
+  "--steps",
+  "0",
+  "--sets",
+  "eval,dev",
+  "--tag",
+  "base"
+ ],
+ "started": null,
+ "ended": null,
+ "exit": null,
+ "killed": "preflight_refused",
+ "min_free": null,
+ "max_swap_mb": null,
+ "peak_rss_mb": 0.0,
+ "elapsed_s": null
+}
