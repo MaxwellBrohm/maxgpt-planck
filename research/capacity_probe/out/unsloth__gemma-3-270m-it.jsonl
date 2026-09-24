@@ -1,0 +1,421 @@
+{"meta": true, "model": "unsloth/gemma-3-270m-it", "params": 268098176, "emb": 167772160, "dtype": "fp32", "n_items": 1116}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.013278505764901638, "foil": -9.743213653564453}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 63}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -2.5306358337402344, "foil": -2.0994701385498047}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 69}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -2.938258171081543, "foil": -9.319195747375488}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.10094664245843887, "foil": -6.157890319824219}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -11.013745307922363, "foil": -3.0564866065979004}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -2.7780683040618896, "foil": -1.2611138820648193}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -1.590320348739624, "orig": -1.5480306148529053}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 92}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -2.3844594955444336, "orig": -1.2142287492752075, "prev": -1.8170195817947388}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 146}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.476114422082901, "orig": -2.5321619510650635, "prev": -4.849517822265625}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 198}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.2211807668209076, "sister": -13.61624526977539, "assistant": -1.7387093305587769}, "ntok": {"gold": 1, "sister": 2, "assistant": 1}, "split": false, "prompt_tokens": 58}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0002706876548472792, "user": -15.399307250976562}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 56}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.24607788026332855, "foil": -2.5340206623077393}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 63}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -5.692708492279053, "foil": -4.443343639373779}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 69}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -3.679389715194702, "foil": -7.004083633422852}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.02153128571808338, "foil": -7.826861381530762}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -7.416346549987793, "foil": -2.9055967330932617}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -4.578078269958496, "foil": -0.10275369882583618}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.19692330062389374, "orig": -3.384310722351074}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 91}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -1.510185956954956, "orig": -2.509005308151245, "prev": -4.318312168121338}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 146}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.425685852766037, "orig": -2.1181812286376953, "prev": -4.13856315612793}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 208}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.3122323155403137, "sister": -13.31758975982666, "assistant": -1.3392441272735596}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0001382732152706012, "user": -17.4375057220459}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.21089546382427216, "foil": -4.233304977416992}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 65}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -0.6376537084579468, "foil": -8.722293853759766}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 71}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -1.4233649969100952, "foil": -2.791342258453369}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.09350427985191345, "foil": -7.0533127784729}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -0.39470696449279785, "foil": -4.69556999206543}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.003551843576133251, "foil": -11.765148162841797}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -1.2575502395629883, "orig": -2.1176233291625977}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 94}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.2928038537502289, "orig": -2.530592918395996, "prev": -4.556036949157715}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 149}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.8228422403335571, "orig": -1.4018961191177368, "prev": -4.366644382476807}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 203}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.003371984465047717, "sister": -14.635862350463867, "assistant": -6.979747772216797}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0010798106668516994, "user": -15.0067138671875}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -2.4859707355499268, "foil": -0.6827552914619446}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -2.1659414768218994, "foil": -7.09655237197876}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -5.682408332824707, "foil": -8.695185661315918}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.0974639356136322, "foil": -10.559734344482422}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -1.041270136833191, "foil": -7.729029655456543}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.04163575917482376, "foil": -10.87957763671875}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.5932158827781677, "orig": -1.448333740234375}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 94}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -1.7459948062896729, "orig": -2.3711893558502197, "prev": -1.685589075088501}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 159}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -1.3390052318572998, "orig": -2.5277888774871826, "prev": -4.573086738586426}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 209}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.011024988256394863, "sister": -13.50223159790039, "assistant": -5.223734378814697}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.00015376815281342715, "user": -17.872892379760742}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -1.8330928087234497, "foil": -1.9660663604736328}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -6.722712516784668, "foil": -6.423244476318359}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -2.953075885772705, "foil": -12.233087539672852}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.15110649168491364, "foil": -13.770142555236816}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -11.088024139404297, "foil": -8.119455337524414}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -1.1613726615905762, "foil": -8.065571784973145}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.640144944190979, "orig": -2.571495532989502}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 94}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -3.09709095954895, "orig": -0.1791297346353531, "prev": -6.040255546569824}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 151}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.27288249135017395, "orig": -2.3808059692382812, "prev": -4.694789886474609}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 217}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.18989373743534088, "sister": -13.55965518951416, "assistant": -2.2612228393554688}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.000332419469486922, "user": -20.244476318359375}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.020670238882303238, "foil": -6.0912251472473145}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 63}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -0.12946999073028564, "foil": -4.968554496765137}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 69}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -6.822090148925781, "foil": -1.1413614749908447}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -2.38155460357666, "foil": -0.11820700019598007}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -0.6846809983253479, "foil": -6.552707672119141}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.018037807196378708, "foil": -7.605747222900391}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.2938247323036194, "orig": -2.493051052093506}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 93}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.5348384976387024, "orig": -2.04646372795105, "prev": -3.241276502609253}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 146}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.3590112030506134, "orig": -3.486332416534424, "prev": -3.8663105964660645}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 204}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.044098176062107086, "sister": -13.026408195495605, "assistant": -3.3036673069000244}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0002882065309677273, "user": -12.079963684082031}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.18466290831565857, "foil": -6.919834136962891}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -1.2179219722747803, "foil": -6.859978675842285}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -2.587123394012451, "foil": -8.731414794921875}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.23434346914291382, "foil": -6.542971611022949}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -1.9775933027267456, "foil": -4.173203468322754}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.29015424847602844, "foil": -7.443541526794434}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -1.3776241540908813, "orig": -1.6643959283828735}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 96}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.48743200302124023, "orig": -1.5966601371765137, "prev": -2.8316893577575684}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 152}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -1.428436040878296, "orig": -0.5337045192718506, "prev": -3.8064839839935303}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 206}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.5567548871040344, "sister": -13.940637588500977, "assistant": -0.8672483563423157}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -5.6622808187967166e-05, "user": -14.174201011657715}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -1.3565218448638916, "foil": -2.959444999694824}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 65}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -6.979491233825684, "foil": -7.412237167358398}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 71}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -7.538163661956787, "foil": -1.133048415184021}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -1.7410383224487305, "foil": -1.1345586776733398}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -1.716288685798645, "foil": -5.729134559631348}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.02231966331601143, "foil": -6.264892578125}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -1.3911845684051514, "orig": -0.7061756253242493}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 94}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.5824649333953857, "orig": -0.9614894390106201, "prev": -4.325322151184082}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 150}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.38848644495010376, "orig": -1.7452483177185059, "prev": -4.6558051109313965}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 204}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.05686366930603981, "sister": -14.631855010986328, "assistant": -3.5738887786865234}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0012225779937580228, "user": -18.965017318725586}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -1.4736963510513306, "foil": -1.2637525796890259}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 65}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -4.755344867706299, "foil": -4.511073112487793}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 71}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -10.986563682556152, "foil": -9.036789894104004}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.933562159538269, "foil": -6.311285972595215}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -9.912768363952637, "foil": -9.858492851257324}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -4.7447509765625, "foil": -6.390707015991211}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -2.3506650924682617, "orig": -1.5093717575073242}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 91}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -2.1933445930480957, "orig": -2.872541904449463, "prev": -3.6917824745178223}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 144}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.36203834414482117, "orig": -4.110292911529541, "prev": -5.311232089996338}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 201}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.015181235037744045, "sister": -9.910818099975586, "assistant": -4.976503849029541}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0001919085334520787, "user": -17.753780364990234}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -3.375601053237915, "foil": -0.31544679403305054}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -3.3586905002593994, "foil": -8.257222175598145}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -4.9355788230896, "foil": -5.517446041107178}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.20593702793121338, "foil": -2.66672945022583}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -6.360042572021484, "foil": -3.2219467163085938}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.48510241508483887, "foil": -1.092442274093628}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -1.7118757963180542, "orig": -0.7572382688522339}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 99}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -3.375953197479248, "orig": -1.0888398885726929, "prev": -5.052112102508545}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 149}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -1.1197586059570312, "orig": -2.0644187927246094, "prev": -3.53118896484375}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 200}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -1.209968090057373, "sister": -16.79402732849121, "assistant": -0.3607134521007538}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -2.8967437174287625e-05, "user": -18.651771545410156}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -1.331676959991455, "foil": -0.7716489434242249}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 63}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -4.277990818023682, "foil": -5.061619281768799}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 69}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -1.5607117414474487, "foil": -4.051871299743652}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.020349303260445595, "foil": -6.308986663818359}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -5.110140323638916, "foil": -0.580005943775177}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -2.1466121673583984, "foil": -0.2121029645204544}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -1.4844815731048584, "orig": -1.5620629787445068}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 93}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.8851742744445801, "orig": -1.5916504859924316, "prev": -5.36550760269165}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 144}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.18371367454528809, "orig": -3.568916082382202, "prev": -6.272735595703125}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 202}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.06746024638414383, "sister": -15.321006774902344, "assistant": -2.815661668777466}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.00022182388056535274, "user": -12.2081880569458}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -4.164183616638184, "foil": -0.03963759168982506}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 63}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -0.5031511783599854, "foil": -8.047882080078125}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 69}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -4.310356616973877, "foil": -8.298057556152344}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.037368353456258774, "foil": -8.389240264892578}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -3.1007628440856934, "foil": -6.312781810760498}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.1305258721113205, "foil": -8.448545455932617}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.9500142335891724, "orig": -3.5461273193359375}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 96}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -2.998931646347046, "orig": -0.23968280851840973, "prev": -4.935971736907959}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 147}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -1.2216846942901611, "orig": -2.1465961933135986, "prev": -5.954158306121826}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 207}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.2353868931531906, "sister": -10.719156265258789, "assistant": -1.6455183029174805}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.00027962587773799896, "user": -21.780366897583008}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.09062952548265457, "foil": -9.219307899475098}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 65}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -4.130537986755371, "foil": -7.667799949645996}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 71}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -4.933767318725586, "foil": -10.173807144165039}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.2104664295911789, "foil": -11.97430419921875}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -7.335581302642822, "foil": -8.607067108154297}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.43871089816093445, "foil": -6.977973461151123}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.2282046526670456, "orig": -1.7230890989303589}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 91}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.1557605117559433, "orig": -3.5730140209198, "prev": -5.747194766998291}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 145}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.16035763919353485, "orig": -2.9191906452178955, "prev": -5.176419258117676}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 207}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.05033637210726738, "sister": -10.451753616333008, "assistant": -3.2262816429138184}, "ntok": {"gold": 1, "sister": 2, "assistant": 1}, "split": false, "prompt_tokens": 58}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0001370812824461609, "user": -13.852182388305664}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 56}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.1203835979104042, "foil": -2.677647829055786}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 63}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -5.205155849456787, "foil": -0.8488173484802246}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 69}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -9.43590259552002, "foil": -0.7611458897590637}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -5.710770130157471, "foil": -0.38509970903396606}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -1.416239857673645, "foil": -9.440316200256348}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.019838720560073853, "foil": -9.268909454345703}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.7156887650489807, "orig": -0.7405224442481995}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 91}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -3.9086756706237793, "orig": -0.7816995978355408, "prev": -4.853393077850342}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 152}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.3583272397518158, "orig": -3.499303102493286, "prev": -4.986226558685303}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 210}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.0017408467829227448, "sister": -15.392083168029785, "assistant": -7.8451666831970215}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.00017498392844572663, "user": -17.76428985595703}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -3.5385656356811523, "foil": -0.5067244172096252}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -3.152703046798706, "foil": -6.145512580871582}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -7.4626240730285645, "foil": -1.3174422979354858}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.3364998996257782, "foil": -2.3963162899017334}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -1.3768020868301392, "foil": -5.8682780265808105}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.16411948204040527, "foil": -4.630161285400391}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.6121581792831421, "orig": -1.9930022954940796}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 97}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.7052835822105408, "orig": -1.4150919914245605, "prev": -4.205045223236084}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 154}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.8639147877693176, "orig": -2.847547769546509, "prev": -3.938711404800415}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 198}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.14913497865200043, "sister": -10.326400756835938, "assistant": -2.2854321002960205}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.00020823694649152458, "user": -18.825281143188477}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.06319399178028107, "foil": -10.92658519744873}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -2.7249362468719482, "foil": -7.103806495666504}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -2.1367740631103516, "foil": -6.964044570922852}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.021077802404761314, "foil": -6.135598659515381}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -7.279941082000732, "foil": -1.2632155418395996}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -2.6394567489624023, "foil": -0.2130994200706482}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -1.1150450706481934, "orig": -2.4719080924987793}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 96}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.47792840003967285, "orig": -1.590820550918579, "prev": -3.8861124515533447}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 150}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -1.0673205852508545, "orig": -0.6613280773162842, "prev": -7.131894111633301}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 202}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.010767102241516113, "sister": -14.910045623779297, "assistant": -4.587202072143555}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.00012313561455812305, "user": -17.77273941040039}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.15360331535339355, "foil": -6.487343788146973}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -0.5562000274658203, "foil": -7.639888763427734}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -6.535871505737305, "foil": -2.0288565158843994}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.4045243263244629, "foil": -1.5054535865783691}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -1.7276875972747803, "foil": -4.588666915893555}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.32585063576698303, "foil": -2.4786064624786377}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.1308828890323639, "orig": -3.3801238536834717}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 96}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -1.0214478969573975, "orig": -1.1452844142913818, "prev": -4.08464241027832}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 150}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.272798091173172, "orig": -2.2713961601257324, "prev": -3.447427272796631}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 218}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.011877058073878288, "sister": -14.073685646057129, "assistant": -5.708498001098633}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0001691436773398891, "user": -19.12808609008789}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -4.198568820953369, "foil": -0.10206028819084167}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -0.7303438186645508, "foil": -9.250911712646484}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -6.419144153594971, "foil": -3.173862934112549}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.048807259649038315, "foil": -5.957637786865234}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -0.3984396159648895, "foil": -9.689384460449219}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.06088870018720627, "foil": -9.973299026489258}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -1.5115373134613037, "orig": -0.9316404461860657}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 91}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.5091716051101685, "orig": -1.674063801765442, "prev": -3.5636396408081055}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 157}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -2.1707072257995605, "orig": -1.525989055633545, "prev": -3.5601439476013184}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 203}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.4905044436454773, "sister": -13.224748611450195, "assistant": -1.0094788074493408}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -4.2676016164477915e-05, "user": -21.81011199951172}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.3932355046272278, "foil": -5.490962982177734}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -1.1643637418746948, "foil": -6.145108699798584}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -7.539838790893555, "foil": -8.043842315673828}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.3988318145275116, "foil": -1.736802577972412}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -7.551024913787842, "foil": -6.1805338859558105}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.9649599194526672, "foil": -2.5956456661224365}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -1.2226648330688477, "orig": -2.7588014602661133}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 93}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -1.4328378438949585, "orig": -1.5817540884017944, "prev": -1.4237855672836304}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 149}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.8869220018386841, "orig": -2.2574567794799805, "prev": -3.3919992446899414}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 201}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.060194481164216995, "sister": -8.742380142211914, "assistant": -2.9907593727111816}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -8.40390202938579e-05, "user": -18.344308853149414}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.29560142755508423, "foil": -6.783902168273926}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -2.0695767402648926, "foil": -8.637399673461914}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -3.5172810554504395, "foil": -4.8601861000061035}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.11112204939126968, "foil": -5.762653350830078}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -8.64544677734375, "foil": -3.1662368774414062}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.36733612418174744, "foil": -1.7987364530563354}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.22818347811698914, "orig": -2.399858236312866}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 94}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -1.013342261314392, "orig": -1.6234897375106812, "prev": -5.787764072418213}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 152}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -2.289710521697998, "orig": -0.32607805728912354, "prev": -5.291076183319092}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 198}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.007019619923084974, "sister": -11.899107933044434, "assistant": -5.224442005157471}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.00010930894495686516, "user": -17.399314880371094}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.026674499735236168, "foil": -4.300673484802246}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -5.378854751586914, "foil": -0.35723134875297546}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -0.8361071944236755, "foil": -4.836132049560547}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.08540660887956619, "foil": -3.4438812732696533}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -8.450723648071289, "foil": -0.8049506545066833}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.20114165544509888, "foil": -2.1723082065582275}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.958306074142456, "orig": -0.9588725566864014}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 91}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.28252649307250977, "orig": -1.9875550270080566, "prev": -3.12589693069458}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 143}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.033252641558647156, "orig": -5.001003265380859, "prev": -7.5216064453125}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 217}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.2682636082172394, "sister": -10.290474891662598, "assistant": -1.6407344341278076}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.00039784147520549595, "user": -21.41554069519043}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.08601103723049164, "foil": -4.2060933113098145}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -7.090524196624756, "foil": -2.4973418712615967}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -3.4651260375976562, "foil": -5.326068878173828}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.02326652780175209, "foil": -6.076721668243408}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -4.482545852661133, "foil": -8.210262298583984}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.008003191091120243, "foil": -9.659992218017578}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -1.4210158586502075, "orig": -1.9457236528396606}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 91}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -2.3334009647369385, "orig": -0.27041083574295044, "prev": -3.173044443130493}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 162}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -1.3879733085632324, "orig": -1.0099215507507324, "prev": -5.333362102508545}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 219}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.2866663634777069, "sister": -13.49934196472168, "assistant": -1.4715685844421387}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.00012790338951162994, "user": -18.580707550048828}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.031594716012477875, "foil": -11.614409446716309}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -3.4386277198791504, "foil": -5.600258827209473}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -2.700512170791626, "foil": -8.803247451782227}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.040066130459308624, "foil": -4.204422473907471}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -8.862377166748047, "foil": -1.563366413116455}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -2.1152937412261963, "foil": -0.1882001757621765}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -1.2597072124481201, "orig": -1.1856505870819092}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 94}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -1.8983635902404785, "orig": -2.561789035797119, "prev": -4.376001834869385}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 157}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.5873729586601257, "orig": -1.7472946643829346, "prev": -2.2091572284698486}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 199}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.5322191119194031, "sister": -10.688003540039062, "assistant": -1.011364221572876}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0016330252401530743, "user": -13.836997032165527}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.013798443600535393, "foil": -9.367871284484863}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -1.1603180170059204, "foil": -4.331571102142334}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -3.2244372367858887, "foil": -1.806540846824646}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.009847513400018215, "foil": -6.779287338256836}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -0.02022489346563816, "foil": -10.288792610168457}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.0041357469744980335, "foil": -13.705122947692871}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.4318653345108032, "orig": -2.734696865081787}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 96}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.30753931403160095, "orig": -2.4737112522125244, "prev": -4.57781457901001}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 153}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -1.5344854593276978, "orig": -1.7308565378189087, "prev": -1.1322447061538696}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 213}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.009315477684140205, "sister": -17.413646697998047, "assistant": -5.078042984008789}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.00037126801908016205, "user": -17.071496963500977}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.5402238965034485, "foil": -8.186847686767578}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 65}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -5.646393299102783, "foil": -10.608962059020996}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 71}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -11.091047286987305, "foil": -4.9269256591796875}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.5690788626670837, "foil": -4.230108737945557}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -0.611240029335022, "foil": -10.580162048339844}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.03388664871454239, "foil": -11.738139152526855}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.9265261888504028, "orig": -1.1859465837478638}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 94}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -2.073768138885498, "orig": -1.2902922630310059, "prev": -4.793027400970459}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 155}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.5598143339157104, "orig": -2.5972042083740234, "prev": -6.281360626220703}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 215}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.014031333848834038, "sister": -15.131495475769043, "assistant": -4.343375205993652}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0002574589161667973, "user": -14.47662353515625}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -1.1337120532989502, "foil": -1.2831438779830933}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -3.814821243286133, "foil": -4.37788200378418}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -3.5471599102020264, "foil": -10.082221031188965}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.2165437489748001, "foil": -6.3135457038879395}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -10.80038070678711, "foil": -2.954911947250366}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -5.040060043334961, "foil": -1.2460557222366333}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.8685259819030762, "orig": -2.166348934173584}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 92}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -2.5554988384246826, "orig": -1.6359775066375732, "prev": -4.431501865386963}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 157}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.1973847895860672, "orig": -3.988654136657715, "prev": -5.814486503601074}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 208}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.0026367679238319397, "sister": -13.977889060974121, "assistant": -7.191899299621582}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0008255410939455032, "user": -17.74519157409668}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.40223589539527893, "foil": -3.596186637878418}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -7.193567752838135, "foil": -4.350302696228027}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -3.6420297622680664, "foil": -8.871800422668457}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.05642390996217728, "foil": -10.700705528259277}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -8.355596542358398, "foil": -8.17789077758789}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.14022693037986755, "foil": -11.606175422668457}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -2.1757266521453857, "orig": -1.297856092453003}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 91}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.6233124136924744, "orig": -2.3923192024230957, "prev": -3.818085193634033}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 155}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.8534253835678101, "orig": -2.14967679977417, "prev": -4.564029216766357}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 209}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.005728020798414946, "sister": -18.102914810180664, "assistant": -5.627325534820557}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.00033277698094025254, "user": -16.806161880493164}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.7444353103637695, "foil": -9.85069751739502}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -2.9600465297698975, "foil": -10.263267517089844}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -2.368795871734619, "foil": -1.8953593969345093}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.5238666534423828, "foil": -3.4158859252929688}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -3.391300678253174, "foil": -1.8584752082824707}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.963435709476471, "foil": -0.5952678322792053}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -3.1068406105041504, "orig": -0.19655287265777588}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 94}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.609042763710022, "orig": -0.9401108026504517, "prev": -4.722651958465576}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 152}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -1.1432080268859863, "orig": -2.4863858222961426, "prev": -4.870680332183838}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 208}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.014219511300325394, "sister": -19.73194694519043, "assistant": -4.360250473022461}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0003541081096045673, "user": -18.67180633544922}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.1665211021900177, "foil": -4.127226829528809}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -0.06365226954221725, "foil": -10.661547660827637}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -10.638538360595703, "foil": -3.6634202003479004}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.3715592920780182, "foil": -6.794050216674805}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -1.4406318664550781, "foil": -11.562887191772461}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.14144694805145264, "foil": -11.948497772216797}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.19002553820610046, "orig": -2.7821524143218994}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 96}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -2.083383083343506, "orig": -0.34420716762542725, "prev": -4.015946865081787}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 151}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.16972440481185913, "orig": -3.225968360900879, "prev": -5.381943702697754}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 203}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.4217262268066406, "sister": -10.214561462402344, "assistant": -1.2101116180419922}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.0002746204845607281, "user": -14.869865417480469}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -1.4010465145111084, "foil": -0.5904586315155029}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 65}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -2.204566717147827, "foil": -3.207089900970459}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 71}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -0.06977403908967972, "foil": -12.725419044494629}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.004261935595422983, "foil": -16.68596076965332}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -5.284235000610352, "foil": -0.8972530961036682}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 80}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.10207094997167587, "foil": -3.3057358264923096}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -1.123553991317749, "orig": -1.6507031917572021}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 91}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -0.5516000986099243, "orig": -1.6599775552749634, "prev": -4.256931781768799}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 154}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.38176247477531433, "orig": -1.8109750747680664, "prev": -7.4269304275512695}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 217}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.45856449007987976, "sister": -10.247209548950195, "assistant": -1.2114484310150146}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.001085883704945445, "user": -13.885738372802734}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.5153281688690186, "foil": -2.662466049194336}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -8.281355857849121, "foil": -4.870655536651611}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -8.097515106201172, "foil": -7.969038009643555}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -1.069459080696106, "foil": -1.680655598640442}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -7.52133846282959, "foil": -6.513134956359863}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -1.714994192123413, "foil": -5.245212554931641}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.3585415780544281, "orig": -2.1893672943115234}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 92}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -3.550961494445801, "orig": -0.7610368728637695, "prev": -4.186692237854004}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 159}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.19573426246643066, "orig": -3.0832254886627197, "prev": -5.107875823974609}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 206}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -4.652477741241455, "sister": -18.14898681640625, "assistant": -0.010675936006009579}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -5.781483559985645e-05, "user": -18.944067001342773}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 0, "scores": {"gold": -0.1404169350862503, "foil": -3.43323016166687}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 64}
+{"task": "R1_owner", "cond": "sister", "d": 0, "scores": {"gold": -8.511404991149902, "foil": -0.9574270248413086}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 70}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "scores": {"gold": -7.740583419799805, "foil": -2.2998580932617188}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "sister", "d": 0, "scores": {"gold": -0.5005441308021545, "foil": -1.7325711250305176}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "R2_twohop", "cond": "aunt", "d": 0, "scores": {"gold": -1.8366806507110596, "foil": -5.073735237121582}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 78}
+{"task": "R2_onehop", "cond": "aunt", "d": 0, "scores": {"gold": -0.6335706114768982, "foil": -2.0601091384887695}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 76}
+{"task": "U_k1", "cond": "update", "d": 0, "scores": {"gold": -0.3084760308265686, "orig": -2.328850269317627}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 90}
+{"task": "U_k2", "cond": "update", "d": 0, "scores": {"gold": -1.171073079109192, "orig": -1.1756163835525513, "prev": -2.3272485733032227}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 154}
+{"task": "U_k3", "cond": "update", "d": 0, "scores": {"gold": -0.4379250705242157, "orig": -2.578355550765991, "prev": -1.9716298580169678}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 208}
+{"task": "P_myname", "cond": "user", "d": 0, "scores": {"gold": -0.02598700486123562, "sister": -10.545207977294922, "assistant": -4.578990459442139}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 57}
+{"task": "P_yourname", "cond": "assistant", "d": 0, "scores": {"gold": -0.00020597243565134704, "user": -20.00347900390625}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 55}
+{"task": "R1_owner", "cond": "mine", "d": 4, "scores": {"gold": -0.08858088403940201, "foil": -8.11762809753418}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 201}
+{"task": "R1_owner", "cond": "sister", "d": 4, "scores": {"gold": -4.026523590087891, "foil": -1.3032704591751099}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 207}
+{"task": "R2_twohop", "cond": "sister", "d": 4, "scores": {"gold": -6.052907943725586, "foil": -12.487682342529297}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 211}
+{"task": "R2_onehop", "cond": "sister", "d": 4, "scores": {"gold": -3.678434371948242, "foil": -11.524894714355469}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 209}
+{"task": "R2_twohop", "cond": "aunt", "d": 4, "scores": {"gold": -10.799165725708008, "foil": -5.506315231323242}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 211}
+{"task": "R2_onehop", "cond": "aunt", "d": 4, "scores": {"gold": -5.311791896820068, "foil": -4.069982051849365}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 209}
+{"task": "U_k1", "cond": "update", "d": 4, "scores": {"gold": -7.499998569488525, "orig": -0.06298122555017471}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 235}
+{"task": "U_k2", "cond": "update", "d": 4, "scores": {"gold": -6.417530536651611, "orig": -0.06699970364570618, "prev": -5.306234836578369}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 287}
+{"task": "U_k3", "cond": "update", "d": 4, "scores": {"gold": -4.637077808380127, "orig": -0.309906542301178, "prev": -3.398214817047119}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 349}
+{"task": "P_myname", "cond": "user", "d": 4, "scores": {"gold": -0.8670538067817688, "sister": -8.718921661376953, "assistant": -6.1071929931640625}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 197}
+{"task": "P_yourname", "cond": "assistant", "d": 4, "scores": {"gold": -3.5708813667297363, "user": -3.6987805366516113}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 195}
+{"task": "R1_owner", "cond": "mine", "d": 4, "scores": {"gold": -5.367933750152588, "foil": -1.9817934036254883}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 200}
+{"task": "R1_owner", "cond": "sister", "d": 4, "scores": {"gold": -1.3251011371612549, "foil": -4.810680389404297}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 206}
+{"task": "R2_twohop", "cond": "sister", "d": 4, "scores": {"gold": -11.58055305480957, "foil": -10.443923950195312}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 221}
+{"task": "R2_onehop", "cond": "sister", "d": 4, "scores": {"gold": -8.267032623291016, "foil": -10.98621940612793}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 219}
+{"task": "R2_twohop", "cond": "aunt", "d": 4, "scores": {"gold": -10.940409660339355, "foil": -12.07945728302002}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 221}
+{"task": "R2_onehop", "cond": "aunt", "d": 4, "scores": {"gold": -10.138641357421875, "foil": -11.004274368286133}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 219}
+{"task": "U_k1", "cond": "update", "d": 4, "scores": {"gold": -4.229696273803711, "orig": -0.12972068786621094}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 232}
+{"task": "U_k2", "cond": "update", "d": 4, "scores": {"gold": -5.678068161010742, "orig": -0.08295442909002304, "prev": -2.867290496826172}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 290}
+{"task": "U_k3", "cond": "update", "d": 4, "scores": {"gold": -5.767621040344238, "orig": -0.10423757880926132, "prev": -4.432198524475098}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 351}
+{"task": "P_myname", "cond": "user", "d": 4, "scores": {"gold": -1.5302858352661133, "sister": -8.156373977661133, "assistant": -0.6365538239479065}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 191}
+{"task": "P_yourname", "cond": "assistant", "d": 4, "scores": {"gold": -0.04913882911205292, "user": -6.11308479309082}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 189}
+{"task": "R1_owner", "cond": "mine", "d": 4, "scores": {"gold": -2.4715523719787598, "foil": -1.1399184465408325}, "ntok": {"gold": 1, "foil": 2}, "split": false, "prompt_tokens": 196}
+{"task": "R1_owner", "cond": "sister", "d": 4, "scores": {"gold": -1.3677079677581787, "foil": -2.0467116832733154}, "ntok": {"gold": 2, "foil": 1}, "split": false, "prompt_tokens": 202}
+{"task": "R2_twohop", "cond": "sister", "d": 4, "scores": {"gold": -4.578750133514404, "foil": -3.4070849418640137}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 207}
+{"task": "R2_onehop", "cond": "sister", "d": 4, "scores": {"gold": -5.381951332092285, "foil": -2.0405399799346924}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 205}
+{"task": "R2_twohop", "cond": "aunt", "d": 4, "scores": {"gold": -2.388059616088867, "foil": -4.764213562011719}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 207}
+{"task": "R2_onehop", "cond": "aunt", "d": 4, "scores": {"gold": -0.815972089767456, "foil": -4.6835737228393555}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 205}
+{"task": "U_k1", "cond": "update", "d": 4, "scores": {"gold": -5.0455732345581055, "orig": -0.26044198870658875}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 231}
+{"task": "U_k2", "cond": "update", "d": 4, "scores": {"gold": -4.281527042388916, "orig": -0.576815128326416, "prev": -2.577110767364502}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 285}
+{"task": "U_k3", "cond": "update", "d": 4, "scores": {"gold": -4.395232677459717, "orig": -0.1219574362039566, "prev": -4.65418004989624}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 345}
+{"task": "P_myname", "cond": "user", "d": 4, "scores": {"gold": -0.18190516531467438, "sister": -13.178872108459473, "assistant": -4.9149489402771}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 195}
+{"task": "P_yourname", "cond": "assistant", "d": 4, "scores": {"gold": -0.5299535989761353, "user": -2.5314297676086426}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 193}
+{"task": "R1_owner", "cond": "mine", "d": 4, "scores": {"gold": -0.9076111316680908, "foil": -1.3955662250518799}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 205}
+{"task": "R1_owner", "cond": "sister", "d": 4, "scores": {"gold": -2.494037628173828, "foil": -0.23938748240470886}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 211}
+{"task": "R2_twohop", "cond": "sister", "d": 4, "scores": {"gold": -4.166038513183594, "foil": -9.515817642211914}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 217}
+{"task": "R2_onehop", "cond": "sister", "d": 4, "scores": {"gold": -0.5482273697853088, "foil": -8.656593322753906}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 217}
+{"task": "R2_twohop", "cond": "aunt", "d": 4, "scores": {"gold": -7.5595903396606445, "foil": -3.2133190631866455}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 217}
+{"task": "R2_onehop", "cond": "aunt", "d": 4, "scores": {"gold": -6.9220781326293945, "foil": -3.842456102371216}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 215}
+{"task": "U_k1", "cond": "update", "d": 4, "scores": {"gold": -2.407153367996216, "orig": -0.22832418978214264}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 224}
+{"task": "U_k2", "cond": "update", "d": 4, "scores": {"gold": -4.885970115661621, "orig": -0.43677249550819397, "prev": -1.396842122077942}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 286}
+{"task": "U_k3", "cond": "update", "d": 4, "scores": {"gold": -3.015592098236084, "orig": -0.13752886652946472, "prev": -5.244821071624756}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 344}
+{"task": "P_myname", "cond": "user", "d": 4, "scores": {"gold": -0.6683056950569153, "sister": -10.515898704528809, "assistant": -3.5220940113067627}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 202}
+{"task": "P_yourname", "cond": "assistant", "d": 4, "scores": {"gold": -1.6319750547409058, "user": -1.7367914915084839}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 200}
+{"task": "R1_owner", "cond": "mine", "d": 4, "scores": {"gold": -4.841140270233154, "foil": -4.997492790222168}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 209}
+{"task": "R1_owner", "cond": "sister", "d": 4, "scores": {"gold": -3.309006690979004, "foil": -3.8881523609161377}, "ntok": {"gold": 2, "foil": 2}, "split": false, "prompt_tokens": 215}
+{"task": "R2_twohop", "cond": "sister", "d": 4, "scores": {"gold": -9.772913932800293, "foil": -9.937848091125488}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 208}
+{"task": "R2_onehop", "cond": "sister", "d": 4, "scores": {"gold": -7.239968299865723, "foil": -9.354859352111816}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 206}
+{"task": "R2_twohop", "cond": "aunt", "d": 4, "scores": {"gold": -10.378113746643066, "foil": -11.487732887268066}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 208}
+{"task": "R2_onehop", "cond": "aunt", "d": 4, "scores": {"gold": -4.1338067054748535, "foil": -7.507856845855713}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 206}
+{"task": "U_k1", "cond": "update", "d": 4, "scores": {"gold": -3.320809841156006, "orig": -0.09984728693962097}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 226}
+{"task": "U_k2", "cond": "update", "d": 4, "scores": {"gold": -2.8528947830200195, "orig": -0.21981894969940186, "prev": -4.355164527893066}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 280}
+{"task": "U_k3", "cond": "update", "d": 4, "scores": {"gold": -3.352674722671509, "orig": -0.04486874118447304, "prev": -6.089819431304932}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 341}
+{"task": "P_myname", "cond": "user", "d": 4, "scores": {"gold": -0.9269243478775024, "sister": -6.304319858551025, "assistant": -2.373556613922119}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 192}
+{"task": "P_yourname", "cond": "assistant", "d": 4, "scores": {"gold": -0.11241023242473602, "user": -5.732288837432861}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 190}
+{"task": "R1_owner", "cond": "mine", "d": 4, "scores": {"gold": -0.03282947465777397, "foil": -9.74582290649414}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 205}
+{"task": "R1_owner", "cond": "sister", "d": 4, "scores": {"gold": -1.2249696254730225, "foil": -2.579761266708374}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 211}
+{"task": "R2_twohop", "cond": "sister", "d": 4, "scores": {"gold": -11.49586296081543, "foil": -11.085813522338867}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 211}
+{"task": "R2_onehop", "cond": "sister", "d": 4, "scores": {"gold": -8.905669212341309, "foil": -9.864384651184082}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 209}
+{"task": "R2_twohop", "cond": "aunt", "d": 4, "scores": {"gold": -10.095080375671387, "foil": -12.411709785461426}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 211}
+{"task": "R2_onehop", "cond": "aunt", "d": 4, "scores": {"gold": -4.427078723907471, "foil": -11.122795104980469}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 209}
+{"task": "U_k1", "cond": "update", "d": 4, "scores": {"gold": -5.301135063171387, "orig": -0.1424248218536377}, "ntok": {"gold": 1, "orig": 1}, "split": false, "prompt_tokens": 229}
+{"task": "U_k2", "cond": "update", "d": 4, "scores": {"gold": -4.993805885314941, "orig": -0.168728768825531, "prev": -4.806180000305176}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 289}
+{"task": "U_k3", "cond": "update", "d": 4, "scores": {"gold": -4.749201774597168, "orig": -0.12854288518428802, "prev": -2.766242027282715}, "ntok": {"gold": 1, "orig": 1, "prev": 1}, "split": false, "prompt_tokens": 350}
+{"task": "P_myname", "cond": "user", "d": 4, "scores": {"gold": -0.4305320680141449, "sister": -9.492757797241211, "assistant": -1.6146637201309204}, "ntok": {"gold": 1, "sister": 1, "assistant": 1}, "split": false, "prompt_tokens": 185}
+{"task": "P_yourname", "cond": "assistant", "d": 4, "scores": {"gold": -0.14072176814079285, "user": -4.37996244430542}, "ntok": {"gold": 1, "user": 1}, "split": false, "prompt_tokens": 183}
+{"task": "R1_owner", "cond": "mine", "d": 4, "scores": {"gold": -4.393735885620117, "foil": -0.33943936228752136}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 195}
+{"task": "R1_owner", "cond": "sister", "d": 4, "scores": {"gold": -0.21996638178825378, "foil": -3.5680365562438965}, "ntok": {"gold": 1, "foil": 1}, "split": false, "prompt_tokens": 201}

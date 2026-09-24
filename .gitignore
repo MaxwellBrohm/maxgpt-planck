@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+
+# model weights and checkpoints never go in git
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.gguf
+*.ckpt
+experiments/**/weights/
+experiments/**/checkpoints/
+
+# caches of downloaded third-party data
+research/recipe_work/uc_cache/
+
+# private notes and the sealed test never go in git
+private/
+sealed/

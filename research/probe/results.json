@@ -1,0 +1,9627 @@
+{
+ "greedy": {
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct": {
+   "params_m": 91.1,
+   "n_conversations": 53,
+   "seeds": [
+    null
+   ],
+   "ability_strict": {
+    "recall": 0.5,
+    "followup": 0.571,
+    "instruction": 0.286,
+    "correction": 0.333,
+    "own_answer": 0.75,
+    "role": 0.333,
+    "topic_return": 0.667,
+    "control": 0.643
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.5,
+    "followup": 0.5,
+    "instruction": 1.0,
+    "correction": 0.333,
+    "own_answer": 1.0,
+    "role": 0.5,
+    "topic_return": 0.667,
+    "control": 0.739
+   },
+   "ability_n_checks": {
+    "recall": 10,
+    "followup": 7,
+    "instruction": 14,
+    "correction": 3,
+    "own_answer": 4,
+    "role": 3,
+    "topic_return": 3,
+    "control": 28
+   },
+   "overall_multiturn_strict": 0.455,
+   "overall_multiturn_macro": 0.491,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.5,
+     "lenient": 0.6,
+     "lp_gold": -0.395,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 9.676,
+     "n": 10
+    },
+    "2": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -0.622,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 12.006,
+     "n": 2
+    },
+    "4": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -1.207,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 5.901,
+     "n": 2
+    },
+    "5": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 3
+    },
+    "6": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -2.095,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 5.936,
+     "n": 2
+    },
+    "10": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -1.533,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 7.226,
+     "n": 1
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 0.998,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 3.301,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -1.943,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 2.328,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": -3.113,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": -2.372,
+     "gold_beats_foil_rate": 0.0
+    },
+    "RI_binding": {
+     "mean_margin": -2.749,
+     "gold_beats_foil_rate": 0.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": -1.795,
+     "gold_beats_foil_rate": 0.0
+    }
+   },
+   "context_vs_capability": {
+    "multi_only_pass": 4,
+    "capability_failure": 6,
+    "both_pass": 9,
+    "context_failure": 9
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "multi_only_pass"
+    ],
+    "R_d2_number:recall": [
+     "capability_failure"
+    ],
+    "R_d4_pet:recall": [
+     "both_pass"
+    ],
+    "R_d4_city:recall": [
+     "context_failure"
+    ],
+    "R_d6_name:recall": [
+     "context_failure"
+    ],
+    "R_d6_number:recall": [
+     "context_failure"
+    ],
+    "R_d10_pet:recall": [
+     "context_failure"
+    ],
+    "R_d5_multi:name": [
+     "multi_only_pass"
+    ],
+    "R_d5_multi:city": [
+     "multi_only_pass"
+    ],
+    "R_d5_multi:pet": [
+     "multi_only_pass"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "both_pass"
+    ],
+    "F_translate:ellipsis": [
+     "capability_failure"
+    ],
+    "F_coref_she:coref": [
+     "context_failure"
+    ],
+    "F_whynot:why": [
+     "capability_failure"
+    ],
+    "F_shorter:shorter": [
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "context_failure"
+    ],
+    "I_end_question:end_q_t3": [
+     "context_failure"
+    ],
+    "I_caps:caps_t3": [
+     "capability_failure"
+    ],
+    "I_persona:arr_t3": [
+     "capability_failure"
+    ],
+    "I_persona:name_pip": [
+     "both_pass"
+    ],
+    "K_day:corrected": [
+     "context_failure"
+    ],
+    "K_time:corrected": [
+     "both_pass"
+    ],
+    "K_color:corrected": [
+     "capability_failure"
+    ],
+    "O_add10:add_to_own": [
+     "both_pass"
+    ],
+    "RI_binding:binding": [
+     "both_pass"
+    ],
+    "T_party:party_math": [
+     "both_pass"
+    ],
+    "T_dragon:fear": [
+     "context_failure"
+    ],
+    "T_dragon:name": [
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 1.0,
+    "persona_t1": 0.0,
+    "persona_t2": 0.0,
+    "persona_t3": 0.0,
+    "t1": 0.667,
+    "t2": 0.0,
+    "t3": 0.0
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.651,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.0
+   },
+   "turn_flags_count": {
+    "hit_max": 97,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 0
+   },
+   "n_assistant_turns": 149,
+   "replies_with_4gram_repeated_3x": 0.0268,
+   "deflection_rate_on_final_recall_turns": 0.0,
+   "self_copy_rate": 0.0,
+   "role_capture_on_self_description": {
+    "rate": 0.062,
+    "n": 16
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.993,
+     "cross_turn_4gram_overlap_mean": 0.032,
+     "max_within_reply_4gram_repeat": 1,
+     "mean_words": 113.667
+    },
+    "L_chitchat": {
+     "distinct3_mean": 0.983,
+     "cross_turn_4gram_overlap_mean": 0.016,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 114.167
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 500,
+    "R_d2_number": 483,
+    "R_d4_pet": 766,
+    "R_d4_city": 774,
+    "R_d6_name": 1038,
+    "R_d6_number": 1055,
+    "R_d10_pet": 1537,
+    "R_d5_multi": 806
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 1.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d2_number": {
+     "recall": 0.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 0.0
+    },
+    "R_d4_pet": {
+     "recall": 1.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_name": {
+     "recall": 0.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_number": {
+     "recall": 0.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d10_pet": {
+     "recall": 0.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d5_multi": {
+     "name": 1.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 0.0,
+     "city": 0.0,
+     "pet": 0.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 0.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 0.0
+    },
+    "F_coref_she": {
+     "coref": 0.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 1.0
+    },
+    "F_whynot": {
+     "why": 0.0
+    },
+    "F_whynot__ctrl": {
+     "why": 0.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 1.0,
+     "one_sentence_t2": 0.0,
+     "one_sentence_t3": 0.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 0.0,
+     "end_q_t2": 0.0,
+     "end_q_t3": 0.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 1.0
+    },
+    "I_caps": {
+     "caps_t1": 1.0,
+     "caps_t2": 0.0,
+     "caps_t3": 0.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 0.0
+    },
+    "I_persona": {
+     "arr_t0": 1.0,
+     "arr_t1": 0.0,
+     "arr_t2": 0.0,
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "K_day": {
+     "corrected": 0.0
+    },
+    "K_day__ctrl": {
+     "corrected": 1.0
+    },
+    "K_time": {
+     "corrected": 1.0
+    },
+    "K_time__ctrl": {
+     "corrected": 1.0
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 0.0
+    },
+    "O_second_item": {
+     "second_item": 1.0
+    },
+    "O_last_item": {
+     "last_item": 0.0
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 1.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 1.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 1.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 1.0
+    },
+    "T_party": {
+     "party_math": 1.0
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 0.0,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 1.0
+    }
+   }
+  },
+  "HuggingFaceTB/SmolLM2-135M-Instruct": {
+   "params_m": 134.5,
+   "n_conversations": 53,
+   "seeds": [
+    null
+   ],
+   "ability_strict": {
+    "recall": 0.1,
+    "followup": 0.286,
+    "instruction": 0.357,
+    "correction": 0.0,
+    "own_answer": 0.333,
+    "role": 0.0,
+    "topic_return": 0.0,
+    "control": 0.464
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.1,
+    "followup": 0.167,
+    "instruction": 1.0,
+    "correction": 0.0,
+    "own_answer": 1.0,
+    "role": 0.0,
+    "topic_return": 0.667,
+    "control": 0.565
+   },
+   "ability_n_checks": {
+    "recall": 10,
+    "followup": 7,
+    "instruction": 14,
+    "correction": 3,
+    "own_answer": 3,
+    "role": 3,
+    "topic_return": 3,
+    "control": 28
+   },
+   "overall_multiturn_strict": 0.209,
+   "overall_multiturn_macro": 0.154,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.6,
+     "lenient": 0.7,
+     "lp_gold": -0.693,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 6.97,
+     "n": 10
+    },
+    "2": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -0.809,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 8.77,
+     "n": 2
+    },
+    "4": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -2.104,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 3.378,
+     "n": 2
+    },
+    "5": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 3
+    },
+    "6": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -1.879,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 3.035,
+     "n": 2
+    },
+    "10": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -6.055,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 4.979,
+     "n": 1
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": -1.773,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": -0.382,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time": {
+     "mean_margin": -4.068,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": -0.249,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color": {
+     "mean_margin": -0.554,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": 0.925,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding": {
+     "mean_margin": -2.936,
+     "gold_beats_foil_rate": 0.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": -1.938,
+     "gold_beats_foil_rate": 0.0
+    }
+   },
+   "context_vs_capability": {
+    "capability_failure": 12,
+    "both_pass": 1,
+    "context_failure": 12,
+    "multi_only_pass": 3
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "capability_failure"
+    ],
+    "R_d2_number:recall": [
+     "capability_failure"
+    ],
+    "R_d4_pet:recall": [
+     "both_pass"
+    ],
+    "R_d4_city:recall": [
+     "capability_failure"
+    ],
+    "R_d6_name:recall": [
+     "capability_failure"
+    ],
+    "R_d6_number:recall": [
+     "context_failure"
+    ],
+    "R_d10_pet:recall": [
+     "context_failure"
+    ],
+    "R_d5_multi:name": [
+     "context_failure"
+    ],
+    "R_d5_multi:city": [
+     "context_failure"
+    ],
+    "R_d5_multi:pet": [
+     "context_failure"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "context_failure"
+    ],
+    "F_translate:ellipsis": [
+     "context_failure"
+    ],
+    "F_coref_she:coref": [
+     "capability_failure"
+    ],
+    "F_whynot:why": [
+     "context_failure"
+    ],
+    "F_shorter:shorter": [
+     "multi_only_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "context_failure"
+    ],
+    "I_end_question:end_q_t3": [
+     "multi_only_pass"
+    ],
+    "I_caps:caps_t3": [
+     "capability_failure"
+    ],
+    "I_persona:arr_t3": [
+     "capability_failure"
+    ],
+    "I_persona:name_pip": [
+     "multi_only_pass"
+    ],
+    "K_day:corrected": [
+     "capability_failure"
+    ],
+    "K_time:corrected": [
+     "capability_failure"
+    ],
+    "K_color:corrected": [
+     "capability_failure"
+    ],
+    "O_add10:add_to_own": [
+     "capability_failure"
+    ],
+    "RI_binding:binding": [
+     "capability_failure"
+    ],
+    "T_party:party_math": [
+     "context_failure"
+    ],
+    "T_dragon:fear": [
+     "context_failure"
+    ],
+    "T_dragon:name": [
+     "context_failure"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 0.0,
+    "persona_t1": 0.0,
+    "persona_t2": 0.0,
+    "persona_t3": 0.0,
+    "t1": 0.667,
+    "t2": 0.333,
+    "t3": 0.333
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.4564,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.0872
+   },
+   "turn_flags_count": {
+    "hit_max": 68,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 13
+   },
+   "n_assistant_turns": 149,
+   "replies_with_4gram_repeated_3x": 0.2215,
+   "deflection_rate_on_final_recall_turns": 0.241,
+   "self_copy_rate": 0.1739,
+   "role_capture_on_self_description": {
+    "rate": 0.125,
+    "n": 16
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.437,
+     "cross_turn_4gram_overlap_mean": 0.947,
+     "max_within_reply_4gram_repeat": 5,
+     "mean_words": 166.0
+    },
+    "L_chitchat": {
+     "distinct3_mean": 0.946,
+     "cross_turn_4gram_overlap_mean": 0.275,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 62.167
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 427,
+    "R_d2_number": 360,
+    "R_d4_pet": 747,
+    "R_d4_city": 678,
+    "R_d6_name": 978,
+    "R_d6_number": 1071,
+    "R_d10_pet": 1504,
+    "R_d5_multi": 939
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 0.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d2_number": {
+     "recall": 0.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 0.0
+    },
+    "R_d4_pet": {
+     "recall": 1.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_name": {
+     "recall": 0.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_number": {
+     "recall": 0.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d10_pet": {
+     "recall": 0.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d5_multi": {
+     "name": 0.0,
+     "city": 0.0,
+     "pet": 0.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 1.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 0.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 0.0,
+     "ellipsis": 0.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_coref_she": {
+     "coref": 0.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 0.0
+    },
+    "F_whynot": {
+     "why": 0.0
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 0.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 1.0,
+     "one_sentence_t2": 0.0,
+     "one_sentence_t3": 0.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 1.0,
+     "end_q_t2": 1.0,
+     "end_q_t3": 1.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 0.0
+    },
+    "I_caps": {
+     "caps_t1": 0.0,
+     "caps_t2": 0.0,
+     "caps_t3": 0.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 0.0
+    },
+    "I_persona": {
+     "arr_t0": 0.0,
+     "arr_t1": 0.0,
+     "arr_t2": 0.0,
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 0.0,
+     "name_pip": 0.0
+    },
+    "K_day": {
+     "corrected": 0.0
+    },
+    "K_day__ctrl": {
+     "corrected": 0.0
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 0.0
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 0.0
+    },
+    "O_second_item": {
+     "second_item": 0.0
+    },
+    "O_last_item": {
+     "last_item": null
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 0.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 0.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 0.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 0.0
+    },
+    "T_party": {
+     "party_math": 0.0
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 0.0,
+     "name": 0.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "unsloth/gemma-3-270m-it": {
+   "params_m": 268.1,
+   "n_conversations": 53,
+   "seeds": [
+    null
+   ],
+   "ability_strict": {
+    "recall": 0.0,
+    "followup": 0.857,
+    "instruction": 0.5,
+    "correction": 0.0,
+    "own_answer": 0.5,
+    "role": 0.0,
+    "topic_return": 0.667,
+    "control": 0.75
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.0,
+    "followup": 0.833,
+    "instruction": 1.0,
+    "correction": 0.0,
+    "own_answer": 1.0,
+    "role": 0.0,
+    "topic_return": 0.667,
+    "control": 0.87
+   },
+   "ability_n_checks": {
+    "recall": 10,
+    "followup": 7,
+    "instruction": 14,
+    "correction": 3,
+    "own_answer": 4,
+    "role": 3,
+    "topic_return": 3,
+    "control": 28
+   },
+   "overall_multiturn_strict": 0.386,
+   "overall_multiturn_macro": 0.361,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.7,
+     "lenient": 0.9,
+     "lp_gold": -0.481,
+     "rank1": 0.714,
+     "gold_beats_foil": 1.0,
+     "margin": 11.846,
+     "n": 10
+    },
+    "2": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -0.154,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 14.272,
+     "n": 2
+    },
+    "4": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -5.214,
+     "rank1": 0.5,
+     "gold_beats_foil": 0.5,
+     "margin": 4.698,
+     "n": 2
+    },
+    "5": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 3
+    },
+    "6": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -4.006,
+     "rank1": 0.5,
+     "gold_beats_foil": 0.5,
+     "margin": 6.003,
+     "n": 2
+    },
+    "10": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -7.247,
+     "rank1": 0.0,
+     "gold_beats_foil": 0.0,
+     "margin": -0.794,
+     "n": 1
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 1.672,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 7.057,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -7.577,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 2.285,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": -4.829,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": -8.238,
+     "gold_beats_foil_rate": 0.0
+    },
+    "RI_binding": {
+     "mean_margin": 9.568,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": 7.526,
+     "gold_beats_foil_rate": 1.0
+    }
+   },
+   "context_vs_capability": {
+    "capability_failure": 6,
+    "context_failure": 13,
+    "both_pass": 8,
+    "multi_only_pass": 1
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "capability_failure"
+    ],
+    "R_d2_number:recall": [
+     "capability_failure"
+    ],
+    "R_d4_pet:recall": [
+     "context_failure"
+    ],
+    "R_d4_city:recall": [
+     "context_failure"
+    ],
+    "R_d6_name:recall": [
+     "capability_failure"
+    ],
+    "R_d6_number:recall": [
+     "context_failure"
+    ],
+    "R_d10_pet:recall": [
+     "context_failure"
+    ],
+    "R_d5_multi:name": [
+     "context_failure"
+    ],
+    "R_d5_multi:city": [
+     "context_failure"
+    ],
+    "R_d5_multi:pet": [
+     "context_failure"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "context_failure"
+    ],
+    "F_translate:ellipsis": [
+     "both_pass"
+    ],
+    "F_coref_she:coref": [
+     "both_pass"
+    ],
+    "F_whynot:why": [
+     "both_pass"
+    ],
+    "F_shorter:shorter": [
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "both_pass"
+    ],
+    "I_end_question:end_q_t3": [
+     "multi_only_pass"
+    ],
+    "I_caps:caps_t3": [
+     "context_failure"
+    ],
+    "I_persona:arr_t3": [
+     "capability_failure"
+    ],
+    "I_persona:name_pip": [
+     "both_pass"
+    ],
+    "K_day:corrected": [
+     "context_failure"
+    ],
+    "K_time:corrected": [
+     "context_failure"
+    ],
+    "K_color:corrected": [
+     "capability_failure"
+    ],
+    "O_add10:add_to_own": [
+     "capability_failure"
+    ],
+    "RI_binding:binding": [
+     "context_failure"
+    ],
+    "T_party:party_math": [
+     "context_failure"
+    ],
+    "T_dragon:fear": [
+     "both_pass"
+    ],
+    "T_dragon:name": [
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 0.0,
+    "persona_t1": 0.0,
+    "persona_t2": 0.0,
+    "persona_t3": 0.0,
+    "t1": 0.667,
+    "t2": 0.667,
+    "t3": 0.667
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.3154,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.0604
+   },
+   "turn_flags_count": {
+    "hit_max": 47,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 9
+   },
+   "n_assistant_turns": 149,
+   "replies_with_4gram_repeated_3x": 0.0403,
+   "deflection_rate_on_final_recall_turns": 0.241,
+   "self_copy_rate": 0.0494,
+   "role_capture_on_self_description": {
+    "rate": 0.062,
+    "n": 16
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.977,
+     "cross_turn_4gram_overlap_mean": 0.684,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 146.167
+    },
+    "L_chitchat": {
+     "distinct3_mean": 1.0,
+     "cross_turn_4gram_overlap_mean": 0.0,
+     "max_within_reply_4gram_repeat": 1,
+     "mean_words": 15.5
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 373,
+    "R_d2_number": 453,
+    "R_d4_pet": 577,
+    "R_d4_city": 431,
+    "R_d6_name": 790,
+    "R_d6_number": 1036,
+    "R_d10_pet": 1445,
+    "R_d5_multi": 579
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 0.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d2_number": {
+     "recall": 0.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 0.0
+    },
+    "R_d4_pet": {
+     "recall": 0.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_name": {
+     "recall": 0.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_number": {
+     "recall": 0.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d10_pet": {
+     "recall": 0.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d5_multi": {
+     "name": 0.0,
+     "city": 0.0,
+     "pet": 0.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 1.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 0.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_coref_she": {
+     "coref": 1.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 1.0
+    },
+    "F_whynot": {
+     "why": 1.0
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 1.0,
+     "one_sentence_t2": 1.0,
+     "one_sentence_t3": 1.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 1.0,
+     "end_q_t2": 1.0,
+     "end_q_t3": 1.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 0.0
+    },
+    "I_caps": {
+     "caps_t1": 0.0,
+     "caps_t2": 0.0,
+     "caps_t3": 0.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 1.0
+    },
+    "I_persona": {
+     "arr_t0": 0.0,
+     "arr_t1": 0.0,
+     "arr_t2": 0.0,
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "K_day": {
+     "corrected": 0.0
+    },
+    "K_day__ctrl": {
+     "corrected": 1.0
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 1.0
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 0.0
+    },
+    "O_second_item": {
+     "second_item": 1.0
+    },
+    "O_last_item": {
+     "last_item": 0.0
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 0.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 0.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 0.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 1.0
+    },
+    "T_party": {
+     "party_math": 0.0
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "LiquidAI/LFM2-350M": {
+   "params_m": 354.5,
+   "n_conversations": 53,
+   "seeds": [
+    null
+   ],
+   "ability_strict": {
+    "recall": 0.6,
+    "followup": 1.0,
+    "instruction": 0.786,
+    "correction": 0.333,
+    "own_answer": 0.5,
+    "role": 0.333,
+    "topic_return": 1.0,
+    "control": 0.893
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.6,
+    "followup": 1.0,
+    "instruction": 1.0,
+    "correction": 0.333,
+    "own_answer": 1.0,
+    "role": 0.5,
+    "topic_return": 1.0,
+    "control": 0.913
+   },
+   "ability_n_checks": {
+    "recall": 10,
+    "followup": 7,
+    "instruction": 14,
+    "correction": 3,
+    "own_answer": 4,
+    "role": 3,
+    "topic_return": 3,
+    "control": 28
+   },
+   "overall_multiturn_strict": 0.705,
+   "overall_multiturn_macro": 0.65,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.8,
+     "lenient": 0.8,
+     "lp_gold": -1.773,
+     "rank1": 0.857,
+     "gold_beats_foil": 0.857,
+     "margin": 4.67,
+     "n": 10
+    },
+    "2": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": -0.786,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 9.675,
+     "n": 2
+    },
+    "4": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -0.518,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 3.565,
+     "n": 2
+    },
+    "5": {
+     "strict": 0.667,
+     "lenient": 0.667,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 3
+    },
+    "6": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -1.387,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 4.592,
+     "n": 2
+    },
+    "10": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -2.451,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 4.293,
+     "n": 1
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 1.399,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 1.711,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -1.179,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 0.747,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": -4.512,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": 2.495,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding": {
+     "mean_margin": 6.213,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": 7.472,
+     "gold_beats_foil_rate": 1.0
+    }
+   },
+   "context_vs_capability": {
+    "both_pass": 19,
+    "multi_only_pass": 2,
+    "context_failure": 6,
+    "capability_failure": 1
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "both_pass"
+    ],
+    "R_d2_number:recall": [
+     "multi_only_pass"
+    ],
+    "R_d4_pet:recall": [
+     "context_failure"
+    ],
+    "R_d4_city:recall": [
+     "both_pass"
+    ],
+    "R_d6_name:recall": [
+     "both_pass"
+    ],
+    "R_d6_number:recall": [
+     "context_failure"
+    ],
+    "R_d10_pet:recall": [
+     "context_failure"
+    ],
+    "R_d5_multi:name": [
+     "capability_failure"
+    ],
+    "R_d5_multi:city": [
+     "both_pass"
+    ],
+    "R_d5_multi:pet": [
+     "both_pass"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "both_pass"
+    ],
+    "F_translate:ellipsis": [
+     "both_pass"
+    ],
+    "F_coref_she:coref": [
+     "both_pass"
+    ],
+    "F_whynot:why": [
+     "both_pass"
+    ],
+    "F_shorter:shorter": [
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "both_pass"
+    ],
+    "I_end_question:end_q_t3": [
+     "context_failure"
+    ],
+    "I_caps:caps_t3": [
+     "both_pass"
+    ],
+    "I_persona:arr_t3": [
+     "both_pass"
+    ],
+    "I_persona:name_pip": [
+     "both_pass"
+    ],
+    "K_day:corrected": [
+     "both_pass"
+    ],
+    "K_time:corrected": [
+     "context_failure"
+    ],
+    "K_color:corrected": [
+     "context_failure"
+    ],
+    "O_add10:add_to_own": [
+     "both_pass"
+    ],
+    "RI_binding:binding": [
+     "multi_only_pass"
+    ],
+    "T_party:party_math": [
+     "both_pass"
+    ],
+    "T_dragon:fear": [
+     "both_pass"
+    ],
+    "T_dragon:name": [
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 1.0,
+    "persona_t1": 1.0,
+    "persona_t2": 1.0,
+    "persona_t3": 1.0,
+    "t1": 0.667,
+    "t2": 0.667,
+    "t3": 0.667
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.5638,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.0134
+   },
+   "turn_flags_count": {
+    "hit_max": 84,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 2
+   },
+   "n_assistant_turns": 149,
+   "replies_with_4gram_repeated_3x": 0.0,
+   "deflection_rate_on_final_recall_turns": 0.069,
+   "self_copy_rate": 0.0,
+   "role_capture_on_self_description": {
+    "rate": 0.062,
+    "n": 16
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.992,
+     "cross_turn_4gram_overlap_mean": 0.038,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 155.5
+    },
+    "L_chitchat": {
+     "distinct3_mean": 0.993,
+     "cross_turn_4gram_overlap_mean": 0.006,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 99.5
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 455,
+    "R_d2_number": 472,
+    "R_d4_pet": 755,
+    "R_d4_city": 678,
+    "R_d6_name": 987,
+    "R_d6_number": 1035,
+    "R_d10_pet": 1587,
+    "R_d5_multi": 838
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 1.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 1.0
+    },
+    "R_d2_number": {
+     "recall": 1.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 0.0
+    },
+    "R_d4_pet": {
+     "recall": 0.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 1.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_name": {
+     "recall": 1.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_number": {
+     "recall": 0.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d10_pet": {
+     "recall": 0.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d5_multi": {
+     "name": 0.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 0.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_coref_she": {
+     "coref": 1.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 1.0
+    },
+    "F_whynot": {
+     "why": 1.0
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 1.0,
+     "one_sentence_t2": 1.0,
+     "one_sentence_t3": 1.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 0.0,
+     "end_q_t2": 0.0,
+     "end_q_t3": 0.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 1.0
+    },
+    "I_caps": {
+     "caps_t1": 1.0,
+     "caps_t2": 1.0,
+     "caps_t3": 1.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 1.0
+    },
+    "I_persona": {
+     "arr_t0": 1.0,
+     "arr_t1": 1.0,
+     "arr_t2": 1.0,
+     "arr_t3": 1.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 1.0,
+     "name_pip": 1.0
+    },
+    "K_day": {
+     "corrected": 1.0
+    },
+    "K_day__ctrl": {
+     "corrected": 1.0
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 1.0
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 1.0
+    },
+    "O_second_item": {
+     "second_item": 0.0
+    },
+    "O_last_item": {
+     "last_item": 0.0
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 1.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 1.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 1.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 0.0
+    },
+    "T_party": {
+     "party_math": 1.0
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "LiquidAI/LFM2.5-350M": {
+   "params_m": 354.5,
+   "n_conversations": 53,
+   "seeds": [
+    null
+   ],
+   "ability_strict": {
+    "recall": 0.6,
+    "followup": 1.0,
+    "instruction": 1.0,
+    "correction": 0.0,
+    "own_answer": 0.75,
+    "role": 0.0,
+    "topic_return": 1.0,
+    "control": 0.821
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.6,
+    "followup": 1.0,
+    "instruction": 1.0,
+    "correction": 0.0,
+    "own_answer": 1.0,
+    "role": 0.0,
+    "topic_return": 1.0,
+    "control": 0.87
+   },
+   "ability_n_checks": {
+    "recall": 10,
+    "followup": 7,
+    "instruction": 14,
+    "correction": 3,
+    "own_answer": 4,
+    "role": 3,
+    "topic_return": 3,
+    "control": 28
+   },
+   "overall_multiturn_strict": 0.75,
+   "overall_multiturn_macro": 0.621,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.7,
+     "lenient": 0.9,
+     "lp_gold": -0.731,
+     "rank1": 0.714,
+     "gold_beats_foil": 1.0,
+     "margin": 10.309,
+     "n": 10
+    },
+    "2": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -1.251,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 11.203,
+     "n": 2
+    },
+    "4": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -0.261,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 8.068,
+     "n": 2
+    },
+    "5": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 3
+    },
+    "6": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -1.435,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 6.658,
+     "n": 2
+    },
+    "10": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": -0.441,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 13.095,
+     "n": 1
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": -0.219,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 6.881,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -2.669,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 6.799,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": -2.927,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": 5.654,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding": {
+     "mean_margin": 7.575,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": 10.938,
+     "gold_beats_foil_rate": 1.0
+    }
+   },
+   "context_vs_capability": {
+    "capability_failure": 2,
+    "context_failure": 6,
+    "both_pass": 17,
+    "multi_only_pass": 3
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "capability_failure"
+    ],
+    "R_d2_number:recall": [
+     "context_failure"
+    ],
+    "R_d4_pet:recall": [
+     "both_pass"
+    ],
+    "R_d4_city:recall": [
+     "context_failure"
+    ],
+    "R_d6_name:recall": [
+     "capability_failure"
+    ],
+    "R_d6_number:recall": [
+     "both_pass"
+    ],
+    "R_d10_pet:recall": [
+     "both_pass"
+    ],
+    "R_d5_multi:name": [
+     "multi_only_pass"
+    ],
+    "R_d5_multi:city": [
+     "both_pass"
+    ],
+    "R_d5_multi:pet": [
+     "both_pass"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "both_pass"
+    ],
+    "F_translate:ellipsis": [
+     "both_pass"
+    ],
+    "F_coref_she:coref": [
+     "both_pass"
+    ],
+    "F_whynot:why": [
+     "both_pass"
+    ],
+    "F_shorter:shorter": [
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "both_pass"
+    ],
+    "I_end_question:end_q_t3": [
+     "both_pass"
+    ],
+    "I_caps:caps_t3": [
+     "both_pass"
+    ],
+    "I_persona:arr_t3": [
+     "both_pass"
+    ],
+    "I_persona:name_pip": [
+     "multi_only_pass"
+    ],
+    "K_day:corrected": [
+     "context_failure"
+    ],
+    "K_time:corrected": [
+     "context_failure"
+    ],
+    "K_color:corrected": [
+     "context_failure"
+    ],
+    "O_add10:add_to_own": [
+     "both_pass"
+    ],
+    "RI_binding:binding": [
+     "context_failure"
+    ],
+    "T_party:party_math": [
+     "both_pass"
+    ],
+    "T_dragon:fear": [
+     "multi_only_pass"
+    ],
+    "T_dragon:name": [
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 1.0,
+    "persona_t1": 1.0,
+    "persona_t2": 1.0,
+    "persona_t3": 1.0,
+    "t1": 1.0,
+    "t2": 1.0,
+    "t3": 1.0
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.3826,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.0403
+   },
+   "turn_flags_count": {
+    "hit_max": 57,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 6
+   },
+   "n_assistant_turns": 149,
+   "replies_with_4gram_repeated_3x": 0.0067,
+   "deflection_rate_on_final_recall_turns": 0.207,
+   "self_copy_rate": 0.0,
+   "role_capture_on_self_description": {
+    "rate": 0.062,
+    "n": 16
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.989,
+     "cross_turn_4gram_overlap_mean": 0.025,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 137.5
+    },
+    "L_chitchat": {
+     "distinct3_mean": 1.0,
+     "cross_turn_4gram_overlap_mean": 0.015,
+     "max_within_reply_4gram_repeat": 1,
+     "mean_words": 38.833
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 490,
+    "R_d2_number": 472,
+    "R_d4_pet": 675,
+    "R_d4_city": 757,
+    "R_d6_name": 968,
+    "R_d6_number": 1035,
+    "R_d10_pet": 1510,
+    "R_d5_multi": 710
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 0.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d2_number": {
+     "recall": 0.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_pet": {
+     "recall": 1.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_name": {
+     "recall": 0.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_number": {
+     "recall": 1.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d10_pet": {
+     "recall": 1.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d5_multi": {
+     "name": 1.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 0.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_coref_she": {
+     "coref": 1.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 1.0
+    },
+    "F_whynot": {
+     "why": 1.0
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 1.0,
+     "one_sentence_t2": 1.0,
+     "one_sentence_t3": 1.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 1.0,
+     "end_q_t2": 1.0,
+     "end_q_t3": 1.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 1.0
+    },
+    "I_caps": {
+     "caps_t1": 1.0,
+     "caps_t2": 1.0,
+     "caps_t3": 1.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 1.0
+    },
+    "I_persona": {
+     "arr_t0": 1.0,
+     "arr_t1": 1.0,
+     "arr_t2": 1.0,
+     "arr_t3": 1.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 1.0,
+     "name_pip": 0.0
+    },
+    "K_day": {
+     "corrected": 0.0
+    },
+    "K_day__ctrl": {
+     "corrected": 1.0
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 1.0
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 1.0
+    },
+    "O_second_item": {
+     "second_item": 0.0
+    },
+    "O_last_item": {
+     "last_item": 1.0
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 1.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 1.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 0.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 1.0
+    },
+    "T_party": {
+     "party_math": 1.0
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 0.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "HuggingFaceTB/SmolLM2-360M-Instruct": {
+   "params_m": 361.8,
+   "n_conversations": 53,
+   "seeds": [
+    null
+   ],
+   "ability_strict": {
+    "recall": 0.7,
+    "followup": 0.857,
+    "instruction": 0.786,
+    "correction": 0.0,
+    "own_answer": 0.667,
+    "role": 0.333,
+    "topic_return": 0.667,
+    "control": 0.536
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.7,
+    "followup": 0.833,
+    "instruction": 1.0,
+    "correction": 0.0,
+    "own_answer": 1.0,
+    "role": 0.5,
+    "topic_return": 0.667,
+    "control": 0.652
+   },
+   "ability_n_checks": {
+    "recall": 10,
+    "followup": 7,
+    "instruction": 14,
+    "correction": 3,
+    "own_answer": 3,
+    "role": 3,
+    "topic_return": 3,
+    "control": 28
+   },
+   "overall_multiturn_strict": 0.674,
+   "overall_multiturn_macro": 0.573,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.4,
+     "lenient": 0.5,
+     "lp_gold": -0.479,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 6.531,
+     "n": 10
+    },
+    "2": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -0.243,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 9.126,
+     "n": 2
+    },
+    "4": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -0.274,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 6.049,
+     "n": 2
+    },
+    "5": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 3
+    },
+    "6": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": -0.213,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 7.397,
+     "n": 2
+    },
+    "10": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -2.717,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 7.111,
+     "n": 1
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 1.615,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 2.971,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -1.75,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 1.258,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": -2.13,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": 0.383,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding": {
+     "mean_margin": 1.003,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": 0.334,
+     "gold_beats_foil_rate": 1.0
+    }
+   },
+   "context_vs_capability": {
+    "both_pass": 12,
+    "capability_failure": 6,
+    "multi_only_pass": 7,
+    "context_failure": 3
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "both_pass"
+    ],
+    "R_d2_number:recall": [
+     "capability_failure"
+    ],
+    "R_d4_pet:recall": [
+     "both_pass"
+    ],
+    "R_d4_city:recall": [
+     "capability_failure"
+    ],
+    "R_d6_name:recall": [
+     "multi_only_pass"
+    ],
+    "R_d6_number:recall": [
+     "both_pass"
+    ],
+    "R_d10_pet:recall": [
+     "context_failure"
+    ],
+    "R_d5_multi:name": [
+     "multi_only_pass"
+    ],
+    "R_d5_multi:city": [
+     "multi_only_pass"
+    ],
+    "R_d5_multi:pet": [
+     "multi_only_pass"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "multi_only_pass"
+    ],
+    "F_translate:ellipsis": [
+     "both_pass"
+    ],
+    "F_coref_she:coref": [
+     "multi_only_pass"
+    ],
+    "F_whynot:why": [
+     "context_failure"
+    ],
+    "F_shorter:shorter": [
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "both_pass"
+    ],
+    "I_end_question:end_q_t3": [
+     "both_pass"
+    ],
+    "I_caps:caps_t3": [
+     "capability_failure"
+    ],
+    "I_persona:arr_t3": [
+     "multi_only_pass"
+    ],
+    "I_persona:name_pip": [
+     "both_pass"
+    ],
+    "K_day:corrected": [
+     "capability_failure"
+    ],
+    "K_time:corrected": [
+     "context_failure"
+    ],
+    "K_color:corrected": [
+     "capability_failure"
+    ],
+    "O_add10:add_to_own": [
+     "both_pass"
+    ],
+    "RI_binding:binding": [
+     "both_pass"
+    ],
+    "T_party:party_math": [
+     "capability_failure"
+    ],
+    "T_dragon:fear": [
+     "both_pass"
+    ],
+    "T_dragon:name": [
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 1.0,
+    "persona_t1": 1.0,
+    "persona_t2": 1.0,
+    "persona_t3": 1.0,
+    "t1": 0.667,
+    "t2": 0.667,
+    "t3": 0.667
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.2282,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.1208
+   },
+   "turn_flags_count": {
+    "hit_max": 34,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 18
+   },
+   "n_assistant_turns": 149,
+   "replies_with_4gram_repeated_3x": 0.0805,
+   "deflection_rate_on_final_recall_turns": 0.31,
+   "self_copy_rate": 0.1205,
+   "role_capture_on_self_description": {
+    "rate": 0.062,
+    "n": 16
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.749,
+     "cross_turn_4gram_overlap_mean": 0.456,
+     "max_within_reply_4gram_repeat": 4,
+     "mean_words": 167.5
+    },
+    "L_chitchat": {
+     "distinct3_mean": 1.0,
+     "cross_turn_4gram_overlap_mean": 0.0,
+     "max_within_reply_4gram_repeat": 1,
+     "mean_words": 18.0
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 417,
+    "R_d2_number": 377,
+    "R_d4_pet": 347,
+    "R_d4_city": 569,
+    "R_d6_name": 603,
+    "R_d6_number": 1076,
+    "R_d10_pet": 1407,
+    "R_d5_multi": 657
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 1.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 1.0
+    },
+    "R_d2_number": {
+     "recall": 0.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 0.0
+    },
+    "R_d4_pet": {
+     "recall": 1.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_name": {
+     "recall": 1.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_number": {
+     "recall": 1.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d10_pet": {
+     "recall": 0.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d5_multi": {
+     "name": 1.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 0.0,
+     "city": 0.0,
+     "pet": 0.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 0.0
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_coref_she": {
+     "coref": 1.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 0.0
+    },
+    "F_whynot": {
+     "why": 0.0
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 1.0,
+     "one_sentence_t2": 1.0,
+     "one_sentence_t3": 1.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 1.0,
+     "end_q_t2": 1.0,
+     "end_q_t3": 1.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 1.0
+    },
+    "I_caps": {
+     "caps_t1": 0.0,
+     "caps_t2": 0.0,
+     "caps_t3": 0.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 0.0
+    },
+    "I_persona": {
+     "arr_t0": 1.0,
+     "arr_t1": 1.0,
+     "arr_t2": 1.0,
+     "arr_t3": 1.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "K_day": {
+     "corrected": 0.0
+    },
+    "K_day__ctrl": {
+     "corrected": 0.0
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 1.0
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 0.0
+    },
+    "O_second_item": {
+     "second_item": 0.0
+    },
+    "O_last_item": {
+     "last_item": null
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 1.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 1.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 1.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 1.0
+    },
+    "T_party": {
+     "party_math": 0.0
+    },
+    "T_party__ctrl": {
+     "party_math": 0.0
+    },
+    "T_dragon": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "Qwen/Qwen2.5-0.5B-Instruct": {
+   "params_m": 494.0,
+   "n_conversations": 53,
+   "seeds": [
+    null
+   ],
+   "ability_strict": {
+    "recall": 0.1,
+    "followup": 0.857,
+    "instruction": 0.571,
+    "correction": 0.0,
+    "own_answer": 1.0,
+    "role": 0.667,
+    "topic_return": 1.0,
+    "control": 0.821
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.4,
+    "followup": 0.833,
+    "instruction": 1.0,
+    "correction": 0.0,
+    "own_answer": 1.0,
+    "role": 1.0,
+    "topic_return": 1.0,
+    "control": 0.957
+   },
+   "ability_n_checks": {
+    "recall": 10,
+    "followup": 7,
+    "instruction": 14,
+    "correction": 3,
+    "own_answer": 3,
+    "role": 3,
+    "topic_return": 3,
+    "control": 28
+   },
+   "overall_multiturn_strict": 0.535,
+   "overall_multiturn_macro": 0.599,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.8,
+     "lenient": 0.9,
+     "lp_gold": -0.229,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 8.604,
+     "n": 10
+    },
+    "2": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -0.283,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 11.47,
+     "n": 2
+    },
+    "4": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -0.093,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 7.738,
+     "n": 2
+    },
+    "5": {
+     "strict": 0.0,
+     "lenient": 1.0,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 3
+    },
+    "6": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -1.546,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 7.023,
+     "n": 2
+    },
+    "10": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -3.511,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 11.449,
+     "n": 1
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 0.918,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 5.305,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -4.61,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 0.666,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": 0.853,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": 5.842,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding": {
+     "mean_margin": 9.378,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": 9.842,
+     "gold_beats_foil_rate": 1.0
+    }
+   },
+   "context_vs_capability": {
+    "both_pass": 12,
+    "context_failure": 11,
+    "capability_failure": 4,
+    "multi_only_pass": 1
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "both_pass"
+    ],
+    "R_d2_number:recall": [
+     "context_failure"
+    ],
+    "R_d4_pet:recall": [
+     "context_failure"
+    ],
+    "R_d4_city:recall": [
+     "context_failure"
+    ],
+    "R_d6_name:recall": [
+     "capability_failure"
+    ],
+    "R_d6_number:recall": [
+     "capability_failure"
+    ],
+    "R_d10_pet:recall": [
+     "context_failure"
+    ],
+    "R_d5_multi:name": [
+     "context_failure"
+    ],
+    "R_d5_multi:city": [
+     "context_failure"
+    ],
+    "R_d5_multi:pet": [
+     "context_failure"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "both_pass"
+    ],
+    "F_translate:ellipsis": [
+     "both_pass"
+    ],
+    "F_coref_she:coref": [
+     "context_failure"
+    ],
+    "F_whynot:why": [
+     "both_pass"
+    ],
+    "F_shorter:shorter": [
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "capability_failure"
+    ],
+    "I_end_question:end_q_t3": [
+     "both_pass"
+    ],
+    "I_caps:caps_t3": [
+     "context_failure"
+    ],
+    "I_persona:arr_t3": [
+     "multi_only_pass"
+    ],
+    "I_persona:name_pip": [
+     "both_pass"
+    ],
+    "K_day:corrected": [
+     "context_failure"
+    ],
+    "K_time:corrected": [
+     "context_failure"
+    ],
+    "K_color:corrected": [
+     "capability_failure"
+    ],
+    "O_add10:add_to_own": [
+     "both_pass"
+    ],
+    "RI_binding:binding": [
+     "both_pass"
+    ],
+    "T_party:party_math": [
+     "both_pass"
+    ],
+    "T_dragon:fear": [
+     "both_pass"
+    ],
+    "T_dragon:name": [
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 1.0,
+    "persona_t1": 1.0,
+    "persona_t2": 1.0,
+    "persona_t3": 1.0,
+    "t1": 0.333,
+    "t2": 0.333,
+    "t3": 0.333
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.3423,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.1678
+   },
+   "turn_flags_count": {
+    "hit_max": 51,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 25
+   },
+   "n_assistant_turns": 149,
+   "replies_with_4gram_repeated_3x": 0.0604,
+   "deflection_rate_on_final_recall_turns": 0.448,
+   "self_copy_rate": 0.0989,
+   "role_capture_on_self_description": {
+    "rate": 0.0,
+    "n": 16
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.938,
+     "cross_turn_4gram_overlap_mean": 1.0,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 162.0
+    },
+    "L_chitchat": {
+     "distinct3_mean": 0.961,
+     "cross_turn_4gram_overlap_mean": 0.248,
+     "max_within_reply_4gram_repeat": 3,
+     "mean_words": 104.333
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 511,
+    "R_d2_number": 456,
+    "R_d4_pet": 603,
+    "R_d4_city": 774,
+    "R_d6_name": 905,
+    "R_d6_number": 1050,
+    "R_d10_pet": 1375,
+    "R_d5_multi": 743
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 1.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 1.0
+    },
+    "R_d2_number": {
+     "recall": 0.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_pet": {
+     "recall": 0.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_name": {
+     "recall": 0.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_number": {
+     "recall": 0.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 0.0
+    },
+    "R_d10_pet": {
+     "recall": 0.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d5_multi": {
+     "name": 0.0,
+     "city": 0.0,
+     "pet": 0.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 1.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_coref_she": {
+     "coref": 0.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 1.0
+    },
+    "F_whynot": {
+     "why": 1.0
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 0.0,
+     "one_sentence_t2": 0.0,
+     "one_sentence_t3": 0.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 0.0
+    },
+    "I_end_question": {
+     "end_q_t1": 1.0,
+     "end_q_t2": 1.0,
+     "end_q_t3": 1.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 1.0
+    },
+    "I_caps": {
+     "caps_t1": 0.0,
+     "caps_t2": 0.0,
+     "caps_t3": 0.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 1.0
+    },
+    "I_persona": {
+     "arr_t0": 1.0,
+     "arr_t1": 1.0,
+     "arr_t2": 1.0,
+     "arr_t3": 1.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "K_day": {
+     "corrected": 0.0
+    },
+    "K_day__ctrl": {
+     "corrected": 1.0
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 1.0
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 0.0
+    },
+    "O_second_item": {
+     "second_item": null
+    },
+    "O_last_item": {
+     "last_item": 1.0
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 1.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 1.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 1.0
+    },
+    "RI_binding": {
+     "binding": 1.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 1.0
+    },
+    "T_party": {
+     "party_math": 1.0
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "Qwen/Qwen3-0.6B": {
+   "params_m": 596.0,
+   "n_conversations": 53,
+   "seeds": [
+    null
+   ],
+   "ability_strict": {
+    "recall": 0.6,
+    "followup": 1.0,
+    "instruction": 0.714,
+    "correction": 0.667,
+    "own_answer": 1.0,
+    "role": 0.0,
+    "topic_return": 1.0,
+    "control": 0.929
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.9,
+    "followup": 1.0,
+    "instruction": 0.0,
+    "correction": 0.667,
+    "own_answer": 1.0,
+    "role": 0.5,
+    "topic_return": 1.0,
+    "control": 1.0
+   },
+   "ability_n_checks": {
+    "recall": 10,
+    "followup": 7,
+    "instruction": 14,
+    "correction": 3,
+    "own_answer": 4,
+    "role": 3,
+    "topic_return": 3,
+    "control": 28
+   },
+   "overall_multiturn_strict": 0.727,
+   "overall_multiturn_macro": 0.712,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.8,
+     "lenient": 1.0,
+     "lp_gold": -1.668,
+     "rank1": 0.429,
+     "gold_beats_foil": 1.0,
+     "margin": 12.505,
+     "n": 10
+    },
+    "2": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -1.872,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 12.283,
+     "n": 2
+    },
+    "4": {
+     "strict": 0.5,
+     "lenient": 1.0,
+     "lp_gold": -4.021,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 9.026,
+     "n": 2
+    },
+    "5": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 3
+    },
+    "6": {
+     "strict": 0.5,
+     "lenient": 1.0,
+     "lp_gold": -1.088,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 10.276,
+     "n": 2
+    },
+    "10": {
+     "strict": 0.0,
+     "lenient": 1.0,
+     "lp_gold": -4.87,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 12.355,
+     "n": 1
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 0.753,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 4.303,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -3.622,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 4.369,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": 4.556,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": 8.115,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding": {
+     "mean_margin": 4.079,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": 7.087,
+     "gold_beats_foil_rate": 1.0
+    }
+   },
+   "context_vs_capability": {
+    "capability_failure": 2,
+    "both_pass": 20,
+    "context_failure": 6
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "capability_failure"
+    ],
+    "R_d2_number:recall": [
+     "both_pass"
+    ],
+    "R_d4_pet:recall": [
+     "context_failure"
+    ],
+    "R_d4_city:recall": [
+     "both_pass"
+    ],
+    "R_d6_name:recall": [
+     "capability_failure"
+    ],
+    "R_d6_number:recall": [
+     "both_pass"
+    ],
+    "R_d10_pet:recall": [
+     "context_failure"
+    ],
+    "R_d5_multi:name": [
+     "both_pass"
+    ],
+    "R_d5_multi:city": [
+     "both_pass"
+    ],
+    "R_d5_multi:pet": [
+     "both_pass"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "both_pass"
+    ],
+    "F_translate:ellipsis": [
+     "both_pass"
+    ],
+    "F_coref_she:coref": [
+     "both_pass"
+    ],
+    "F_whynot:why": [
+     "both_pass"
+    ],
+    "F_shorter:shorter": [
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "both_pass"
+    ],
+    "I_end_question:end_q_t3": [
+     "both_pass"
+    ],
+    "I_caps:caps_t3": [
+     "both_pass"
+    ],
+    "I_persona:arr_t3": [
+     "context_failure"
+    ],
+    "I_persona:name_pip": [
+     "context_failure"
+    ],
+    "K_day:corrected": [
+     "both_pass"
+    ],
+    "K_time:corrected": [
+     "both_pass"
+    ],
+    "K_color:corrected": [
+     "context_failure"
+    ],
+    "O_add10:add_to_own": [
+     "both_pass"
+    ],
+    "RI_binding:binding": [
+     "context_failure"
+    ],
+    "T_party:party_math": [
+     "both_pass"
+    ],
+    "T_dragon:fear": [
+     "both_pass"
+    ],
+    "T_dragon:name": [
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 1.0,
+    "persona_t1": 0.0,
+    "persona_t2": 0.0,
+    "persona_t3": 0.0,
+    "t1": 1.0,
+    "t2": 1.0,
+    "t3": 1.0
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.2349,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.0268
+   },
+   "turn_flags_count": {
+    "hit_max": 35,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 4
+   },
+   "n_assistant_turns": 149,
+   "replies_with_4gram_repeated_3x": 0.0201,
+   "deflection_rate_on_final_recall_turns": 0.138,
+   "self_copy_rate": 0.0706,
+   "role_capture_on_self_description": {
+    "rate": 0.188,
+    "n": 16
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.986,
+     "cross_turn_4gram_overlap_mean": 0.4,
+     "max_within_reply_4gram_repeat": 3,
+     "mean_words": 131.167
+    },
+    "L_chitchat": {
+     "distinct3_mean": 0.991,
+     "cross_turn_4gram_overlap_mean": 0.106,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 33.5
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 356,
+    "R_d2_number": 330,
+    "R_d4_pet": 651,
+    "R_d4_city": 587,
+    "R_d6_name": 912,
+    "R_d6_number": 982,
+    "R_d10_pet": 1376,
+    "R_d5_multi": 683
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 0.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d2_number": {
+     "recall": 1.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_pet": {
+     "recall": 0.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 1.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_name": {
+     "recall": 0.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_number": {
+     "recall": 1.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d10_pet": {
+     "recall": 0.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d5_multi": {
+     "name": 1.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 1.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_coref_she": {
+     "coref": 1.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 1.0
+    },
+    "F_whynot": {
+     "why": 1.0
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 1.0,
+     "one_sentence_t2": 1.0,
+     "one_sentence_t3": 1.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 1.0,
+     "end_q_t2": 1.0,
+     "end_q_t3": 1.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 1.0
+    },
+    "I_caps": {
+     "caps_t1": 1.0,
+     "caps_t2": 1.0,
+     "caps_t3": 1.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 1.0
+    },
+    "I_persona": {
+     "arr_t0": 1.0,
+     "arr_t1": 0.0,
+     "arr_t2": 0.0,
+     "arr_t3": 0.0,
+     "name_pip": 0.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 1.0,
+     "name_pip": 1.0
+    },
+    "K_day": {
+     "corrected": 1.0
+    },
+    "K_day__ctrl": {
+     "corrected": 1.0
+    },
+    "K_time": {
+     "corrected": 1.0
+    },
+    "K_time__ctrl": {
+     "corrected": 1.0
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 1.0
+    },
+    "O_second_item": {
+     "second_item": 1.0
+    },
+    "O_last_item": {
+     "last_item": 1.0
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 1.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 1.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 0.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 1.0
+    },
+    "T_party": {
+     "party_math": 1.0
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  }
+ },
+ "sampled": {
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct": {
+   "params_m": 91.1,
+   "n_conversations": 53,
+   "seeds": [
+    0
+   ],
+   "ability_strict": {
+    "recall": 0.5,
+    "followup": 0.714,
+    "instruction": 0.357,
+    "correction": 0.667,
+    "own_answer": 0.75,
+    "role": 0.333,
+    "topic_return": 0.667,
+    "control": 0.607
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.6,
+    "followup": 0.667,
+    "instruction": 1.0,
+    "correction": 0.667,
+    "own_answer": 1.0,
+    "role": 0.0,
+    "topic_return": 0.667,
+    "control": 0.783
+   },
+   "ability_n_checks": {
+    "recall": 10,
+    "followup": 7,
+    "instruction": 14,
+    "correction": 3,
+    "own_answer": 4,
+    "role": 3,
+    "topic_return": 3,
+    "control": 28
+   },
+   "overall_multiturn_strict": 0.523,
+   "overall_multiturn_macro": 0.57,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.7,
+     "lenient": 0.8,
+     "lp_gold": -0.395,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 9.676,
+     "n": 10
+    },
+    "2": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -0.42,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 11.609,
+     "n": 2
+    },
+    "4": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -1.807,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 4.954,
+     "n": 2
+    },
+    "5": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 3
+    },
+    "6": {
+     "strict": 0.0,
+     "lenient": 0.5,
+     "lp_gold": -1.784,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 6.711,
+     "n": 2
+    },
+    "10": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -0.275,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 10.071,
+     "n": 1
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 1.767,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 3.301,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -3.054,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 2.328,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": -1.947,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": -2.372,
+     "gold_beats_foil_rate": 0.0
+    },
+    "RI_binding": {
+     "mean_margin": -4.001,
+     "gold_beats_foil_rate": 0.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": -1.795,
+     "gold_beats_foil_rate": 0.0
+    }
+   },
+   "context_vs_capability": {
+    "both_pass": 10,
+    "capability_failure": 5,
+    "context_failure": 7,
+    "multi_only_pass": 6
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "both_pass"
+    ],
+    "R_d2_number:recall": [
+     "capability_failure"
+    ],
+    "R_d4_pet:recall": [
+     "both_pass"
+    ],
+    "R_d4_city:recall": [
+     "context_failure"
+    ],
+    "R_d6_name:recall": [
+     "capability_failure"
+    ],
+    "R_d6_number:recall": [
+     "context_failure"
+    ],
+    "R_d10_pet:recall": [
+     "context_failure"
+    ],
+    "R_d5_multi:name": [
+     "multi_only_pass"
+    ],
+    "R_d5_multi:city": [
+     "both_pass"
+    ],
+    "R_d5_multi:pet": [
+     "both_pass"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "both_pass"
+    ],
+    "F_translate:ellipsis": [
+     "capability_failure"
+    ],
+    "F_coref_she:coref": [
+     "multi_only_pass"
+    ],
+    "F_whynot:why": [
+     "multi_only_pass"
+    ],
+    "F_shorter:shorter": [
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "capability_failure"
+    ],
+    "I_end_question:end_q_t3": [
+     "context_failure"
+    ],
+    "I_caps:caps_t3": [
+     "multi_only_pass"
+    ],
+    "I_persona:arr_t3": [
+     "capability_failure"
+    ],
+    "I_persona:name_pip": [
+     "multi_only_pass"
+    ],
+    "K_day:corrected": [
+     "both_pass"
+    ],
+    "K_time:corrected": [
+     "context_failure"
+    ],
+    "K_color:corrected": [
+     "multi_only_pass"
+    ],
+    "O_add10:add_to_own": [
+     "both_pass"
+    ],
+    "RI_binding:binding": [
+     "context_failure"
+    ],
+    "T_party:party_math": [
+     "both_pass"
+    ],
+    "T_dragon:fear": [
+     "context_failure"
+    ],
+    "T_dragon:name": [
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 1.0,
+    "persona_t1": 0.0,
+    "persona_t2": 0.0,
+    "persona_t3": 0.0,
+    "t1": 0.333,
+    "t2": 0.333,
+    "t3": 0.333
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.6846,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.0067
+   },
+   "turn_flags_count": {
+    "hit_max": 102,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 1
+   },
+   "n_assistant_turns": 149,
+   "replies_with_4gram_repeated_3x": 0.0201,
+   "deflection_rate_on_final_recall_turns": 0.0,
+   "self_copy_rate": 0.0,
+   "role_capture_on_self_description": {
+    "rate": 0.188,
+    "n": 16
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.993,
+     "cross_turn_4gram_overlap_mean": 0.004,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 105.0
+    },
+    "L_chitchat": {
+     "distinct3_mean": 0.99,
+     "cross_turn_4gram_overlap_mean": 0.006,
+     "max_within_reply_4gram_repeat": 1,
+     "mean_words": 94.5
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 500,
+    "R_d2_number": 480,
+    "R_d4_pet": 769,
+    "R_d4_city": 774,
+    "R_d6_name": 1056,
+    "R_d6_number": 1052,
+    "R_d10_pet": 1453,
+    "R_d5_multi": 798
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 1.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 1.0
+    },
+    "R_d2_number": {
+     "recall": 0.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 0.0
+    },
+    "R_d4_pet": {
+     "recall": 1.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_name": {
+     "recall": 0.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_number": {
+     "recall": 0.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d10_pet": {
+     "recall": 0.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d5_multi": {
+     "name": 1.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 0.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 0.0,
+     "ellipsis": 0.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 0.0
+    },
+    "F_coref_she": {
+     "coref": 1.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 0.0
+    },
+    "F_whynot": {
+     "why": 1.0
+    },
+    "F_whynot__ctrl": {
+     "why": 0.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 0.0,
+     "one_sentence_t2": 0.0,
+     "one_sentence_t3": 0.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 0.0
+    },
+    "I_end_question": {
+     "end_q_t1": 0.0,
+     "end_q_t2": 0.0,
+     "end_q_t3": 0.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 1.0
+    },
+    "I_caps": {
+     "caps_t1": 1.0,
+     "caps_t2": 1.0,
+     "caps_t3": 1.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 0.0
+    },
+    "I_persona": {
+     "arr_t0": 1.0,
+     "arr_t1": 0.0,
+     "arr_t2": 0.0,
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 0.0,
+     "name_pip": 0.0
+    },
+    "K_day": {
+     "corrected": 1.0
+    },
+    "K_day__ctrl": {
+     "corrected": 1.0
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 1.0
+    },
+    "K_color": {
+     "corrected": 1.0
+    },
+    "K_color__ctrl": {
+     "corrected": 0.0
+    },
+    "O_second_item": {
+     "second_item": 1.0
+    },
+    "O_last_item": {
+     "last_item": 0.0
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 1.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 1.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 1.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 0.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 1.0
+    },
+    "T_party": {
+     "party_math": 1.0
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 0.0,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "HuggingFaceTB/SmolLM2-135M-Instruct": {
+   "params_m": 134.5,
+   "n_conversations": 106,
+   "seeds": [
+    0,
+    1
+   ],
+   "ability_strict": {
+    "recall": 0.35,
+    "followup": 0.5,
+    "instruction": 0.214,
+    "correction": 0.0,
+    "own_answer": 0.333,
+    "role": 0.0,
+    "topic_return": 0.167,
+    "control": 0.375
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.35,
+    "followup": 0.417,
+    "instruction": 1.0,
+    "correction": 0.0,
+    "own_answer": 0.5,
+    "role": 0.0,
+    "topic_return": 0.5,
+    "control": 0.5
+   },
+   "ability_n_checks": {
+    "recall": 20,
+    "followup": 14,
+    "instruction": 28,
+    "correction": 6,
+    "own_answer": 6,
+    "role": 6,
+    "topic_return": 6,
+    "control": 56
+   },
+   "overall_multiturn_strict": 0.267,
+   "overall_multiturn_macro": 0.223,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.45,
+     "lenient": 0.65,
+     "lp_gold": -0.693,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 6.97,
+     "n": 20
+    },
+    "2": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -0.884,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 8.675,
+     "n": 4
+    },
+    "4": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -2.796,
+     "rank1": 0.5,
+     "gold_beats_foil": 0.5,
+     "margin": 2.453,
+     "n": 4
+    },
+    "5": {
+     "strict": 0.167,
+     "lenient": 0.167,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 6
+    },
+    "6": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -1.689,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 2.991,
+     "n": 4
+    },
+    "10": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -5.579,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 6.139,
+     "n": 2
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": -2.066,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": -0.382,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time": {
+     "mean_margin": -2.776,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": -0.249,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color": {
+     "mean_margin": -0.875,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": 0.925,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding": {
+     "mean_margin": -3.345,
+     "gold_beats_foil_rate": 0.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": -1.938,
+     "gold_beats_foil_rate": 0.0
+    }
+   },
+   "context_vs_capability": {
+    "multi_only_pass": 10,
+    "capability_failure": 25,
+    "both_pass": 7,
+    "context_failure": 14
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "multi_only_pass",
+     "multi_only_pass"
+    ],
+    "R_d2_number:recall": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "R_d4_pet:recall": [
+     "both_pass",
+     "both_pass"
+    ],
+    "R_d4_city:recall": [
+     "context_failure",
+     "capability_failure"
+    ],
+    "R_d6_name:recall": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "R_d6_number:recall": [
+     "both_pass",
+     "both_pass"
+    ],
+    "R_d10_pet:recall": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "R_d5_multi:name": [
+     "multi_only_pass",
+     "context_failure"
+    ],
+    "R_d5_multi:city": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "R_d5_multi:pet": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_translate:ellipsis": [
+     "context_failure",
+     "capability_failure"
+    ],
+    "F_coref_she:coref": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "F_whynot:why": [
+     "multi_only_pass",
+     "context_failure"
+    ],
+    "F_shorter:shorter": [
+     "multi_only_pass",
+     "multi_only_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "context_failure",
+     "context_failure"
+    ],
+    "I_end_question:end_q_t3": [
+     "capability_failure",
+     "multi_only_pass"
+    ],
+    "I_caps:caps_t3": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "I_persona:arr_t3": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "I_persona:name_pip": [
+     "multi_only_pass",
+     "multi_only_pass"
+    ],
+    "K_day:corrected": [
+     "context_failure",
+     "capability_failure"
+    ],
+    "K_time:corrected": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "K_color:corrected": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "O_add10:add_to_own": [
+     "capability_failure",
+     "multi_only_pass"
+    ],
+    "RI_binding:binding": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "T_party:party_math": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "T_dragon:fear": [
+     "context_failure",
+     "context_failure"
+    ],
+    "T_dragon:name": [
+     "context_failure",
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 0.0,
+    "persona_t1": 0.0,
+    "persona_t2": 0.0,
+    "persona_t3": 0.0,
+    "t1": 0.333,
+    "t2": 0.167,
+    "t3": 0.167
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.4295,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.0872
+   },
+   "turn_flags_count": {
+    "hit_max": 128,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 26
+   },
+   "n_assistant_turns": 298,
+   "replies_with_4gram_repeated_3x": 0.2584,
+   "deflection_rate_on_final_recall_turns": 0.19,
+   "self_copy_rate": 0.1685,
+   "role_capture_on_self_description": {
+    "rate": 0.125,
+    "n": 32
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.334,
+     "cross_turn_4gram_overlap_mean": 0.928,
+     "max_within_reply_4gram_repeat": 7,
+     "mean_words": 166.833
+    },
+    "L_chitchat": {
+     "distinct3_mean": 0.977,
+     "cross_turn_4gram_overlap_mean": 0.862,
+     "max_within_reply_4gram_repeat": 1,
+     "mean_words": 50.0
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 400,
+    "R_d2_number": 415,
+    "R_d4_pet": 775,
+    "R_d4_city": 690,
+    "R_d6_name": 799,
+    "R_d6_number": 1064,
+    "R_d10_pet": 1461,
+    "R_d5_multi": 927
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 1.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d2_number": {
+     "recall": 0.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 0.0
+    },
+    "R_d4_pet": {
+     "recall": 1.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 0.5
+    },
+    "R_d6_name": {
+     "recall": 0.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_number": {
+     "recall": 1.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d10_pet": {
+     "recall": 0.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 0.5
+    },
+    "R_d5_multi": {
+     "name": 0.5,
+     "city": 0.0,
+     "pet": 0.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 0.5,
+     "city": 0.5,
+     "pet": 0.5
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 0.0,
+     "ellipsis": 0.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 0.5
+    },
+    "F_coref_she": {
+     "coref": 0.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 0.0
+    },
+    "F_whynot": {
+     "why": 0.5
+    },
+    "F_whynot__ctrl": {
+     "why": 0.5
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 0.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 0.5,
+     "one_sentence_t2": 0.0,
+     "one_sentence_t3": 0.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 0.5,
+     "end_q_t2": 0.5,
+     "end_q_t3": 0.5
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 0.0
+    },
+    "I_caps": {
+     "caps_t1": 0.0,
+     "caps_t2": 0.0,
+     "caps_t3": 0.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 0.0
+    },
+    "I_persona": {
+     "arr_t0": 0.0,
+     "arr_t1": 0.0,
+     "arr_t2": 0.0,
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 0.0,
+     "name_pip": 0.0
+    },
+    "K_day": {
+     "corrected": 0.0
+    },
+    "K_day__ctrl": {
+     "corrected": 0.5
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 0.0
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 0.0
+    },
+    "O_second_item": {
+     "second_item": 0.0
+    },
+    "O_last_item": {
+     "last_item": 0.0
+    },
+    "O_add10": {
+     "knows_60": 0.5,
+     "add_to_own": 0.5
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 0.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 0.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 0.0
+    },
+    "T_party": {
+     "party_math": 0.0
+    },
+    "T_party__ctrl": {
+     "party_math": 0.5
+    },
+    "T_dragon": {
+     "fear": 0.0,
+     "name": 0.5
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "unsloth/gemma-3-270m-it": {
+   "params_m": 268.1,
+   "n_conversations": 106,
+   "seeds": [
+    0,
+    1
+   ],
+   "ability_strict": {
+    "recall": 0.05,
+    "followup": 0.643,
+    "instruction": 0.25,
+    "correction": 0.0,
+    "own_answer": 0.375,
+    "role": 0.0,
+    "topic_return": 0.667,
+    "control": 0.482
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.1,
+    "followup": 0.667,
+    "instruction": 0.0,
+    "correction": 0.0,
+    "own_answer": 1.0,
+    "role": 0.0,
+    "topic_return": 0.667,
+    "control": 0.609
+   },
+   "ability_n_checks": {
+    "recall": 20,
+    "followup": 14,
+    "instruction": 28,
+    "correction": 6,
+    "own_answer": 8,
+    "role": 6,
+    "topic_return": 6,
+    "control": 56
+   },
+   "overall_multiturn_strict": 0.273,
+   "overall_multiturn_macro": 0.284,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.35,
+     "lenient": 0.6,
+     "lp_gold": -0.481,
+     "rank1": 0.714,
+     "gold_beats_foil": 1.0,
+     "margin": 11.846,
+     "n": 20
+    },
+    "2": {
+     "strict": 0.25,
+     "lenient": 0.25,
+     "lp_gold": -0.106,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 14.322,
+     "n": 4
+    },
+    "4": {
+     "strict": 0.0,
+     "lenient": 0.25,
+     "lp_gold": -3.128,
+     "rank1": 0.5,
+     "gold_beats_foil": 0.75,
+     "margin": 5.24,
+     "n": 4
+    },
+    "5": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 6
+    },
+    "6": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -4.275,
+     "rank1": 0.5,
+     "gold_beats_foil": 0.5,
+     "margin": 5.383,
+     "n": 4
+    },
+    "10": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -7.701,
+     "rank1": 0.0,
+     "gold_beats_foil": 0.0,
+     "margin": -0.83,
+     "n": 2
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 2.322,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 7.057,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -6.477,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 2.285,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": -3.699,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": -8.238,
+     "gold_beats_foil_rate": 0.0
+    },
+    "RI_binding": {
+     "mean_margin": 9.97,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": 7.526,
+     "gold_beats_foil_rate": 1.0
+    }
+   },
+   "context_vs_capability": {
+    "capability_failure": 28,
+    "multi_only_pass": 1,
+    "context_failure": 16,
+    "both_pass": 11
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "R_d2_number:recall": [
+     "multi_only_pass",
+     "context_failure"
+    ],
+    "R_d4_pet:recall": [
+     "context_failure",
+     "context_failure"
+    ],
+    "R_d4_city:recall": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "R_d6_name:recall": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "R_d6_number:recall": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "R_d10_pet:recall": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "R_d5_multi:name": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "R_d5_multi:city": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "R_d5_multi:pet": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "context_failure",
+     "capability_failure"
+    ],
+    "F_translate:ellipsis": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "F_coref_she:coref": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_whynot:why": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_shorter:shorter": [
+     "context_failure",
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_end_question:end_q_t3": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "I_caps:caps_t3": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "I_persona:arr_t3": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "I_persona:name_pip": [
+     "context_failure",
+     "context_failure"
+    ],
+    "K_day:corrected": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "K_time:corrected": [
+     "context_failure",
+     "capability_failure"
+    ],
+    "K_color:corrected": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "O_add10:add_to_own": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "RI_binding:binding": [
+     "context_failure",
+     "context_failure"
+    ],
+    "T_party:party_math": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "T_dragon:fear": [
+     "both_pass",
+     "both_pass"
+    ],
+    "T_dragon:name": [
+     "both_pass",
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 0.0,
+    "persona_t1": 0.0,
+    "persona_t2": 0.0,
+    "persona_t3": 0.0,
+    "t1": 0.333,
+    "t2": 0.5,
+    "t3": 0.333
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.2852,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0067,
+    "no_memory_claim": 0.0403
+   },
+   "turn_flags_count": {
+    "hit_max": 85,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 2,
+    "no_memory_claim": 12
+   },
+   "n_assistant_turns": 298,
+   "replies_with_4gram_repeated_3x": 0.0201,
+   "deflection_rate_on_final_recall_turns": 0.172,
+   "self_copy_rate": 0.0327,
+   "role_capture_on_self_description": {
+    "rate": 0.125,
+    "n": 32
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.982,
+     "cross_turn_4gram_overlap_mean": 0.448,
+     "max_within_reply_4gram_repeat": 3,
+     "mean_words": 96.333
+    },
+    "L_chitchat": {
+     "distinct3_mean": 0.998,
+     "cross_turn_4gram_overlap_mean": 0.004,
+     "max_within_reply_4gram_repeat": 1,
+     "mean_words": 21.5
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 409,
+    "R_d2_number": 474,
+    "R_d4_pet": 526,
+    "R_d4_city": 510,
+    "R_d6_name": 904,
+    "R_d6_number": 975,
+    "R_d10_pet": 1357,
+    "R_d5_multi": 580
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 0.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d2_number": {
+     "recall": 0.5
+    },
+    "R_d2_number__ctrl": {
+     "recall": 0.5
+    },
+    "R_d4_pet": {
+     "recall": 0.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_name": {
+     "recall": 0.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_number": {
+     "recall": 0.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 0.0
+    },
+    "R_d10_pet": {
+     "recall": 0.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 0.5
+    },
+    "R_d5_multi": {
+     "name": 0.0,
+     "city": 0.0,
+     "pet": 0.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 0.5,
+     "city": 0.5,
+     "pet": 0.5
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 0.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 0.5
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 0.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 0.5
+    },
+    "F_coref_she": {
+     "coref": 1.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 1.0
+    },
+    "F_whynot": {
+     "why": 1.0
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 0.5
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 1.0,
+     "one_sentence_t2": 1.0,
+     "one_sentence_t3": 1.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 0.0,
+     "end_q_t2": 0.5,
+     "end_q_t3": 0.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 0.5
+    },
+    "I_caps": {
+     "caps_t1": 0.0,
+     "caps_t2": 0.0,
+     "caps_t3": 0.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 0.0
+    },
+    "I_persona": {
+     "arr_t0": 0.0,
+     "arr_t1": 0.0,
+     "arr_t2": 0.0,
+     "arr_t3": 0.0,
+     "name_pip": 0.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "K_day": {
+     "corrected": 0.0
+    },
+    "K_day__ctrl": {
+     "corrected": 0.0
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 0.5
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 0.0
+    },
+    "O_second_item": {
+     "second_item": 0.5
+    },
+    "O_last_item": {
+     "last_item": 0.0
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 0.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 0.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 0.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 1.0
+    },
+    "T_party": {
+     "party_math": 0.0
+    },
+    "T_party__ctrl": {
+     "party_math": 0.0
+    },
+    "T_dragon": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "LiquidAI/LFM2-350M": {
+   "params_m": 354.5,
+   "n_conversations": 106,
+   "seeds": [
+    0,
+    1
+   ],
+   "ability_strict": {
+    "recall": 0.65,
+    "followup": 1.0,
+    "instruction": 0.75,
+    "correction": 0.333,
+    "own_answer": 0.375,
+    "role": 0.333,
+    "topic_return": 0.833,
+    "control": 0.714
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.8,
+    "followup": 1.0,
+    "instruction": 1.0,
+    "correction": 0.333,
+    "own_answer": 1.0,
+    "role": 0.5,
+    "topic_return": 0.833,
+    "control": 0.913
+   },
+   "ability_n_checks": {
+    "recall": 20,
+    "followup": 14,
+    "instruction": 28,
+    "correction": 6,
+    "own_answer": 8,
+    "role": 6,
+    "topic_return": 6,
+    "control": 56
+   },
+   "overall_multiturn_strict": 0.682,
+   "overall_multiturn_macro": 0.611,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.65,
+     "lenient": 0.9,
+     "lp_gold": -1.773,
+     "rank1": 0.857,
+     "gold_beats_foil": 0.857,
+     "margin": 4.67,
+     "n": 20
+    },
+    "2": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": -0.748,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 10.377,
+     "n": 4
+    },
+    "4": {
+     "strict": 0.25,
+     "lenient": 0.75,
+     "lp_gold": -1.0,
+     "rank1": 0.25,
+     "gold_beats_foil": 1.0,
+     "margin": 3.544,
+     "n": 4
+    },
+    "5": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 6
+    },
+    "6": {
+     "strict": 0.5,
+     "lenient": 0.75,
+     "lp_gold": -1.3,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 4.729,
+     "n": 4
+    },
+    "10": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -2.883,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 3.985,
+     "n": 2
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 1.01,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 1.711,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -1.167,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 0.747,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": -5.113,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": 2.495,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding": {
+     "mean_margin": 5.965,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": 7.472,
+     "gold_beats_foil_rate": 1.0
+    }
+   },
+   "context_vs_capability": {
+    "both_pass": 29,
+    "context_failure": 11,
+    "multi_only_pass": 11,
+    "capability_failure": 5
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "both_pass",
+     "both_pass"
+    ],
+    "R_d2_number:recall": [
+     "both_pass",
+     "multi_only_pass"
+    ],
+    "R_d4_pet:recall": [
+     "context_failure",
+     "both_pass"
+    ],
+    "R_d4_city:recall": [
+     "context_failure",
+     "context_failure"
+    ],
+    "R_d6_name:recall": [
+     "multi_only_pass",
+     "capability_failure"
+    ],
+    "R_d6_number:recall": [
+     "both_pass",
+     "context_failure"
+    ],
+    "R_d10_pet:recall": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "R_d5_multi:name": [
+     "multi_only_pass",
+     "multi_only_pass"
+    ],
+    "R_d5_multi:city": [
+     "both_pass",
+     "both_pass"
+    ],
+    "R_d5_multi:pet": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_translate:ellipsis": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_coref_she:coref": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_whynot:why": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_shorter:shorter": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "multi_only_pass",
+     "multi_only_pass"
+    ],
+    "I_end_question:end_q_t3": [
+     "context_failure",
+     "context_failure"
+    ],
+    "I_caps:caps_t3": [
+     "both_pass",
+     "context_failure"
+    ],
+    "I_persona:arr_t3": [
+     "multi_only_pass",
+     "multi_only_pass"
+    ],
+    "I_persona:name_pip": [
+     "both_pass",
+     "both_pass"
+    ],
+    "K_day:corrected": [
+     "context_failure",
+     "context_failure"
+    ],
+    "K_time:corrected": [
+     "context_failure",
+     "capability_failure"
+    ],
+    "K_color:corrected": [
+     "multi_only_pass",
+     "both_pass"
+    ],
+    "O_add10:add_to_own": [
+     "context_failure",
+     "both_pass"
+    ],
+    "RI_binding:binding": [
+     "multi_only_pass",
+     "both_pass"
+    ],
+    "T_party:party_math": [
+     "both_pass",
+     "both_pass"
+    ],
+    "T_dragon:fear": [
+     "capability_failure",
+     "multi_only_pass"
+    ],
+    "T_dragon:name": [
+     "both_pass",
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 1.0,
+    "persona_t1": 1.0,
+    "persona_t2": 1.0,
+    "persona_t3": 1.0,
+    "t1": 0.667,
+    "t2": 0.667,
+    "t3": 0.5
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.5638,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.0101
+   },
+   "turn_flags_count": {
+    "hit_max": 168,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 3
+   },
+   "n_assistant_turns": 298,
+   "replies_with_4gram_repeated_3x": 0.0067,
+   "deflection_rate_on_final_recall_turns": 0.052,
+   "self_copy_rate": 0.0,
+   "role_capture_on_self_description": {
+    "rate": 0.031,
+    "n": 32
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.998,
+     "cross_turn_4gram_overlap_mean": 0.031,
+     "max_within_reply_4gram_repeat": 1,
+     "mean_words": 158.417
+    },
+    "L_chitchat": {
+     "distinct3_mean": 0.995,
+     "cross_turn_4gram_overlap_mean": 0.001,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 106.667
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 491,
+    "R_d2_number": 472,
+    "R_d4_pet": 753,
+    "R_d4_city": 673,
+    "R_d6_name": 999,
+    "R_d6_number": 1034,
+    "R_d10_pet": 1547,
+    "R_d5_multi": 853
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 1.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 1.0
+    },
+    "R_d2_number": {
+     "recall": 1.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 0.5
+    },
+    "R_d4_pet": {
+     "recall": 0.5
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_name": {
+     "recall": 0.5
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_number": {
+     "recall": 0.5
+    },
+    "R_d6_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d10_pet": {
+     "recall": 0.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 0.0
+    },
+    "R_d5_multi": {
+     "name": 1.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 0.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_coref_she": {
+     "coref": 1.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 1.0
+    },
+    "F_whynot": {
+     "why": 1.0
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 0.5,
+     "one_sentence_t2": 0.5,
+     "one_sentence_t3": 1.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 0.0
+    },
+    "I_end_question": {
+     "end_q_t1": 0.5,
+     "end_q_t2": 0.5,
+     "end_q_t3": 0.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 1.0
+    },
+    "I_caps": {
+     "caps_t1": 1.0,
+     "caps_t2": 1.0,
+     "caps_t3": 0.5
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 1.0
+    },
+    "I_persona": {
+     "arr_t0": 1.0,
+     "arr_t1": 1.0,
+     "arr_t2": 1.0,
+     "arr_t3": 1.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "K_day": {
+     "corrected": 0.0
+    },
+    "K_day__ctrl": {
+     "corrected": 1.0
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 0.5
+    },
+    "K_color": {
+     "corrected": 1.0
+    },
+    "K_color__ctrl": {
+     "corrected": 0.5
+    },
+    "O_second_item": {
+     "second_item": 0.0
+    },
+    "O_last_item": {
+     "last_item": 0.0
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 0.5
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 1.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 1.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 0.5
+    },
+    "T_party": {
+     "party_math": 1.0
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 0.5,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 0.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "LiquidAI/LFM2.5-350M": {
+   "params_m": 354.5,
+   "n_conversations": 106,
+   "seeds": [
+    0,
+    1
+   ],
+   "ability_strict": {
+    "recall": 0.65,
+    "followup": 1.0,
+    "instruction": 1.0,
+    "correction": 0.333,
+    "own_answer": 0.5,
+    "role": 0.333,
+    "topic_return": 0.833,
+    "control": 0.804
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.75,
+    "followup": 1.0,
+    "instruction": 1.0,
+    "correction": 0.5,
+    "own_answer": 1.0,
+    "role": 0.5,
+    "topic_return": 0.833,
+    "control": 0.87
+   },
+   "ability_n_checks": {
+    "recall": 20,
+    "followup": 14,
+    "instruction": 28,
+    "correction": 6,
+    "own_answer": 8,
+    "role": 6,
+    "topic_return": 6,
+    "control": 56
+   },
+   "overall_multiturn_strict": 0.773,
+   "overall_multiturn_macro": 0.664,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.6,
+     "lenient": 0.8,
+     "lp_gold": -0.731,
+     "rank1": 0.714,
+     "gold_beats_foil": 1.0,
+     "margin": 10.309,
+     "n": 20
+    },
+    "2": {
+     "strict": 0.25,
+     "lenient": 0.25,
+     "lp_gold": -1.398,
+     "rank1": 0.25,
+     "gold_beats_foil": 1.0,
+     "margin": 11.531,
+     "n": 4
+    },
+    "4": {
+     "strict": 0.75,
+     "lenient": 0.75,
+     "lp_gold": -0.22,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 7.038,
+     "n": 4
+    },
+    "5": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 6
+    },
+    "6": {
+     "strict": 0.5,
+     "lenient": 0.75,
+     "lp_gold": -2.724,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 5.465,
+     "n": 4
+    },
+    "10": {
+     "strict": 0.5,
+     "lenient": 1.0,
+     "lp_gold": -1.686,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 13.181,
+     "n": 2
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 1.635,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 6.881,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -2.864,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 6.799,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": -2.646,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": 5.654,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding": {
+     "mean_margin": 8.723,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": 10.938,
+     "gold_beats_foil_rate": 1.0
+    }
+   },
+   "context_vs_capability": {
+    "multi_only_pass": 8,
+    "context_failure": 11,
+    "both_pass": 34,
+    "capability_failure": 3
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "multi_only_pass",
+     "capability_failure"
+    ],
+    "R_d2_number:recall": [
+     "context_failure",
+     "context_failure"
+    ],
+    "R_d4_pet:recall": [
+     "both_pass",
+     "both_pass"
+    ],
+    "R_d4_city:recall": [
+     "both_pass",
+     "context_failure"
+    ],
+    "R_d6_name:recall": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "R_d6_number:recall": [
+     "multi_only_pass",
+     "multi_only_pass"
+    ],
+    "R_d10_pet:recall": [
+     "context_failure",
+     "both_pass"
+    ],
+    "R_d5_multi:name": [
+     "multi_only_pass",
+     "multi_only_pass"
+    ],
+    "R_d5_multi:city": [
+     "both_pass",
+     "both_pass"
+    ],
+    "R_d5_multi:pet": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_translate:ellipsis": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_coref_she:coref": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_whynot:why": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_shorter:shorter": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_end_question:end_q_t3": [
+     "both_pass",
+     "multi_only_pass"
+    ],
+    "I_caps:caps_t3": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_persona:arr_t3": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_persona:name_pip": [
+     "multi_only_pass",
+     "multi_only_pass"
+    ],
+    "K_day:corrected": [
+     "both_pass",
+     "both_pass"
+    ],
+    "K_time:corrected": [
+     "context_failure",
+     "context_failure"
+    ],
+    "K_color:corrected": [
+     "context_failure",
+     "context_failure"
+    ],
+    "O_add10:add_to_own": [
+     "context_failure",
+     "context_failure"
+    ],
+    "RI_binding:binding": [
+     "both_pass",
+     "both_pass"
+    ],
+    "T_party:party_math": [
+     "both_pass",
+     "both_pass"
+    ],
+    "T_dragon:fear": [
+     "context_failure",
+     "both_pass"
+    ],
+    "T_dragon:name": [
+     "both_pass",
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 1.0,
+    "persona_t1": 1.0,
+    "persona_t2": 1.0,
+    "persona_t3": 1.0,
+    "t1": 1.0,
+    "t2": 1.0,
+    "t3": 1.0
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.3691,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.0201
+   },
+   "turn_flags_count": {
+    "hit_max": 110,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 6
+   },
+   "n_assistant_turns": 298,
+   "replies_with_4gram_repeated_3x": 0.0,
+   "deflection_rate_on_final_recall_turns": 0.103,
+   "self_copy_rate": 0.0,
+   "role_capture_on_self_description": {
+    "rate": 0.0,
+    "n": 32
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.998,
+     "cross_turn_4gram_overlap_mean": 0.005,
+     "max_within_reply_4gram_repeat": 1,
+     "mean_words": 139.25
+    },
+    "L_chitchat": {
+     "distinct3_mean": 0.997,
+     "cross_turn_4gram_overlap_mean": 0.005,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 88.917
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 446,
+    "R_d2_number": 472,
+    "R_d4_pet": 719,
+    "R_d4_city": 756,
+    "R_d6_name": 996,
+    "R_d6_number": 1033,
+    "R_d10_pet": 1351,
+    "R_d5_multi": 809
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 0.5
+    },
+    "R_d2_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d2_number": {
+     "recall": 0.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_pet": {
+     "recall": 1.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.5
+    },
+    "R_d4_city__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_name": {
+     "recall": 0.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_number": {
+     "recall": 1.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 0.0
+    },
+    "R_d10_pet": {
+     "recall": 0.5
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d5_multi": {
+     "name": 1.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 0.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_coref_she": {
+     "coref": 1.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 1.0
+    },
+    "F_whynot": {
+     "why": 1.0
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 1.0,
+     "one_sentence_t2": 1.0,
+     "one_sentence_t3": 1.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 1.0,
+     "end_q_t2": 1.0,
+     "end_q_t3": 1.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 0.5
+    },
+    "I_caps": {
+     "caps_t1": 1.0,
+     "caps_t2": 1.0,
+     "caps_t3": 1.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 1.0
+    },
+    "I_persona": {
+     "arr_t0": 1.0,
+     "arr_t1": 1.0,
+     "arr_t2": 1.0,
+     "arr_t3": 1.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 1.0,
+     "name_pip": 0.0
+    },
+    "K_day": {
+     "corrected": 1.0
+    },
+    "K_day__ctrl": {
+     "corrected": 1.0
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 1.0
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 1.0
+    },
+    "O_second_item": {
+     "second_item": 0.0
+    },
+    "O_last_item": {
+     "last_item": 1.0
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 0.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 1.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 1.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 1.0
+    },
+    "T_party": {
+     "party_math": 1.0
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 0.5,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "HuggingFaceTB/SmolLM2-360M-Instruct": {
+   "params_m": 361.8,
+   "n_conversations": 106,
+   "seeds": [
+    0,
+    1
+   ],
+   "ability_strict": {
+    "recall": 0.7,
+    "followup": 0.714,
+    "instruction": 0.786,
+    "correction": 0.167,
+    "own_answer": 0.333,
+    "role": 0.667,
+    "topic_return": 0.667,
+    "control": 0.661
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.7,
+    "followup": 0.667,
+    "instruction": 1.0,
+    "correction": 0.167,
+    "own_answer": 1.0,
+    "role": 0.5,
+    "topic_return": 0.667,
+    "control": 0.717
+   },
+   "ability_n_checks": {
+    "recall": 20,
+    "followup": 14,
+    "instruction": 28,
+    "correction": 6,
+    "own_answer": 6,
+    "role": 6,
+    "topic_return": 6,
+    "control": 56
+   },
+   "overall_multiturn_strict": 0.663,
+   "overall_multiturn_macro": 0.576,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.5,
+     "lenient": 0.55,
+     "lp_gold": -0.479,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 6.531,
+     "n": 20
+    },
+    "2": {
+     "strict": 0.25,
+     "lenient": 0.25,
+     "lp_gold": -0.267,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 8.997,
+     "n": 4
+    },
+    "4": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -0.264,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 5.447,
+     "n": 4
+    },
+    "5": {
+     "strict": 0.833,
+     "lenient": 0.833,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 6
+    },
+    "6": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": -0.242,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 7.202,
+     "n": 4
+    },
+    "10": {
+     "strict": 1.0,
+     "lenient": 1.0,
+     "lp_gold": -1.293,
+     "rank1": 0.5,
+     "gold_beats_foil": 1.0,
+     "margin": 7.478,
+     "n": 2
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 0.857,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 2.971,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -2.215,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 1.258,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": -1.782,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": 0.383,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding": {
+     "mean_margin": 1.193,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": 0.334,
+     "gold_beats_foil_rate": 1.0
+    }
+   },
+   "context_vs_capability": {
+    "context_failure": 12,
+    "both_pass": 25,
+    "capability_failure": 9,
+    "multi_only_pass": 10
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "context_failure",
+     "context_failure"
+    ],
+    "R_d2_number:recall": [
+     "context_failure",
+     "multi_only_pass"
+    ],
+    "R_d4_pet:recall": [
+     "both_pass",
+     "both_pass"
+    ],
+    "R_d4_city:recall": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "R_d6_name:recall": [
+     "both_pass",
+     "multi_only_pass"
+    ],
+    "R_d6_number:recall": [
+     "both_pass",
+     "both_pass"
+    ],
+    "R_d10_pet:recall": [
+     "both_pass",
+     "both_pass"
+    ],
+    "R_d5_multi:name": [
+     "multi_only_pass",
+     "capability_failure"
+    ],
+    "R_d5_multi:city": [
+     "multi_only_pass",
+     "multi_only_pass"
+    ],
+    "R_d5_multi:pet": [
+     "multi_only_pass",
+     "multi_only_pass"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "multi_only_pass",
+     "capability_failure"
+    ],
+    "F_translate:ellipsis": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_coref_she:coref": [
+     "multi_only_pass",
+     "both_pass"
+    ],
+    "F_whynot:why": [
+     "context_failure",
+     "context_failure"
+    ],
+    "F_shorter:shorter": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_end_question:end_q_t3": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_caps:caps_t3": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "I_persona:arr_t3": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_persona:name_pip": [
+     "both_pass",
+     "both_pass"
+    ],
+    "K_day:corrected": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "K_time:corrected": [
+     "context_failure",
+     "context_failure"
+    ],
+    "K_color:corrected": [
+     "context_failure",
+     "multi_only_pass"
+    ],
+    "O_add10:add_to_own": [
+     "context_failure",
+     "context_failure"
+    ],
+    "RI_binding:binding": [
+     "both_pass",
+     "capability_failure"
+    ],
+    "T_party:party_math": [
+     "context_failure",
+     "context_failure"
+    ],
+    "T_dragon:fear": [
+     "both_pass",
+     "both_pass"
+    ],
+    "T_dragon:name": [
+     "both_pass",
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 1.0,
+    "persona_t1": 1.0,
+    "persona_t2": 1.0,
+    "persona_t3": 1.0,
+    "t1": 0.667,
+    "t2": 0.667,
+    "t3": 0.667
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.198,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.1342
+   },
+   "turn_flags_count": {
+    "hit_max": 59,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 40
+   },
+   "n_assistant_turns": 298,
+   "replies_with_4gram_repeated_3x": 0.0839,
+   "deflection_rate_on_final_recall_turns": 0.31,
+   "self_copy_rate": 0.125,
+   "role_capture_on_self_description": {
+    "rate": 0.031,
+    "n": 32
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.757,
+     "cross_turn_4gram_overlap_mean": 0.306,
+     "max_within_reply_4gram_repeat": 95,
+     "mean_words": 156.5
+    },
+    "L_chitchat": {
+     "distinct3_mean": 0.996,
+     "cross_turn_4gram_overlap_mean": 0.024,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 51.083
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 415,
+    "R_d2_number": 382,
+    "R_d4_pet": 511,
+    "R_d4_city": 535,
+    "R_d6_name": 577,
+    "R_d6_number": 1075,
+    "R_d10_pet": 1449,
+    "R_d5_multi": 650
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 0.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 1.0
+    },
+    "R_d2_number": {
+     "recall": 0.5
+    },
+    "R_d2_number__ctrl": {
+     "recall": 0.5
+    },
+    "R_d4_pet": {
+     "recall": 1.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_name": {
+     "recall": 1.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.5
+    },
+    "R_d6_number": {
+     "recall": 1.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d10_pet": {
+     "recall": 1.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d5_multi": {
+     "name": 0.5,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 0.0,
+     "city": 0.0,
+     "pet": 0.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 0.5,
+     "ellipsis": 0.5
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 0.0
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_coref_she": {
+     "coref": 1.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 0.5
+    },
+    "F_whynot": {
+     "why": 0.0
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 1.0,
+     "one_sentence_t2": 1.0,
+     "one_sentence_t3": 1.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 1.0,
+     "end_q_t2": 1.0,
+     "end_q_t3": 1.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 1.0
+    },
+    "I_caps": {
+     "caps_t1": 0.0,
+     "caps_t2": 0.0,
+     "caps_t3": 0.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 0.0
+    },
+    "I_persona": {
+     "arr_t0": 1.0,
+     "arr_t1": 1.0,
+     "arr_t2": 1.0,
+     "arr_t3": 1.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 1.0,
+     "name_pip": 1.0
+    },
+    "K_day": {
+     "corrected": 0.0
+    },
+    "K_day__ctrl": {
+     "corrected": 0.0
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 1.0
+    },
+    "K_color": {
+     "corrected": 0.5
+    },
+    "K_color__ctrl": {
+     "corrected": 0.5
+    },
+    "O_second_item": {
+     "second_item": 0.0
+    },
+    "O_last_item": {
+     "last_item": null
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 0.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 1.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 1.0,
+     "user_job": 0.5
+    },
+    "RI_binding": {
+     "binding": 0.5
+    },
+    "RI_binding__ctrl": {
+     "binding": 0.5
+    },
+    "T_party": {
+     "party_math": 0.0
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "Qwen/Qwen2.5-0.5B-Instruct": {
+   "params_m": 494.0,
+   "n_conversations": 106,
+   "seeds": [
+    0,
+    1
+   ],
+   "ability_strict": {
+    "recall": 0.3,
+    "followup": 0.786,
+    "instruction": 0.393,
+    "correction": 0.0,
+    "own_answer": 0.875,
+    "role": 0.333,
+    "topic_return": 0.833,
+    "control": 0.679
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.4,
+    "followup": 0.75,
+    "instruction": 1.0,
+    "correction": 0.167,
+    "own_answer": 1.0,
+    "role": 0.5,
+    "topic_return": 0.833,
+    "control": 0.978
+   },
+   "ability_n_checks": {
+    "recall": 20,
+    "followup": 14,
+    "instruction": 28,
+    "correction": 6,
+    "own_answer": 8,
+    "role": 6,
+    "topic_return": 6,
+    "control": 56
+   },
+   "overall_multiturn_strict": 0.477,
+   "overall_multiturn_macro": 0.503,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.45,
+     "lenient": 0.95,
+     "lp_gold": -0.229,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 8.604,
+     "n": 20
+    },
+    "2": {
+     "strict": 0.5,
+     "lenient": 0.75,
+     "lp_gold": -0.226,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 11.844,
+     "n": 4
+    },
+    "4": {
+     "strict": 0.25,
+     "lenient": 0.25,
+     "lp_gold": -0.143,
+     "rank1": 1.0,
+     "gold_beats_foil": 1.0,
+     "margin": 7.005,
+     "n": 4
+    },
+    "5": {
+     "strict": 0.5,
+     "lenient": 0.667,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 6
+    },
+    "6": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -0.824,
+     "rank1": 0.75,
+     "gold_beats_foil": 1.0,
+     "margin": 7.59,
+     "n": 4
+    },
+    "10": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -2.821,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 11.451,
+     "n": 2
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 0.704,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 5.305,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -4.597,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 0.666,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": 0.284,
+     "gold_beats_foil_rate": 0.5
+    },
+    "K_color__ctrl": {
+     "mean_margin": 5.842,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding": {
+     "mean_margin": 10.919,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": 9.842,
+     "gold_beats_foil_rate": 1.0
+    }
+   },
+   "context_vs_capability": {
+    "both_pass": 17,
+    "context_failure": 21,
+    "capability_failure": 10,
+    "multi_only_pass": 8
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "both_pass",
+     "multi_only_pass"
+    ],
+    "R_d2_number:recall": [
+     "context_failure",
+     "capability_failure"
+    ],
+    "R_d4_pet:recall": [
+     "context_failure",
+     "both_pass"
+    ],
+    "R_d4_city:recall": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "R_d6_name:recall": [
+     "context_failure",
+     "context_failure"
+    ],
+    "R_d6_number:recall": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "R_d10_pet:recall": [
+     "context_failure",
+     "capability_failure"
+    ],
+    "R_d5_multi:name": [
+     "multi_only_pass",
+     "capability_failure"
+    ],
+    "R_d5_multi:city": [
+     "multi_only_pass",
+     "capability_failure"
+    ],
+    "R_d5_multi:pet": [
+     "multi_only_pass",
+     "capability_failure"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_translate:ellipsis": [
+     "both_pass",
+     "context_failure"
+    ],
+    "F_coref_she:coref": [
+     "both_pass",
+     "context_failure"
+    ],
+    "F_whynot:why": [
+     "both_pass",
+     "context_failure"
+    ],
+    "F_shorter:shorter": [
+     "multi_only_pass",
+     "multi_only_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "context_failure",
+     "context_failure"
+    ],
+    "I_end_question:end_q_t3": [
+     "context_failure",
+     "both_pass"
+    ],
+    "I_caps:caps_t3": [
+     "context_failure",
+     "context_failure"
+    ],
+    "I_persona:arr_t3": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "I_persona:name_pip": [
+     "both_pass",
+     "both_pass"
+    ],
+    "K_day:corrected": [
+     "context_failure",
+     "context_failure"
+    ],
+    "K_time:corrected": [
+     "context_failure",
+     "context_failure"
+    ],
+    "K_color:corrected": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "O_add10:add_to_own": [
+     "both_pass",
+     "both_pass"
+    ],
+    "RI_binding:binding": [
+     "both_pass",
+     "both_pass"
+    ],
+    "T_party:party_math": [
+     "context_failure",
+     "both_pass"
+    ],
+    "T_dragon:fear": [
+     "multi_only_pass",
+     "both_pass"
+    ],
+    "T_dragon:name": [
+     "multi_only_pass",
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 1.0,
+    "persona_t1": 0.5,
+    "persona_t2": 0.5,
+    "persona_t3": 0.0,
+    "t1": 0.333,
+    "t2": 0.333,
+    "t3": 0.167
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.396,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.1107
+   },
+   "turn_flags_count": {
+    "hit_max": 118,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 33
+   },
+   "n_assistant_turns": 298,
+   "replies_with_4gram_repeated_3x": 0.0235,
+   "deflection_rate_on_final_recall_turns": 0.328,
+   "self_copy_rate": 0.0056,
+   "role_capture_on_self_description": {
+    "rate": 0.0,
+    "n": 32
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.979,
+     "cross_turn_4gram_overlap_mean": 0.116,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 136.75
+    },
+    "L_chitchat": {
+     "distinct3_mean": 0.997,
+     "cross_turn_4gram_overlap_mean": 0.003,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 78.083
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 511,
+    "R_d2_number": 494,
+    "R_d4_pet": 725,
+    "R_d4_city": 603,
+    "R_d6_name": 898,
+    "R_d6_number": 1011,
+    "R_d10_pet": 1444,
+    "R_d5_multi": 749
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 1.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 0.5
+    },
+    "R_d2_number": {
+     "recall": 0.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 0.5
+    },
+    "R_d4_pet": {
+     "recall": 0.5
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 0.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 0.5
+    },
+    "R_d6_name": {
+     "recall": 0.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_number": {
+     "recall": 0.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 0.5
+    },
+    "R_d10_pet": {
+     "recall": 0.0
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 0.5
+    },
+    "R_d5_multi": {
+     "name": 0.5,
+     "city": 0.5,
+     "pet": 0.5
+    },
+    "R_d5_multi__ctrl": {
+     "name": 0.0,
+     "city": 0.0,
+     "pet": 0.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 0.5
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_coref_she": {
+     "coref": 0.5
+    },
+    "F_coref_she__ctrl": {
+     "coref": 1.0
+    },
+    "F_whynot": {
+     "why": 0.5
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 0.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 0.0,
+     "one_sentence_t2": 0.0,
+     "one_sentence_t3": 0.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 1.0,
+     "end_q_t2": 1.0,
+     "end_q_t3": 0.5
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 1.0
+    },
+    "I_caps": {
+     "caps_t1": 0.0,
+     "caps_t2": 0.0,
+     "caps_t3": 0.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 1.0
+    },
+    "I_persona": {
+     "arr_t0": 1.0,
+     "arr_t1": 0.5,
+     "arr_t2": 0.5,
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 0.0,
+     "name_pip": 1.0
+    },
+    "K_day": {
+     "corrected": 0.0
+    },
+    "K_day__ctrl": {
+     "corrected": 1.0
+    },
+    "K_time": {
+     "corrected": 0.0
+    },
+    "K_time__ctrl": {
+     "corrected": 1.0
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 0.5
+    },
+    "O_second_item": {
+     "second_item": 0.5
+    },
+    "O_last_item": {
+     "last_item": 1.0
+    },
+    "O_add10": {
+     "knows_60": 1.0,
+     "add_to_own": 1.0
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 1.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 1.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 1.0
+    },
+    "T_party": {
+     "party_math": 0.5
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 0.5,
+     "name": 0.5
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  },
+  "Qwen/Qwen3-0.6B": {
+   "params_m": 596.0,
+   "n_conversations": 106,
+   "seeds": [
+    0,
+    1
+   ],
+   "ability_strict": {
+    "recall": 0.5,
+    "followup": 0.929,
+    "instruction": 1.0,
+    "correction": 0.333,
+    "own_answer": 0.75,
+    "role": 0.0,
+    "topic_return": 1.0,
+    "control": 0.911
+   },
+   "ability_lenient_gold_mentioned": {
+    "recall": 0.6,
+    "followup": 0.917,
+    "instruction": 1.0,
+    "correction": 0.5,
+    "own_answer": 0.5,
+    "role": 0.5,
+    "topic_return": 1.0,
+    "control": 0.978
+   },
+   "ability_n_checks": {
+    "recall": 20,
+    "followup": 14,
+    "instruction": 28,
+    "correction": 6,
+    "own_answer": 8,
+    "role": 6,
+    "topic_return": 6,
+    "control": 56
+   },
+   "overall_multiturn_strict": 0.739,
+   "overall_multiturn_macro": 0.645,
+   "recall_by_distance": {
+    "0": {
+     "strict": 0.8,
+     "lenient": 0.95,
+     "lp_gold": -1.668,
+     "rank1": 0.429,
+     "gold_beats_foil": 1.0,
+     "margin": 12.505,
+     "n": 20
+    },
+    "2": {
+     "strict": 0.0,
+     "lenient": 0.0,
+     "lp_gold": -1.701,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 12.689,
+     "n": 4
+    },
+    "4": {
+     "strict": 0.5,
+     "lenient": 0.5,
+     "lp_gold": -4.293,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 9.275,
+     "n": 4
+    },
+    "5": {
+     "strict": 0.833,
+     "lenient": 0.833,
+     "lp_gold": null,
+     "rank1": null,
+     "gold_beats_foil": null,
+     "margin": null,
+     "n": 6
+    },
+    "6": {
+     "strict": 0.5,
+     "lenient": 0.75,
+     "lp_gold": -1.089,
+     "rank1": 0.25,
+     "gold_beats_foil": 1.0,
+     "margin": 10.154,
+     "n": 4
+    },
+    "10": {
+     "strict": 0.5,
+     "lenient": 1.0,
+     "lp_gold": -4.937,
+     "rank1": 0.0,
+     "gold_beats_foil": 1.0,
+     "margin": 11.778,
+     "n": 2
+    }
+   },
+   "forced_choice_corrections_binding": {
+    "K_day": {
+     "mean_margin": 1.816,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_day__ctrl": {
+     "mean_margin": 4.303,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_time": {
+     "mean_margin": -3.814,
+     "gold_beats_foil_rate": 0.0
+    },
+    "K_time__ctrl": {
+     "mean_margin": 4.369,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color": {
+     "mean_margin": 2.211,
+     "gold_beats_foil_rate": 1.0
+    },
+    "K_color__ctrl": {
+     "mean_margin": 8.115,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding": {
+     "mean_margin": 3.021,
+     "gold_beats_foil_rate": 1.0
+    },
+    "RI_binding__ctrl": {
+     "mean_margin": 7.087,
+     "gold_beats_foil_rate": 1.0
+    }
+   },
+   "context_vs_capability": {
+    "capability_failure": 5,
+    "context_failure": 13,
+    "both_pass": 38
+   },
+   "context_vs_capability_detail": {
+    "R_d2_name:recall": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "R_d2_number:recall": [
+     "context_failure",
+     "context_failure"
+    ],
+    "R_d4_pet:recall": [
+     "context_failure",
+     "context_failure"
+    ],
+    "R_d4_city:recall": [
+     "both_pass",
+     "both_pass"
+    ],
+    "R_d6_name:recall": [
+     "capability_failure",
+     "capability_failure"
+    ],
+    "R_d6_number:recall": [
+     "both_pass",
+     "both_pass"
+    ],
+    "R_d10_pet:recall": [
+     "context_failure",
+     "both_pass"
+    ],
+    "R_d5_multi:name": [
+     "context_failure",
+     "both_pass"
+    ],
+    "R_d5_multi:city": [
+     "both_pass",
+     "both_pass"
+    ],
+    "R_d5_multi:pet": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_ellipsis_capital:ellipsis": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_translate:ellipsis": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_coref_she:coref": [
+     "both_pass",
+     "both_pass"
+    ],
+    "F_whynot:why": [
+     "both_pass",
+     "context_failure"
+    ],
+    "F_shorter:shorter": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_one_sentence:one_sentence_t3": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_end_question:end_q_t3": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_caps:caps_t3": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_persona:arr_t3": [
+     "both_pass",
+     "both_pass"
+    ],
+    "I_persona:name_pip": [
+     "both_pass",
+     "both_pass"
+    ],
+    "K_day:corrected": [
+     "context_failure",
+     "context_failure"
+    ],
+    "K_time:corrected": [
+     "both_pass",
+     "both_pass"
+    ],
+    "K_color:corrected": [
+     "capability_failure",
+     "context_failure"
+    ],
+    "O_add10:add_to_own": [
+     "context_failure",
+     "both_pass"
+    ],
+    "RI_binding:binding": [
+     "context_failure",
+     "context_failure"
+    ],
+    "T_party:party_math": [
+     "both_pass",
+     "both_pass"
+    ],
+    "T_dragon:fear": [
+     "both_pass",
+     "both_pass"
+    ],
+    "T_dragon:name": [
+     "both_pass",
+     "both_pass"
+    ]
+   },
+   "instruction_persistence_by_turn": {
+    "persona_t0": 1.0,
+    "persona_t1": 1.0,
+    "persona_t2": 1.0,
+    "persona_t3": 1.0,
+    "t1": 1.0,
+    "t2": 1.0,
+    "t3": 1.0
+   },
+   "turn_flags_rate": {
+    "hit_max": 0.2349,
+    "leaked_template": 0.0,
+    "invented_user_turn": 0.0,
+    "empty": 0.0,
+    "no_memory_claim": 0.0235
+   },
+   "turn_flags_count": {
+    "hit_max": 70,
+    "leaked_template": 0,
+    "invented_user_turn": 0,
+    "empty": 0,
+    "no_memory_claim": 7
+   },
+   "n_assistant_turns": 298,
+   "replies_with_4gram_repeated_3x": 0.0168,
+   "deflection_rate_on_final_recall_turns": 0.086,
+   "self_copy_rate": 0.0471,
+   "role_capture_on_self_description": {
+    "rate": 0.156,
+    "n": 32
+   },
+   "loops": {
+    "L_tell_more": {
+     "distinct3_mean": 0.975,
+     "cross_turn_4gram_overlap_mean": 0.474,
+     "max_within_reply_4gram_repeat": 2,
+     "mean_words": 127.917
+    },
+    "L_chitchat": {
+     "distinct3_mean": 1.0,
+     "cross_turn_4gram_overlap_mean": 0.045,
+     "max_within_reply_4gram_repeat": 1,
+     "mean_words": 26.5
+    }
+   },
+   "recall_prompt_tokens": {
+    "R_d2_name": 349,
+    "R_d2_number": 372,
+    "R_d4_pet": 749,
+    "R_d4_city": 566,
+    "R_d6_name": 896,
+    "R_d6_number": 963,
+    "R_d10_pet": 1422,
+    "R_d5_multi": 713
+   },
+   "per_test": {
+    "R_d2_name": {
+     "recall": 0.0
+    },
+    "R_d2_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d2_number": {
+     "recall": 0.0
+    },
+    "R_d2_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_pet": {
+     "recall": 0.0
+    },
+    "R_d4_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d4_city": {
+     "recall": 1.0
+    },
+    "R_d4_city__ctrl": {
+     "recall": 1.0
+    },
+    "R_d6_name": {
+     "recall": 0.0
+    },
+    "R_d6_name__ctrl": {
+     "recall": 0.0
+    },
+    "R_d6_number": {
+     "recall": 1.0
+    },
+    "R_d6_number__ctrl": {
+     "recall": 1.0
+    },
+    "R_d10_pet": {
+     "recall": 0.5
+    },
+    "R_d10_pet__ctrl": {
+     "recall": 1.0
+    },
+    "R_d5_multi": {
+     "name": 0.5,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "R_d5_multi__ctrl": {
+     "name": 1.0,
+     "city": 1.0,
+     "pet": 1.0
+    },
+    "F_ellipsis_capital": {
+     "knows_paris": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_ellipsis_capital__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_translate": {
+     "knows_gracias": 1.0,
+     "ellipsis": 1.0
+    },
+    "F_translate__ctrl": {
+     "ellipsis": 1.0
+    },
+    "F_coref_she": {
+     "coref": 1.0
+    },
+    "F_coref_she__ctrl": {
+     "coref": 1.0
+    },
+    "F_whynot": {
+     "why": 0.5
+    },
+    "F_whynot__ctrl": {
+     "why": 1.0
+    },
+    "F_shorter": {
+     "shorter": 1.0
+    },
+    "F_shorter__ctrl": {
+     "shorter": 1.0
+    },
+    "I_one_sentence": {
+     "one_sentence_t1": 1.0,
+     "one_sentence_t2": 1.0,
+     "one_sentence_t3": 1.0
+    },
+    "I_one_sentence__ctrl": {
+     "one_sentence_t3": 1.0
+    },
+    "I_end_question": {
+     "end_q_t1": 1.0,
+     "end_q_t2": 1.0,
+     "end_q_t3": 1.0
+    },
+    "I_end_question__ctrl": {
+     "end_q_t3": 1.0
+    },
+    "I_caps": {
+     "caps_t1": 1.0,
+     "caps_t2": 1.0,
+     "caps_t3": 1.0
+    },
+    "I_caps__ctrl": {
+     "caps_t3": 1.0
+    },
+    "I_persona": {
+     "arr_t0": 1.0,
+     "arr_t1": 1.0,
+     "arr_t2": 1.0,
+     "arr_t3": 1.0,
+     "name_pip": 1.0
+    },
+    "I_persona__ctrl": {
+     "arr_t3": 1.0,
+     "name_pip": 1.0
+    },
+    "K_day": {
+     "corrected": 0.0
+    },
+    "K_day__ctrl": {
+     "corrected": 1.0
+    },
+    "K_time": {
+     "corrected": 1.0
+    },
+    "K_time__ctrl": {
+     "corrected": 1.0
+    },
+    "K_color": {
+     "corrected": 0.0
+    },
+    "K_color__ctrl": {
+     "corrected": 0.5
+    },
+    "O_second_item": {
+     "second_item": 1.0
+    },
+    "O_last_item": {
+     "last_item": 1.0
+    },
+    "O_add10": {
+     "knows_60": 0.5,
+     "add_to_own": 0.5
+    },
+    "O_add10__ctrl": {
+     "add_to_own": 1.0
+    },
+    "RI_identity": {
+     "assistant_not_user": 0.0,
+     "user_job": 0.0
+    },
+    "RI_binding": {
+     "binding": 0.0
+    },
+    "RI_binding__ctrl": {
+     "binding": 1.0
+    },
+    "T_party": {
+     "party_math": 1.0
+    },
+    "T_party__ctrl": {
+     "party_math": 1.0
+    },
+    "T_dragon": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "T_dragon__ctrl": {
+     "fear": 1.0,
+     "name": 1.0
+    },
+    "L_tell_more": {},
+    "L_chitchat": {
+     "topic_recall": 0.0
+    }
+   }
+  }
+ },
+ "fixed_history": {
+  "HuggingFaceTB/SmolLM2-135M-Instruct": {
+   "short_n0": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.75,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.707,
+    "prompt_tokens": 76.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.75,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.061,
+    "prompt_tokens": 115.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.75,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.055,
+    "prompt_tokens": 149.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.426,
+    "prompt_tokens": 218.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -2.129,
+    "prompt_tokens": 361.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.0,
+    "gold_beats_foil": 0.5,
+    "lp_gold": -4.425,
+    "prompt_tokens": 497.25,
+    "n": 4
+   },
+   "long_n0": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.75,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.707,
+    "prompt_tokens": 76.25,
+    "n": 4
+   },
+   "long_n1": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.75,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.161,
+    "prompt_tokens": 215.25,
+    "n": 4
+   },
+   "long_n2": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.5,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.449,
+    "prompt_tokens": 349.25,
+    "n": 4
+   },
+   "long_n4": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.5,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -2.082,
+    "prompt_tokens": 618.25,
+    "n": 4
+   },
+   "long_n8": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 0.5,
+    "lp_gold": -4.383,
+    "prompt_tokens": 1161.25,
+    "n": 4
+   },
+   "long_n12": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.0,
+    "gold_beats_foil": 0.5,
+    "lp_gold": -7.766,
+    "prompt_tokens": 1697.25,
+    "n": 4
+   }
+  },
+  "HuggingFaceTB/SmolLM2-135M-Instruct  [memory system prompt]": {
+   "short_n0": {
+    "strict": 0.25,
+    "lenient": 0.5,
+    "deflect": 0.25,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.576,
+    "prompt_tokens": 98.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.5,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.935,
+    "prompt_tokens": 137.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.891,
+    "prompt_tokens": 171.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 0.25,
+    "lenient": 0.5,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.309,
+    "prompt_tokens": 240.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -2.142,
+    "prompt_tokens": 383.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 0.5,
+    "lp_gold": -4.538,
+    "prompt_tokens": 519.25,
+    "n": 4
+   }
+  },
+  "HuggingFaceTB/SmolLM2-135M-Instruct  [plain transcript]": {
+   "short_n0": {
+    "strict": 0.25,
+    "lenient": 0.5,
+    "deflect": 0.25,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.722,
+    "prompt_tokens": 63.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.112,
+    "prompt_tokens": 98.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.916,
+    "prompt_tokens": 128.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.74,
+    "prompt_tokens": 189.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.042,
+    "prompt_tokens": 316.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.944,
+    "prompt_tokens": 435.25,
+    "n": 4
+   },
+   "long_n0": {
+    "strict": 0.25,
+    "lenient": 0.5,
+    "deflect": 0.25,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.722,
+    "prompt_tokens": 63.25,
+    "n": 4
+   },
+   "long_n1": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.538,
+    "prompt_tokens": 198.25,
+    "n": 4
+   },
+   "long_n2": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.277,
+    "prompt_tokens": 328.25,
+    "n": 4
+   },
+   "long_n4": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.272,
+    "prompt_tokens": 589.25,
+    "n": 4
+   },
+   "long_n8": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.5,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.826,
+    "prompt_tokens": 1116.25,
+    "n": 4
+   },
+   "long_n12": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.5,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -2.993,
+    "prompt_tokens": 1635.25,
+    "n": 4
+   }
+  },
+  "HuggingFaceTB/SmolLM2-135M  [plain transcript]": {
+   "short_n0": {
+    "strict": 0.25,
+    "lenient": 0.5,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.651,
+    "prompt_tokens": 63.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.958,
+    "prompt_tokens": 98.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.985,
+    "prompt_tokens": 128.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 0.5,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.5,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.003,
+    "prompt_tokens": 189.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.573,
+    "prompt_tokens": 316.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.79,
+    "prompt_tokens": 435.25,
+    "n": 4
+   },
+   "long_n0": {
+    "strict": 0.25,
+    "lenient": 0.5,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.651,
+    "prompt_tokens": 63.25,
+    "n": 4
+   },
+   "long_n1": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.932,
+    "prompt_tokens": 198.25,
+    "n": 4
+   },
+   "long_n2": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.261,
+    "prompt_tokens": 328.25,
+    "n": 4
+   },
+   "long_n4": {
+    "strict": 0.0,
+    "lenient": 0.5,
+    "deflect": 0.25,
+    "capture": 0.5,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.834,
+    "prompt_tokens": 589.25,
+    "n": 4
+   },
+   "long_n8": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -2.068,
+    "prompt_tokens": 1116.25,
+    "n": 4
+   },
+   "long_n12": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -2.829,
+    "prompt_tokens": 1635.25,
+    "n": 4
+   }
+  },
+  "HuggingFaceTB/SmolLM2-360M-Instruct": {
+   "short_n0": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.09,
+    "prompt_tokens": 76.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.092,
+    "prompt_tokens": 115.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.085,
+    "prompt_tokens": 149.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.102,
+    "prompt_tokens": 218.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.179,
+    "prompt_tokens": 361.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.572,
+    "prompt_tokens": 497.25,
+    "n": 4
+   },
+   "long_n0": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.09,
+    "prompt_tokens": 76.25,
+    "n": 4
+   },
+   "long_n1": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.144,
+    "prompt_tokens": 215.25,
+    "n": 4
+   },
+   "long_n2": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.168,
+    "prompt_tokens": 349.25,
+    "n": 4
+   },
+   "long_n4": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.203,
+    "prompt_tokens": 618.25,
+    "n": 4
+   },
+   "long_n8": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.587,
+    "prompt_tokens": 1161.25,
+    "n": 4
+   },
+   "long_n12": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.181,
+    "prompt_tokens": 1697.25,
+    "n": 4
+   }
+  },
+  "HuggingFaceTB/SmolLM2-360M-Instruct  [memory system prompt]": {
+   "short_n0": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.069,
+    "prompt_tokens": 98.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.073,
+    "prompt_tokens": 137.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.068,
+    "prompt_tokens": 171.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.084,
+    "prompt_tokens": 240.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.123,
+    "prompt_tokens": 383.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.575,
+    "prompt_tokens": 519.25,
+    "n": 4
+   }
+  },
+  "LiquidAI/LFM2-350M": {
+   "short_n0": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.485,
+    "prompt_tokens": 54.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.471,
+    "prompt_tokens": 92.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.5,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -1.651,
+    "prompt_tokens": 125.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.5,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -1.677,
+    "prompt_tokens": 195.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.692,
+    "prompt_tokens": 335.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 0.5,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.743,
+    "prompt_tokens": 472.25,
+    "n": 4
+   },
+   "long_n0": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.485,
+    "prompt_tokens": 54.25,
+    "n": 4
+   },
+   "long_n1": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.783,
+    "prompt_tokens": 192.25,
+    "n": 4
+   },
+   "long_n2": {
+    "strict": 0.5,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.827,
+    "prompt_tokens": 325.25,
+    "n": 4
+   },
+   "long_n4": {
+    "strict": 0.5,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.931,
+    "prompt_tokens": 595.25,
+    "n": 4
+   },
+   "long_n8": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -1.011,
+    "prompt_tokens": 1135.25,
+    "n": 4
+   },
+   "long_n12": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -0.947,
+    "prompt_tokens": 1672.25,
+    "n": 4
+   }
+  },
+  "LiquidAI/LFM2.5-350M": {
+   "short_n0": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.916,
+    "prompt_tokens": 54.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.5,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.308,
+    "prompt_tokens": 92.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.08,
+    "prompt_tokens": 125.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.539,
+    "prompt_tokens": 195.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.893,
+    "prompt_tokens": 335.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.168,
+    "prompt_tokens": 472.25,
+    "n": 4
+   },
+   "long_n0": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.916,
+    "prompt_tokens": 54.25,
+    "n": 4
+   },
+   "long_n1": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.78,
+    "prompt_tokens": 192.25,
+    "n": 4
+   },
+   "long_n2": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.537,
+    "prompt_tokens": 325.25,
+    "n": 4
+   },
+   "long_n4": {
+    "strict": 0.25,
+    "lenient": 0.5,
+    "deflect": 0.5,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.406,
+    "prompt_tokens": 595.25,
+    "n": 4
+   },
+   "long_n8": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.306,
+    "prompt_tokens": 1135.25,
+    "n": 4
+   },
+   "long_n12": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.14,
+    "prompt_tokens": 1672.25,
+    "n": 4
+   }
+  },
+  "LiquidAI/LFM2.5-350M  [memory system prompt]": {
+   "short_n0": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.138,
+    "prompt_tokens": 98.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.315,
+    "prompt_tokens": 136.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.219,
+    "prompt_tokens": 169.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.044,
+    "prompt_tokens": 239.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.148,
+    "prompt_tokens": 379.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.103,
+    "prompt_tokens": 516.25,
+    "n": 4
+   }
+  },
+  "Qwen/Qwen2.5-0.5B-Instruct": {
+   "short_n0": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.06,
+    "prompt_tokens": 74.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.5,
+    "lenient": 0.5,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.064,
+    "prompt_tokens": 112.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.048,
+    "prompt_tokens": 145.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.059,
+    "prompt_tokens": 213.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.184,
+    "prompt_tokens": 349.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.185,
+    "prompt_tokens": 484.25,
+    "n": 4
+   },
+   "long_n0": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.06,
+    "prompt_tokens": 74.25,
+    "n": 4
+   },
+   "long_n1": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.069,
+    "prompt_tokens": 212.25,
+    "n": 4
+   },
+   "long_n2": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.071,
+    "prompt_tokens": 345.25,
+    "n": 4
+   },
+   "long_n4": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.098,
+    "prompt_tokens": 613.25,
+    "n": 4
+   },
+   "long_n8": {
+    "strict": 0.5,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.181,
+    "prompt_tokens": 1149.25,
+    "n": 4
+   },
+   "long_n12": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.387,
+    "prompt_tokens": 1684.25,
+    "n": 4
+   }
+  },
+  "Qwen/Qwen2.5-0.5B-Instruct  [memory system prompt]": {
+   "short_n0": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.011,
+    "prompt_tokens": 96.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.014,
+    "prompt_tokens": 134.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.015,
+    "prompt_tokens": 167.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.022,
+    "prompt_tokens": 235.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.068,
+    "prompt_tokens": 371.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.092,
+    "prompt_tokens": 506.25,
+    "n": 4
+   }
+  },
+  "Qwen/Qwen3-0.6B": {
+   "short_n0": {
+    "strict": 0.25,
+    "lenient": 0.75,
+    "deflect": 0.75,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.438,
+    "prompt_tokens": 57.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.25,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.65,
+    "prompt_tokens": 95.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.733,
+    "prompt_tokens": 128.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 0.5,
+    "lenient": 1.0,
+    "deflect": 0.25,
+    "capture": 0.5,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.536,
+    "prompt_tokens": 196.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.25,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.573,
+    "prompt_tokens": 332.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.129,
+    "prompt_tokens": 467.25,
+    "n": 4
+   },
+   "long_n0": {
+    "strict": 0.25,
+    "lenient": 0.75,
+    "deflect": 0.75,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.438,
+    "prompt_tokens": 57.25,
+    "n": 4
+   },
+   "long_n1": {
+    "strict": 0.25,
+    "lenient": 0.75,
+    "deflect": 0.5,
+    "capture": 0.5,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.987,
+    "prompt_tokens": 195.25,
+    "n": 4
+   },
+   "long_n2": {
+    "strict": 0.25,
+    "lenient": 0.5,
+    "deflect": 0.75,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 0.25,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.977,
+    "prompt_tokens": 328.25,
+    "n": 4
+   },
+   "long_n4": {
+    "strict": 0.25,
+    "lenient": 0.75,
+    "deflect": 0.75,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.881,
+    "prompt_tokens": 596.25,
+    "n": 4
+   },
+   "long_n8": {
+    "strict": 0.0,
+    "lenient": 0.5,
+    "deflect": 1.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -2.015,
+    "prompt_tokens": 1132.25,
+    "n": 4
+   },
+   "long_n12": {
+    "strict": 0.25,
+    "lenient": 0.5,
+    "deflect": 0.5,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.77,
+    "prompt_tokens": 1667.25,
+    "n": 4
+   }
+  },
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct": {
+   "short_n0": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.375,
+    "prompt_tokens": 59.5,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.282,
+    "prompt_tokens": 102.5,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.238,
+    "prompt_tokens": 138.5,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.359,
+    "prompt_tokens": 218.5,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 0.5,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.5,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.621,
+    "prompt_tokens": 371.5,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 1.0,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.807,
+    "prompt_tokens": 525.5,
+    "n": 4
+   },
+   "long_n0": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.375,
+    "prompt_tokens": 59.5,
+    "n": 4
+   },
+   "long_n1": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.303,
+    "prompt_tokens": 202.5,
+    "n": 4
+   },
+   "long_n2": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.317,
+    "prompt_tokens": 338.5,
+    "n": 4
+   },
+   "long_n4": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.412,
+    "prompt_tokens": 618.5,
+    "n": 4
+   },
+   "long_n8": {
+    "strict": 0.75,
+    "lenient": 1.0,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.901,
+    "prompt_tokens": 1171.5,
+    "n": 4
+   },
+   "long_n12": {
+    "strict": 0.75,
+    "lenient": 0.75,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -1.432,
+    "prompt_tokens": 1725.5,
+    "n": 4
+   }
+  },
+  "unsloth/gemma-3-270m-it": {
+   "short_n0": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.5,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.535,
+    "prompt_tokens": 54.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.5,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -2.51,
+    "prompt_tokens": 92.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.75,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -2.7,
+    "prompt_tokens": 125.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.5,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -2.92,
+    "prompt_tokens": 192.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -2.775,
+    "prompt_tokens": 331.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.5,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -3.066,
+    "prompt_tokens": 462.25,
+    "n": 4
+   },
+   "long_n0": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.5,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.535,
+    "prompt_tokens": 54.25,
+    "n": 4
+   },
+   "long_n1": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -2.059,
+    "prompt_tokens": 192.25,
+    "n": 4
+   },
+   "long_n2": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -1.956,
+    "prompt_tokens": 325.25,
+    "n": 4
+   },
+   "long_n4": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.5,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -3.562,
+    "prompt_tokens": 592.25,
+    "n": 4
+   },
+   "long_n8": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.5,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -3.645,
+    "prompt_tokens": 1131.25,
+    "n": 4
+   },
+   "long_n12": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.5,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -4.166,
+    "prompt_tokens": 1662.25,
+    "n": 4
+   }
+  },
+  "unsloth/gemma-3-270m-it  [memory system prompt]": {
+   "short_n0": {
+    "strict": 0.25,
+    "lenient": 0.25,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 1.0,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -0.19,
+    "prompt_tokens": 93.25,
+    "n": 4
+   },
+   "short_n1": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.5,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -2.071,
+    "prompt_tokens": 131.25,
+    "n": 4
+   },
+   "short_n2": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.75,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -2.431,
+    "prompt_tokens": 164.25,
+    "n": 4
+   },
+   "short_n4": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.5,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.75,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -2.864,
+    "prompt_tokens": 231.25,
+    "n": 4
+   },
+   "short_n8": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.5,
+    "gold_beats_foil": 1.0,
+    "lp_gold": -2.609,
+    "prompt_tokens": 370.25,
+    "n": 4
+   },
+   "short_n12": {
+    "strict": 0.0,
+    "lenient": 0.0,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "greedy_gold_from_prefix": 0.5,
+    "gold_beats_foil": 0.75,
+    "lp_gold": -2.971,
+    "prompt_tokens": 501.25,
+    "n": 4
+   }
+  }
+ },
+ "fixed_history_pooled": {
+  "HuggingFaceTB__SmolLM2-135M-Instruct": {
+   "short": {
+    "strict": 0.15,
+    "deflect": 0.3,
+    "capture": 0.0,
+    "gold_beats_foil": 0.9,
+    "greedy_gold": 0.6,
+    "lp_gold": -2.019,
+    "n": 20,
+    "n12_strict": 0.0,
+    "n12_gold_beats_foil": 0.5,
+    "n12_tokens": 497.25
+   },
+   "long": {
+    "strict": 0.15,
+    "deflect": 0.3,
+    "capture": 0.0,
+    "gold_beats_foil": 0.8,
+    "greedy_gold": 0.5,
+    "lp_gold": -3.368,
+    "n": 20,
+    "n12_strict": 0.0,
+    "n12_gold_beats_foil": 0.5,
+    "n12_tokens": 1697.25
+   },
+   "n0_strict": 0.25
+  },
+  "HuggingFaceTB__SmolLM2-135M-Instruct__memsys": {
+   "short": {
+    "strict": 0.2,
+    "deflect": 0.15,
+    "capture": 0.05,
+    "gold_beats_foil": 0.9,
+    "greedy_gold": 0.65,
+    "lp_gold": -1.963,
+    "n": 20,
+    "n12_strict": 0.0,
+    "n12_gold_beats_foil": 0.5,
+    "n12_tokens": 519.25
+   },
+   "n0_strict": 0.25
+  },
+  "HuggingFaceTB__SmolLM2-135M-Instruct__plain": {
+   "short": {
+    "strict": 0.7,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 0.85,
+    "lp_gold": -0.951,
+    "n": 20,
+    "n12_strict": 0.75,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 435.25
+   },
+   "long": {
+    "strict": 0.5,
+    "deflect": 0.05,
+    "capture": 0.0,
+    "gold_beats_foil": 0.95,
+    "greedy_gold": 0.65,
+    "lp_gold": -1.781,
+    "n": 20,
+    "n12_strict": 0.25,
+    "n12_gold_beats_foil": 0.75,
+    "n12_tokens": 1635.25
+   },
+   "n0_strict": 0.25
+  },
+  "HuggingFaceTB__SmolLM2-135M__plain": {
+   "short": {
+    "strict": 0.6,
+    "deflect": 0.05,
+    "capture": 0.1,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 0.9,
+    "lp_gold": -1.262,
+    "n": 20,
+    "n12_strict": 0.25,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 435.25
+   },
+   "long": {
+    "strict": 0.4,
+    "deflect": 0.1,
+    "capture": 0.15,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 0.75,
+    "lp_gold": -1.785,
+    "n": 20,
+    "n12_strict": 0.25,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 1635.25
+   },
+   "n0_strict": 0.25
+  },
+  "HuggingFaceTB__SmolLM2-360M-Instruct": {
+   "short": {
+    "strict": 0.9,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 1.0,
+    "lp_gold": -0.206,
+    "n": 20,
+    "n12_strict": 1.0,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 497.25
+   },
+   "long": {
+    "strict": 0.65,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 1.0,
+    "lp_gold": -0.457,
+    "n": 20,
+    "n12_strict": 0.25,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 1697.25
+   },
+   "n0_strict": 1.0
+  },
+  "HuggingFaceTB__SmolLM2-360M-Instruct__memsys": {
+   "short": {
+    "strict": 0.95,
+    "deflect": 0.0,
+    "capture": 0.05,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 1.0,
+    "lp_gold": -0.185,
+    "n": 20,
+    "n12_strict": 1.0,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 519.25
+   },
+   "n0_strict": 0.75
+  },
+  "LiquidAI__LFM2-350M": {
+   "short": {
+    "strict": 0.55,
+    "deflect": 0.0,
+    "capture": 0.05,
+    "gold_beats_foil": 0.9,
+    "greedy_gold": 0.75,
+    "lp_gold": -1.247,
+    "n": 20,
+    "n12_strict": 0.5,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 472.25
+   },
+   "long": {
+    "strict": 0.6,
+    "deflect": 0.05,
+    "capture": 0.1,
+    "gold_beats_foil": 0.9,
+    "greedy_gold": 0.9,
+    "lp_gold": -0.9,
+    "n": 20,
+    "n12_strict": 0.5,
+    "n12_gold_beats_foil": 0.75,
+    "n12_tokens": 1672.25
+   },
+   "n0_strict": 1.0
+  },
+  "LiquidAI__LFM2.5-350M": {
+   "short": {
+    "strict": 0.7,
+    "deflect": 0.15,
+    "capture": 0.05,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 0.8,
+    "lp_gold": -0.798,
+    "n": 20,
+    "n12_strict": 1.0,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 472.25
+   },
+   "long": {
+    "strict": 0.45,
+    "deflect": 0.3,
+    "capture": 0.0,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 0.85,
+    "lp_gold": -0.434,
+    "n": 20,
+    "n12_strict": 0.75,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 1672.25
+   },
+   "n0_strict": 0.75
+  },
+  "LiquidAI__LFM2.5-350M__memsys": {
+   "short": {
+    "strict": 1.0,
+    "deflect": 0.0,
+    "capture": 0.0,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 1.0,
+    "lp_gold": -0.166,
+    "n": 20,
+    "n12_strict": 1.0,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 516.25
+   },
+   "n0_strict": 1.0
+  },
+  "Qwen__Qwen2.5-0.5B-Instruct": {
+   "short": {
+    "strict": 0.7,
+    "deflect": 0.25,
+    "capture": 0.0,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 1.0,
+    "lp_gold": -0.108,
+    "n": 20,
+    "n12_strict": 0.75,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 484.25
+   },
+   "long": {
+    "strict": 0.7,
+    "deflect": 0.1,
+    "capture": 0.05,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 1.0,
+    "lp_gold": -0.161,
+    "n": 20,
+    "n12_strict": 0.75,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 1684.25
+   },
+   "n0_strict": 1.0
+  },
+  "Qwen__Qwen2.5-0.5B-Instruct__memsys": {
+   "short": {
+    "strict": 0.75,
+    "deflect": 0.0,
+    "capture": 0.25,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 1.0,
+    "lp_gold": -0.042,
+    "n": 20,
+    "n12_strict": 0.75,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 506.25
+   },
+   "n0_strict": 1.0
+  },
+  "Qwen__Qwen3-0.6B": {
+   "short": {
+    "strict": 0.7,
+    "deflect": 0.25,
+    "capture": 0.2,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 0.25,
+    "lp_gold": -1.524,
+    "n": 20,
+    "n12_strict": 0.75,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 467.25
+   },
+   "long": {
+    "strict": 0.2,
+    "deflect": 0.7,
+    "capture": 0.15,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 0.1,
+    "lp_gold": -1.926,
+    "n": 20,
+    "n12_strict": 0.25,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 1667.25
+   },
+   "n0_strict": 0.25
+  },
+  "tiiuae__Falcon-H1-Tiny-90M-Instruct": {
+   "short": {
+    "strict": 0.8,
+    "deflect": 0.0,
+    "capture": 0.2,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 1.0,
+    "lp_gold": -0.461,
+    "n": 20,
+    "n12_strict": 1.0,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 525.5
+   },
+   "long": {
+    "strict": 0.75,
+    "deflect": 0.0,
+    "capture": 0.1,
+    "gold_beats_foil": 1.0,
+    "greedy_gold": 1.0,
+    "lp_gold": -0.673,
+    "n": 20,
+    "n12_strict": 0.75,
+    "n12_gold_beats_foil": 1.0,
+    "n12_tokens": 1725.5
+   },
+   "n0_strict": 0.75
+  },
+  "unsloth__gemma-3-270m-it": {
+   "short": {
+    "strict": 0.15,
+    "deflect": 0.45,
+    "capture": 0.0,
+    "gold_beats_foil": 0.75,
+    "greedy_gold": 0.7,
+    "lp_gold": -2.794,
+    "n": 20,
+    "n12_strict": 0.0,
+    "n12_gold_beats_foil": 0.75,
+    "n12_tokens": 462.25
+   },
+   "long": {
+    "strict": 0.1,
+    "deflect": 0.05,
+    "capture": 0.0,
+    "gold_beats_foil": 0.8,
+    "greedy_gold": 0.6,
+    "lp_gold": -3.077,
+    "n": 20,
+    "n12_strict": 0.25,
+    "n12_gold_beats_foil": 0.75,
+    "n12_tokens": 1662.25
+   },
+   "n0_strict": 0.0
+  },
+  "unsloth__gemma-3-270m-it__memsys": {
+   "short": {
+    "strict": 0.0,
+    "deflect": 0.45,
+    "capture": 0.0,
+    "gold_beats_foil": 0.85,
+    "greedy_gold": 0.65,
+    "lp_gold": -2.589,
+    "n": 20,
+    "n12_strict": 0.0,
+    "n12_gold_beats_foil": 0.75,
+    "n12_tokens": 501.25
+   },
+   "n0_strict": 0.25
+  }
+ },
+ "failure_taxonomy_greedy_multiturn": {
+  "HuggingFaceTB/SmolLM2-135M-Instruct": {
+   "deflection": 5,
+   "wrong_or_ignored": 4,
+   "perspective_error (answers as the user or about itself)": 2,
+   "copy_of_own_earlier_reply": 7,
+   "stale_value": 1
+  },
+  "unsloth/gemma-3-270m-it": {
+   "wrong_or_ignored": 8,
+   "deflection": 7,
+   "stale_value": 1,
+   "copy_of_own_earlier_reply": 1
+  },
+  "LiquidAI/LFM2-350M": {
+   "wrong_or_ignored": 5,
+   "deflection": 1,
+   "stale_value": 2
+  },
+  "Qwen/Qwen2.5-0.5B-Instruct": {
+   "deflection": 12,
+   "copy_of_own_earlier_reply": 1,
+   "wrong_or_ignored": 1
+  },
+  "Qwen/Qwen3-0.6B": {
+   "deflection": 3,
+   "perspective_error (answers as the user or about itself)": 3,
+   "copy_of_own_earlier_reply": 1,
+   "wrong_or_ignored": 1
+  },
+  "LiquidAI/LFM2.5-350M": {
+   "wrong_or_ignored": 2,
+   "deflection": 6,
+   "stale_value": 1,
+   "perspective_error (answers as the user or about itself)": 1
+  },
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct": {
+   "wrong_or_ignored": 8,
+   "stale_value": 2
+  },
+  "HuggingFaceTB/SmolLM2-360M-Instruct": {
+   "deflection": 2,
+   "copy_of_own_earlier_reply": 3,
+   "wrong_or_ignored": 4
+  }
+ },
+ "failure_taxonomy_sampled_multiturn": {
+  "Qwen/Qwen2.5-0.5B-Instruct": {
+   "wrong_or_ignored": 6,
+   "deflection": 14,
+   "perspective_error (answers as the user or about itself)": 4,
+   "stale_value": 2
+  },
+  "HuggingFaceTB/SmolLM2-135M-Instruct": {
+   "deflection": 6,
+   "wrong_or_ignored": 12,
+   "copy_of_own_earlier_reply": 7,
+   "stale_value": 2,
+   "perspective_error (answers as the user or about itself)": 5
+  },
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct": {
+   "wrong_or_ignored": 8,
+   "perspective_error (answers as the user or about itself)": 1,
+   "stale_value": 1
+  },
+  "LiquidAI/LFM2.5-350M": {
+   "deflection": 6,
+   "perspective_error (answers as the user or about itself)": 3,
+   "wrong_or_ignored": 7
+  },
+  "LiquidAI/LFM2-350M": {
+   "wrong_or_ignored": 9,
+   "perspective_error (answers as the user or about itself)": 3,
+   "stale_value": 1,
+   "deflection": 3
+  },
+  "unsloth/gemma-3-270m-it": {
+   "deflection": 10,
+   "wrong_or_ignored": 12,
+   "perspective_error (answers as the user or about itself)": 8,
+   "stale_value": 2,
+   "copy_of_own_earlier_reply": 1
+  },
+  "Qwen/Qwen3-0.6B": {
+   "wrong_or_ignored": 8,
+   "deflection": 5,
+   "perspective_error (answers as the user or about itself)": 5,
+   "copy_of_own_earlier_reply": 2
+  },
+  "HuggingFaceTB/SmolLM2-360M-Instruct": {
+   "deflection": 5,
+   "copy_of_own_earlier_reply": 5,
+   "wrong_or_ignored": 7
+  }
+ }
+}

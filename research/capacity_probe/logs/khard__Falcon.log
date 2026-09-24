@@ -1,0 +1,24 @@
+Loading weights:   0%|          | 0/386 [00:00<?, ?it/s]Loading weights: 100%|██████████| 386/386 [00:00<00:00, 6296.19it/s]
+Traceback (most recent call last):
+  File "/Users/brohm/Documents/Projects/maxgpt-nano/research/capacity_probe/khard.py", line 96, in <module>
+    main()
+  File "/Users/brohm/Documents/Projects/maxgpt-nano/research/capacity_probe/khard.py", line 85, in main
+    model = AutoModelForCausalLM.from_pretrained(a.model, dtype=dt).to(a.device).eval()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/brohm/Documents/Projects/video-editor/.venv/lib/python3.12/site-packages/transformers/modeling_utils.py", line 3746, in to
+    return super().to(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/brohm/Documents/Projects/video-editor/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1383, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/brohm/Documents/Projects/video-editor/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+    module._apply(fn)
+  File "/Users/brohm/Documents/Projects/video-editor/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+    module._apply(fn)
+  File "/Users/brohm/Documents/Projects/video-editor/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 964, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/Users/brohm/Documents/Projects/video-editor/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1369, in convert
+    return t.to(
+           ^^^^^
+RuntimeError: invalid low watermark ratio 1.4
