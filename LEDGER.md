@@ -268,6 +268,13 @@
    - P-095 depends on P-090.
    - P-019 and P-029 to P-031 are arms of P-010's N design.
 
+## Added after the ledger build
+
+| id | idea | category | novelty | closest prior art (with size) | limit attacked | cheapest test | est. hours | win condition |
+|---|---|---|---|---|---|---|---|---|
+| P-186 | Token-count scaling of multi-turn skill: one WSD run per size with decay branches at 500 / 2,000 / 5,000 / 20,000 tokens per parameter (Max, Sep 24) | pretraining | tweak-of-known | Overtraining studies measure loss, not multi-turn skill (Sardana et al.; SmolLM2-135M at 2T, LFM2.5-230M at ~83k tok/param); P-050 reads public checkpoints only | #4 | 5M and 10M on the 5070, 2 seeds | ~40-80 (est.) | Default: the budget where every RC-12 dev family's gain per doubling of tokens falls below its seed noise |
+| P-158 (expanded) | Vocabulary optimum measured at 5M, 20M and 60M on a 2k-32k grid, fit optimum vs size, per-size choice for the curve (Max, Sep 24) | tokenizer | known-apply at one size; the fit for multi-turn chat at 5-60M is untested | Tao et al. 2407.13623 (fit at 33M-3B non-embedding, loss only) | #9 | 18 arms x 2 seeds x 3 sizes, 5070 | ~60-120 (est.) | Default: optimum located within one grid step on both seeds at each size |
+
 ## Parked (judged not worth testing now)
 
 | Idea | Reason |

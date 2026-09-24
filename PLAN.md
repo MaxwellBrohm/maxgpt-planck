@@ -11,6 +11,11 @@ Version 2, 2026-09-24. It is built from the draft plan and its 28-item review, `
 - **New section 3 on unattended running.** It covers job queues on each machine, heartbeats pushed out to a status repo, disk guards, Windows update windows, and a Titan smoke test on Dec 7-10.
 - **D8 now covers every string that reaches training text.** Templates, slot pools and word lists come from human-written open sources or from the teacher, never from Claude.
 
+
+**Changes requested by Max (Sep 24)**
+- **Vocabulary: measure the optimum instead of assuming 8,192.** E7 (P-158) grows from one size to three: 5M, 20M and 60M total parameters, each on a vocabulary grid of 2k, 3k, 4k, 6k, 8k, 12k, 16k, 24k and 32k at equal total parameters (depth adjusted by the budget solver), 2 seeds each, from one nested BPE family trained on the chat mix so every vocabulary is a truncation of the same merges. The grid is centered by the Tao et al. vocabulary law's estimate, then refined around the best point. Each arm is scored on bits per byte, the RC-12 dev battery and rare-name recall (P-096). From the three sizes we fit how the optimal vocabulary moves with model size, and each curve point uses its own measured optimum when it beats 8,192 by at least 1% bits per byte with no battery regression. The result is reported as a valley with its width, since the optimum is a range, not a single exact number.
+- **Token budget: measure how much more data buys before spending it.** New experiment E-tok (P-186): one long WSD run each at 5M and 10M, with decay branches taken at 500, 2,000, 5,000 and 20,000 tokens per parameter (one stable phase, several short decays, so the sweep costs little more than the longest run). Every branch is scored on the RC-12 dev battery. The curve's token budgets are then set from where multi-turn skills stop improving: the small sizes get thousands of tokens per parameter if skills are still rising (cheap on the 5070), and the 150M budget is set from the measured slope and the Titan time available.
+
 ---
 
 ## 1. The goal and the claim we are trying to earn
