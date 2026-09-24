@@ -1,0 +1,66 @@
+
+## chat probe, greedy, hardened graders (old graders' macro in brackets)
+| model | src | recall | follow-up | instruction | correction | own answer | role | topic return | macro new [old] | controls | end_q ungraded (capped) | fails on capped replies | deflect |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Falcon-90M | E001 | 0.20 | 0.57 | 0.33 | 0.33 | 0.75 | 0.33 | 0.67 | 0.46 [0.49] | 0.54 | 2 | 20 | 0.00 |
+| SmolLM2-135M | research | 0.10 | 0.29 | 0.36 | 0.00 | 0.00 | 0.00 | 0.00 | 0.11 [0.15] | 0.46 | 0 | 8 | 0.24 |
+| LFM2.5-230M | E001 | 0.20 | 1.00 | 0.86 | 0.00 | 0.75 | 0.00 | 0.33 | 0.45 [0.45] | 0.82 | 0 | 0 | 0.48 |
+| Gemma3-270M | research | 0.00 | 0.86 | 0.50 | 0.00 | 0.50 | 0.00 | 0.67 | 0.36 [0.36] | 0.71 | 0 | 2 | 0.28 |
+| LFM2-350M | research | 0.40 | 1.00 | 0.92 | 0.00 | 0.50 | 0.33 | 1.00 | 0.59 [0.65] | 0.71 | 2 | 7 | 0.10 |
+| LFM2.5-350M | research | 0.60 | 1.00 | 1.00 | 0.00 | 0.75 | 0.00 | 1.00 | 0.62 [0.62] | 0.75 | 0 | 1 | 0.28 |
+| SmolLM2-360M | research | 0.70 | 0.86 | 0.79 | 0.00 | 0.67 | 0.33 | 0.67 | 0.57 [0.57] | 0.54 | 0 | 7 | 0.31 |
+| Qwen2.5-0.5B | research | 0.10 | 0.86 | 0.57 | 0.00 | 1.00 | 0.67 | 1.00 | 0.60 [0.60] | 0.82 | 0 | 1 | 0.45 |
+| Qwen3-0.6B | research | 0.60 | 1.00 | 0.71 | 0.67 | 1.00 | 0.00 | 1.00 | 0.71 [0.71] | 0.93 | 0 | 0 | 0.14 |
+forced answer prefix on multi-turn items (greedy emits gold / gold beats foil):
+  Falcon-90M: correction 0.33 / 0.33 (n=3); recall 0.57 / 1.00 (n=7); role 0.00 / 0.00 (n=1)
+  SmolLM2-135M: correction 0.00 / 0.00 (n=3); recall 0.57 / 1.00 (n=7); role 0.00 / 0.00 (n=1)
+  LFM2.5-230M: correction 0.00 / 0.00 (n=3); recall 0.57 / 1.00 (n=7); role 1.00 / 1.00 (n=1)
+  Gemma3-270M: correction 0.00 / 0.33 (n=3); recall 0.57 / 0.57 (n=7); role 1.00 / 1.00 (n=1)
+  LFM2-350M: correction 0.33 / 0.33 (n=3); recall 0.71 / 1.00 (n=7); role 1.00 / 1.00 (n=1)
+  LFM2.5-350M: correction 0.00 / 0.00 (n=3); recall 0.43 / 1.00 (n=7); role 1.00 / 1.00 (n=1)
+  SmolLM2-360M: correction 0.33 / 0.33 (n=3); recall 0.86 / 1.00 (n=7); role 1.00 / 1.00 (n=1)
+  Qwen2.5-0.5B: correction 0.67 / 0.67 (n=3); recall 0.71 / 1.00 (n=7); role 1.00 / 1.00 (n=1)
+  Qwen3-0.6B: correction 0.00 / 0.67 (n=3); recall 0.14 / 1.00 (n=7); role 0.00 / 1.00 (n=1)
+flip counts (old grader -> new grader):
+  Falcon-90M {'pass->fail': 6, 'fail->ungraded': 2}
+  SmolLM2-135M {'pass->fail': 1}
+  LFM2.5-230M {}
+  Gemma3-270M {'pass->fail': 1}
+  LFM2-350M {'pass->fail': 8, 'fail->ungraded': 2}
+  LFM2.5-350M {'pass->fail': 2}
+  SmolLM2-360M {}
+  Qwen2.5-0.5B {}
+  Qwen3-0.6B {}
+
+## chat probe, sampled, hardened graders (old graders' macro in brackets)
+| model | src | recall | follow-up | instruction | correction | own answer | role | topic return | macro new [old] | controls | end_q ungraded (capped) | fails on capped replies | deflect |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Falcon-90M | E001 | 0.40 | 0.64 | 0.48 | 0.33 | 0.62 | 0.33 | 0.83 | 0.52 [0.56] | 0.55 | 4 | 33 | 0.03 |
+| SmolLM2-135M | research | 0.35 | 0.43 | 0.21 | 0.00 | 0.17 | 0.00 | 0.50 | 0.24 [0.22] | 0.36 | 0 | 15 | 0.19 |
+| LFM2.5-230M | E001 | 0.20 | 0.86 | 0.89 | 0.00 | 0.71 | 0.00 | 0.83 | 0.50 [0.49] | 0.75 | 1 | 4 | 0.48 |
+| Gemma3-270M | research | 0.05 | 0.64 | 0.25 | 0.00 | 0.38 | 0.00 | 0.67 | 0.28 [0.28] | 0.50 | 0 | 4 | 0.19 |
+| LFM2-350M | research | 0.50 | 1.00 | 0.88 | 0.00 | 0.38 | 0.33 | 0.67 | 0.54 [0.61] | 0.62 | 4 | 16 | 0.07 |
+| LFM2.5-350M | research | 0.60 | 1.00 | 1.00 | 0.33 | 0.50 | 0.33 | 0.83 | 0.66 [0.66] | 0.77 | 0 | 3 | 0.10 |
+| SmolLM2-360M | research | 0.65 | 0.71 | 0.79 | 0.00 | 0.33 | 0.67 | 0.67 | 0.55 [0.58] | 0.64 | 0 | 5 | 0.31 |
+| Qwen2.5-0.5B | research | 0.25 | 0.79 | 0.39 | 0.00 | 0.88 | 0.33 | 0.83 | 0.50 [0.50] | 0.59 | 0 | 8 | 0.33 |
+| Qwen3-0.6B | research | 0.45 | 0.93 | 1.00 | 0.33 | 0.75 | 0.00 | 1.00 | 0.64 [0.65] | 0.89 | 0 | 0 | 0.09 |
+forced answer prefix on multi-turn items (greedy emits gold / gold beats foil):
+  Falcon-90M: correction 0.00 / 0.17 (n=6); recall 0.79 / 1.00 (n=14); role 0.00 / 0.00 (n=2)
+  SmolLM2-135M: correction 0.00 / 0.00 (n=6); recall 0.57 / 0.86 (n=14); role 0.00 / 0.00 (n=2)
+  LFM2.5-230M: correction 0.00 / 0.00 (n=6); recall 0.50 / 1.00 (n=14); role 0.00 / 1.00 (n=2)
+  Gemma3-270M: correction 0.00 / 0.33 (n=6); recall 0.57 / 0.64 (n=14); role 1.00 / 1.00 (n=2)
+  LFM2-350M: correction 0.33 / 0.33 (n=6); recall 0.50 / 1.00 (n=14); role 1.00 / 1.00 (n=2)
+  LFM2.5-350M: correction 0.00 / 0.33 (n=6); recall 0.57 / 1.00 (n=14); role 1.00 / 1.00 (n=2)
+  SmolLM2-360M: correction 0.33 / 0.33 (n=6); recall 0.93 / 1.00 (n=14); role 1.00 / 1.00 (n=2)
+  Qwen2.5-0.5B: correction 0.50 / 0.50 (n=6); recall 0.79 / 1.00 (n=14); role 1.00 / 1.00 (n=2)
+  Qwen3-0.6B: correction 0.00 / 0.67 (n=6); recall 0.07 / 1.00 (n=14); role 0.00 / 1.00 (n=2)
+flip counts (old grader -> new grader):
+  Falcon-90M {'pass->fail': 11, 'fail->ungraded': 4}
+  SmolLM2-135M {'pass->fail': 3, 'fail->pass': 2}
+  LFM2.5-230M {'pass->fail': 2, 'fail->ungraded': 1}
+  Gemma3-270M {'fail->pass': 1}
+  LFM2-350M {'pass->fail': 11, 'fail->ungraded': 4}
+  LFM2.5-350M {'pass->fail': 3}
+  SmolLM2-360M {'pass->fail': 3}
+  Qwen2.5-0.5B {'pass->fail': 6}
+  Qwen3-0.6B {'pass->fail': 2}

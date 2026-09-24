@@ -1,0 +1,35 @@
+unmutated: 0 failures []
+killed   ties count as right (empty answer passes)
+killed   gold compared with the first foil only
+killed   gold-only record passes
+killed   empty record passes
+killed   pass rule ignores two-slot and no-update
+killed   pass rule ignores two-slot
+killed   pass rule read at d4 instead of d10
+killed   pass rule uses > 0.8 instead of >= 0.8
+killed   pass rule pools renders
+killed   'most seeds' counts a tie
+killed   lock-in = first touch, not stays
+killed   lock-in ignores two-slot
+killed   paired CI ignores prompt hashes
+killed   paired CI sign flipped
+killed   crossed item B asks for A's correction (post-hoc control broken)
+killed   generation grader ignores other candidate values
+killed   generation grader ignores negation
+killed   generation grader passes an empty reply
+killed   generation lenient grader uses the last mention
+killed   training has no no-update items
+killed   training two-slot gold = last mention
+killed   training has only single-object updates (old shortcut)
+killed   eval statement frame leaked into training
+killed   eval question/prefix leaked into training
+killed   eval filler leaked into training
+killed   training filler carries a weekday
+killed   eval object noun leaked into training
+killed   training question contains its answer
+killed   eval pet name leaked into training
+killed   examples left-truncated (old bug)
+killed   prompt tokens labelled
+killed   max_len 512 (biased long-distance mix)
+32 of 32 mutants killed
+mutation_exit=0

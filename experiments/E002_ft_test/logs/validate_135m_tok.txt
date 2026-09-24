@@ -1,0 +1,138 @@
+{
+ "oracles": {
+  "ideal": {
+   "LW10": 1.0,
+   "TS10": 1.0,
+   "NU10": 1.0,
+   "pass": true
+  },
+  "empty": {
+   "LW10": 0.0,
+   "TS10": 0.0,
+   "NU10": 0.0,
+   "pass": false
+  },
+  "wrong": {
+   "LW10": 0.0,
+   "TS10": 0.0,
+   "NU10": 0.0,
+   "pass": false
+  },
+  "first": {
+   "LW10": 0.0,
+   "TS10": 0.0,
+   "NU10": 1.0,
+   "pass": false
+  },
+  "last": {
+   "LW10": 1.0,
+   "TS10": 0.0,
+   "NU10": 0.0,
+   "pass": false
+  }
+ },
+ "leak_checks": 24133,
+ "heldout": {
+  "eval_frames": 181,
+  "train_frames": 105,
+  "shared_frames": 0,
+  "shared_5grams": [
+   "and my <e>'s <e> is",
+   "i'm <v>. my <e> <v>"
+  ]
+ },
+ "shortcuts": {
+  "first_mentioned_right": 0.356,
+  "last_mentioned_right": 0.398,
+  "latest_rule_right": 1.0,
+  "kinds": {
+   "upd": 2942,
+   "noupd_b": 594,
+   "noupd_incid": 1214,
+   "noupd": 2425,
+   "persp": 2674,
+   "twoslot": 2325,
+   "twohop": 2570,
+   "bind": 2778,
+   "revert": 628,
+   "upd_incid": 608,
+   "twoslot_b": 608,
+   "mid": 634
+  },
+  "families": {
+   "update": 11978,
+   "persp": 2674,
+   "twohop": 2570,
+   "bind": 2778
+  },
+  "by_kind": {
+   "mid": {
+    "n": 634,
+    "first": 0.0,
+    "last": 0.0
+   },
+   "noupd": {
+    "n": 2425,
+    "first": 1.0,
+    "last": 0.0
+   },
+   "noupd_b": {
+    "n": 594,
+    "first": 0.0,
+    "last": 1.0
+   },
+   "noupd_incid": {
+    "n": 1214,
+    "first": 1.0,
+    "last": 0.0
+   },
+   "revert": {
+    "n": 628,
+    "first": 1.0,
+    "last": 1.0
+   },
+   "twoslot": {
+    "n": 2325,
+    "first": 0.0,
+    "last": 0.0
+   },
+   "twoslot_b": {
+    "n": 608,
+    "first": 0.0,
+    "last": 1.0
+   },
+   "upd": {
+    "n": 2942,
+    "first": 0.0,
+    "last": 1.0
+   },
+   "upd_incid": {
+    "n": 608,
+    "first": 0.0,
+    "last": 0.0
+   }
+  }
+ },
+ "tokenization": {
+  "d8plus_first_mentioned_right_all": 0.361,
+  "d8plus_first_mentioned_right_kept": 0.361,
+  "raw_over_max_len": 0,
+  "raw_n": 3000,
+  "kept_mean_len": 305.3,
+  "kept_max_len": 689,
+  "stream_rejected": 0,
+  "stream_n": 2000,
+  "stream_split_answers": 0,
+  "eval_len": {
+   "new_plain_d10": {
+    "mean": 500.2,
+    "max": 619
+   },
+   "new_chat_d10": {
+    "mean": 582.7,
+    "max": 713
+   }
+  }
+ }
+}
+0 failures

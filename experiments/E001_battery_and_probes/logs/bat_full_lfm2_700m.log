@@ -1,0 +1,27 @@
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights:   1%|          | 1/148 [00:00<00:26,  5.56it/s]Loading weights:  72%|███████▏  | 106/148 [00:00<00:00, 449.73it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 403.24it/s]
+loaded LiquidAI/LFM2-700M {'params': 742489344, 'emb': 100663296, 'dtype': 'fp32', 'device': 'mps'} in 2.2s
+new/plain 0/1728 0s len=99
+new/plain 250/1728 41s len=101
+new/plain 500/1728 111s len=223
+new/plain 750/1728 220s len=526
+new/plain 1000/1728 300s len=171
+new/plain 1250/1728 356s len=308
+new/plain 1500/1728 446s len=431
+done new/plain: 1728 scored, 0 skipped, 561s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/LiquidAI__LFM2-700M__new__plain.jsonl
+new/chat 0/1728 0s len=119
+new/chat 250/1728 47s len=117
+new/chat 500/1728 128s len=264
+new/chat 750/1728 254s len=612
+new/chat 1000/1728 346s len=203
+new/chat 1250/1728 411s len=357
+new/chat 1500/1728 514s len=502
+done new/chat: 1728 scored, 0 skipped, 648s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/LiquidAI__LFM2-700M__new__chat.jsonl
+old/plain 0/1116 0s len=59
+old/plain 250/1116 29s len=198
+old/plain 500/1116 77s len=208
+old/plain 750/1116 148s len=426
+old/plain 1000/1116 260s len=389
+done old/plain: 1116 scored, 0 skipped, 287s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/LiquidAI__LFM2-700M__old__plain.jsonl
+khard/plain 0/80 0s len=24
+done khard/plain: 80 scored, 0 skipped, 7s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/LiquidAI__LFM2-700M__khard__plain.jsonl
+ALL DONE LiquidAI/LFM2-700M in 1505s

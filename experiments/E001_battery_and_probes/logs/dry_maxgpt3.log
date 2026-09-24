@@ -1,0 +1,14 @@
+loaded maxgpt3:final {'params': 235358208, 'emb': 16384000, 'lm_head': 16384000, 'pos_emb': 1048576, 'dtype': 'float32', 'device': 'mps', 'step': 2440000, 'checkpoint': "/Users/brohm/Documents/Projects/Max's AI Model/maxgpt-3/checkpoints/final.pt", 'context_window': 1024} in 1.4s
+new/plain 0/20 0s len=118
+done new/plain: 20 scored, 0 skipped, 2s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/maxgpt3__final__new__plain__dry.jsonl
+new/chat 0/20 0s len=100
+done new/chat: 20 scored, 0 skipped, 1s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/maxgpt3__final__new__chat__dry.jsonl
+old/plain 0/20 0s len=62
+done old/plain: 20 scored, 0 skipped, 1s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/maxgpt3__final__old__plain__dry.jsonl
+old/chat 0/20 0s len=53
+done old/chat: 20 scored, 0 skipped, 1s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/maxgpt3__final__old__chat__dry.jsonl
+khard/plain 0/20 0s len=24
+done khard/plain: 20 scored, 0 skipped, 1s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/maxgpt3__final__khard__plain__dry.jsonl
+khard/chat 0/20 0s len=20
+done khard/chat: 20 scored, 0 skipped, 1s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/maxgpt3__final__khard__chat__dry.jsonl
+ALL DONE maxgpt3:final in 8s

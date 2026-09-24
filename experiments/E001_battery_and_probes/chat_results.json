@@ -1,0 +1,2178 @@
+{
+ "research_transcripts": {
+  "HuggingFaceTB/SmolLM2-135M-Instruct": {
+   "greedy": {
+    "ability_new": {
+     "recall": 0.1,
+     "followup": 0.286,
+     "instruction": 0.357,
+     "correction": 0.0,
+     "own_answer": 0.0,
+     "role": 0.0,
+     "topic_return": 0.0,
+     "control": 0.464
+    },
+    "ability_old": {
+     "recall": 0.1,
+     "followup": 0.286,
+     "instruction": 0.357,
+     "correction": 0.0,
+     "own_answer": 0.333,
+     "role": 0.0,
+     "topic_return": 0.0,
+     "control": 0.464
+    },
+    "n_gradable_new": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 3,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "n_checks": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "macro_new": 0.106,
+    "macro_old": 0.154,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 8,
+    "capped_reply_rate": 0.456,
+    "deflection_rate_final_userfact": 0.241,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.571,
+      "gold_beats_foil": 1.0,
+      "n": 7
+     },
+     "correction": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.0,
+      "n": 3
+     },
+     "role": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.0,
+      "n": 1
+     }
+    },
+    "flips": [
+     {
+      "id": "O_add10",
+      "seed": null,
+      "check": "knows_60",
+      "old": true,
+      "new": false,
+      "reply": "To find 15 times 4, we can use the distributive property of multiplication over addition. This means we multiply the numbers together and then add the results.\n\n15 x 4 = 60\n60 + 60 = 120\n\nSo, 15 times 4 equals 120."
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 1
+    }
+   },
+   "sampled": {
+    "ability_new": {
+     "recall": 0.35,
+     "followup": 0.429,
+     "instruction": 0.214,
+     "correction": 0.0,
+     "own_answer": 0.167,
+     "role": 0.0,
+     "topic_return": 0.5,
+     "control": 0.357
+    },
+    "ability_old": {
+     "recall": 0.35,
+     "followup": 0.5,
+     "instruction": 0.214,
+     "correction": 0.0,
+     "own_answer": 0.333,
+     "role": 0.0,
+     "topic_return": 0.167,
+     "control": 0.375
+    },
+    "n_gradable_new": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 6,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "n_checks": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "macro_new": 0.237,
+    "macro_old": 0.223,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 15,
+    "capped_reply_rate": 0.43,
+    "deflection_rate_final_userfact": 0.19,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.571,
+      "gold_beats_foil": 0.857,
+      "n": 14
+     },
+     "correction": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.0,
+      "n": 6
+     },
+     "role": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.0,
+      "n": 2
+     }
+    },
+    "flips": [
+     {
+      "id": "F_whynot",
+      "seed": 0,
+      "check": "why",
+      "old": true,
+      "new": false,
+      "reply": "You're right, touching a hot stove can be a serious risk, especially if you're not used to handling hot food or if you're not familiar with the heat.\n\nHowever, there are some situations where touching a hot stove might be acceptable or even beneficial:\n\n1. **Emergency Situations**: In case of an eme"
+     },
+     {
+      "id": "K_day__ctrl",
+      "seed": 0,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "I'm sorry for the mistake, but as a dental AI, I'm designed to provide accurate information. I'm here to assist you with any dental issues you may have. However, I must remind you that the dentist appointment on Monday is for a scheduled appointment, and it's not a scheduled appointment for Tuesday."
+     },
+     {
+      "id": "O_add10",
+      "seed": 0,
+      "check": "knows_60",
+      "old": true,
+      "new": false,
+      "reply": "To find 15 times 4, we can use a simple and efficient method. We multiply 15 by 4, which gives us 60. Then, we multiply 60 by 4, which gives us 24 Milk. So, 15 times 4 is equal to 60 Milk."
+     },
+     {
+      "id": "T_dragon",
+      "seed": 0,
+      "check": "fear",
+      "old": false,
+      "new": true,
+      "reply": "Based on the description of Ember's fear of heights, I would suggest that Ember is afraid of the \"Sky's Edge.\" The Sky's Edge is a mountain that's situated at the edge of the world, and it's considered a potentially deadly threat to anyone who ventures too close to it.\n\nEmber's fear of heights is li"
+     },
+     {
+      "id": "T_dragon",
+      "seed": 0,
+      "check": "name",
+      "old": false,
+      "new": true,
+      "reply": "Based on the description of Ember's fear of heights, I would suggest that Ember is afraid of the \"Sky's Edge.\" The Sky's Edge is a mountain that's situated at the edge of the world, and it's considered a potentially deadly threat to anyone who ventures too close to it.\n\nEmber's fear of heights is li"
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 3,
+     "fail->pass": 2
+    }
+   }
+  },
+  "HuggingFaceTB/SmolLM2-360M-Instruct": {
+   "greedy": {
+    "ability_new": {
+     "recall": 0.7,
+     "followup": 0.857,
+     "instruction": 0.786,
+     "correction": 0.0,
+     "own_answer": 0.667,
+     "role": 0.333,
+     "topic_return": 0.667,
+     "control": 0.536
+    },
+    "ability_old": {
+     "recall": 0.7,
+     "followup": 0.857,
+     "instruction": 0.786,
+     "correction": 0.0,
+     "own_answer": 0.667,
+     "role": 0.333,
+     "topic_return": 0.667,
+     "control": 0.536
+    },
+    "n_gradable_new": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 3,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "n_checks": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "macro_new": 0.573,
+    "macro_old": 0.573,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 7,
+    "capped_reply_rate": 0.228,
+    "deflection_rate_final_userfact": 0.31,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.857,
+      "gold_beats_foil": 1.0,
+      "n": 7
+     },
+     "correction": {
+      "greedy_gold": 0.333,
+      "gold_beats_foil": 0.333,
+      "n": 3
+     },
+     "role": {
+      "greedy_gold": 1.0,
+      "gold_beats_foil": 1.0,
+      "n": 1
+     }
+    },
+    "flips": [],
+    "flip_counts": {}
+   },
+   "sampled": {
+    "ability_new": {
+     "recall": 0.65,
+     "followup": 0.714,
+     "instruction": 0.786,
+     "correction": 0.0,
+     "own_answer": 0.333,
+     "role": 0.667,
+     "topic_return": 0.667,
+     "control": 0.643
+    },
+    "ability_old": {
+     "recall": 0.7,
+     "followup": 0.714,
+     "instruction": 0.786,
+     "correction": 0.167,
+     "own_answer": 0.333,
+     "role": 0.667,
+     "topic_return": 0.667,
+     "control": 0.661
+    },
+    "n_gradable_new": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 6,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "n_checks": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "macro_new": 0.545,
+    "macro_old": 0.576,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 5,
+    "capped_reply_rate": 0.198,
+    "deflection_rate_final_userfact": 0.31,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.929,
+      "gold_beats_foil": 1.0,
+      "n": 14
+     },
+     "correction": {
+      "greedy_gold": 0.333,
+      "gold_beats_foil": 0.333,
+      "n": 6
+     },
+     "role": {
+      "greedy_gold": 1.0,
+      "gold_beats_foil": 1.0,
+      "n": 2
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d6_name__ctrl",
+      "seed": 0,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "Hello, Marcus. My name is SmolLM, and I'm here to assist you with your guitar learning journey. What's your name, Marcus?"
+     },
+     {
+      "id": "R_d10_pet",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "Your dog's name is probably Waffles."
+     },
+     {
+      "id": "K_color",
+      "seed": 1,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "I'm not sure, but I can suggest some options. Blue is a great color, but I'm not sure if you like it. Green is another great color, but I'm not sure if you like it. Red is a bold color, but I'm not sure if you like it. Yellow is a bright color, but I'm not sure if you like it. Purple is a unique col"
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 3
+    }
+   }
+  },
+  "LiquidAI/LFM2-350M": {
+   "greedy": {
+    "ability_new": {
+     "recall": 0.4,
+     "followup": 1.0,
+     "instruction": 0.917,
+     "correction": 0.0,
+     "own_answer": 0.5,
+     "role": 0.333,
+     "topic_return": 1.0,
+     "control": 0.714
+    },
+    "ability_old": {
+     "recall": 0.6,
+     "followup": 1.0,
+     "instruction": 0.786,
+     "correction": 0.333,
+     "own_answer": 0.5,
+     "role": 0.333,
+     "topic_return": 1.0,
+     "control": 0.893
+    },
+    "n_gradable_new": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 12,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "n_checks": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "macro_new": 0.593,
+    "macro_old": 0.65,
+    "ungraded_truncated_checks": 2,
+    "capped_content_fails": 7,
+    "capped_reply_rate": 0.564,
+    "deflection_rate_final_userfact": 0.103,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.714,
+      "gold_beats_foil": 1.0,
+      "n": 7
+     },
+     "correction": {
+      "greedy_gold": 0.333,
+      "gold_beats_foil": 0.333,
+      "n": 3
+     },
+     "role": {
+      "greedy_gold": 1.0,
+      "gold_beats_foil": 1.0,
+      "n": 1
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d2_name",
+      "seed": null,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "You told me my name was Priya."
+     },
+     {
+      "id": "R_d4_pet__ctrl",
+      "seed": null,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "That's a fun playful question! While there isn't a specific name for a cat that loves cardboard boxes, a cute and quirky name you could give Biscuit might be \"Boxy the Boxy\" or simply \"Boxy\" for short. Either way, it captures the playful and imaginative nature of your feline friend!"
+     },
+     {
+      "id": "R_d4_city",
+      "seed": null,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "I don't have specific information about your exact location, but I can tell you that Tucson, Arizona, is a beautiful city with a rich history and culture. It's known for its vibrant arts scene, beautiful parks, and a strong sense of community. If you live in Tucson, you might enjoy exploring local a"
+     },
+     {
+      "id": "R_d6_name__ctrl",
+      "seed": null,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "Hello Marcus! My name is Alex. I'm just starting out learning to play the guitar. How about you, Marcus? What's your favorite song to play on the guitar?"
+     },
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": null,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "To determine how old your grandmother is about to turn 94, we need to calculate her current age and then subtract 94 from that number.\n\n1. **Current Age Calculation:**\n   - If next week's turn is 94, then her current age is 93.\n\n2. **Age Calculation:**\n   - To find out how old she will be in 7 years"
+     },
+     {
+      "id": "I_end_question",
+      "seed": null,
+      "check": "end_q_t2",
+      "old": false,
+      "new": null,
+      "reply": " have you ever struggled with a tricky sauce or a particularly dense pasta? \n\nFinally, what's your ideal weekend pasta experience like?  Is it a relaxing, leisurely stroll with a plate of pasta, or is"
+     },
+     {
+      "id": "I_end_question",
+      "seed": null,
+      "check": "end_q_t3",
+      "old": false,
+      "new": null,
+      "reply": "e book character \u2013 perhaps someone who seems particularly cryptic or intriguing? \n\nFinally, what's your plan for the next few chapters?  Do you want to start with the initial clues, follow a suspect's"
+     },
+     {
+      "id": "K_day",
+      "seed": null,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "To determine the exact day of your dentist appointment, you can use a few different methods:\n\n1. **Calendar Check**: Look at your calendar or the appointment schedule on your phone or computer.\n2. **Online Calendar**: If you have an online calendar, search for your dentist's appointment date.\n3. **P"
+     },
+     {
+      "id": "K_color__ctrl",
+      "seed": null,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "That's a great change of heart! Given your newfound love for green, it's likely that your favorite color is now a vibrant mix of blue and green, perhaps with a touch of yellow or brown. It's interesting how colors can evolve and change based on personal preferences and experiences. What do you think"
+     },
+     {
+      "id": "T_dragon__ctrl",
+      "seed": null,
+      "check": "fear",
+      "old": true,
+      "new": false,
+      "reply": "What a great starting point for a story. Ember's fear of heights could be rooted in a deep-seated anxiety about being overwhelmed by the vast, open spaces of the forest or the treacherous cliffs that often surround her home. Perhaps she's always felt a bit small and clumsy, and the heights represent"
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 8,
+     "fail->ungraded": 2
+    }
+   },
+   "sampled": {
+    "ability_new": {
+     "recall": 0.5,
+     "followup": 1.0,
+     "instruction": 0.875,
+     "correction": 0.0,
+     "own_answer": 0.375,
+     "role": 0.333,
+     "topic_return": 0.667,
+     "control": 0.625
+    },
+    "ability_old": {
+     "recall": 0.65,
+     "followup": 1.0,
+     "instruction": 0.75,
+     "correction": 0.333,
+     "own_answer": 0.375,
+     "role": 0.333,
+     "topic_return": 0.833,
+     "control": 0.714
+    },
+    "n_gradable_new": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 24,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "n_checks": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "macro_new": 0.536,
+    "macro_old": 0.611,
+    "ungraded_truncated_checks": 4,
+    "capped_content_fails": 16,
+    "capped_reply_rate": 0.564,
+    "deflection_rate_final_userfact": 0.069,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.5,
+      "gold_beats_foil": 1.0,
+      "n": 14
+     },
+     "correction": {
+      "greedy_gold": 0.333,
+      "gold_beats_foil": 0.333,
+      "n": 6
+     },
+     "role": {
+      "greedy_gold": 1.0,
+      "gold_beats_foil": 1.0,
+      "n": 2
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d2_name",
+      "seed": 0,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "You told me my name was Priya!"
+     },
+     {
+      "id": "R_d6_number",
+      "seed": 0,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "To estimate your grandmother's age when she turns 94, let's break it down:\n\n* At birth, she's around 5 years old.\n* By the time she turns 94, she'll have lived for approximately 84 years.\n\nSo, assuming she's around 5 years older than her current age (which is roughly 9 years old), we can calculate:\n"
+     },
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": 0,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "To determine how old your grandmother is about to turn 94, we need to calculate the number of years she will have passed from now until her 94th birthday.\n\nFirst, let's break down the calculation:\n\n1. From now (next week) to her 94th birthday, there are 78 years.\n2. To find out how old she will be w"
+     },
+     {
+      "id": "I_end_question",
+      "seed": 0,
+      "check": "end_q_t1",
+      "old": false,
+      "new": null,
+      "reply": "r location? Or perhaps you have a particular type of hiking experience in mind (e.g., trail, river, coastal)? \n\nLet's make sure we choose a hike that's both enjoyable and safe! \n\nHave you already made"
+     },
+     {
+      "id": "I_end_question",
+      "seed": 0,
+      "check": "end_q_t2",
+      "old": false,
+      "new": null,
+      "reply": " herbaceous, creamy)\n* **How much time do you have for the hike?** (a full day, half-day, or a shorter walk?) \n* **Would you prefer a casual, relaxed pace or something a bit more adventurous?**\n\nLet's"
+     },
+     {
+      "id": "I_end_question",
+      "seed": 0,
+      "check": "end_q_t3",
+      "old": false,
+      "new": null,
+      "reply": " hints, cryptic messages, or overtly presented facts?\n* **The red herrings:** A good mystery needs misdirection! Think about introducing false leads or misleading information to keep readers guessing."
+     },
+     {
+      "id": "K_color",
+      "seed": 0,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "That's a great question! Since you've recently adopted a new favorite color, here are a few thoughts on what might resonate with you:\n\n1. **Blue**: As mentioned, blue is a very popular choice and can evoke feelings of calmness, serenity, and stability. It's a versatile color that can be used in vari"
+     },
+     {
+      "id": "R_d2_number",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "To provide you with the most accurate information, could you please confirm your apartment number? Once I have that, I can give you specific breakfast ideas tailored to your location:\n\n- **Apartment Number:** [Your Apartment Number]\n- **Location:** [Your Current Address]\n\nFor example, if your apartm"
+     },
+     {
+      "id": "R_d4_pet__ctrl",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "That's a fun little pun! If you're referring to Biscuit as if he were a cat, he would be called a \"Biscie\" or \"Caterpillar.\" Cats are known for their love of cardboard boxes, so this playful name fits perfectly with his behavior!"
+     },
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "To determine how old your grandmother is about to turn 94, we need to calculate her current age based on the information given. Since she turns 94 next week, we simply subtract 1 year from her current age:\n\n94 (current age) - 1 (year) = 93\n\nSo, your grandmother is approximately 93 years old next wee"
+     },
+     {
+      "id": "I_end_question",
+      "seed": 1,
+      "check": "end_q_t3",
+      "old": false,
+      "new": null,
+      "reply": "you discovered any clues or hints throughout the book? If so, where did they appear, and how did they impact the plot?\n* Are there any characters who seem suspicious or have secrets that could help or"
+     },
+     {
+      "id": "K_color",
+      "seed": 1,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "It's interesting how your perspective might shift! Since I don't have real-time data or personal preferences, here are a few thoughts based on common trends and popular choices:\n\n1. **Blue**: Blue is often considered calming and versatile, making it a favorite for many people. It can represent tranq"
+     },
+     {
+      "id": "K_color__ctrl",
+      "seed": 1,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "That's a great realization! Given your newfound preference for green, it's likely that your favorite color at this point is probably **purple** or **orange**. Both colors evoke feelings of nature, growth, and warmth, which are quite appealing to many people. However, if I had to guess, I'd say your "
+     },
+     {
+      "id": "RI_binding__ctrl",
+      "seed": 1,
+      "check": "binding",
+      "old": true,
+      "new": false,
+      "reply": "That's great! It's awesome that you're naming your sister after you too. Since you're both named Oscar, it sounds like you might be thinking of someone named Oscar or Oscar Jr. If you're still unsure, you could say something like \"Oscar\" or \"Oscar Jr.\" If you want to share more about your relationsh"
+     },
+     {
+      "id": "T_dragon",
+      "seed": 1,
+      "check": "fear",
+      "old": true,
+      "new": false,
+      "reply": "Let's tie Ember's fear to the majestic mountain itself. Since Everest is a formidable challenge, it's likely that Ember's fear stems from the idea of being overwhelmed by its sheer size and power. Here's a possible connection:\n\nEmber's fear could be that she'll never be able to touch or stand still "
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 11,
+     "fail->ungraded": 4
+    }
+   }
+  },
+  "LiquidAI/LFM2.5-350M": {
+   "greedy": {
+    "ability_new": {
+     "recall": 0.6,
+     "followup": 1.0,
+     "instruction": 1.0,
+     "correction": 0.0,
+     "own_answer": 0.75,
+     "role": 0.0,
+     "topic_return": 1.0,
+     "control": 0.75
+    },
+    "ability_old": {
+     "recall": 0.6,
+     "followup": 1.0,
+     "instruction": 1.0,
+     "correction": 0.0,
+     "own_answer": 0.75,
+     "role": 0.0,
+     "topic_return": 1.0,
+     "control": 0.821
+    },
+    "n_gradable_new": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "n_checks": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "macro_new": 0.621,
+    "macro_old": 0.621,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 1,
+    "capped_reply_rate": 0.383,
+    "deflection_rate_final_userfact": 0.276,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.429,
+      "gold_beats_foil": 1.0,
+      "n": 7
+     },
+     "correction": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.0,
+      "n": 3
+     },
+     "role": {
+      "greedy_gold": 1.0,
+      "gold_beats_foil": 1.0,
+      "n": 1
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d2_number__ctrl",
+      "seed": null,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "The apartment number for building 417 is **12345**. You can use this number to contact the building management or check for any specific amenities or services. Let me know if you need further assistance!"
+     },
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": null,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "Your grandmother is currently 94 years old.\n\nIf she turns 94 next week, that means she will be **95 years old**.\n\nWould you like help planning something special for her? For example, a birthday dinner, a holiday gift, or a special activity?"
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 2
+    }
+   },
+   "sampled": {
+    "ability_new": {
+     "recall": 0.6,
+     "followup": 1.0,
+     "instruction": 1.0,
+     "correction": 0.333,
+     "own_answer": 0.5,
+     "role": 0.333,
+     "topic_return": 0.833,
+     "control": 0.768
+    },
+    "ability_old": {
+     "recall": 0.65,
+     "followup": 1.0,
+     "instruction": 1.0,
+     "correction": 0.333,
+     "own_answer": 0.5,
+     "role": 0.333,
+     "topic_return": 0.833,
+     "control": 0.804
+    },
+    "n_gradable_new": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "n_checks": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "macro_new": 0.657,
+    "macro_old": 0.664,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 3,
+    "capped_reply_rate": 0.369,
+    "deflection_rate_final_userfact": 0.103,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.571,
+      "gold_beats_foil": 1.0,
+      "n": 14
+     },
+     "correction": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.333,
+      "n": 6
+     },
+     "role": {
+      "greedy_gold": 1.0,
+      "gold_beats_foil": 1.0,
+      "n": 2
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d6_number",
+      "seed": 0,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "Lucrezia, your grandmother is currently **94 years old**. She\u2019s been living in this house for over 70 years, and her story is one of quiet resilience and love. Would you like to know more about her life or perhaps plan a special memory for her? \ud83d\ude0a"
+     },
+     {
+      "id": "R_d2_number__ctrl",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "The apartment number for building 417 is **12345**. You can use this number to locate your specific unit in the building\u2019s system. If you need further assistance, feel free to ask!"
+     },
+     {
+      "id": "K_day__ctrl",
+      "seed": 1,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "The dentist appointment is on **Tuesday**.  \n\nHere\u2019s why:  \n- The appointment is scheduled for **Monday**, but the date is listed as **Tuesday**.  \n- This could mean the appointment is on a different day (e.g., Wednesday or Thursday) or it might be a recurring appointment.  \n\nLet me know if you need"
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 3
+    }
+   }
+  },
+  "Qwen/Qwen2.5-0.5B-Instruct": {
+   "greedy": {
+    "ability_new": {
+     "recall": 0.1,
+     "followup": 0.857,
+     "instruction": 0.571,
+     "correction": 0.0,
+     "own_answer": 1.0,
+     "role": 0.667,
+     "topic_return": 1.0,
+     "control": 0.821
+    },
+    "ability_old": {
+     "recall": 0.1,
+     "followup": 0.857,
+     "instruction": 0.571,
+     "correction": 0.0,
+     "own_answer": 1.0,
+     "role": 0.667,
+     "topic_return": 1.0,
+     "control": 0.821
+    },
+    "n_gradable_new": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 3,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "n_checks": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "macro_new": 0.599,
+    "macro_old": 0.599,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 1,
+    "capped_reply_rate": 0.342,
+    "deflection_rate_final_userfact": 0.448,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.714,
+      "gold_beats_foil": 1.0,
+      "n": 7
+     },
+     "correction": {
+      "greedy_gold": 0.667,
+      "gold_beats_foil": 0.667,
+      "n": 3
+     },
+     "role": {
+      "greedy_gold": 1.0,
+      "gold_beats_foil": 1.0,
+      "n": 1
+     }
+    },
+    "flips": [],
+    "flip_counts": {}
+   },
+   "sampled": {
+    "ability_new": {
+     "recall": 0.25,
+     "followup": 0.786,
+     "instruction": 0.393,
+     "correction": 0.0,
+     "own_answer": 0.875,
+     "role": 0.333,
+     "topic_return": 0.833,
+     "control": 0.589
+    },
+    "ability_old": {
+     "recall": 0.3,
+     "followup": 0.786,
+     "instruction": 0.393,
+     "correction": 0.0,
+     "own_answer": 0.875,
+     "role": 0.333,
+     "topic_return": 0.833,
+     "control": 0.679
+    },
+    "n_gradable_new": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "n_checks": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "macro_new": 0.496,
+    "macro_old": 0.503,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 8,
+    "capped_reply_rate": 0.396,
+    "deflection_rate_final_userfact": 0.328,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.786,
+      "gold_beats_foil": 1.0,
+      "n": 14
+     },
+     "correction": {
+      "greedy_gold": 0.5,
+      "gold_beats_foil": 0.5,
+      "n": 6
+     },
+     "role": {
+      "greedy_gold": 1.0,
+      "gold_beats_foil": 1.0,
+      "n": 2
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d6_name__ctrl",
+      "seed": 0,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "Hello Marcus! It's great to meet you on this journey of learning to play the guitar. The name \"Marcus\" is an interesting one that captures your interest and sets up expectations for how you might approach your guitar playing. Remember, practice is key when it comes to improving your skills. Good luc"
+     },
+     {
+      "id": "K_time__ctrl",
+      "seed": 0,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "If your meeting with Sam has been rescheduled from 3 PM to 4 PM and you have confirmed the time in advance, then you should arrive on time as per the new scheduled time. If you haven't yet confirmed this or if there's any other information that needs to be updated regarding your arrival time, please"
+     },
+     {
+      "id": "R_d2_name",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "I apologize if there was any confusion earlier. Your name was indeed \"Priya.\" Is there anything else you need assistance with related to organizing your space, managing tasks, or improving your overall productivity?"
+     },
+     {
+      "id": "R_d4_pet__ctrl",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "Your cat is likely named \"Biscuit\" or simply \"Biscy.\" Both names are commonly used for this affectionate nickname given to your furry companion. If you're unsure of which one to use, you could consider naming him after his owner or adding a short name like \"Papa\" if he has a pet parent."
+     },
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "If your grandmother is turning 94 next week, that means she has been alive for approximately 30 years. To find out how old you can be compared to her age, we need to consider the following:\n\n1. If you were born in the same year as her (next year), then you would be 94 - 1 = 93 years old.\n2. If you w"
+     },
+     {
+      "id": "K_time__ctrl",
+      "seed": 1,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "If your meeting with Sam has been rescheduled from 3 PM to 4 PM, you should arrive at your designated location one hour earlier than usual. Typically, this means arriving around 2:45 PM. Make sure to check the specific schedule or availability of both parties so that you can confirm if there's any a"
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 6
+    }
+   }
+  },
+  "Qwen/Qwen3-0.6B": {
+   "greedy": {
+    "ability_new": {
+     "recall": 0.6,
+     "followup": 1.0,
+     "instruction": 0.714,
+     "correction": 0.667,
+     "own_answer": 1.0,
+     "role": 0.0,
+     "topic_return": 1.0,
+     "control": 0.929
+    },
+    "ability_old": {
+     "recall": 0.6,
+     "followup": 1.0,
+     "instruction": 0.714,
+     "correction": 0.667,
+     "own_answer": 1.0,
+     "role": 0.0,
+     "topic_return": 1.0,
+     "control": 0.929
+    },
+    "n_gradable_new": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "n_checks": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "macro_new": 0.712,
+    "macro_old": 0.712,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 0,
+    "capped_reply_rate": 0.235,
+    "deflection_rate_final_userfact": 0.138,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.143,
+      "gold_beats_foil": 1.0,
+      "n": 7
+     },
+     "correction": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.667,
+      "n": 3
+     },
+     "role": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 1.0,
+      "n": 1
+     }
+    },
+    "flips": [],
+    "flip_counts": {}
+   },
+   "sampled": {
+    "ability_new": {
+     "recall": 0.45,
+     "followup": 0.929,
+     "instruction": 1.0,
+     "correction": 0.333,
+     "own_answer": 0.75,
+     "role": 0.0,
+     "topic_return": 1.0,
+     "control": 0.893
+    },
+    "ability_old": {
+     "recall": 0.5,
+     "followup": 0.929,
+     "instruction": 1.0,
+     "correction": 0.333,
+     "own_answer": 0.75,
+     "role": 0.0,
+     "topic_return": 1.0,
+     "control": 0.911
+    },
+    "n_gradable_new": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "n_checks": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "macro_new": 0.637,
+    "macro_old": 0.645,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 0,
+    "capped_reply_rate": 0.235,
+    "deflection_rate_final_userfact": 0.086,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.071,
+      "gold_beats_foil": 1.0,
+      "n": 14
+     },
+     "correction": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.667,
+      "n": 6
+     },
+     "role": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 1.0,
+      "n": 2
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d6_number",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "Your grandmother is turning 94 next week. That's a significant milestone\u2014her age is currently **94**, and she will turn **95** on the upcoming week. If you're planning something for her, you might want to consider her favorite memories, hobbies, or personal interests to make the celebration meaningf"
+     },
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "Your grandmother is turning **94**, and the next week she will be **95**. So, the age you're planning to celebrate her is **95**."
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 2
+    }
+   }
+  },
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct": {
+   "greedy": {
+    "ability_new": {
+     "recall": 0.2,
+     "followup": 0.571,
+     "instruction": 0.333,
+     "correction": 0.333,
+     "own_answer": 0.75,
+     "role": 0.333,
+     "topic_return": 0.667,
+     "control": 0.536
+    },
+    "ability_old": {
+     "recall": 0.5,
+     "followup": 0.571,
+     "instruction": 0.286,
+     "correction": 0.333,
+     "own_answer": 0.75,
+     "role": 0.333,
+     "topic_return": 0.667,
+     "control": 0.643
+    },
+    "n_gradable_new": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 12,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "n_checks": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "macro_new": 0.455,
+    "macro_old": 0.491,
+    "ungraded_truncated_checks": 2,
+    "capped_content_fails": 20,
+    "capped_reply_rate": 0.651,
+    "deflection_rate_final_userfact": 0.0,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.571,
+      "gold_beats_foil": 1.0,
+      "n": 7
+     },
+     "correction": {
+      "greedy_gold": 0.333,
+      "gold_beats_foil": 0.333,
+      "n": 3
+     },
+     "role": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.0,
+      "n": 1
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d6_name__ctrl",
+      "seed": null,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "Hello Marcus! You're a guitarist. If you're learning to play the guitar, you might find your name \"Marcus\" or \"Guitarist.\" Both names are common and can be familiar to many guitarists. If you're looking for more specific information or have any questions about guitar playing, feel free to ask!"
+     },
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": null,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "To determine your grandmother's age next week, you need to add 94 (the current year) to her current age.\n\nHere's the calculation:\n\n\\[ \\text{Grandmother's age next week} = \\text{Current year} + \\text{Current year} \\]\n\n\\[ \\text{Grandmother's age next week} = 94 + 94 \\]\n\n\\[ \\text{Grandmother's age next"
+     },
+     {
+      "id": "R_d5_multi",
+      "seed": null,
+      "check": "name",
+      "old": true,
+      "new": false,
+      "reply": "Sure! Here's a quick summary of the three things you learned:\n\n1. **Elena**: You're a parrot named Kiwi living in Oslo.\n2. **Rayleigh Scattering**: The sky appears blue due to sunlight scattering around objects.\n3. **Noun**: A word that describes something of particular nature or fact.\n\nThese concep"
+     },
+     {
+      "id": "R_d5_multi",
+      "seed": null,
+      "check": "city",
+      "old": true,
+      "new": false,
+      "reply": "Sure! Here's a quick summary of the three things you learned:\n\n1. **Elena**: You're a parrot named Kiwi living in Oslo.\n2. **Rayleigh Scattering**: The sky appears blue due to sunlight scattering around objects.\n3. **Noun**: A word that describes something of particular nature or fact.\n\nThese concep"
+     },
+     {
+      "id": "R_d5_multi",
+      "seed": null,
+      "check": "pet",
+      "old": true,
+      "new": false,
+      "reply": "Sure! Here's a quick summary of the three things you learned:\n\n1. **Elena**: You're a parrot named Kiwi living in Oslo.\n2. **Rayleigh Scattering**: The sky appears blue due to sunlight scattering around objects.\n3. **Noun**: A word that describes something of particular nature or fact.\n\nThese concep"
+     },
+     {
+      "id": "I_end_question",
+      "seed": null,
+      "check": "end_q_t1",
+      "old": false,
+      "new": null,
+      "reply": "ng compared to other outdoor activities?**\n6. **Can I incorporate other outdoor activities into my hiking routine?**\n7. **How can I stay hydrated while hiking?**\n8. **What are some common challenges h"
+     },
+     {
+      "id": "I_end_question",
+      "seed": null,
+      "check": "end_q_t2",
+      "old": false,
+      "new": null,
+      "reply": "rs or sauces that can enhance pasta dishes?**\n6. **Can I make pasta with a side of cheese or meat?**\n7. **How can I incorporate pasta into a vegetarian meal without compromising taste?**\n8. **What are"
+     },
+     {
+      "id": "K_time__ctrl",
+      "seed": null,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "If the meeting with Sam is scheduled to start at 3 pm and you want to show up at 4 pm, you should follow these steps:\n\n1. **Determine the Start Time:**\n   - Start time: 3 pm\n   - End time: 4 pm\n\n2. **Calculate the Reversal Time:**\n   - The time difference between 3 pm and 4 pm is 1 hour.\n   - Theref"
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 6,
+     "fail->ungraded": 2
+    }
+   },
+   "sampled": {
+    "ability_new": {
+     "recall": 0.2,
+     "followup": 0.714,
+     "instruction": 0.455,
+     "correction": 0.333,
+     "own_answer": 0.75,
+     "role": 0.333,
+     "topic_return": 0.667,
+     "control": 0.536
+    },
+    "ability_old": {
+     "recall": 0.5,
+     "followup": 0.714,
+     "instruction": 0.357,
+     "correction": 0.667,
+     "own_answer": 0.75,
+     "role": 0.333,
+     "topic_return": 0.667,
+     "control": 0.607
+    },
+    "n_gradable_new": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 11,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "n_checks": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "macro_new": 0.493,
+    "macro_old": 0.57,
+    "ungraded_truncated_checks": 3,
+    "capped_content_fails": 18,
+    "capped_reply_rate": 0.685,
+    "deflection_rate_final_userfact": 0.0,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.714,
+      "gold_beats_foil": 1.0,
+      "n": 7
+     },
+     "correction": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.333,
+      "n": 3
+     },
+     "role": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.0,
+      "n": 1
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d4_pet__ctrl",
+      "seed": 0,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "A cat named Biscuit who loves sitting in cardboard boxes could be called a \"Cardboard Cat.\" This name suggests a playful and imaginative character, often associated with the act of sitting in boxes.\n\nCardboard cats are known for their distinctive appearance and behavior. They are often large and hav"
+     },
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": 0,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "To determine your grandmother's age next week, you can use the following calculation:\n\n\\[\n\\text{Your Grandmother's Age} = 94 + 1 = 95\n\\]\n\nSo, your grandmother is currently 95 years old.\n\nFor your reference, here's how you can verify this:\n\n1. Add 1 to 94: \\(94 + 1 = 95\\).\n2. This age is accurate to "
+     },
+     {
+      "id": "R_d5_multi",
+      "seed": 0,
+      "check": "name",
+      "old": true,
+      "new": false,
+      "reply": "Certainly! Here\u2019s a quick summary:\n\n1. **Elena**: I am a parrot named Kiwi.\n2. **Elena's Parrot**: I live in Oslo, Norway.\n3. **Quick Intro**: I live in an indoor environment with a rainy day.\n\nThese details highlight different aspects of who I am and how I live my life."
+     },
+     {
+      "id": "R_d5_multi",
+      "seed": 0,
+      "check": "city",
+      "old": true,
+      "new": false,
+      "reply": "Certainly! Here\u2019s a quick summary:\n\n1. **Elena**: I am a parrot named Kiwi.\n2. **Elena's Parrot**: I live in Oslo, Norway.\n3. **Quick Intro**: I live in an indoor environment with a rainy day.\n\nThese details highlight different aspects of who I am and how I live my life."
+     },
+     {
+      "id": "R_d5_multi",
+      "seed": 0,
+      "check": "pet",
+      "old": true,
+      "new": false,
+      "reply": "Certainly! Here\u2019s a quick summary:\n\n1. **Elena**: I am a parrot named Kiwi.\n2. **Elena's Parrot**: I live in Oslo, Norway.\n3. **Quick Intro**: I live in an indoor environment with a rainy day.\n\nThese details highlight different aspects of who I am and how I live my life."
+     },
+     {
+      "id": "I_end_question",
+      "seed": 0,
+      "check": "end_q_t1",
+      "old": false,
+      "new": null,
+      "reply": "t's just a few miles, taking a leisurely break can be refreshing. Whether it's a walk along a scenic trail, a picnic in a nearby park, or a quiet evening at home, these breaks offer a break from the h"
+     },
+     {
+      "id": "I_end_question",
+      "seed": 0,
+      "check": "end_q_t2",
+      "old": false,
+      "new": null,
+      "reply": "taste. Its creamy texture is often a hit with your taste buds.\n\n3. **Cooking Appeal**: Pasta is a staple in many cuisines around the world. It pairs well with a variety of dishes, from pasta dishes to"
+     },
+     {
+      "id": "I_end_question",
+      "seed": 0,
+      "check": "end_q_t3",
+      "old": false,
+      "new": null,
+      "reply": "eep track of these details to understand the plot more deeply.\n\n3. **Look for Key Scenes**: Hidden clues often lead to important events. Look for these at the end of each chapter to uncover more about"
+     },
+     {
+      "id": "K_color",
+      "seed": 0,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "As of my last update in April 2023, here are a few reasons why certain colors might be popular or why you might find them intriguing:\n\n1. **Emotional Vibrancy**: Colors like blue and green can evoke feelings of calmness, creativity, and positivity.\n\n2. **Color Psychology**: Many people find blue and"
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 6,
+     "fail->ungraded": 3
+    }
+   }
+  },
+  "unsloth/gemma-3-270m-it": {
+   "greedy": {
+    "ability_new": {
+     "recall": 0.0,
+     "followup": 0.857,
+     "instruction": 0.5,
+     "correction": 0.0,
+     "own_answer": 0.5,
+     "role": 0.0,
+     "topic_return": 0.667,
+     "control": 0.714
+    },
+    "ability_old": {
+     "recall": 0.0,
+     "followup": 0.857,
+     "instruction": 0.5,
+     "correction": 0.0,
+     "own_answer": 0.5,
+     "role": 0.0,
+     "topic_return": 0.667,
+     "control": 0.75
+    },
+    "n_gradable_new": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "n_checks": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "macro_new": 0.361,
+    "macro_old": 0.361,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 2,
+    "capped_reply_rate": 0.315,
+    "deflection_rate_final_userfact": 0.276,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.571,
+      "gold_beats_foil": 0.571,
+      "n": 7
+     },
+     "correction": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.333,
+      "n": 3
+     },
+     "role": {
+      "greedy_gold": 1.0,
+      "gold_beats_foil": 1.0,
+      "n": 1
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d4_city__ctrl",
+      "seed": null,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "Okay, great! I'm happy to help you find the best city for your bakery. To give you the best recommendation, I need a little more information about your needs and preferences. \n\nTell me more about:\n\n*   **Your Bakery's Location:** Where is your bakery located? (e.g., Downtown Tucson, near the Univers"
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 1
+    }
+   },
+   "sampled": {
+    "ability_new": {
+     "recall": 0.05,
+     "followup": 0.643,
+     "instruction": 0.25,
+     "correction": 0.0,
+     "own_answer": 0.375,
+     "role": 0.0,
+     "topic_return": 0.667,
+     "control": 0.5
+    },
+    "ability_old": {
+     "recall": 0.05,
+     "followup": 0.643,
+     "instruction": 0.25,
+     "correction": 0.0,
+     "own_answer": 0.375,
+     "role": 0.0,
+     "topic_return": 0.667,
+     "control": 0.482
+    },
+    "n_gradable_new": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "n_checks": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "macro_new": 0.284,
+    "macro_old": 0.284,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 4,
+    "capped_reply_rate": 0.285,
+    "deflection_rate_final_userfact": 0.19,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.571,
+      "gold_beats_foil": 0.643,
+      "n": 14
+     },
+     "correction": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.333,
+      "n": 6
+     },
+     "role": {
+      "greedy_gold": 1.0,
+      "gold_beats_foil": 1.0,
+      "n": 2
+     }
+    },
+    "flips": [
+     {
+      "id": "K_day__ctrl",
+      "seed": 0,
+      "check": "corrected",
+      "old": false,
+      "new": true,
+      "reply": "Okay, I understand. I apologize for the mistake. I'll be sure to remember to book the appointment on Tuesday."
+     }
+    ],
+    "flip_counts": {
+     "fail->pass": 1
+    }
+   }
+  }
+ },
+ "e001_transcripts": {
+  "LiquidAI/LFM2.5-230M": {
+   "greedy": {
+    "ability_new": {
+     "recall": 0.2,
+     "followup": 1.0,
+     "instruction": 0.857,
+     "correction": 0.0,
+     "own_answer": 0.75,
+     "role": 0.0,
+     "topic_return": 0.333,
+     "control": 0.821
+    },
+    "ability_old": {
+     "recall": 0.2,
+     "followup": 1.0,
+     "instruction": 0.857,
+     "correction": 0.0,
+     "own_answer": 0.75,
+     "role": 0.0,
+     "topic_return": 0.333,
+     "control": 0.821
+    },
+    "n_gradable_new": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "n_checks": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "macro_new": 0.449,
+    "macro_old": 0.449,
+    "ungraded_truncated_checks": 0,
+    "capped_content_fails": 0,
+    "capped_reply_rate": 0.369,
+    "deflection_rate_final_userfact": 0.483,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.571,
+      "gold_beats_foil": 1.0,
+      "n": 7
+     },
+     "correction": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.0,
+      "n": 3
+     },
+     "role": {
+      "greedy_gold": 1.0,
+      "gold_beats_foil": 1.0,
+      "n": 1
+     }
+    },
+    "flips": [],
+    "flip_counts": {}
+   },
+   "sampled": {
+    "ability_new": {
+     "recall": 0.2,
+     "followup": 0.857,
+     "instruction": 0.889,
+     "correction": 0.0,
+     "own_answer": 0.714,
+     "role": 0.0,
+     "topic_return": 0.833,
+     "control": 0.75
+    },
+    "ability_old": {
+     "recall": 0.2,
+     "followup": 0.857,
+     "instruction": 0.857,
+     "correction": 0.0,
+     "own_answer": 0.714,
+     "role": 0.0,
+     "topic_return": 0.833,
+     "control": 0.786
+    },
+    "n_gradable_new": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 27,
+     "correction": 6,
+     "own_answer": 7,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "n_checks": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "macro_new": 0.499,
+    "macro_old": 0.494,
+    "ungraded_truncated_checks": 1,
+    "capped_content_fails": 4,
+    "capped_reply_rate": 0.413,
+    "deflection_rate_final_userfact": 0.483,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.5,
+      "gold_beats_foil": 1.0,
+      "n": 14
+     },
+     "correction": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.0,
+      "n": 6
+     },
+     "role": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 1.0,
+      "n": 2
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": 0,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "To determine how old your grandmother is, we need to know the current age of your grandmother. Since you don't have that information, I'll assume a typical age for a woman's birthday (around 70-80 years old) as a general guideline.\n\nIf your grandmother turns 94, it would be approximately **74 years "
+     },
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "To determine how old your grandmother is, we need to know the current age of your grandmother. Since you mentioned she turns 94 next week, we can calculate her age by subtracting 94 from today's date (assuming today is October 2023).\n\nToday is October 2023, so:\n94 - 2023 = -918 years\n\nThis result in"
+     },
+     {
+      "id": "I_end_question",
+      "seed": 1,
+      "check": "end_q_t3",
+      "old": false,
+      "new": null,
+      "reply": " unexpected revelations.\n4. **Keep clues subtle**: Avoid obvious hints; instead, let readers piece together the mystery through their own experiences.\n5. **Resolve gradually**: Tie up loose ends while"
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 2,
+     "fail->ungraded": 1
+    }
+   }
+  },
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct": {
+   "greedy": {
+    "ability_new": {
+     "recall": 0.2,
+     "followup": 0.571,
+     "instruction": 0.333,
+     "correction": 0.333,
+     "own_answer": 0.75,
+     "role": 0.333,
+     "topic_return": 0.667,
+     "control": 0.536
+    },
+    "ability_old": {
+     "recall": 0.5,
+     "followup": 0.571,
+     "instruction": 0.286,
+     "correction": 0.333,
+     "own_answer": 0.75,
+     "role": 0.333,
+     "topic_return": 0.667,
+     "control": 0.643
+    },
+    "n_gradable_new": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 12,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "n_checks": {
+     "recall": 10,
+     "followup": 7,
+     "instruction": 14,
+     "correction": 3,
+     "own_answer": 4,
+     "role": 3,
+     "topic_return": 3,
+     "control": 28
+    },
+    "macro_new": 0.455,
+    "macro_old": 0.491,
+    "ungraded_truncated_checks": 2,
+    "capped_content_fails": 20,
+    "capped_reply_rate": 0.651,
+    "deflection_rate_final_userfact": 0.0,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.571,
+      "gold_beats_foil": 1.0,
+      "n": 7
+     },
+     "correction": {
+      "greedy_gold": 0.333,
+      "gold_beats_foil": 0.333,
+      "n": 3
+     },
+     "role": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.0,
+      "n": 1
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d6_name__ctrl",
+      "seed": null,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "Hello Marcus! You're a guitarist. If you're learning to play the guitar, you might find your name \"Marcus\" or \"Guitarist.\" Both names are common and can be familiar to many guitarists. If you're looking for more specific information or have any questions about guitar playing, feel free to ask!"
+     },
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": null,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "To determine your grandmother's age next week, you need to add 94 (the current year) to her current age.\n\nHere's the calculation:\n\n\\[ \\text{Grandmother's age next week} = \\text{Current year} + \\text{Current year} \\]\n\n\\[ \\text{Grandmother's age next week} = 94 + 94 \\]\n\n\\[ \\text{Grandmother's age next"
+     },
+     {
+      "id": "R_d5_multi",
+      "seed": null,
+      "check": "name",
+      "old": true,
+      "new": false,
+      "reply": "Sure! Here's a quick summary of the three things you learned:\n\n1. **Elena**: You're a parrot named Kiwi living in Oslo.\n2. **Rayleigh Scattering**: The sky appears blue due to sunlight scattering around objects.\n3. **Noun**: A word that describes something of particular nature or fact.\n\nThese concep"
+     },
+     {
+      "id": "R_d5_multi",
+      "seed": null,
+      "check": "city",
+      "old": true,
+      "new": false,
+      "reply": "Sure! Here's a quick summary of the three things you learned:\n\n1. **Elena**: You're a parrot named Kiwi living in Oslo.\n2. **Rayleigh Scattering**: The sky appears blue due to sunlight scattering around objects.\n3. **Noun**: A word that describes something of particular nature or fact.\n\nThese concep"
+     },
+     {
+      "id": "R_d5_multi",
+      "seed": null,
+      "check": "pet",
+      "old": true,
+      "new": false,
+      "reply": "Sure! Here's a quick summary of the three things you learned:\n\n1. **Elena**: You're a parrot named Kiwi living in Oslo.\n2. **Rayleigh Scattering**: The sky appears blue due to sunlight scattering around objects.\n3. **Noun**: A word that describes something of particular nature or fact.\n\nThese concep"
+     },
+     {
+      "id": "I_end_question",
+      "seed": null,
+      "check": "end_q_t1",
+      "old": false,
+      "new": null,
+      "reply": "ng compared to other outdoor activities?**\n6. **Can I incorporate other outdoor activities into my hiking routine?**\n7. **How can I stay hydrated while hiking?**\n8. **What are some common challenges h"
+     },
+     {
+      "id": "I_end_question",
+      "seed": null,
+      "check": "end_q_t2",
+      "old": false,
+      "new": null,
+      "reply": "rs or sauces that can enhance pasta dishes?**\n6. **Can I make pasta with a side of cheese or meat?**\n7. **How can I incorporate pasta into a vegetarian meal without compromising taste?**\n8. **What are"
+     },
+     {
+      "id": "K_time__ctrl",
+      "seed": null,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "If the meeting with Sam is scheduled to start at 3 pm and you want to show up at 4 pm, you should follow these steps:\n\n1. **Determine the Start Time:**\n   - Start time: 3 pm\n   - End time: 4 pm\n\n2. **Calculate the Reversal Time:**\n   - The time difference between 3 pm and 4 pm is 1 hour.\n   - Theref"
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 6,
+     "fail->ungraded": 2
+    }
+   },
+   "sampled": {
+    "ability_new": {
+     "recall": 0.4,
+     "followup": 0.643,
+     "instruction": 0.48,
+     "correction": 0.333,
+     "own_answer": 0.625,
+     "role": 0.333,
+     "topic_return": 0.833,
+     "control": 0.545
+    },
+    "ability_old": {
+     "recall": 0.55,
+     "followup": 0.643,
+     "instruction": 0.429,
+     "correction": 0.5,
+     "own_answer": 0.625,
+     "role": 0.333,
+     "topic_return": 0.833,
+     "control": 0.661
+    },
+    "n_gradable_new": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 25,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 55
+    },
+    "n_checks": {
+     "recall": 20,
+     "followup": 14,
+     "instruction": 28,
+     "correction": 6,
+     "own_answer": 8,
+     "role": 6,
+     "topic_return": 6,
+     "control": 56
+    },
+    "macro_new": 0.521,
+    "macro_old": 0.559,
+    "ungraded_truncated_checks": 4,
+    "capped_content_fails": 33,
+    "capped_reply_rate": 0.674,
+    "deflection_rate_final_userfact": 0.034,
+    "forced_prefix": {
+     "recall": {
+      "greedy_gold": 0.786,
+      "gold_beats_foil": 1.0,
+      "n": 14
+     },
+     "correction": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.167,
+      "n": 6
+     },
+     "role": {
+      "greedy_gold": 0.0,
+      "gold_beats_foil": 0.0,
+      "n": 2
+     }
+    },
+    "flips": [
+     {
+      "id": "R_d4_pet__ctrl",
+      "seed": 0,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "A cat named Biscuit who loves sitting in cardboard boxes could be called a \"Cardboard Cat.\" This name suggests a playful and imaginative character, often associated with the act of sitting in boxes.\n\nCardboard cats are known for their distinctive appearance and behavior. They are often large and hav"
+     },
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": 0,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "To determine your grandmother's age next week, you can use the following calculation:\n\n\\[\n\\text{Your Grandmother's Age} = 94 + 1 = 95\n\\]\n\nSo, your grandmother is currently 95 years old.\n\nFor your reference, here's how you can verify this:\n\n1. Add 1 to 94: \\(94 + 1 = 95\\).\n2. This age is accurate to "
+     },
+     {
+      "id": "R_d5_multi",
+      "seed": 0,
+      "check": "name",
+      "old": true,
+      "new": false,
+      "reply": "Certainly! Here\u2019s a quick summary:\n\n1. **Elena**: I am a parrot named Kiwi.\n2. **Elena's Parrot**: I live in Oslo, Norway.\n3. **Quick Intro**: I live in an indoor environment with a rainy day.\n\nThese details highlight different aspects of who I am and how I live my life."
+     },
+     {
+      "id": "R_d5_multi",
+      "seed": 0,
+      "check": "city",
+      "old": true,
+      "new": false,
+      "reply": "Certainly! Here\u2019s a quick summary:\n\n1. **Elena**: I am a parrot named Kiwi.\n2. **Elena's Parrot**: I live in Oslo, Norway.\n3. **Quick Intro**: I live in an indoor environment with a rainy day.\n\nThese details highlight different aspects of who I am and how I live my life."
+     },
+     {
+      "id": "R_d5_multi",
+      "seed": 0,
+      "check": "pet",
+      "old": true,
+      "new": false,
+      "reply": "Certainly! Here\u2019s a quick summary:\n\n1. **Elena**: I am a parrot named Kiwi.\n2. **Elena's Parrot**: I live in Oslo, Norway.\n3. **Quick Intro**: I live in an indoor environment with a rainy day.\n\nThese details highlight different aspects of who I am and how I live my life."
+     },
+     {
+      "id": "I_end_question",
+      "seed": 0,
+      "check": "end_q_t1",
+      "old": false,
+      "new": null,
+      "reply": "t's just a few miles, taking a leisurely break can be refreshing. Whether it's a walk along a scenic trail, a picnic in a nearby park, or a quiet evening at home, these breaks offer a break from the h"
+     },
+     {
+      "id": "I_end_question",
+      "seed": 0,
+      "check": "end_q_t2",
+      "old": false,
+      "new": null,
+      "reply": "taste. Its creamy texture is often a hit with your taste buds.\n\n3. **Cooking Appeal**: Pasta is a staple in many cuisines around the world. It pairs well with a variety of dishes, from pasta dishes to"
+     },
+     {
+      "id": "I_end_question",
+      "seed": 0,
+      "check": "end_q_t3",
+      "old": false,
+      "new": null,
+      "reply": "eep track of these details to understand the plot more deeply.\n\n3. **Look for Key Scenes**: Hidden clues often lead to important events. Look for these at the end of each chapter to uncover more about"
+     },
+     {
+      "id": "K_color",
+      "seed": 0,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "As of my last update in April 2023, here are a few reasons why certain colors might be popular or why you might find them intriguing:\n\n1. **Emotional Vibrancy**: Colors like blue and green can evoke feelings of calmness, creativity, and positivity.\n\n2. **Color Psychology**: Many people find blue and"
+     },
+     {
+      "id": "R_d4_pet__ctrl",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "A cat named Biscuit who enjoys sitting in cardboard boxes could be called \"Cardboard Biscuit.\" This name reflects both the theme of cardboard boxes (which Biscuit loves) and the name of the pet (Biscuit). Cardboard boxes are often associated with a sleek and modern look, making them a suitable choic"
+     },
+     {
+      "id": "R_d6_number__ctrl",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "To determine how old your grandmother is about to be (94) next week, you can follow these steps:\n\n1. **Understand the Date:**\n   - The date 94 weeks is approximately 6 weeks and 2 days.\n\n2. **Convert Weeks to Days:**\n   - 1 week = 7 days\n   - Therefore, 6 weeks = 6 \u00d7 7 = 42 days\n\n3. **Add Days to th"
+     },
+     {
+      "id": "R_d10_pet__ctrl",
+      "seed": 1,
+      "check": "recall",
+      "old": true,
+      "new": false,
+      "reply": "As of my last update in October 2023, Waffles's name is \"Waffles.\" This name is well-known among dog enthusiasts and can be a good fit for your pet's personality and the breed you're adopting. However, it's always good to check the most recent breeder's database for the most current and accurate inf"
+     },
+     {
+      "id": "I_end_question__ctrl",
+      "seed": 1,
+      "check": "end_q_t3",
+      "old": false,
+      "new": null,
+      "reply": "d a cryptic incantation\u2014has left the villagers haunted. The plot thickens as the villagers uncover a sinister plot by a group of rogue adventurers, each with their own agenda.\n\n**Key Factions:**\n1. **"
+     },
+     {
+      "id": "K_time__ctrl",
+      "seed": 1,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "If the meeting is moved from 3 pm to 4 pm, you should show up at 4 pm. This is because the 4 pm hour is the latest time a meeting typically ends in the morning, and the 3 pm hour is the earlier of the two. \n\nHere\u2019s a quick check:\n\n- If you are at 3 pm, show up at 4 pm.\n- If you are at 4 pm, show up "
+     },
+     {
+      "id": "K_color__ctrl",
+      "seed": 1,
+      "check": "corrected",
+      "old": true,
+      "new": false,
+      "reply": "Given the changes you've made, let's analyze your preferences and preferences step by step:\n\n1. **Current Favorite Color**: Blue\n   - **Explanation**: Blue is a natural, vibrant, and commonly associated color. It's often seen as calming and positive in nature.\n\n2. **Favorite Color After Changes**: G"
+     }
+    ],
+    "flip_counts": {
+     "pass->fail": 11,
+     "fail->ungraded": 4
+    }
+   }
+  }
+ },
+ "table_source": {
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct|greedy": "E001",
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct|sampled": "E001",
+  "HuggingFaceTB/SmolLM2-135M-Instruct|greedy": "research",
+  "HuggingFaceTB/SmolLM2-135M-Instruct|sampled": "research",
+  "LiquidAI/LFM2.5-230M|greedy": "E001",
+  "LiquidAI/LFM2.5-230M|sampled": "E001",
+  "unsloth/gemma-3-270m-it|greedy": "research",
+  "unsloth/gemma-3-270m-it|sampled": "research",
+  "LiquidAI/LFM2-350M|greedy": "research",
+  "LiquidAI/LFM2-350M|sampled": "research",
+  "LiquidAI/LFM2.5-350M|greedy": "research",
+  "LiquidAI/LFM2.5-350M|sampled": "research",
+  "HuggingFaceTB/SmolLM2-360M-Instruct|greedy": "research",
+  "HuggingFaceTB/SmolLM2-360M-Instruct|sampled": "research",
+  "Qwen/Qwen2.5-0.5B-Instruct|greedy": "research",
+  "Qwen/Qwen2.5-0.5B-Instruct|sampled": "research",
+  "Qwen/Qwen3-0.6B|greedy": "research",
+  "Qwen/Qwen3-0.6B|sampled": "research"
+ }
+}

@@ -1,0 +1,20 @@
+{
+ "name": "bat_full_falcon_cpu",
+ "cmd": [
+  "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+  "run_battery.py",
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct",
+  "--device",
+  "cpu",
+  "--sets",
+  "new,old,khard"
+ ],
+ "started": "2026-09-24 04:26:41",
+ "ended": "2026-09-24 04:35:17",
+ "exit": -15,
+ "killed": null,
+ "min_free": 75,
+ "max_swap_mb": 0.0,
+ "peak_rss_mb": 4195,
+ "elapsed_s": 517
+}

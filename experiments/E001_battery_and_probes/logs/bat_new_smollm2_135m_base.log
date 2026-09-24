@@ -1,0 +1,12 @@
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 3340.08it/s]
+loaded HuggingFaceTB/SmolLM2-135M {'params': 134515008, 'emb': 28311552, 'dtype': 'fp32', 'device': 'mps'} in 2.0s
+new/plain 0/1728 0s len=104
+new/plain 250/1728 12s len=105
+new/plain 500/1728 32s len=233
+new/plain 750/1728 63s len=551
+new/plain 1000/1728 85s len=178
+new/plain 1250/1728 101s len=320
+new/plain 1500/1728 126s len=451
+done new/plain: 1728 scored, 0 skipped, 159s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/HuggingFaceTB__SmolLM2-135M__new__plain.jsonl
+skip new/chat: tokenizer has no chat template
+ALL DONE HuggingFaceTB/SmolLM2-135M in 161s

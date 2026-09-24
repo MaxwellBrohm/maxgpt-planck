@@ -1,0 +1,22 @@
+06:44:58 QUEUE START
+06:53:55 base_135m exit=0 killed=None
+07:38:27 ft_135m_s0 exit=0 killed=None
+07:39:32 queue_e002.sh shell stopped by hand while ft_135m_s1 ran under its guard (job left running); continuing with queue_e002b.sh
+08:26:13 ft_135m_s1 exit=0 killed=None (logged by queue B)
+08:26:13 QUEUE B START
+08:26:23 dry_gen_135m exit=0 killed=None
+08:26:34 dry_chat_135m exit=0 killed=None
+09:47:47 ft_135m_s2 exit=0 killed=None
+10:35:09 ft_135m_s3 exit=0 killed=None
+11:33:19 ft_135m_s4 exit=0 killed=None
+12:56:49 rescore_base_135m_cross exit=1 killed=wall_clock_ceiling_3600s
+13:49:53 ft_135m_s0r exit=0 killed=None
+13:52:11 gen_135m_base exit=0 killed=None
+13:53:23 gen_135m_s0r exit=0 killed=None
+13:54:36 gen_135m_s1 exit=0 killed=None
+13:55:51 gen_135m_s2 exit=0 killed=None
+13:57:02 gen_135m_s3 exit=0 killed=None
+13:58:12 gen_135m_s4 exit=0 killed=None
+13:59:24 chat_135m_base exit=1 killed=swap_grew_922MB
+13:59:24 QUEUE STOPPED: swap_grew_922MB in chat_135m_base
+14:00:27 QUEUE C WAITING for E003

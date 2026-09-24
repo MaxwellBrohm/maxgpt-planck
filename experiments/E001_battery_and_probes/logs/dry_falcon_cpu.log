@@ -1,0 +1,11 @@
+Loading weights:   0%|          | 0/386 [00:00<?, ?it/s]Loading weights: 100%|██████████| 386/386 [00:00<00:00, 9641.56it/s]
+loaded tiiuae/Falcon-H1-Tiny-90M-Instruct {'params': 91131072, 'emb': 16777216, 'dtype': 'fp32', 'device': 'cpu'} in 1.7s
+new/plain 0/20 1s len=112
+done new/plain: 20 scored, 0 skipped, 25s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/tiiuae__Falcon-H1-Tiny-90M-Instruct__new__plain__dry.jsonl
+new/chat 0/20 1s len=133
+done new/chat: 20 scored, 0 skipped, 30s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/tiiuae__Falcon-H1-Tiny-90M-Instruct__new__chat__dry.jsonl
+old/plain 0/20 1s len=71
+done old/plain: 20 scored, 0 skipped, 21s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/tiiuae__Falcon-H1-Tiny-90M-Instruct__old__plain__dry.jsonl
+khard/plain 0/20 1s len=26
+done khard/plain: 20 scored, 0 skipped, 20s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/tiiuae__Falcon-H1-Tiny-90M-Instruct__khard__plain__dry.jsonl
+ALL DONE tiiuae/Falcon-H1-Tiny-90M-Instruct in 98s

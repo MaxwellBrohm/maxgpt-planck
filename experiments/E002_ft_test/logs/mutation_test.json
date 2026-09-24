@@ -1,0 +1,240 @@
+{
+ "unmutated_fails": [],
+ "mutants": [
+  {
+   "mutant": "ties count as right (empty answer passes)",
+   "status": "killed",
+   "by": [
+    "right(): tie passes (empty answer)",
+    "oracle empty passes the pass rule: {'LW10': 1.0, 'TS10': 1.0, 'NU10': 1.0, 'pass': True}"
+   ]
+  },
+  {
+   "mutant": "gold compared with the first foil only",
+   "status": "killed",
+   "by": [
+    "right(): wrong with 3 candidates passes",
+    "last-mentioned: {'LW10': 1.0, 'TS10': 1.0, 'NU10': 0.0, 'pass': False}"
+   ]
+  },
+  {
+   "mutant": "gold-only record passes",
+   "status": "killed",
+   "by": [
+    "right(): gold-only passes"
+   ]
+  },
+  {
+   "mutant": "empty record passes",
+   "status": "killed",
+   "by": [
+    "right(): empty dict passes"
+   ]
+  },
+  {
+   "mutant": "pass rule ignores two-slot and no-update",
+   "status": "killed",
+   "by": [
+    "primary: 0.7 should fail",
+    "primary: missing two-slot must fail"
+   ]
+  },
+  {
+   "mutant": "pass rule ignores two-slot",
+   "status": "killed",
+   "by": [
+    "primary: missing two-slot must fail"
+   ]
+  },
+  {
+   "mutant": "pass rule read at d4 instead of d10",
+   "status": "killed",
+   "by": [
+    "primary: 0.8 exactly should pass",
+    "primary: must be read at d10, not d4"
+   ]
+  },
+  {
+   "mutant": "pass rule uses > 0.8 instead of >= 0.8",
+   "status": "killed",
+   "by": [
+    "primary: 0.8 exactly should pass"
+   ]
+  },
+  {
+   "mutant": "pass rule pools renders",
+   "status": "killed",
+   "by": [
+    "primary: must be read on the plain render only"
+   ]
+  },
+  {
+   "mutant": "'most seeds' counts a tie",
+   "status": "killed",
+   "by": [
+    "verdict: 1/2 should fail (tie is not most)"
+   ]
+  },
+  {
+   "mutant": "lock-in = first touch, not stays",
+   "status": "killed",
+   "by": [
+    "lock_in: drops at the end -> None"
+   ]
+  },
+  {
+   "mutant": "lock-in ignores two-slot",
+   "status": "killed",
+   "by": [
+    "lock_in: requires all three"
+   ]
+  },
+  {
+   "mutant": "paired CI ignores prompt hashes",
+   "status": "killed",
+   "by": [
+    "paired: prompt-hash mismatch not caught"
+   ]
+  },
+  {
+   "mutant": "paired CI sign flipped",
+   "status": "killed",
+   "by": [
+    "paired: all gained should be +1 {'n': 50, 'acc_before': 0.0, 'acc_after': 1.0, 'd_acc': -1.0, 'd_acc_ci95': [1.0, 1.0], 'gained': 50, 'lost': 0, 'd_margin': -2.0, 'd_margin_ci95': [2.0, 2.0]}",
+    "paired: margin change should be +2"
+   ]
+  },
+  {
+   "mutant": "crossed item B asks for A's correction (post-hoc control broken)",
+   "status": "killed",
+   "by": [
+    "cross_pair oracle first_correction: 1.0 != 0.0"
+   ]
+  },
+  {
+   "mutant": "generation grader ignores other candidate values",
+   "status": "killed",
+   "by": [
+    "gen_probe grader self-test: [('It moved from Monday to Tuesday.', False, False, (True, False)), ('Tuesday, not Monday.', False, True, (True, True)), (\"It's not on Tuesday.\", False, True, (True, True)), (\"It isn't Tuesday, it's Monday.\", False, True, (True, True))]"
+   ]
+  },
+  {
+   "mutant": "generation grader ignores negation",
+   "status": "killed",
+   "by": [
+    "gen_probe grader self-test: [(\"It's not on Tuesday.\", False, True, (True, True))]"
+   ]
+  },
+  {
+   "mutant": "generation grader passes an empty reply",
+   "status": "killed",
+   "by": [
+    "gen_probe grader self-test: [('', False, False, (True, True)), ('   ', False, False, (True, True))]"
+   ]
+  },
+  {
+   "mutant": "generation lenient grader uses the last mention",
+   "status": "killed",
+   "by": [
+    "gen_probe grader self-test: [('It moved from Monday to Tuesday.', False, False, (False, True)), ('Tuesday, not Monday.', False, True, (False, False)), (\"It isn't Tuesday, it's Monday.\", False, True, (False, False))]"
+   ]
+  },
+  {
+   "mutant": "training has no no-update items",
+   "status": "killed",
+   "by": [
+    "shortcut: last-mentioned right on 0.643 of update items (> 0.5)"
+   ]
+  },
+  {
+   "mutant": "training two-slot gold = last mention",
+   "status": "killed",
+   "by": [
+    "shortcut: last-mentioned right on 0.593 of update items (> 0.5)",
+    "shortcut: latest-statement rule right on only 0.805"
+   ]
+  },
+  {
+   "mutant": "training has only single-object updates (old shortcut)",
+   "status": "killed",
+   "by": [
+    "shortcut: last-mentioned right on 1.000 of update items (> 0.5)"
+   ]
+  },
+  {
+   "mutant": "eval statement frame leaked into training",
+   "status": "killed",
+   "by": [
+    "held-out: 2 training frames equal eval frames: ['my <e> is on <v>.', 'okay, your <e> is on <v>.']"
+   ]
+  },
+  {
+   "mutant": "eval question/prefix leaked into training",
+   "status": "killed",
+   "by": [
+    "held-out: 2 training frames equal eval frames: ['what day is my <e>?', 'your <e> is on']"
+   ]
+  },
+  {
+   "mutant": "eval filler leaked into training",
+   "status": "killed",
+   "by": [
+    "held-out: shared fillers {'why do cats purr?'}"
+   ]
+  },
+  {
+   "mutant": "training filler carries a weekday",
+   "status": "killed",
+   "by": [
+    "training filler carries a value: Is the gym busy on Monday?"
+   ]
+  },
+  {
+   "mutant": "eval object noun leaked into training",
+   "status": "killed",
+   "by": [
+    "held-out: 176 training dialogues use eval object words, e.g. [{'turns': [('Just so you know, the dentist appointment is happening Saturday.', \"Thanks, I'll keep Saturday in mind.\"), ('Put the flight down for Tuesday, please.', 'Done, the flight is down for Tuesday.'), ('How do I keep a sourdough starter alive?', 'Feed it flour and water regularly and keep it somewhere cool between feedings.'), ('Why do bees make honey?', 'Honey is their stored food for times when flowers are scarce.'), ('How often should I replace a toothbrush?', 'About every three months, or sooner if the bristles look frayed.'), ('Why do stars twinkle?', 'Moving layers of air bend their light slightly, so the brightness flickers.'), (\"What's a good stretch after running?\", 'A standing quad stretch and a calf stretch against a wall, each held for about thirty seconds.'), ('How can I sleep on a noisy street?', 'Earplugs, a fan for steady background noise, and heavy drapes all help.')], 'question': 'Which day did we land on for the flight?', 'prefix': 'We landed on', 'answer': ' Tuesday.', 'family': 'update', 'kind': 'noupd_b', 'vtype': 'day', 'd': 6, 'asked': 'flight', 'gold': 'Tuesday', 'mentions': [('Saturday', 'dentist appointment'), ('Tuesday', 'flight')]}]"
+   ]
+  },
+  {
+   "mutant": "training question contains its answer",
+   "status": "killed",
+   "by": [
+    "train leak: What color are we doing the winter coat in (was it orange?) -> orange",
+    "train leak: Which day did we land on for the team meeting (was it Monday?) -> Monday"
+   ]
+  },
+  {
+   "mutant": "eval pet name leaked into training",
+   "status": "killed",
+   "by": [
+    "held-out: shared names/jobs {'Biscuit'}"
+   ]
+  },
+  {
+   "mutant": "examples left-truncated (old bug)",
+   "status": "killed",
+   "by": [
+    "tok: a streamed example does not start at the dialogue start (truncated?)",
+    "tok: a streamed example does not start at the dialogue start (truncated?)"
+   ]
+  },
+  {
+   "mutant": "prompt tokens labelled",
+   "status": "killed",
+   "by": [
+    "tok: answer decodes to \"User: I picked silver for the new winter coat.\\nAssistant: Nice, silver for the winter coat.\\nUser: Small change, the coat is gray now.\\nAssistant: Noted, gray now.\\nUser: What makes bread rise?\\nAssistant: Yeast eats sugars and releases gas, which gets trapped in the stretchy gluten network.\\nUser: Why is the moon sometimes visible during the day?\\nAssistant: It is bright enough to see whenever it is above the horizon and far enough from the Sun.\\nUser: Small change, the coat is orange now.\\nAssistant: Noted, orange now.\\nUser: How do I get rid of fruit flies?\\nAssistant: Set out a small dish of vinegar with a drop of soap and take out ripe fruit.\\nUser: What color are we doing the winter coat in?\\nAssistant: We're doing it in orange.\" not ' orange.'",
+    "tok: answer decodes to \"User: What's the best way to learn to type faster?\\nAssistant: Use all ten fingers, keep your eyes on the screen, and practice in short daily sessions.\\nUser: Put the flight down for Sunday, please.\\nAssistant: Done, the flight is down for Sunday.\\nUser: Why do stars twinkle?\\nAssistant: Moving layers of air bend their light slightly, so the brightness flickers.\\nUser: How should I prepare for a job fair?\\nAssistant: Research the employers, bring copies of your resume, and practice a short introduction.\\nUser: What's a simple way to meditate?\\nAssistant: Sit comfortably, breathe slowly, and gently bring your attention back to your breath.\\nUser: The team meeting got scheduled for Monday.\\nAssistant: Sounds good, Monday it is.\\nUser: Which day did we land on for the team meeting?\\nAssistant: We landed on Monday.\" not ' Monday.'"
+   ]
+  },
+  {
+   "mutant": "max_len 512 (biased long-distance mix)",
+   "status": "killed",
+   "by": [
+    "tok: length limit shifts the d>=8 mix toward first-mentioned golds (0.352 -> 0.438)"
+   ]
+  }
+ ],
+ "killed": 32,
+ "total": 32
+}

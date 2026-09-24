@@ -1,0 +1,34 @@
+loaded maxgpt3:final {'params': 235358208, 'emb': 16384000, 'lm_head': 16384000, 'pos_emb': 1048576, 'dtype': 'float32', 'device': 'mps', 'step': 2440000, 'checkpoint': "/Users/brohm/Documents/Projects/Max's AI Model/maxgpt-3/checkpoints/final.pt", 'context_window': 1024} in 1.2s
+new/plain 0/1728 0s len=118
+new/plain 250/1728 16s len=111
+new/plain 500/1728 44s len=241
+new/plain 750/1728 90s len=536
+new/plain 1000/1728 123s len=165
+new/plain 1250/1728 143s len=296
+new/plain 1500/1728 177s len=426
+done new/plain: 1728 scored, 0 skipped, 224s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/maxgpt3__final__new__plain.jsonl
+new/chat 0/1728 0s len=100
+new/chat 250/1728 14s len=92
+new/chat 500/1728 38s len=203
+new/chat 750/1728 77s len=455
+new/chat 1000/1728 104s len=140
+new/chat 1250/1728 121s len=252
+new/chat 1500/1728 150s len=360
+done new/chat: 1728 scored, 0 skipped, 189s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/maxgpt3__final__new__chat.jsonl
+old/plain 0/1116 0s len=62
+old/plain 250/1116 11s len=227
+old/plain 500/1116 29s len=216
+old/plain 750/1116 57s len=437
+old/plain 1000/1116 103s len=392
+done old/plain: 1116 scored, 0 skipped, 114s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/maxgpt3__final__old__plain.jsonl
+old/chat 0/1116 0s len=53
+old/chat 250/1116 9s len=193
+old/chat 500/1116 25s len=182
+old/chat 750/1116 49s len=375
+old/chat 1000/1116 87s len=335
+done old/chat: 1116 scored, 0 skipped, 97s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/maxgpt3__final__old__chat.jsonl
+khard/plain 0/80 0s len=24
+done khard/plain: 80 scored, 0 skipped, 3s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/maxgpt3__final__khard__plain.jsonl
+khard/chat 0/80 0s len=20
+done khard/chat: 80 scored, 0 skipped, 2s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/maxgpt3__final__khard__chat.jsonl
+ALL DONE maxgpt3:final in 630s

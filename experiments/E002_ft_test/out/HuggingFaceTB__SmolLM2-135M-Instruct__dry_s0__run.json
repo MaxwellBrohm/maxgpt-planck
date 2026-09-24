@@ -1,0 +1,84 @@
+{
+ "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+ "seed": 0,
+ "steps": 5,
+ "lr": 5e-05,
+ "bs": 4,
+ "accum": 4,
+ "eff_batch": 16,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "mps",
+ "dry": true,
+ "tag": "dry_s0",
+ "params": 134515008,
+ "torch": "2.13.0",
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "loss_selfcheck": {
+  "hf": 1.6029036045074463,
+  "answer_only": 1.6029000282287598
+ },
+ "train_s": 48.4,
+ "train_stats": {
+  "n": 84,
+  "rejected_long": 0,
+  "kinds": {
+   "noupd_incid": 4,
+   "noupd_b": 2,
+   "persp": 15,
+   "upd": 14,
+   "bind": 9,
+   "noupd": 11,
+   "twohop": 14,
+   "mid": 3,
+   "revert": 1,
+   "twoslot": 7,
+   "twoslot_b": 3,
+   "upd_incid": 1
+  },
+  "len_sum": 25047,
+  "len_max": 634,
+  "split": 0,
+  "mean_len": 298.2
+ },
+ "losses": [
+  1.64689,
+  1.74417,
+  1.57119,
+  1.73965,
+  1.5729
+ ],
+ "probe": [
+  {
+   "step": 0,
+   "LW": 0.0,
+   "TS": 0.0,
+   "NU": 1.0
+  },
+  {
+   "step": 5,
+   "LW": 0.0,
+   "TS": 0.0,
+   "NU": 1.0
+  }
+ ],
+ "lock_in_step": null,
+ "eval_s": 0.7,
+ "eval_counts": {
+  "new/plain": 2,
+  "new/chat": 2,
+  "extra/plain": 2,
+  "extra/chat": 2,
+  "old/plain": 2,
+  "uprobe/plain": 2,
+  "khard/plain": 2,
+  "kbig/plain": 2
+ },
+ "peak_mps_driver_gb": 5.142,
+ "peak_mps_alloc_gb": 3.678,
+ "total_s": 52.0
+}

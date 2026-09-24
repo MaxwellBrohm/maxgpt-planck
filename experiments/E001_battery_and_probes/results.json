@@ -1,0 +1,3121 @@
+{
+ "experiment": "E001_battery_and_probes",
+ "date": "2026-09-24",
+ "self_tests": [
+  {
+   "cmd": "battery.py",
+   "exit": 0,
+   "tail": [
+    "selftest OK: 591 grader assertions over 53 conversations (29 multi-turn, 24 single-turn controls)",
+    "multi-turn lengths: [2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 7, 8, 8, 12]"
+   ]
+  },
+  {
+   "cmd": "mutation_test_graders.py",
+   "exit": 0,
+   "tail": [
+    "KILLED   RI_binding hedged-alternative pattern removed ",
+    "KILLED   knowledge checks graded as strictly as user facts ",
+    "unmutated selftest passes; 43 mutants; all killed"
+   ]
+  },
+  {
+   "cmd": "validate_items.py",
+   "exit": 0,
+   "tail": [
+    "1728 new items; 0 errors",
+    "old battery + khard items whose question contains the answer word: 0",
+    "validate_items OK"
+   ]
+  },
+  {
+   "cmd": "mutation_test_items.py",
+   "exit": 0,
+   "tail": [
+    "KILLED   items: tail shorter than d (64 errors, e.g. N_keyorig day|4|0: 3 exchanges after the last statement, d=4)",
+    "KILLED   items: same_k1 gold set to the original value (195 errors, e.g. N_same_k1 day|0|0: mention order ['gold', 'orig'] != ['orig', 'gold'])",
+    "unmutated validation passes; all mutants killed"
+   ]
+  }
+ ],
+ "likelihood": {
+  "HuggingFaceTB/SmolLM2-135M-Instruct": {
+   "runs": {
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "HuggingFaceTB__SmolLM2-135M-Instruct__new__chat.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 134515008,
+     "emb": 28311552
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "HuggingFaceTB__SmolLM2-135M-Instruct__new__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 134515008,
+     "emb": 28311552
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.0,
+    "same_chat": 0.039,
+    "format_same": 0.039,
+    "format_all5": 0.0,
+    "key": 0.672,
+    "position": 0.18,
+    "prefix": 0.156,
+    "noupd": 1.0,
+    "twoslot_picks": {
+     "gold": 0.01,
+     "orig": 0.99,
+     "other": 0.0
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.02,
+     "orig": 0.91,
+     "other": 0.08
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -2.86
+   }
+  },
+  "HuggingFaceTB/SmolLM2-135M": {
+   "runs": {
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "HuggingFaceTB__SmolLM2-135M__new__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 134515008,
+     "emb": 28311552
+    }
+   },
+   "new_items_n_records": 1728,
+   "attribution": {
+    "same_plain": 0.016,
+    "same_chat": null,
+    "format_same": null,
+    "format_all5": null,
+    "key": 0.406,
+    "position": 0.179,
+    "prefix": 0.18,
+    "noupd": 1.0,
+    "twoslot_picks": {
+     "gold": 0.05,
+     "orig": 0.95,
+     "other": 0.0
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.16,
+     "orig": 0.67,
+     "other": 0.17
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -1.73
+   }
+  },
+  "HuggingFaceTB/SmolLM2-360M-Instruct": {
+   "runs": {
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "HuggingFaceTB__SmolLM2-360M-Instruct__new__chat.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 361821120,
+     "emb": 47185920
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "HuggingFaceTB__SmolLM2-360M-Instruct__new__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 361821120,
+     "emb": 47185920
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.0,
+    "same_chat": 0.039,
+    "format_same": 0.039,
+    "format_all5": 0.0,
+    "key": 0.352,
+    "position": 0.328,
+    "prefix": 0.188,
+    "noupd": 1.0,
+    "twoslot_picks": {
+     "gold": 0.02,
+     "orig": 0.98,
+     "other": 0.0
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.0,
+     "orig": 0.58,
+     "other": 0.42
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -3.38
+   }
+  },
+  "LiquidAI/LFM2-1.2B": {
+   "runs": {
+    "khard|plain": {
+     "n": 80,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2-1.2B__khard__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 1170340608,
+     "emb": 134217728
+    },
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2-1.2B__new__chat.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 1170340608,
+     "emb": 134217728
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2-1.2B__new__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 1170340608,
+     "emb": 134217728
+    },
+    "old|plain": {
+     "n": 1116,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2-1.2B__old__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 1170340608,
+     "emb": 134217728
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.0,
+    "same_chat": 0.023,
+    "format_same": 0.023,
+    "format_all5": 0.008,
+    "key": 0.414,
+    "position": 0.25,
+    "prefix": 0.164,
+    "noupd": 1.0,
+    "twoslot_picks": {
+     "gold": 0.0,
+     "orig": 1.0,
+     "other": 0.0
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.0,
+     "orig": 1.0,
+     "other": 0.0
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -3.73
+   },
+   "khard": {
+    "K4_closed": {
+     "acc": 0.95,
+     "n": 40,
+     "se": 0.034
+    },
+    "K4_open": {
+     "acc": 1.0,
+     "n": 40,
+     "se": 0.0
+    }
+   }
+  },
+  "LiquidAI/LFM2-2.6B": {
+   "runs": {
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2-2.6B__new__chat.jsonl",
+     "dtype": "bf16",
+     "device": "mps",
+     "params": 2569272320,
+     "emb": 134217728
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2-2.6B__new__plain.jsonl",
+     "dtype": "bf16",
+     "device": "mps",
+     "params": 2569272320,
+     "emb": 134217728
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.727,
+    "same_chat": 0.969,
+    "format_same": 0.242,
+    "format_all5": 0.469,
+    "key": 0.445,
+    "position": 0.148,
+    "prefix": -0.274,
+    "noupd": 1.0,
+    "twoslot_picks": {
+     "gold": 0.55,
+     "orig": 0.34,
+     "other": 0.04
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.52,
+     "orig": 0.16,
+     "other": 0.23
+    },
+    "same_wrong_orig_share": 0.89,
+    "same_margin": 0.83
+   }
+  },
+  "LiquidAI/LFM2-350M": {
+   "runs": {
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2-350M__new__chat.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 354483968,
+     "emb": 67108864
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2-350M__new__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 354483968,
+     "emb": 67108864
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.141,
+    "same_chat": 0.148,
+    "format_same": 0.007,
+    "format_all5": -0.016,
+    "key": 0.539,
+    "position": 0.265,
+    "prefix": 0.133,
+    "noupd": 0.984,
+    "twoslot_picks": {
+     "gold": 0.12,
+     "orig": 0.87,
+     "other": 0.02
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.12,
+     "orig": 0.84,
+     "other": 0.03
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -1.89
+   }
+  },
+  "LiquidAI/LFM2-700M": {
+   "runs": {
+    "khard|plain": {
+     "n": 80,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2-700M__khard__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 742489344,
+     "emb": 100663296
+    },
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2-700M__new__chat.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 742489344,
+     "emb": 100663296
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2-700M__new__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 742489344,
+     "emb": 100663296
+    },
+    "old|plain": {
+     "n": 1116,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2-700M__old__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 742489344,
+     "emb": 100663296
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.297,
+    "same_chat": 0.242,
+    "format_same": -0.055,
+    "format_all5": -0.031,
+    "key": 0.25,
+    "position": 0.226,
+    "prefix": 0.14,
+    "noupd": 0.93,
+    "twoslot_picks": {
+     "gold": 0.2,
+     "orig": 0.77,
+     "other": 0.04
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.06,
+     "orig": 0.94,
+     "other": 0.0
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -0.88
+   },
+   "khard": {
+    "K4_closed": {
+     "acc": 0.9,
+     "n": 40,
+     "se": 0.047
+    },
+    "K4_open": {
+     "acc": 1.0,
+     "n": 40,
+     "se": 0.0
+    }
+   }
+  },
+  "LiquidAI/LFM2.5-230M": {
+   "runs": {
+    "khard|plain": {
+     "n": 80,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2.5-230M__khard__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 229693184,
+     "emb": 67108864
+    },
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2.5-230M__new__chat.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 229693184,
+     "emb": 67108864
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2.5-230M__new__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 229693184,
+     "emb": 67108864
+    },
+    "old|plain": {
+     "n": 1116,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2.5-230M__old__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 229693184,
+     "emb": 67108864
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.0,
+    "same_chat": 0.0,
+    "format_same": 0.0,
+    "format_all5": 0.0,
+    "key": 0.352,
+    "position": 0.078,
+    "prefix": 0.148,
+    "noupd": 1.0,
+    "twoslot_picks": {
+     "gold": 0.0,
+     "orig": 1.0,
+     "other": 0.0
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.0,
+     "orig": 1.0,
+     "other": 0.0
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -4.37
+   },
+   "khard": {
+    "K4_closed": {
+     "acc": 0.875,
+     "n": 40,
+     "se": 0.052
+    },
+    "K4_open": {
+     "acc": 1.0,
+     "n": 40,
+     "se": 0.0
+    }
+   }
+  },
+  "LiquidAI/LFM2.5-350M": {
+   "runs": {
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2.5-350M__new__chat.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 354483968,
+     "emb": 67108864
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "LiquidAI__LFM2.5-350M__new__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 354483968,
+     "emb": 67108864
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.0,
+    "same_chat": 0.0,
+    "format_same": 0.0,
+    "format_all5": 0.0,
+    "key": 0.602,
+    "position": 0.266,
+    "prefix": 0.188,
+    "noupd": 1.0,
+    "twoslot_picks": {
+     "gold": 0.01,
+     "orig": 0.99,
+     "other": 0.0
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.0,
+     "orig": 1.0,
+     "other": 0.0
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -6.4
+   }
+  },
+  "Qwen/Qwen2.5-0.5B-Instruct": {
+   "runs": {
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "Qwen__Qwen2.5-0.5B-Instruct__new__chat.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 494032768,
+     "emb": 136134656
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "Qwen__Qwen2.5-0.5B-Instruct__new__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 494032768,
+     "emb": 136134656
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.008,
+    "same_chat": 0.016,
+    "format_same": 0.008,
+    "format_all5": 0.008,
+    "key": -0.078,
+    "position": 0.258,
+    "prefix": 0.0,
+    "noupd": 1.0,
+    "twoslot_picks": {
+     "gold": 0.0,
+     "orig": 1.0,
+     "other": 0.0
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.0,
+     "orig": 1.0,
+     "other": 0.0
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -3.38
+   }
+  },
+  "Qwen/Qwen3-0.6B": {
+   "runs": {
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "Qwen__Qwen3-0.6B__new__chat.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 596049920,
+     "emb": 155582464
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "Qwen__Qwen3-0.6B__new__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 596049920,
+     "emb": 155582464
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.266,
+    "same_chat": 0.156,
+    "format_same": -0.11,
+    "format_all5": 0.008,
+    "key": 0.516,
+    "position": 0.562,
+    "prefix": 0.188,
+    "noupd": 1.0,
+    "twoslot_picks": {
+     "gold": 0.22,
+     "orig": 0.78,
+     "other": 0.0
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.39,
+     "orig": 0.34,
+     "other": 0.27
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -0.78
+   }
+  },
+  "maxgpt3:final": {
+   "runs": {
+    "khard|chat": {
+     "n": 80,
+     "skipped": 0,
+     "file": "maxgpt3__final__khard__chat.jsonl",
+     "dtype": "float32",
+     "device": "mps",
+     "params": 235358208,
+     "emb": 16384000
+    },
+    "khard|plain": {
+     "n": 80,
+     "skipped": 0,
+     "file": "maxgpt3__final__khard__plain.jsonl",
+     "dtype": "float32",
+     "device": "mps",
+     "params": 235358208,
+     "emb": 16384000
+    },
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "maxgpt3__final__new__chat.jsonl",
+     "dtype": "float32",
+     "device": "mps",
+     "params": 235358208,
+     "emb": 16384000
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "maxgpt3__final__new__plain.jsonl",
+     "dtype": "float32",
+     "device": "mps",
+     "params": 235358208,
+     "emb": 16384000
+    },
+    "old|chat": {
+     "n": 1116,
+     "skipped": 0,
+     "file": "maxgpt3__final__old__chat.jsonl",
+     "dtype": "float32",
+     "device": "mps",
+     "params": 235358208,
+     "emb": 16384000
+    },
+    "old|plain": {
+     "n": 1116,
+     "skipped": 0,
+     "file": "maxgpt3__final__old__plain.jsonl",
+     "dtype": "float32",
+     "device": "mps",
+     "params": 235358208,
+     "emb": 16384000
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.422,
+    "same_chat": 0.289,
+    "format_same": -0.133,
+    "format_all5": 0.008,
+    "key": 0.765,
+    "position": 0.078,
+    "prefix": 0.281,
+    "noupd": 0.719,
+    "twoslot_picks": {
+     "gold": 0.3,
+     "orig": 0.48,
+     "other": 0.21
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.58,
+     "orig": 0.14,
+     "other": 0.28
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -0.18
+   },
+   "khard": {
+    "K4_closed": {
+     "acc": 0.675,
+     "n": 40,
+     "se": 0.074
+    },
+    "K4_open": {
+     "acc": 1.0,
+     "n": 40,
+     "se": 0.0
+    }
+   },
+   "khard_own_format": {
+    "K4_closed": {
+     "acc": 0.7,
+     "n": 40,
+     "se": 0.072
+    },
+    "K4_open": {
+     "acc": 1.0,
+     "n": 40,
+     "se": 0.0
+    }
+   }
+  },
+  "maxgpt3:final_sft": {
+   "runs": {
+    "khard|chat": {
+     "n": 80,
+     "skipped": 0,
+     "file": "maxgpt3__final_sft__khard__chat.jsonl",
+     "dtype": "float32",
+     "device": "mps",
+     "params": 235358208,
+     "emb": 16384000
+    },
+    "khard|plain": {
+     "n": 80,
+     "skipped": 0,
+     "file": "maxgpt3__final_sft__khard__plain.jsonl",
+     "dtype": "float32",
+     "device": "mps",
+     "params": 235358208,
+     "emb": 16384000
+    },
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "maxgpt3__final_sft__new__chat.jsonl",
+     "dtype": "float32",
+     "device": "mps",
+     "params": 235358208,
+     "emb": 16384000
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "maxgpt3__final_sft__new__plain.jsonl",
+     "dtype": "float32",
+     "device": "mps",
+     "params": 235358208,
+     "emb": 16384000
+    },
+    "old|chat": {
+     "n": 1116,
+     "skipped": 0,
+     "file": "maxgpt3__final_sft__old__chat.jsonl",
+     "dtype": "float32",
+     "device": "mps",
+     "params": 235358208,
+     "emb": 16384000
+    },
+    "old|plain": {
+     "n": 1116,
+     "skipped": 0,
+     "file": "maxgpt3__final_sft__old__plain.jsonl",
+     "dtype": "float32",
+     "device": "mps",
+     "params": 235358208,
+     "emb": 16384000
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.359,
+    "same_chat": 0.227,
+    "format_same": -0.132,
+    "format_all5": 0.0,
+    "key": 0.718,
+    "position": 0.102,
+    "prefix": 0.398,
+    "noupd": 0.844,
+    "twoslot_picks": {
+     "gold": 0.26,
+     "orig": 0.59,
+     "other": 0.15
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.53,
+     "orig": 0.14,
+     "other": 0.33
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -0.68
+   },
+   "khard": {
+    "K4_closed": {
+     "acc": 0.675,
+     "n": 40,
+     "se": 0.074
+    },
+    "K4_open": {
+     "acc": 1.0,
+     "n": 40,
+     "se": 0.0
+    }
+   },
+   "khard_own_format": {
+    "K4_closed": {
+     "acc": 0.725,
+     "n": 40,
+     "se": 0.071
+    },
+    "K4_open": {
+     "acc": 1.0,
+     "n": 40,
+     "se": 0.0
+    }
+   }
+  },
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct": {
+   "runs": {
+    "khard|plain": {
+     "n": 80,
+     "skipped": 0,
+     "file": "tiiuae__Falcon-H1-Tiny-90M-Instruct__khard__plain.jsonl",
+     "dtype": "fp32",
+     "device": "cpu",
+     "params": 91131072,
+     "emb": 16777216
+    },
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "tiiuae__Falcon-H1-Tiny-90M-Instruct__new__chat.jsonl",
+     "dtype": "fp32",
+     "device": "cpu",
+     "params": 91131072,
+     "emb": 16777216
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "tiiuae__Falcon-H1-Tiny-90M-Instruct__new__plain.jsonl",
+     "dtype": "fp32",
+     "device": "cpu",
+     "params": 91131072,
+     "emb": 16777216
+    },
+    "old|plain": {
+     "n": 1116,
+     "skipped": 0,
+     "file": "tiiuae__Falcon-H1-Tiny-90M-Instruct__old__plain.jsonl",
+     "dtype": "fp32",
+     "device": "cpu",
+     "params": 91131072,
+     "emb": 16777216
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.391,
+    "same_chat": 0.016,
+    "format_same": -0.375,
+    "format_all5": -0.023,
+    "key": -0.179,
+    "position": 0.234,
+    "prefix": -0.085,
+    "noupd": 0.711,
+    "twoslot_picks": {
+     "gold": 0.22,
+     "orig": 0.53,
+     "other": 0.25
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.25,
+     "orig": 0.69,
+     "other": 0.06
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -0.58
+   },
+   "khard": {
+    "K4_closed": {
+     "acc": 0.775,
+     "n": 40,
+     "se": 0.066
+    },
+    "K4_open": {
+     "acc": 1.0,
+     "n": 40,
+     "se": 0.0
+    }
+   }
+  },
+  "unsloth/gemma-3-270m-it": {
+   "runs": {
+    "new|chat": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "unsloth__gemma-3-270m-it__new__chat.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 268098176,
+     "emb": 167772160
+    },
+    "new|plain": {
+     "n": 1728,
+     "skipped": 0,
+     "file": "unsloth__gemma-3-270m-it__new__plain.jsonl",
+     "dtype": "fp32",
+     "device": "mps",
+     "params": 268098176,
+     "emb": 167772160
+    }
+   },
+   "new_items_n_records": 3456,
+   "attribution": {
+    "same_plain": 0.0,
+    "same_chat": 0.0,
+    "format_same": 0.0,
+    "format_all5": 0.0,
+    "key": 0.578,
+    "position": 0.195,
+    "prefix": 0.195,
+    "noupd": 1.0,
+    "twoslot_picks": {
+     "gold": 0.0,
+     "orig": 1.0,
+     "other": 0.0
+    },
+    "twoslot_picks_d0": {
+     "gold": 0.0,
+     "orig": 0.7,
+     "other": 0.3
+    },
+    "same_wrong_orig_share": 1.0,
+    "same_margin": -4.18
+   }
+  }
+ },
+ "likelihood_old_item_table": {
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct": {
+   "src": "E001",
+   "owner_pair10": 0.469,
+   "onehop_pair10": 0.344,
+   "twohop_all": 0.583,
+   "persp_pair10": 0.281,
+   "latest_wins_4_10": 0.005,
+   "K": 0.833,
+   "khard_closed": 0.775,
+   "khard_open": 1.0,
+   "U_d0": "0.00 / 0.00 / 0.00"
+  },
+  "HuggingFaceTB/SmolLM2-135M": {
+   "src": "research",
+   "owner_pair10": 0.219,
+   "onehop_pair10": 0.219,
+   "twohop_all": 0.542,
+   "persp_pair10": 0.125,
+   "latest_wins_4_10": 0.021,
+   "K": 0.95,
+   "khard_closed": 0.775,
+   "khard_open": 1.0,
+   "U_d0": "0.53 / 0.34 / 0.31"
+  },
+  "HuggingFaceTB/SmolLM2-135M-Instruct": {
+   "src": "research",
+   "owner_pair10": 0.625,
+   "onehop_pair10": 0.375,
+   "twohop_all": 0.51,
+   "persp_pair10": 0.094,
+   "latest_wins_4_10": 0.0,
+   "K": 0.867,
+   "khard_closed": 0.775,
+   "khard_open": 0.95,
+   "U_d0": "0.16 / 0.09 / 0.06"
+  },
+  "LiquidAI/LFM2.5-230M": {
+   "src": "E001",
+   "owner_pair10": 0.438,
+   "onehop_pair10": 0.562,
+   "twohop_all": 0.662,
+   "persp_pair10": 0.031,
+   "latest_wins_4_10": 0.0,
+   "K": 0.917,
+   "khard_closed": 0.875,
+   "khard_open": 1.0,
+   "U_d0": "0.00 / 0.03 / 0.00"
+  },
+  "maxgpt3:final": {
+   "src": "E001",
+   "owner_pair10": 0.031,
+   "onehop_pair10": 0.125,
+   "twohop_all": 0.479,
+   "persp_pair10": 0.125,
+   "latest_wins_4_10": 0.089,
+   "K": 0.6,
+   "khard_closed": 0.675,
+   "khard_open": 1.0,
+   "U_d0": "0.22 / 0.12 / 0.19"
+  },
+  "maxgpt3:final_sft": {
+   "src": "E001",
+   "owner_pair10": 0.062,
+   "onehop_pair10": 0.125,
+   "twohop_all": 0.51,
+   "persp_pair10": 0.125,
+   "latest_wins_4_10": 0.062,
+   "K": 0.617,
+   "khard_closed": 0.675,
+   "khard_open": 1.0,
+   "U_d0": "0.09 / 0.16 / 0.22"
+  },
+  "unsloth/gemma-3-270m-it": {
+   "src": "research",
+   "owner_pair10": null,
+   "onehop_pair10": null,
+   "twohop_all": null,
+   "persp_pair10": null,
+   "latest_wins_4_10": 0.0,
+   "K": null,
+   "khard_closed": 0.95,
+   "khard_open": 0.975,
+   "U_d0": "0.75 / 0.62 / 0.81"
+  },
+  "LiquidAI/LFM2-350M": {
+   "src": "research",
+   "owner_pair10": 0.344,
+   "onehop_pair10": 0.344,
+   "twohop_all": 0.662,
+   "persp_pair10": 0.094,
+   "latest_wins_4_10": 0.11,
+   "K": 0.917,
+   "khard_closed": 0.85,
+   "khard_open": 1.0,
+   "U_d0": "0.56 / 0.19 / 0.31"
+  },
+  "LiquidAI/LFM2.5-350M": {
+   "src": "research",
+   "owner_pair10": 0.469,
+   "onehop_pair10": 1.0,
+   "twohop_all": 0.86,
+   "persp_pair10": 0.0,
+   "latest_wins_4_10": 0.0,
+   "K": 0.95,
+   "khard_closed": 0.85,
+   "khard_open": 1.0,
+   "U_d0": "0.03 / 0.00 / 0.00"
+  },
+  "HuggingFaceTB/SmolLM2-360M-Instruct": {
+   "src": "research",
+   "owner_pair10": 0.938,
+   "onehop_pair10": 0.594,
+   "twohop_all": 0.63,
+   "persp_pair10": 0.906,
+   "latest_wins_4_10": 0.0,
+   "K": 0.95,
+   "khard_closed": 0.875,
+   "khard_open": 0.975,
+   "U_d0": "0.72 / 0.31 / 0.34"
+  },
+  "Qwen/Qwen2.5-0.5B-Instruct": {
+   "src": "research",
+   "owner_pair10": 0.75,
+   "onehop_pair10": 0.656,
+   "twohop_all": 0.724,
+   "persp_pair10": 0.125,
+   "latest_wins_4_10": 0.0,
+   "K": 0.983,
+   "khard_closed": 0.85,
+   "khard_open": 0.975,
+   "U_d0": "1.00 / 0.88 / 0.41"
+  },
+  "Qwen/Qwen3-0.6B": {
+   "src": "research",
+   "owner_pair10": 1.0,
+   "onehop_pair10": 1.0,
+   "twohop_all": 0.99,
+   "persp_pair10": 0.969,
+   "latest_wins_4_10": 0.0,
+   "K": 0.95,
+   "khard_closed": 0.8,
+   "khard_open": 1.0,
+   "U_d0": "0.34 / 0.06 / 0.00"
+  },
+  "LiquidAI/LFM2-700M": {
+   "src": "E001",
+   "owner_pair10": 0.875,
+   "onehop_pair10": 0.969,
+   "twohop_all": 0.922,
+   "persp_pair10": 0.5,
+   "latest_wins_4_10": 0.036,
+   "K": 0.983,
+   "khard_closed": 0.9,
+   "khard_open": 1.0,
+   "U_d0": "0.38 / 0.03 / 0.03"
+  },
+  "LiquidAI/LFM2-1.2B": {
+   "src": "E001",
+   "owner_pair10": 0.438,
+   "onehop_pair10": 0.656,
+   "twohop_all": 0.729,
+   "persp_pair10": 0.844,
+   "latest_wins_4_10": 0.0,
+   "K": 0.983,
+   "khard_closed": 0.95,
+   "khard_open": 1.0,
+   "U_d0": "0.94 / 0.25 / 0.03"
+  },
+  "LiquidAI/LFM2-2.6B": {
+   "src": "research",
+   "owner_pair10": 1.0,
+   "onehop_pair10": 1.0,
+   "twohop_all": 0.943,
+   "persp_pair10": 0.969,
+   "latest_wins_4_10": 0.724,
+   "K": 0.983,
+   "khard_closed": 1.0,
+   "khard_open": 1.0,
+   "U_d0": "1.00 / 1.00 / 1.00"
+  }
+ },
+ "likelihood_full_summaries_file": "battery_results.json",
+ "chat": {
+  "research_transcripts": {
+   "HuggingFaceTB/SmolLM2-135M-Instruct": {
+    "greedy": {
+     "ability_new": {
+      "recall": 0.1,
+      "followup": 0.286,
+      "instruction": 0.357,
+      "correction": 0.0,
+      "own_answer": 0.0,
+      "role": 0.0,
+      "topic_return": 0.0,
+      "control": 0.464
+     },
+     "ability_old": {
+      "recall": 0.1,
+      "followup": 0.286,
+      "instruction": 0.357,
+      "correction": 0.0,
+      "own_answer": 0.333,
+      "role": 0.0,
+      "topic_return": 0.0,
+      "control": 0.464
+     },
+     "n_gradable_new": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 3,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "n_checks": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "macro_new": 0.106,
+     "macro_old": 0.154,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 8,
+     "capped_reply_rate": 0.456,
+     "deflection_rate_final_userfact": 0.241,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.571,
+       "gold_beats_foil": 1.0,
+       "n": 7
+      },
+      "correction": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.0,
+       "n": 3
+      },
+      "role": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.0,
+       "n": 1
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 1
+     }
+    },
+    "sampled": {
+     "ability_new": {
+      "recall": 0.35,
+      "followup": 0.429,
+      "instruction": 0.214,
+      "correction": 0.0,
+      "own_answer": 0.167,
+      "role": 0.0,
+      "topic_return": 0.5,
+      "control": 0.357
+     },
+     "ability_old": {
+      "recall": 0.35,
+      "followup": 0.5,
+      "instruction": 0.214,
+      "correction": 0.0,
+      "own_answer": 0.333,
+      "role": 0.0,
+      "topic_return": 0.167,
+      "control": 0.375
+     },
+     "n_gradable_new": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 6,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "n_checks": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "macro_new": 0.237,
+     "macro_old": 0.223,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 15,
+     "capped_reply_rate": 0.43,
+     "deflection_rate_final_userfact": 0.19,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.571,
+       "gold_beats_foil": 0.857,
+       "n": 14
+      },
+      "correction": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.0,
+       "n": 6
+      },
+      "role": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.0,
+       "n": 2
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 3,
+      "fail->pass": 2
+     }
+    }
+   },
+   "HuggingFaceTB/SmolLM2-360M-Instruct": {
+    "greedy": {
+     "ability_new": {
+      "recall": 0.7,
+      "followup": 0.857,
+      "instruction": 0.786,
+      "correction": 0.0,
+      "own_answer": 0.667,
+      "role": 0.333,
+      "topic_return": 0.667,
+      "control": 0.536
+     },
+     "ability_old": {
+      "recall": 0.7,
+      "followup": 0.857,
+      "instruction": 0.786,
+      "correction": 0.0,
+      "own_answer": 0.667,
+      "role": 0.333,
+      "topic_return": 0.667,
+      "control": 0.536
+     },
+     "n_gradable_new": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 3,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "n_checks": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "macro_new": 0.573,
+     "macro_old": 0.573,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 7,
+     "capped_reply_rate": 0.228,
+     "deflection_rate_final_userfact": 0.31,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.857,
+       "gold_beats_foil": 1.0,
+       "n": 7
+      },
+      "correction": {
+       "greedy_gold": 0.333,
+       "gold_beats_foil": 0.333,
+       "n": 3
+      },
+      "role": {
+       "greedy_gold": 1.0,
+       "gold_beats_foil": 1.0,
+       "n": 1
+      }
+     },
+     "flip_counts": {}
+    },
+    "sampled": {
+     "ability_new": {
+      "recall": 0.65,
+      "followup": 0.714,
+      "instruction": 0.786,
+      "correction": 0.0,
+      "own_answer": 0.333,
+      "role": 0.667,
+      "topic_return": 0.667,
+      "control": 0.643
+     },
+     "ability_old": {
+      "recall": 0.7,
+      "followup": 0.714,
+      "instruction": 0.786,
+      "correction": 0.167,
+      "own_answer": 0.333,
+      "role": 0.667,
+      "topic_return": 0.667,
+      "control": 0.661
+     },
+     "n_gradable_new": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 6,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "n_checks": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "macro_new": 0.545,
+     "macro_old": 0.576,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 5,
+     "capped_reply_rate": 0.198,
+     "deflection_rate_final_userfact": 0.31,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.929,
+       "gold_beats_foil": 1.0,
+       "n": 14
+      },
+      "correction": {
+       "greedy_gold": 0.333,
+       "gold_beats_foil": 0.333,
+       "n": 6
+      },
+      "role": {
+       "greedy_gold": 1.0,
+       "gold_beats_foil": 1.0,
+       "n": 2
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 3
+     }
+    }
+   },
+   "LiquidAI/LFM2-350M": {
+    "greedy": {
+     "ability_new": {
+      "recall": 0.4,
+      "followup": 1.0,
+      "instruction": 0.917,
+      "correction": 0.0,
+      "own_answer": 0.5,
+      "role": 0.333,
+      "topic_return": 1.0,
+      "control": 0.714
+     },
+     "ability_old": {
+      "recall": 0.6,
+      "followup": 1.0,
+      "instruction": 0.786,
+      "correction": 0.333,
+      "own_answer": 0.5,
+      "role": 0.333,
+      "topic_return": 1.0,
+      "control": 0.893
+     },
+     "n_gradable_new": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 12,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "n_checks": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "macro_new": 0.593,
+     "macro_old": 0.65,
+     "ungraded_truncated_checks": 2,
+     "capped_content_fails": 7,
+     "capped_reply_rate": 0.564,
+     "deflection_rate_final_userfact": 0.103,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.714,
+       "gold_beats_foil": 1.0,
+       "n": 7
+      },
+      "correction": {
+       "greedy_gold": 0.333,
+       "gold_beats_foil": 0.333,
+       "n": 3
+      },
+      "role": {
+       "greedy_gold": 1.0,
+       "gold_beats_foil": 1.0,
+       "n": 1
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 8,
+      "fail->ungraded": 2
+     }
+    },
+    "sampled": {
+     "ability_new": {
+      "recall": 0.5,
+      "followup": 1.0,
+      "instruction": 0.875,
+      "correction": 0.0,
+      "own_answer": 0.375,
+      "role": 0.333,
+      "topic_return": 0.667,
+      "control": 0.625
+     },
+     "ability_old": {
+      "recall": 0.65,
+      "followup": 1.0,
+      "instruction": 0.75,
+      "correction": 0.333,
+      "own_answer": 0.375,
+      "role": 0.333,
+      "topic_return": 0.833,
+      "control": 0.714
+     },
+     "n_gradable_new": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 24,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "n_checks": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "macro_new": 0.536,
+     "macro_old": 0.611,
+     "ungraded_truncated_checks": 4,
+     "capped_content_fails": 16,
+     "capped_reply_rate": 0.564,
+     "deflection_rate_final_userfact": 0.069,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.5,
+       "gold_beats_foil": 1.0,
+       "n": 14
+      },
+      "correction": {
+       "greedy_gold": 0.333,
+       "gold_beats_foil": 0.333,
+       "n": 6
+      },
+      "role": {
+       "greedy_gold": 1.0,
+       "gold_beats_foil": 1.0,
+       "n": 2
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 11,
+      "fail->ungraded": 4
+     }
+    }
+   },
+   "LiquidAI/LFM2.5-350M": {
+    "greedy": {
+     "ability_new": {
+      "recall": 0.6,
+      "followup": 1.0,
+      "instruction": 1.0,
+      "correction": 0.0,
+      "own_answer": 0.75,
+      "role": 0.0,
+      "topic_return": 1.0,
+      "control": 0.75
+     },
+     "ability_old": {
+      "recall": 0.6,
+      "followup": 1.0,
+      "instruction": 1.0,
+      "correction": 0.0,
+      "own_answer": 0.75,
+      "role": 0.0,
+      "topic_return": 1.0,
+      "control": 0.821
+     },
+     "n_gradable_new": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "n_checks": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "macro_new": 0.621,
+     "macro_old": 0.621,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 1,
+     "capped_reply_rate": 0.383,
+     "deflection_rate_final_userfact": 0.276,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.429,
+       "gold_beats_foil": 1.0,
+       "n": 7
+      },
+      "correction": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.0,
+       "n": 3
+      },
+      "role": {
+       "greedy_gold": 1.0,
+       "gold_beats_foil": 1.0,
+       "n": 1
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 2
+     }
+    },
+    "sampled": {
+     "ability_new": {
+      "recall": 0.6,
+      "followup": 1.0,
+      "instruction": 1.0,
+      "correction": 0.333,
+      "own_answer": 0.5,
+      "role": 0.333,
+      "topic_return": 0.833,
+      "control": 0.768
+     },
+     "ability_old": {
+      "recall": 0.65,
+      "followup": 1.0,
+      "instruction": 1.0,
+      "correction": 0.333,
+      "own_answer": 0.5,
+      "role": 0.333,
+      "topic_return": 0.833,
+      "control": 0.804
+     },
+     "n_gradable_new": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "n_checks": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "macro_new": 0.657,
+     "macro_old": 0.664,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 3,
+     "capped_reply_rate": 0.369,
+     "deflection_rate_final_userfact": 0.103,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.571,
+       "gold_beats_foil": 1.0,
+       "n": 14
+      },
+      "correction": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.333,
+       "n": 6
+      },
+      "role": {
+       "greedy_gold": 1.0,
+       "gold_beats_foil": 1.0,
+       "n": 2
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 3
+     }
+    }
+   },
+   "Qwen/Qwen2.5-0.5B-Instruct": {
+    "greedy": {
+     "ability_new": {
+      "recall": 0.1,
+      "followup": 0.857,
+      "instruction": 0.571,
+      "correction": 0.0,
+      "own_answer": 1.0,
+      "role": 0.667,
+      "topic_return": 1.0,
+      "control": 0.821
+     },
+     "ability_old": {
+      "recall": 0.1,
+      "followup": 0.857,
+      "instruction": 0.571,
+      "correction": 0.0,
+      "own_answer": 1.0,
+      "role": 0.667,
+      "topic_return": 1.0,
+      "control": 0.821
+     },
+     "n_gradable_new": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 3,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "n_checks": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "macro_new": 0.599,
+     "macro_old": 0.599,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 1,
+     "capped_reply_rate": 0.342,
+     "deflection_rate_final_userfact": 0.448,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.714,
+       "gold_beats_foil": 1.0,
+       "n": 7
+      },
+      "correction": {
+       "greedy_gold": 0.667,
+       "gold_beats_foil": 0.667,
+       "n": 3
+      },
+      "role": {
+       "greedy_gold": 1.0,
+       "gold_beats_foil": 1.0,
+       "n": 1
+      }
+     },
+     "flip_counts": {}
+    },
+    "sampled": {
+     "ability_new": {
+      "recall": 0.25,
+      "followup": 0.786,
+      "instruction": 0.393,
+      "correction": 0.0,
+      "own_answer": 0.875,
+      "role": 0.333,
+      "topic_return": 0.833,
+      "control": 0.589
+     },
+     "ability_old": {
+      "recall": 0.3,
+      "followup": 0.786,
+      "instruction": 0.393,
+      "correction": 0.0,
+      "own_answer": 0.875,
+      "role": 0.333,
+      "topic_return": 0.833,
+      "control": 0.679
+     },
+     "n_gradable_new": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "n_checks": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "macro_new": 0.496,
+     "macro_old": 0.503,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 8,
+     "capped_reply_rate": 0.396,
+     "deflection_rate_final_userfact": 0.328,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.786,
+       "gold_beats_foil": 1.0,
+       "n": 14
+      },
+      "correction": {
+       "greedy_gold": 0.5,
+       "gold_beats_foil": 0.5,
+       "n": 6
+      },
+      "role": {
+       "greedy_gold": 1.0,
+       "gold_beats_foil": 1.0,
+       "n": 2
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 6
+     }
+    }
+   },
+   "Qwen/Qwen3-0.6B": {
+    "greedy": {
+     "ability_new": {
+      "recall": 0.6,
+      "followup": 1.0,
+      "instruction": 0.714,
+      "correction": 0.667,
+      "own_answer": 1.0,
+      "role": 0.0,
+      "topic_return": 1.0,
+      "control": 0.929
+     },
+     "ability_old": {
+      "recall": 0.6,
+      "followup": 1.0,
+      "instruction": 0.714,
+      "correction": 0.667,
+      "own_answer": 1.0,
+      "role": 0.0,
+      "topic_return": 1.0,
+      "control": 0.929
+     },
+     "n_gradable_new": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "n_checks": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "macro_new": 0.712,
+     "macro_old": 0.712,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 0,
+     "capped_reply_rate": 0.235,
+     "deflection_rate_final_userfact": 0.138,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.143,
+       "gold_beats_foil": 1.0,
+       "n": 7
+      },
+      "correction": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.667,
+       "n": 3
+      },
+      "role": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 1.0,
+       "n": 1
+      }
+     },
+     "flip_counts": {}
+    },
+    "sampled": {
+     "ability_new": {
+      "recall": 0.45,
+      "followup": 0.929,
+      "instruction": 1.0,
+      "correction": 0.333,
+      "own_answer": 0.75,
+      "role": 0.0,
+      "topic_return": 1.0,
+      "control": 0.893
+     },
+     "ability_old": {
+      "recall": 0.5,
+      "followup": 0.929,
+      "instruction": 1.0,
+      "correction": 0.333,
+      "own_answer": 0.75,
+      "role": 0.0,
+      "topic_return": 1.0,
+      "control": 0.911
+     },
+     "n_gradable_new": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "n_checks": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "macro_new": 0.637,
+     "macro_old": 0.645,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 0,
+     "capped_reply_rate": 0.235,
+     "deflection_rate_final_userfact": 0.086,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.071,
+       "gold_beats_foil": 1.0,
+       "n": 14
+      },
+      "correction": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.667,
+       "n": 6
+      },
+      "role": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 1.0,
+       "n": 2
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 2
+     }
+    }
+   },
+   "tiiuae/Falcon-H1-Tiny-90M-Instruct": {
+    "greedy": {
+     "ability_new": {
+      "recall": 0.2,
+      "followup": 0.571,
+      "instruction": 0.333,
+      "correction": 0.333,
+      "own_answer": 0.75,
+      "role": 0.333,
+      "topic_return": 0.667,
+      "control": 0.536
+     },
+     "ability_old": {
+      "recall": 0.5,
+      "followup": 0.571,
+      "instruction": 0.286,
+      "correction": 0.333,
+      "own_answer": 0.75,
+      "role": 0.333,
+      "topic_return": 0.667,
+      "control": 0.643
+     },
+     "n_gradable_new": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 12,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "n_checks": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "macro_new": 0.455,
+     "macro_old": 0.491,
+     "ungraded_truncated_checks": 2,
+     "capped_content_fails": 20,
+     "capped_reply_rate": 0.651,
+     "deflection_rate_final_userfact": 0.0,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.571,
+       "gold_beats_foil": 1.0,
+       "n": 7
+      },
+      "correction": {
+       "greedy_gold": 0.333,
+       "gold_beats_foil": 0.333,
+       "n": 3
+      },
+      "role": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.0,
+       "n": 1
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 6,
+      "fail->ungraded": 2
+     }
+    },
+    "sampled": {
+     "ability_new": {
+      "recall": 0.2,
+      "followup": 0.714,
+      "instruction": 0.455,
+      "correction": 0.333,
+      "own_answer": 0.75,
+      "role": 0.333,
+      "topic_return": 0.667,
+      "control": 0.536
+     },
+     "ability_old": {
+      "recall": 0.5,
+      "followup": 0.714,
+      "instruction": 0.357,
+      "correction": 0.667,
+      "own_answer": 0.75,
+      "role": 0.333,
+      "topic_return": 0.667,
+      "control": 0.607
+     },
+     "n_gradable_new": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 11,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "n_checks": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "macro_new": 0.493,
+     "macro_old": 0.57,
+     "ungraded_truncated_checks": 3,
+     "capped_content_fails": 18,
+     "capped_reply_rate": 0.685,
+     "deflection_rate_final_userfact": 0.0,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.714,
+       "gold_beats_foil": 1.0,
+       "n": 7
+      },
+      "correction": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.333,
+       "n": 3
+      },
+      "role": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.0,
+       "n": 1
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 6,
+      "fail->ungraded": 3
+     }
+    }
+   },
+   "unsloth/gemma-3-270m-it": {
+    "greedy": {
+     "ability_new": {
+      "recall": 0.0,
+      "followup": 0.857,
+      "instruction": 0.5,
+      "correction": 0.0,
+      "own_answer": 0.5,
+      "role": 0.0,
+      "topic_return": 0.667,
+      "control": 0.714
+     },
+     "ability_old": {
+      "recall": 0.0,
+      "followup": 0.857,
+      "instruction": 0.5,
+      "correction": 0.0,
+      "own_answer": 0.5,
+      "role": 0.0,
+      "topic_return": 0.667,
+      "control": 0.75
+     },
+     "n_gradable_new": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "n_checks": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "macro_new": 0.361,
+     "macro_old": 0.361,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 2,
+     "capped_reply_rate": 0.315,
+     "deflection_rate_final_userfact": 0.276,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.571,
+       "gold_beats_foil": 0.571,
+       "n": 7
+      },
+      "correction": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.333,
+       "n": 3
+      },
+      "role": {
+       "greedy_gold": 1.0,
+       "gold_beats_foil": 1.0,
+       "n": 1
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 1
+     }
+    },
+    "sampled": {
+     "ability_new": {
+      "recall": 0.05,
+      "followup": 0.643,
+      "instruction": 0.25,
+      "correction": 0.0,
+      "own_answer": 0.375,
+      "role": 0.0,
+      "topic_return": 0.667,
+      "control": 0.5
+     },
+     "ability_old": {
+      "recall": 0.05,
+      "followup": 0.643,
+      "instruction": 0.25,
+      "correction": 0.0,
+      "own_answer": 0.375,
+      "role": 0.0,
+      "topic_return": 0.667,
+      "control": 0.482
+     },
+     "n_gradable_new": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "n_checks": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "macro_new": 0.284,
+     "macro_old": 0.284,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 4,
+     "capped_reply_rate": 0.285,
+     "deflection_rate_final_userfact": 0.19,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.571,
+       "gold_beats_foil": 0.643,
+       "n": 14
+      },
+      "correction": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.333,
+       "n": 6
+      },
+      "role": {
+       "greedy_gold": 1.0,
+       "gold_beats_foil": 1.0,
+       "n": 2
+      }
+     },
+     "flip_counts": {
+      "fail->pass": 1
+     }
+    }
+   }
+  },
+  "e001_transcripts": {
+   "LiquidAI/LFM2.5-230M": {
+    "greedy": {
+     "ability_new": {
+      "recall": 0.2,
+      "followup": 1.0,
+      "instruction": 0.857,
+      "correction": 0.0,
+      "own_answer": 0.75,
+      "role": 0.0,
+      "topic_return": 0.333,
+      "control": 0.821
+     },
+     "ability_old": {
+      "recall": 0.2,
+      "followup": 1.0,
+      "instruction": 0.857,
+      "correction": 0.0,
+      "own_answer": 0.75,
+      "role": 0.0,
+      "topic_return": 0.333,
+      "control": 0.821
+     },
+     "n_gradable_new": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "n_checks": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "macro_new": 0.449,
+     "macro_old": 0.449,
+     "ungraded_truncated_checks": 0,
+     "capped_content_fails": 0,
+     "capped_reply_rate": 0.369,
+     "deflection_rate_final_userfact": 0.483,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.571,
+       "gold_beats_foil": 1.0,
+       "n": 7
+      },
+      "correction": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.0,
+       "n": 3
+      },
+      "role": {
+       "greedy_gold": 1.0,
+       "gold_beats_foil": 1.0,
+       "n": 1
+      }
+     },
+     "flip_counts": {}
+    },
+    "sampled": {
+     "ability_new": {
+      "recall": 0.2,
+      "followup": 0.857,
+      "instruction": 0.889,
+      "correction": 0.0,
+      "own_answer": 0.714,
+      "role": 0.0,
+      "topic_return": 0.833,
+      "control": 0.75
+     },
+     "ability_old": {
+      "recall": 0.2,
+      "followup": 0.857,
+      "instruction": 0.857,
+      "correction": 0.0,
+      "own_answer": 0.714,
+      "role": 0.0,
+      "topic_return": 0.833,
+      "control": 0.786
+     },
+     "n_gradable_new": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 27,
+      "correction": 6,
+      "own_answer": 7,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "n_checks": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "macro_new": 0.499,
+     "macro_old": 0.494,
+     "ungraded_truncated_checks": 1,
+     "capped_content_fails": 4,
+     "capped_reply_rate": 0.413,
+     "deflection_rate_final_userfact": 0.483,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.5,
+       "gold_beats_foil": 1.0,
+       "n": 14
+      },
+      "correction": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.0,
+       "n": 6
+      },
+      "role": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 1.0,
+       "n": 2
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 2,
+      "fail->ungraded": 1
+     }
+    }
+   },
+   "tiiuae/Falcon-H1-Tiny-90M-Instruct": {
+    "greedy": {
+     "ability_new": {
+      "recall": 0.2,
+      "followup": 0.571,
+      "instruction": 0.333,
+      "correction": 0.333,
+      "own_answer": 0.75,
+      "role": 0.333,
+      "topic_return": 0.667,
+      "control": 0.536
+     },
+     "ability_old": {
+      "recall": 0.5,
+      "followup": 0.571,
+      "instruction": 0.286,
+      "correction": 0.333,
+      "own_answer": 0.75,
+      "role": 0.333,
+      "topic_return": 0.667,
+      "control": 0.643
+     },
+     "n_gradable_new": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 12,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "n_checks": {
+      "recall": 10,
+      "followup": 7,
+      "instruction": 14,
+      "correction": 3,
+      "own_answer": 4,
+      "role": 3,
+      "topic_return": 3,
+      "control": 28
+     },
+     "macro_new": 0.455,
+     "macro_old": 0.491,
+     "ungraded_truncated_checks": 2,
+     "capped_content_fails": 20,
+     "capped_reply_rate": 0.651,
+     "deflection_rate_final_userfact": 0.0,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.571,
+       "gold_beats_foil": 1.0,
+       "n": 7
+      },
+      "correction": {
+       "greedy_gold": 0.333,
+       "gold_beats_foil": 0.333,
+       "n": 3
+      },
+      "role": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.0,
+       "n": 1
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 6,
+      "fail->ungraded": 2
+     }
+    },
+    "sampled": {
+     "ability_new": {
+      "recall": 0.4,
+      "followup": 0.643,
+      "instruction": 0.48,
+      "correction": 0.333,
+      "own_answer": 0.625,
+      "role": 0.333,
+      "topic_return": 0.833,
+      "control": 0.545
+     },
+     "ability_old": {
+      "recall": 0.55,
+      "followup": 0.643,
+      "instruction": 0.429,
+      "correction": 0.5,
+      "own_answer": 0.625,
+      "role": 0.333,
+      "topic_return": 0.833,
+      "control": 0.661
+     },
+     "n_gradable_new": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 25,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 55
+     },
+     "n_checks": {
+      "recall": 20,
+      "followup": 14,
+      "instruction": 28,
+      "correction": 6,
+      "own_answer": 8,
+      "role": 6,
+      "topic_return": 6,
+      "control": 56
+     },
+     "macro_new": 0.521,
+     "macro_old": 0.559,
+     "ungraded_truncated_checks": 4,
+     "capped_content_fails": 33,
+     "capped_reply_rate": 0.674,
+     "deflection_rate_final_userfact": 0.034,
+     "forced_prefix": {
+      "recall": {
+       "greedy_gold": 0.786,
+       "gold_beats_foil": 1.0,
+       "n": 14
+      },
+      "correction": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.167,
+       "n": 6
+      },
+      "role": {
+       "greedy_gold": 0.0,
+       "gold_beats_foil": 0.0,
+       "n": 2
+      }
+     },
+     "flip_counts": {
+      "pass->fail": 11,
+      "fail->ungraded": 4
+     }
+    }
+   }
+  }
+ },
+ "chat_table_source": {
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct|greedy": "E001",
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct|sampled": "E001",
+  "HuggingFaceTB/SmolLM2-135M-Instruct|greedy": "research",
+  "HuggingFaceTB/SmolLM2-135M-Instruct|sampled": "research",
+  "LiquidAI/LFM2.5-230M|greedy": "E001",
+  "LiquidAI/LFM2.5-230M|sampled": "E001",
+  "unsloth/gemma-3-270m-it|greedy": "research",
+  "unsloth/gemma-3-270m-it|sampled": "research",
+  "LiquidAI/LFM2-350M|greedy": "research",
+  "LiquidAI/LFM2-350M|sampled": "research",
+  "LiquidAI/LFM2.5-350M|greedy": "research",
+  "LiquidAI/LFM2.5-350M|sampled": "research",
+  "HuggingFaceTB/SmolLM2-360M-Instruct|greedy": "research",
+  "HuggingFaceTB/SmolLM2-360M-Instruct|sampled": "research",
+  "Qwen/Qwen2.5-0.5B-Instruct|greedy": "research",
+  "Qwen/Qwen2.5-0.5B-Instruct|sampled": "research",
+  "Qwen/Qwen3-0.6B|greedy": "research",
+  "Qwen/Qwen3-0.6B|sampled": "research"
+ },
+ "chat_flips_file": "chat_results.json",
+ "guard_verdicts": [
+  {
+   "name": "bat_full_falcon_cpu",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "tiiuae/Falcon-H1-Tiny-90M-Instruct",
+    "--device",
+    "cpu",
+    "--sets",
+    "new,old,khard"
+   ],
+   "started": "2026-09-24 04:26:41",
+   "ended": "2026-09-24 04:35:17",
+   "exit": -15,
+   "killed": null,
+   "min_free": 75,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 4195,
+   "elapsed_s": 517
+  },
+  {
+   "name": "bat_full_lfm25_230m",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "LiquidAI/LFM2.5-230M",
+    "--sets",
+    "new,old,khard"
+   ],
+   "started": "2026-09-24 02:19:03",
+   "ended": "2026-09-24 02:27:04",
+   "exit": 0,
+   "killed": null,
+   "min_free": 70,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 877,
+   "elapsed_s": 481
+  },
+  {
+   "name": "bat_full_lfm2_1_2b",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "LiquidAI/LFM2-1.2B",
+    "--sets",
+    "new,old,khard"
+   ],
+   "started": "2026-09-24 03:01:55",
+   "ended": "2026-09-24 03:41:07",
+   "exit": 0,
+   "killed": null,
+   "min_free": 38,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 557,
+   "elapsed_s": 2351
+  },
+  {
+   "name": "bat_full_lfm2_700m",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "LiquidAI/LFM2-700M",
+    "--sets",
+    "new,old,khard"
+   ],
+   "started": "2026-09-24 02:36:01",
+   "ended": "2026-09-24 03:01:10",
+   "exit": 0,
+   "killed": null,
+   "min_free": 61,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 2275,
+   "elapsed_s": 1509
+  },
+  {
+   "name": "bat_full_maxgpt3_final",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "maxgpt3:final",
+    "--sets",
+    "new,old,khard"
+   ],
+   "started": "2026-09-24 03:41:07",
+   "ended": "2026-09-24 03:51:39",
+   "exit": 0,
+   "killed": null,
+   "min_free": 67,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 1237,
+   "elapsed_s": 632
+  },
+  {
+   "name": "bat_full_maxgpt3_sft",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "maxgpt3:final_sft",
+    "--sets",
+    "new,old,khard"
+   ],
+   "started": "2026-09-24 03:51:39",
+   "ended": "2026-09-24 04:02:11",
+   "exit": 0,
+   "killed": null,
+   "min_free": 67,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 1237,
+   "elapsed_s": 632
+  },
+  {
+   "name": "bat_new_falcon_cpu",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "tiiuae/Falcon-H1-Tiny-90M-Instruct",
+    "--device",
+    "cpu",
+    "--shared",
+    "--sets",
+    "new"
+   ],
+   "started": "2026-09-24 04:38:52",
+   "ended": "2026-09-24 05:26:46",
+   "exit": 0,
+   "killed": null,
+   "min_free": 75,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 2910,
+   "elapsed_s": 2875
+  },
+  {
+   "name": "bat_new_gemma3_270m",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "unsloth/gemma-3-270m-it",
+    "--sets",
+    "new"
+   ],
+   "started": "2026-09-24 02:11:56",
+   "ended": "2026-09-24 02:19:02",
+   "exit": 0,
+   "killed": null,
+   "min_free": 68,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 1131,
+   "elapsed_s": 426
+  },
+  {
+   "name": "bat_new_lfm25_350m",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "LiquidAI/LFM2.5-350M",
+    "--sets",
+    "new"
+   ],
+   "started": "2026-09-24 01:06:09",
+   "ended": "2026-09-24 01:16:11",
+   "exit": 0,
+   "killed": null,
+   "min_free": 65,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 1219,
+   "elapsed_s": 602
+  },
+  {
+   "name": "bat_new_lfm2_2_6b",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "LiquidAI/LFM2-2.6B",
+    "--sets",
+    "new",
+    "--dtype",
+    "bf16"
+   ],
+   "started": "2026-09-24 05:50:21",
+   "ended": "2026-09-24 06:12:40",
+   "exit": 0,
+   "killed": null,
+   "min_free": 48,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 575,
+   "elapsed_s": 1339
+  },
+  {
+   "name": "bat_new_lfm2_350m",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "LiquidAI/LFM2-350M",
+    "--sets",
+    "new"
+   ],
+   "started": "2026-09-24 01:16:11",
+   "ended": "2026-09-24 01:26:13",
+   "exit": 0,
+   "killed": null,
+   "min_free": 65,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 1086,
+   "elapsed_s": 602
+  },
+  {
+   "name": "bat_new_qwen25_05b_i",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "Qwen/Qwen2.5-0.5B-Instruct",
+    "--sets",
+    "new"
+   ],
+   "started": "2026-09-24 01:39:30",
+   "ended": "2026-09-24 01:52:47",
+   "exit": 0,
+   "killed": null,
+   "min_free": 63,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 1416,
+   "elapsed_s": 797
+  },
+  {
+   "name": "bat_new_qwen3_06b",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "Qwen/Qwen3-0.6B",
+    "--sets",
+    "new"
+   ],
+   "started": "2026-09-24 01:52:48",
+   "ended": "2026-09-24 02:11:56",
+   "exit": 0,
+   "killed": null,
+   "min_free": 62,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 1245,
+   "elapsed_s": 1148
+  },
+  {
+   "name": "bat_new_smollm2_135m_base",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "HuggingFaceTB/SmolLM2-135M",
+    "--sets",
+    "new"
+   ],
+   "started": "2026-09-24 06:12:40",
+   "ended": "2026-09-24 06:15:26",
+   "exit": 0,
+   "killed": null,
+   "min_free": 70,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 923,
+   "elapsed_s": 165
+  },
+  {
+   "name": "bat_new_smollm2_135m_i",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "HuggingFaceTB/SmolLM2-135M-Instruct",
+    "--sets",
+    "new"
+   ],
+   "started": "2026-09-24 01:00:18",
+   "ended": "2026-09-24 01:06:09",
+   "exit": 0,
+   "killed": null,
+   "min_free": 72,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 930,
+   "elapsed_s": 351
+  },
+  {
+   "name": "bat_new_smollm2_360m_i",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "HuggingFaceTB/SmolLM2-360M-Instruct",
+    "--sets",
+    "new"
+   ],
+   "started": "2026-09-24 01:26:13",
+   "ended": "2026-09-24 01:39:30",
+   "exit": 0,
+   "killed": null,
+   "min_free": 67,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 1146,
+   "elapsed_s": 797
+  },
+  {
+   "name": "bat_oldkh_falcon_cpu",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "tiiuae/Falcon-H1-Tiny-90M-Instruct",
+    "--device",
+    "cpu",
+    "--shared",
+    "--sets",
+    "old,khard"
+   ],
+   "started": "2026-09-24 05:26:47",
+   "ended": "2026-09-24 05:50:21",
+   "exit": 0,
+   "killed": null,
+   "min_free": 76,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 2295,
+   "elapsed_s": 1415
+  },
+  {
+   "name": "chat_falcon_greedy",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_chat.py",
+    "tiiuae/Falcon-H1-Tiny-90M-Instruct",
+    "--mode",
+    "greedy"
+   ],
+   "started": "2026-09-24 04:02:11",
+   "ended": "2026-09-24 04:10:22",
+   "exit": 0,
+   "killed": null,
+   "min_free": 32,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 930,
+   "elapsed_s": 491
+  },
+  {
+   "name": "chat_falcon_sampled",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_chat.py",
+    "tiiuae/Falcon-H1-Tiny-90M-Instruct",
+    "--mode",
+    "sampled",
+    "--seeds",
+    "0",
+    "1"
+   ],
+   "started": "2026-09-24 04:10:23",
+   "ended": "2026-09-24 04:26:40",
+   "exit": 0,
+   "killed": null,
+   "min_free": 50,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 870,
+   "elapsed_s": 978
+  },
+  {
+   "name": "chat_lfm25_230m_greedy",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_chat.py",
+    "LiquidAI/LFM2.5-230M",
+    "--mode",
+    "greedy"
+   ],
+   "started": "2026-09-24 02:27:04",
+   "ended": "2026-09-24 02:29:35",
+   "exit": 0,
+   "killed": null,
+   "min_free": 69,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 769,
+   "elapsed_s": 150
+  },
+  {
+   "name": "chat_lfm25_230m_sampled",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_chat.py",
+    "LiquidAI/LFM2.5-230M",
+    "--mode",
+    "sampled",
+    "--seeds",
+    "0",
+    "1"
+   ],
+   "started": "2026-09-24 02:29:35",
+   "ended": "2026-09-24 02:36:01",
+   "exit": 0,
+   "killed": null,
+   "min_free": 69,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 1554,
+   "elapsed_s": 386
+  },
+  {
+   "name": "check_shared_falcon_cpu",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "check_shared.py",
+    "tiiuae/Falcon-H1-Tiny-90M-Instruct",
+    "--device",
+    "cpu",
+    "--n",
+    "30"
+   ],
+   "started": "2026-09-24 04:35:45",
+   "ended": "2026-09-24 04:38:36",
+   "exit": 0,
+   "killed": null,
+   "min_free": 75,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 5149,
+   "elapsed_s": 171
+  },
+  {
+   "name": "dry_battery_smol135",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "HuggingFaceTB/SmolLM2-135M-Instruct",
+    "--sets",
+    "new,old,khard",
+    "--renders",
+    "plain,chat",
+    "--dry",
+    "3",
+    "--tag",
+    "dry"
+   ],
+   "started": "2026-09-24 00:51:17",
+   "ended": "2026-09-24 00:51:22",
+   "exit": 0,
+   "killed": null,
+   "min_free": 78,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 0,
+   "elapsed_s": 5
+  },
+  {
+   "name": "dry_chat_falcon_cpu",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_chat.py",
+    "tiiuae/Falcon-H1-Tiny-90M-Instruct",
+    "--device",
+    "cpu",
+    "--mode",
+    "greedy",
+    "--only",
+    "R_d2_name,K_time",
+    "--out",
+    "../out/dry/dry__falcon_cpu.jsonl"
+   ],
+   "started": "2026-09-24 00:53:50",
+   "ended": "2026-09-24 00:58:06",
+   "exit": 0,
+   "killed": null,
+   "min_free": 77,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 1828,
+   "elapsed_s": 256
+  },
+  {
+   "name": "dry_chat_lfm25_230m",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_chat.py",
+    "LiquidAI/LFM2.5-230M",
+    "--mode",
+    "greedy",
+    "--only",
+    "R_d2_name,K_day,RI_binding",
+    "--out",
+    "../out/dry/dry__lfm25_230m.jsonl"
+   ],
+   "started": "2026-09-24 00:59:22",
+   "ended": "2026-09-24 00:59:37",
+   "exit": 0,
+   "killed": null,
+   "min_free": 73,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 830,
+   "elapsed_s": 15
+  },
+  {
+   "name": "dry_chat_smol135",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_chat.py",
+    "HuggingFaceTB/SmolLM2-135M-Instruct",
+    "--mode",
+    "greedy",
+    "--only",
+    "R_d2_name,K_time",
+    "--out",
+    "../transcripts/dry__smol135.jsonl"
+   ],
+   "started": "2026-09-24 00:51:37",
+   "ended": "2026-09-24 00:51:53",
+   "exit": 0,
+   "killed": null,
+   "min_free": 70,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 857,
+   "elapsed_s": 15
+  },
+  {
+   "name": "dry_falcon_cpu",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "tiiuae/Falcon-H1-Tiny-90M-Instruct",
+    "--device",
+    "cpu",
+    "--sets",
+    "new,old,khard",
+    "--renders",
+    "plain,chat",
+    "--dry",
+    "20",
+    "--tag",
+    "dry"
+   ],
+   "started": "2026-09-24 00:51:59",
+   "ended": "2026-09-24 00:53:39",
+   "exit": 0,
+   "killed": null,
+   "min_free": 78,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 3003,
+   "elapsed_s": 100
+  },
+  {
+   "name": "dry_lfm25_230m",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "LiquidAI/LFM2.5-230M",
+    "--sets",
+    "new",
+    "--renders",
+    "plain,chat",
+    "--dry",
+    "60",
+    "--tag",
+    "dry"
+   ],
+   "started": "2026-09-24 00:59:12",
+   "ended": "2026-09-24 00:59:22",
+   "exit": 0,
+   "killed": null,
+   "min_free": 73,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 808,
+   "elapsed_s": 10
+  },
+  {
+   "name": "dry_maxgpt3",
+   "cmd": [
+    "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+    "run_battery.py",
+    "maxgpt3:final",
+    "--sets",
+    "new,old,khard",
+    "--renders",
+    "plain,chat",
+    "--dry",
+    "20",
+    "--tag",
+    "dry"
+   ],
+   "started": "2026-09-24 00:58:51",
+   "ended": "2026-09-24 00:59:01",
+   "exit": 0,
+   "killed": null,
+   "min_free": 73,
+   "max_swap_mb": 0.0,
+   "peak_rss_mb": 363,
+   "elapsed_s": 10
+  }
+ ]
+}

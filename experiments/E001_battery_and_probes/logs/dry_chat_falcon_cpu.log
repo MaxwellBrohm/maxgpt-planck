@@ -1,0 +1,6 @@
+Loading weights:   0%|          | 0/386 [00:00<?, ?it/s]Loading weights: 100%|██████████| 386/386 [00:00<00:00, 15128.87it/s]
+loaded tiiuae/Falcon-H1-Tiny-90M-Instruct params=91.1M device=cpu eos=[228, 11] in 0.3s
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+[   106s] seed=None R_d2_name                  1/1 tok=500
+[   250s] seed=None K_time                     1/1 tok=529
+done tiiuae/Falcon-H1-Tiny-90M-Instruct in 250s -> ../out/dry/dry__falcon_cpu.jsonl

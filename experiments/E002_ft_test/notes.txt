@@ -1,0 +1,88 @@
+E002: repaired ft_test (REPORT 7.3 step 2c, REPORT 7.4, LEDGER P-001)
+Mac M5 24 GB, one model process at a time through code/guard.py. Nothing under research/ was modified.
+
+PRE-REGISTERED BEFORE ANY REAL RUN (written 2026-09-24 06:46, after the dry runs, before the baselines)
+  Pass rule, per seed, plain "User:/Assistant:" render, E001 items (held-out wording):
+    LW10 = latest-wins at d10 = E001 same_k1 + same_k2 + same_k3 at d = 10, both families (n = 192)
+    TS10 = E001 twoslot at d10 (n = 64)      NU10 = E001 noupd at d10 (n = 64)
+    seed passes  <=>  LW10 >= 0.8 AND TS10 >= 0.8 AND NU10 >= 0.8
+    model passes <=>  a strict majority of its seeds pass (3 of 5 at 135M, 2 of 3 at 360M)
+    lock-in rate = passing seeds / seeds; lock-in step = first in-training probe step from which the
+    probe's LW/TS/NU (same_k1, twoslot, noupd at d10, a separate item draw, n = 32 each) stay >= 0.8.
+  An item is right only if the gold's summed log-prob is strictly above every other in-context
+  candidate (ties, NaN or missing scores fail: an "empty answer" scores 0).
+  Knowledge: closed-book change vs the untouched model on the SAME items, paired, 95% CI
+    (bootstrap for accuracy, t for the log-prob margin), on kbig = khard40 + 401 new items (441),
+    also reported for khard40 alone and the old 60-item K_closedbook.
+  Reading (REPORT 7.4): pass with controls on most seeds at 135M -> updating is trainable at a 106M body;
+    main items pass but controls fail -> a shortcut, tells us nothing; flat at 135M, moving at 360M ->
+    a threshold in range or the 2x token difference; flat everywhere -> needs pretraining-scale signal,
+    a curriculum or a state mechanism (still not proof of a capacity limit).
+
+SETTINGS
+  Hyperparameters kept from the original script: 400 optimizer steps, AdamW lr 5e-5, wd 0, 20 warmup
+  steps then cosine to 0, grad clip 1.0, fp32 weights and optimizer, loss on answer tokens only,
+  effective batch 16.
+  135M: micro-batch 4 x accumulation 4.   360M: micro-batch 2 x accumulation 8.
+  Gradient checkpointing, max length 768, examples longer than that redrawn (none occur: longest ~733).
+  Why not 512: at 512 the rejection removed 45-55% of d = 9-10 examples and, worse, removed the long
+  examples selectively (twoslot 31% kept vs noupd 81% at d >= 8), which raised the share of
+  first-mentioned golds at long distance from 0.36 to 0.47. REPORT 7.4 allows "512 or gradient
+  checkpointing"; checkpointing keeps the training mix unbiased. validate.py checks this.
+  fp32, not bf16: pure-bf16 AdamW at lr 5e-5 drops most updates (bf16 resolution ~4e-3 relative),
+  which would corrupt the measurement; fp32 fits (dry-run peaks below).
+  Env (guard.py): PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.7, PYTORCH_MPS_LOW_WATERMARK_RATIO=0.6,
+  HF_HUB_OFFLINE=1, low_cpu_mem_usage=True; ft_test.py refuses to run on MPS without the watermarks.
+
+DRY RUNS (5 optimizer steps, every micro-batch padded to 768 tokens = worst case, 2 items per eval set)
+  135M: peak MPS driver 5.14 GB, allocated 1.83 GB, system free memory min 54%, swap 0, 9.5 s/step.
+  360M: peak MPS driver 8.09 GB, allocated 4.24 GB, system free memory min 52%, swap 0, 20 s/step.
+  Loss self-check (answer-only loss vs the HF loss on one batch): 1.60290 vs 1.60290.
+
+POST-HOC ADDITIONS (decided 2026-09-24 07:00-07:45, after seed 0's in-training probe read 1.0 at step 50;
+none of these changes the pre-registered pass rule, and each is labelled post hoc in every table)
+  1. Crossed control (code/eval_extra.py build_crossed): both objects stated, then both corrected,
+     asked about each on the same dialogue. The E001 controls cannot exclude "a correction marker wins,
+     else the first value" (every E001 correction starts with "Actually"; no E001 item corrects the other
+     object). cross_pair: first-mentioned, last-mentioned, first-correction and last-correction oracles
+     all score 0; only per-object tracking scores 1 (validate.py). Scored from seed 1 on (the seed-0
+     process had already loaded its code), on the 135M baseline by rescore.py, and on a rerun of seed 0 (s0r).
+  2. Fine-tuned weights saved as scratch copies (weights/, gitignored) from seed 1 on, for post-hoc scoring;
+     deleted when E002 is done.
+  3. Free generation (code/gen_probe.py): greedy, no answer prefix, E001 same_k1/twoslot/noupd + crossed at
+     d10, plain and chat template. Strict grader: gold mentioned, no other candidate mentioned, gold not
+     negated. Grader self-test + 4 mutants in mutation_test.py.
+  4. The 53-conversation chat probe (E001 run_chat.py + hardened battery.py, greedy) on the untouched and
+     fine-tuned 135M/360M: the correction category (3 items) and collateral change in every other category.
+  Queue change: queue_e002.sh's shell was stopped by hand at 07:40 while ft_135m_s1 ran (the job itself was
+  left running under its guard); queue_e002b.sh took over (same guard rules) and orders the post-hoc 135M
+  jobs before the 360M block.
+
+TESTS (no model loaded; logs/validate_135m_tok.txt, logs/mutation_test.txt / .json)
+  validate.py: 0 failures. Covers grader fixtures (empty/tie/NaN/wrong answers fail), pass-rule boundary,
+  d10-only, plain-only, majority rule, lock-in rule, paired CI (hash alignment, sign), oracle models on the
+  real eval items (first-mentioned: LW10 0 / TS10 0 / NU10 1; last-mentioned: 1 / 0 / 0; empty and wrong: 0;
+  ideal: pass), no question or prefix contains its own answer word (24k items incl. 20k training
+  examples and kbig), held-out wording (0 of 105 normalized training frames equal any of 181 eval frames,
+  names/jobs/pets/fillers/objects disjoint), shortcut audit of the training stream (first-mentioned right
+  0.356, last-mentioned 0.398, latest-statement rule 1.000), tokenization (answer-only labels, no truncation,
+  answers decode exactly, max length 689 of 768), crossed oracles, generation-grader self-test.
+  mutation_test.py: 32 of 32 mutants killed (none by crash), unmutated suite green.
+  Reproducibility: the untouched 135M baseline reproduces E001's scores on the 3,456 shared scorings
+  exactly (max |diff| 0.0, 0 decision flips; logs/repro_135m.json).
+
+HARNESS CHANGE 2026-09-24 ~10:50 (resumed session; no effect on any score)
+  The Mac slept with the lid closed on battery during ft_135m_s2 (08:51-09:24) and ft_135m_s4 (10:43). At 10:45
+  macOS logged 'Thermal Emergency Sleep' twice: in dark wakes the closed laptop kept running the MPS job.
+  guard.py now (from the job after ft_135m_s4): does not start a job while the lid is closed on battery; SIGSTOPs
+  the job's process group while the lid is closed on battery and SIGCONTs it when the lid opens or AC is
+  connected; the ceiling counts ACTIVE time (paused time and system sleep excluded) and a 3 x ceiling wall-clock
+  cap still bounds every job. gen_probe.py was added to the list of model jobs the preflight refuses to overlap.
+  Tests: code/test_guard_lid.py (dummy counter child, no model): 3 cases pass; 4 of 4 guard mutants caught
+  (no SIGSTOP, paused time counted as active, wall cap removed [caught by the test's own 90 s timeout], never
+  resume). logs/selftest/. Live check on ft_135m_s4 (the real MPS training process group): SIGSTOP 20 s, CPU time
+  frozen, SIGCONT, training continued at the normal step time with normal loss.
+  ft_135m_s4 itself ran under the old guard, so a temporary scratch watcher paused it on lid close
+  (logs/lidwatch_s4.txt).
+  Note: ft_135m_s2 ran through the 08:51-09:24 sleep (elapsed 4873 s vs ~2900 s for other seeds); its results
+  are in line with the other seeds.

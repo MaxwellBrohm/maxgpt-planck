@@ -1,0 +1,24 @@
+{
+ "name": "dry_battery_smol135",
+ "cmd": [
+  "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+  "run_battery.py",
+  "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "--sets",
+  "new,old,khard",
+  "--renders",
+  "plain,chat",
+  "--dry",
+  "3",
+  "--tag",
+  "dry"
+ ],
+ "started": "2026-09-24 00:51:17",
+ "ended": "2026-09-24 00:51:22",
+ "exit": 0,
+ "killed": null,
+ "min_free": 78,
+ "max_swap_mb": 0.0,
+ "peak_rss_mb": 0,
+ "elapsed_s": 5
+}

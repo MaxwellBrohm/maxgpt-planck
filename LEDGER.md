@@ -275,6 +275,13 @@
 | P-186 | Token-count scaling of multi-turn skill: one WSD run per size with decay branches at 500 / 2,000 / 5,000 / 20,000 tokens per parameter (Max, Sep 24) | pretraining | tweak-of-known | Overtraining studies measure loss, not multi-turn skill (Sardana et al.; SmolLM2-135M at 2T, LFM2.5-230M at ~83k tok/param); P-050 reads public checkpoints only | #4 | 5M and 10M on the 5070, 2 seeds | ~40-80 (est.) | Default: the budget where every RC-12 dev family's gain per doubling of tokens falls below its seed noise |
 | P-158 (expanded) | Vocabulary optimum measured at 5M, 20M and 60M on a 2k-32k grid, fit optimum vs size, per-size choice for the curve (Max, Sep 24) | tokenizer | known-apply at one size; the fit for multi-turn chat at 5-60M is untested | Tao et al. 2407.13623 (fit at 33M-3B non-embedding, loss only) | #9 | 18 arms x 2 seeds x 3 sizes, 5070 | ~60-120 (est.) | Default: optimum located within one grid step on both seeds at each size |
 
+## Results so far
+
+| id | experiment | result | verdict | details |
+|---|---|---|---|---|
+| P-002 | E001: new correction controls on 13 public models (90M to 2.6B) plus MaxGPT-3 | "First value wins" after a correction holds in every instruct model below 1B tested (11 models, 5 families); key-phrase match and turn-1 position strengthen it but do not explain it; LFM2-2.6B passes the controls in its own template (all-5 score 0.79), so the bar is reachable | confirmed limit | `experiments/E001_battery_and_probes/` |
+| P-001 | E002: repaired correction fine-tune on SmolLM2-135M-Instruct, 5 seeds | Passes its pre-registered rule on 5/5 seeds (latest-wins at d10 0.95-1.00 vs 0.00), also in free generation. The audit found the training data shared every task structure with the test; a "copy the value from the latest turn that shares the question's wording" rule passes the rule and the crossed control. Where the correction is worded differently from the question, several seeds fall below chance. Owner, two-hop and perspective gains were trained directly | passed the rule, shortcut not excluded: general updating NOT shown | `experiments/E002_ft_test/AUDIT.md`; follow-up E004 trains with wording-diverse corrections and tests held-out structures |
+
 ## Parked (judged not worth testing now)
 
 | Idea | Reason |

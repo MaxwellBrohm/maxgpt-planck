@@ -1,0 +1,25 @@
+{
+ "name": "rescore_base_135m_cross",
+ "cmd": [
+  "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+  "-B",
+  "rescore.py",
+  "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "hf",
+  "--tag",
+  "base",
+  "--sets",
+  "cross"
+ ],
+ "started": "2026-09-24 11:33:19",
+ "ended": "2026-09-24 12:56:49",
+ "exit": -15,
+ "killed": "wall_clock_ceiling_3600s",
+ "min_free": 64,
+ "max_swap_mb": 0.0,
+ "peak_rss_mb": 923,
+ "elapsed_s": 5010,
+ "active_s": 116,
+ "paused_s": 261,
+ "n_pauses": 1
+}

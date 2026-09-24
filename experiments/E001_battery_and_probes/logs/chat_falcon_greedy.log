@@ -1,0 +1,59 @@
+Loading weights:   0%|          | 0/386 [00:00<?, ?it/s]Loading weights: 100%|██████████| 386/386 [00:00<00:00, 6956.12it/s]
+loaded tiiuae/Falcon-H1-Tiny-90M-Instruct params=91.1M device=mps eos=[228, 11] in 0.5s
+/Users/brohm/Documents/Projects/video-editor/.venv/lib/python3.12/site-packages/torch/nn/functional.py:5823: UserWarning: MPS: The constant padding of more than 3 dimensions is not currently supported natively. It uses View Ops default implementation to run. This may have performance implications. (Triggered internally at /Users/runner/work/pytorch/pytorch/aten/src/ATen/native/mps/operations/Pad.mm:567.)
+  return torch._C._nn.pad(input, pad, mode, value)
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+[    14s] seed=None R_d2_name                  1/1 tok=500
+[    17s] seed=None R_d2_name__ctrl            0/1 tok=42
+[    32s] seed=None R_d2_number                0/1 tok=483
+[    35s] seed=None R_d2_number__ctrl          0/1 tok=34
+[    59s] seed=None R_d4_pet                   1/1 tok=766
+[    61s] seed=None R_d4_pet__ctrl             1/1 tok=33
+[    87s] seed=None R_d4_city                  0/1 tok=774
+[    89s] seed=None R_d4_city__ctrl            1/1 tok=33
+[   126s] seed=None R_d6_name                  0/1 tok=1038
+[   128s] seed=None R_d6_name__ctrl            0/1 tok=33
+[   168s] seed=None R_d6_number                0/1 tok=1055
+[   170s] seed=None R_d6_number__ctrl          0/1 tok=39
+[   239s] seed=None R_d10_pet                  0/1 tok=1537
+[   242s] seed=None R_d10_pet__ctrl            1/1 tok=31
+[   263s] seed=None R_d5_multi                 0/3 tok=806
+[   265s] seed=None R_d5_multi__ctrl           0/3 tok=53
+[   267s] seed=None F_ellipsis_capital         2/2 tok=74
+[   268s] seed=None F_ellipsis_capital__ctrl   1/1 tok=17
+[   272s] seed=None F_translate                1/2 tok=193
+[   274s] seed=None F_translate__ctrl          0/1 tok=23
+[   279s] seed=None F_coref_she                0/1 tok=206
+[   281s] seed=None F_coref_she__ctrl          1/1 tok=34
+[   285s] seed=None F_whynot                   0/1 tok=197
+[   287s] seed=None F_whynot__ctrl             0/1 tok=23
+[   289s] seed=None F_shorter                  1/1 tok=70
+[   290s] seed=None F_shorter__ctrl            1/1 tok=22
+[   295s] seed=None I_one_sentence             1/3 tok=162
+[   295s] seed=None I_one_sentence__ctrl       1/1 tok=20
+[   308s] seed=None I_end_question             0/3 tok=571
+[   309s] seed=None I_end_question__ctrl       1/1 tok=32
+[   317s] seed=None I_caps                     1/3 tok=312
+[   317s] seed=None I_caps__ctrl               0/1 tok=21
+[   328s] seed=None I_persona                  2/5 tok=584
+[   329s] seed=None I_persona__ctrl            1/2 tok=44
+[   344s] seed=None K_day                      0/1 tok=516
+[   346s] seed=None K_day__ctrl                1/1 tok=46
+[   363s] seed=None K_time                     1/1 tok=529
+[   366s] seed=None K_time__ctrl               0/1 tok=44
+[   375s] seed=None K_color                    0/1 tok=341
+[   378s] seed=None K_color__ctrl              0/1 tok=42
+[   379s] seed=None O_second_item              1/1 tok=65
+[   380s] seed=None O_last_item                0/1 tok=66
+[   382s] seed=None O_add10                    2/2 tok=115
+[   384s] seed=None O_add10__ctrl              1/1 tok=24
+[   392s] seed=None RI_identity                0/2 tok=387
+[   402s] seed=None RI_binding                 1/1 tok=344
+[   403s] seed=None RI_binding__ctrl           1/1 tok=31
+[   415s] seed=None T_party                    1/1 tok=585
+[   416s] seed=None T_party__ctrl              1/1 tok=45
+[   429s] seed=None T_dragon                   1/2 tok=594
+[   431s] seed=None T_dragon__ctrl             2/2 tok=46
+[   458s] seed=None L_tell_more                0/0 tok=1095
+[   485s] seed=None L_chitchat                 1/1 tok=1137
+done tiiuae/Falcon-H1-Tiny-90M-Instruct in 485s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/transcripts/tiiuae__Falcon-H1-Tiny-90M-Instruct__greedy.jsonl
