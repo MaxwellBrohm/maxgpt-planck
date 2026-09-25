@@ -1,0 +1,230 @@
+PLANCK CHAT PIPELINE SPEC v0 (2026-09-24). Components S (verified skill chat) and RH (grounded rephrasings).
+Sources: CORPUS.md 1-4 (4.1-4.6), PLAN.md Phases 1-2, research/followup/chatdata.md 3.1-3.7, conversation_ideas.md,
+tools/gemma_chat.py, experiments/E004_general_updating/code (read-only). No model is loaded while building this.
+
+0. RULES THAT OVERRIDE EVERYTHING BELOW
+- D8: every token of training text is human-written open text or written by an Apache-2.0 model. Claude writes code,
+  prompts, rubrics. So every natural-language line the PROGRAM inserts (user event lines, referring expressions,
+  openings, closings, RH wrappers, topic and intent phrases) comes from a TEACHER-WRITTEN BANK stored with provenance.
+- Until the bank pass runs, banks and pools are FAKE (code-generated for tests), each record says provenance "FAKE",
+  and admit.py refuses any record that touched a FAKE item (FAKE_PROVENANCE). Fail closed.
+- Held-out gate (section 9) runs on every skeleton, every render, every R1/R2 output, every RH seed and every bank item.
+- Teacher calls go only to a local fake HTTP stub in this build. The client refuses any host but 127.0.0.1 unless the
+  flag --allow-real-teacher is passed; tests never pass it.
+- No em or en dashes, emojis, bold, lists or headings in any training text. The checker rejects them.
+
+1. FLOW AND FILES (pipeline/)
+  pools.py      slot pools + loaders + FAKE pools        heldout.py   E004/RC-12 gate (section 9)
+  skeleton.py   sampler -> skeleton JSON (section 2-3)     prompt.py    skeleton -> render prompt (section 5)
+  teacher.py    completions client + fake stub server     parse.py     teacher text -> turns (section 5)
+  checker.py    checks + reason codes (section 6)         diversity.py caps, counters, coverage (section 7)
+  r1.py, r2.py  paraphrase and slot re-draw (section 8)   rh.py        grounded rephrasing (section 10)
+  admit.py      provenance + dedup + decon + shard write  tests/       fixtures and mutation tests per reason code
+  Stages: sample -> gate -> prompt -> render (R0) -> parse -> check -> admit -> R1 -> check -> R2 at load time.
+  One retry per skeleton with a new render seed (chatdata 3.1). Single-turn repair is a pilot flag, off by default.
+
+2. SKELETON JSON (one object per conversation; all ids stable; hash = sha256 of canonical JSON)
+{ "skel_id": str, "seed": int, "gen_version": str, "register": "RS"|"RM"|"RL", "slice": "core"|"lookup",
+  "topic_path": [topic_id, ...1-3],  "opening": opening_id, "closing": "goodbye"|"open"|"abrupt",
+  "user": {"name": slot, "age_band": "teen"|"20s"|..|"70s", "style": "terse"|"chatty"|"typos"|"lowercase",
+           "persona_seed": persona_id (prompt only, never training text), "facts": [fact_id, ...2-4]},
+  "assistant": {"name": slot, "may_say": [self_fact_id...], "must_not": ["plans","family","body","past",
+                "preferences","places"], "system_text": bank_line|null},
+  "slots": {slot_id: {"type": type, "value": str, "nonce": bool, "owner": "user"|"assistant"|person_id,
+                      "features": {"article": "a"|"an"|"", "number": "sg"|"pl", "cap": bool}}},
+  "persons": {person_id: {"relation": "sister"|..., "name": slot_id}},
+  "required_words": {"noun": w, "verb": w, "adj": w, "turn_hint": [i, j, k]},
+  "events": [{"id": "e1", "kind": "S1".."S9", "params": {...section 3}, "gold": {...}, "turns": {role: i}}],
+  "turns": [{"i": int, "role": "user"|"assistant"|"tool", "mode": "exact"|"guided"|"free",
+             "text": str (exact only, bank line with slots filled), "bank_ref": id|null,
+             "intent": intent_id + args (guided), "min_w": int, "max_w": int,
+             "must_include": [str], "must_exclude": [str], "events": [event_id], "mask": 0|1,
+             "gold_note": str|null}],
+  "heldout_gate": gate_hash, "provenance": {"banks": [bank_id@hash], "pools": [pool_id@hash]} }
+- Turn count 4-12 user turns (weights 4:5%, 5:10%, 6:20%, 7:20%, 8:20%, 9-10:15%, 11-12:10%), each followed by one
+  assistant turn; lookup turns add a tool turn. Hard cap 1,800 Planck tokens; target mean 200-400.
+- Register (P-048, pre-registered per size): RS (5-10M): word list 2,000, user 3-20 words, assistant 3-25;
+  RM (20-30M): 5,000, 3-25 / 3-30; RL (60M+): unrestricted list, 3-30 / 3-40. Per-turn min_w/max_w may tighten.
+- Event turns (plant, correction, query, rule, return) are "exact" with p_exact = 0.7, else "guided" with the
+  value and referring expression in must_include. Filler turns are "guided" from a topic intent bank line.
+- gold_note (P-011): program-written state note per assistant turn, "key: value (was old)", keys from the slot-type
+  label list. Stored, never rendered by the teacher, used only by note arms.
+- mask = 1 marks an assistant turn with no loss (S3 assistant_err). User-turn loss is a training switch (L8).
+
+3. EVENT CATALOGUE (share of event instances, pilot prior; re-weighted by yield toward coverage minimums)
+  2-4 events per conversation (2: 25%, 3: 45%, 4: 30%); fillers between events are topic small talk and serve as
+  distractors. Answer value mentioned second as often as first (P-008). d = user turns between last mention and query.
+  S1 recall at distance, 18%. params: slot, plant_turn, query_turn, d 1-10, distractor slot of the same type (0-1),
+     ref_expr_id, answer_order. gold: slot value. value absent between plant and query except scheduled mentions.
+  S2 reference and list state, 12%. params: item type, 3-5 items, 0-2 ops (add, remove, move), query (ordinal,
+     first, last, count, contains, "the other one"). gold: computed list state (program), exact item or order.
+  S3 correction and update, 20% (P-009). variant: update 40%, no_update_twin 20%, two_slot 15%, revert 10%,
+     assistant_err 15% (assistant states a wrong value, user corrects, the wrong turn gets mask 1). k 1-3 corrections,
+     marker_id or none (none 35%), original position varied, ref form full/head/pronoun/ellipsis. gold: latest value;
+     stale: every earlier value.
+  S4 instruction persistence and override, 10% (P-018). params: rule_id from the rule catalogue (max N words, one
+     sentence, end with a question, call the user X, avoid word W, start with the user's name), start turn,
+     optional override turn with a new rule. gold: verifier id + args on every later assistant turn.
+  S5 topic return, 7% (P-044). params: origin entities (1-2), digression 2-4 turns, return line (bank).
+     gold: return answer names >= 1 origin entity and 0 digression entities.
+  S6 speaker and perspective binding, 13% (P-007, P-008). variant: two persons of the user (same attribute type),
+     user fact vs assistant card fact, role-swap trap ("what's my dog called?" vs "what's your name?").
+     gold: bound value; assistant says "your X" for user facts, never "my X".
+  S7 two-sided abstention, 10% (P-017). variant: abstain 50% (asked slot never planted; gold: hedge + offer, no
+     candidate), given 50% (planted slot asked with deflection bait, "do you remember ..."; gold: value, no deflection).
+  S8 social basics, 5% as events (greeting, how_are_you, thanks, who_are_you, goodbye); openings and closings occur
+     in every conversation anyway. gold: identity = card name, length bounds, no topic injection.
+  S9 lookup, 5% overall, only in the lookup slice (20% of conversations, 1-2 S9 events each). params: fictional
+     entity + attribute, result hit / empty / counterfactual (0/10/25% arm, P-085), need: needed / already in
+     context. Format: assistant turn "<lookup>query</lookup>", tool turn "<result>key: value</result>" (program).
+     gold: lookup iff needed; answer copies the result value; empty result reported as not found.
+  Never repeat a (topic, persona, event-kind set) triple. Log acceptance per kind x variant x d bin x teacher.
+
+4. SLOT POOLS (D8 column = where the strings come from; all filtered by the held-out gate before use)
+  first names         SSA baby names, public domain; common and rare bands; minus E004 ALIAS_SURNAMES
+  surnames (rare use) Census 2010 surnames, public domain; minus ALIAS_SURNAMES; never with an honorific
+  cities, places      GeoNames cities15000, CC-BY-4.0, ASCII English names; minus held-out objects and aliases
+  weekdays, months,   programmatic closed lists (weekday, month, colour, time of day in words, number words
+  colours, times      one to twelve); DIGITS NEVER (E004 NUMBER is held out), numbers are words
+  pets, foods, jobs,  teacher-written lists from a Claude-written prompt (bank pass), provenance per item;
+  hobbies, objects    hobbies exclude every E004 SPORT value; objects exclude every E004 held-out object phrase
+  nonce values        programmatic pronounceable strings (CV(C)CV(C)), not an English word, not a pool name;
+                      share 25% default, 0/50% arms (P-025)
+  topics, intents     teacher-written everyday topics (several thousand) and per-topic filler intents
+  personas            Nemotron-Personas-USA, CC-BY-4.0, gpt-oss-120b (Q2 yes): prompt seeds only; PERSONA_LEAK
+                      rejects any 8-gram shared between persona text and a render
+  required words      noun/verb/adj from the controlled word list (computed from our allowed corpora; FAKE until then)
+  lookup KB           program-built fictional entities (nonce names), attribute labels from a teacher-written list
+  bank lines          teacher-written user event lines with {slot} holes, ref expressions, markers, openings,
+                      closings, rule phrasings, return lines, RH wrappers; each line used at most 50 times per 100k
+  Pool files record source URL, license, retrieval date, sha256. Nothing is downloaded in the build step.
+
+5. RENDER PROMPT CONTRACT (script mode, one generation per conversation)
+  Wire format (Gemma 4, thinking off, from tools/gemma_chat.py):
+    "<|turn>user\n" + PROMPT + "<turn|>\n<|turn>model\n<|channel>thought\n<channel|>"
+  POST /v1/completions {model, prompt, max_tokens, temperature, top_p, top_k, min_p, stop:["<turn|>","<|turn>"]}.
+  Sampling: Gemma T 1.0, top_p 0.95, top_k 64, min_p 0.05; Ministral T 0.7-1.0 (tested in the pilot).
+  max_tokens = 2 x (sum of max_w over turns) + 40. Record model id, license, prompt variant id, prompt sha256.
+  PROMPT = instruction block (one of 50-200 teacher paraphrases of the base block, rotated, id recorded)
+         + card block + script block. Content, in order:
+    a) task: write one chat between a user and an assistant, following the script line by line;
+    b) style: plain everyday sentences; no emojis, no bold or markdown, no lists, no dashes, no stage directions,
+       no speaker names inside lines; typos only if the user style says so;
+    c) assistant card: its name, the only things it may say about itself, "never invent plans, family, a body,
+       a past or places for the assistant";
+    d) user sketch: name, age band, style, 1-line persona seed paraphrase (prompt only);
+    e) script: one line per turn: "U3 [exact]: <text>" (copy exactly), or "A3 [4-18 words; must include: X;
+       must not include: Y]: <intent>"; tool turns are given complete and must be copied;
+    f) output format: exactly the planned labels in order, one per line, "U1: ...", "A1: ...", ..., then "END".
+  Parse: strip; drop one leading empty thought block if present; each non-empty line must match
+  ^(U|A|T)(\d+): (.+)$ in the planned order, then "END". Anything else is a FORMAT_* reject (no repair in v0).
+  Exact lines: the parsed text must equal the bank line after NFKC, quote and whitespace normalization; the
+  stored text is the bank line itself.
+
+6. CHECKER (every check runs; all failing codes are logged; the first in this order is the primary reason)
+  FORMAT_LINES count or labels wrong      FORMAT_EXTRA text outside labeled lines      FORMAT_WRAP unlabeled line
+  THOUGHT_TAG leftover channel/turn tags  EMPTY_TURN                                   ROLE_LABEL "User:" etc. in text
+  MARKDOWN ** __ # ` bullets numbering    EMOJI any emoji/pictograph codepoint          DASH em/en dash, " - ", "--"
+  LEN_USER / LEN_ASSIST outside min_w..max_w                                           DIGIT any digit character
+  EXACT_MISMATCH exact line altered       REQ_SPAN missing must_include                 FORBID_SPAN must_exclude found
+  REQ_WORD a required word never used     VOCAB_OOL out-of-list rate > 2% (slots exempt; report-only while FAKE)
+  PLANT_MISSING value not in plant turn   DIST_LEAK value between plant and query      QUERY_RESTATES query has value
+  QUERY_NOREF query lacks its ref expr    ANSWER_WRONG gold absent                     ANSWER_STALE stale value present
+  ANSWER_SHOTGUN >= 2 candidates          PERSPECTIVE "my X" for a user fact, or user fact claimed by assistant
+  SELF_CLAIM first-person self-facts outside the card ("I went", "my weekend", "I love", "I live", "my family")
+  PERSIST_FAIL rule verifier fails        OFFTOPIC reply shares no content word with its turn's intent or topic
+  ABSTAIN_MISSING no hedge, or a candidate given on an abstain item
+  DEFLECT deflection pattern ("I don't have access", "as an AI I can't know", "I can't remember") on a given item
+  AI_ISM ("as an AI", "language model", "great question", "feel free to", "I'm here to help", "Certainly!")
+  TOPIC_RETURN S5 gold fails              IDENTITY S8 name mismatch or other name       LIST_STATE S2 gold fails
+  LOOKUP_FORMAT / LOOKUP_UNNEEDED / LOOKUP_MISSING / LOOKUP_COPY / LOOKUP_EMPTY (S9 golds)
+  REPEAT_4GRAM a 4-gram 3+ times in a turn   CONSEC_REP coverage >= 0.25   SELF_COPY >= 50% of the previous
+  assistant turn's 4-grams                   ECHO_USER assistant copies >= 60% of the user turn's 4-grams
+  NON_ENGLISH                            SAFETY blocklist hit                       PERSONA_LEAK (section 4)
+  PROMPT_ECHO any 6-gram of the instruction or card block (slots and bank lines excluded) in a turn: this stops
+    Claude-written prompt wording from leaking into training text
+  HELDOUT_VOCAB / HELDOUT_ECHO / HELDOUT_STRUCT (section 9)   NGRAM_CAP / SENT_CAP / OPENING_CAP (section 7)
+  FAKE_PROVENANCE (admit only)            DUP_EXACT / DUP_NEAR (admit only)          DECON_PENDING (admit only)
+  Matching: lowercase, NFKC, word-bounded value regex with optional plural (E004 text_e004.value_re style); number
+  words only. Candidates = every same-type value in the conversation plus stale values.
+  Every code has a clean fixture that must pass and a planted fixture that must fire it (Max's mutation rule);
+  shotgun, echo-of-question, stale value, wrong owner, leaked role and empty reply are planted for every answer check.
+  A 1-2% sample goes to a second-model naturalness read (report only, not a gate).
+
+7. DIVERSITY CONTROLS
+  Skeleton randomization: events, variants, d, distractors, turn count, opening, closing, user style, tone,
+  required words, topic path, assistant name and card. Personas and topics are sampled without replacement per
+  shard. Instruction block rotated over 50-200 teacher paraphrases. Openings from a verbalized-sampling bank (the
+  teacher lists 5 openings with probabilities; the tail is kept). ~30% of shards use a second teacher (L14/P-154).
+  Caps, counted per shard in accepted conversations, enforced at generation time (reject, never truncate):
+    NGRAM_CAP a non-bank 8-gram (slots replaced by type tags) in > 0.1% of conversations
+    SENT_CAP  an assistant sentence (normalized, slots as tags) in > 0.1% of conversations
+    OPENING_CAP first-user-turn 4-word opening in > 2% of openings; the shard's top 50 openings form the
+      next shard's "do not start with" list
+    bank line use cap (section 4); triple uniqueness (section 3)
+  Measured per 10M-token shard (report, two-sided alarms against the pilot band and OASST2 human turns): gzip ratio,
+  distinct-2/3, long-n-gram frequency, template rate, Self-BLEU, opening clusters, coverage matrix
+  (kind x variant x d bin x topic group x style x opening) with a minimum per cell; sampling weight per cell is
+  target share / accepted share, so low-yield cells (corrections, long d) get sampled more.
+
+8. PASSES
+  R0 render: section 5 on a fresh skeleton; checked by section 6; accepted records keep slot spans as
+     {turn, start, end, slot_id, type} character offsets.
+  R1 paraphrase (2-4 per R0, P-162): a small Apache-2.0 model sees the accepted chat with each slot span and each
+     required span replaced by a locked placeholder {S1}, {R1}; it must keep every placeholder exactly once per line,
+     the line labels and count, and the register. Placeholders are re-filled, spans recomputed, and the FULL checker
+     re-runs. Extra codes: R1_PLACEHOLDER (lost, doubled or moved across lines), R1_TOO_CLOSE (word-4-gram Jaccard
+     with the source > 0.8), R1_DRIFT (a turn's intent changed: OFFTOPIC against the source turn).
+  R2 re-draw (CPU, at load time, every pass): each slot gets a fresh same-type value from the pools (distinct in
+     the conversation, same features: article, number, cap), spans and gold notes are re-filled, golds recomputed,
+     and the cheap checks re-run (DIGIT, DASH, HELDOUT_VOCAB, value uniqueness, a/an agreement). A slot that fails
+     keeps its old value. Nonce share is re-drawn at the configured rate.
+  Every record: pass (R0|R1|R2), parent id, teacher or paraphraser id + license, prompt variant, bank and pool
+  hashes, heldout gate hash, rc12 status.
+
+9. HELD-OUT GATE (heldout.py; imports experiments/E004_general_updating/code/heldout_e004.py read-only, with
+   sys.dont_write_bytecode = True, never copies or edits it)
+  Vocabulary (reject HELDOUT_VOCAB, word-bounded, case-insensitive, optional plural):
+    all_heldout_objects() (E001 objects, EVAL_OBJECTS phrases, H6 objects incl. "table size"), SPORT, NUMBER
+    (and every digit, so DIGIT covers it), EVAL_MARKERS ("hold on", "correction:", "one more change", "oops,",
+    "on second thought,", "one more thing:"), HONORIFICS (no honorific anywhere), ALIAS_SURNAMES.
+  Text overlap (reject HELDOUT_ECHO): 0 word 5-grams shared with the E004 eval, dev and probe texts (items_e004.draw
+    for every name in DRAWS, collected as ngram_overlap.eval_texts does), and 0 whole-sentence normalized frames
+    shared with them (text_e004.normalize).
+  Structure (skeleton-level, HELDOUT_STRUCT; E004 H1-H5 axes stay unseen): at most 3 corrections of one slot, d at
+    most 10, at most 2 slots of one value type, no in-dialogue alias definition, and no frame echo (E004 definition,
+    text_e004.echo_runs) between a query and any statement of the queried slot.
+  RC-12, OOD-H, human-test scripts: they do not exist yet (RC-12 locks Oct 11-14). The sealed session will export a
+    held-out vocabulary list and hashed 13-gram sets; heldout.py loads them from pipeline/heldout_ext/ when present.
+    Until then every shard is stamped rc12 "pending" and admit.py refuses to mark it trainable (DECON_PENDING).
+    OOD-H thread ids are excluded from RH-I seeds by id.
+  The gate hash (sha256 of every list and n-gram set) is written into each record; a changed gate re-checks shards.
+
+10. RH, GROUNDED REPHRASINGS (rh.py)
+  RH-G (main): an open human passage (60-250 words, FD-high bucket first; license carried; ShareAlike flag) must pass
+    the held-out gate and the date gate BEFORE rendering; a rejected passage is logged, not rewritten.
+    Placement (sampled): system context block 50%, or the user pastes it after a bank wrapper line 50%.
+    Plan (program): 3-6 user questions, of which 1-2 are unanswerable or near-miss; the knowledge gap is kept (the
+    user has not read the passage). Teacher output format:
+      U1: ...   A1: ...   E1: "<verbatim quote from the passage>" or E1: NONE   ...   END
+    Checks: all section 6 hygiene codes; RH_QUOTE (E line not verbatim in the passage after whitespace
+    normalization), RH_SUPPORT (answer content words overlap its quote < 50%, or a capitalized word or number word
+    in the answer is absent from passage and user turns), RH_UNANS (unanswerable item without hedge, or with a
+    passage-derived guess), RH_COPY (an answer copies >= 20 consecutive passage words). E lines are stripped from
+    training text and kept in the record.
+  RH-I (inpainting): human lines (OASST2 minus OOD-H threads; Gutenberg Dialogue) stay byte-identical as one speaker;
+    the teacher writes only the other speaker. RH_HUMAN_ALTERED if any human line changes.
+  RH record: passage source id, license, char range, placement, questions with answerable flag, quotes,
+  provenance per turn (human source vs teacher id).
+
+11. OUTPUT
+  accepted/*.jsonl: one record per conversation: ids, pass, system text, turns [{role, text, mask, author, spans}],
+  events with golds and turn indices, gold notes, provenance, check list, gate hash, rc12 status.
+  rejects/*.jsonl: skel_id, attempt, primary code, all codes, first failing line, teacher id.
+  yield.jsonl: per shard and teacher: accepted / attempted by code, kind, variant, d bin; accepted Planck tokens
+  per hour (Planck tokenizer when it exists, else word count x 1.3, flagged).
+
+12. WHAT IS FAKE OR OPEN IN THIS BUILD
+  Fake: every bank, every pool except closed programmatic lists, the word list, the teacher (canned outputs from a
+  local stub), the paraphraser. Open: final event shares (pilot), p_exact, RC-12 exports, the user-turn loss switch,
+  whether RH passages with a lone digit or an honorific are dropped (default: dropped, logged).

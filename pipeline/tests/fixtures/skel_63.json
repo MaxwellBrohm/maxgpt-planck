@@ -1,0 +1,397 @@
+{
+ "assistant": {
+  "may_say": [
+   "is_assistant",
+   "can_look_up"
+  ],
+  "must_not": [
+   "plans",
+   "family",
+   "body",
+   "past",
+   "preferences",
+   "places"
+  ],
+  "name": "s3",
+  "system_ref": null,
+  "system_text": null
+ },
+ "attempt": [
+  0,
+  0
+ ],
+ "closing": "open",
+ "estimate": {
+  "flag": "word count x 1.3",
+  "tokens_max": 358,
+  "tokens_mid": 198
+ },
+ "events": [
+  {
+   "gold": {
+    "answer": "Turin",
+    "lookup": false,
+    "need": "context",
+    "result": "hit",
+    "stale": []
+   },
+   "id": "e1",
+   "kind": "S9",
+   "params": {
+    "attribute": "location",
+    "entity": "Dourdris Market",
+    "lookup": null,
+    "need_kind": "context",
+    "result": "hit",
+    "slot": "s1",
+    "stale": [],
+    "vtype": "city"
+   },
+   "turns": {
+    "answer": 9,
+    "context": 4,
+    "query": 8
+   }
+  },
+  {
+   "gold": {
+    "answer": "sketching",
+    "candidates": [],
+    "slot": "s2",
+    "stale": []
+   },
+   "id": "e2",
+   "kind": "S1",
+   "params": {
+    "ack_mentions": true,
+    "answer_order": "first",
+    "d": 1,
+    "distractor": null,
+    "distractor_pos": null,
+    "ops": [
+     {
+      "op": "plant",
+      "slot": "s2",
+      "turn": "plant",
+      "value": "sketching"
+     }
+    ],
+    "plant_turn": 1,
+    "query_turn": 3,
+    "ref_expr": "my hobby",
+    "ref_form": "full",
+    "slot": "s2"
+   },
+   "turns": {
+    "answer": 7,
+    "plant": 2,
+    "query": 6
+   }
+  }
+ ],
+ "gen_version": "skel-v0.1",
+ "heldout_gate": "f8c8742ff496b8b9",
+ "opening": "open.greet.1",
+ "persons": {},
+ "provenance": {
+  "banks": [
+   "banks@d08728824f87:FAKE"
+  ],
+  "fake": true,
+  "personas": "FAKE",
+  "pools": [
+   "assistant_name@3f6cc99fc757:FAKE",
+   "city@10ba899db35f:FAKE",
+   "entity_kind@4def074a1884:FAKE",
+   "hobby@789c11ff2e38:FAKE",
+   "object@56de67b1a1f9:FAKE",
+   "pet_kind@e70868e886dc:FAKE",
+   "plan@a4640831889c:FAKE",
+   "relation@cd7345de60e6:FAKE",
+   "req_adj@0e424b7be636:FAKE",
+   "req_noun@76ff350d0659:FAKE",
+   "req_verb@08b818b625e0:FAKE",
+   "topic@9198fcb4956b:FAKE"
+  ]
+ },
+ "rc12": "pending",
+ "register": "RM",
+ "required_words": {
+  "adj": "golden",
+  "noun": "island",
+  "turn_hint": [
+   1,
+   3,
+   5
+  ],
+  "verb": "trim"
+ },
+ "seed": 63,
+ "skel_id": "sk-611d790eb7a9963a",
+ "slice": "lookup",
+ "slots": {
+  "s1": {
+   "counted": true,
+   "features": {
+    "article": "",
+    "cap": true,
+    "number": "sg"
+   },
+   "key": "lookup_value",
+   "nonce": false,
+   "noun": null,
+   "owner": "user",
+   "type": "city",
+   "value": "Turin"
+  },
+  "s2": {
+   "counted": true,
+   "features": {
+    "article": "a",
+    "cap": false,
+    "number": "sg"
+   },
+   "key": "hobby",
+   "nonce": false,
+   "noun": null,
+   "owner": "user",
+   "type": "hobby",
+   "value": "sketching"
+  },
+  "s3": {
+   "counted": false,
+   "features": {
+    "article": "",
+    "cap": true,
+    "number": "sg"
+   },
+   "key": "assistant_name",
+   "nonce": false,
+   "noun": null,
+   "owner": "user",
+   "type": "assistant_name",
+   "value": "Tavi"
+  }
+ },
+ "topic_path": [
+  "t0046",
+  "t0015"
+ ],
+ "topic_text": {
+  "t0015": "a rainy weekend",
+  "t0046": "cutting back on sugar"
+ },
+ "turns": [
+  {
+   "bank_ref": "open.greet.1",
+   "events": [],
+   "gold_note": null,
+   "i": 0,
+   "intent": null,
+   "mask": 0,
+   "max_w": 25,
+   "min_w": 2,
+   "mode": "exact",
+   "must_exclude": [],
+   "must_include": [],
+   "role": "user",
+   "role_in_event": "opening",
+   "text": "Hello there."
+  },
+  {
+   "bank_ref": null,
+   "events": [],
+   "gold_note": null,
+   "i": 1,
+   "intent": "greet back and engage with the topic",
+   "mask": 0,
+   "max_w": 30,
+   "min_w": 3,
+   "mode": "guided",
+   "must_exclude": [
+    "Tavi"
+   ],
+   "must_include": [],
+   "role": "assistant",
+   "text": null
+  },
+  {
+   "bank_ref": null,
+   "events": [
+    "e2"
+   ],
+   "gold_note": null,
+   "i": 2,
+   "intent": "state hobby",
+   "mask": 0,
+   "max_w": 25,
+   "min_w": 3,
+   "mode": "guided",
+   "must_exclude": [],
+   "must_include": [
+    "sketching"
+   ],
+   "role": "user",
+   "role_in_event": "plant",
+   "text": null
+  },
+  {
+   "bank_ref": null,
+   "events": [
+    "e2"
+   ],
+   "gold_note": "hobby: sketching",
+   "i": 3,
+   "intent": "acknowledge briefly",
+   "mask": 0,
+   "max_w": 30,
+   "min_w": 3,
+   "mode": "guided",
+   "must_exclude": [
+    "Tavi"
+   ],
+   "must_include": [
+    "sketching"
+   ],
+   "role": "assistant",
+   "text": null
+  },
+  {
+   "bank_ref": "lookup.ctx.1",
+   "events": [
+    "e1"
+   ],
+   "gold_note": null,
+   "i": 4,
+   "intent": null,
+   "mask": 0,
+   "max_w": 25,
+   "min_w": 3,
+   "mode": "exact",
+   "must_exclude": [
+    "sketching"
+   ],
+   "must_include": [
+    "Turin"
+   ],
+   "role": "user",
+   "role_in_event": "context",
+   "text": "I read somewhere that the Dourdris Market is in Turin."
+  },
+  {
+   "bank_ref": null,
+   "events": [
+    "e1"
+   ],
+   "gold_note": "hobby: sketching",
+   "i": 5,
+   "intent": "acknowledge briefly",
+   "mask": 0,
+   "max_w": 30,
+   "min_w": 3,
+   "mode": "guided",
+   "must_exclude": [
+    "Tavi",
+    "sketching"
+   ],
+   "must_include": [],
+   "role": "assistant",
+   "text": null
+  },
+  {
+   "bank_ref": "key.hobby.query.0",
+   "events": [
+    "e2"
+   ],
+   "gold_note": null,
+   "i": 6,
+   "intent": null,
+   "mask": 0,
+   "max_w": 25,
+   "min_w": 3,
+   "mode": "exact",
+   "must_exclude": [
+    "Turin"
+   ],
+   "must_include": [
+    "my hobby"
+   ],
+   "role": "user",
+   "role_in_event": "query",
+   "text": "What hobby did I mention?"
+  },
+  {
+   "bank_ref": null,
+   "events": [
+    "e2"
+   ],
+   "gold_note": "hobby: sketching",
+   "i": 7,
+   "intent": "answer with the value first",
+   "mask": 0,
+   "max_w": 30,
+   "min_w": 3,
+   "mode": "guided",
+   "must_exclude": [
+    "Tavi",
+    "Turin"
+   ],
+   "must_include": [
+    "sketching"
+   ],
+   "role": "assistant",
+   "text": null
+  },
+  {
+   "bank_ref": "lookup.q.city.1",
+   "events": [
+    "e1"
+   ],
+   "gold_note": null,
+   "i": 8,
+   "intent": null,
+   "mask": 0,
+   "max_w": 25,
+   "min_w": 3,
+   "mode": "exact",
+   "must_exclude": [],
+   "must_include": [
+    "Dourdris Market"
+   ],
+   "role": "user",
+   "role_in_event": "query",
+   "text": "Can you find out which city the Dourdris Market is in?"
+  },
+  {
+   "bank_ref": null,
+   "events": [
+    "e1"
+   ],
+   "gold_note": "hobby: sketching",
+   "i": 9,
+   "intent": "answer from what the user said, without a lookup; end with an open question",
+   "mask": 0,
+   "max_w": 30,
+   "min_w": 3,
+   "mode": "guided",
+   "must_exclude": [
+    "Tavi"
+   ],
+   "must_include": [
+    "Turin"
+   ],
+   "role": "assistant",
+   "text": null
+  }
+ ],
+ "user": {
+  "age_band": "20s",
+  "facts": [
+   "s1",
+   "s2"
+  ],
+  "name": null,
+  "persona_seed": "np00057",
+  "style": "typos"
+ }
+}

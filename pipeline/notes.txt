@@ -1,0 +1,250 @@
+PLANCK PIPELINE NOTES, STEP 2 (skeleton generator), 2026-09-24. Plain text, no model loaded or called.
+
+ENTRY POINTS
+  skeleton.build(seed, register="RM", persona=None, topics=None) -> one gated skeleton dict, deterministic.
+  skeleton.shard(shard_seed, n, register) -> n skeletons; personas and topics without replacement; no repeated
+    (topic path, persona, kind set) triple.
+  gate.check(skel) -> [(code, detail)]; empty = may go to the teacher. golds.derive(skel) -> {event id: gold}.
+  golds.notes(skel) -> per assistant turn state note. schema.validate(skel) -> [errors].
+  Tests: cd pipeline && python3 -B -m unittest discover -s tests   (33 tests, about 55 s, 5,000 RM skeletons).
+  PLANCK_SKEL_N=300 gives a quick run; the frequency and coverage tests only hold at 5,000.
+
+FILES
+  heldout.py      E004 lists (read-only import), vocab regex, E004 5-gram and frame echo, RC-12 loader (load_ext)
+  gate.py         skeleton gate: HELDOUT_VOCAB / HELDOUT_ECHO / HELDOUT_STRUCT / DASH
+  fake_data.py    FAKE pool lists          pools.py     pools, features, nonce generator, provenance refs
+  banks_keys.py   FAKE key catalogue (plant, query, bait, correction, twin lines per fact key)
+  banks.py        FAKE line banks, fill(), list names, lookup predicates, bank hash
+  events_base.py  Ctx: slots, turn claims, reply specs, leak windows, position picker
+  events_a.py S1 S2, events_s3.py S3, events_b.py S4 S5 S6, events_c.py S7 S8 S9
+  assemble.py     opening, closing, fillers, windows, rules, turn list, required words, notes, provenance
+  skeleton.py     kind draw, parameter shrink, layout retries, build, shard
+  golds.py        gold derivation from the JSON alone; schema.py validator; tests/ (fixture, tests, mutations)
+
+MEASURED (5,000 RM skeletons, all tests pass)
+  Non-S9 kind shares within 1.5 points of SPEC (S3 runs about 0.6 points low, see shrink below).
+  S3 variants within 3 points; exact share of event user turns 0.70; S1 d covers 1..10; mean estimated
+  tokens about 370 (word count x 1.3); about 11 ms per skeleton. Mutations watched failing: vocab (8 kinds),
+  digit, E004 echo, dash, d > 10, alias, 3 slots of a type, 4 corrections, query frame echo, RC-12 vocab and
+  13-gram, wrong gold, unstated op value, leak, query restating, list op, 8 schema defects. Generator mutations
+  (S3 weight 30, p_exact 0.5, gate bypass with "golf" in the hobby pool, corrupted S1 gold) each turned the
+  matching corpus test red.
+
+SPEC CONFLICTS (Max or the next step decides)
+  1. Turn counts: 2-4 events of 1-7 user turns each, plus opening and goodbye, do not fit the SPEC turn weights.
+     The sampler draws T >= need, so 36% of chats have 12 user turns (SPEC 5%). Options: fewer events per chat,
+     compound turns (two events in one user turn), or accept longer chats (token mean is still in range).
+  2. S9 share: a 20% lookup slice with 1-2 S9 each gives 8% of events, not 5%. Implemented: slice 20%, S9 1 (80%)
+     or 2 (20%), other kinds keep their relative SPEC shares.
+  3. When a draw needs more than 12 user turns, shrink() reduces k, digression length, distractor, list ops,
+     override, the goodbye closing, then drops the opening; kinds and variants are never changed. About 1% of
+     seeds still redraw kinds.
+
+DECISIONS NOT IN THE SPEC
+  Held-out: pools and key nouns also ban held-out HEAD nouns (concert, reading, order...), stricter than the
+    text gate. Marker stems banned whole: "oops", "on second thought", "hold on", "one more change/thing";
+    "correction:" only with the colon. Hobbies exclude sport-like activities so H6's sport TYPE stays unseen.
+    No "number" slot type; number words appear only as S2 counts, the max-words rule and times of day.
+    Singleton key labels ("favourite food") count as object terms in frame-echo normalization.
+    Lookup values count toward the 2-slots-per-type cap.
+  Identity: S6 user_vs_card and S8 who_are_you force a system text that names the assistant. Without a system
+    text, may_say drops "name" and every guided assistant turn excludes the card name.
+  S6 variants 40/30/30 (two_persons, user_vs_card, role_swap); role_swap asks "what's your X?" and the gold is a
+    denial with no self-claim. S7 abstain reserves its key or noun so nothing plants it later; candidates are
+    all same-type values. S9: counterfactual = user states a belief, tool returns another value (gold = tool
+    value, stale = belief); context = the user passed the fact on earlier; need split 70/30, result 70/20/10.
+  Second S2 in a chat gets a different item type; lists are named (shopping list, route, guest list, chore list).
+  Closing weights 40/35/25, topic path 1/2/3 at 40/40/20, system text 40% unless forced.
+
+SCHEMA EXTENSIONS (SPEC section 2 shape kept)
+  user.name may be null (the name is never said). Slots add key, noun, counted (counted = a planted fact for the
+  2-per-type cap; list items, nickname, lookup values, card name are uncounted but still slots for R2).
+  events[].params.ops is the replay list golds.derive uses. Turns add role_in_event, lookup_call, rules.
+  Filler intents are ids "topic:<topic id>:<form>" (form indexes fake_data.INTENT_FORMS); S5 digressions use
+  "topic:<id>:digress". attempt = [kind draw, layout attempt]; estimate = token estimate; topic_text.
+
+FOR STEP 3 (prompt, teacher stub, parse, checker)
+  Exact turns keep must_include/must_exclude (redundant; exact text equality is the check). Match values with
+  golds.value_re (capitalized values case-sensitive, optional plural). Run gate.check again on rendered text.
+  S4 golds list the assistant turns each rule covers; lookup call turns are exempt. mask 1 only on the S3
+  assistant_err recap reply. Every skeleton is provenance fake: true and rc12 pending, so admit must refuse.
+  The lookup call and tool result are program-written text inside training chats: a D8 question for Max.
+
+
+PLANCK PIPELINE NOTES, STEP 3 (render prompt, parser, checker), 2026-09-25. No model loaded or called.
+
+ENTRY POINTS
+  render_prompt.build(skel) -> {prompt, prompt_sha256, variant, blocks, labels, persona, max_tokens, provenance}.
+    gemma_raw(prompt) is the Gemma 4 raw string with thinking OFF; completion_body(built) is the /v1/completions
+    body (T 1.0, top_p 0.95, top_k 64, min_p 0.05, stops); chat_body(built, model) is the chat-messages body.
+    feasible(skel) -> SKEL_INFEASIBLE codes: run it BEFORE any teacher call.
+  parse.parse(raw, parse.plan(skel)) -> {turns, codes, drift}. Labels are global (U1, A2, U3, ..., T8) so lookups
+    never make a label ambiguous. The tolerated drift list is in the parse.py docstring; all else is FORMAT_*.
+  checker.run(skel, raw, built) -> {ok, primary, codes, hits, drift, turns}; every check runs, primary = first
+    code in checker.ORDER. checker.record_turns(skel, res) stores the bank line itself for exact turns.
+  fake_teacher.raw(skel): a correct FAKE render (the clean baseline; also usable as the step 4 stub's canned body).
+  python3 -B mutation_checker.py (full, about 30 to 60 s) or --quick (about 15 s). tests/test_checker.py (9 tests)
+    runs --quick --mutant-sample 4. Whole suite: python3 -B -m unittest discover -s tests (42 tests, about 80 s).
+
+FILES (each under 250 lines)
+  render_prompt.py, render_intents.py (skeleton intent -> teacher guidance), parse.py, checker.py, check_base.py,
+  check_text.py, check_events.py, check_behav.py, lexicons.py (rubric patterns; the SAFETY list is FAKE),
+  fake_user.py + fake_teacher.py (FAKE renders), defects_text.py, defects_event.py, defects_behav.py (planted
+  defects), fixtures_hand.py (hand-written renders, the measured Gemma habits, parser drift), fixtures_bound.py
+  (threshold pairs), checker_mutants.py, mutation_checker.py, tests/test_checker.py,
+  tests/fixtures/skel_{10,63,72,169}.json (pinned skeletons for the hand-written renders).
+
+MEASURED
+  Full mutation run: 798 feasible skeletons (600 RM, 100 RS, 100 RL). 1584/1584 cases behave: 798 clean renders
+  pass, 200 drifted renders pass with identical turns, 4 hand-written natural renders pass, 2 Gemma-habit renders
+  fire EMOJI, MARKDOWN, DASH, SELF_CLAIM and LOOKUP_UNNEEDED, 445 planted defects (89 kinds) each fire their code,
+  135 boundary cases sit exactly on or one step inside a threshold. Every one of the 59 codes has a planted
+  fixture. 128/128 checker mutants killed: each check switched off (28), each code dropped (59), 14 threshold
+  moves, 27 one-line source edits (off-by-one windows, flipped comparisons, case handling, parser tolerance).
+  The four new unit tests were each watched failing under a deliberate break (gemma_raw, card name leak, dash in
+  the prompt, unquote), then restored.
+  Clean scan of 4,995 more skeletons (3,000 RM, 1,000 RS, 1,000 RL): 24 infeasible (0.5%), 2 fake renders fail
+  REQ_WORD. Both are limits of the fake teacher's rigid frames (two role-swap denials in one chat), not checker
+  false positives. Every other clean render passes.
+  Speed: about 12 ms per conversation checked (held-out lookups cached per text).
+
+DECISIONS
+  Matching uses golds.value_re; capitalized values are case-sensitive except in turns of a lowercase-style user.
+  ANSWER_SHOTGUN candidates: gold candidates + stale + every same-type value, minus what the turn must include.
+  QUERY_RESTATES exempts only S2 contains queries ("yes or no" is not a leak); a count word in a count query is.
+  PROMPT_ECHO covers the instruction head and tail, the card block and the script guidance (all Claude wording),
+  with slot values, required spans, topics, persona and bank lines masked out. Rule guidance is telegraphic
+  ("request a rule: one sentence per reply") because natural wording ("in one sentence from now on") collides with
+  what a user would really say.
+  With no system text the prompt never shows the card name; must_exclude still enforces it.
+  Codes added to the SPEC list: STAGE_DIR, PLANT_UNBOUND, CORR_MISSING, VALUE_EARLY, USER_VOICE, ASSIST_VOICE,
+  OPEN_END, SOCIAL_TOPIC, SKEL_INFEASIBLE (meanings in the checker.py docstring).
+  Not checked yet: answer position (value first vs after a lead-in); VOCAB_OOL is wired and report-only until the
+  real word list exists; the naturalness read; NGRAM/SENT/OPENING caps are shard level (diversity.py, later).
+
+CHANGES TO STEP 2 FILES (inside pipeline/, suite green)
+  heldout.pool_ok now also drops pool items that share an E004 word 5-gram (new heldout.echo5). The FAKE topic
+  "baking bread for the first time" contains "baking bread for the first" from the E004 texts and would have
+  reached training text through opening lines. gate.check also runs the E004 echo on topic texts.
+  Dropping a topic reshuffled every draw and showed that test_skeleton's "S1 d covers 1..10 in 5,000" only
+  passed by luck: d=10 needs the plant in the first user turn of a 12-turn chat, about 1 skeleton in 4,700
+  (3 in 14,000 measured). The assertion now requires 1..9 in the corpus and pins seed 9615 for d=10 (re-pin if
+  the pools change; watched failing with seed 9616).
+
+FINDINGS FOR THE SKELETON STEP
+  1. d is skewed short: of S1 events, d=1 24%, d=9 2%, d=10 0.02%. SPEC 7 wants long d oversampled.
+  2. 0.5% of skeletons cannot be rendered: a terse guided turn whose must_include alone is over 10 words (lists of
+     multi-word items), a value that is also a topic word (rice, coffee, gardening), a value inside another noun
+     (hobby "pottery" with a "pottery class"). feasible() catches them; the generator should not make them.
+  3. A guided plant turn lists only the value in must_include. The checker now requires the noun (PLANT_UNBOUND);
+     the skeleton should add it to must_include so the prompt shows it.
+  4. After a bare greeting opening ("Hi!") the assistant intent is "greet back and engage with the topic", so it
+     must raise a topic the user never mentioned (OFFTOPIC enforces it). Use a neutral reply there, or put the
+     topic in the first user turn.
+  5. Required-word hints land on turns with an 8-word cap and on role-swap denials.
+
+YIELD RISKS TO MEASURE IN THE PILOT (strict by design, may cost accepted chats)
+  ECHO_USER at 60% rejects acknowledgements that repeat a plant line almost word for word. SELF_CLAIM counts
+  "I love" and "I like" as preferences (SPEC list), so "I love that idea" is rejected. OFFTOPIC needs one shared
+  content word (crude suffix stemming). VALUE_EARLY rejects any mention of a scheduled value before its turn,
+  including common words (a colour, "rice").
+
+FOR STEP 4 (teacher client, stub, admit)
+  The stub can serve fake_teacher.raw(skel) and the defect fixtures as canned completions. The record needs
+  built["variant"], prompt_sha256, check codes, drift, rc12 status, gate hash. Everything is still FAKE:
+  instruction variants, persona text, the SAFETY list, all banks and pools, so admit must refuse.
+  The lookup call and tool result are program-written lines inside training chats (D8 question for Max, open).
+
+
+PLANCK PIPELINE NOTES, STEP 4 (driver, fake teacher server, dedup, stats), 2026-09-25. No model loaded or called;
+no real server contacted.
+
+ENTRY POINTS
+  python3 -B driver.py --out RUN_DIR --endpoint URL --model M --n N [--mode completions|chat] [--shard-seed S]
+      [--register RM] [--skeletons FILE.jsonl] [--concurrency 8] [--max-attempts 2] [--allow-real-teacher]
+      [--timeout 180] [--http-tries 4] [--backoff 1] [--stop-after K] [--log-every 30] [--license L]
+    The same command resumes a killed run. Exit 0 when finished, 3 when stopped early.
+  python3 -B fake_server.py --plan plan.json [--port 8765]    the FAKE teacher (stub_plan.plan(skels) builds plans)
+  python3 -B stats.py RUN_DIR [--json out.json]                diversity report on accepted shards (read-only)
+  python3 -B mutation_driver.py [--jobs 4]                     mutants of the step 4 code on temp copies
+  Tests: tests/test_driver.py (9, about 10 s), tests/test_driver_units.py (11, about 2 s).
+
+FILES (SPEC section 1 names in brackets)
+  teacher_client.py [teacher.py]  OpenAI-compatible client; completions = Gemma 4 raw prompt thinking off, or chat
+  fake_server.py  [teacher.py stub] canned renders keyed by sha256(prompt):seed; 500/429/503/drop/length steps
+  stub_plan.py    scenario plans + exact expected outcome per (skeleton, attempt)
+  driver.py, driver_state.py (run.json pin, manifest, resume), records.py (accepted/reject records, blocking),
+  dedup.py [admit.py part], shards.py (append-only jsonl, torn-line repair), yieldlog.py, stats.py [diversity.py]
+  skeleton.py: shard() now wraps iter_shard(shard_seed, register, start_j, seen), a resumable generator
+    (identical output: checked against the old code on 300 skeletons and by TestIterShard).
+
+RUN DIRECTORY
+  run.json (pinned: shard seed, register, gen version, max attempts, source, gate hash; a resume with a different
+  value is refused, including a changed held-out gate), skeletons/ (manifest, every skeleton written BEFORE its
+  first request), accepted/, rejects/ (one record per failed attempt), yield.jsonl (snapshots). Shards rotate at
+  5,000 records. Resume = the shards themselves: an attempt is done when its record exists. Torn last lines are
+  cut and reported (torn_bytes in the snapshot).
+
+BEHAVIOUR
+  Attempt 0, then one retry with a new seed (render_seed(skel_id, attempt)) after any reject except
+  SKEL_INFEASIBLE (render_prompt.feasible runs before any request, so it costs nothing). Driver codes beyond
+  checker.ORDER: TEACHER_ERROR (request failed after the client's retries; 408/429/5xx/timeouts/drops are retried
+  with backoff, other 4xx are not), CHECKER_ERROR (the checker raised; the traceback text is in the record, the run
+  goes on), DUP_EXACT, DUP_NEAR. A truncated render (finish "length") is rejected by the checker (FORMAT_LINES);
+  the finish reason is in the record.
+  Dedup: exact = sha256 of the normalized chat; near = MinHash (128 perms, 32x4 LSH) over word 5-grams with slot
+  values masked by type, estimated Jaccard >= 0.7. A copy that differs only in slot values is DUP_NEAR (R2 makes
+  those for free). On 598 fake renders: no false hits, max true Jaccard between different chats 0.19.
+  Records: accepted records carry turns with author (bank:<ref>, teacher:<model>, program) and slot spans, slots,
+  events + golds, gold notes, provenance (skeleton + teacher model, license, prompt variant, prompt sha256, seed),
+  codes incl. report-only, drift, gate hash, rc12, est tokens (words x 1.3, flagged), trainable=false and
+  blocked=[FAKE_PROVENANCE | LICENSE, DECON_PENDING]. Rejects carry primary, all codes, first failing line, hits,
+  finish, usage and the raw teacher text (for measuring checker false rejects in the pilot).
+  Yield: yield.jsonl snapshots every --log-every s and at the end: accepted/attempted, by primary, by every code,
+  by cell (kind|variant|d bin, one count per event), accepted est tokens per hour (this session), completion
+  tokens per second, mean latency.
+
+SAFETY
+  Without --allow-real-teacher the client refuses a non-loopback host before opening a socket, and on loopback it
+  refuses unless GET /planck-stub answers as the fake stub. The driver checks this before writing anything. The
+  stub sets license FAKE, so its records are blocked twice over. With --allow-real-teacher the license comes from
+  the model id (gemma-4, ministral-3 -> Apache-2.0, anything else UNKNOWN -> blocked LICENSE) or --license.
+
+MEASURED
+  End to end (70 shard skeletons + 2 exact copies + 1 value-swapped copy + 1 infeasible copy, 8 scenarios: clean,
+  defect then clean, two defects, 500+429 then clean, dropped connection then clean, 503 on every try then clean,
+  truncated then clean, infeasible): every accepted and rejected record matches the plan outcome by outcome, the
+  yield snapshot's by-primary counts equal the records', the stub's request count equals the plan's, max 5
+  requests in flight at concurrency 5. The same plan holds after --stop-after 25 plus a torn line, after SIGKILL of
+  the CLI at 30+ records, in chat mode, and with a checker that raises once.
+  Defects used by the stub: 30 "pure" ones whose code was primary on 40/40 skeletons (primary must match) and 5
+  semantic ones (ANSWER_WRONG, ANSWER_STALE, ANSWER_SHOTGUN, DIST_LEAK, PLANT_MISSING) whose code must be among the
+  codes; REQ_SPAN or an earlier code is usually primary for those, which the yield log shows as it is.
+  Scale check, 1,000 shard skeletons, concurrency 8: 1,487 attempts, 866 accepted, 621 rejected, 1,848 requests,
+  all equal to the plan and verified outcome by outcome; about 6 s of driver time with an instant stub (checker +
+  dedup + writes are about 4 ms per attempt, negligible next to a teacher). The first 1,000 run showed 2 skeletons
+  whose "clean" fake render fails the checker (LEN_USER: a 12-word terse user line, the step 3 fake teacher's
+  rigid frames). The driver was right; the plan now checks every canned clean render and plans such skeletons as
+  fake_unclean (two rejects). No checker change.
+  Mutation (mutation_driver.py, copies of pipeline/ in a temp dir, E004 linked read-only): 27 of 27 mutants killed
+  (no dedup, no retry, infeasible retried, 3 attempts, resume forgetting accepts / rejects / the dedup index / the
+  tally, no torn-line repair, rotation off by one, no HTTP retry, drops not retried, no loopback check, no stub
+  handshake, seed ignoring the attempt, double-counted yield, records not blocked, span offset, one worker,
+  stop-after ignored, near threshold 0.95, no slot masking, distinct-n counting unigrams, n-gram alarm ignoring
+  MIN_N, histogram edges, checker crash re-raised, no manifest). Two fixtures were vacuous and fixed after being
+  caught: distinct-2 on "a b a b" (equal to distinct-1) and a no-alarm case that had no 8-grams at all. The
+  duplicate-at-the-end skeleton exists so resume must rebuild the dedup index.
+  Full suite: python3 -B -m unittest discover -s tests: 62 tests, about 65 s.
+
+NOT DONE / FOR THE NEXT STEP
+  1. SPEC 7 caps at generation time (NGRAM_CAP, SENT_CAP, OPENING_CAP, "do not start with" list) are measured by
+     stats.py (alarms from 1,000 conversations up) but not enforced by the driver. On FAKE renders every alarm
+     would fire (1,000-run: top 8-gram in 5.7% of chats, top assistant sentence 31.5%, top opening 22%); that is the
+     fake teacher's templates and the FAKE opening bank, not a measurement of the real teacher.
+  2. Self-BLEU, syntactic templates and embedding clusters of openings (CORPUS 4.4) are not in stats.py.
+  3. R1 paraphrase, R2 re-draw, RH, 13-gram decontamination (DECON_PENDING stays on every record) are not built.
+  4. The dedup index lives in memory (about 4 KB per accepted chat): fine per 30k-chat shard, not for millions.
+  5. Generator fixes from step 3 still open: infeasible skeletons (0.5%, cost no teacher call now), the noun in
+     guided plant must_include, the neutral reply after a bare greeting, required words on short turns.
+  6. Before any real run: start LM Studio or vLLM yourself, then pass --allow-real-teacher, --model and --endpoint.
+     Check the first 20 rejects' raw text by hand for checker false rejects (the raw render is in every reject).
