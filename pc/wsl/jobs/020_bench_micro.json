@@ -1,0 +1,10 @@
+{
+ "name": "020_bench_micro",
+ "cmd": ["$PLANCK_HOME/venv/bin/python", "pc/bench_micro.py",
+         "--targets", "5e6,10e6,20e6,30e6", "--batches", "8,16,32",
+         "--out", "$PLANCK_HOME/runs/bench_micro.jsonl"],
+ "cwd": "$PLANCK_HOME/repo",
+ "no_prereg_reason": "throughput benchmark (PLAN.md bench_micro), not an experiment",
+ "max_hours": 2,
+ "max_attempts": 1
+}

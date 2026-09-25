@@ -1,0 +1,198 @@
+MaxGPT-Planck: PC setup runbook (RTX 5070 12 GB, Windows, reached over Tailscale SSH)
+==================================================================================
+
+Written 2026-09-24/25. NOTHING in this kit has run on the PC yet. The Python parts are tested
+on the Mac (CPU, fake nvidia-smi, fake jobs: pc/tests). The .ps1 files and the Linux-only
+parts of the .sh files have never executed anywhere; expect small fixes on first contact.
+
+Who does what
+  [MAX]    needs Max at the PC or his accounts: Linux password, Windows Update clicks,
+           creating the private status repo and its deploy key, rebooting to test.
+  [CLAUDE] can be done over SSH from the Mac once Max has clicked Connect in Tailscale.
+  Nothing here stores a password, token or key in a file.
+
+SSH from the Mac (host and key come from pc/local.env, which is gitignored; see pc/local.env.example):
+  PC=$PLANCK_PC_HOST   # set in pc/local.env (gitignored)
+  SSH="ssh -i $PLANCK_PC_KEY -o IdentitiesOnly=yes -o BatchMode=yes"
+  The SSH shell on the PC is cmd.exe. Never nest PowerShell quoting through it: copy .ps1
+  files over and run  powershell -NoProfile -ExecutionPolicy Bypass -File <path>.
+  Anything longer than a minute or two goes through win\start_detached.ps1 (WMI), or it dies
+  with the SSH session.
+  "Admin" scripts need an elevated session. OpenSSH gives an admin user an elevated token;
+  if a script still says it needs admin, Max runs it in "Terminal (Admin)" instead.
+
+Paths on the PC
+  C:\Users\<winuser>\planck-kit\pc\{win,wsl}  the scripts (copied in step 1)
+  C:\Users\<winuser>\planck.bundle          the repo as a git bundle (step 2)
+  WSL ~/planck/repo                     clone of the repo (harness/, pc/, ...)
+  WSL ~/planck/venv, ~/planck/venv-vllm training venv (torch cu128), vLLM venv
+  WSL ~/planck/queue/{pending,running,done,failed}, logs/, status/, runs/
+  Keep all Planck data inside WSL (~/planck), never under /mnt/c: the Windows mount is slow.
+
+---------------------------------------------------------------------------------------
+STEP 1  Check the PC (read only)                                                [CLAUDE]
+  $SSH $PC "mkdir C:\Users\<winuser>\planck-kit\pc"
+  scp -i $PLANCK_PC_KEY -o IdentitiesOnly=yes -r pc/win pc/wsl $PC:C:/Users/<winuser>/planck-kit/pc/
+  $SSH $PC "powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\<winuser>\planck-kit\pc\win\check_pc.ps1"
+  Look at: free GB per drive (PLAN wants about 150 GB for Planck: teachers 20, baselines 17,
+  general text 10-30, checkpoints 30-60), RAM (32 GB expected), driver (596.49 was seen),
+  WSL version, current power and update settings.
+  If C: has under 150 GB free but another drive has room, install WSL there in step 6
+  (-Location D:\WSL\Ubuntu-24.04).
+
+STEP 2  Get the code to the PC                                          [MAX] then [CLAUDE]
+  harness/ and pc/ were NOT committed as of 2026-09-25 (git status shows them untracked).
+  The runner only starts experiments whose prereg.yaml is committed, and it checks that with
+  git on the PC, so the PC needs a real clone:
+    [MAX]    decide to commit harness/ and pc/ (git add harness pc; never git add -A here,
+             other sessions work in this tree).
+    [CLAUDE] bash pc/mac/send_kit.sh          (git bundle of HEAD/main, copied to the PC)
+             A quick look without the prereg gate: bash pc/mac/send_kit.sh --tar
+  The clone itself happens in step 7 (WSL does not exist yet).
+
+STEP 3  Power: never sleep on AC                                                [CLAUDE]
+  $SSH $PC "powershell -NoProfile -ExecutionPolicy Bypass -File C:\Users\<winuser>\planck-kit\pc\win\setup_power.ps1"
+  Expect "Current AC Power Setting Index: 0x00000000" for sleep and hibernate.
+
+STEP 4  WSL memory cap 24 GB                                                    [CLAUDE]
+  ... -File C:\Users\<winuser>\planck-kit\pc\win\write_wslconfig.ps1
+  Keeps other lines of %USERPROFILE%\.wslconfig, backs the old file up, sets
+  [wsl2] memory=24GB swap=8GB. Applies after "wsl --shutdown" (only when no WSL job runs).
+
+STEP 5  Windows Update: install now, then pause                          [MAX] then [CLAUDE]
+  Sep 25 is a booked update window (PLAN.md, Windows and WSL).
+    [MAX]    Settings > Windows Update > install everything pending > reboot.
+    [CLAUDE] ... -File C:\Users\<winuser>\planck-kit\pc\win\pause_updates.ps1     (35 days max)
+    [MAX]    Look at Settings > Windows Update: it must say "Updates paused until <date>".
+             If not, click "Pause for 5 weeks" there. Active hours are set to 06:00-23:00.
+  Next windows: Oct 24-25, Nov 28-29, Jan 2-3, Feb 6-7. Each: touch ~/planck/PAUSE, wait for
+  the running job to finish or touch ~/planck/STOP (it checkpoints and requeues), install,
+  reboot, run pause_updates.ps1 again, rm ~/planck/PAUSE ~/planck/STOP.
+
+STEP 6  WSL2 + Ubuntu 24.04                                              [CLAUDE] then [MAX]
+    [CLAUDE] ... -File C:\Users\<winuser>\planck-kit\pc\win\install_wsl.ps1  [-Location D:\WSL\Ubuntu-24.04]
+             Reboot and re-run if it asks.
+    [MAX]    At the PC: Start menu > "Ubuntu 24.04", create the Linux user and password.
+             Tell Claude the user name (it goes into step 11). The password stays with Max.
+  Never install an NVIDIA driver or CUDA toolkit inside Ubuntu; the Windows driver serves WSL.
+
+STEP 7  Inside WSL: packages, clone, venvs                                      [CLAUDE]
+  (U = the Linux user name from step 6)
+  7a packages, as root (wsl -u root needs no password), from the copy made in step 1:
+     $SSH $PC "wsl -d Ubuntu-24.04 -u root --exec bash /mnt/c/Users/<winuser>/planck-kit/pc/wsl/setup_wsl.sh --apt"
+  7b clone the bundle from step 2:
+     $SSH $PC "wsl -d Ubuntu-24.04 --exec bash -lc \"mkdir -p ~/planck && git clone /mnt/c/Users/<winuser>/planck.bundle ~/planck/repo\""
+  7c venvs, as U. It downloads torch (about 3 GB) and vLLM, so run it detached:
+     write C:\Users\<winuser>\planck-kit\setup_wsl.ps1 containing the single line
+       wsl.exe -d Ubuntu-24.04 --exec bash -lc "bash ~/planck/repo/pc/wsl/setup_wsl.sh"
+     then  ... -File C:\Users\<winuser>\planck-kit\pc\win\start_detached.ps1 -Script C:\Users\<winuser>\planck-kit\setup_wsl.ps1
+     and poll C:\Users\<winuser>\planck-kit\setup_wsl.log until "done. Next: RUNBOOK step 8".
+  TORCH_VERSION defaults to 2.13.0, the Mac harness version (PLAN: one pinned torch; move both
+  to 2.14.0 together if it is released and passes the self-tests). The training venv and the
+  vLLM venv are separate because vLLM pins its own torch.
+  Code updates later: bash pc/mac/send_kit.sh on the Mac, then in WSL
+    git -C ~/planck/repo pull /mnt/c/Users/<winuser>/planck.bundle main
+
+STEP 8  Verify CUDA, then measure                                               [CLAUDE]
+  $SSH $PC "wsl -d Ubuntu-24.04 --exec bash -lc \"~/planck/venv/bin/python ~/planck/repo/pc/verify_cuda.py\""
+  It checks: torch sees the 5070 and the wheel has sm_120 kernels; bf16 SDPA (causal and
+  bool mask) forward and backward; the harness leak self-tests under bf16 on CUDA; and that
+  nvidia-smi in WSL reports temperature and memory. If that last check fails, put
+    PLANCK_NVIDIA_SMI=/mnt/c/Windows/System32/nvidia-smi.exe
+  in ~/planck/runner.env and export it for the check.
+  Then queue the benchmark (step 11 starts the runner; before that, run it by hand detached):
+    python3 ~/planck/repo/pc/wsl/add_job.py ~/planck/repo/pc/wsl/jobs/010_verify_cuda.json
+    python3 ~/planck/repo/pc/wsl/add_job.py ~/planck/repo/pc/wsl/jobs/020_bench_micro.json
+    python3 ~/planck/repo/pc/wsl/add_job.py ~/planck/repo/pc/wsl/jobs/025_bench_micro_compile.json
+  bench_micro measures training tokens/s for the 5M, 10M, 20M and 30M shapes that
+  harness/budget.py picks (vocab 8192, T 2048, NorMuon, bf16), micro-batch 8/16/32, in two
+  modes: causal (flash path, bucket rows) and docmask (packed rows with the document mask).
+  Results: ~/planck/runs/bench_micro.jsonl, one line per measurement, with versions. These
+  replace PLAN.md's throughput estimates (re-plan rule, Phase 4).
+
+STEP 9  Runner settings                                                         [CLAUDE]
+  ~/planck/runner.env (plain settings only, never secrets). Example:
+    RUNNER_ARGS=""                       # add "--push" once step 10 is done
+    # PLANCK_NVIDIA_SMI=/mnt/c/Windows/System32/nvidia-smi.exe   (only if step 8 said so)
+  Guard defaults (pc/wsl/gpuguard.py GuardConfig; a job can override any in "guard"):
+    stop the job at >= 87 C for 3 samples (10 s apart); start nothing above 75 C
+    stop at > 11,600 MiB GPU memory for 3 samples (runaway); start nothing while something
+      else holds > 3,000 MiB (for example the Daimax fine-tune on Windows)
+    stop when WSL MemAvailable < 1 GiB for 3 samples, or nvidia-smi is blind for 6 samples
+    disk: start only with >= 25 GB free, checkpoint-and-stop below 15 GB
+  "Stop" = SIGTERM to the job's process group (train.py saves a checkpoint and exits), then
+  SIGKILL after 120 s. Heat, disk, STOP, blind nvidia-smi and reboots requeue the job (it
+  resumes from its checkpoint; max_attempts starts, default 5). Runaway memory, timeouts
+  and crashes go to queue/failed/ for a person.
+
+STEP 10  Private status repo for heartbeats (optional)                          [MAX]
+  The heartbeat script is ready; no repo exists and this kit creates none.
+    [MAX] create a private GitHub repo (for example planck-status), then in WSL as U:
+          ssh-keygen -t ed25519 -f ~/.ssh/planck_status -N "" -C planck-pc-status
+          add ~/.ssh/planck_status.pub to that repo as a deploy key WITH write access
+          (repo-scoped: it can touch nothing else). In ~/.ssh/config:
+            Host github-planck-status
+              HostName github.com
+              User git
+              IdentityFile ~/.ssh/planck_status
+              IdentitiesOnly yes
+          git clone git@github-planck-status:<owner>/planck-status.git ~/planck/status-repo
+          git -C ~/planck/status-repo config user.name "planck-pc"
+          git -C ~/planck/status-repo config user.email "planck-pc@localhost"
+    [CLAUDE] test: python3 ~/planck/repo/pc/wsl/heartbeat.py --push --print
+             then set RUNNER_ARGS="--push" in ~/planck/runner.env.
+  Heartbeat line: time, host, runner state, job and attempt, step, loss, tok/s, ETA (when the
+  job gives total_tokens), GPU temp/memory/util/power and throttle reasons, free disk, WSL
+  memory, queue counts. Local copies: ~/planck/status/heartbeat.{json,log}. The runner
+  writes one every 30 minutes; the Mac supervisor flags two missed ones.
+
+STEP 11  Start the runner at boot                                        [CLAUDE] then [MAX]
+  ... -File C:\Users\<winuser>\planck-kit\pc\win\register_runner_task.ps1 -LinuxUser U
+  $SSH $PC "powershell -NoProfile -Command Start-ScheduledTask -TaskName PlanckRunner"
+  Check: wsl ... tail ~/planck/logs/runner.log  and  cat ~/planck/status/runner.json
+    [MAX] Reboot test: reboot, do NOT log in, wait 3 minutes; then Claude checks that
+          runner.log has a new "runner_start: boot" line (or a heartbeat arrived).
+          If not, Windows will not start WSL from a boot session on this build:
+          re-run register_runner_task.ps1 -LinuxUser U -AtLogon. A reboot then waits for
+          Max to log in, and the missing heartbeat shows it.
+  The task has no time limit (the Windows default of 72 h would kill the runner), restarts
+  every minute on failure, and keeps wsl.exe in the foreground (that keeps WSL alive).
+
+---------------------------------------------------------------------------------------
+Daily use (all inside WSL, as U)
+  queue a job     python3 ~/planck/repo/pc/wsl/add_job.py <job.json> [--as 040_name.json]
+                  job format: pc/wsl/jobq.py docstring; examples: pc/wsl/jobs/
+                  experiments need "prereg" (committed); tools give "no_prereg_reason"
+  status          python3 ~/planck/repo/pc/wsl/heartbeat.py --print
+                  cat ~/planck/status/runner.json; tail ~/planck/status/jobs.jsonl
+  job output      ~/planck/logs/<job>.log
+  hold the queue  touch ~/planck/PAUSE      (the running job continues; nothing new starts)
+  stop now        touch ~/planck/STOP       (running job checkpoints, goes back to pending)
+  resume          rm -f ~/planck/PAUSE ~/planck/STOP
+  a failed job    the reason is in status/jobs.jsonl; fix, then move it from queue/failed/
+                  back to queue/pending/ (reset "attempts" in the file if it hit the limit)
+
+Troubleshooting
+  "no kernel image is available"   torch wheel without sm_120: reinstall from the cu128 index
+  runner refuses to start jobs     cat ~/planck/status/runner.json ("why": disk, heat, memory
+                                   in use, nvidia-smi without temperature)
+  runner.log: "another runner holds the lock"   one is already running (ok)
+  WSL disk short                   wsl --manage Ubuntu-24.04 --move D:\WSL  (from Windows,
+                                   with WSL stopped)
+  a job must outlive SSH on Windows (not in WSL)   win\start_detached.ps1
+
+Files in this kit
+  RUNBOOK.txt                this file
+  bench_micro.py             tokens/s for the curve shapes on CUDA (CPU smoke mode for tests)
+  verify_cuda.py             readiness check (step 8)
+  win\check_pc.ps1           read-only inventory            win\setup_power.ps1   never sleep
+  win\write_wslconfig.ps1    24 GB cap                      win\pause_updates.ps1  35-day pause
+  win\install_wsl.ps1        WSL2 + Ubuntu 24.04            win\start_detached.ps1 WMI launcher
+  win\register_runner_task.ps1   boot (or logon) task for the runner
+  wsl/setup_wsl.sh           apt (root part) + venvs        wsl/runner_start.sh   task entry
+  wsl/queue_runner.py        one GPU job at a time, guarded wsl/gpuguard.py       nvidia-smi guard
+  wsl/jobq.py                job files, prereg check        wsl/heartbeat.py      status line
+  wsl/sysinfo.py             disk and memory                wsl/add_job.py        queue a job
+  wsl/jobs/*.json            example jobs                   mac/send_kit.sh       Mac to PC copy
+  tests/                     Mac tests (pytest) and mutation_check.py
+  notes.txt                  what was tested and what was not

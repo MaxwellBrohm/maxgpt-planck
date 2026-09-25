@@ -1,0 +1,187 @@
+MaxGPT-Planck harness notes
+===========================
+
+STEP 1 (2026-09-24): parameter-budget solver. Done, tests green (84 passed, CPU only).
+
+Files
+  config.py        PlanckConfig dataclass: shapes, block flags (all on = Max's validated block),
+                   sharing/looping switches (n_loops, loop_order, n_prelude, n_coda, qk_share,
+                   kv_tie). schedule() maps effective layers to unique blocks.
+  blocks.py        RMSNorm, RoPE, attention (GQA, QK-norm, gate, value residual), SwiGLU, Block.
+                   Copied from maxgpt-ultra/model/model.py with attribution; "Planck:" marks changes.
+  model.py         PlanckLM + build_model(cfg, device). device "meta" builds shapes with no RAM.
+  count_params.py  Ground truth: builds the module and counts parameters() (dedups tied/shared).
+  budget.py        count_analytic(cfg) (closed form) + solve(target, Constraints) + CLI.
+  budget_report.py PLAN shapes table + vocab grid, every row re-verified against the module.
+  test_budget.py   Tests. Mutation-tested: 13 deliberate breaks, all 13 turned the suite red.
+
+Run (no Planck venv exists yet; the video-editor venv has torch 2.13.0 + pytest):
+  cd harness && /Users/brohm/Documents/Projects/video-editor/.venv/bin/python -m pytest -q -p no:cacheprovider test_budget.py
+  .../python budget.py --target 5e6 --vocab 8192
+  .../python budget_report.py [--head-dim 32]
+
+Conventions
+  total = every stored parameter once (tied embedding once, loops/shared W_q,W_k once).
+  embedding = V*d (2*V*d untied). body = everything else, final norm included.
+  n_layers = unique CORE layers; unique = prelude + core + coda; depth = prelude + core*loops + coda.
+  Solver ranking cost = |log(aspect/24)| + |log(mlp/(ratio*d))| + 5*|log(total/target)|,
+  aspect = d / unique layers; hard limit tol=2%. MLP width may move up to 10% (step 8) to land
+  on target (fit_mlp=0 turns that off). Looped arms get the same unique shape as dense arms.
+  Value residual scalars (3) exist on every unique block that ever runs at effective depth > 0,
+  so looping the core adds exactly 3 params (block 0). Init scales o_proj/down_proj by
+  1/sqrt(2*effective depth).
+
+Findings
+  PLAN table's shapes counted exactly with nominal SwiGLU (8/3 d rounded to 32):
+  5M 192x8 = 5.121M (+2.41%, outside 2%), 60M 512x18 = 61.207M (+2.01%), others within 2%.
+  The PLAN used 12*d^2 per layer and ignored gates, norms and MLP rounding.
+  Solver at vocab 8192 reproduces all six PLAN (d, layers, heads) with MLP widths
+  488/688/864/1040/1336/1744 and errors under 0.2%.
+  Vocab grid (head_dim 64): at 3M and 5M, vocab 16k-32k eats 63-84% of the total
+  (5M@32k: d=128, 4 layers, 84% embedding). 3M@32k forces d=64 (1 head at head_dim 64).
+  head_dim 32 gives a finer width grid at small sizes (see --head-dim 32).
+
+STEP 2 (2026-09-24): trainer, optimizer, schedule, data. Done, 145 tests green (CPU only,
+models under 0.1M params, about 4 s). No GPU was used.
+
+Files
+  blocks.py/model.py  + document masking: forward(idx, targets, doc=, pos=, reduction=).
+                   doc (B,T) ids -> mask causal AND same-document (runs of equal ids, so a
+                   reused id later in the row is a new doc); RoPE positions restart per doc.
+                   doc=None keeps the fast is_causal path (bucket mode). reduction="sum" for
+                   the trainer. Note: with RoPE, restarting positions is mathematically a no-op
+                   under a doc mask (scores depend on relative position), so no output test
+                   can see it; it is kept for inference parity.
+  selftest.py      startup leak test (PLAN review 23): causal and document, each with grad and
+                   under no_grad. Ratio = logit change where nothing may move / change where it
+                   should. tol 1e-3 fp32, 3e-2 autocast. train.py runs it before training.
+  optim.py         Ultra's Muon/NorMuon + cautious WD (copied, attributed). Groups: matrix
+                   (NorMuon), embed (tok_emb + untied head, AdamW, own embed_lr/embed_wd),
+                   scalar (norms, gains, VR scalars, AdamW, no decay). Every group has base_lr;
+                   set_lr(opt, factor). kind: normuon | muon | adamw.
+  schedule.py      WSD factor. full (1% warmup, linear decay to 0 over last 20%), trunk (never
+                   decays; stable checkpoints at branch_points or branch_points_tpp), branch
+                   (from a trunk stable ckpt at step s: decay_steps = s*f/(1-f) or explicit;
+                   refuses warmup or decay-phase ckpts). factor(step) is the lr for that update.
+  chat_template.py <|system|> <|user|> <|assistant|> <|end|> (+ optional <|tool|>, else tool
+                   turns use tool_role). loss assistant: assistant content + its <|end|>; the
+                   role token is prompt. loss all: every token. Per-turn "loss": false wins.
+                   Turns carry "ids" (pretokenized) or "text" (needs data.tokenizer, HF json).
+  sources.py       TokenShardSource (headerless uint16 .bin, EOT after each doc, Ultra format;
+                   docs cut at EOT, long docs chunked to max_len). ChatJsonlSource (SPEC s11
+                   records; conversations over max_len are DROPPED and counted, never cut).
+                   Both loop over epochs with a (seed, epoch) shard order.
+  packing.py       pack: FFD of whole items into seq_len rows + doc/pos, pad is its own doc.
+                   bucket: one item per row, smallest bucket that fits, tokens_per_micro // L
+                   rows per batch. Targets never cross items; pad targets -100.
+  data.py          Loader: token-share mixing (deficit rule, exact by tokens), windows of
+                   window_tokens, exact resume (window index, unit offset, cursors at window
+                   start). stats(): drawn_<source> (tokens read into windows), dropped_long_*.
+  runio.py         yaml with extends (Ultra cfg.py), prereg gate, runs.jsonl append (fsync),
+                   atomic checkpoints: ckpt_* rolling (keep_last), stable_* and final_* kept,
+                   latest.json.
+  device.py        auto device (cuda, mps, cpu), precision auto = bf16 on cuda/mps, fp32 cpu;
+                   MPS watermark env vars set before torch import. fp16+scaler NOT wired.
+  trainer.py       step = grad_accum micro-batches; loss = sum over tokens / supervised tokens
+                   of the whole step; clip 1.0; STOP file or SIGTERM saves and exits.
+  train.py         CLI. python train.py RUN_DIR/config.yaml [--device cpu] [--max-steps N]
+                   [--no-resume] [--require-committed]. Exit 2 = prereg refused.
+  make_fake_data.py synthetic shards (ids: 0 pad, 1 eot, 2 sys, 3 user, 4 asst, 5 end, 6 tool).
+  configs/sample_tiny/{config.yaml,prereg.yaml}  every key, commented; device pinned to cpu.
+
+Prereg gate: prereg.yaml must sit next to config.yaml with non-empty id, hypothesis, metric,
+decision_rule. Its sha256 goes into runs.jsonl and every checkpoint. --require-committed also
+demands git-tracked and unchanged from HEAD (for the queue runner; tests run without it).
+runs.jsonl events: start (env versions, schedule, n_params, prereg), pause, end, error.
+Per-step metrics go to out_dir/log.jsonl.
+
+Run
+  cd harness && P=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python
+  $P -m pytest -q -p no:cacheprovider test_*.py
+  $P make_fake_data.py runs/fake_data && $P train.py configs/sample_tiny/config.yaml
+
+Verified by tests (each mutation-tested: 29 deliberate breaks in a scratch copy, all 29 red):
+  packed docs == each doc alone (7 arch arms); self-test catches a doc leak, a causal leak and
+  a no-grad-only leak; mixing share by tokens (independent count); loader resume exact in
+  both modes; 2x4 accumulation == 1x8 batch; training resume bitwise identical; trunk ->
+  stable ckpt -> branch continues the same data with 1.0 -> 1/decay_steps; decay-phase ckpt
+  refused; bf16 autocast path on CPU keeps fp32 weights.
+
+Not done / next
+  Untested on MPS and CUDA (not allowed on this Mac tonight): run the self-test and a smoke
+  run there first. Doc-masked SDPA with a dense bool mask is O(T^2) memory per row (64 MB for
+  16 rows at 2048); flex_attention on CUDA is the E1 option. No eval loop (RC-12 dev), no
+  batch-size ramp, no fp16 loss scaling (Titans), no lock file, swap or LM Studio guards
+  (runner's job), no KV-cache decode, no tokenizer yet (chat turns must carry ids until then).
+
+STEP 3 (2026-09-24): self-test suite + mutation check. Done. 301 tests green (145 old + 156
+new), full suite 23 s on CPU (4 threads), models <= 0.51M params. No GPU was used.
+
+Run
+  P=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python
+  $P -m pytest -q -p no:cacheprovider test_*.py                 # everything, about 25 s
+  $P -m pytest -q -p no:cacheprovider test_s3_*.py -m "not overfit"
+  $P mutation_check.py --group mask|causal|packing|loss|resume|schedule|optim|budget
+     (one group per call, 25-35 s each; --list, --id X, --overfit, --workers N)
+
+Files
+  testutil.py            shared: tiny(), ARMS (18 attention/looping modes), scramble(),
+                         allowed_matrix() (independent loop reference), random_chat(), write_run().
+  test_s3_leak.py        (a) per-token perturbation (bitwise, grad and no_grad), exact Jacobian
+                         zero/nonzero structure, row independence, bf16 autocast; all 18 arms,
+                         plain causal and packed rows (5 docs, 1-token doc, reused id, pad).
+  test_s3_pipeline_leak  (a) through the real path: chat template -> pack_rows / bucket_batches
+                         / Loader -> model. Each item == item alone; changing one item leaves
+                         every other item bitwise unchanged; bucket padding and neighbours too.
+  test_s3_loss_mask.py   (b) reference target list built from raw records (no template code);
+                         render, pack, bucket, Loader from jsonl (pack and bucket), target
+                         alignment (tgt[t] == idx[t+1], same doc, left-aligned buckets), and
+                         Trainer.train_step: n_sup == reference and loss == sum of per-conversation
+                         losses computed ALONE / n_sup (proves the trainer passes doc ids).
+  test_s3_budget.py      (c) 150 random configs (every switch), all 126 solver answers for
+                         3M..150M x vocab 4k/8k/16k x 6 arms (built on meta), and runs.jsonl n_params.
+  test_s3_schedule.py    (d) full/trunk/branch vs a written-out reference, refusals, tpp points,
+                         the lr the trainer really applied each step, and P-186 end to end:
+                         trunk -> stable ckpt @30 -> 10-step decay branch == a planned 40-step
+                         run, BITWISE (weights, per-step loss and lr).
+  test_s3_optim.py       (e) groups by parameter NAME (independent of split_params' dim rule),
+                         lrs/decay per group, NorMuon flag, one step lowers loss and moves every
+                         param, matrix group alone lowers loss, toy regression, tiny LM.
+  test_s3_resume.py      (f) 20 + resume + 20 == 40 straight, tolerance NONE: weights, every
+                         optimizer tensor, loader state, per-step loss/gnorm/lr/tokens. Cases:
+                         pack fp32; bucket + looped/shared/K=V; bf16 autocast + prelude/coda +
+                         grad_accum 3. Plus a guard that step 10/20/40 states really differ.
+  test_s3_overfit.py     (g) 510,534-param model, 16 dialogues, follow-up user turns identical so
+                         replies 2 and 3 need history; 200 steps via train.py. Pack dense, bucket
+                         dense, pack looped x2: final loss 1e-5 / 1.2e-4 / 0.0, greedy decoding
+                         reproduces 38/38 assistant turns exactly in all three; 3-6 s each.
+  mutants.py, mutation_check.py  40 deliberate bugs, each applied in a temp copy; killed = pytest
+                         exit 1 (collection errors count as INVALID, never killed).
+  conftest.py            registers the "overfit" marker.
+
+Mutation results (final run, all groups): 40/40 as expected. 39 killed, 1 equivalent survived
+(RoPE positions not restarted per packed doc: a true no-op under the doc mask, see step 2).
+  mask 7/7, causal 5/5, packing 3/3 (+1 equivalent), loss 6/6, resume 3/3, schedule 5/5,
+  optim 5/5, budget 5/5. The STARTUP gate (train.py self-test) itself catches 10 of the 12
+  mask/causal mutants; the two it cannot see are a reused doc id (packing never produces one)
+  and the trainer dropping doc ids (caught by the trainer-normalization test and by the
+  overfit test).
+
+Changes to step-2 code (bugs or gaps the new tests found)
+  selftest.py  The startup gate could NOT see a leak through the attention gate or the value
+               residual: both are exactly inert at init (zero-init gate projection, alpha2 = 0).
+               Verified: with those two mutants, the old gate passed and the new one fails.
+               Now it also runs every check on a scrambled copy (all params random) and runs
+               the causal check through the document-mask path. 12 checks instead of 4.
+  trainer.py   log.jsonl lr_factor was recomputed from the schedule, not read from the
+               optimizer, so a trainer that applied the wrong step's lr logged the right one
+               (mutant sched_trainer_off_by_one survived). It now logs the factor actually
+               set on the optimizer (param_groups[0] lr / base_lr).
+  test_s3_optim One-step "loss goes down" passed with NorMuon's sign flipped: AdamW on the
+               embedding dominates one step. Added a matrix-group-only test (embed/scalar lr 0).
+  testutil     torch threads = PLANCK_TEST_THREADS (default 4) to leave cores free.
+
+Still true / next
+  Bitwise claims are CPU claims. On MPS/CUDA run: the startup gate (automatic), then
+  test_s3_resume-style 20+20 vs 40 with a tolerance, since GPU kernels may not be deterministic.
+  Nothing has run on MPS or CUDA yet. Step 4 needs: tokenizer, eval loop (RC-12 dev), runner.

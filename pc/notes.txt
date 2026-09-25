@@ -1,0 +1,61 @@
+MaxGPT-Planck PC kit notes
+==========================
+
+STEP 4 (2026-09-24/25): PC setup kit. Files only; nothing was run on the PC, nothing was
+downloaded, the Mac GPU was not used. RUNBOOK.txt has the steps and the file list.
+
+What is verified (Mac, CPU, pytest)
+  Run:  /Users/brohm/Documents/Projects/video-editor/.venv/bin/python -m pytest -q -p no:cacheprovider pc/tests
+  51 tests pass in about 15 s. They drive the real runner, guard, heartbeat and bench code
+  with a fake nvidia-smi (tests/fake_nvidia_smi.py, same CLI and CSV format) and a fake
+  training job (tests/fake_job.py: log.jsonl lines, checkpoint-and-exit on SIGTERM, can
+  heat or fill the fake GPU mid-run, ignore SIGTERM, or leave a child process).
+  Covered: every guard trip (heat, runaway GPU memory, host memory, blind nvidia-smi, disk,
+  STOP, timeout, runner SIGTERM), SIGKILL after the grace period reaching the whole process
+  group, requeue vs failed, cool-down before restart, reboot recovery and max_attempts,
+  PAUSE, filename order, prereg committed / dirty / untracked / missing / absent (real git
+  in tmp repos), malformed job files kept untouched, the lock, runner_start.sh exit codes,
+  heartbeat line and ETA, heartbeat push to a throwaway local bare repo in pytest's tmp_path,
+  bench_micro on CPU with models under 1M parameters (shape = the solver's, built parameter
+  count = the solver's total, docmask really passes document ids, OOM skips larger batches),
+  verify_cuda.py --device cpu passes, the example jobs resolve to real files.
+  Mutation check: python pc/tests/mutation_check.py --group <guard|runner|start|hb|bench>
+  29 deliberate bugs, 29 killed (guard 6, runner 7, start 10, hb 3, bench 3). One found a
+  real gap first: bench_micro reported the solver's shape, not the built model's (a wrong
+  model would have been benchmarked silently); it now records n_params_built and the test
+  checks it.
+
+What is NOT verified
+  - No .ps1 file has executed anywhere (no PowerShell on the Mac). Written for Windows
+    PowerShell 5.1, ASCII only. Most likely first-contact fixes: the PCIe ASPM powercfg
+    alias, whether the Windows Update pause keys are honored on this build (the runbook
+    says to look at Settings), and whether WSL starts from an S4U boot task (the runbook's
+    reboot test; fallback -AtLogon).
+  - setup_wsl.sh ran only through `bash -n`; its Linux parts (apt, cu128 torch, uv + vLLM)
+    need the PC. runner_start.sh ran on the Mac through its tests.
+  - No CUDA path has run: bench_micro and verify_cuda were exercised on CPU only. bf16,
+    SDPA kernel choice, torch.compile and peak memory on the 5070 are unmeasured.
+  - Whether WSL's nvidia-smi reports temperature: verify_cuda.py checks it; if not, set
+    PLANCK_NVIDIA_SMI to the Windows nvidia-smi.exe (runner.env).
+  - runner_start.sh's crash-restart loop (60 s sleep) is not tested (it would cost 60 s).
+
+Design choices worth knowing
+  - Runner, guard, heartbeat and add_job are stdlib only: they run under WSL's system
+    python3; only the jobs use ~/planck/venv.
+  - Job files: JSON in ~/planck/queue/pending, filename order. Experiments must name a
+    committed prereg (checked with git on the PC); tools say no_prereg_reason instead.
+  - Code reaches the PC as a git bundle (pc/mac/send_kit.sh), so the prereg check has real
+    history and the PC holds no GitHub credential for the project repo. harness/ and pc/
+    are untracked today: they must be committed (Max's call) before the bundle carries them.
+    When committing, check that harness/runs/ (fake data, sample runs) is not swept in.
+  - Separate venvs: ~/planck/venv (torch 2.13.0 cu128, same as the Mac) and
+    ~/planck/venv-vllm (vLLM picks its own torch).
+  - The status repo for heartbeats is not created; RUNBOOK step 10 is Max's (private repo
+    + repo-scoped deploy key). heartbeat.py only pushes to an existing local clone, with git
+    prompts disabled.
+  - PLAN's "pull job configs from the status repo every 10 minutes" is NOT built: jobs are
+    queued with add_job.py over SSH. A pull step belongs next to the heartbeat push later.
+
+Next
+  PC session: RUNBOOK steps 1-11 in order. First measurements: verify_cuda.py, then the
+  bench_micro jobs (020, 025), which replace PLAN.md's throughput estimates.

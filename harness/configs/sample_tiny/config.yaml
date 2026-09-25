@@ -1,0 +1,68 @@
+# Sample run config: a ~0.2M-parameter model on synthetic data, CPU, a few seconds.
+# Make the data first:  python make_fake_data.py runs/fake_data   (from harness/)
+# Run:                  python train.py configs/sample_tiny/config.yaml --device cpu
+# Relative paths resolve against THIS file's directory. prereg.yaml must sit next to it.
+name: sample_tiny
+seed: 0
+out_dir: ../../runs/sample_tiny          # checkpoints, log.jsonl
+runs_jsonl: ../../runs/runs.jsonl        # append-only run index (start/pause/end/error)
+
+model:                                   # every PlanckConfig field (config.py) may appear
+  vocab_size: 256
+  d_model: 64
+  n_layers: 2                            # unique CORE layers
+  n_heads: 2
+  n_kv_heads: 1
+  head_dim: 32
+  mlp_hidden: 160
+  seq_len: 128
+  tie_embeddings: true
+  # sharing / looping switches (all off here):
+  n_loops: 1
+  loop_order: cyclic
+  n_prelude: 0
+  n_coda: 0
+  qk_share: 1
+  kv_tie: false
+
+data:
+  mode: pack                             # pack (doc-masked rows) | bucket (one conversation per row)
+  buckets: [32, 64, 128]                 # bucket mode only; largest <= seq_len
+  # tokens_per_micro: 512                # bucket mode only; default micro_batch * seq_len
+  window_tokens: 8192                    # items per packing window (resume granularity)
+  pad_id: 0
+  # tokenizer: path/to/tokenizer.json    # needed when chat turns carry text instead of ids
+  chat:
+    loss: assistant                      # assistant (assistant content + <|end|>) | all
+    role_ids: {system: 2, user: 3, assistant: 4, tool: 6}
+    end_id: 5
+  sources:
+    - {name: text, kind: tokens, paths: ["../../runs/fake_data/text_*.bin"], eot_id: 1, share: 0.75}
+    - {name: chat, kind: chat, paths: ["../../runs/fake_data/chat_*.jsonl"], share: 0.25}
+
+optim:
+  kind: normuon                          # normuon | muon | adamw
+  lr: 3.0e-3                             # matrices (NorMuon, RMS-matched to AdamW)
+  embed_lr: 3.0e-3                       # tuned per vocab (PLAN.md)
+  scalar_lr: 3.0e-3
+  weight_decay: 0.1
+  cautious_wd: true
+
+schedule:
+  mode: full                             # full | trunk | branch
+  warmup_frac: 0.01
+  decay_frac: 0.2                        # full: last 20% linear to zero; branch: decay = s*f/(1-f)
+  # trunk:  branch_points: [steps]  or  branch_points_tpp: [500, 2000, 5000, 20000]
+  # branch: init_from: ../trunk_run/out/stable_00001000.pt  (and decay_frac or decay_steps)
+
+train:
+  device: cpu                            # auto | cpu | mps | cuda (auto picks cuda, then mps)
+  precision: auto                        # auto (bf16 on cuda/mps, fp32 on cpu) | bf16 | fp32
+  micro_batch: 4                         # rows per micro-batch (pack mode)
+  grad_accum: 2
+  total_steps: 60                        # or total_tokens
+  grad_clip: 1.0
+  log_every: 10
+  ckpt_every: 20
+  keep_last: 2
+  selftest: true                         # causal and document leak test at startup
