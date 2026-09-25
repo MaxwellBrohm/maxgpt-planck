@@ -48,7 +48,7 @@ Design choices worth knowing
     history and the PC holds no GitHub credential for the project repo. harness/ and pc/
     are untracked today: they must be committed (Max's call) before the bundle carries them.
     When committing, check that harness/runs/ (fake data, sample runs) is not swept in.
-  - Separate venvs: ~/planck/venv (torch 2.13.0 cu128, same as the Mac) and
+  - Separate venvs: ~/planck/venv (torch 2.13.0 cu130; cu128 stops at 2.11) and
     ~/planck/venv-vllm (vLLM picks its own torch).
   - The status repo for heartbeats is not created; RUNBOOK step 10 is Max's (private repo
     + repo-scoped deploy key). heartbeat.py only pushes to an existing local clone, with git

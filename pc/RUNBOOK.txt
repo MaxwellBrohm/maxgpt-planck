@@ -25,7 +25,7 @@ Paths on the PC
   C:\Users\<winuser>\planck-kit\pc\{win,wsl}  the scripts (copied in step 1)
   C:\Users\<winuser>\planck.bundle          the repo as a git bundle (step 2)
   WSL ~/planck/repo                     clone of the repo (harness/, pc/, ...)
-  WSL ~/planck/venv, ~/planck/venv-vllm training venv (torch cu128), vLLM venv
+  WSL ~/planck/venv, ~/planck/venv-vllm training venv (torch cu130), vLLM venv
   WSL ~/planck/queue/{pending,running,done,failed}, logs/, status/, runs/
   Keep all Planck data inside WSL (~/planck), never under /mnt/c: the Windows mount is slow.
 
@@ -173,7 +173,7 @@ Daily use (all inside WSL, as U)
                   back to queue/pending/ (reset "attempts" in the file if it hit the limit)
 
 Troubleshooting
-  "no kernel image is available"   torch wheel without sm_120: reinstall from the cu128 index
+  "no kernel image is available"   torch wheel without sm_120: reinstall from the cu130 index
   runner refuses to start jobs     cat ~/planck/status/runner.json ("why": disk, heat, memory
                                    in use, nvidia-smi without temperature)
   runner.log: "another runner holds the lock"   one is already running (ok)

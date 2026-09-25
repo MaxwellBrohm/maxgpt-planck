@@ -7,17 +7,17 @@
 #       wsl -d Ubuntu-24.04 -- bash -lc "bash ~/planck/repo/pc/wsl/setup_wsl.sh"
 #       TORCH_VERSION=2.13.0 SKIP_VLLM=1 ...   (optional overrides)
 #
-# Makes ~/planck/{queue/*,logs,status,runs}, a training venv (~/planck/venv: torch cu128 at
+# Makes ~/planck/{queue/*,logs,status,runs}, a training venv (~/planck/venv: torch cu130 at
 # the SAME version as the Mac harness venv, plus numpy, pyyaml, tokenizers, pytest) and a
 # SEPARATE vLLM venv (~/planck/venv-vllm), because vLLM pins its own torch and would
 # otherwise move the training torch. Every step is safe to re-run.
 # Not installed on purpose: any NVIDIA driver or CUDA toolkit. In WSL the Windows driver
-# provides libcuda (/usr/lib/wsl/lib) and the pip wheels bundle the CUDA 12.8 runtime.
+# provides libcuda (/usr/lib/wsl/lib) and the pip wheels bundle the CUDA 13.0 runtime.
 set -euo pipefail
 
 PLANCK_HOME="${PLANCK_HOME:-$HOME/planck}"
 TORCH_VERSION="${TORCH_VERSION:-2.13.0}"          # harness/notes.txt: the Mac runs 2.13.0
-TORCH_INDEX="${TORCH_INDEX:-https://download.pytorch.org/whl/cu128}"   # CUDA 12.8: first with sm_120
+TORCH_INDEX="${TORCH_INDEX:-https://download.pytorch.org/whl/cu130}"   # cu128 stops at torch 2.11; cu130 needs driver >= 580
 VLLM_SPEC="${VLLM_SPEC:-vllm}"                    # current release; pin later, e.g. vllm==X.Y.Z
 SKIP_VLLM="${SKIP_VLLM:-0}"
 MIN_FREE_GB="${MIN_FREE_GB:-150}"
