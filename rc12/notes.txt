@@ -416,3 +416,46 @@ NEXT STEP MUST KNOW
   For model runs, also run OWN with --own-cf (--families OWN) and report it beside OWN.
   Open for the lock: OWN-CF as a gate or a report; LOOP in the composite; the strict cases (a)-(c); PERSIST drop
   list; G10 / G11 as prereg gates; the sealed split needs its own include-word pool in grade_fmt_dyn.STUFF_POOL.
+
+STEP 6 (2026-09-25 night): RC-12 responder for Planck checkpoints (planck_responder.py) + runner flag
+BUILT
+  planck_responder.py  PlanckResponder (start/count/reply like the fakes and HFResponder) + from_checkpoint(ckpt,
+                   config, tokenizer, device, precision, render). Imports no torch until used; loads harness modules
+                   by appending ../harness to sys.path (no module name exists in both dirs; checked).
+                   template render = harness chat_template.ChatTemplate.render with the trainer's own encode call,
+                   then <|assistant|>; no system turn, no BOS. plain render = tokenizer on render.plain().
+                   Decoding = hf_responder.DECODE (greedy, or T 0.6 with top-p 1.0 / top-k off / rep 1.0; the file
+                   refuses other DECODE values); per-reply private CPU generator seeded with hf_responder.conv_seed,
+                   so the global torch RNG is never touched. KV cache via harness/decode.py (cache=False = full
+                   forward per token, the reference path).
+                   Stops: <|end|> eot, EOS ids (config token-source eot_id + <|endoftext|>) eos, any role token
+                   role (the token STAYS in the reply, so grade_loop.MARKER charges a LEAK), 256 new tokens cap.
+                   New tokens are also capped at seq_len - prompt; that binds only when the current user turn alone
+                   leaves < 256 (counted in .short); a prompt that fills seq_len gives "" / cap without a forward.
+  runner.py        --responder planck:<ckpt.pt> [--planck-config run/config.yaml] [--planck-tokenizer tok.json]
+                   [--planck-device cpu|mps|cuda, default cpu] [--planck-precision auto|fp32|bf16]. ctx defaults to
+                   the checkpoint's seq_len (history fitted to seq_len - 256 by the existing fit()); --ctx above
+                   seq_len is refused. Needs torch + tokenizers, so run it with the venv python, e.g.
+                   /Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B runner.py --responder
+                   planck:../runs/x/out/final_00001000.pt --planck-config ../runs/x/config.yaml --seeds greedy,1,2,3
+                   --out runs/planck_x
+                   Only make_responder (new branch), argparse and the docstring changed; no mutated line moved.
+DECISIONS
+  A role token in a reply is stop "role" AND a LEAK (unlike the plain-render role cut, which is the natural end of a
+  plain-text turn and not a leak). History is fed back as TEXT (the stripped decoded reply, re-encoded), the same
+  protocol as the HF path; a byte-level reply that is not valid UTF-8 does not round-trip to the same ids.
+  Tokenizer path: explicit --planck-tokenizer, else the config's data.tokenizer relative to --planck-config, else the
+  checkpoint's stored config only if that path is absolute (a relative one is refused, not guessed).
+TESTS (harness side, they need torch: harness/test_rc12_eval.py, test_rc12_hook.py, test_decode.py)
+  Random scrambled 0.50M model, toy byte-level tokenizer (harness/toy_tokenizer.py), seq_len 512, CPU. One conversation
+  per family + the BIND pair (13): transcripts have exactly the fake:IDEAL schema (row, turn, probe keys; probes add
+  "lost" only when truncated) and score through score.py (R = 0.83: every family 0.00 except LOOP 0.08; the test allows 0 to 15); history = user turns + its
+  own stripped replies with whole oldest pairs dropped; every prompt <= seq_len - 256 when history > 1 message and
+  prompt + new <= 512; > 20 turns dropped history and some probes fail "trunc" exactly when a needed turn was dropped;
+  all four stop reasons occur and each matches its token. Greedy = argmax of the full forward and equal to the
+  uncached path; sampling replays exactly from softmax(logits / 0.6) with md5(seed, id, turn); no grad, mode restored.
+  Scores are meaningless (random model); what passed is plumbing.
+  validate_machinery 9/9 and mutation_e2e 50/50 (3 parts) re-run after the runner edit: unchanged.
+NOT DONE
+  No trained Planck model and no Planck tokenizer exist yet; nothing real has been scored. No batching across
+  conversations (one sequence at a time). The plain render through Planck is untested beyond its prompt string.

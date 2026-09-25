@@ -123,6 +123,13 @@ def main(argv=None) -> int:
                  log_every=int(tc.get("log_every", 10)), ckpt_every=int(tc.get("ckpt_every", 500)),
                  keep_last=int(tc.get("keep_last", 2)), stable_points=stable_pts, meta=meta)
 
+    if (cfg.get("eval") or {}).get("rc12"):   # off unless eval.rc12.every > 0 (rc12_eval.py)
+        from rc12_eval import make_hook
+        hook = make_hook(cfg, base, out_dir, device, amp, mcfg.seq_len)
+        if hook is not None:
+            tr.hooks.append(hook)
+            print(f"[train] RC-12 eval every {hook.every} steps on {len(hook.recs)} conversations", flush=True)
+
     resumed_from = None
     last = None if a.no_resume else runio.latest_checkpoint(out_dir)
     if last:

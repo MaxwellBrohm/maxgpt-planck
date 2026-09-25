@@ -185,3 +185,106 @@ Still true / next
   Bitwise claims are CPU claims. On MPS/CUDA run: the startup gate (automatic), then
   test_s3_resume-style 20+20 vs 40 with a tolerance, since GPU kernels may not be deterministic.
   Nothing has run on MPS or CUDA yet. Step 4 needs: tokenizer, eval loop (RC-12 dev), runner.
+
+STEP 4 (2026-09-25 night): RC-12 eval (responder, KV-cache decode, trainer hook). CPU only, no GPU used,
+models <= 0.50M params. 355 tests green (301 old + 54 new), full suite about 45 s.
+
+Files
+  decode.py         KVDecoder: incremental decoding as an ADAPTER over the model's own modules (model.py and
+                    blocks.py unchanged). One K/V cache per EFFECTIVE layer (loops), mixed values cached (the value
+                    residual mix is per position), prefill then one token at a time. test_decode.py: logits equal the
+                    full forward at every position on all 18 ARMS, prefill 1 and 5 (atol 2e-5), argmax identical.
+                    Any change to Attention/Block/PlanckLM.forward must keep it green.
+  rc12_eval.py      RC12Eval hook + make_hook(). Config eval.rc12: every (0/absent = OFF, the default), per_family,
+                    families, seeds [greedy, ints], render, data, tokenizer, out. Uses rc12/planck_responder.py and
+                    rc12/runner.run on the live model (ctx = seq_len), writes out_dir/rc12/step_<8>/transcripts.jsonl +
+                    scores.jsonl and one line per eval in out_dir/rc12_eval.jsonl (greedy and sampled summaries: R,
+                    families, loop_rate, degenerate, t0, k; R is None unless all 10 composite families are in the
+                    subset). An eval exception is logged there and printed; training continues.
+  toy_tokenizer.py  byte-level tokenizer with no merges, specials at the fake-data ids (0 pad, 1 eot, 2-6 roles,
+                    5 <|end|>), VOCAB 264. Plumbing only; NOT a Planck tokenizer.
+  test_rc12_eval.py, test_rc12_hook.py, test_decode.py; mutation_rc12_eval.py (32 mutants over planck_responder,
+                    decode, rc12_eval, the runner flag, trainer and train wiring; --part i/3, about 45 s each).
+
+Changes to existing files (all old tests still pass; harness mutation groups mask 7/7, loss 6/6, resume 3/3,
+schedule 5/5 re-run and unchanged)
+  trainer.py  Trainer(..., hooks=None): each hook(trainer) is called after every step, after logging and the
+              rolling checkpoint, before the STOP check.
+  train.py    installs rc12_eval.make_hook(...) when the config has eval.rc12 (rc12 is not imported otherwise).
+
+Verified
+  hook on vs off (20 steps, evals at 10 and 20, T0 + a BIND pair, greedy + seed 1): final weights, optimizer state,
+  loader state, torch RNG state, token counts and every log.jsonl line identical. rc12/runner.py
+  --responder planck:<final ckpt> in a subprocess reproduces the hook's step-20 greedy transcript exactly (replies,
+  stops, dropped), via --planck-config and via --planck-tokenizer. Refusals: relative tokenizer with no config,
+  --ctx above seq_len, config/checkpoint shape mismatch, config role ids that contradict the tokenizer.
+  mutation_rc12_eval.py: 32/32 killed (one survivor on the way, "<|end|> does not stop", closed by checking every
+  reply's token ids against its stop reason).
+
+Not done / next
+  Eval cost: one conversation at a time, no batching; a random model runs every reply to the 256 cap (about 11 s
+  for 13 conversations at 0.5M, CPU). A trained model stops early. Nothing ran on MPS/CUDA. Needs a real Planck
+  tokenizer (data.tokenizer) before the hook can run on real data.
+
+STEP 5 (2026-09-25): pipeline -> harness data adapter. CPU only, no GPU, nothing downloaded. 367 tests green
+(355 old + 12 new), full suite about 52 s. No existing file changed (harness or pipeline).
+
+Files
+  from_pipeline.py   python from_pipeline.py OUT_DIR INPUT... [--allow-nontrainable] [--tokenizer tok.json]
+                     [--shard-size 5000] [--max-len N]. INPUT = pipeline run dir, its accepted/ dir, or one
+                     accepted-NNNNN.jsonl. Writes OUT_DIR/chat-NNNNN.jsonl + manifest.json (via OUT_DIR.partial,
+                     renamed at the end). Exit 3 and no shard when nothing was admitted. Docstring has the format.
+  make_pipeline_fake.py  stdlib python3: the REAL pipeline driver against its FAKE stub (in-process, loopback),
+                     N shard skeletons into a scratch run dir. python3 -B make_pipeline_fake.py OUT --n 200.
+  pipeline_fixture.py    one fake run per test process, or PLANCK_PIPELINE_FAKE=<run dir>.
+  test_from_pipeline.py (5), test_from_pipeline_refuse.py (7), mutation_from_pipeline.py (about 20 s).
+
+Record out (ChatJsonlSource / ChatTemplate read it unchanged)
+  {"id": conv_id, "turns": [...], "pipeline": {every input field except turns, verbatim}, "source": {file,
+  line, sha256 of the line}, "adapter": {version, admitted_nontrainable, tokenizer_sha256, n_tokens}}.
+  Turn: role, text, loss, src_i (pipeline turn index, which events/gold notes/spans use), author, mask, spans,
+  + ids with --tokenizer (token shards = the same jsonl with per-turn ids; the template prefers ids).
+  loss: assistant = not mask (mask 1 = S3 assistant_err); user = true, so data.chat.loss decides (assistant:
+  no user loss; all: the L8 user-turn switch); tool = false in both modes; system = false.
+  The pipeline system text becomes turn 0 (role system) so a token record renders with no tokenizer; there is
+  no top-level "system" key (adding one would render the system text twice).
+
+Refusals (counted in the manifest with up to 20 examples; the run goes on)
+  NOT_TRAINABLE unless trainable is exactly true and blocked is empty; --allow-nontrainable admits and stamps
+  adapter.admitted_nontrainable. ROLE_TOKEN_IN_TEXT for any <|...|> string in a text: HF tokenizers turn a
+  literal "<|end|>" into the real control id even with add_special_tokens=False (checked on the toy
+  tokenizer). SPECIAL_ID_IN_TEXT, EMPTY_IDS (token mode), BAD_JSON (incl. a torn last line), NO_ID, NO_TURNS,
+  BAD_TURN, BAD_MASK (mask 1 on a user or tool turn).
+
+Why the adapter is required: chat_template.py says records follow SPEC s11, but it ignores the pipeline
+"mask" field. A raw pipeline record fed to ChatJsonlSource trains on the S3 wrong-value reply (checked on a
+fake record: the masked turn's tokens are all supervised) and would read a literal <|end|> in text as control.
+
+Measured (FAKE, 200 RM skeletons, stub plan): 301 attempts, 176 accepted (= the plan), 125 rejected; all 176
+FAKE and non-trainable. Default run: 176 NOT_TRAINABLE, exit 3. With the flag + toy tokenizer: 176 admitted,
+1,828 assistant turns (18 masked), 1,794 user, 34 tool, 80 system; 146,750 toy tokens (bytes: mean 834,
+max 1,258); 0.12 s. Fixture generation about 6 s.
+
+Verified
+  Round trip, token and text mode: adapter -> build_loader (pack, seq 2048) over one full epoch -> items cut
+  from the packed rows by doc id -> split at role ids -> decoded with the toy tokenizer. Every conversation
+  comes out, equal turn by turn to a reference built from the raw pipeline lines with no adapter or template
+  code, and the supervised set is exactly the assistant turns with mask 0 (content + <|end|>, never the role
+  token); dropped_long 0. Token records == text records rendered with the tokenizer, id for id and flag for
+  flag. Loss "all": tool, system and masked turns stay unsupervised. Provenance: pipeline block, line sha256,
+  turn author/mask/spans/src_i, input shard hashes. Output is byte-identical across runs and shard sizes.
+  mutation_from_pipeline.py: 32/32 mutants killed (mask ignored, tool or system loss, truthy trainable,
+  blocked ignored, never refusing, role-token and special-id checks off or narrowed, system dropped, bad and
+  boolean masks, empty text, provenance field lost, hash/line/src_i off, spans or author dropped, first turn
+  untokenized, n_tokens, manifest tool id, rotation, exit code, stale .partial, duplicate input, non-object
+  line, examples cap, a record not written, text altered).
+  Smoke (not a test): train.py on the adapter output, 103,619 params, CPU fp32, seq 1536, 20 steps: self-test
+  passed, loss 4.62 (step 5) -> 3.03 (step 20), dropped_long 0.
+
+Not done / open
+  Token shards are jsonl with ids, not a binary format (a binary chat format with flags needs a new source).
+  The lookup call is an assistant turn and is supervised (author "program"); the tool result never is. Max's D8
+  question on program-written lines in training chats is still open. No RC-12 decontamination and no dedup
+  across adapter runs (the pipeline's DECON_PENDING block is what refuses today). source.file is an absolute
+  path; the line sha256 still identifies the line if the run moves. Rerun with --tokenizer once a Planck
+  tokenizer exists; manifest token counts then replace the pipeline's words x 1.3 estimate.

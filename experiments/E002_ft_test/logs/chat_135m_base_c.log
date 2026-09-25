@@ -1,0 +1,55 @@
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 3634.61it/s]
+loaded HuggingFaceTB/SmolLM2-135M-Instruct params=134.5M device=mps eos=[2] in 0.3s
+[     4s] seed=None R_d2_name                  0/1 tok=427
+[     5s] seed=None R_d2_name__ctrl            0/1 tok=61
+[     9s] seed=None R_d2_number                0/1 tok=360
+[     9s] seed=None R_d2_number__ctrl          0/1 tok=52
+[    16s] seed=None R_d4_pet                   1/1 tok=747
+[    17s] seed=None R_d4_pet__ctrl             1/1 tok=51
+[    24s] seed=None R_d4_city                  0/1 tok=678
+[    25s] seed=None R_d4_city__ctrl            0/1 tok=49
+[    36s] seed=None R_d6_name                  0/1 tok=978
+[    37s] seed=None R_d6_name__ctrl            0/1 tok=49
+[    48s] seed=None R_d6_number                0/1 tok=1071
+[    50s] seed=None R_d6_number__ctrl          1/1 tok=57
+[    66s] seed=None R_d10_pet                  0/1 tok=1504
+[    67s] seed=None R_d10_pet__ctrl            1/1 tok=49
+[    77s] seed=None R_d5_multi                 0/3 tok=939
+[    78s] seed=None R_d5_multi__ctrl           3/3 tok=68
+[    78s] seed=None F_ellipsis_capital         1/2 tok=60
+[    79s] seed=None F_ellipsis_capital__ctrl   1/1 tok=37
+[    82s] seed=None F_translate                0/2 tok=216
+[    83s] seed=None F_translate__ctrl          1/1 tok=41
+[    84s] seed=None F_coref_she                0/1 tok=120
+[    85s] seed=None F_coref_she__ctrl          0/1 tok=50
+[    87s] seed=None F_whynot                   0/1 tok=217
+[    89s] seed=None F_whynot__ctrl             1/1 tok=42
+[    90s] seed=None F_shorter                  1/1 tok=128
+[    91s] seed=None F_shorter__ctrl            0/1 tok=42
+[    92s] seed=None I_one_sentence             1/3 tok=193
+[    93s] seed=None I_one_sentence__ctrl       1/1 tok=40
+[    95s] seed=None I_end_question             3/3 tok=223
+[    95s] seed=None I_end_question__ctrl       0/1 tok=52
+[    97s] seed=None I_caps                     0/3 tok=235
+[    98s] seed=None I_caps__ctrl               0/1 tok=42
+[   103s] seed=None I_persona                  1/5 tok=422
+[   104s] seed=None I_persona__ctrl            0/2 tok=38
+[   108s] seed=None K_day                      0/1 tok=354
+[   109s] seed=None K_day__ctrl                0/1 tok=62
+[   113s] seed=None K_time                     0/1 tok=390
+[   114s] seed=None K_time__ctrl               0/1 tok=64
+[   118s] seed=None K_color                    0/1 tok=355
+[   118s] seed=None K_color__ctrl              0/1 tok=60
+[   120s] seed=None O_second_item              0/1 tok=172
+[   121s] seed=None O_last_item                0/1 tok=164
+[   122s] seed=None O_add10                    0/2 tok=131
+[   123s] seed=None O_add10__ctrl              0/1 tok=44
+[   124s] seed=None RI_identity                0/2 tok=134
+[   128s] seed=None RI_binding                 0/1 tok=359
+[   129s] seed=None RI_binding__ctrl           0/1 tok=47
+[   133s] seed=None T_party                    0/1 tok=498
+[   135s] seed=None T_party__ctrl              1/1 tok=62
+[   142s] seed=None T_dragon                   0/2 tok=606
+[   144s] seed=None T_dragon__ctrl             2/2 tok=62
+/Users/brohm/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

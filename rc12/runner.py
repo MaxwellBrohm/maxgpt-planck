@@ -1,8 +1,11 @@
 """RC-12 runner (SPEC s1, s2): plays every 12-turn conversation against a responder, feeding the responder's OWN
 replies back as history, grades it with the real graders, and writes per-turn transcripts and per-family scores.
 
-Responders: fake:<NAME> (fakes.py / fakes_family.py, no model) or hf:<model id or path> (hf_responder.py,
-UNTESTED: no model has been loaded through it; it runs only with --hf-untested-ok).
+Responders: fake:<NAME> (fakes.py / fakes_family.py, no model), hf:<model id or path> (hf_responder.py,
+UNTESTED: no model has been loaded through it; it runs only with --hf-untested-ok) or planck:<checkpoint.pt>
+(planck_responder.py: a harness checkpoint rendered with Planck's own role tokens; ctx = its seq_len; flags
+--planck-config, --planck-tokenizer, --planck-device (default cpu), --planck-precision; needs torch, so run it with
+a Python that has torch and tokenizers).
 Loop per conversation: send u1, generate a1, append a1 as the assistant message, send u2, ... to a12. Nothing from a
 gold, IDEAL reply or annotation is ever put in the history. The fed-back reply is the decoded text after the stop
 rule, stripped; it is stored verbatim with its stop reason (eos | eot | role | cap).
@@ -18,7 +21,9 @@ dropped, raw}], probes (grader results), unit, flags, leaks) and scores.jsonl (p
 score.py computes the composites). CLI:
   python3 -B runner.py --responder fake:IDEAL --render plain --seeds greedy --out runs/fake_IDEAL
   python3 -B runner.py --responder hf:Qwen/Qwen2.5-0.5B-Instruct --render template --seeds 1,2,3 \\
-      --ctx 32768 --out runs/qwen05 --hf-untested-ok"""
+      --ctx 32768 --out runs/qwen05 --hf-untested-ok
+  <venv python> -B runner.py --responder planck:../runs/x/out/final_00001000.pt --planck-config ../runs/x/config.yaml \\
+      --render template --seeds greedy,1,2,3 --out runs/planck_x"""
 import argparse
 import json
 import os
@@ -118,6 +123,13 @@ def make_responder(spec, args):
             sys.exit("hf responder is UNTESTED (no model was ever loaded through it); rerun with --hf-untested-ok")
         import hf_responder as H
         return H.HFResponder(name, render=args.render, dtype=args.dtype, device=args.device), name
+    if kind == "planck":
+        import planck_responder as PR
+        r = PR.from_checkpoint(name, args.planck_config, args.planck_tokenizer, args.planck_device,
+                               args.planck_precision, args.render)
+        if args.ctx is not None and args.ctx > r.ctx:
+            sys.exit(f"--ctx {args.ctx} exceeds the checkpoint's seq_len {r.ctx}")
+        return r, name
     sys.exit(f"unknown responder {spec}")
 
 
@@ -140,6 +152,10 @@ def main():
     ap.add_argument("--own-cf", action="store_true", help="OWN counterfactual-history diagnostic (own_cf.py)")
     ap.add_argument("--dtype", default="bfloat16")
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--planck-config", default=None, help="planck: the run's config.yaml (tokenizer path, chat ids)")
+    ap.add_argument("--planck-tokenizer", default=None, help="planck: tokenizer.json (overrides the config's)")
+    ap.add_argument("--planck-device", default="cpu", help="planck: cpu | mps | cuda (default cpu)")
+    ap.add_argument("--planck-precision", default="auto", help="planck: auto | fp32 | bf16 (auto: bf16 off cpu)")
     args = ap.parse_args()
     recs = load(args.data, args.families.split(",") if args.families else None, args.limit)
     responder, name = make_responder(args.responder, args)

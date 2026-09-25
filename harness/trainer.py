@@ -23,7 +23,7 @@ from optim import set_lr
 class Trainer:
     def __init__(self, *, model, optimizer, loader, sched, device, amp, cfg: dict, out_dir: str,
                  grad_accum: int, grad_clip: float, log_every: int, ckpt_every: int,
-                 keep_last: int, stable_points: set[int], meta: dict):
+                 keep_last: int, stable_points: set[int], meta: dict, hooks=None):
         self.model, self.opt, self.loader, self.sched = model, optimizer, loader, sched
         self.device, self.amp, self.cfg, self.out_dir = device, amp, cfg, out_dir
         self.grad_accum, self.grad_clip = grad_accum, grad_clip
@@ -35,6 +35,7 @@ class Trainer:
         self.sup_tokens = 0                  # supervised target tokens
         self.stop_requested = False
         self.log_path = os.path.join(out_dir, "log.jsonl")
+        self.hooks = list(hooks or [])      # called as hook(trainer) after every step (rc12_eval.RC12Eval)
 
     # ------------------------------------------------------------------ #
     def _to(self, t):
@@ -117,6 +118,8 @@ class Trainer:
                 t0, tok0 = time.time(), self.tokens
             if self.ckpt_every and self.step % self.ckpt_every == 0 and self.step < self.sched.total_steps:
                 self.save()
+            for hook in self.hooks:
+                hook(self)
             if os.path.exists(stop_file) or self.stop_requested:
                 self.save()
                 return {**rec, "stopped": True, "loss": last_loss}
