@@ -1,0 +1,232 @@
+RC-12 SPEC: dev split and machinery. Version 0.1, 2026-09-24 (LEDGER P-003; with P-033, P-045, P-082)
+Status: draft for the pre-registration (lock Oct 11-14). Every number marked (proposal) becomes final only when
+prereg/RC-12.md is pushed, and never changes after. No Planck model is scored on any RC-12 split, dev included,
+before that push. This file covers the DEV split and the machinery. The sealed split is written later, in a separate
+session, from separate Claude-written templates and slot pools, encrypted at rest (PLAN Phase 0, P-049).
+Sources: PLAN.md s1 (Level R/A wording) and Phase 0; research/REPORT.md s3, s5, s8 (D3, headroom rule); LEDGER
+P-001..P-008, P-045, P-046; E004 notes and code (oracles, shortcut table, gen_grade.py, mutation tests); E001
+battery.py (hardened chat graders: asserted spans, negation, hedges, hypotheticals, guess lists, person binding).
+
+0. SCOPE AND BINDING RULES
+  Target: conversational mechanics over the conversation's own context. Stored world knowledge is out of scope.
+  Knowledge-free families: every gold is stated in the conversation (a user turn, a supplied passage, or the
+    model's own earlier reply). Their scores make the composite. Knowledge-bearing items (family K) are scored and
+    reported separately and never enter a composite or a claim.
+  L1 Cheaters: every item is run through the fake scripted responders of s5 on the REAL items; they must fail.
+  L2 No question, answer prefix or user turn after a statement contains that probe's gold word.
+  L3 Every grader fails an empty reply, a loop, a hedge, a negation, a guess list, a reply in the user's voice
+    (plus PLAN's list: wrong in-pool value, shotgun list, echo of the question, stale value, hypothetical), and
+    passes a correct natural sentence. Each clause is mutation-tested: remove it, watch a fixture go red.
+  L4 Knowledge-free and knowledge-bearing scores are never pooled.
+  Dev text is Claude-written (D8 allows Claude for gold sets). Dev and sealed share no template or slot pool.
+  Dev is never training text: its prompts go into the 13-gram decontamination list. E004 eval items are not
+  reused (E004's fine-tunes saw its training streams); E004 and E001 CODE and ideas are reused and extended.
+
+1. CONVERSATION FORMAT
+  Every conversation has exactly 12 scripted user turns u1..u12. User text never depends on the model's replies.
+  Own history: the harness sends u1, generates reply a1, appends it as the assistant message, sends u2, and so on
+    to a12. Nothing from any gold, IDEAL reply or annotation is ever injected. The reply fed back is the decoded
+    text after the stop rule (s2), with leading/trailing whitespace stripped; it is stored verbatim with its stop
+    reason (eos, end-of-turn, role tag, cap).
+  Turn kinds (annotation): S statement of a fact, L same-type lure (a value of the probe's type bound to another
+    holder or object), C correction, I standing instruction, O override of an instruction, Q request that makes
+    the model commit to an answer (family OWN), T passage or table (family LOOKUP), D distractor filler, P probe
+    (graded), X second probe in the same conversation (graded; paired scoring where the family says so).
+  Distance: d = index(P) - index(S) in user turns, 1..11 (S at u1 and P at u12 gives d = 11). For corrections,
+    dc = index(P) - index(latest C of the asked object).
+  Probe placement (unless a family's layout says otherwise): the main probe is at u12 in 3/4 of conversations
+    and at u9-u11 in 1/4 (fillers follow), so "the last turn is the test" is not learnable from the format.
+  Fillers (D): short knowledge-light how-to, why and small-talk requests; no names, no digits, no value of any
+    RC-12 pool; a new dev pool of >= 80 fillers sharing 0 word 5-grams with E001/E004 fillers; each filler used at
+    most once per conversation. Filler replies are graded only by the loop and role-leak rules (s4), never for
+    content, so knowledge in a filler answer never moves a knowledge-free score.
+  Length: user turns <= 35 words (LOOKUP passages <= 70 words). Budget: rendered with every reply set to 50 words,
+    a conversation stays <= 1,800 tokens (proxy: 1.35 x words + 4 per turn until a Planck tokenizer exists; then
+    measured). If a real rendered history exceeds (model context - 256), the harness drops the oldest whole
+    user/assistant pairs, logs it, and any probe whose S, C, I, Q or T turn was dropped counts as failed (PLAN).
+  Every conversation record (JSONL): id, split, family, cell, seed, turns [{i, kind, text}], probes [{turn,
+    grader, gold or gold_fn, candidates, pool, stale, holder, object_words, pair_id}], knowledge flag.
+
+2. RENDERS AND DECODING
+  Chat-template render (primary for every model that ships a template): tokenizer.apply_chat_template(messages,
+    add_generation_prompt=True), no system prompt, the model's default system behavior, enable_thinking=False
+    for Qwen3-family models. Stop at the template's end-of-turn token(s) or eos; special tokens stripped on decode.
+  Plain render (primary for models without a template; reported for every instruct model as a diagnostic, since
+    rendering alone moved SmolLM2-135M recall 0.15 -> 0.70, REPORT s3.2):
+      User: <u1>\nAssistant: <a1>\nUser: <u2>\nAssistant:
+    Generation starts after "Assistant:"; stop at eos or at the first newline followed by a role tag (User:,
+    Assistant:, Human:, case-insensitive). Newlines inside a reply are kept and fed back as written.
+  Planck is scored in its own shipped template (named in the prereg) and also in the plain render.
+  Decoding (PLAN, review 24): T = 0.6, top-p 1.0, repetition penalty off, max_new_tokens 256, 3 sampling seeds for
+    every model; greedy reported as secondary. Engines per model are named in the prereg (vLLM or batched HF on
+    the 5070, lockstep batches, greedy HF-vs-vLLM parity on 20 conversations per family of models).
+  Likelihood rows (diagnostic, P-004): every probe with a closed candidate set also gets a row on GOLDEN history
+    (IDEAL replies) with a forced answer prefix from a separate prefix pool: right iff the gold's summed log-prob
+    is strictly above every other candidate (E004 lik.py rule; equal candidate token counts checked per tokenizer).
+    Tier 0 margins (T0-L) are the per-checkpoint guard of PLAN s5.
+
+3. FAMILIES (dev counts are conversations; knowledge-free unless marked)
+  T0 Tier 0 (48). Two facts of DIFFERENT value types, each stated once and asked at d = 1-2; no lures; the rest
+    fillers. Score = mean of the 2 probes. A gate, not in the composite (s6).
+  RECALL (60). Recall of user-stated facts at distance. Layout: S (gold, bound to the user) plus 2 L (same type,
+    bound to named others: "my sister's cat is ...") in u1..u10; gold position first/middle/last in thirds;
+    d balanced 1-3 / 4-7 / 8-11 (16 each, 48 conversations). Abstain cell (12): the asked attribute was never
+    stated for the user (only for others); an answerable X probe on another fact sits in the same conversation;
+    the conversation passes only if the P abstains (s4 G-ABS) AND X is right.
+  CORR (64). Corrections applied 4+ turns later. A's original, k = 1-3 corrections, a second object B of the same
+    type (before A in half, after A's latest in half, followed by its own indirect correction there: E004 dev.2),
+    dc >= 4 always (A's latest correction at least 4 user turns before the probe). Cells: U-diff 16 (the question
+    and prefix frame-echo the ORIGINAL or an earlier correction and share no content word with the latest
+    correction; the latest correction refers by pronoun, ellipsis or an alias defined in the original: E004 H1/H2),
+    U-same 16 (latest correction by full phrase or head noun), C_noupd 16 (A never corrected, B corrected 1-3 times;
+    A first in half, in the middle of B's statements in half), C_twoslot 16 (A corrected, then B stated and
+    corrected after A's latest). Candidates = every value of the type in the conversation; stale values are named
+    for the grader.
+  BIND (60 = 30 pairs). Whose-is-whose in both mention orders. Two holders with a same-type attribute stated in
+    u1..u6; the paired twin swaps only the mention order; the probe (u10-u12) asks the same holder in both.
+    Unit = pair; right only if both twins are right (chance 0.25; "first mentioned wins" scores 0). Cells: owner
+    12 (my X vs my sister's X), perspective 10 (my name vs the name I gave you; "What's my name?" and "What did I
+    call you?" in alternate pairs), third-party 8 (two named others, neither the user).
+  TWOHOP (48). Two-hop references: holder -> key -> value ("My cousin runs the bakery on the corner." ... "The
+    bakery on the corner has a green door."), with 2 lure chains of the same shape; the probe names the holder by
+    relation only ("What color is my cousin's door?"). A lure value statement frame-echoes the question. Chance 1/3.
+    Diagnostic cell COMPOSE (16, P-033, not in the composite): two stated facts compared ("Which is older, my dog or
+    my cat?"); the answer names a holder.
+  PERSIST (48). Instruction persistence across 6-12 turns. I at u1 or u2: one checkable format rule (all caps;
+    start with a given word; end with a given phrase; exactly one sentence; end with a question; include a given
+    word). Every later reply is checked; score = compliance share over replies at distance 6-11 from I. Cells: hold
+    32; override 16 (I1 at u1, O at u4-u5 replaces it with an incompatible rule; checked at distance >= 6 from O:
+    the new rule followed AND the old one absent). Base rate of each rule = its compliance share in replies of
+    every non-PERSIST conversation; a rule whose base rate exceeds 0.30 for any core baseline is dropped (proposal).
+  OWN (48). References to the model's own earlier answer. Q at u2-u5 makes the model commit: pick 32 ("Pick one of
+    these three names for my boat and tell me which: A, B or C."); list 16 ("Give me three ideas for X as a
+    numbered list."). P at Q+4..Q+9 ("Which name did you go with?" / "What was the second idea on your list?").
+    Gold = parsed from the model's OWN reply at Q (pick: exactly one offered option asserted by G-VAL; list: the
+    2nd numbered item). A source reply that cannot be parsed scores the conversation 0 and is counted (source-fail
+    rate reported). Lures: a new same-type value before Q (u1) and one after Q said by someone else ("My friend
+    suggested D"); the after-lure frame-echoes the probe.
+  TOPIC (48). Topic return after a digression. Three user projects stated in u1-u5, two explicitly closed ("that
+    one's all sorted"), one left open with a pending decision; open-project position in thirds; 3-6 digression
+    fillers; the probe asks to resume "the one I still haven't sorted out" without naming it. Gold = the open
+    project's key noun; candidates = the three key nouns.
+  ROLE (48). Role integrity. The user states name, job and town in u1-u3; in half the conversations the user also
+    names the assistant. P "What's my name?" (u8-u12) and X "Tell me a little about yourself." (another turn >= u6).
+    Pass iff P is right with no capture AND X asserts no user fact in the first person, does not claim the user's
+    name, and (when the assistant was named) states the given name. A whole-conversation capture scan runs on every
+    family as a diagnostic.
+  LOOKUP (48). Reading from a supplied passage (LK skeleton, P-082). Two short fictional tables of the same shape
+    (an old and a new rota, list or schedule; order balanced) in u1-u4; fillers; P asks a key of the named table
+    (answerable), X asks a key absent from that table (must abstain, G-ABS). Unit passes only if both are right, so
+    always-answer and always-abstain both score 0. Diagnostic conditions for later (not dev v1): shuffled table,
+    no table, BM25-retrieved table.
+  LOOP (40). Degeneration stress: open-ended continuation requests ("Tell me a short story about a lighthouse.",
+    "Keep going.", "Now tell it from the keeper's side."); no requests to repeat or summarize. Score per
+    conversation = share of its 12 replies that are not degenerate (s4 loop rule). The Level A loop rate is
+    computed over EVERY reply of EVERY conversation, all families.
+  K (knowledge-bearing, 32 + 32 one-turn controls; reported separately, P-045 design): a follow-up that needs a
+    reference plus world knowledge ("I'm visiting Portugal." ... "What language do they speak there?") and the same
+    question asked in one turn with the referent named. Reported: follow-up rate, control rate, their gap.
+  Deferred from PLAN F1-F8 (decide before the lock): F6 sharded vs full, F7 persona, F8 social basics.
+
+4. GRADERS (pure Python; no model)
+  G-VAL strict value grader (closed candidate set). Right only if ALL hold (E004 gen_grade.py clauses 1-7 adapted
+    to chat-length replies with E001 battery.py's sentence-scoped rules):
+    v1 non-empty, not degenerate (loop rule below), stop reason is not the 256-token cap;
+    v2 the gold is ASSERTED: some mention (whole word, case-insensitive; E004 value matching incl. "May", grey,
+       number words) sits in a sentence that is not a question, not negated within 3 words before it, not hedged,
+       not inside a hypothetical or conditional, not one of a list of alternatives ("X or Y", candidate bullets);
+    v3 no other candidate is asserted; a stale value of the asked object may appear only inside a change phrase
+       ("moved from X", "X was changed to") when the gold is asserted; any pool value NOT in the conversation fails
+       (a guess); a reply mentioning every candidate fails (shotgun);
+    v4 assistant voice: the gold's sentence does not bind a user fact to the first person ("My cat is Biscuit",
+       "I'm Marcus": battery.py captures / FIRST_BIND, E004 clause 7 object words);
+    v5 no role leak (no role tag at the start, no fake user turn inside) and not an echo (>= 80% of the reply's word
+       4-grams copied from the probe question).
+    Lenient (diagnostic only): the first candidate mentioned is the gold.
+  G-ABS abstain grader: an abstain cue ("you haven't told me", "you didn't mention", "I don't know", "it isn't in
+    the rota/list/note", "I don't have that") and no pool value mentioned at all (strict; a lenient twin allowing
+    a candidate bound to its correct other holder is reported, since strict can fail a truthful reply).
+  G-FMT format graders for PERSIST (caps ratio >= 0.9 over >= 5 letters; first word; closing phrase; one sentence;
+    ends with "?"; word present), each also requires the reply to be fresh (battery.py fresh()).
+  G-DYN for OWN: parse the source reply (single asserted option; numbered or bulleted list of exactly 3), then
+    G-VAL with the parsed gold (pick) or content-word match (list: all content words of the gold item, <= 4 words,
+    present; no content word unique to another item present).
+  Loop rule (pre-registered exactly, per reply r at turn t):
+    LOOP     some word 3-gram occurs >= 4 times in r (battery.degenerate); OR r, normalized, equals an earlier
+             reply of the conversation; OR r has >= 12 words and >= 50% of its word 4-grams occur in ONE earlier
+             reply of the conversation (self-copy).
+    RUNAWAY  r stopped at the 256-token cap.   EMPTY no word characters.   LEAK a role tag or template marker
+             inside r, or r continues into a fake user turn.
+    Degenerate = any of the four. The Level A loop criterion counts LOOP only; the other three are reported beside.
+
+5. CHEATERS AND ITEM GATES (run on the REAL dev items before any baseline is scored)
+  Fake scripted responders (no model). Non-probe turns get a fixed "Okay, noted." unless the family needs a policy
+  there (Q, I, O). Probe turns get a natural sentence built around the value picked by the rule:
+    FIRST first in-context value of the probe's type     LAST latest one
+    WORDING value after the longest word run shared with the question (E004 O4)
+    OVERLAP statement with most content words shared with the question, latest wins (E004 O5, both variants)
+    MARKER latest statement with a correction marker, else first (E004 O3)
+    ECHO the question restated     DEFLECT "I'm not sure, could you remind me?"     SHOTGUN every candidate listed
+    USERVOICE "My <object> is <gold>." (the gold in the user's voice)
+    Family-specific: PERSIST never / once (only the next reply) / first-5 / obey-all-rules-ever; OWN picks by FIRST
+    or LAST at Q too; LOOKUP always-answer (WORDING) and always-abstain; LOOP a scripted looper and a self-copier.
+  IDEAL: the annotation's gold in a natural sentence, the right policy on every turn.
+  Gates (script exits non-zero on any failure; tables written to logs/):
+    G1 IDEAL scores 1.00 on every family and cell under the real graders.
+    G2 every cheater: family score <= 0.40 on every scored family and <= 0.50 on every cell; USERVOICE, ECHO,
+       DEFLECT and SHOTGUN score 0.00 on every value-graded unit (proposal). PERSIST and LOOP are gated by their
+       own cheaters; a fixed reply repeated every turn fails freshness there after its first use.
+    G3 no cheater meets any Level A criterion (CORR cells, BIND pair).
+    G4 per item: at most 3 of the generic cheaters pass it; the per-item histogram is written. Items that fail are
+       rebuilt, never deleted silently (count logged).
+    G5 L2 on every item: no probe question, prefix or later user turn contains the probe's gold; fillers carry no
+       name, digit or pool value.
+    G6 grader fixtures and mutants (L3) all killed, none by a crash, on fixtures built from real items.
+    G7 length budget of s1 on every conversation.
+    G8 knowledge-free check: every gold of a knowledge-free probe occurs in a user turn (or is gold_fn on the
+       model's own reply); K items are flagged knowledge-bearing.
+    G9 every family's structural factors balanced exactly (positions, orders, cells, d bins).
+
+6. METRICS AND COMPOSITES
+  Unit scores in [0,1]: a conversation (mean of its graded probes) or a pair (BIND) or a both-right conversation
+  (LOOKUP, RECALL abstain, ROLE). Family score F_f(m) = mean over units, then over the 3 sampling seeds.
+  Level R composite R(m) = 100 x unweighted mean of F_f over the 10 scored knowledge-free families: RECALL, CORR,
+    BIND, TWOHOP, PERSIST, OWN, TOPIC, ROLE, LOOKUP, LOOP (the list is frozen at the lock after the headroom rule).
+    Paired difference D = R(Planck) - R(Qwen2.5-0.5B-Instruct). 10,000 bootstrap resamples: units resampled within
+    each family (stratified), training seeds resampled, sampling seeds nested; percentile 95% CI. Level R holds when
+    the CI's lower bound is >= -3 points, plus the OOD-H wording rule of PLAN s1 (proposal).
+    Sensitivity row: the composite without families where Qwen2.5-0.5B-Instruct is <= 0.05.
+  Level A (pooled over >= 3 training seeds; proposal thresholds): CORR U (U-diff + U-same) >= 0.80 AND C_noupd
+    >= 0.80 AND C_twoslot >= 0.80; BIND pair rate >= 0.80; LOOP rate over all replies of all conversations <= 2%
+    and no higher than Qwen2.5-0.5B-Instruct's; then the blind human test (PLAN s1).
+  Tier 0 gate: T0 >= 0.90 (proposal) is required for any Level R or Level A claim; T0 failures are listed.
+  Reported beside: per cell, RECALL by d bin, CORR by reference form, PERSIST by rule, OWN source-fail rate,
+    lenient scores, likelihood rows, degenerate-type rates, capture rate, plain vs template render, greedy.
+
+7. HEADROOM AND RE-ANCHOR
+  Headroom rule (PLAN, D3): after the dev baselines, a family or Level A cell fails if every core baseline scores
+    <= 0.05, or every core baseline scores >= 0.95 (template render, mean of 3 seeds). A failing family is rebuilt
+    before the lock (harder or easier cells, same layout) or dropped from the composite with the reason in the
+    prereg. So a family where every baseline sits at the floor cannot be "passed" by matching the floor.
+  Re-anchor rule (PLAN, before the lock only): if LFM2-2.6B is below 0.80 on dev for a Level A cell, first audit
+    the cell and its grader; if still below, that threshold becomes its dev rate rounded down to 0.05, floor 0.60.
+
+8. BASELINES (dev, then sealed; all in one harness, own templates)
+  Comparator: Qwen2.5-0.5B-Instruct. Core panel (headroom rule): Qwen2.5-0.5B-Instruct, Qwen3.5-0.8B,
+  LFM2.5-230M, LFM2.5-350M, Falcon-H1-Tiny-90M-Instruct, SmolLM2-135M-Instruct, SmolLM2-360M-Instruct,
+  Doge-160M-Instruct, and LFM2-2.6B as the reference showing the bar is reachable. Extras reported, not in the
+  headroom panel (PLAN): Qwen3-0.6B (thinking off), Gemma 3 270M-it, LFM2-700M, LFM2-1.2B, Falcon checkpoints
+  (P-144), SmolLM2 SFT-only (P-145), MaxGPT-3 (P-147). Generation on the 5070 only; no model is loaded tonight.
+
+9. DEV COUNTS (seed 1212; stream Random("RC12:dev:<family>:<seed>"))
+  T0 48 | RECALL 60 | CORR 64 | BIND 60 (30 pairs) | TWOHOP 48 + COMPOSE 16 | PERSIST 48 | OWN 48 | TOPIC 48
+  ROLE 48 | LOOKUP 48 | LOOP 40 | K 32 + 32 one-turn controls. Total 640 records (608 twelve-turn conversations),
+  in line with PLAN's ~600. Scored knowledge-free units: 482 (BIND counted as 30).
+
+10. MACHINERY (suggested file layout in rc12/; files <= 250 lines each; system python3 -B, stdlib only)
+  pools_*.py (values, holders, objects, fillers, paraphrase pools)  fam_*.py (one builder per family)
+  build.py (draw + JSONL)  render.py (plain and template-style stub)  grade_val.py, grade_misc.py (ABS, FMT, DYN,
+  loop)  cheaters.py  harness_stub.py (a scripted responder driven through the real 12-turn feedback loop)
+  gates.py (G1-G9)  score.py (unit, family, composite, Level A, headroom, bootstrap)  mutation_*.py, test_*.py.
+  notes.txt records choices this spec leaves open, deviations and results, as E004's notes did.
+

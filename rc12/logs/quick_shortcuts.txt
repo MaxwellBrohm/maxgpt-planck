@@ -1,0 +1,34 @@
+family:cell                  FIRST      LAST   WORDING OVERLAP_A OVERLAP_B    MARKER   units
+BIND:owner                    0.00      0.00      0.25      0.00      0.00      0.00   12
+BIND:perspective              0.00      0.00      0.00      0.00      0.00      0.00   10
+BIND:third-party              0.00      0.00      0.00      0.00      0.00      0.00   8
+CORR:C_noupd                  0.25      0.00      0.50      0.25      0.25      0.00   16
+CORR:C_twoslot                0.00      0.00      0.25      0.25      0.25      0.00   16
+CORR:U-diff                   0.00      0.12      0.00      0.00      0.00      0.19   16
+CORR:U-same                   0.00      0.00      0.50      0.00      0.00      0.12   16
+LOOKUP:menu                   0.06      0.06      0.38      0.38      0.25      0.06   16
+LOOKUP:rota                   0.06      0.12      0.31      0.31      0.12      0.06   16
+LOOKUP:tour                   0.19      0.19      0.25      0.25      0.25      0.19   16
+RECALL:abstain                1.00      1.00      1.00      1.00      1.00      1.00   12
+RECALL:d1-3                   0.38      0.31      0.31      0.31      0.31      0.38   16
+RECALL:d4-7                   0.31      0.31      0.25      0.31      0.31      0.31   16
+RECALL:d8-11                  0.31      0.38      0.38      0.38      0.38      0.31   16
+ROLE:named                    0.25      0.29      0.29      0.29      0.29      0.25   24
+ROLE:unnamed                  0.33      0.33      0.33      0.33      0.33      0.33   24
+T0:t0                         1.00      1.00      1.00      1.00      1.00      1.00   96
+TOPIC:topic                   0.33      0.29      0.21      0.29      0.29      0.21   48
+TWOHOP:COMPOSE                0.50      0.50      0.50      0.75      0.75      0.50   16
+TWOHOP:city                   0.33      0.33      0.33      0.33      0.33      0.33   12
+TWOHOP:day                    0.33      0.33      0.33      0.33      0.33      0.33   12
+TWOHOP:door                   0.33      0.33      0.33      0.33      0.33      0.33   12
+TWOHOP:month                  0.33      0.33      0.33      0.33      0.33      0.33   12
+
+pooled over composite units only: T0 (a gate), TWOHOP:COMPOSE (diagnostic) and the X probes of
+RECALL:abstain (their unit also needs the abstain) are left out of the pooled rows
+BIND (pooled)                 0.00      0.00      0.10      0.00      0.00      0.00
+CORR (pooled)                 0.06      0.03      0.31      0.12      0.12      0.08
+LOOKUP (pooled)               0.10      0.12      0.31      0.31      0.21      0.10
+RECALL (pooled)               0.33      0.33      0.31      0.33      0.33      0.33
+ROLE (pooled)                 0.29      0.31      0.31      0.31      0.31      0.29
+TOPIC (pooled)                0.33      0.29      0.21      0.29      0.29      0.21
+TWOHOP (pooled)               0.33      0.33      0.33      0.33      0.33      0.33

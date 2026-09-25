@@ -1,0 +1,21 @@
+RC-12 mutation_e2e.py part 3/3: 16 of 50 mutants, fresh process each, 53 s. No model.
+baseline failures (expected: only the G4 item lines):
+  none
+KILLED    #02 runner: plain stop rule not applied  <- stops: CONTINUER plain: fake user turn not cut
+KILLED    #05 runner: needed turn kinds narrowed  <- trunc: ctx 556: verdict, runner's lost turns and the fake's history disagree [('rc12-dev-lookup-001', 11), ('rc12-dev-lookup-002', 9), ('rc12-dev-look
+KILLED    #08 runner: history truncated but the drop not recorded  <- trunc: ctx 556: only 0 truncated probes
+KILLED    #11 render: plain render without the generation tag  <- render: plain render string
+KILLED    #14 render: fit drops half pairs  <- history: HISTCHECK plain ctx=556: 1032 bad histories [('rc12-dev-t0-001', 9), ('rc12-dev-t0-001', 10), ('rc12-dev-t0-001', 11)]
+KILLED    #17 score: BIND scored per conversation, not per pair  <- G2 ANTI_OVERLAP: family BIND=0.50
+KILLED    #20 score: flat mean instead of nested seed means  <- scoring: nested seed means
+KILLED    #23 score: Level A bar lowered  <- G3 ANTEPENULT: CORR:C_twoslot=0.50 meets its Level A criterion
+KILLED    #26 score: claimable with one training seed  <- scoring: claimable needs 3 training seeds
+KILLED    #29 score_stats: headroom floor bar  <- stats: headroom floor bar (DEFLECT PERSIST sits between 0 and 0.05)
+KILLED    #32 score_stats: Level R margin  <- stats: bootstrap FIRST-IDEAL {'D': -86.29166666666667, 'lo': -88.84375, 'hi': -83.95833333333334, 'n': 200}
+KILLED    #35 score_stats: sensitivity drops nothing  <- stats: sensitivity
+KILLED    #38 fakes: IDEAL answers OWN from the annotation, not its own reply  <- G1 IDEAL_ALT: OWN:list=0.00
+KILLED    #41 fakes_family: P_NEVER obeys  <- G2 P_NEVER: cell PERSIST:hold=1.00
+KILLED    #44 hf_responder: HF path claims to be tested  <- hf: hf_responder import is not light or claims to be tested
+KILLED    #47 own_cf: OWN-CF pick not swapped  <- owncf: CONSIST OWN under --own-cf = 0.67, want 0.0
+killed 16 | survived 0 | crashed 0 | malformed 0
+ALL MUTANTS KILLED

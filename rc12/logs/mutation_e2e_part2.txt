@@ -1,0 +1,22 @@
+RC-12 mutation_e2e.py part 2/3: 17 of 50 mutants, fresh process each, 55 s. No model.
+baseline failures (expected: only the G4 item lines):
+  none
+KILLED    #01 runner: fed-back reply not stripped  <- history: HISTCHECK plain ctx=556: 6688 bad histories [('rc12-dev-t0-001', 2), ('rc12-dev-t0-001', 3), ('rc12-dev-t0-001', 4)]
+KILLED    #04 runner: truncated probes not failed  <- trunc: ctx 556: only 0 truncated probes
+KILLED    #07 runner: no room kept for the 256 new tokens  <- trunc: ctx 556: only 0 truncated probes
+KILLED    #10 runner: untested HF path runs without the flag  <- hf: runner went past the refusal to load a model (ModuleNotFoundError)
+KILLED    #13 render: role cut without the newline  <- render: cut_plain('A\nAssistant: B')
+KILLED    #16 render: own_reply off by one  <- G1 IDEAL: OWN:list=0.00
+KILLED    #19 score: T0 in the composite  <- G2 ANTI_OVERLAP: cell T0:t0=1.00
+KILLED    #22 score: loop rate counts runaways  <- stops: CAPPER: R 0.0, loop 1.0, runaway 1.0
+KILLED    #25 score: loop-vs-comparator always met  <- scoring: Level A met without a comparator
+KILLED    #28 score: Level A keys double-count cell units  <- scoring: unit counts {'BIND': 30, 'BIND:owner': 12, 'BIND:perspective': 10, 'BIND:third-party': 8, 'CORR': 64, 'CORR:C_noupd': 32, 'CORR:C_twoslot': 3
+KILLED    #31 score_stats: bootstrap not paired  <- stats: bootstrap is not paired: D(FIRST, FIRST) CI {'D': 0.0, 'lo': -3.4062500000000018, 'hi': 3.635416666666666, 'n': 200}
+KILLED    #34 score_stats: PERSIST drop bar  <- stats: PERSIST base rates {'brackets:None': 0.0, 'caps:None': 0.0, 'closing:over and out': 0.0, 'closing:stay curious': 0.0, 'closing:that is all': 0.
+KILLED    #37 fakes: value cheaters get the gold  <- G2 FIRST: cell BIND:owner=1.00
+KILLED    #40 fakes: ABSTAIN answers right  <- G2 ABSTAIN: 394 value-graded units above 0 (e.g. ['rc12-dev-recall-001', 'rc12-dev-recall-002', 'rc12-dev-recall-003'])
+KILLED    #43 fakes_family: P_OBEYALL lets the newest rule win (correct on 3 of 4 override pairs)  <- G2 P_OBEYALL: cell PERSIST:override=0.75
+KILLED    #46 fakes_audit: ORDER_ABS abstains where it should  <- G2 ORDER_ABS: cell LOOKUP:menu=1.00
+KILLED    #49 runner: runner ignores --own-cf  <- owncf: CONSIST OWN under --own-cf = 1.00, want 0.0
+killed 17 | survived 0 | crashed 0 | malformed 0
+ALL MUTANTS KILLED

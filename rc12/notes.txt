@@ -1,0 +1,418 @@
+RC-12 notes (append-only; SPEC.txt is the design, this file records choices SPEC leaves open, deviations and
+results). No model was loaded for anything below. Nothing outside rc12/ was written.
+
+STEP 2 (2026-09-24 night): conversation generators and the DEV split
+BUILT
+  build_dev.py -> dev/rc12_dev.jsonl: 640 records (608 twelve-turn + 32 one-turn K controls), seed 1212, one stream
+  per family Random("RC12:dev:<family>:1212"). Byte-identical across processes (tested). md5 at the end of step 2:
+  23e6bb663dd9a3f0272c70bb35ef3eee.
+  Counts = SPEC s9: T0 48 | RECALL 48 + abstain 12 | CORR 16 x 4 cells | BIND 30 pairs (owner 12, perspective 10,
+  third-party 8) | TWOHOP 48 + COMPOSE 16 | PERSIST hold 32 + override 16 | OWN pick 32 + list 16 | TOPIC 48 |
+  ROLE 48 | LOOKUP 48 | LOOP 40 | K 32 + 32 controls.
+  Files: pools_vals.py (value pools, holders, acks, value matcher), pools_fill_a/b.py (90 fillers with IDEAL
+  replies), pools_slots.py (T0/RECALL/CORR wording), pools_misc.py (OWN/TOPIC/ROLE/LOOKUP/LOOP/K wording),
+  common.py (Conv builder, placement, record format), fam_*.py (builders), test_gens.py + test_gens_fam.py +
+  test_gens_fam_b.py (checks), mutation_gens.py (mutants of the checks), quick_shortcuts.py (diagnostic).
+
+RECORD FORMAT (common.py docstring has the full list)
+  turns[i]: i, kind (S L C I O Q T D P X), text (user), ideal (the IDEAL reply; never shown to a model), facts
+  (annotations), vals (every RC-12 pool value in the text). probes[]: turn, kind P/X, grader VAL | ABS | FMT | DYN
+  | ROLEX | LOOP, question, gold / gold_fn, candidates (in-context values of the type, in mention order), pool,
+  stale, holder, object_words, pair_id, d, dc, src (user turns carrying the gold), prefix (likelihood rows),
+  ideal, plus family fields: CORR b_values/alias; RECALL-abstain lure_holders; TWOHOP echo_value/hop1_turn;
+  COMPOSE pool_values/diagnostic; PERSIST fmt {rule, arg, absent}; OWN gold_fn {type pick|list2, src_turn,
+  options}, ideal_gold, ideal_items, lure_items; ROLE-X user_facts, aname; LOOKUP key, lure_value, other_value;
+  K accepted, referent, ref_turn. meta.unit: mean (probes averaged), all (every probe must pass: RECALL
+  abstain, ROLE, LOOKUP), pair (BIND: both twins).
+  The IDEAL responder is simply "reply turns[i].ideal". IDEAL replies are distinct inside every conversation
+  (tested), so the IDEAL cannot trip the equality branch of the loop rule.
+
+CHOICES SPEC LEFT OPEN
+  Value pools: 18 pools, pairwise disjoint (tested), "May" left out of MONTH. K answers (languages, capitals) share
+  nothing with the knowledge-free pools. Names given to the assistant (ANAME) and user/lure names (PERSON) form
+  one guess pool "name".
+  RECALL/T0: gold frames never contain the question's "my <object>" run; lure frames bind the same type to
+  another holder and reuse the question's words. X of the abstain cell is one stated fact of another type.
+  CORR: U-diff latest forms pronoun / ellipsis / demonstrative / alias, 4 each; U-same full / head 8 each; B before
+  A / after A's latest (with its own indirect correction) 8/8 in both U cells; C_twoslot latest forms full, head,
+  pronoun, alias 4 each; an indirect correction always directly follows its own object's statement (tested).
+  C_noupd: 8 of 16 get an ANCHOR: B's latest correction also names A as unchanged ("Actually, my college visit
+  got changed to August, but nothing changes for my charity race."). Without it, "pick the statement naming the
+  asked object" scored 1.00 on C_noupd (the E004 problem SPEC s0 names); with it, 0.50.
+  BIND: owner and third-party use an intro turn naming both holders with no value, then pronoun-bound value
+  statements with the SAME frame ("Mine is teal." / "Hers is red."); perspective crosses the words: the user's
+  name comes with "call" ("Everyone calls me Elena."), the assistant's with "name" ("Your name is Kestrel from now
+  on."), and "What's my name?" / "What did I call you?" alternate by pair. Twins differ only by swapping the two
+  value statements (tested). Probe u12 in 3/4 of pairs, u10/u11 otherwise.
+  TWOHOP: 4 schemas (door colour, class day, workplace city, event month) x 12; exactly one lure hop-2 statement
+  echoes the question with a 3-word run and the gold's never does (tested).
+  COMPOSE: number words (two..twelve), holder nouns as answers ("Which of my two pets is older?" -> "cat"); its
+  pool is local (probe.pool_values). Diagnostic only.
+  PERSIST rule words chosen to be rare in normal replies: first words Indeed/Behold/Ahoy/Greetings, closings
+  "over and out" / "stay curious" / "that is all" / "until next time", include-words splendid/nifty/dandy/groovy.
+  The base-rate drop rule (SPEC s3) still has to be run on baseline replies; "Greetings" and "Indeed" are the
+  likeliest to hit it.
+  OWN: pick categories boat, puppy, band, quiz team (8 each); IDEAL picks option 1/2/3 = 11/11/10. List topics 8 x 2.
+  TOPIC: closed projects reuse the probes' own words ("sorted out", "up in the air"); the open project shares no
+  word with the probes. Number of projects closed in a later turn cycles 0/1/2 inside each open position.
+  LOOKUP: tables written "Key: value, ..."; three shapes (rota weekday->person, tour month->city, lunch menu
+  weekday->food) x (old first / new first) x (asked old / new), 4 each.
+  LOOP: 40 topics, 11 of 16 continuation requests per conversation, no repeat/summarize/again (tested).
+  K: 16 "What language do they speak there?" + 16 "What's the capital city there?"; referent at u1-u6.
+  Fillers: 90 new (45 how-to/why, 45 small talk/creative), IDEAL reply one sentence each. First drafts shared word
+  5-grams with E001/E004 fillers in 37 of 90 (common stems like "what's a good way to"): all rewritten; now 0.
+
+DEVIATIONS FROM SPEC (to carry into the prereg or fix before the lock)
+  D1 RECALL statements may sit in u1..u11, not u1..u10: with the probe at u12, gold-first at d <= 3 needs two lure
+     turns after the gold, so u11 is required. Consequence: every gold-first item of bin d1-3 has d = 3.
+  D2 PERSIST hold uses 8 rules (SPEC's 6 plus lowercase and square brackets) so 32 conversations balance exactly
+     (8 x 4, I at u1 or u2 2/2 per rule). Override uses 4 incompatible pairs x 4: first word A->B, closing A->B,
+     include-word A->B ("never use A again"), caps -> lowercase; O at u4 or u5, 8/8.
+  D3 ROLE: the user's name, job and town, TWO lure names (a single lure left FIRST/LAST at 0.42/0.46) and, in half,
+     the assistant's name, all in u1..u6 (SPEC: u1-u3). The user's name is first/middle/last of the three people
+     in thirds (replaces "lure before/after"). X sits after the statements (u7-u11), not merely >= u6.
+  D4 TOPIC is one cell ("topic"); the open position is a balanced factor. As cells, FIRST scored 1.00 on the
+     "first" cell by construction.
+  D5 k (corrections of A) is spread 1/2/3 = 6/5/5 per cell (16 is not a multiple of 3); also OWN IDEAL 11/11/10.
+  D6 C_noupd anchor (above) is new; it is a legitimate no-update cue for a real reader, not a trick.
+
+TESTS AND RESULTS
+  test_gens.py (+ _fam, _fam_b): counts per family and cell, 12 turns, kinds, words <= 35 (tables <= 70; longest
+  user turn is 23 words), token proxy <= 1,800 (max 1,107), no em dash, IDEAL has the gold and no other
+  candidate, abstain IDEAL names no value of its pool, d = turn - latest src, L2 (no question or prefix contains
+  its gold or ANY candidate; no user turn after the gold's source repeats the gold), G8 (every knowledge-free
+  gold is in its source user turn; DYN golds come from a Q turn), filler purity (no digit, name-like word, pool
+  value, holder word or PERSIST rule word; one-sentence IDEAL; 0 word 5-grams with E001/E004 fillers), pool
+  disjointness, determinism (file == fresh build in a second process == in-process build), and per family: probe
+  placement (u12 in exactly 3/4, the rest in the family's early range), RECALL bins/positions, CORR dc >= 4 and
+  forms/placements, BIND twin swap and 30/30 mention orders, TWOHOP echo design, PERSIST checked turns and IDEAL
+  compliance (and old rule absent after an override), OWN Q/P gaps and lures, TOPIC layout, ROLE and LOOKUP
+  balance and key placement, LOOP requests, K pairs. Result: 0 failures (logs/test_gens.txt).
+  mutation_gens.py: 22 record mutants + 5 filler mutants + 1 file mutant, each must be caught by the INTENDED
+  check's message (a kill by an unrelated check does not count), none by a crash: all 28 killed
+  (logs/mutation_gens.txt).
+  quick_shortcuts.py (diagnostic, NOT the SPEC s5 cheaters): value-pick shortcuts on the real VAL probes. Pooled
+  over composite units, the worst family score is 0.33 (RECALL FIRST/LAST, TWOHOP, ROLE LAST); worst cells 0.50
+  (CORR U-same LAST/WORDING/OVERLAP/MARKER, CORR C_noupd FIRST/WORDING/OVERLAP). T0 is 1.00 for every shortcut
+  by design (no lures; it is a gate). logs/quick_shortcuts.txt.
+
+NEXT STEP MUST KNOW
+  Not built yet: the graders (G-VAL, G-ABS, G-FMT, G-DYN, G-ROLEX, loop rule), the cheater responders, the
+  12-turn harness stub, gates G1-G9, scoring. The shortcut numbers above are value picks, not graded replies.
+  At the SPEC's proposed thresholds, U-same and C_noupd sit exactly at the 0.50 cell limit for several shortcuts.
+  If G2 is kept at "<= 0.50 per cell", they pass with no margin; widen the margin by adding anchors or
+  frame-echo lures before the lock rather than moving the threshold.
+  RECALL abstain: the X probe alone is trivially answerable; the unit needs the abstain too (meta.unit = all).
+  The OWN gold is dynamic (gold_fn on the model's own Q reply); the IDEAL's choice is ideal_gold.
+  COMPOSE questions do not contain the gold, but the answer is a holder noun, not a pool value, so G-VAL needs
+  pool_values from the probe.
+
+STEP 3 (2026-09-25 night): graders, loop rule, role-leak scan, grader mutation test
+BUILT (stdlib only, no model loaded, nothing written outside rc12/)
+  grade_text.py   assertion analysis (E001 battery.py adapted): sentence spans, negation, hedges, examples,
+                  if-clauses, "X or Y", bare list lines, "than X", greeting vocatives, person binding (captures),
+                  "my" + object word (E004 clause 7), assistant-held reversal, unsure/deflect and abstain cues, echo.
+  grade_loop.py   the SPEC s4 loop rule exactly: LOOP (3-gram >= 4 in the reply; equal to an earlier reply after
+                  lowercase word normalization; >= 12 words with >= 50% of 4-grams in ONE earlier reply), RUNAWAY
+                  (stop "cap"), EMPTY, LEAK (role tag User/Assistant/Human/System/AI/Bot/Model at a line start,
+                  or a chat-template marker). conversation_flags() gives per-turn flags.
+  grade_role.py   G-ROLEX (r1-r7) and role_leaks(): capture (a user-held fact bound to the first person, only at
+                  or after the fact's turn), user_voice ("my <holder>" with that holder's value), turn_leak.
+  graders.py      G-VAL (v1-v5), G-ABS (a1-a4), LOOP probes, dispatch grade_probe(), grade_conv() -> probes,
+                  unit (meta.unit mean / all / pair), flags, leaks. Clause lists are in the docstrings.
+  grade_fmt_dyn.py  G-FMT (f1-f5, 8 rules) and G-DYN (pick: parse the model's own Q reply, then G-VAL; list2:
+                  numbered/bulleted list of exactly 3, content-word match with 5-letter stems).
+  fixtures_graders.py, fixtures_more.py  fixtures built from REAL items; mutants_graders.py  the mutant table;
+  mutation_graders.py  the runner (4 worker processes, ~32 s).
+
+CHOICES SPEC LEFT OPEN
+  Negation: a cue (not, no, never, neither, nor, without, cannot, none, any n't word, instead of, rather than) in
+  the 3 word tokens before the value; the interjection "no," / "no problem," is not a negation; a negated copula
+  right after also counts ("Friday isn't right"). Hedges are sentence-scoped (maybe, perhaps, possibly, probably,
+  might, may be, could be, not sure, i guess, i think, i believe, i suppose, presumably, likely); unsure/deflect
+  phrases fail the whole reply ("I'm not sure", "I can't remember", "remind me", "you haven't told me").
+  "X or Y" counts when the other side is capitalized, a digit or a value of the probe's pool, except an "or" in a
+  negated list after the value ("Friday, not Monday or Tuesday") or before a "but" ("Not A or B, but Friday").
+  A value right after "than" is compared, not asserted. Stale values pass only in a change phrase (from, changed,
+  originally, previously, earlier, before, used to, was, were, old before it; was/were/originally/.../no longer
+  after it) and only when the gold is asserted; a negated other value is not an assertion. Guess = any mention of
+  a pool value absent from the user turns up to the probe. Shotgun = every candidate mentioned in any form.
+  User voice (v4): captures() on the gold or "my" within 3 words before an object word or the holder word; for
+  assistant-held probes (OWN, "What did I call you?") the reverse ("You picked X", "Your name is X", "I called
+  you X"). G-ABS cue list in grade_text.ABS_CUE; lenient ABS allows a value whose sentence names its own holder.
+  G-FMT lowercase = no capital at all; closing = last words equal the phrase, trailing punctuation ignored.
+
+DEVIATIONS (carry into the prereg or change before the lock)
+  D7  LOOP family probes also fail an echo of the user turn (loop_echo). It counts in the LOOP family score only;
+      the Level A loop rate still counts LOOP only.
+  D8  Echo = SPEC's 80% of 4-grams OR the reply contains the whole question (4+ words) word for word. Without the
+      second part "What instrument am I learning? Trombone." passed on short questions and failed on long ones.
+  D9  G-FMT fails replies under 4 words (a bare marker "Greetings." is not a reply) and echoes of the user turn.
+  D10 G-ROLEX adds r5 (a first-person sentence without "you" naming a person other than the assistant's given
+      name) and r7 (no first-person word at all). Before r7, "It is Beatriz, Priya and Leilani." passed ROLEX.
+  D11 COMPOSE is exempt from shotgun ("Your sister is younger than your brother" names both by design).
+  D12 G-ABS and G-DYN list have no echo clause: no ABS question holds an abstain cue (checked every run) and the
+      gold item's words are never in the question, so a2_cue / d2_gold already fail every echo (an echo clause
+      there could never be the only failure, so its mutant could not be killed). G-DYN list counts content words
+      of the user's lure items as "another item" (d3), so "a cooking class or a trivia evening" fails.
+
+KNOWN STRICT CASES (SPEC v3 as written; measure on baseline replies before the lock, lenient twins reported)
+  (a) A correct reply that also asserts another candidate with its right owner fails: "Your name is Tobias, and
+      I'm Kestrel." (ROLE P), "The shed and the bookshelf are done; the speech is still open." (TOPIC).
+  (b) Shotgun fails "It is the speech, not the shed or the bookshelf." and BIND "the banjo, not the trombone".
+  (c) The loop rule's equality clause makes two identical short acks ("Got it.") a LOOP. A terse Planck acking
+      the same way twice would be charged a loop. Proposal to decide at the lock: equality only at 4+ words.
+
+RESULTS
+  mutation_graders.py (logs/mutation_graders.txt): 124 records (4 per family x cell; PERSIST one per rule and
+  override pair, so all 8 rules and 4 pairs are covered), 6,321 fixtures from real items (1,428 must pass, 4,893
+  must fail: empty, cap, leak, loops, copies, hedge, unsure, deflect, negation, question, example, if-clause,
+  "or" lists, bullets, "than", vocative, wrong candidate, stale, guess, shotgun, user voice, echo, rule breaks,
+  source failures): 0 misses. Conversation tests (unit mean/all, role-leak events incl. one BEFORE the fact's
+  turn that must not count): 0 misses. IDEAL on all 640 records: 0 failing probes, 0 loop flags, 0 leak events.
+  Mutants: 128 (36 clause removals, 38 sub-rule switches, 8 thresholds, 46 one-line source edits): 128 killed,
+  0 survived, 0 crashed; each killed by the fixture aimed at it (the log names one per mutant). Survivors found
+  on the way and fixed: alternatives were never isolated (v3_other also fired), PERSIST caps/brackets/question
+  rules were not in the first 4 records, the list-shape check was duplicated, two mutant strings were misquoted.
+  test_gens.py still 0 failures; dev md5 unchanged (23e6bb663dd9a3f0272c70bb35ef3eee).
+  Smoke run of generic replies on real probes (preview, NOT the SPEC s5 gate): ECHO passes 0 probes anywhere;
+  DEFLECT passes only ABS probes (by SPEC; their units need the paired probe too); SHOTGUN passes 0 probes with
+  2+ candidates; "My <object> is <gold>." passes 0 user-held probes.
+
+NEXT STEP MUST KNOW
+  API: graders.grade_conv(rec, replies, stops); replies[i] is the model's own reply to user turn i+1 (history is
+  the model's, never the IDEAL); stops "eos" | "eot" | "role" | "cap". unit "pair" is per conversation; joining
+  twins by pair_id belongs in score.py. PERSIST score = mean of its FMT probes; LOOP = mean of its 12 LOOP probes.
+  OWN results carry source_fail (report the rate). T0 and K probes have one candidate, so FIRST/LAST/SHOTGUN give
+  the right answer there by design (T0 is a gate, K is separate). USERVOICE for assistant-held probes must be
+  the reversed perspective ("Your name is Zephyr", "You picked Quizzards"): "My name is Zephyr" is the correct
+  assistant voice and passes. Re-run mutation_graders.py after any grader edit; source mutants match exact
+  text, so editing a mutated line needs mutants_graders.py updated (a missing text is reported as a crash).
+  Not built: cheaters.py, harness_stub.py, gates.py (G1-G9), score.py, render.py.
+
+STEP 4 (2026-09-25 night): runner, scoring, fake responders, end-to-end validation
+BUILT (stdlib only, no model loaded, nothing written outside rc12/)
+  render.py        plain render ("User: ..\nAssistant:") and its stop cut (first newline + User:/Assistant:/Human:,
+                   any case), tokenizer chat-template call (enable_thinking=False for Qwen3-family), a ChatML stub
+                   for fakes, the s1 proxy token count, fit() (drops the oldest WHOLE user/assistant pairs to fit
+                   ctx - 256), own_reply() (a turn's own reply as it sits in a possibly truncated history).
+  runner.py        play(): u1, a1 (the responder's own reply, stop-cut, stripped) appended, u2, ... a12; grade():
+                   graders.grade_conv on the played replies, then truncation failures; run() writes
+                   transcripts.jsonl (per conversation x seed: every turn with reply, stop, dropped, raw) and
+                   scores.jsonl (per run: every family, cell and Level A key). CLI: fake:<NAME> or hf:<model>.
+  hf_responder.py  HFResponder. UNTESTED: HF_TESTED = False, runner refuses it without --hf-untested-ok, importing it
+                   loads no torch (checked). It passes T 0.6 / top-p 1.0 / top-k off / repetition penalty 1.0
+                   explicitly, because a model's generation_config.json (Qwen: top_p 0.8, top_k 20, rep 1.05)
+                   would otherwise change the protocol silently. Per-reply seed = md5(seed, conversation, turn).
+  score.py         units (BIND = pair of twins), nested means (units, then sampling seeds, then training seeds),
+                   R over the 10 composite families (T0, K, COMPOSE excluded), Level A criteria and claimability
+                   (>= 3 training seeds, T0 >= 0.90, comparator needed for the loop sub-criterion), T0 failure list,
+                   K follow-up / control / gap, degenerate-type rates, OWN source-fail rate, capture rate, lenient.
+  score_stats.py   paired bootstrap for D = R(a) - R(b) (same unit draw for both models, stratified by family,
+                   training seeds resampled, sampling seeds nested), level_r (CI lower bound >= -3), headroom rule,
+                   PERSIST base rates + the 0.30 drop rule, sensitivity row.
+  fakes.py, fakes_family.py  IDEAL, IDEAL_ALT, the 12 generic cheaters (FIRST LAST WORDING OVERLAP_A OVERLAP_B
+                   MARKER ECHO DEFLECT SHOTGUN USERVOICE ABSTAIN ROLECAP), PERSIST (P_NEVER P_ONCE P_FIRST5
+                   P_OBEYALL) and LOOP (L_REPEAT L_SELFCOPY L_STUTTER) cheaters, and machinery-test fakes
+                   (CONTINUER HISTCHECK CAPPER SAMPLER FORGETFUL T0WRONG BINDHALF). Policies in the docstrings.
+  validate_e2e.py  SPEC s5 G1-G4 through the real runner, transcripts written to runs/fakes/ and READ BACK before
+                   scoring. validate_machinery.py: 8 check groups (render, history, stops, trunc, seeds, scoring,
+                   stats, hf). mutation_e2e.py + mutants_e2e.py: 45 mutants, each in a fresh process.
+  SPEC s10 names: cheaters.py = fakes.py + fakes_family.py; harness_stub.py = runner.py driven by a fake;
+  gates.py = validate_e2e.py for G1-G4 (G5, G7, G8, G9 stay in test_gens*.py; G6 is mutation_graders.py).
+  rc12/.gitignore ignores runs/ (44 MB of fake transcripts, regenerated in ~6 s; model runs will be larger).
+
+CHOICES SPEC LEFT OPEN
+  Generic cheaters play the right policy everywhere except their shortcut: the IDEAL ack on I/O turns, the IDEAL
+  Q reply (FIRST / LAST pick option 1 / 3 there), IDEAL on ROLE X; "Okay, noted." on S L C D T turns and on
+  PERSIST / LOOP probes (SPEC's fixed ack). So a unit fails because of the shortcut, not a side policy.
+  The fixed ack makes every generic cheater's loop rate about 0.8 (equality branch), which alone fails Level A.
+  So G3 also requires each Level A CONTENT criterion (CORR:U, C_noupd, C_twoslot, BIND) to be unmet on its own.
+  Cheater replies are the IDEAL sentence with the gold swapped for the picked value (a sentence that would pass
+  if the pick were right). USERVOICE = the IDEAL sentence with I/you swapped (user-held: "My massage session is
+  on Wednesday."; assistant-held: "You picked Quizzards."), falling back to "My <object> is <gold>.".
+  P_OBEYALL keeps the OLDEST rule outermost (old wins conflicts). Newest-outermost is simply correct behavior on 3
+  of the 4 override pairs, so it is not a cheater there. P_OBEYALL equals IDEAL on hold and is gated on override.
+  IDEAL answers OWN probes from its OWN Q reply read out of the history; IDEAL_ALT picks a different option (swaps
+  list items 2 and 3) and must still score 1.00, which only happens if the runner feeds replies back and G-DYN
+  takes the gold from them.
+  HF stop reasons: eot (an end-of-turn token), eos (eos token or an early end), cap (256 new tokens).
+
+DEVIATIONS (carry into the prereg or change before the lock)
+  D13 Truncation: a probe fails if ANY S, C, I, O, Q or T turn before it (or any of its src turns) was dropped from
+      the history its reply was generated from; SPEC says the probe's own S, C, I, Q or T turn. This is a
+      superset (a dropped lure also fails the probe), so it can only lower a score. Dev conversations are at most
+      572 proxy tokens with IDEAL replies, so no model with a 2k+ context ever triggers it.
+  D14 G4 counts OVERLAP_A and OVERLAP_B as ONE cheater (SPEC s5 lists them as two variants of OVERLAP): 11 generic
+      cheaters. Counted separately, 12 more items would exceed 3 (all passed by both OVERLAP variants).
+
+RESULTS (logs/e2e_fakes.txt, logs/e2e_machinery.txt, logs/mutation_e2e_part1.txt, _part2.txt)
+  G1 PASS: IDEAL and IDEAL_ALT score 1.00 on every family, cell, T0, K and COMPOSE key; 0 degenerate replies,
+     0 role-leak events; Level A met with IDEAL as comparator.
+  G2 PASS: every generic cheater <= 0.40 on every composite family and <= 0.50 on every cell (worst: FIRST and
+     LAST RECALL 0.27, TOPIC 0.33, TWOHOP 0.33; C_noupd 0.50 for FIRST, WORDING and OVERLAP, exactly at the cell
+     bar); ECHO, DEFLECT, SHOTGUN, USERVOICE, ABSTAIN, ROLECAP 0.00 on every value-graded unit; PERSIST cheaters
+     0.08 (the one_sentence rule passes plain replies); P_OBEYALL override 0.00; LOOP cheaters 0.08 / 0.08 / 0.00.
+  G3 PASS: no generic cheater meets any Level A content criterion; every generic and LOOP cheater misses Level A.
+  G4 FAIL on 4 items: CORR U-same rc12-dev-corr-021, -025, -029, -031 are passed by LAST, MARKER, OVERLAP and
+     WORDING. All four are U-same with B BEFORE A: A's latest correction is then the last value statement, has a
+     marker and repeats the question's words, so the cell's layout makes it easy. Not rebuilt (generator change,
+     dev md5 would change). Options for the lock: (a) in U-same B-before items, put a same-type lure after A's
+     latest correction (a third holder, no marker); (b) exempt U-same from G4 as the easy reference cell of CORR;
+     (c) move B after A's latest in all U-same items. (a) keeps SPEC's half/half placement.
+     Histogram (units passed by k of 11 generic cheaters): 0:308, 1:62, 2:94, 3:14, 4:4.
+  Machinery: 8 of 8 check groups pass. Mutation: 45 mutants (runner 11, render 6, score 12, score_stats 7, fakes 5,
+  fakes_family 3, hf_responder 1), 45 killed, 0 survived, 0 crashed. First run had 2 survivors, both real
+  blind spots, both fixed: units were never checked after truncation (a scripted IDEAL answers right anyway), and
+  G3 only saw Level A as a whole, which the cheaters' ack loops fail regardless (lowering the Level A bar to 0.50
+  went unnoticed). Dev md5 unchanged (23e6bb663dd9a3f0272c70bb35ef3eee); test_gens.py still 0 failures; no grader
+  file was edited.
+
+NEXT STEP MUST KNOW
+  Run: python3 -B validate_e2e.py (exit 1 = G1-G3 fail, 2 = only G4); python3 -B validate_machinery.py;
+  python3 -B mutation_e2e.py --part 1/2 and --part 2/2 (about 60 s each, 9 processes). Re-run after any change
+  to runner/render/score/fakes; mutants match exact source text, so edit mutants_e2e.py with the source.
+  Model runs: python3 -B runner.py --responder hf:<id> --render template --seeds 1,2,3 --out runs/<name>
+  --hf-untested-ok (then also --render plain as the diagnostic, and greedy). The HF path has never run: do the
+  20-conversation greedy parity check first. score.py <transcripts> --comparator <qwen transcripts>.
+  Open decisions before the lock: G4 on the 4 U-same items (above), the step-3 strict cases (a)-(c), the
+  PERSIST drop list (one_sentence will be dropped: plain replies comply, IDEAL base rate far above 0.30), and
+  the OOD-H wording rule of Level R (not implemented; needs the OOD split).
+
+STEP 5 (2026-09-25 night): adversarial audit of the dev split, graders and machinery
+No model was loaded. Nothing outside rc12/ was written. Dev md5 23e6bb663dd9a3f0272c70bb35ef3eee ->
+a290f9c535475d2db2368940ba5f9a13 (every family except T0, PERSIST, OWN, LOOP and K was rebuilt; pre-lock, no
+model has been scored on dev).
+
+BUILT
+  audit_rules.py     27 cheap value rules on the real VAL probes (positions from both ends, frequency, anti-echo,
+                     markers, "value before the newest fresh statement", length, anti-recency EXL_*, binding) plus
+                     quick_shortcuts' six. Now a GATE: every non-reference rule <= 0.50 per cell, <= 0.40 per family.
+  fakes_audit.py     real responders for 14 value rules (ANTI_OVERLAP ANTI_WORDING LONGEST SHORTEST LEASTFREQ MOSTFREQ
+                     POS2 PENULT ANTEPENULT PENULT_MARKER PREV_FRESH EXL_OVERLAP EXL_WORDING EXL_MARKER), 2 reference
+                     rules (MYONLY, MARKER_OBJ), ORDER_ABS, CONSIST, VARIED; P_UNIVERSAL in fakes_family.py. fakes.make
+                     falls through to fakes_audit (fakes.py is at 250 lines). validate_e2e gives the value rules G2 and
+                     G3 like the generic cheaters, ORDER_ABS its target cells, and prints a G4 histogram over all 25.
+  balance.py         length-rank and echo balance for value statements (used by RECALL, ROLE, BIND, TOPIC, CORR).
+  audit_graders.py   natural-paraphrase battery on real probes: 21,012 graded variants of correct, hedged, guessed,
+                     wrong, abstaining, ROLE X and OWN replies; exit 1 on any wrong verdict.
+  grade_cues.py      the grader cue additions (kept apart so grade_text.py stays at 250 lines).
+  own_cf.py          OWN counterfactual-history DIAGNOSTIC, runner --own-cf (see OWN below).
+  test_gens_audit.py the balance guarantees, read from the turns; mutation_audit.py 13 generator mutants that each undo
+                     one fix and must turn the named detector red.
+
+FOUND AND FIXED IN THE GENERATORS (value-level rate on the old split -> now; the gate listed 37 violations before)
+  ROLE    user-name statements never said "name" while every lure did: ANTI_OVERLAP / ANTI_WORDING 1.00, SHORTEST 0.85.
+          Frames with and without the question's words on both sides; balance.choose keeps the gold from being the
+          unique most / least echoing or longest / shortest statement. Now <= 0.33.
+  RECALL  gold frames were the long paraphrases: LONGEST 0.79 (0.88 on d8-11). Neutral tails ("by the way") plus a
+          long / mid / short target per item and echo balance (3 new frames). Now every non-reference rule <= 0.38.
+          Abstain cell: the answerable X always came first, so "answer the first question, abstain on the second"
+          (ORDER_ABS) passed 12 of 12; now 6 / 6.
+  LOOKUP  the abstain X came first in 46 of 48: ORDER_ABS with an exact table lookup scored 0.96. Now 8 / 8 per shape;
+          ORDER_ABS 0.50 (see what is left).
+  TOPIC   the open project's statement was the longest (LONGEST 0.88) and the least mentioned (LEASTFREQ 0.62,
+          closed projects got closing updates). The open project can now get a later update too, from a fixed plan
+          (TOPIC_PLAN: FIRST 16, LAST 14, second-to-last 16 of 48, never both the first and the last mention),
+          shorter open frames without the pending decision (IDEAL then says "it isn't settled yet"), closed frames
+          that do not echo the probes. Now <= 0.35 (MYONLY 0.42, reference).
+  CORR    C_twoslot always ended "A's latest, B, B's correction": ANTEPENULT, PENULT_MARKER, PREV_FRESH 1.00
+          (each met the C_twoslot Level A bar alone). Now two layouts (B first / B after A) x B corrected once or
+          twice: 0.50.
+          U cells: the 4 G4 items (B before A, nothing after A's latest: LAST, MARKER, OVERLAP, WORDING) and the
+          positional rules. Now a searched tail plan after A's latest (U_TAILS: same-type lures of other holders,
+          marked or plain, and B), so LAST, n-th from the end, latest / n-th-last marked turn, value before the
+          latest fresh statement and their anti-recency versions all stay <= 5 of 16; U-same never ends on A's latest
+          (G4), U-diff does in 2. U-diff B-before lures are zero-echo (a named person, a third object) because the
+          cell's own definition (latest correction shares no word with the question) made ANTI_WORDING 0.62.
+          C_noupd: dropping the newest turn (the anchor) and taking the most echoing one (EXL_OVERLAP / EXL_WORDING)
+          scored 1.00, meeting the C_noupd Level A bar. Now another holder's statement about A's own object sits
+          before or after A (never last) and every anchor item ends on a plain lure: 0.25 / 0.50.
+          Gold statement length rank balanced (an ellipsis correction was the shortest turn: SHORTEST 0.56 on U-diff).
+  BIND    perspective crossed the words (user "call", assistant "name"): ANTI_OVERLAP 0.80 of pairs. Both statements now
+          tie on echo and length. Now 0.00 for every audit rule (generic WORDING 0.10 of BIND pairs).
+  TWOHOP  only lures echoed the question: ANTI_WORDING 0.42 per family. The echoing chain is now gold in 4 of 12 per
+          schema. Now 0.35.
+
+FOUND AND FIXED IN THE GRADERS (audit_graders.py first run: 2,364 wrong verdicts over 13,032 variants)
+  False passes (graded as confident answers on EVERY value probe): "I'd guess X", "My best guess is X", "I can't be
+    certain, but X", "If I remember right, it's X", "X, if I recall correctly", "X sounds about right", "X, as far as
+    I know", "From what I recall, X", "I would assume X", "It seems to be X", "It should be X", "X, I'd say",
+    "X, unless it changed again", "X, if that's still right", "X, apparently", and a hedge as its own short sentence
+    ("Maybe. It is X." / "X. Probably."). HEDGE extended (grade_cues.HEDGE_MORE) plus near_hedge().
+  False fails (every ABS probe): "I don't think you've told me that.", "I don't believe you mentioned that.", "That
+    hasn't come up yet.", LOOKUP "That list skips Thursday.", "Thursday isn't covered in that one.", "Nobody is down
+    for Thursday there." ABS_CUE extended (grade_cues.ABS_MORE).
+  G-FMT word rule: a reply stuffing 3+ of the include-words passed any word item; P_UNIVERSAL (one all-caps sentence,
+    "Greetings", all four words, "that is all", reads no rule) passed 14 of 32 hold items. Now fails stuffing: 10 / 32.
+  Each addition has a fixture on real items and a mutant: mutation_graders 137 / 137 killed (was 128; +7 cue, +2 stuff).
+  Now 0 wrong verdicts over 21,012 variants (VAL, ABS, ROLE X, OWN pick and list). The 60 BIND "Not A. It's B."
+  cases are SPEC's shotgun (both candidates named): still known strict case (b), decide at the lock.
+
+FOUND, NOT FIXABLE BY A GENERATOR (measured, mitigated or left for the lock)
+  OWN     CONSIST picks option 1 at Q and later names option 1 of the USER's list (lists: re-derives the same list):
+          OWN 1.00 without reading its own reply. Any fixed policy is self-consistent, so no item change helps, and a
+          small model with a strong first-option bias gets the same free credit. Mitigation: runner --own-cf rewrites
+          the model's own Q reply before it enters the history (pick: chosen option exchanged with the next one; list:
+          items 2 and 3 exchanged). IDEAL and IDEAL_ALT stay 1.00, CONSIST drops to 0.00 (validate_machinery owncf).
+          Proposal for the prereg: report OWN under --own-cf beside OWN; decide at the lock whether it gates OWN.
+  LOOP    VARIED (12 different canned sentences, never about the story) scores LOOP 1.00: the family scores
+          non-degeneration only and the IDEAL replies are themselves generic. Not a grader bug; a construct limit.
+          Proposal: keep LOOP's loop rate as the Level A criterion, and decide at the lock whether LOOP stays in the
+          Level R composite (headroom rule) or gets a validated relevance criterion first.
+  ORDER_ABS  0.50 on every LOOKUP cell and on RECALL:abstain (at the cell bar): with balanced order a positional
+          abstainer with perfect lookup is right on the half where the order matches. Only pairing twins would lower it.
+  Reference rules (the skill, not a shortcut, reported not gated): MYONLY (holder binding) RECALL 0.65, ROLE 0.60;
+          MARKER_OBJ (latest correction naming the asked object) CORR:U-same 0.12 now that other holders' same-object
+          lures follow A.
+  Margins: several gated rules sit at 0.50 on a 16-item cell (C_twoslot, U-same) and 0.33 to 0.35 per family; with
+          48-item families a chance-level rule fluctuates by about 0.07, so the 0.40 family bar is tight by design.
+
+BLIND SPOTS IN OUR OWN TESTS (found by mutation, fixed)
+  Two balance checks read design metadata only, so a generator writing the wrong turns survived (TOPIC's open update
+  written as a closing; RECALL abstain order), and the U-cell tail check compared the turns with the plan, so a bad
+  plan (U-same ending on A's latest) survived. The checks now read the turns and U-same has an explicit "never ends
+  on A's latest" invariant; mutation_audit 13 / 13 killed. mutation_gens' m_echo_on_gold assumed the gold never echoes;
+  it now targets an item whose lure echoes (28 / 28 killed).
+
+DEVIATIONS (carry into the prereg or change before the lock)
+  D15 Value statements carry neutral tails and are chosen for length rank and echo balance (balance.py); RECALL and
+      ROLE have new frames. SPEC s3 layouts are unchanged otherwise.
+  D16 RECALL:abstain and LOOKUP: the probe order is balanced; "the main probe at u12 in 3/4" now means the LATER of
+      the two probes.
+  D17 CORR: in U-same something of the type always follows A's latest correction, in U-diff all but 2 items do,
+      as lures of other holders and B (U_TAILS); C_twoslot adds the B-first layout and B corrected once or twice;
+      C_noupd adds another holder's statement about A's object and a trailing lure after every anchor.
+  D18 TOPIC: the open project may get a later "still undecided" update (TOPIC_PLAN); the probe answer's IDEAL omits
+      the pending decision when the open statement does.
+  D19 BIND perspective: frames no longer cross the words; the two statements tie on echo and length.
+  D20 TWOHOP: the echoing hop-2 statement is the gold's in 1/3 (SPEC: "a lure value statement frame-echoes").
+  D21 Graders: HEDGE, ABS_CUE extended (grade_cues.py), near_hedge, G-FMT stuffing rule (3+ include-words).
+  D22 New gates: audit_rules.py (G10 proposal), audit_graders.py (G11 proposal), mutation_audit.py.
+
+RESULTS (logs/)
+  test_gens 0 failures | audit_rules GATE PASS | audit_graders 0 wrong / 21,012 | validate_e2e G1-G4 PASS (41 fakes;
+  G4 histogram 0:310 1:43 2:76 3:53, no item above 3) | validate_machinery 9 / 9 groups | mutation_graders 137 / 137 |
+  mutation_gens 28 / 28 | mutation_audit 13 / 13 | mutation_e2e 50 / 50 (3 parts, each about 55 s).
+
+FINAL CHEATER TABLE (validate_e2e, plain render; worst composite family and worst composite cell; bars 0.40 / 0.50)
+  generic   FIRST .33 / .38   LAST .33 / .38   WORDING .33 / .50   OVERLAP_A,B .33 / .38   MARKER .33 / .38
+            ECHO DEFLECT SHOTGUN USERVOICE ABSTAIN ROLECAP: 0.00 on every value unit (0.08 on LOOP at most)
+  audit     ANTI_OVERLAP .33 / .38   ANTI_WORDING .35 / .42   LONGEST .33 / .50   SHORTEST .33 / .42
+            LEASTFREQ .35 / .38   MOSTFREQ .33 / .38   POS2 .33 / .44   PENULT .33 / .38   ANTEPENULT .33 / .50
+            PENULT_MARKER .25 / .50   PREV_FRESH .33 / .50   EXL_OVERLAP .33 / .38   EXL_WORDING .35 / .50
+            EXL_MARKER .33 / .50   ORDER_ABS LOOKUP .50 (cells .50, target only)
+  family    P_NEVER P_ONCE P_FIRST5 PERSIST .08   P_UNIVERSAL .25 (hold .31)   P_OBEYALL override .00
+            L_REPEAT L_SELFCOPY .08, L_STUTTER .00
+  reported  MYONLY RECALL .65 ROLE .60 | MARKER_OBJ U-same .12 | CONSIST OWN 1.00 (0.00 under --own-cf)
+            VARIED LOOP 1.00
+  Level A   no gated cheater meets any content criterion (CORR:U, C_noupd, C_twoslot, BIND); all miss Level A.
+
+NEXT STEP MUST KNOW
+  Full check order (each under 2 minutes): python3 -B build_dev.py; test_gens.py; audit_rules.py; audit_graders.py;
+  validate_e2e.py; validate_machinery.py; mutation_graders.py; mutation_gens.py > logs/mutation_gens.txt;
+  mutation_audit.py (about 90 s); mutation_e2e.py --part 1/3, 2/3, 3/3. Mutants match exact source text: edit
+  mutants_graders.py / mutants_e2e.py / mutation_audit.py with the line they target.
+  For model runs, also run OWN with --own-cf (--families OWN) and report it beside OWN.
+  Open for the lock: OWN-CF as a gate or a report; LOOP in the composite; the strict cases (a)-(c); PERSIST drop
+  list; G10 / G11 as prereg gates; the sealed split needs its own include-word pool in grade_fmt_dyn.STUFF_POOL.
