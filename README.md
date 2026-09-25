@@ -16,14 +16,20 @@ the skill. The result we are after is a curve, not a single model: the same reci
 
 ## Status
 
-- **Research phase: done (Sep 23 2026).** A literature sweep, a hands-on probe of eight real small
-  chat models, adversarial fact-checks of every lane, and three independent diagnoses of what
-  limits a small chat model. Start with [`research/REPORT.md`](research/REPORT.md), section 1.
-- **Idea ledger: done.** [`LEDGER.md`](LEDGER.md) holds every idea from the research (331 raw ideas
-  merged into 29 baseline items, 185 ranked bets and 57 parked), each labeled honestly as known,
-  a tweak of known work, or untested at this size, with its closest prior work.
-- **Now:** fixing the measurement (test controls, probes of more small models) before training
-  anything.
+Every experiment, its pre-registered rule, its result and its independent audit are written up in
+[`docs/EXPERIMENTS.md`](docs/EXPERIMENTS.md).
+
+- **Research and idea ledger: done (Sep 23 2026).** Start with [`research/REPORT.md`](research/REPORT.md),
+  section 1; every idea is ranked in [`LEDGER.md`](LEDGER.md).
+- **E001-E004: done, each checked by an independent audit.** Below 2.6B, small instruct models keep the
+  first value after a correction (E001). A 135M model fine-tuned for 400 steps passed E002's rule, but
+  the audit showed a wording shortcut. On E004's harder held-out test it failed the pre-registered rule
+  on 5 of 5 seeds, yet learned an updating rule that transfers to new wording, longer distances and
+  more corrections. It fails on name-based references it never saw in training and on three objects.
+- **Now: E005 is running.** It adds name-based corrections and end-of-turn training to E004's recipe,
+  to tell a data gap from a real limit at 135M. No results yet.
+- **Next:** the same question for models of 30M and under, and locking the 12-turn RC-12 test before
+  any Planck model is scored on it.
 
 ## Ground rules
 
