@@ -26,7 +26,7 @@ if [ "${1:-}" = "--tar" ]; then
     FILE="$OUT_DIR/planck-kit.tgz"
     COPYFILE_DISABLE=1 tar -czf "$FILE" -C "$ROOT" --exclude '__pycache__' --exclude '.pytest_cache' \
         --exclude '._*' --exclude '*.pt' --exclude 'bench_results.jsonl' harness pc
-    DEST="C:/Users/<winuser>/planck-kit.tgz"
+    DEST="planck-kit/planck-kit.tgz"   # relative to the Windows home folder
 else
     if [ -n "$(git -C "$ROOT" status --porcelain -- harness pc)" ]; then
         echo "harness/ or pc/ has uncommitted changes; they would not reach the PC:"
@@ -37,8 +37,8 @@ else
     FILE="$OUT_DIR/planck.bundle"
     git -C "$ROOT" bundle create "$FILE" HEAD main
     git bundle verify "$FILE" >/dev/null
-    DEST="C:/Users/<winuser>/planck.bundle"
+    DEST="planck-kit/planck.bundle"   # relative to the Windows home folder
 fi
 ls -l "$FILE"
 scp "${SSH_OPTS[@]}" "$FILE" "$HOST:$DEST"
-echo "copied to $DEST (in WSL: /mnt/c/${DEST#C:/})"
+echo "copied to $DEST in the Windows home folder (in WSL: /mnt/c/Users/<winuser>/$DEST, where <winuser> is the output of: cmd.exe /c echo %USERNAME%)"
