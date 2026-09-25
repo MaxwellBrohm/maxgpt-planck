@@ -1,0 +1,42 @@
+AL items: 64 (cells {'AL1': 16, 'AL2': 16, 'AL3': 16, 'AL4': 16}, value types {'city': 16, 'month': 16, 'weekday': 16, 'colour': 16}, placements {'other_obj': 16, 'filler': 16, 'adjacent': 32})
+
+rule                                             all       AL1       AL2       AL3       AL4  adjacent    filler other_obj
+--------------------------------------------------------------------------------------------------------------------------
+O1 first mention                                0.08      0.31      0.00      0.00      0.00      0.06      0.19      0.00
+O2 last mention                                 0.41      0.00      0.00      1.00      0.62      0.41      0.31      0.50
+O3 last marked, else first                      0.36      0.31      0.06      0.44      0.62      0.38      0.31      0.38
+O4 prefix copy (3/2 words)                      0.42      0.00      0.00      1.00      0.69      0.41      0.38      0.50
+O5 content words vs question                    0.39      0.88      0.00      0.00      0.69      0.38      0.44      0.38
+O5 content words vs q+prefix                    0.39      0.88      0.00      0.00      0.69      0.38      0.44      0.38
+O5 all words vs question                        0.34      0.75      0.00      0.06      0.56      0.28      0.50      0.31
+O5 3-word runs vs q+prefix                      0.33      0.25      0.00      0.50      0.56      0.31      0.38      0.31
+O6 latest naming asked                          0.50      1.00      0.00      0.00      1.00      0.50      0.50      0.50
+O7 latest naming no other                       0.50      0.00      0.00      1.00      1.00      0.50      0.50      0.50
+O8 most frequent                                0.33      0.06      0.19      0.62      0.44      0.34      0.25      0.38
+X1 second-to-last statement                     0.31      0.25      0.62      0.00      0.38      0.25      0.25      0.50
+X2 latest with update cue                       0.44      0.06      0.00      0.81      0.88      0.47      0.44      0.38
+X3 latest naming asked, full phrase             0.30      0.88      0.00      0.00      0.31      0.31      0.31      0.25
+X4 value at last naming                         0.50      1.00      0.00      0.00      1.00      0.50      0.50      0.50
+X5 statement after last echo                    0.41      0.00      0.00      1.00      0.62      0.41      0.31      0.50
+X6 latest with no q/p overlap                   0.25      0.00      0.00      1.00      0.00      0.25      0.25      0.25
+X7 first naming asked                           0.12      0.50      0.00      0.00      0.00      0.06      0.19      0.19
+X8 latest acked with value                      0.33      0.06      0.19      0.62      0.44      0.34      0.25      0.38
+X9 latest unmarked naming asked                 0.28      0.81      0.00      0.00      0.31      0.31      0.31      0.19
+X10 longest statement                           0.05      0.12      0.00      0.06      0.00      0.03      0.12      0.00
+X11 third-to-last statement                     0.28      0.75      0.38      0.00      0.00      0.34      0.44      0.00
+T topic tracker (diagnostic)                    0.75      0.75      0.38      0.88      1.00      0.84      0.94      0.38
+AR latest alias correction                      0.25      0.00      0.00      1.00      0.00      0.25      0.25      0.25
+LN latest statement with a name                 0.25      0.00      0.00      1.00      0.00      0.25      0.25      0.25
+LINK text-level linking                         1.00      1.00      1.00      1.00      1.00      1.00      1.00      1.00
+IDEAL                                           1.00      1.00      1.00      1.00      1.00      1.00      1.00      1.00
+
+chance (1 / in-context candidates): 0.260; candidates per item {3: 8, 4: 56}
+names: 20 AL surnames, 20 used; titles {'Ms.': 24, 'Dr.': 27, 'Mrs.': 28, 'Mr.': 33}; aliases per item {2: 48, 1: 16}
+purity: 35000 training examples (seeds (1, 2, 3, 4, 5), first 7000 draws each; blocks {'e004': 24488, 'alias': 7006, 'ind': 3506}), 63666 distinct training texts, 69463 training 5-grams; AL: 96 alias corrections, 197 frames, 868 filler turns; shared 5-grams 0, shared frames 0
+PASS  rules G1-G3: 0 problems []
+PASS  structure G4/G5: 0 problems []
+PASS  names G6: 0 problems []
+PASS  purity: 0 problems []
+WROTE /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E005_alias_eot/al/al_items.jsonl: 64 items, sha256 e99b40d6b56c9c2d47ea0daf19316f409b850cd09dcf3f778b5cac5357c4a06d
+
+RESULT: ALL PASS

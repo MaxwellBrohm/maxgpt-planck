@@ -344,3 +344,65 @@ DEVIATIONS
     E004's s1-s5; the AL items (code/items_al.py) were never built, so the queue does not score them. AL was
     proposed as a diagnostic that the orchestrator could strike; no rule reads it. Without it, a DATA GAP reading
     cannot tell linking from "the latest statement by a name wins" (every eval alias correction is the gold).
+
+STEP 5 (2026-09-25 09:37): AL items built and hashed BEFORE any E005 result; no model loaded; no E001-E004 file or
+running queue edited
+  al/al_items.jsonl sha256 e99b40d6b56c9c2d47ea0daf19316f409b850cd09dcf3f778b5cac5357c4a06d (written 09:37:13; the
+  same line is in al/al_items.sha256, which the AL scorer checks). Seen at 09:36:52 and 09:37:13: logs/queue.txt
+  held only "QUEUE E005 WAITING (pid 20479)" and "09:33:41 waiting: 1 other model job(s) running" (E004's
+  lr_ts3m_1e-03 under its guard; E004's queue.txt ends "QUEUE STOPPED: paused by Claude to run E005 first");
+  E005 out/ and weights/ were empty. E005 had not started, so nothing of E005 was scored.
+  Code: items_al.py (builder, Random("E005:4005:AL")), checks_al.py + purity_al.py (validation), log
+  logs/items_al.txt. Cells as the ADDITION (AL1-AL4, 16 each, 2 objects, d 10, pre 0-3, E004 eval objects,
+  templates, joins, alias corrections, acks, markers, questions, prefixes, fillers). Choices fixed before the
+  first build: value type x placement jointly per cell (adjacent 2, filler 1, other_obj 1 per value type; the
+  placement is the key alias correction vs its own object's previous statement: AL1 B's lure, AL2/AL4 A's, AL3
+  B's); question form 8/8; AL1 A corrected 0/1 (named) 8/8 and A also aliased (never used) 8/8; AL2 B's original
+  before A's or after A's alias correction 6/6; AL3 B's original first or second 2/2 (other_obj); AL4 B's
+  original before A's or after the head-noun correction 6/6 and B also aliased 8/8. No pronoun or ellipsis
+  statements. Two aliases in one item never share a surname.
+  DEVIATION 3 (names): the ADDITION said E004 eval surnames; AL uses 20 NEW eval-only surnames (Albrecht Balogun
+    Carvalho Donnelly Dubois Esposito Figueroa Halvorsen Ishikawa Janssen Kovacs Magnusson Marchetti Nwosu Okonkwo
+    Pellegrini Rinaldi Sandoval Szabo Whitaker) under the four honorifics, disjoint from the E005 training pool
+    and the E004 eval list and found in no file of the project when chosen (grep -w; Laurent, Ostrowski,
+    Lindgren, Takahashi were dropped for that), so no scored model has met any AL name. Scoring adds the chat
+    render to the ADDITION's plain one (both reported; no rule reads AL).
+  Validation (all pass): IDEAL 1.00 and LINK (text-level linking: a name belongs to the object named where it is
+    introduced) 1.00; LN (latest statement holding a title + name) .25, AR .25 (right on AL3 only); every E004
+    O and X rule <= .50 overall (max O6, O7, X4 .50; O2 .41); T (adjacency tracker, diagnostic, not gated) .75
+    overall: AL1 .75, AL2 .38, AL3 .88, AL4 1.00; adjacent .84, filler .94, other_obj .38, so AL alone does not
+    rule out adjacency (the analysis must split by placement); chance .26. No value (answer word included) in
+    any question or prefix. Purity vs the E005 stream (seeds 1-5, first 7,000 draws each, all blocks; 35,000
+    examples, 63,666 texts): 0 AL surnames in training text, 0 training surnames/roles/joins in AL text, 0 alias
+    3-grams shared with training alias templates, 0 shared word 5-grams, 0 shared frames, 0 training objects or
+    fillers. The draw is deterministic (built twice, byte-identical).
+  Scoring and queue (09:44; no model loaded while building them):
+    code/e005_al_ft_test.py: one model per process through guard.py ("ft_test.py" in the name, so every guard
+      counts it). E005's scoring calls fed the AL items: e004_ft_test.load, e004_core.load_checks (a weights
+      directory reads its own config.json), e004_sets.lik_item -> e004_core.score_set (LIK, plain and chat),
+      e004_sets.gen_item -> gen_run.run_gen (strict grader, plain and chat). Refuses items whose sha256 differs from
+      al/al_items.sha256; records the weights file sha256. Outputs al/out/<tag>__*. --dry: 4 items + E004's scorer
+      self-test. Checked without a model: plain LIK prompt = items_render.prompt on 64/64, GEN prompt, candidates
+      and grader spec match, chat LIK prompt = the GEN chat prompt + prefix (untouched and E004 s1 tokenizers), at
+      most 892 chat tokens. It has NOT run on a model yet; the queue's dry run is its first real run.
+    code/analyze_al.py -> al/tables_al.txt, al/al_results.json: LIK/GEN per render, cell, AL1+AL2+AL4, placement,
+      the 14 "needs linking" items (T and LN both wrong), LIK picks equal to LN's or T's value, and the ADDITION
+      check (DATA GAP and >= 3 of 5 E005 seeds with AL1+AL2+AL4 LIK plain < 0.5).
+    code/test_al.py (logs/test_al.txt): 19/19. Mutants flagged: own-object lure (LN .50), wrong gold, value in a
+      question, unbalanced question form, training surname in the AL list, alias correction naming its object,
+      training surname / alias template / filler / sentence frame in AL text; scripted IDEAL, LN and T models
+      give the exact expected tables; the ADDITION sentence fires only with DATA GAP and 3 low seeds. It caught one
+      real bug in itself (a stale scratch directory carried a model into the next case; it now clears it).
+    code/queue_e005_al.sh: waits for "QUEUE E005 DONE" or "QUEUE STOPPED" in logs/queue.txt, no zsh running
+      queue_e005.sh, guard.other_model_jobs() empty, then 60 s and all again; items check (sha256 + byte-identical
+      rebuild) and test_al; dry run (failure stops); untouched model; E005 s1-s5 from weights/ (queue_e005.sh runs
+      the seeds with --save 1, so weights land in weights/<slug>__s<n>); E004 s1-s5 weights (read-only, as the
+      ADDITION lists); analyze_al; "QUEUE AL DONE". One line per job in logs/queue_al.txt. zsh -n clean; simulated
+      with a fake python and guard (scratch copy): waits with no end line, with an end line while an E005-named
+      queue runs, and while a model job runs; starts on DONE and on STOPPED; job order and arguments; missing
+      weights give GAP lines; a failed dry run or items check stops; a failed seed is a GAP and the queue goes on;
+      a free_memory verdict stops. Started 09:44:38 with nohup, pid 26193, logs/queue_al_nohup.txt; logs/queue_al.txt
+      says "QUEUE AL WAITING". queue_e005.sh was not edited.
+    E005's logs/code_sha256_at_start.txt (09:41) already lists items_al, checks_al, purity_al, e005_al_ft_test and
+      analyze_al with their current hashes; test_al.py changed after it (the scratch fix) and queue_e005_al.sh did
+      not exist yet. None of these files is used by queue_e005.sh.
