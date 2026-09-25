@@ -1,0 +1,148 @@
+E004 tables (analyze_e004.py; pass rule per notes.txt (c))
+
+== HuggingFaceTB/SmolLM2-135M-Instruct: reading FAIL (no PASS, PARTIAL-G or PARTIAL-X condition holds)
+   sub-reading: LIK failure on H1, H2 or a control: the E002 shortcut signature (never partial)
+   sub-reading: ID >= 0.8 but H1/H2 < 0.8: learned the training task by a rule that does not transfer
+   run   part       H1       H2       H3       H4       H5       H6       H7  C_noupd C_twoslo       ID  pass
+   base  LIK      0.05     0.06     0.06     0.16     0.16     0.17     0.19     0.39     0.16     0.41  fail
+   base  GEN      0.09     0.12     0.00     0.03     0.11     0.11     0.06     0.30     0.08     0.16  
+   base  BELOW-CHANCE (LIK): H1, H2, H3, H4, H6, H7, C_twoslot
+   s1    LIK      0.67     0.70     0.86     0.94     0.70     0.92     0.92     0.88     0.81     0.95  fail
+   s1    GEN      0.66     0.70     0.84     0.92     0.70     0.91     0.94     0.89     0.86     0.95  
+   s2    LIK      0.70     0.80     0.88     0.97     0.72     0.84     0.95     0.88     0.84     0.95  fail
+   s2    GEN      0.72     0.81     0.86     0.97     0.70     0.94     0.97     0.81     0.84     0.95  
+   s3    LIK      0.70     0.67     0.83     0.92     0.81     0.81     0.89     0.94     0.88     0.95  fail
+   s3    GEN      0.77     0.78     0.86     0.91     0.83     0.86     0.95     0.91     0.84     0.97  
+   s4    LIK      0.67     0.66     0.81     0.91     0.75     0.91     0.91     0.84     0.84     0.92  fail
+   s4    GEN      0.66     0.66     0.88     0.91     0.73     0.92     0.92     0.84     0.84     0.92  
+   s5    LIK      0.66     0.75     0.83     0.89     0.80     0.94     0.94     0.92     0.84     0.91  fail
+   s5    GEN      0.66     0.75     0.83     0.94     0.81     0.95     0.95     0.91     0.83     0.91  
+   chance        0.20     0.24     0.15     0.23     0.15     0.23     0.23     0.23     0.20
+   untouched model passes (needs no fine-tune): False
+   meta base: lr=5e-05, steps=0, loss_finite=True, rejected_long=0, total_s=1560.3
+   meta s1: lr=0.00015, steps=400, loss_finite=True, max_share_shift=0.0005, rejected_long=6, total_s=4800.5, s_per_step=7.287
+   meta s2: lr=0.00015, steps=400, loss_finite=True, max_share_shift=0.0013, rejected_long=15, total_s=4656.0, s_per_step=7.26
+   meta s3: lr=0.00015, steps=400, loss_finite=True, max_share_shift=0.001, rejected_long=13, total_s=4682.7, s_per_step=7.14
+   meta s4: lr=0.00015, steps=400, loss_finite=True, max_share_shift=0.0006, rejected_long=9, total_s=4673.1, s_per_step=7.189
+   meta s5: lr=0.00015, steps=400, loss_finite=True, max_share_shift=0.0013, rejected_long=13, total_s=4528.3, s_per_step=7.125
+   LR pick: CHOSEN 1.5e-04 (5e-05: min 0.59 mean 0.74, 1.5e-04: min 0.78 mean 0.85)
+   s1 H1/H2 by reference form: H1 LIK alias=0.19 ell=0.81 pron=1.00; H1 GEN alias=0.14 ell=0.81 pron=1.00; H2 LIK alias=0.24 ell=0.90 pron=0.95; H2 GEN alias=0.24 ell=0.90 pron=0.95
+   s2 H1/H2 by reference form: H1 LIK alias=0.33 ell=0.76 pron=1.00; H1 GEN alias=0.33 ell=0.81 pron=1.00; H2 LIK alias=0.52 ell=0.90 pron=0.95; H2 GEN alias=0.52 ell=0.90 pron=1.00
+   s3 H1/H2 by reference form: H1 LIK alias=0.33 ell=0.76 pron=1.00; H1 GEN alias=0.48 ell=0.81 pron=1.00; H2 LIK alias=0.38 ell=0.67 pron=0.95; H2 GEN alias=0.57 ell=0.76 pron=1.00
+   s4 H1/H2 by reference form: H1 LIK alias=0.19 ell=0.81 pron=1.00; H1 GEN alias=0.19 ell=0.76 pron=1.00; H2 LIK alias=0.33 ell=0.67 pron=0.95; H2 GEN alias=0.33 ell=0.67 pron=0.95
+   s5 H1/H2 by reference form: H1 LIK alias=0.10 ell=0.86 pron=1.00; H1 GEN alias=0.10 ell=0.86 pron=1.00; H2 LIK alias=0.38 ell=0.90 pron=0.95; H2 GEN alias=0.43 ell=0.86 pron=0.95
+   format base: n=1056, bare=0.233, long=0.697, mean_words=7.57, voice=0.0, capped=0.0019
+   format s1: n=1056, bare=0.0, long=0.9962, mean_words=5.31, voice=0.0, capped=0.0
+   format s2: n=1056, bare=0.0, long=0.9905, mean_words=5.24, voice=0.0, capped=0.0
+   format s3: n=1056, bare=0.0, long=0.9763, mean_words=5.08, voice=0.0, capped=0.0
+   format s4: n=1056, bare=0.0, long=0.9612, mean_words=4.98, voice=0.0, capped=0.0
+   format s5: n=1056, bare=0.0, long=0.9962, mean_words=4.77, voice=0.0, capped=0.0
+   knowledge s1 kbig441: 0.848 -> 0.753 d=-0.095 CI[-0.1293, -0.0635] margin -1.107 CI[-1.4299, -0.7842] McNemar p=0.0
+   knowledge s1 khard40: 0.775 -> 0.675 d=-0.100 CI[-0.225, 0.0] margin -1.276 CI[-2.8903, 0.3385] McNemar p=0.21875
+   knowledge s1 K_closedbook60: 0.867 -> 0.817 d=-0.050 CI[-0.1333, 0.0333] margin -0.946 CI[-1.492, -0.4] McNemar p=0.45312
+   knowledge s2 kbig441: 0.848 -> 0.771 d=-0.077 CI[-0.1111, -0.0408] margin -1.054 CI[-1.3455, -0.7616] McNemar p=1e-05
+   knowledge s2 khard40: 0.775 -> 0.725 d=-0.050 CI[-0.15, 0.05] margin -1.200 CI[-2.6743, 0.2738] McNemar p=0.625
+   knowledge s2 K_closedbook60: 0.867 -> 0.850 d=-0.017 CI[-0.1, 0.0667] margin -0.827 CI[-1.3327, -0.3221] McNemar p=1.0
+   knowledge s3 kbig441: 0.848 -> 0.773 d=-0.075 CI[-0.1088, -0.0454] margin -1.034 CI[-1.2843, -0.7826] McNemar p=0.0
+   knowledge s3 khard40: 0.775 -> 0.725 d=-0.050 CI[-0.15, 0.05] margin -1.094 CI[-2.1446, -0.0439] McNemar p=0.625
+   knowledge s3 K_closedbook60: 0.867 -> 0.817 d=-0.050 CI[-0.1333, 0.0167] margin -0.804 CI[-1.2804, -0.3275] McNemar p=0.375
+   knowledge s4 kbig441: 0.848 -> 0.757 d=-0.091 CI[-0.127, -0.059] margin -0.939 CI[-1.2551, -0.6229] McNemar p=0.0
+   knowledge s4 khard40: 0.775 -> 0.700 d=-0.075 CI[-0.2, 0.05] margin -0.972 CI[-2.1957, 0.2521] McNemar p=0.45312
+   knowledge s4 K_closedbook60: 0.867 -> 0.783 d=-0.083 CI[-0.1833, 0.0] margin -0.672 CI[-1.2562, -0.0882] McNemar p=0.125
+   knowledge s5 kbig441: 0.848 -> 0.762 d=-0.086 CI[-0.1202, -0.0544] margin -1.145 CI[-1.4455, -0.8451] McNemar p=0.0
+   knowledge s5 khard40: 0.775 -> 0.700 d=-0.075 CI[-0.175, 0.025] margin -1.190 CI[-2.627, 0.2473] McNemar p=0.375
+   knowledge s5 K_closedbook60: 0.867 -> 0.800 d=-0.067 CI[-0.15, 0.0] margin -0.880 CI[-1.3805, -0.3792] McNemar p=0.21875
+   continuity base: new=0.37, extra=0.98, old=0.49, uprobe=0.14, cross=0.20
+   continuity s1: new=1.00, extra=1.00, old=0.83, uprobe=0.82, cross=1.00
+   continuity s2: new=0.99, extra=1.00, old=0.84, uprobe=0.87, cross=1.00
+   continuity s3: new=0.95, extra=1.00, old=0.85, uprobe=0.86, cross=1.00
+   continuity s4: new=0.99, extra=1.00, old=0.85, uprobe=0.97, cross=1.00
+   continuity s5: new=0.99, extra=1.00, old=0.83, uprobe=0.82, cross=1.00
+   untouched SmolLM2 vs E002 base, decision flips: {'new/plain': 0, 'new/chat': 0, 'extra/plain': 0, 'extra/chat': 0, 'old/plain': 0, 'uprobe/plain': 0, 'cross/plain': 0, 'cross/chat': 'items differ (384 vs 184)'}
+   chat render base (not ruled): LIK 0.06 0.03 0.08 0.22 0.11 0.14 0.22 0.31 0.17 | GEN 0.02 0.03 0.03 0.03 0.05 0.05 0.02 0.14 0.06
+   chat render s1 (not ruled): LIK 0.61 0.73 0.88 0.94 0.66 0.91 0.94 0.77 0.86 | GEN 0.00 0.00 0.00 0.11 0.02 0.03 0.03 0.03 0.00
+   chat render s2 (not ruled): LIK 0.72 0.81 0.89 0.95 0.66 0.84 0.89 0.66 0.88 | GEN 0.06 0.17 0.17 0.70 0.23 0.36 0.22 0.28 0.19
+   chat render s3 (not ruled): LIK 0.66 0.70 0.84 0.89 0.77 0.81 0.88 0.84 0.81 | GEN 0.02 0.00 0.00 0.09 0.03 0.11 0.09 0.08 0.02
+   chat render s4 (not ruled): LIK 0.66 0.67 0.81 0.91 0.77 0.91 0.92 0.75 0.88 | GEN 0.03 0.14 0.02 0.39 0.14 0.22 0.05 0.22 0.03
+   chat render s5 (not ruled): LIK 0.64 0.77 0.78 0.89 0.78 0.95 0.89 0.84 0.84 | GEN 0.33 0.34 0.30 0.72 0.53 0.52 0.27 0.62 0.44
+   chat probe base: n_conv=53, control=0.4643, correction=0.0, followup=0.2857, instruction=0.3571, loop=0.0, own_answer=0.0, recall=0.1, role=0.0, topic_return=0.0
+   chat probe s1: n_conv=53, control=0.6296, correction=1.0, followup=0.4286, instruction=0.0, loop=0.0, own_answer=0.0, recall=0.4, role=0.6667, topic_return=0.3333
+   chat probe s2: n_conv=53, control=0.6296, correction=0.6667, followup=0.1429, instruction=0.0, loop=0.0, own_answer=0.0, recall=0.4, role=0.3333, topic_return=0.3333
+   chat probe s3: n_conv=53, control=0.5926, correction=1.0, followup=0.1429, instruction=0.0909, loop=0.0, own_answer=0.0, recall=0.4, role=0.0, topic_return=0.3333
+   chat probe s4: n_conv=53, control=0.6667, correction=1.0, followup=0.4286, instruction=0.0, loop=0.0, own_answer=0.0, recall=0.6, role=0.6667, topic_return=0.3333
+   chat probe s5: n_conv=53, control=0.5185, correction=1.0, followup=0.1429, instruction=0.0909, loop=0.0, own_answer=0.0, recall=0.4, role=0.0, topic_return=0.3333
+   LIK by length base: H1 0.00/0.05 (60>512, 2>768); H2 0.00/0.08 (53>512, 0>768); H3 0.00/0.06 (62>512, 4>768); H4 -/0.16 (64>512, 64>768); H5 -/0.16 (64>512, 22>768); H6 0.21/0.16 (50>512, 0>768); H7 0.35/0.11 (44>512, 0>768); C_noupd 0.46/0.37 (51>512, 13>768); C_twoslot 0.17/0.16 (58>512, 10>768); ID 0.48/0.37 (43>512, 0>768)
+   LIK by length s1: H1 1.00/0.65 (60>512, 2>768); H2 0.64/0.72 (53>512, 0>768); H3 1.00/0.85 (62>512, 4>768); H4 -/0.94 (64>512, 64>768); H5 -/0.70 (64>512, 22>768); H6 1.00/0.90 (50>512, 0>768); H7 0.85/0.95 (44>512, 0>768); C_noupd 0.85/0.88 (51>512, 13>768); C_twoslot 0.83/0.81 (58>512, 10>768); ID 0.95/0.95 (43>512, 0>768)
+   LIK by length s2: H1 1.00/0.68 (60>512, 2>768); H2 0.64/0.83 (53>512, 0>768); H3 1.00/0.87 (62>512, 4>768); H4 -/0.97 (64>512, 64>768); H5 -/0.72 (64>512, 22>768); H6 0.79/0.86 (50>512, 0>768); H7 1.00/0.93 (44>512, 0>768); C_noupd 0.92/0.86 (51>512, 13>768); C_twoslot 0.83/0.84 (58>512, 10>768); ID 1.00/0.93 (43>512, 0>768)
+   LIK by length s3: H1 1.00/0.68 (60>512, 2>768); H2 0.82/0.64 (53>512, 0>768); H3 1.00/0.82 (62>512, 4>768); H4 -/0.92 (64>512, 64>768); H5 -/0.81 (64>512, 22>768); H6 0.86/0.80 (50>512, 0>768); H7 0.80/0.93 (44>512, 0>768); C_noupd 0.92/0.94 (51>512, 13>768); C_twoslot 0.83/0.88 (58>512, 10>768); ID 0.95/0.95 (43>512, 0>768)
+   LIK by length s4: H1 1.00/0.65 (60>512, 2>768); H2 0.82/0.62 (53>512, 0>768); H3 0.50/0.82 (62>512, 4>768); H4 -/0.91 (64>512, 64>768); H5 -/0.75 (64>512, 22>768); H6 1.00/0.88 (50>512, 0>768); H7 0.90/0.91 (44>512, 0>768); C_noupd 0.92/0.82 (51>512, 13>768); C_twoslot 1.00/0.83 (58>512, 10>768); ID 0.95/0.91 (43>512, 0>768)
+   LIK by length s5: H1 0.75/0.65 (60>512, 2>768); H2 0.64/0.77 (53>512, 0>768); H3 1.00/0.82 (62>512, 4>768); H4 -/0.89 (64>512, 64>768); H5 -/0.80 (64>512, 22>768); H6 0.93/0.94 (50>512, 0>768); H7 0.95/0.93 (44>512, 0>768); C_noupd 0.92/0.92 (51>512, 13>768); C_twoslot 0.83/0.84 (58>512, 10>768); ID 0.95/0.88 (43>512, 0>768)
+
+== roneneldan/TinyStories-8M: reading NOT_SCORED (no complete scored seed run)
+   run   part       H1       H2       H3       H4       H5       H6       H7  C_noupd C_twoslo       ID  pass
+   base  LIK      0.25     0.27     0.16     0.31     0.05     0.25     0.28     0.22     0.14     0.27  fail
+   base  GEN      0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00  
+   base  BELOW-CHANCE (LIK): H5, C_noupd, C_twoslot, ID
+   s1    (missing or incomplete)
+   s2    (missing or incomplete)
+   s3    (missing or incomplete)
+   chance        0.20     0.24     0.15     0.23     0.15     0.23     0.23     0.23     0.20
+   untouched model passes (needs no fine-tune): False
+   meta base: lr=5e-05, steps=0, loss_finite=True, rejected_long=0, total_s=491.3
+   format base: n=1056, bare=0.0653, long=0.5095, mean_words=14.04, voice=0.0, capped=0.3826
+   continuity base: new=0.42, extra=0.61, old=0.46, uprobe=0.48, cross=0.25
+   LIK by length base: H1 0.20/0.25 (59>512, 1>768); H2 0.23/0.27 (51>512, 0>768); H3 0.00/0.16 (61>512, 3>768); H4 -/0.31 (64>512, 64>768); H5 -/0.05 (64>512, 15>768); H6 0.25/0.25 (44>512, 0>768); H7 0.31/0.26 (38>512, 0>768); C_noupd 0.25/0.21 (48>512, 13>768); C_twoslot 0.29/0.12 (57>512, 10>768); ID 0.43/0.17 (41>512, 0>768)
+
+== EleutherAI/pythia-31m: reading NOT_SCORED (no complete scored seed run)
+   run   part       H1       H2       H3       H4       H5       H6       H7  C_noupd C_twoslo       ID  pass
+   base  LIK      0.03     0.05     0.17     0.20     0.14     0.20     0.27     0.28     0.16     0.27  fail
+   base  GEN      0.00     0.00     0.00     0.00     0.02     0.00     0.00     0.00     0.02     0.02  
+   base  BELOW-CHANCE (LIK): H1, H2, H4, H5, H6, C_twoslot, ID
+   s1    (missing or incomplete)
+   s2    (missing or incomplete)
+   s3    (missing or incomplete)
+   chance        0.20     0.24     0.15     0.23     0.15     0.23     0.23     0.23     0.20
+   untouched model passes (needs no fine-tune): False
+   meta base: lr=5e-05, steps=0, loss_finite=True, rejected_long=0, total_s=135.0
+   format base: n=1056, bare=0.0047, long=0.9631, mean_words=10.22, voice=0.0123, capped=0.0218
+   continuity base: new=0.49, extra=1.00, old=0.43, uprobe=0.38, cross=0.42
+   LIK by length base: H1 0.00/0.03 (62>512, 2>768); H2 0.00/0.05 (55>512, 0>768); H3 0.00/0.18 (62>512, 7>768); H4 -/0.20 (64>512, 64>768); H5 -/0.14 (64>512, 25>768); H6 0.33/0.17 (52>512, 0>768); H7 0.22/0.28 (46>512, 0>768); C_noupd 0.50/0.23 (52>512, 13>768); C_twoslot 0.17/0.16 (58>512, 11>768); ID 0.39/0.22 (46>512, 1>768)
+
+== roneneldan/TinyStories-3M: reading NOT_SCORED (no complete scored seed run)
+   run   part       H1       H2       H3       H4       H5       H6       H7  C_noupd C_twoslo       ID  pass
+   base  LIK      0.17     0.19     0.14     0.27     0.19     0.16     0.36     0.20     0.19     0.31  fail
+   base  GEN      0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00  
+   base  BELOW-CHANCE (LIK): H1, H2, H3, H6, C_noupd, C_twoslot, ID
+   s1    (missing or incomplete)
+   s2    (missing or incomplete)
+   s3    (missing or incomplete)
+   chance        0.20     0.24     0.15     0.23     0.15     0.23     0.23     0.23     0.20
+   untouched model passes (needs no fine-tune): False
+   meta base: lr=5e-05, steps=0, loss_finite=True, rejected_long=0, total_s=437.6
+   format base: n=1056, bare=0.1193, long=0.6155, mean_words=14.47, voice=0.0, capped=0.3153
+   continuity base: new=0.45, extra=0.53, old=0.48, uprobe=0.46, cross=0.25
+   LIK by length base: H1 0.00/0.19 (59>512, 1>768); H2 0.31/0.16 (51>512, 0>768); H3 0.67/0.11 (61>512, 3>768); H4 -/0.27 (64>512, 64>768); H5 -/0.19 (64>512, 15>768); H6 0.10/0.18 (44>512, 0>768); H7 0.42/0.32 (38>512, 0>768); C_noupd 0.38/0.15 (48>512, 13>768); C_twoslot 0.29/0.18 (57>512, 10>768); ID 0.43/0.24 (41>512, 0>768)
+
+== EleutherAI/pythia-14m: reading NOT_SCORED (no complete scored seed run)
+   run   part       H1       H2       H3       H4       H5       H6       H7  C_noupd C_twoslo       ID  pass
+   base  LIK      0.02     0.03     0.19     0.27     0.09     0.14     0.23     0.23     0.19     0.28  fail
+   base  GEN      0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00  
+   base  BELOW-CHANCE (LIK): H1, H2, H5, H6, H7, C_twoslot, ID
+   s1    (missing or incomplete)
+   s2    (missing or incomplete)
+   s3    (missing or incomplete)
+   chance        0.20     0.24     0.15     0.23     0.15     0.23     0.23     0.23     0.20
+   untouched model passes (needs no fine-tune): False
+   meta base: lr=5e-05, steps=0, loss_finite=True, rejected_long=0, total_s=104.7
+   format base: n=1056, bare=0.0009, long=0.9848, mean_words=10.69, voice=0.0104, capped=0.0634
+   continuity base: new=0.48, extra=1.00, old=0.42, uprobe=0.38, cross=0.38
+   LIK by length base: H1 0.00/0.02 (62>512, 2>768); H2 0.00/0.04 (55>512, 0>768); H3 0.00/0.19 (62>512, 7>768); H4 -/0.27 (64>512, 64>768); H5 -/0.09 (64>512, 25>768); H6 0.17/0.13 (52>512, 0>768); H7 0.11/0.28 (46>512, 0>768); C_noupd 0.50/0.17 (52>512, 13>768); C_twoslot 0.67/0.14 (58>512, 11>768); ID 0.44/0.22 (46>512, 1>768)
+
+== roneneldan/TinyStories-1M: reading NOT_SCORED (no complete scored seed run)
+   run   part       H1       H2       H3       H4       H5       H6       H7  C_noupd C_twoslo       ID  pass
+   base  (missing or incomplete)
+   s1    (missing or incomplete)
+   s2    (missing or incomplete)
+   s3    (missing or incomplete)
+   untouched model passes (needs no fine-tune): None
+

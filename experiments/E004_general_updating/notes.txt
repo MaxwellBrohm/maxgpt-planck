@@ -521,3 +521,4 @@ STEP 5 (queue, decision rules, analyzer), 2026-09-24. No model loaded by this st
     6 min, baselines 75 min, 135M LR check 80 min, 135M seeds 5 h, chat probes 25 min, tiny LR searches 2.7 h
     (more with extensions), tiny seeds 4.3 h if they run. About 11 h (LR-only ladder) to 15 h (full ladder).
 2026-09-24 19:43:04 guard.py (E004 copy and E002 master): the wall-clock ceiling now excludes time paused for a closed lid on battery (Claude, after the step-5 note that dry_ts1m would be killed after 45 min of lid-closed pause). Applies to jobs started after this time; the running dry_ts1m still uses the old rule.
+2026-09-24 22:09:17 TinyStories-1M re-added as queue_e004_ts1m.sh (same settings as the tiny ladder), waiting for QUEUE E004 DONE.
