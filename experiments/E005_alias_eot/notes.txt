@@ -1,0 +1,346 @@
+E005: alias corrections, indirect corrections followed by the other object, end-of-turn (E004 + three data changes)
+Mac M5 24 GB, one model process at a time through code/guard.py (E004's copy). E001-E004 are read-only: their code
+is copied or imported, never edited; E004's records and weights are read, never written.
+
+PRE-REGISTRATION WRITTEN 2026-09-25 07:53 (before any E005 training example, item or model run exists. Run so far,
+no model: the byte copy of E004's code below, and a scratch check of the candidate alias pools against E004's eval
+vocabulary and its eval/dev/probe draws, logged at the end of this entry)
+
+WHY
+E004 (E004_general_updating/AUDIT.md) FAILED its rule on 5/5 seeds, but the audit found a transferable rule ("latest
+statement attributable to the asked object", by name, head noun or adjacency) that holds for k 4-5, d 20, new fillers,
+new objects and both controls, and it refuted the E002 wording shortcut. The failures: (1) alias corrections
+("Ms. Petrov rescheduled me for Sunday"), .10-.57 per family and seed, a reference form that NEVER occurred in
+training; (2) ellipsis corrections when the other object's statements follow (about .70); (3) three objects (H5,
+recency from other objects). Costs: closed-book knowledge -7.5 to -9.5 points; in the chat template the model never
+stops (targets were "answer\n" in the plain render; no end-of-turn after an answer was ever trained).
+E005 asks one question first: was the alias failure a data gap or a limit of 135M? It changes the training data in
+exactly three ways and nothing else.
+
+THE THREE CHANGES (all in the training data; code/train_e005.py, a later step, wraps train_e004.py unchanged)
+Stream of seed s (seeds 1-5). R_mix = Random(1000 * s + 46) draws, per example, a block u then a render r:
+  E004 block   70%   the next example of train_e004.stream(s) (Random(1000 * s + 44)), unchanged, consumed in order,
+                     so E005 seed s trains on the first ~4,480 examples E004 seed s saw (same kinds, shares, pools)
+  ALIAS block  20%   change (a), drawn from R_new = Random(1000 * s + 45)
+  IND block    10%   change (b), drawn from R_new
+  render       chat with probability 0.50 for every example of every block (change (c)), else E004's plain render.
+A rendered example over 768 tokens is rejected and the next draw of R_mix is taken (E004's redraw, never truncate).
+After the rejection no block share, E004-kind share, alias case, placement or render share moves by > 2 points.
+
+(a) ALIAS CORRECTIONS (training-only vocabulary; code/pools_alias_train.py, a later step, holds exactly these lists)
+  Alias = title + " " + surname. Surnames (24, uniform; two aliases in one dialogue never share a surname):
+    Abernathy Bergstrom Chaudhry Delgado Eriksen Fontaine Gallagher Hoffmann Iwasaki Jablonski Kariuki Lombardi
+    Moreau Nakamura Oyelaran Rasmussen Santoro Thornbury Vasquez Wojcik Yilmaz Zielinski Mancini Beaumont
+  Titles: an honorific Mr. / Mrs. / Ms. / Dr. with probability 2/3, else a role Pastor / Professor / Chef / Captain
+    (uniform within each group). The four honorifics are SHARED with the E004 eval by design; every surname and
+    therefore every honorific-plus-surname pair is disjoint from the eval. The roles occur in no E004 draw.
+  Definition: the aliased object's ORIGINAL renders its object phrase as "<phrase> <join>" (E004 eval mechanism), join
+    uniform from the value type's three (eval joins are "with", "from", "run by"; no training join contains with,
+    from, run or by):
+      weekday  "arranged through {a}", "that {a} set up", "that {a} looks after"
+      colour   "that {a} is handling", "that {a} is taking care of", "that {a} quoted me for"
+      month    "that {a} is planning", "that {a} is organizing", "that {a} is coordinating"
+      city     "that {a} is putting on", "that {a} is in charge of", "that {a} is hosting"
+  Alias correction templates (uniform; no object word, no it / they / them / one: the name is the only link):
+      weekday  "{a} bumped my booking over to {v}." "{a} texted to say {v} is better." "{a} switched my slot to {v}."
+               "{a} left a voicemail saying {v}." "{a} has me down for {v}." "{a} asked if {v} would suit me, and I
+               said yes."
+      colour   "{a} tells me I'm getting {v}." "{a} swapped over to {v} for me." "{a} emailed to confirm {v}."
+               "{a} ran short and offered {v}, which I took." "{a} recommends {v} and I agreed." "{a} has {v} ready
+               for me."
+      month    "{a} decided on {v} for all of us." "{a} booked everyone for {v}." "{a} wrote that {v} is final."
+               "{a} settled on {v} after the vote." "{a} called around and picked {v}." "{a} set the date for {v}."
+      city     "{a} switched the venue to {v}." "{a} announced {v} as the location." "{a} has booked a hall in {v}."
+               "{a} emailed everyone about {v} being the host city." "{a} picked {v} in the end." "{a} confirmed {v}
+               a minute ago."
+    Alias corrections take E004's correction markers (none 35%, else one of the 7) and E004's correction acks.
+  Every ALIAS example: 2 objects of one value type (uniform over the 4 training types), E004's training objects,
+  statement templates, questions (full phrase or head noun, 1/2; never the alias), answers, fillers, pre 0-3,
+  gaps 0-2, d 0-10, distinct values, at most one alias correction per object. Cases (A = asked, B = the other):
+    LATEST   60%  A aliased; A corrected k = 1-3 times, the LAST is the alias correction; gold = it.
+                  B: original + 0/1/2 corrections (1/4, 1/2, 1/4).
+    EARLIER  15%  A aliased; A corrected k = 2-3 times; the alias correction is followed by 1-2 more corrections of
+                  A (E004 reference rules); gold = A's last. B as LATEST.
+    OTHER    25%  B aliased; B corrected 1-2 times, its alias correction comes after A's latest statement;
+                  A corrected 0-2 times (E004 rules); gold = A's latest (the alias statement is a lure).
+  Placement of the alias correction relative to the aliased object's previous statement, 1/3 each in every case:
+    adjacent   the very next turn (no filler, no statement between)
+    filler     1-2 fillers between, no statement
+    other-obj  the other object's statement(s) between: for A aliased, B's original (0-1 fillers around it), B's
+               corrections after the alias correction; for B aliased (OTHER), A's latest statement.
+    For adjacent and filler placements with A aliased, all of B's statements come before A's original (1/2) or after
+    A's alias correction (1/2).
+  Both-aliased: in 1/3 of ALIAS examples (every case) the object that is not aliased above gets its own alias too
+  (defined in its original, never used in a correction), so "the object with a name" is not enough.
+  Corrections other than the alias one use E004's reference forms and rules (pronoun and ellipsis only directly
+  after the same object's exchange). Resulting rates: 20% of examples define an alias; the alias correction is the
+  gold in 12%; an alias lure (a statement by a name that is not the answer) sits in 8%.
+
+(b) INDIRECT CORRECTION FOLLOWED BY THE OTHER OBJECT (at most 2 objects; 3 objects stay held out for H5)
+  Read as the audit's failure case: an ellipsis or pronoun correction of one object, AFTER which the other object's
+  statements follow (the other object's own indirect correction included). An indirect correction placed right after
+  the other object's statement would refer to that object, so that literal reading is not used.
+  Every IND example: objects X then Y of one value type (uniform over the 4). X original, X corrected k = 1-3 times;
+  X's LAST correction is ellipsis (2/3) or pronoun (1/3), directly after X's previous statement; then 0-2 fillers;
+  Y original; Y corrected 1-2 times, Y's last correction indirect (ellipsis 2/3, pronoun 1/3, directly after Y's
+  previous statement) in 2/3 of examples, else full / head (3:2, E004's far weights). Earlier corrections follow
+  E004's rules. Ask X 3/4 (gold = X's indirect latest), ask Y 1/4 (gold = Y's latest). E004 pools (pron, ell,
+  markers, acks, questions, answers, fillers), pre 0-3, d 0-10, distinct values. No aliases in IND.
+
+(c) END-OF-TURN (chat render, 50% of all examples; the plain render stays for the rest)
+  Chat render = exactly the eval's: messages = every (user, assistant) exchange, then the question as a user message;
+  prompt = tok.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True), no system message (SmolLM2's
+  template inserts its default system prompt, as in lik.chat_prompt and gen_run). Target = the answer sentence
+  (no leading space, no newline) followed by "<|im_end|>" (SmolLM2's eos); loss on the answer tokens and <|im_end|>
+  only; the "\n" the template writes after <|im_end|> is not trained. Plain render unchanged: target " answer\n".
+  The loss self-check against the HF loss (and its two wrong-loss mutants) runs on a plain AND a chat batch.
+
+WHAT IS RE-CHECKED BECAUSE OF THE CHANGES (before any model run; thresholds are E004's)
+  Stream acceptance on each seed's actual trained examples (after the rejection): every cheap oracle O1-O8 <= 0.70,
+  O1 and O2 <= 0.50, IDEAL 1.00; also reported per block, plus two diagnostic oracles: AR (latest alias correction,
+  else O2) and T (topic tracker). If a threshold fails, a share above moves by at most 5 points, logged as a
+  deviation before any model run (E004's rule).
+  Purity, replacing E004's "0 alias/honorific in training" line: 0 training examples with an E004 eval/dev/probe
+  surname, an eval honorific+surname pair, an eval join used as a join (a title right after "with", "from" or
+  "run by"), or an alias template sharing a word 3-gram with an eval alias template ({a}/{v} as placeholders);
+  0 word 5-grams shared between training text and eval text (E004's rule, new pools included). Every other E004
+  purity line stays: 0 frame echoes, 0 eval markers, k <= 3, d <= 10, <= 2 objects, 0 held-out objects, 0 H6 values
+  or digits, 0 non-training fillers, 0 H7 5-grams.
+  Eval identity: E005's eval, dev and probe draws must match E004's prompt by prompt (hashes), 1,120 of 1,120.
+
+UNCHANGED (E004 notes (a)-(e), step 2-5 choices, deviations 1-9)
+  Model HuggingFaceTB/SmolLM2-135M-Instruct. 400 optimizer steps, AdamW lr 1.5e-4 (E004's dev pick; no new LR
+  search), wd 0, 20 warmup then cosine to 0, clip 1.0, fp32 weights and optimizer, answer-only loss, micro-batch 4 x
+  accumulation 4 (effective 16), gradient checkpointing, max length 768 with redraw. The E004 generator, pools, kind
+  shares and reference forms inside the E004 block. The E004 eval draw 4004 (64 per family, 9 pass families + ID),
+  dev 4104 (not used: no LR search), probe 4204 (in-training likelihood probe every 50 steps, lock-in rule). The
+  hardened grader (gen_grade.py), LIK scorer, pass rule, majority, reading labels and sub-readings (rules_e004.py).
+  Continuity sets, knowledge sets (kbig 441, khard40, K_closedbook60), chat probe (53 conversations), answer-format
+  stats. Guard and stop rules. The untouched baseline is E004's (same model, items and code): its records are copied
+  read-only with sha256 and not rerun.
+
+PASS RULE (identical to E004 (c))
+  Seed passes <=> for EVERY family f in {H1..H7, C_noupd, C_twoslot}: LIK_f >= 0.8 AND GEN_f >= 0.8 (plain render,
+  n = 64 each). Model passes <=> 3 of 5 planned seeds pass (an incomplete seed fails). Readings PASS, PARTIAL-G,
+  PARTIAL-X, FAIL in that order, exactly as E004 (c) and step 5; a LIK failure on H1, H2 or a control is never
+  partial. The chat render is reported, not ruled.
+
+ALIAS READING (pre-registered, read in addition to the pass rule)
+  Per seed: alias LIK and alias GEN = share right over the 42 H1 + H2 items whose latest correction is an alias
+  (21 + 21 in the eval draw; E004's scorer and strict grader). A seed is HIGH if LIK >= 0.8 AND GEN >= 0.8, LOW if
+  LIK <= 0.5 AND GEN <= 0.5.
+    DATA GAP      a majority (3 of 5) of seeds HIGH: the E004 alias failure was missing training data.
+    REAL LIMIT    a majority of seeds LOW: linking a name to its object is a real limit at 135M after this training.
+    INCONCLUSIVE  anything else.
+  At n = 42 the 95% interval is about +-0.12 near 0.8. Per-family (n = 21) values are reported, not read. E004's own
+  seeds are rescored by the same code for the comparison (audit: H1 .10-.33, H2 .24-.52 LIK).
+
+EXTRA REPORTS (descriptive; no rule)
+  1 Adjacency split of the alias items, LIK and GEN per seed (eval draw 4004 counts, measured in step 1):
+    adjacent (next turn) H1 3 + H2 6 = 9; filler-separated 8 + 6 = 14; B-separated 10 + 9 = 19.
+  2 H1/H2 by reference form (alias / ellipsis / pronoun) and ellipsis with the other object following, on every
+    family that has it (the audit's secondary finding), vs E004.
+  3 Chat-template strict GEN per family and seed (expected to recover), share of chat replies capped at 48 tokens,
+    and first-line grading as the audit did. Yardstick stated now: "stopping learned" if chat strict GEN is within
+    0.10 of plain GEN on every pass family for 3 of 5 seeds.
+  4 H5 LIK and GEN per seed with the audit's splits (another object's indirect correction after the asked object's
+    latest or not; asked object's latest form), vs E004.
+  5 Closed-book knowledge change per seed vs the untouched model (bootstrap 95% CI, margin t interval, exact McNemar
+    p, as E004), and E005 vs E004 (mean over seeds, paired bootstrap over items).
+  6 Chat probe: E004's per-category table plus capped-turn share and training-answer-template share (the audit's
+    measures), vs untouched and E004. Answer-format stats and continuity as E004.
+  7 Every family, E005 minus E004 (mean over seeds), so a cost of the smaller E004 block (70%) shows.
+
+ADDITION, proposed in step 1 (diagnostic only; no rule reads it; the orchestrator may strike it before any run)
+  Why: in the E004 eval every alias correction is the asked object's latest, so "the latest statement by a name wins"
+  scores 1.00 on the alias items without linking anything. AL (code/items_al.py, later step): 64 items from E004's
+  EVAL vocabulary (eval objects, surnames, joins, alias templates, fillers, markers), draw Random("E005:4005:AL"),
+  4 cells x 16, value types balanced, d 10, 2 objects:
+    AL1  B aliased, B's alias correction after A's latest; ask A (gold A's latest)
+    AL2  both aliased, A's alias correction then B's; ask A (gold A's alias correction)
+    AL3  as AL2, ask B (gold B's alias correction)
+    AL4  A aliased, alias correction then a head-noun correction of A; ask A (gold the head-noun one)
+  Alias recency scores 0 on AL1, AL2, AL4. Scored (LIK and GEN, plain) on every E005 seed, the untouched model and
+  E004's saved seeds s1-s5. If the alias reading is DATA GAP but AL1+AL2+AL4 LIK < 0.5 on a majority of E005 seeds,
+  the report says "resolved by alias recency, not by linking" next to DATA GAP.
+
+MODEL, SEEDS, KNOWN RISKS
+  SmolLM2-135M-Instruct only, seeds 1-5 (the same numbers as E004, so the E004 blocks are paired with E004's
+  streams). No tiny ladder in E005: if the reading is DATA GAP, a ladder with this recipe needs its own
+  pre-registration. Risks stated now: half the examples are chat-rendered and the E004 block is 70%, so plain-render
+  families that E004 passed may move; the four honorifics are shared with the eval, so DATA GAP means "new surnames,
+  joins and templates under familiar titles", not titles never seen.
+
+QUEUE (code/queue_e005.sh, later step; E004's guard, stop rules and log format, "QUEUE E005 DONE")
+  0 Wait until E004's queues have ended (a "QUEUE E004 DONE" or "QUEUE STOPPED" line in E004 logs/queue.txt, and the
+    same for queue_e004_ts1m.sh) and no other model process runs (guard wait_idle). E004 is not touched.
+  1 No-model checks: validate_e005 (stream acceptance, shares, purity, eval identity), generator tests and mutants,
+    selfcheck (exact labels for both renders: chat target decodes to the answer + <|im_end|>).
+  2 Dry run: 5 steps padded to 768; loss self-check on a plain and a chat batch; wrong-loss mutants rejected.
+  3 Seeds 1-5 in order, each: train (probe every 50 steps), eval LIK + GEN (plain and chat), continuity, knowledge,
+    AL. Weights saved for the chat probe.
+  4 Chat probe s1-s5.   5 AL on the untouched model and E004's s1-s5 weights (read-only).
+  6 Analyzer: tables, pass-rule reading, alias reading, extra reports.
+  Rough time from E004's logs (4,530-4,800 s per seed incl. eval; chat renders add ~25 tokens): about 7 h.
+
+STEP 1 LOG (2026-09-25 07:53)
+  Code copy: all 64 files of E004_general_updating/code copied byte-for-byte (cp -p) into E005_alias_eot/code;
+  every copy's sha256 equals its source's (sorted lists compared with cmp). Per-file hashes in
+  logs/copied_from_e004_sha256.txt; digest of that list
+  aaf4082a769037200dae49563903d05ee5c1134d68ddb56da3518664d215e196.
+  Key files: train_e004.py 2cb98d16..., items_e004.py 953a7de5..., gen_grade.py 2819c5ed..., rules_e004.py
+  49cc1c3c..., lik.py da7689ff..., guard.py e142a74e... Nothing in code/ is edited yet; new files come in step 2.
+  Scratch check of the pools above (scratchpad e005/check_cand.py, system python3 -B, no model), against E004's
+  heldout_e004 / pools_eval and all 1,120 eval + dev + probe items: no surname or role title in any E001-E004 .py,
+  .txt or .json file or any draw; no surname equals a value; joins disjoint as required; alias templates share 0 word
+  3-grams with the 12 eval alias templates, 0 word 5-grams and 0 word 4-grams with the draw text, and hold no object
+  word, value or pronoun. The first candidates failed and were replaced before this entry: role "Coach" (occurs in
+  a draw), "{a} bumped me to {v}." (3-gram "me to {v}" with an eval template), "the order" and "this morning"
+  (object words).
+
+STEP 2 LOG (2026-09-25 08:19): changes (a) and (b) implemented; no model loaded; no copied file edited
+  New files (code/): pools_alias_train.py (the (a) lists exactly), train_e005.py (stream(seed): E004 block via
+  train_e004.stream unchanged, ALIAS and IND blocks, the render draw of (c); chat rendering and the <|im_end|>
+  target are step 3), checks_e005.py + checks_e005_b.py (alias pool, purity, alias/IND structure and reference
+  checks), shares_e005.py, test_train_e005.py, oracles_e005.py, purity_e005.py, ngram_overlap_e005.py,
+  eval_identity_e005.py, mutation_e005.py + mutation_e005_b.py. The 64 copies still hash as in step 1.
+  Choices where (a)/(b) leave room (fixed before any check ran; no share or threshold moved):
+    OTHER: B's alias correction is B's LAST correction; with kB = 2, B's original precedes A's original in 1/2.
+      other_obj: 0-1 fillers on each side of A's latest (as for B's original when A is aliased).
+    EARLIER: for k = 3 the alias is correction 1 or 2 (uniform); adjacent/filler with B after: B's whole chain sits
+      at a uniform slot after the alias (right after it or after one of A's later corrections); other_obj: B's
+      corrections are interleaved at random with A's later corrections, all after the alias.
+    IND: 0-2 fillers before Y's original; Y's earlier correction (kY = 2) by E004's rules.
+    Markers: E004's with_marker lowercases the first letter ("Actually, dr. Iwasaki"); a statement that starts
+      with a title keeps its capital (train_e005.with_marker_e5). The E004 block is untouched.
+  Results (all logs/*e005*.txt, exit 0):
+    test_train_e005: ALL PASS. E004 block = train_e004.stream(s) in order on seeds 1-5 (4,507-4,567 of 6,500
+      draws); 0 failing examples (seed 0 x 2,000 all blocks; all 9,778 ALIAS/IND of seeds 1-5); every alias pool
+      entry and training object used per seed. Pooled shares: blocks .699/.201/.100; chat .500/.500/.494;
+      cases .599/.155/.246; placements near 1/3; both aliased .331-.346; honorific titles .673; alias correction
+      is the gold in .120 of examples, a lure in .080; IND asks X .754, Y's last indirect .671.
+    oracles_e005 (first 6,404 DRAWN examples, seeds 1-5; the kept-after-rejection repeat is validate_e005):
+      every O and X rule <= .633 (O7), O1 .197-.208, O2 .396-.408, IDEAL 1.00. Diagnostics: AR .445 overall
+      (alias block .598: 1.00 LATEST, 0 EARLIER and OTHER); T .853 overall, .705 on the alias block.
+      Rule note: O7 (latest naming no other object) is .793 on LATEST alone, .633 on the stream.
+    purity_e005: 0 examples on every axis (E004's kept lines + eval surname, pair, join, alias 3-gram,
+      undeclared name); pool level clean. ngram_overlap_e005: 0 shared 5-grams, 0 frames, 0 template 5-grams.
+    E004 eval gates rerun from the copy: shortcuts eval/dev/probe ALL GATES PASS (tables identical to E004's
+      logs), test_eval_items ALL PASS, E004's test_train_gen identical to its E004 log; eval identity 1,120/1,120.
+    mutation_e005: 47/47 mutants killed, baselines clean (every named checker must flag; a crash is not a kill).
+      It found one real bug: check_alias_struct crashed on an alias correction placed before its object's
+      original; it now reports it, and a mutant for that case was added.
+
+STEP 3 LOG (2026-09-25 08:37): change (c), the entry point and the analyzer; no model loaded; no copied file edited
+  New files (code/): e005_sets.py (both renders, stream stats), e005_train.py (E004's loop + the three-batch loss
+  self-check), e005_ft_test.py (entry point), selfcheck_e005.py, test_render_e005.py, evidence_e005.py,
+  rules_e005.py, analyze_e005.py + analyze_e005_b.py, test_analyze_e005.py, mutation_e005_c.py. The 64 copies still
+  match their sha256 list (64/64), and so do their E004 sources.
+  Tokenizer facts (SmolLM2 tokenizer only): eos = pad = "<|im_end|>" id 2, bos "<|im_start|>" id 1, and no BOS is
+  added to plain text. The template inserts its default system prompt when the first message is not a system one.
+  gen_run already stops on id 2.
+  Chat render as (c) says. The target is sentence + "<|im_end|>", tokenized jointly after the template prompt
+  (add_special_tokens off). Labels cover the sentence tokens and <|im_end|> only. The input ends at <|im_end|>.
+  e005_sets refuses a tokenizer whose eos is not <|im_end|>.
+  Choices where (c) leaves room (fixed before any check ran):
+    Loss self-check batches: E004 consumed its first 4 kept examples as the check batch and did not train on
+      them; E005 keeps that ("first") and adds a plain-only and a chat-only batch of 4. Those two come from a
+      separate iterator of the same seed's stream, so the training iterator does not move. A mismatch on any of
+      the three exits. In --dry, both wrong-loss mutants must differ from the HF loss on all three batches, and
+      the 5 steps must have trained both renders.
+    e005_ft_test defaults --lr to 1.5e-4 (E004's other checks are unchanged). A run with training refuses a
+      tokenizer without <|im_end|> as eos.
+    "Stopping learned" reads "within 0.10" literally: |chat strict GEN - plain strict GEN| <= 0.10 on every pass
+      family. The signed min/max gap per seed is printed next to it.
+    Chat first-line strict follows the audit: the reply's first line is graded as a stopped reply ("eos").
+    Wrong-pick classes, in priority order: gold, tie, A_prev, A_earlier, other_after, other_before,
+      not_in_context, none. A lure flag is kept on the side. Alias placement: adjacent, filler or B_sep (another
+      object's statement between), as step 1 counted it.
+  Results (logs, all exit 0):
+    test_render_e005: ALL PASS. Labels are right on 2,400/2,400 examples of seeds 0-5 (1,174 plain, 1,226 chat,
+      all joint). The chat prompt equals lik.chat_prompt and gen_run's template call. The loss mask was checked
+      by gradients on a CPU stub (embedding + head, no language model): the trained tokens decode exactly to the
+      target on 40/40 examples. The three-batch self-check passes. A prompt-scoring HF loss is caught on all
+      three batches. The rejection path fires at 350 tokens (241 = 241). Mutants flagged: 7/7 label layouts and
+      6/6 encoders. The gradient check and the label check each catch all 6 layout mutants on their own.
+    selfcheck_e005: ALL PASS. Checks parsing, the plan (e004 LIK/GEN plain + chat 640, cont 416, kbig 441,
+      probe 144, outputs in E005/out), import hygiene (--plan loads neither torch nor transformers), and dry
+      renders: seeds 0-5 train 33-51 examples of each render in the dry steps. It also confirms E004's optimizer,
+      schedule, clip, loss and probe lines are kept.
+    Kept-share pre-check (tokenizer, 6,420 kept per seed, 768 tokens; the formal check is validate_e005, later):
+      101-112 rejected per seed, largest drawn-vs-kept shift 0.75 points (render), chat kept .489-.497.
+    test_analyze_e005: ALL PASS (40 checks). Through the new code, E004's records reproduce the audit exactly:
+      H1 alias .19 .33 .33 .19 .10, H2 alias .24 .52 .38 .33 .38, ellipsis and pronoun per seed; placement
+      counts 9/14/19. On H1/H2 alias items, 147 LIK picks are wrong: 139 are the previous statement, 5 older, 3
+      the other object, 57 lures. H5 has 78 wrong: 49 + 3 other object, 26 the asked object's own. H5 scores
+      .67/.84 with/without another object's indirect correction after. Label and cells equal E004's analyzer.
+      E004's fixed strings are gone. The alias reading on E004 (no alias training) is REAL LIMIT (LOW 4, MID 1).
+    Continuity fix: cross/chat is now compared by prompt hash. E002's file holds the first 184 of 384 items:
+      184 matched, 0 flips, max score difference 0.000, 200 only in E004. All 8 continuity sets have 0 flips.
+    mutation_e005_c: 19/19 analyzer mutants killed, clean baseline, crashes not counted as kills. The mutants
+      cover the thresholds, majority denominators, stopping tolerance and side, adjacency and B_sep,
+      role/lure/tie classes, first-line grading, positional flips, the unchecked join, E004's strings, alias
+      n, the sign of the difference, and p rounding.
+  Not done in this step: validate_e005 (oracles and shares on the kept examples), the AL items, the chat-probe
+  capped/template shares, copying E004's base records with sha256, and queue_e005.sh.
+
+STEP 4 LOG (2026-09-25 08:52): the queue; no model loaded; no copied file edited; E004 only read
+  New files (code/): validate_e005.py, reuse_base_e005.py, test_queue_tools_e005.py, queue_e005.sh.
+  validate_e005: per seed 1-5, the first 6,404 examples KEPT by e005_sets.example_stream (tokenizer, 768), which is
+    what e005_train consumes. Gates: every O and X rule <= .70, O1/O2 <= .50, IDEAL 1.00; drawn-vs-kept shift <= 2
+    points; purity_e005.violations = 0 on every kept example (purity_e005 stops at 6,404 drawn, 101-112 short of the
+    last kept one). shares_e005 on the kept examples is printed, not gated (its tolerances were set on the drawn
+    stream). Result (logs/validate_e005.txt, 120 s): ALL PASS. Max rule .622-.632, O1 .200-.211, O2 .396-.408,
+    IDEAL 1.00; rejected 101-112 per seed; largest shift .60-.76 points (render); purity 0; every share check ok.
+  reuse_base_e005: the untouched baseline is E004's, copied, not rescored, and only if every check holds: 64/64
+    copies and sources match the step-1 list; every E004 .py predates the base run (22:07:38) and the untouched chat
+    probe (07:06:29); e005_sets.lik_sets/gen_sets are e004_sets' functions (with --steps 0, e005_ft_test runs the
+    same scoring calls as e004_ft_test; read line by line); both guard verdicts exit 0, killed None, expected
+    command; run.json steps 0, chat, sets, max_new 48; the 16 base files are exactly the plan's (15 sets + run.json)
+    with the plan's counts; all 15 sets hash the same when built in each code directory; all 8,101 LIK records carry
+    the prompt hash of the same E005 item (chat prompts through the tokenizer) and all 1,696 GEN records its report
+    keys; one HF snapshot (12fd25f7..., refs/main), files older than the base run, model.safetensors sha256 5af571cb...
+    Check-only run now: REUSE OK. If any check fails at queue time, the queue scores the untouched model itself.
+  test_queue_tools_e005 (mutation test, logs/test_queue_tools_e005.txt): 16/16. validate: baseline passes; shift
+    limit 0, oracle limit .30, one injected purity violation each fail. reuse, on a scratch copy of E004's files: one
+    LIK hash, one GEN family, a missing base file, a killed guard verdict, run.json steps 400, a newer .py, a set
+    builder dropping one item, a 52-line transcript each fail on their named check; copy mode copies 16 files with
+    equal sha256, is idempotent, refuses an existing copy with other bytes. It found one real bug: a missing base
+    file crashed check 5 instead of failing it; fixed (a missing or short file counts every unmatched item).
+    E004's code and transcripts hashed the same before and after.
+  queue_e005.sh: E004's functions (wait_idle, guarded, check_step, stop rules, log format), E005's jobs. Waits until
+    E004 logs/queue.txt has "QUEUE E004-TS1M DONE", "E004-TS1M not started" or "QUEUE STOPPED", AND no zsh runs a
+    queue_e004*.sh (matched on interpreter and script name), AND guard.other_model_jobs() is empty; 60 s; all again.
+    Then: code sha256 list (logs/code_sha256_at_start.txt); checks eval_identity_e005, validate_e005,
+    test_train_e005, test_render_e005, selfcheck_e005, test_analyze_e005, test_queue_tools_e005 (any failure
+    stops); dry run (seed 0 as E004, --chat, both renders) and one chat-probe conversation; base reuse (else base
+    scoring + untouched chat probe); seeds 1-5 at 1.5e-4 with --chat --save 1, each followed by its 53-conversation
+    chat probe (E004 ran the probes after all seeds; the outputs are the same either way); analyze_e005 after every
+    seed; the readings line; "QUEUE E005 DONE". A failed dry run stops the queue; a failed seed is logged and the
+    queue goes on (E004's rule); memory and preflight verdicts stop it.
+  Queue checks: zsh -n clean. The existing checks rerun now all pass (eval_identity 0 s, test_train 22 s,
+    test_render 7 s, selfcheck 1 s, test_analyze 4 s; their logs came out byte-identical). A simulation (scratch
+    copy, fake guard and fake python) confirmed: it waits with no end line, with an end line while a queue script
+    runs, and while a model job runs; starts on each of the three end lines; order and arguments of every job; a
+    refused reuse runs base scoring and the untouched probe; SELFTEST FAIL in the dry run stops; a failed seed gives
+    a GAP line and the queue goes on; free_memory and preflight verdicts stop. The readings line was checked on
+    analyze_e005 output for E004's records (rule FAIL, alias REAL LIMIT, HIGH 0, LOW 4, stopping learned False).
+  Not built, so not in the queue: the AL items (the ADDITION; diagnostic, no rule reads it; deviation 2) and the
+    chat-probe capped/template shares (analyzer only; they can be computed from the transcripts afterwards).
+  Started 08:51:49 with nohup (pid 20479, logs/queue_nohup.txt); logs/queue.txt: "QUEUE E005 WAITING". E004 then
+    had ts3m's LR search running (641 s per LR), p14m's to come, then queue_e004_ts1m.sh (dry, base, 4 LRs).
+  Time estimate: E004 about 1.5-2 h more. E005 itself about 7.5 h (checks 3 min, dry 2 min, reuse seconds; per seed
+    about 5,100-5,300 s from E004's 4,530-4,800 s plus longer chat-rendered examples, plus a 256 s chat probe).
+    Expected "QUEUE E005 DONE" around 18:00-19:00 today if nothing waits or stops.
+
+DEVIATIONS
+  1 (step 3, before any model run) FAIL sub-readings. The notes list E004's sub-readings as unchanged. The audit
+    showed they were fixed interpretive strings that any H1/H2/control LIK failure triggered without reading an
+    item ("the E002 shortcut signature", "a rule that does not transfer"), and the items refute both. rules_e005
+    keeps E004's four triggers and prints each as the fact it checks, then adds item evidence: H1/H2 by
+    reference form, the alias placement split, and the wrong picks. It attaches no interpretation. Reading
+    labels, the pass rule and the majority are unchanged (rules_e004.reading is called as is).
+  2 (step 4, before any model run) AL not run. The QUEUE plan listed AL on every seed, the untouched model and
+    E004's s1-s5; the AL items (code/items_al.py) were never built, so the queue does not score them. AL was
+    proposed as a diagnostic that the orchestrator could strike; no rule reads it. Without it, a DATA GAP reading
+    cannot tell linking from "the latest statement by a name wins" (every eval alias correction is the gold).

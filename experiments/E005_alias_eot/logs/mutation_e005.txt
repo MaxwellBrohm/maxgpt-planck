@@ -1,0 +1,51 @@
+baseline (seed 0 x 800; seeds 1-5 x 6500 for shares) clean on every checker: True
+
+KILLED   eval surnames in the training surname pool           pool:eval surname=4, heldout:eval surname=28, purity:eval surname=28
+KILLED   eval join 'with' as a training join                  pool:eval join word=3, heldout:eval join=42, purity:eval join=42
+KILLED   eval join 'run by' as a training join                pool:eval join word=3, heldout:eval join=39, purity:eval join=39
+KILLED   alias template sharing a 3-gram with an eval template pool:3-gram shared=6, purity:eval alias 3-gram=42
+KILLED   alias template with a pronoun                        pool:pronoun=6, alias refs:pronoun=32
+KILLED   three objects in IND (H5)                            structure:not exactly 2 objects=86, purity:H5 obj3=86
+KILLED   k = 4 on the asked object (H3)                       structure:more than 3 corrections=41, purity:H3 k45=41
+KILLED   d = 20 (H4)                                          structure:out of range=800, purity:H4 d20=800
+KILLED   eval objects in the training pool (H6)               heldout:held-out object=212, purity:H6 object=212
+KILLED   held-out value in a training pool (H6)               values:held-out type=63, purity:H6 value=63
+KILLED   adjacent alias correction after a filler             structure:adjacent placement=50
+KILLED   OTHER alias before A's latest                        structure:OTHER=43
+KILLED   B split around A's chain (adjacent/filler)           structure:B not all before=63
+KILLED   IND X's last correction direct                       structure:not ellipsis/pronoun=86
+KILLED   IND Y stated before X's last                         structure:Y stated before=86, references:not adjacent=86
+KILLED   IND indirect correction after a filler               references:not adjacent=86
+KILLED   E004 block skips one example                         identity=1
+KILLED   E004 block example edited                            identity=1
+KILLED   block shares 65/25/10                                shares:block=2
+KILLED   chat render 45%                                      shares:chat render=3
+KILLED   alias cases 50/25/25                                 shares:alias case=2
+KILLED   both aliased 25%                                     shares:both aliased=3
+KILLED   honorific titles 50%                                 shares:honorific=1
+KILLED   B's corrections 0/1/2 uniform                        shares:B's corrections=1
+KILLED   IND asks X 60%                                       shares:IND asks X=1
+KILLED   all-LATEST alias stream (O7 shortcut)                oracle:O7=1
+KILLED   eval alias template copied into training             ngram:template=4, ngram:text=12, pool:3-gram shared=6
+KILLED   alias correction before its object's original        structure:before its object's original=28
+KILLED   eval honorific+surname pair as an alias              heldout:eval alias pair=1, purity:eval alias pair=1
+KILLED   honorific in an E004-block statement                 heldout:honorific or role outside=1, purity:undeclared name=1
+KILLED   alias in an acknowledgement                          alias refs:a title outside=1
+KILLED   alias defined in an IND example                      heldout:aliases outside the alias block=1, structure:undeclared IND=1
+KILLED   second alias left undeclared                         heldout:honorific or role outside=1, purity:undeclared name=1
+KILLED   alias from outside the training pools                heldout:alias not from the training pools=1
+KILLED   alias correction names its object                    alias refs:names an object=1
+KILLED   H7 filler in a training dialogue                     values:neither a statement nor a training filler=1, purity:H7 filler=1
+KILLED   eval marker on an alias correction                   heldout:eval marker=1, purity:eval marker=1
+KILLED   question echoes the gold statement                   echo:echo=1, purity:H1/H2 echo=1
+KILLED   other alias used in the alias correction             alias refs:without its object's alias=1
+KILLED   two aliases share a surname                          structure:share a surname=1
+KILLED   alias never defined in the original                  alias refs:not defined right after=1
+KILLED   two alias corrections of one object                  structure:2 alias corrections=1
+KILLED   other_obj example labelled filler                    structure:filler placement=1
+KILLED   adjacent example labelled other_obj                  structure:other-object placement=1
+KILLED   EARLIER example labelled LATEST                      structure:LATEST=1
+KILLED   single-alias example labelled both_aliased           structure:both_aliased=1
+KILLED   wrong gold on every 10th example                     oracle:IDEAL=1
+
+RESULT: 47/47 mutants killed

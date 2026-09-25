@@ -1,0 +1,30 @@
+E005 purity: 32020 training examples (seeds (1, 2, 3, 4, 5), first 6404 draws of each stream; blocks {'e004': 22403, 'alias': 6409, 'ind': 3208})
+
+PASS  H1/H2 echo             training examples with it: 0
+PASS  eval marker            training examples with it: 0
+PASS  H3 k45                 training examples with it: 0
+PASS  H4 d20                 training examples with it: 0
+PASS  H5 obj3                training examples with it: 0
+PASS  H6 object              training examples with it: 0
+PASS  H6 value               training examples with it: 0
+PASS  H7 filler              training examples with it: 0
+PASS  held-out (E004 lists)  training examples with it: 0
+PASS  eval surname           training examples with it: 0
+PASS  eval alias pair        training examples with it: 0
+PASS  eval join              training examples with it: 0
+PASS  eval alias 3-gram      training examples with it: 0
+PASS  undeclared name        training examples with it: 0
+PASS  H7 genre               H7 filler 5-grams in training text: 0 []
+PASS  alias pools            pool-level problems: 0 []
+
+Alias vocabulary actually used: 192 distinct aliases, 24 surnames, titles {'Mr.': 1402, 'Dr.': 1472, 'Pastor': 723, 'Ms.': 1434, 'Chef': 693, 'Mrs.': 1472, 'Professor': 703, 'Captain': 678}
+
+Training ranges actually covered (held-out values must lie outside):
+  k (asked)                        {0: 7789, 1: 7921, 2: 8740, 3: 7570}
+  max corrections of any object    {0: 2761, 1: 7488, 2: 12106, 3: 9665}
+  d                                {0: 2977, 1: 2908, 2: 2856, 3: 2883, 4: 2881, 5: 2932, 6: 2918, 7: 2897, 8: 2885, 9: 2887, 10: 2996}
+  objects                          {1: 9666, 2: 22354}
+  value statements                 {2: 4644, 3: 5594, 4: 8154, 5: 7593, 6: 4368, 7: 1667}
+  held out: k 4-5 (H3), d 20 (H4), 3 objects (H5), value types sport/number and 48 H6 objects (H6), small-talk/creative fillers (H7), frame echoes (H1/H2), eval surnames/pairs/joins/alias templates
+
+RESULT: ALL PASS
