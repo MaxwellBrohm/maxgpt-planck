@@ -16,8 +16,12 @@ kept docs (bytes_boilerplate is the boilerplate part). The merge (extract_merge.
 boilerplate lines (boilerplate.py; CCCC and Wikimedia), then runs global exact dedup (sha1 of the
 final text) in source order oasst2, dolly, irc, cccc, stackexchange, gutenberg, wikimedia, so the
 first copy wins and chat copies beat prose copies. A repeated doc id is dropped as dup_id.
-Not implemented in v0 (CORPUS 3.2): MinHash near-dedup (step 2), quality heuristics (step 4) and
-13-gram decontamination (step 6).
+MinHash near-dedup (CORPUS 3.2 step 2; neardedup.py, neardedup_lsh.py) runs in the merge BEFORE
+boilerplate removal, as 3.2 orders: workers write each passed doc's signature (tmp .mh.npy), the
+merge clusters all files at once (tier = source order, then date, then file order) and drops every
+non-leader as dup_near (dup_exact when its text equals a kept doc's), and only the survivors add to
+the boilerplate line counts. --no-near-dedup skips it (the v0 behavior). Not implemented here:
+quality heuristics (step 4) and 13-gram decontamination (step 6).
 
 The English stopword gate (hygiene.MIN_EN_STOPWORDS = 0.10) was added after a probe of the real
 files (timestamps stripped first): of the first 4,000 Ubuntu IRC docs, 1,214 had 200+ bytes; the
@@ -39,6 +43,7 @@ import numpy as np
 
 import boilerplate as BP
 import hygiene as H
+import neardedup as ND
 from extract_merge import add_drop, merge
 from readers_chat import read_dolly, read_oasst
 from readers_cp import read_common_pile
@@ -51,7 +56,8 @@ PREFIX = {"OpenAssistant__oasst2/": "oasst2", "databricks__databricks-dolly-15k/
 READERS = {"oasst2": read_oasst, "dolly": read_dolly}
 DEFAULTS = dict(cutoff=H.DATE_CUTOFF, min_bytes=H.MIN_BYTES, max_non_ascii=H.MAX_NON_ASCII,
                 min_stopwords=H.MIN_EN_STOPWORDS, gutenberg_cap=200_000,
-                oasst_states=["ready_for_export"], max_docs=0, boilerplate_min_docs=BP.MIN_DOCS)
+                oasst_states=["ready_for_export"], max_docs=0, boilerplate_min_docs=BP.MIN_DOCS,
+                near_dedup=True, near_dedup_verify=ND.VERIFY, near_dedup_chain_floor=0.0)
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -85,6 +91,7 @@ def process_file(job):
     st, passed = new_stats(), 0
     bp = source in BP.SOURCES and o["boilerplate_min_docs"] > 0
     lh, ln, lu = array("Q"), array("q"), []
+    sk = ND.SidecarWriter(tmp) if o["near_dedup"] else None
     with open(tmp + ".jsonl", "w", encoding="utf-8") as out, open(tmp + ".keys", "w") as keys:
         for ev in reader(source, os.path.join(raw_dir, rel), rel, o):
             if ev[0] == "note":
@@ -101,12 +108,16 @@ def process_file(job):
             out.write(json.dumps(rec, ensure_ascii=False) + "\n")
             keys.write(f"{rec['meta']['sha1']}\t{rec['id']}\t{H.nbytes(rec['text'])}\t{ev[2]}"
                        f"\t{undated}\n")
+            if sk is not None:
+                sk.add(rec["text"], rec["meta"].get("created"))
             if bp:
                 h = BP.doc_hashes(rec["text"])
                 lh.extend(h)
                 ln.append(len(h))
                 lu.append(BP.url_key(rec["meta"].get("url")))
             passed += 1
+    if sk is not None:
+        sk.close()
     if bp:
         np.save(tmp + ".lh.npy", np.frombuffer(lh, dtype=np.uint64))
         np.save(tmp + ".ln.npy", np.frombuffer(ln, dtype=np.int64))
@@ -170,13 +181,17 @@ def main(argv=None):
     ap.add_argument("--cutoff", default=H.DATE_CUTOFF)
     ap.add_argument("--shard-mb", type=int, default=256)
     ap.add_argument("--boilerplate-min-docs", type=int, default=BP.MIN_DOCS, help="0 disables")
+    ap.add_argument("--no-near-dedup", action="store_true", help="skip MinHash near-dedup")
+    ap.add_argument("--near-dedup-chain-floor", type=float, default=0.0,
+                    help="neardedup_lsh --chain-floor (0: plain union-find)")
     ap.add_argument("--overwrite", action="store_true")
     a = ap.parse_args(argv)
     r = run_extract(a.raw_dir, a.out_dir, workers=a.workers, shard_bytes=a.shard_mb << 20,
                     overwrite=a.overwrite, max_docs=a.max_docs_per_file,
                     gutenberg_cap=a.gutenberg_cap, min_bytes=a.min_bytes,
                     max_non_ascii=a.max_non_ascii, min_stopwords=a.min_stopwords, cutoff=a.cutoff,
-                    boilerplate_min_docs=a.boilerplate_min_docs)
+                    boilerplate_min_docs=a.boilerplate_min_docs, near_dedup=not a.no_near_dedup,
+                    near_dedup_chain_floor=a.near_dedup_chain_floor)
     for s, st in r["sources"].items():
         drops = {k: v["docs"] for k, v in sorted(st["dropped"].items())}
         print(f"{s:14s} in {st['docs_in']:>9,} kept {st['docs_kept']:>9,} "

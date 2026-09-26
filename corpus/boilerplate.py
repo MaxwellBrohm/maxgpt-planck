@@ -12,8 +12,9 @@ Rule, per source:
   counted once per document. A document adds its lines to the count only if neither its sha1 nor
   its URL (url_key: no scheme, no 'www.', no fragment or trailing slash) was seen before in the
   source, so an exact copy, or the same page captured in several crawl snapshots (CCCC holds ten),
-  does not make the page's own content look like boilerplate. Near-copies under other URLs still
-  count: MinHash near-dedup (CORPUS 3.2 step 2, which should run first) is not implemented;
+  does not make the page's own content look like boilerplate. Near-copies under other URLs are
+  handled before this step: MinHash near-dedup (CORPUS 3.2 step 2, neardedup_lsh.py) runs first
+  and only its survivors are counted (extract_merge.boilerplate_sets);
 - boilerplate lines are deleted from every document of the source, the rest is re-normalized, and
   a document left under min_bytes is dropped as 'boilerplate_short'. Exact dedup then runs on the
   cleaned text (extract_merge.py).

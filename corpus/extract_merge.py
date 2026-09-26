@@ -1,8 +1,12 @@
 """The merge step of extract.py, after the per-file workers:
 
+0. MinHash near-dedup (CORPUS 3.2 step 2, neardedup_lsh.py) over every passed doc of every file,
+   from the signatures the workers wrote (tmp .mh.npy); tier = the source's position in the
+   results, so chat copies beat prose copies; a dropped doc counts as dup_exact when its text
+   equals a surviving doc's, else dup_near;
 1. boilerplate line removal (boilerplate.py) for boilerplate.SOURCES, from the line hashes the
-   workers wrote (tmp .lh.npy / .ln.npy / .lu); a doc whose sha1 or URL was already seen adds
-   nothing to the counts;
+   workers wrote (tmp .lh.npy / .ln.npy / .lu); only near-dedup survivors add to the counts, and
+   a doc whose sha1 or URL was already seen adds nothing;
 2. global exact dedup (sha1 of the final text) and doc id uniqueness, in the order extract.py
    passes the results (source order), so the first copy wins;
 3. shards per source, with sha256, docs and bytes.
@@ -15,6 +19,7 @@ import numpy as np
 
 import boilerplate as BP
 import hygiene as H
+import neardedup_lsh as NL
 
 
 def add_drop(st, reason, b):
@@ -49,8 +54,37 @@ class ShardWriter:
             self.fh = None
 
 
-def boilerplate_sets(results, tmp_dir, min_docs):
-    """-> {source: frozenset of boilerplate line hashes}; a repeated sha1 or URL counts once."""
+def near_dup_keep(results, tmp_dir, out_dir, o):
+    """Step 0 -> ([bool keep array per result], set of the survivors' sha1 digests), or
+    (None, None) when near_dedup is off. The report goes to out_dir/neardedup_report.json."""
+    if not o.get("near_dedup"):
+        return None, None
+    order = list(dict.fromkeys(r[0] for r in results))
+    shards = [{"stem": os.path.join(tmp_dir, f"{i:05d}"), "tier": order.index(r[0]),
+               "label": f"{r[0]}:{os.path.basename(os.path.dirname(r[1]))}"}   # cccc: snapshot
+              for i, r in enumerate(results)]
+    rep = NL.find_near_dups(shards, tmp_dir, verify=o.get("near_dedup_verify", NL.ND.VERIFY),
+                            chain_floor=o.get("near_dedup_chain_floor", 0.0))
+    keep = [np.load(s["stem"] + NL.ND_SUFFIX)["keep"].astype(bool) for s in shards]
+    kept, ids = set(), {}
+    for i, s in enumerate(shards):
+        with open(s["stem"] + ".keys") as fk:
+            rows = [k.split("\t", 2)[:2] for k in fk]
+        kept.update(bytes.fromhex(sha) for (sha, _), k in zip(rows, keep[i]) if k)
+        ids[s["stem"]] = [d for _, d in rows]
+    for a in rep["audit"]:                      # tmp stems and rows -> doc ids
+        a["id"], a["leader_id"] = ids[a["stem"]][a["row"]], ids[a["leader_stem"]][a["leader_row"]]
+    for x in rep["largest"]:
+        x["id"] = ids[x["stem"]][x["row"]]
+    rep["shards"] = [f"{r[0]}:{r[1]}" for r in results]
+    with open(os.path.join(out_dir, "neardedup_report.json"), "w") as f:
+        json.dump(rep, f, indent=1)
+    return keep, kept
+
+
+def boilerplate_sets(results, tmp_dir, min_docs, nd_keep=None):
+    """-> {source: frozenset of boilerplate line hashes}; near-dup drops add nothing, and a
+    repeated sha1 or URL counts once."""
     parts, seen = {}, {}
     for idx, (source, _, _, _) in enumerate(results):
         tmp = os.path.join(tmp_dir, f"{idx:05d}")
@@ -64,6 +98,8 @@ def boilerplate_sets(results, tmp_dir, min_docs):
         s = seen.setdefault(source, set())
         first = np.zeros(len(shas), dtype=bool)
         for i, (sha, url) in enumerate(zip(shas, urls)):
+            if nd_keep is not None and not nd_keep[idx][i]:
+                continue
             key = "url:" + url if url else None
             if sha not in s and key not in s:
                 first[i] = True
@@ -76,7 +112,8 @@ def boilerplate_sets(results, tmp_dir, min_docs):
 
 def merge(results, tmp_dir, out_dir, shard_bytes, stats, o):
     """Copies passed lines into shards, updating stats in place; -> the shard list."""
-    bad = boilerplate_sets(results, tmp_dir, o["boilerplate_min_docs"])
+    nd_keep, nd_kept = near_dup_keep(results, tmp_dir, out_dir, o)
+    bad = boilerplate_sets(results, tmp_dir, o["boilerplate_min_docs"], nd_keep)
     seen, ids, writers = set(), set(), {}
     for idx, (source, rel, st, _) in enumerate(results):
         tot = stats[source]
@@ -95,9 +132,12 @@ def merge(results, tmp_dir, out_dir, shard_bytes, stats, o):
                                                                           shard_bytes))
         tmp = os.path.join(tmp_dir, f"{idx:05d}")
         with open(tmp + ".jsonl", "rb") as fj, open(tmp + ".keys") as fk:
-            for line, key in zip(fj, fk):
+            for row, (line, key) in enumerate(zip(fj, fk)):
                 sha, doc_id, kb, rb, und = key.rstrip("\n").split("\t")
                 kb, rb, cut = int(kb), int(rb), 0
+                if nd_keep is not None and not nd_keep[idx][row]:
+                    add_drop(tot, "dup_exact" if bytes.fromhex(sha) in nd_kept else "dup_near", rb)
+                    continue
                 if bp:
                     r = json.loads(line)
                     text = BP.strip_boilerplate(r["text"], bp)

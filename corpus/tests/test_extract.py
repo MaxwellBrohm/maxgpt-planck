@@ -26,7 +26,9 @@ def run(tmp_path_factory):
     raw = str(tmp_path_factory.mktemp("raw"))
     facts = write_raw(raw)
     out = str(tmp_path_factory.mktemp("out"))
-    stats = extract.run_extract(raw, out, workers=1, gutenberg_cap=2000)
+    # near_dedup=False: fixture docs recombine 16 sentences, so MinHash would merge most of them;
+    # near-dedup and its place before boilerplate removal are tested in test_neardedup_order.py
+    stats = extract.run_extract(raw, out, workers=1, gutenberg_cap=2000, near_dedup=False)
     recs = [json.loads(line) for p in sorted(glob.glob(f"{out}/*/*.jsonl")) for line in open(p)]
     return raw, out, stats, recs, facts
 
@@ -153,7 +155,7 @@ def test_stats_accounting_and_shard_hashes(run):
 
 def test_parallel_run_is_identical(run, tmp_path):
     raw, _, stats, _, _ = run
-    s2 = extract.run_extract(raw, str(tmp_path), workers=2, gutenberg_cap=2000)
+    s2 = extract.run_extract(raw, str(tmp_path), workers=2, gutenberg_cap=2000, near_dedup=False)
     assert [o["sha256"] for o in s2["outputs"]] == [o["sha256"] for o in stats["outputs"]]
     assert s2["sources"] == stats["sources"]
 
@@ -175,5 +177,6 @@ def test_post_cutoff_markers_and_boilerplate(run):
     stripped = [r for r in recs if r["meta"].get("boilerplate_bytes")]
     assert len(stripped) == 20 and all(r["meta"]["sha1"] == __import__("hygiene").dedup_key(
         r["text"]) for r in stripped)
-    s2 = extract.run_extract(run[0], out + "_nobp", gutenberg_cap=2000, boilerplate_min_docs=0)
+    s2 = extract.run_extract(run[0], out + "_nobp", gutenberg_cap=2000, boilerplate_min_docs=0,
+                             near_dedup=False)
     assert "boilerplate_short" not in {k for k in s2["sources"]["cccc"]["dropped"]}
