@@ -91,3 +91,39 @@ def test_refuses_cuda_when_absent(tmp_path):
         pytest.skip("this machine has CUDA")
     with pytest.raises(SystemExit):
         bench_micro.main(["--targets", "3e5", "--out", str(tmp_path / "x.jsonl")])
+
+
+def test_loss_first_is_warmup_step_zero_and_step_times_recorded(tmp_path):
+    """loss_first is the loss of warmup step 0 whatever --warmup is (CPU is deterministic);
+    it used to hold the LAST warmup step's loss."""
+    out = tmp_path / "w.jsonl"
+    for w in ("1", "3"):
+        bench_micro.main(TINY[:-1] + [w] + ["--targets", "3e5", "--batches", "2",
+                                            "--modes", "causal", "--out", str(out)])
+    r1, r3 = rows(out)
+    assert r1["loss_first"] == r3["loss_first"] and r3["loss_first"] != r3["loss_last"]
+    for r in (r1, r3):
+        assert r["first_step_s"] >= 0 and r["first_step_s"] <= r["warmup_s"] + 0.01
+        assert 0 < r["step_ms_median"] <= r["step_ms_max"] and r["step_max_over_median"] >= 1
+
+
+G = 2**30
+
+
+@pytest.mark.parametrize("free_before,res_before,alloc,reserved,free_after,fit", [
+    (10.76, 0.0, 14.45, 15.41, 0.0, "over"),   # 20M causal B16 eager, 1st cell: 4x slower/token
+    (10.18, 0.53, 11.07, 12.17, 0.0, "over"),  # 10M docmask B16 eager, a later cell: 30% slower
+    (10.0, 0.0, 9.50, 10.40, 0.0, "over"),     # allocated alone looks fine; the reservation is not
+    (10.18, 0.53, 9.92, 10.50, 0.09, "edge"),  # 30M docmask B8, a later cell: the 0.53 GiB left
+                                               # reserved by the previous cell is reusable
+    (10.76, 0.0, 7.41, 7.85, 2.86, "ok"),      # 20M causal B8 eager
+])
+def test_mem_report_uses_reservation_and_free_memory(monkeypatch, free_before, res_before, alloc,
+                                                     reserved, free_after, fit):
+    monkeypatch.setattr(torch.cuda, "mem_get_info", lambda *a: (int(free_after * G), int(11.94 * G)))
+    monkeypatch.setattr(torch.cuda, "max_memory_reserved", lambda *a: int(reserved * G))
+    monkeypatch.setattr(torch.cuda, "max_memory_allocated", lambda *a: int(alloc * G))
+    r = bench_micro.mem_report((int(free_before * G), int(res_before * G)), 0.5)
+    assert r["mem_fit"] == fit
+    assert (r["peak_mem_gib"], r["peak_reserved_gib"], r["free_gib"], r["reserved_before_gib"]) == \
+        (round(alloc, 2), round(reserved, 2), round(free_after, 2), round(res_before, 2))

@@ -288,3 +288,70 @@ Not done / open
   across adapter runs (the pipeline's DECON_PENDING block is what refuses today). source.file is an absolute
   path; the line sha256 still identifies the line if the run moves. Rerun with --tokenizer once a Planck
   tokenizer exists; manifest token counts then replace the pipeline's words x 1.3 estimate.
+
+SPEED INTEGRATE (2026-09-25 night): no speedup flags added. The GPU-speed workflow's implementer phase
+returned no results (no patches, no worktrees), so nothing was integrated and every default is unchanged:
+train.py has no compile, FlexAttention, fused-loss or memory-cap option; only pc/bench_micro.py --compile
+exists (bench only). Harness suite: 367 passed on the Mac CPU and 367 passed on the PC (the suite is CPU
+only, including its bf16 tests; it does not exercise CUDA).
+
+REVIEW FIX (same night; the integrate review's findings, each re-checked). pc/bench_micro.py measured the
+wrong memory: peak_mem_gib is max_memory_allocated, which leaves out the allocator's cached blocks (0.4 to
+1.1 GiB here) and the ~1.2 GiB the CUDA context, libraries and desktop hold; about 10.7 GiB of the 11.94 is
+left for the allocator. Each row now also has peak_reserved_gib, free_before_gib, reserved_before_gib,
+free_gib and mem_fit (over / edge / ok, see its docstring), per-step CUDA-event times (step_ms_median,
+step_max_over_median) and first_step_s (holds the compile time under --compile). loss_first was the LAST
+warmup step's loss; it is now step 0's. Tests in pc/tests/test_bench_micro.py, each watched failing against a
+mutant (loss_first reverted, allocated for reserved, no edge, no over, reserved_before ignored).
+
+Baseline throughput, RTX 5070, torch 2.13.0+cu130, eager, bf16, NorMuon, T=2048, bench_micro defaults (20
+steps, 5 warmup). HEAD bench_micro (base) vs the fixed one (cand, same timed loop), order ABBAABBAAB in one
+pc_heavy + gpu lock hold, median of 5 runs each. GiB columns are the cand rows; free = left after the steps.
+  shape mode     B    base tok/s  cand tok/s  delta  h/1B  alloc  reserved  free       fit
+  5M    causal   16   216,220     216,214     -0.0%  1.28  7.23   8.27      2.20-2.23  ok
+  5M    docmask  16   162,415     163,429     +0.6%  1.71  8.25   9.38      1.03-1.13  ok
+  10M   causal   8    123,123     127,516     +3.6%  2.26  4.99   5.60      5.10       ok
+  10M   causal   16   131,180     132,745     +1.2%  2.12  9.81   10.84     0.00       over (speed held)
+  10M   docmask  8    94,565      96,103      +1.6%  2.94  5.62   6.28      4.43       ok
+  10M   docmask  16   66,475      67,232      +1.1%  4.18  11.07  12.17     0.00       over (30% slower than B8)
+  20M   causal   8    76,046      76,459      +0.5%  3.65  7.41   7.85      2.86       ok
+  20M   docmask  8    57,984      57,532      -0.8%  4.79  8.29   8.79      1.62-1.71  ok
+  30M   causal   8    59,371      59,275      -0.2%  4.68  8.98   9.51      0.90-0.97  ok
+  30M   docmask  8    45,342      45,246      -0.2%  6.13  9.92   10.50     0.08-0.10  edge
+  30M docmask B4 x accum 2 (cand, 3 runs interleaved with B8 in one hold): 47,380 vs B8 45,216 (+4.8%),
+  5.82 GiB reserved, 4.89 free, ok. 20M causal B16 (spill control): 18,813 tok/s, 15.41 reserved, over.
+  The instrumentation costs nothing measurable (all deltas inside the spread). Spread across the 10 runs of
+  one cell: 1.1 to 11.2 percent (10M causal B8 worst, 20M causal B8 9.9 with one slow run at 69.8k).
+  Choose batches by mem_fit ok (at least 0.5 GiB free), not by "allocated under 11.5 GB": 10M causal B16
+  allocates 9.81 and is over; 30M docmask B8 is at the edge (0.08 to 0.12 GiB free) and should not carry a
+  180 h run; B4 x accum 2 is faster there and has 4.9 GiB spare.
+  Projections are UPPER BOUNDS at 100 percent row fill (bench rows are all real tokens; pack rows are padded
+  at the end and the trainer counts only non-pad tokens; no loader or hooks): 25B tokens at 5M = 32.1 h
+  causal, 42.8 h docmask; 30B tokens at 30M = 140 h causal, 176 h docmask (B4 x 2). Before quoting hours,
+  multiply by a measured fill fraction and time a short real train.py run.
+  Noise (corrects the integrate note): in the earlier A/A run the third block was 0.6 to 9.2 percent slower
+  than the other three on 6 of 8 shapes. Speed A/Bs need at least 5 interleaved repeats and medians;
+  deltas under about 5 percent are unresolved.
+  Open lead (bench_micro --compile, not in train.py, no parity or leak test): 30M causal B8 eager ~59k ->
+  compiled 90.7k cold / 93.8k warm tok/s here (profile phase 98k), compile time 24.0 s cold cache, 2.4 s
+  warm (first_step_s); 5M causal B16 ~216k -> ~359k (profile phase); 20M causal B16 compiled fits with only
+  ~0.5 GiB spare (review probe: reserved 10.05, free 0.53). The earlier "compiled loss != eager" evidence
+  (loss_last after 25 steps on one reused random batch) does not hold up: step-0 loss is 9.1267 eager and
+  compiled; loss_last is 0.094 and 0.107 compiled against 0.096 to 0.117 over 8 eager runs; the review saw
+  about 0.01 at the last warmup step. A compile flag needs a fixed-batch, early-step parity test against
+  the eager-vs-eager tolerance.
+  CUDA is not deterministic under default kernels: the same seed, batch and 3 steps (5M docmask B8 bf16)
+  run twice in one process differ from step 1 (113 of 113 weight tensors, max |dw| 0.006); with
+  torch.use_deterministic_algorithms(True) and CUBLAS_WORKSPACE_CONFIG=:4096:8 they are bitwise equal. So
+  a CUDA parity test for a speed flag runs both arms in deterministic mode (bitwise where the flag is
+  meant to be exact) or compares against a same-seed eager-vs-eager floor; CUDA resume is bitwise only in
+  deterministic mode (test_s3_resume.py covers CPU).
+  Any loss-path flag (fused or chunked CE, compiled loss) must pass a fixed-batch test with grad_accum >= 2
+  and unequal supervised counts, comparing the logged loss AND the gradients against the eager sum / n_sup
+  reference. A 300-step curve does not catch per-micro-batch normalization; on the Mac that mutant (trainer
+  line 58) fails test_train.py::test_grad_accum_matches_one_big_batch and passes test_s3_loss_mask.py.
+
+POINTER (2026-09-25 night, from rc12/notes.txt STEP 7): Max's D8 question on program-written lines is RULED: OD5 (a),
+with its three conditions (prereg draft s17; summary in pipeline/notes.txt). rc12_eval.py now also records the OD6
+rates ack_repeat, ack_repeat_of_statements and ack_repeat_of_answers per seed kind; test_rc12_eval.py and
+test_rc12_hook.py were not re-run after that edit (they need torch).
