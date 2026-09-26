@@ -1,0 +1,228 @@
+{
+ "model": "roneneldan/TinyStories-3M",
+ "seed": 0,
+ "steps": 5,
+ "lr": 5e-05,
+ "bs": 4,
+ "accum": 4,
+ "eff_batch": 16,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "mps",
+ "dry": true,
+ "tag": "dry",
+ "sets": [
+  "cont",
+  "eval",
+  "know"
+ ],
+ "chat": false,
+ "max_new": 48,
+ "params": 8278400,
+ "checks": {
+  "params_config": {
+   "total": 8278400,
+   "embedding": 6695040,
+   "body": 1583360,
+   "tok_emb": 6432896,
+   "out_head": 0,
+   "pos_emb": 262144,
+   "layers": 8,
+   "d": 128,
+   "vocab": 50257,
+   "n_ctx": 2048
+  },
+  "params_model": 8278400,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [
+   "transformer.h.0.attn.attention.bias",
+   "transformer.h.0.attn.attention.masked_bias",
+   "transformer.h.1.attn.attention.bias",
+   "transformer.h.1.attn.attention.masked_bias",
+   "transformer.h.2.attn.attention.bias",
+   "transformer.h.2.attn.attention.masked_bias",
+   "transformer.h.3.attn.attention.bias",
+   "transformer.h.3.attn.attention.masked_bias",
+   "transformer.h.4.attn.attention.bias",
+   "transformer.h.4.attn.attention.masked_bias"
+  ],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": true,
+  "config_says_tied": true,
+  "sanity_nll": 0.844
+ },
+ "trained_ctx": 512,
+ "torch": "2.13.0",
+ "train_stream": "train_e004.stream(seed) = Random(1000 * seed + 44)",
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "loss_selfcheck": {
+  "hf": 6.068278789520264,
+  "answer_only": 6.068278789520264
+ },
+ "loss_mutants": {
+  "no_shift": 9.612502098083496,
+  "prompt_labelled": 6.579959392547607
+ },
+ "train_s": 10.0,
+ "s_per_step": 2.0,
+ "train_stats": {
+  "n": 84,
+  "rejected_long": 0,
+  "drawn": {
+   "twoslot": 18,
+   "upd": 19,
+   "noupd": 14,
+   "noupd_b": 8,
+   "cross": 5,
+   "noupd_incid": 2,
+   "mid": 9,
+   "twoslot_b": 4,
+   "revert": 4,
+   "upd_incid": 1
+  },
+  "kept": {
+   "twoslot": 18,
+   "upd": 19,
+   "noupd": 14,
+   "noupd_b": 8,
+   "cross": 5,
+   "noupd_incid": 2,
+   "mid": 9,
+   "twoslot_b": 4,
+   "revert": 4,
+   "upd_incid": 1
+  },
+  "len_sum": 31874,
+  "len_max": 646,
+  "split": 0,
+  "mean_len": 379.5,
+  "shares": {
+   "cross": {
+    "drawn": 0.0595,
+    "kept": 0.0595
+   },
+   "mid": {
+    "drawn": 0.1071,
+    "kept": 0.1071
+   },
+   "noupd": {
+    "drawn": 0.1667,
+    "kept": 0.1667
+   },
+   "noupd_b": {
+    "drawn": 0.0952,
+    "kept": 0.0952
+   },
+   "noupd_incid": {
+    "drawn": 0.0238,
+    "kept": 0.0238
+   },
+   "revert": {
+    "drawn": 0.0476,
+    "kept": 0.0476
+   },
+   "twoslot": {
+    "drawn": 0.2143,
+    "kept": 0.2143
+   },
+   "twoslot_b": {
+    "drawn": 0.0476,
+    "kept": 0.0476
+   },
+   "upd": {
+    "drawn": 0.2262,
+    "kept": 0.2262
+   },
+   "upd_incid": {
+    "drawn": 0.0119,
+    "kept": 0.0119
+   }
+  },
+  "max_share_shift": 0.0
+ },
+ "losses": [
+  6.55162,
+  6.16295,
+  5.75666,
+  5.02034,
+  5.06766
+ ],
+ "probe": [
+  {
+   "step": 0,
+   "H1": 0.0,
+   "H2": 0.0,
+   "H3": 0.0,
+   "H4": 0.0,
+   "H5": 0.0,
+   "H6": 1.0,
+   "H7": 0.0,
+   "C_noupd": 0.0,
+   "C_twoslot": 0.0
+  },
+  {
+   "step": 5,
+   "H1": 0.0,
+   "H2": 0.0,
+   "H3": 0.0,
+   "H4": 0.0,
+   "H5": 0.0,
+   "H6": 1.0,
+   "H7": 0.0,
+   "C_noupd": 0.0,
+   "C_twoslot": 0.0
+  }
+ ],
+ "lock_in_step": null,
+ "loss_finite": true,
+ "eval_s": 2.1,
+ "eval_counts": {
+  "e004/plain": 2,
+  "new/plain": 2,
+  "extra/plain": 2,
+  "old/plain": 2,
+  "uprobe/plain": 2,
+  "cross/plain": 2,
+  "khard/plain": 2,
+  "kbig/plain": 2,
+  "gen_e004/plain": 2,
+  "gen_cont/plain": 2
+ },
+ "summary": {
+  "LIK e004/plain": {
+   "H1": 0.0,
+   "H2": null,
+   "H3": null,
+   "H4": null,
+   "H5": null,
+   "H6": null,
+   "H7": null,
+   "C_noupd": null,
+   "C_twoslot": null,
+   "ID": null
+  },
+  "GEN e004/plain": {
+   "strict": 0,
+   "lenient": 0,
+   "n": 2,
+   "capped": 0,
+   "bare": 2
+  },
+  "GEN cont/plain": {
+   "strict": 0,
+   "lenient": 0,
+   "n": 2,
+   "capped": 0,
+   "bare": 0
+  }
+ },
+ "selftest_fail": [],
+ "peak_mps_driver_gb": 3.151,
+ "peak_mps_alloc_gb": 0.197,
+ "total_s": 16.0
+}

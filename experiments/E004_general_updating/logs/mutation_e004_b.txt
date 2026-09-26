@@ -1,0 +1,11 @@
+baseline generate(): 9 scripted cases, mismatches 0; run_gen + grader: mismatches 0
+  KILLED   generate | no 'User:' stop                    | User: stop: want ('Your lesson is on Friday.', 'user', 8) got ('Your lesson is on Friday. User: More a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a
+  KILLED   generate | no newline stop                    | newline stop: want ('Your lesson is on Friday.', 'newline', 7) got ('Your lesson is on Friday.\n More a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+  KILLED   generate | newline stop ignores the render    | chat render keeps newlines: want ('Your lesson is on Friday.\n More', 'eos', 8) got ('Your lesson is on Friday.', 'newline', 7)
+  KILLED   generate | leading newline skipped (E002)     | leading newline = empty reply: want ('', 'newline', 1) got ('Your lesson is on Friday.', 'newline', 8)
+  KILLED   generate | cap reported as a stop             | cap at 48: want ('Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Fr
+  KILLED   generate | end-of-turn / eos ignored          | end-of-turn stop: want ('Your lesson is on Friday.', 'eos', 6) got ('Your lesson is on Friday. More a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+  KILLED   generate | only eos, not <|im_end|>           | end-of-turn stop: want ('Your lesson is on Friday.', 'eos', 6) got ('Your lesson is on Friday. More a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+  KILLED   generate | cap at 47                          | cap at 48: want ('Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Fr
+  KILLED   generate | cap at 49                          | cap at 48: want ('Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Friday Fr
+mutants killed 9/9 (none by a crash); ALL PASS

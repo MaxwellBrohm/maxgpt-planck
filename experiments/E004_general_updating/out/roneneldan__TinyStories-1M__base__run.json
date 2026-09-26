@@ -1,0 +1,123 @@
+{
+ "model": "roneneldan/TinyStories-1M",
+ "seed": 0,
+ "steps": 0,
+ "lr": 5e-05,
+ "bs": 4,
+ "accum": 4,
+ "eff_batch": 16,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "mps",
+ "dry": false,
+ "tag": "base",
+ "sets": [
+  "cont",
+  "eval",
+  "know"
+ ],
+ "chat": false,
+ "max_new": 48,
+ "params": 3745984,
+ "checks": {
+  "params_config": {
+   "total": 3745984,
+   "embedding": 3347520,
+   "body": 398464,
+   "tok_emb": 3216448,
+   "out_head": 0,
+   "pos_emb": 131072,
+   "layers": 8,
+   "d": 64,
+   "vocab": 50257,
+   "n_ctx": 2048
+  },
+  "params_model": 3745984,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [
+   "transformer.h.0.attn.attention.bias",
+   "transformer.h.0.attn.attention.masked_bias",
+   "transformer.h.1.attn.attention.bias",
+   "transformer.h.1.attn.attention.masked_bias",
+   "transformer.h.2.attn.attention.bias",
+   "transformer.h.2.attn.attention.masked_bias",
+   "transformer.h.3.attn.attention.bias",
+   "transformer.h.3.attn.attention.masked_bias",
+   "transformer.h.4.attn.attention.bias",
+   "transformer.h.4.attn.attention.masked_bias"
+  ],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": true,
+  "config_says_tied": true,
+  "sanity_nll": 0.9209
+ },
+ "trained_ctx": 512,
+ "torch": "2.13.0",
+ "train_stream": "train_e004.stream(seed) = Random(1000 * seed + 44)",
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "train_stats": {
+  "n": 0,
+  "rejected_long": 0,
+  "drawn": {},
+  "kept": {},
+  "len_sum": 0,
+  "len_max": 0,
+  "split": 0,
+  "mean_len": null,
+  "shares": {},
+  "max_share_shift": null
+ },
+ "losses": [],
+ "probe": [],
+ "lock_in_step": null,
+ "loss_finite": true,
+ "eval_s": 686.5,
+ "eval_counts": {
+  "e004/plain": 640,
+  "new/plain": 1728,
+  "extra/plain": 192,
+  "old/plain": 1116,
+  "uprobe/plain": 576,
+  "cross/plain": 384,
+  "khard/plain": 80,
+  "kbig/plain": 441,
+  "gen_e004/plain": 640,
+  "gen_cont/plain": 416
+ },
+ "summary": {
+  "LIK e004/plain": {
+   "H1": 0.2031,
+   "H2": 0.2969,
+   "H3": 0.125,
+   "H4": 0.2969,
+   "H5": 0.0938,
+   "H6": 0.25,
+   "H7": 0.2344,
+   "C_noupd": 0.2656,
+   "C_twoslot": 0.2344,
+   "ID": 0.2812
+  },
+  "GEN e004/plain": {
+   "strict": 0,
+   "lenient": 0,
+   "n": 640,
+   "capped": 463,
+   "bare": 2
+  },
+  "GEN cont/plain": {
+   "strict": 0,
+   "lenient": 0,
+   "n": 416,
+   "capped": 142,
+   "bare": 0
+  }
+ },
+ "peak_mps_driver_gb": 11.075,
+ "peak_mps_alloc_gb": 0.045,
+ "total_s": 689.0
+}

@@ -1,0 +1,18 @@
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 11304.17it/s]
+loaded HuggingFaceTB/SmolLM2-135M-Instruct params=134,515,008 (config 134,515,008, body 106,203,456) sanity_nll=1.9598 1.9s mps_alloc=0.50G driver=1.06G peak_driver=1.06G
+scored e004/plain: 640 items in 245s mps_alloc=0.50G driver=2.22G peak_driver=2.22G
+scored e004/chat: 640 items in 284s mps_alloc=0.50G driver=2.14G peak_driver=2.22G
+scored new/plain: 1728 items in 155s mps_alloc=0.50G driver=1.25G peak_driver=2.22G
+scored extra/plain: 192 items in 13s mps_alloc=0.50G driver=1.27G peak_driver=2.22G
+scored old/plain: 1116 items in 81s mps_alloc=0.50G driver=1.26G peak_driver=2.22G
+scored uprobe/plain: 576 items in 61s mps_alloc=0.50G driver=1.30G peak_driver=2.22G
+scored cross/plain: 384 items in 69s mps_alloc=0.50G driver=1.18G peak_driver=2.22G
+scored new/chat: 1728 items in 183s mps_alloc=0.50G driver=1.22G peak_driver=2.22G
+scored extra/chat: 192 items in 15s mps_alloc=0.50G driver=1.27G peak_driver=2.22G
+scored cross/chat: 384 items in 82s mps_alloc=0.50G driver=2.22G peak_driver=2.22G
+scored khard/plain: 80 items in 2s mps_alloc=0.50G driver=1.09G peak_driver=2.22G
+scored kbig/plain: 441 items in 8s mps_alloc=0.50G driver=1.05G peak_driver=2.22G
+generated e004/plain: strict 68/640 in 119s mps_alloc=0.50G driver=3.16G peak_driver=3.16G
+generated e004/chat: strict 32/640 in 164s mps_alloc=0.50G driver=4.27G peak_driver=4.27G
+generated cont/plain: strict 75/416 in 76s mps_alloc=0.50G driver=1.62G peak_driver=4.27G
+DONE HuggingFaceTB/SmolLM2-135M-Instruct base total 1560s peak_driver=4.274G lock_in_step=None loss_finite=True

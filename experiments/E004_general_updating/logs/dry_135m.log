@@ -1,0 +1,27 @@
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights:  87%|████████▋ | 237/272 [00:00<00:00, 2331.63it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 2335.34it/s]
+loaded HuggingFaceTB/SmolLM2-135M-Instruct params=134,515,008 (config 134,515,008, body 106,203,456) sanity_nll=1.9598 1.9s mps_alloc=0.50G driver=1.06G peak_driver=1.06G
+loss self-check hf=2.12011 answer_only=2.12011
+loss mutants {'no_shift': 11.106929779052734, 'prompt_labelled': 2.3114218711853027} (must all differ from 2.12011)
+probe step 0 {'step': 0, 'H1': 0.0, 'H2': 0.0, 'H3': 0.0, 'H4': 1.0, 'H5': 0.0, 'H6': 0.0, 'H7': 0.0, 'C_noupd': 0.0, 'C_twoslot': 0.0} mps_alloc=0.50G driver=1.14G peak_driver=1.14G
+step 0 loss 2.7185 gnorm 9.40 lr 4.52e-06 10s mps_alloc=1.83G driver=5.14G peak_driver=5.14G
+step 1 loss 2.7743 gnorm 7.62 lr 4.91e-06 20s mps_alloc=1.83G driver=5.14G peak_driver=5.14G
+step 2 loss 2.4837 gnorm 9.45 lr 3.45e-06 30s mps_alloc=1.83G driver=5.14G peak_driver=5.14G
+step 3 loss 2.5602 gnorm 8.49 lr 1.19e-06 39s mps_alloc=1.83G driver=5.14G peak_driver=5.14G
+step 4 loss 2.3444 gnorm 9.39 lr 0.00e+00 49s mps_alloc=1.83G driver=5.14G peak_driver=5.14G
+probe step 5 {'step': 5, 'H1': 0.0, 'H2': 0.0, 'H3': 0.0, 'H4': 1.0, 'H5': 0.0, 'H6': 0.0, 'H7': 0.0, 'C_noupd': 0.0, 'C_twoslot': 0.0}
+scored e004/plain: 2 items in 1s mps_alloc=0.50G driver=1.04G peak_driver=5.14G
+scored e004/chat: 2 items in 1s mps_alloc=0.50G driver=1.04G peak_driver=5.14G
+scored new/plain: 2 items in 0s mps_alloc=0.50G driver=1.07G peak_driver=5.14G
+scored extra/plain: 2 items in 0s mps_alloc=0.50G driver=1.07G peak_driver=5.14G
+scored old/plain: 2 items in 0s mps_alloc=0.50G driver=1.06G peak_driver=5.14G
+scored uprobe/plain: 2 items in 0s mps_alloc=0.50G driver=1.07G peak_driver=5.14G
+scored cross/plain: 2 items in 0s mps_alloc=0.50G driver=1.08G peak_driver=5.14G
+scored new/chat: 2 items in 0s mps_alloc=0.50G driver=1.07G peak_driver=5.14G
+scored extra/chat: 2 items in 0s mps_alloc=0.50G driver=1.07G peak_driver=5.14G
+scored cross/chat: 2 items in 0s mps_alloc=0.50G driver=1.10G peak_driver=5.14G
+scored khard/plain: 2 items in 0s mps_alloc=0.50G driver=1.07G peak_driver=5.14G
+scored kbig/plain: 2 items in 0s mps_alloc=0.50G driver=1.05G peak_driver=5.14G
+generated e004/plain: strict 0/2 in 0s mps_alloc=0.50G driver=1.18G peak_driver=5.14G
+generated e004/chat: strict 1/2 in 0s mps_alloc=0.50G driver=1.25G peak_driver=5.14G
+generated cont/plain: strict 0/2 in 0s mps_alloc=0.50G driver=1.25G peak_driver=5.14G
+DONE HuggingFaceTB/SmolLM2-135M-Instruct dry total 64s peak_driver=5.145G lock_in_step=None loss_finite=True

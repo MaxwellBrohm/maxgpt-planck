@@ -1,0 +1,22 @@
+baseline: 7 tests, 0 failed, 0 crashed
+  KILLED seed pass: mean instead of min: 3 assertion failures (first: t_seed_pass: one LIK cell under 0.8 fails the seed)
+  KILLED seed pass: LIK only: 2 assertion failures (first: t_seed_pass: one GEN cell under 0.8 fails the seed)
+  KILLED seed pass: GEN only: 3 assertion failures (first: t_seed_pass: one LIK cell under 0.8 fails the seed)
+  KILLED threshold strict >: 1 assertion failures (first: t_seed_pass: 0.8 exactly passes (>=))
+  KILLED majority over results: 1 assertion failures (first: t_majority: majority over the PLANNED seeds, not the results)
+  KILLED majority: half is enough: 1 assertion failures (first: t_majority: strict majority: 2 of 4 is not a majority)
+  KILLED PARTIAL-X: three axes allowed: 1 assertion failures (first: t_reading_labels: three held-out axes are not PARTIAL-X)
+  KILLED PARTIAL-X before PARTIAL-G: 1 assertion failures (first: t_reading_labels: {'label': 'PARTIAL-X', 'limit': ['H4', 'H7'], 'detail': '', 'sub': []})
+  KILLED PARTIAL-X may hold H1: 1 assertion failures (first: t_reading_labels: {'n_planned': 3, 'n_results': 3, 'n_seed_pass': 0, 'label': 'PARTIAL-X', 'detail': 'updating)
+  KILLED below chance: <=: 1 assertion failures (first: t_below_chance: )
+  KILLED lock-in: first reach: 1 assertion failures (first: t_lock_in: must STAY >= 0.8 to the end)
+  KILLED 135M: gain 0.05: 1 assertion failures (first: t_pick_135m: )
+  KILLED 135M: mean condition dropped: 1 assertion failures (first: t_pick_135m: mean lower)
+  KILLED 135M: 5e-05 ineligible -> 1.5e-04: 1 assertion failures (first: t_pick_135m: )
+  KILLED grid: ties to the larger LR: 1 assertion failures (first: t_pick_grid: ties on min go to the higher mean, then the SMALLER LR)
+  KILLED grid: never extend: 1 assertion failures (first: t_pick_grid: )
+  KILLED grid: extend when final: 1 assertion failures (first: t_pick_grid: final: the top grid LR at min < 0.8 is kept)
+  KILLED grid: extend at min >= 0.8: 1 assertion failures (first: t_pick_grid: )
+  KILLED dev score: mean: 1 assertion failures (first: t_pick_grid: )
+mutants killed by an assertion: 19/19
+ALL PASS

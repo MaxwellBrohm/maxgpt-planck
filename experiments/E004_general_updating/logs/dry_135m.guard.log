@@ -1,0 +1,4 @@
+19:37:11 start free=86% swap=1774MB cmd=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B e004_ft_test.py HuggingFaceTB/SmolLM2-135M-Instruct --bs 4 --accum 4 --max-len 768 --grad-ckpt --seed 0 --dry --sets eval,cont,know --chat --tag dry
+19:37:43 t=   32s active=   32s free=66% swap=1774MB rss=863MB
+19:38:13 t=   62s active=   62s free=79% swap=1774MB rss=670MB
+19:38:16 end exit=0 killed=None active=65s paused=0s pauses=0 min_free=61% max_swap=1774MB peak_rss=875MB

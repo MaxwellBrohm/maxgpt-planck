@@ -1,0 +1,16 @@
+E004 n-gram overlap: 35199 distinct training texts from 20000 dialogues; eval texts from the eval, dev and probe draws
+
+1 word n-grams within one text: shared / distinct eval n-grams (share)
+  ack             3-grams 45/725 (0.062)  4-grams 0/533 (0.000)  5-grams 0/351 (0.000)
+  filler default  3-grams 36/944 (0.038)  4-grams 11/873 (0.013)  5-grams 0/780 (0.000)
+  filler h7       3-grams 0/442 (0.000)  4-grams 0/394 (0.000)  5-grams 0/340 (0.000)
+  prefix + gold   3-grams 96/1912 (0.050)  4-grams 20/2208 (0.009)  5-grams 0/1962 (0.000)
+  question        3-grams 41/1428 (0.029)  4-grams 12/1783 (0.007)  5-grams 0/1880 (0.000)
+  statement       3-grams 522/6357 (0.082)  4-grams 151/8434 (0.018)  5-grams 0/9329 (0.000)
+  most frequent shared 4-grams: 'which city is the' x69, 'is going to be' x61, 'the color of the' x37, 'the month of the' x33, 'which day do i' x26, 'the day for the' x22, 'what day is the' x18, 'to seattle for the' x15, 'which city do i' x15, 'should i expect the' x15, 'do i go to' x12, 'what month should i' x12
+
+2 whole-sentence frames shared: 0 []
+3 template-level 5-grams shared (<v> = any value): 0 []
+4 whole rendered prompts (role tags, across turns), eval draw: 687/36610 5-grams shared (0.0188), e.g. ['a blue one assistant okay', 'a orange one assistant okay', 'a orange one assistant thanks', 'a purple one assistant thanks', 'a silver one assistant okay', 'a white one assistant okay']
+
+RESULT: ALL PASS (1: 0 shared 5-grams, 2: 0 frames, 3: 0 template 5-grams)

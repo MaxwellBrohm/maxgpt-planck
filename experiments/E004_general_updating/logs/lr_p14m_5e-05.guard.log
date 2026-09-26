@@ -1,0 +1,8 @@
+21:03:16 start free=77% swap=5708MB cmd=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B e004_ft_test.py EleutherAI/pythia-14m --bs 4 --accum 4 --max-len 768 --grad-ckpt --seed 0 --sets dev --save 0 --lr 5e-05 --tag lr5e-05_s0
+21:03:51 t=   35s active=   35s free=73% swap=5692MB rss=2306MB
+21:04:22 t=   66s active=   66s free=71% swap=5612MB rss=2431MB
+21:04:53 t=   96s active=   96s free=75% swap=5556MB rss=2435MB
+21:05:23 t=  127s active=  127s free=76% swap=5532MB rss=2494MB
+21:05:54 t=  157s active=  157s free=79% swap=5508MB rss=2496MB
+21:06:24 t=  188s active=  188s free=79% swap=5444MB rss=2498MB
+21:06:29 end exit=0 killed=None active=193s paused=0s pauses=0 min_free=70% max_swap=5708MB peak_rss=2498MB

@@ -1,0 +1,14 @@
+Loading weights:   0%|          | 0/76 [00:00<?, ?it/s]Loading weights: 100%|██████████| 76/76 [00:00<00:00, 6145.74it/s]
+loaded EleutherAI/pythia-31m params=30,494,720 (config 30,494,720, body 4,739,072) sanity_nll=3.5116 2.2s mps_alloc=0.11G driver=1.04G peak_driver=1.04G
+scored e004/plain: 640 items in 22s mps_alloc=0.11G driver=1.07G peak_driver=1.07G
+scored new/plain: 1728 items in 20s mps_alloc=0.11G driver=1.05G peak_driver=1.07G
+scored extra/plain: 192 items in 2s mps_alloc=0.11G driver=1.09G peak_driver=1.09G
+scored old/plain: 1116 items in 12s mps_alloc=0.11G driver=1.15G peak_driver=1.15G
+scored uprobe/plain: 576 items in 7s mps_alloc=0.11G driver=1.11G peak_driver=1.15G
+scored cross/plain: 384 items in 7s mps_alloc=0.11G driver=1.07G peak_driver=1.15G
+scored khard/plain: 80 items in 1s mps_alloc=0.11G driver=1.05G peak_driver=1.15G
+scored kbig/plain: 441 items in 2s mps_alloc=0.11G driver=1.04G peak_driver=1.15G
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer GPTNeoXTokenizer. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+generated e004/plain: strict 3/640 in 40s mps_alloc=0.11G driver=1.63G peak_driver=1.63G
+generated cont/plain: strict 0/416 in 21s mps_alloc=0.11G driver=1.38G peak_driver=1.63G
+DONE EleutherAI/pythia-31m base total 135s peak_driver=1.631G lock_in_step=None loss_finite=True

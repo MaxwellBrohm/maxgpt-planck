@@ -1,0 +1,33 @@
+-- part_parse
+PASS defaults {'steps': 400, 'lr': 5e-05, 'bs': 4, 'accum': 4, 'max_len': 768, 'probe_every': 50, 'tag': 's1', 'max_new': 48, 'chat': False, 'dry': False, 'plan': False, 'device': 'mps', 'save': 0} sets ['cont', 'eval', 'know']
+PASS effective batch 16
+PASS --steps 0 -> tag base
+PASS --dry -> 5 steps, tag dry
+PASS LR-search command line
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct --seed 1 --sets bogus
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct --seed 1 --sets dev,eval
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct --seed 1 --max-new 64
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct --seed 1 --bs 0
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct --seed 1 --lr 0
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct --seed 1 --sets 
+PASS refused: --seed 1
+-- part_plan
+PASS scored run e004 LIK {('e004', 'plain'): 640, ('e004', 'chat'): 640, ('new', 'plain'): 1728, ('extra', 'plain'): 192, ('old', 'plain'): 1116, ('uprobe', 'plain'): 576, ('cross', 'plain'): 384, ('new', 'chat'): 1728, ('extra', 'chat'): 192, ('cross', 'chat'): 384, ('khard', 'plain'): 80, ('kbig', 'plain'): 441}
+PASS continuity + knowledge LIK sets
+PASS kbig 441 items (441)
+PASS GEN sets {('e004', 'plain'): 640, ('e004', 'chat'): 640, ('cont', 'plain'): 416}
+PASS no dev draw in a scored run; probe 144
+PASS unique outputs
+PASS baseline plan: no probe, tag base, plain only without --chat
+PASS LR plan [['dev', 'plain', 320]] []
+PASS dry plan: <= 2 items per set, probe 9
+-- part_imports
+PASS --plan imports neither torch nor transformers ([])
+-- part_grader_items
+PASS E004 prefix + gold passes on 1120/1120 generation items []
+PASS gold + another in-context value fails clause 4 on 1120/1120
+PASS user's voice fails clause 7 on 1120/1120
+PASS continuity prefix + gold passes on 416/416
+PASS training answers pass the grader: 2000/2000 []
+0 failures; ALL PASS

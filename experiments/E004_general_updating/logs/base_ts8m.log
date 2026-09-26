@@ -1,0 +1,21 @@
+Loading weights:   0%|          | 0/108 [00:00<?, ?it/s]Loading weights: 100%|██████████| 108/108 [00:00<00:00, 64944.06it/s]
+[transformers] [1mGPTNeoForCausalLM LOAD REPORT[0m from: roneneldan/TinyStories-8M
+Key                                                               | Status     |  | 
+------------------------------------------------------------------+------------+--+-
+transformer.h.{0, 1, 2, 3, 4, 5, 6, 7}.attn.attention.bias        | UNEXPECTED |  | 
+transformer.h.{0, 1, 2, 3, 4, 5, 6, 7}.attn.attention.masked_bias | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+loaded roneneldan/TinyStories-8M params=19,702,528 (config 19,702,528, body 6,312,448) sanity_nll=0.7722 2.2s mps_alloc=0.10G driver=1.05G peak_driver=1.05G
+scored e004/plain: 640 items in 113s mps_alloc=0.10G driver=11.11G peak_driver=11.11G
+scored new/plain: 1728 items in 57s mps_alloc=0.10G driver=11.08G peak_driver=11.11G
+scored extra/plain: 192 items in 5s mps_alloc=0.10G driver=11.11G peak_driver=11.11G
+scored old/plain: 1116 items in 29s mps_alloc=0.10G driver=11.16G peak_driver=11.16G
+scored uprobe/plain: 576 items in 21s mps_alloc=0.10G driver=11.14G peak_driver=11.16G
+scored cross/plain: 384 items in 24s mps_alloc=0.10G driver=11.11G peak_driver=11.16G
+scored khard/plain: 80 items in 1s mps_alloc=0.10G driver=11.07G peak_driver=11.16G
+scored kbig/plain: 441 items in 4s mps_alloc=0.10G driver=11.05G peak_driver=11.16G
+generated e004/plain: strict 0/640 in 201s mps_alloc=0.10G driver=11.23G peak_driver=11.23G
+generated cont/plain: strict 0/416 in 34s mps_alloc=0.10G driver=11.59G peak_driver=11.59G
+DONE roneneldan/TinyStories-8M base total 491s peak_driver=11.589G lock_in_step=None loss_finite=True

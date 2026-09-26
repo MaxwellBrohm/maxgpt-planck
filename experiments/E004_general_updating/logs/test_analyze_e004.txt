@@ -1,0 +1,23 @@
+ok   135M PASS with 3 of 5 seeds ({'n_planned': 5, 'n_results': 4, 'n_seed_pass': 3, 'label': 'PASS', 'detail': 'a strict majority of seeds pass every cell', 'sub': []})
+ok   incomplete s5 counted missing (['s5'])
+ok   135M untouched fails
+ok   no below-chance flag at 0.9
+ok   untouched at 0.3 with 3 candidates is below chance (1/3)
+ok   bare flag ['s1', 's2', 's3']
+ok   TinyStories H4 -> PARTIAL-X ({'n_planned': 3, 'n_results': 3, 'n_seed_pass': 0, 'label': 'PARTIAL-X', 'detail': 'updating with a named limit: H4 (3 seeds pass everything else); TinyStories positional confound named (positions 512+ had no pretraining gradient, 768+ no fine-tuning gradient): not a size finding', 'limit': ['H4'], 'sub': []})
+ok   TinyStories fixture base passes untouched
+ok   pythia H1 -> FAIL with sub-readings ({'n_planned': 3, 'n_results': 3, 'n_seed_pass': 0, 'label': 'FAIL', 'detail': 'no PASS, PARTIAL-G or PARTIAL-X condition holds', 'sub': ['LIK failure on H1, H2 or a control: the E002 shortcut signature (never partial)', 'ID >= 0.8 but H1/H2 < 0.8: learned the training task by a rule that does not transfer']})
+ok   a model with no runs is NOT_SCORED
+ok   length split counts {'<=512': [None, 0], '<=768': [0.8958, 48], '>512': [0.9062, 64], '>768': [0.9375, 16]}
+ok   H1 reference-form split present
+ok   tables carry the reading line
+ok   gate 135M prints PASS
+ok   gate pythia-31m prints FAIL
+ok   base gates
+ok   135M LR check picks 1.5e-04 at +0.125 (CHOSEN 1.5e-04)
+ok   a NaN loss makes a run ineligible ({'model': 'HuggingFaceTB/SmolLM2-135M-Instruct', 'mode': '135m', 'lrs': ['5e-05', '1.5e-04'], 'rows': {'5e-05': {'min': 0.5, 'mean': 0.5, 'fams': {'H1': 0.5, 'H2': 0.5, 'H3': 0.5, 'H4': 0.5, 'H5': 0.5, 'H6': 0.5, 'H7': 0.5, 'C_noupd': 0.5, 'C_twoslot': 0.5}, 'lr': '5e-05', 'lock_in_step': None, 'loss_first10': 1.0, 'loss_last50': 1.0}, '1.5e-04': None}, 'ineligible': {'1.5e-04': 'non-finite training loss'}, 'final': False, 'decision': 'CHOSEN', 'value': '5e-05', 'line': 'CHOSEN 5e-05'})
+ok   grid extends (EXTEND 3e-03)
+ok   final pick after the extension (CHOSEN 1e-03)
+ok   no LR runs -> NONE
+21/21 checks hold
+ALL PASS
