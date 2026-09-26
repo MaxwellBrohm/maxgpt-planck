@@ -1190,3 +1190,58 @@ Gutenberg, LoC books and Wikimedia.
   (`corpus/oodh.leaked_reserve_trees()`), and the reserve holds only 376 English ready threads with 2+ user
   turns (14 with 3+). If Part 1 needs 150 longer threads, the reserve rule changes before tokenizer v1.
 - Dolly and OASST2 are dated 2023 and exempt from the date gate (section 2.2); both now pass the AI-ism filter.
+
+## Addendum, 2026-09-26: core v0 final data review
+
+The core v0 run finished at 10:09. A read-only review decompressed and parsed all 870 final shards, read samples
+by hand and re-measured near-dedup. Per-source numbers: `corpus/stats/core_v0/final_stats.json`.
+
+| source | tier | docs | text GB | bytes/token | tokens (est., 8k) | near-dup share at pass B |
+|---|---|---|---|---|---|---|
+| oasst2 | 1 | 4,432 | 0.009 | 3.73 | 0.002B | 0.00% |
+| dolly | 1 | 10,785 | 0.010 | 3.62 | 0.003B | 2.50% |
+| stackexchange | 1 | 1,080,107 | 4.772 | 3.66 | 1.303B | 0.00% |
+| irc | 1 | 192,016 | 4.372 | 2.67 | 1.638B | 0.17% |
+| wikimedia | 1 | 83,610 | 0.315 | 3.55 | 0.089B | 2.25% |
+| news | 1 | 118,883 | 0.314 | 3.28 | 0.096B | 0.19% |
+| pressbooks | 1 | 14,926 | 0.158 | 3.69 | 0.043B | 12.07% |
+| oercommons | 1 | 4,416 | 0.042 | 3.75 | 0.011B | 8.19% |
+| foodista | 1 | 67,780 | 0.087 | 3.00 | 0.029B | 0.44% |
+| pdr | 1 | 1,278 | 0.006 | 3.65 | 0.002B | 0.16% |
+| gutenberg | 2 | 56,660 | 20.701 | 3.30 | 6.273B | 1.36% |
+| youtube | 3 | 753,966 | 14.984 | 4.03 | 3.718B | 1.00% |
+| loc | 4 | 120,495 | 37.351 | 3.37 | 11.079B | 9.56% |
+| cccc | 5 | 6,798,136 | 36.737 | 3.15 | 11.650B | 65.27% |
+| total | | 9,307,490 | 119.9 | | 35.9B (95% CI 35.3-36.6B) | |
+
+**Integrity.** All 787 core files of the manifest are in the ledger, each checked for size and checksum before
+extraction. All 870 final shards and keys files match their MANIFEST sha256; lines, keys, info rows and manifest
+counts agree; every text's sha1 matches meta.sha1 and the keys file. No document's meta date is on or after
+2022-12-01 outside the exempt sets. The tier records carry no coverage field (the code that ran predates it); completeness was checked
+by hand.
+
+**Near-dedup (CCCC 65.27%).** Of 2,000 random dropped CCCC docs, 68.2% have word 5-gram Jaccard >= 0.7 with
+their kept lead (29.8% >= 0.9), 34.6% share its URL and 91.5% have a lead from another snapshot. 31.8% are under
+0.7 (8.8% under 0.5): members of chained template clusters (plain union-find, chain_floor 0), 13.5% of the
+dropped bytes. The largest cluster (2,013,959 docs) is MediaWiki Special:RecentChangesLinked pages from many
+wikis; the second (185,738) is EUNIS species pages. Of 30 pairs read, 19 were the same page and 11 were
+different pages sharing a site template.
+
+**Near-duplicates left.** In a URL-key cluster sample of 20,462 final CCCC docs (510 hosts), 6.8% have a
+same-URL partner at Jaccard >= 0.8 (4.5% at >= 0.9), most on bizsugar.com and destructoid.com. On 16 bizsugar
+pairs, stage1 Jaccard was 0.23-0.55 and the texts became near-identical after boilerplate stripping; pass D
+removes exact copies only.
+
+**Other findings.**
+- Boilerplate stripping changed 7.0M of 8.1M CCCC docs (4.59 GB). In 360 sampled stripped docs it removed 24% of
+  bytes on average, including section headings (Abstract, References, Introduction) in 105 docs. Some CCCC URLs
+  lack their query string (2,180 isfdb.org pages in 12 shards share one URL), so a site counts as one URL group
+  and its template lines stay.
+- StackExchange: in 2,000 threads every post predates 2022-12-01 (latest 2022-09-23).
+- IRC: bridged lines (`P2: <nick> text`) keep raw nicknames in 10.3% of docs; speaker labels are also
+  substituted inside URLs (20.6% of docs).
+- OASST2: 8.5% of 2,000 docs hold model-style phrases the AI-ism filter does not match.
+- Leftover boilerplate where stripping is off: news, pdr, oercommons, pressbooks, LoC stamps, Gutenberg
+  transcriber notes. 64% of oercommons docs are undated; in the sample their `created` field holds subject or
+  type strings ('U.S. History').
+- Simple Wikipedia (section 2.2) and Aya are neither in the core v0 manifest nor in its out-of-scope list.

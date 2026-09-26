@@ -44,7 +44,15 @@ neither imports torch or loads weights. Tests: `python3 models/tests/test_regist
   within a 50 GB budget for all Mac copies. Mac copies on 2026-09-26: 33 models, 9.95 GB. Larger models
   live on the PC archive only.
 - **The archive is the D: drive** (about 466 GB free), as `/mnt/d/planck-archive` from WSL. Layout: the
-  registry id is the path, e.g. `/mnt/d/planck-archive/E005/135m/s1/model.safetensors`.
+  registry id is the path, e.g. `/mnt/d/planck-archive/E005/135m/s1/model.safetensors`. Each id directory
+  holds the entry's registered files under their own names (not the whole run directory).
+- **Archive status (2026-09-26, 14:50)**: 15 models, 5.65 GB, every file re-hashed there by
+  `verify --where pc` and listed in its entry: the 5 E2 smoke checkpoints, and E004/E005 135m s1-s5 (copied
+  on the PC from their hash-verified `~/planck/dev/e006_refs_*` copies). Not yet copied: 23 Mac-only
+  models (E002 5, E003 18; 4.53 GB). The Mac was on a phone hotspot, where Mac to PC ran at about
+  0.35 MB/s (about 3.6 hours and 4.5 GB of cellular data), so that upload waits for the home network; it
+  is restartable per file, and each file is hash-checked on the PC before its location is added. E006
+  has no saved weights yet.
 - `~/planck/dev/...` is a working area that has been cleaned by another process once; a copy there
   (for example E006's reference copies of E004/E005) is listed but is never the only copy.
 - **Off-site backup (option, needs Max)**: a private Hugging Face model repo per experiment, pushed with
@@ -158,8 +166,8 @@ once it is chosen (README: "to be chosen before the first model release"). Excep
 | E003 | 8 public bases, 1M-160M | scored seeds yes (`--save 1`); LR search no (`--save 0`); dry no | mac (18, 1.82 GB) | 26 LR, 8 dry, 12 killed attempts | RUNNING on the Mac: ts33m s1-s3 and the p160m block remain | not edited; register the new dirs when the queue ends (p160m's 3 LR runs will be not_saved) |
 | E004 | SmolLM2-135M-I + tiny ladder | 135M seeds yes; LR searches no; tiny-ladder seeds never ran (their queue lines carry `--save 0`) | mac (5, 2.71 GB) + pc dev copy | 21 LR, 7 dry, 1 killed | done | none: no future runs; a rerun of the ladder passes `--save 1` |
 | E005 | SmolLM2-135M-I | yes (`--save 1`) | mac (5, 2.71 GB) + pc dev copy | 1 dry | done (AL diagnostic is eval only) | none |
-| E006 | SmolLM2-135M-I arms C/P/G x 5 seeds + 2 TF32 twins | yes (`--save 1`), saved and hashed before scoring, `weights_sha256` in each guard record | `pc:~/planck/e006_run/weights` | dry runs (outputs deleted by design) | RUNNING on the PC (not checked: offline) | not edited; afterwards archive and register from the guard records |
-| E2, E3 | harness, from scratch, 5M and 20M | yes: `final_*.pt` and `stable_*.pt` never pruned; rolling `keep_last 2` (pre-registered) | `pc:~/planck/runs/E2`, `.../E3` | rolling checkpoints beyond 2 | queue ready; whether it started is unknown from the Mac; smoke ran 2026-09-26 (5 lines) | none: runs need committed code and checked config sha256, and saving already meets section 1 |
+| E006 | SmolLM2-135M-I arms C/P/G x 5 seeds + 2 TF32 twins | yes (`--save 1`), saved and hashed before scoring, `weights_sha256` in each guard record | `pc:~/planck/e006_run/weights` | dry runs (outputs deleted by design) | STOPPED 12:04:57 (queue.txt: gpu_mem kill in e005w1, an eval-only steps-0 job) before any training job; `weights/` empty | not edited; afterwards archive and register from the guard records (its dry runs dryC5, dryC6a, dryC6b, dryP, dryG are not registered yet) |
+| E2, E3 | harness, from scratch, 5M and 20M | yes: `final_*.pt` and `stable_*.pt` never pruned; rolling `keep_last 2` (pre-registered) | `pc:~/planck/runs/E2`, `.../E3` | rolling checkpoints beyond 2 | queue ready, not started at 14:28 (no `~/planck/runs/E2` or `E3` on the PC); smoke ran 2026-09-26 (5 lines, archived) | none: runs need committed code and checked config sha256, and saving already meets section 1 |
 | S001-S007 | harness, 5M | as E2 (SCREENS.txt: keep_last 2 plus final; C8 keeps finals until post-lock scoring) | PC | as E2 | pre-registered, no config yet | none: C8's "kept until then" becomes "kept" |
 | RC-12 baselines | no (13 public models, inference) | nothing to save | n/a | n/a | PC queue | proposal: record each model's HF snapshot revision in the run records; not implemented (PC-side code, outside experiments/) |
 
@@ -177,6 +185,7 @@ Superseded: E002 notes, POST-HOC ADDITION 2 ("deleted when E002 is done"). Those
   hashed and re-verified with `verify --where mac` (180 files OK). The 10 E004/E005 weights equal the
   `weights_sha256` E005's AL diagnostic recorded when it scored them.
 - **5 E2 smoke checkpoints on the PC** (3 finals, 2 branch points), registered from runs.jsonl with
-  null hashes: the PC was offline. Fill them there with `verify --where pc --fill`.
+  null hashes: the PC was offline. Filled later that day on the PC with `verify --where pc --fill`, and
+  copied to the archive (both copies hash equal).
 - **79 trained but not saved**: 47 LR-search runs (`--save 0`: E003 26, E004 21), 18 dry runs, E002's
   seed 0 (before the save code), and 13 killed attempts from the queue logs (E003 12, E004 1).

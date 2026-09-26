@@ -18,6 +18,10 @@ FLOCK=${E006_FLOCK:-flock}
 LOCK_TRIES=${E006_LOCK_TRIES:-12}
 DATA=${E006_DATA:-$HOME/planck/data}
 export HF_HOME=${HF_HOME:-$HOME/planck/hf} HF_HUB_OFFLINE=1
+# DEVIATION 2026-09-26 (notes.txt POST-RUN LOG): torch's caching allocator kept freed blocks until the WHOLE card read
+# 11,597-11,602 MiB (the guard's gpu_mem limit is > 11,600) while a scoring job had at most 2.6 GiB allocated; e005w1
+# was killed for it. Capping the cache at 70% of the card bounds it; memory placement only, no numeric change.
+export PYTORCH_CUDA_ALLOC_CONF=per_process_memory_fraction:0.70
 EXP=$ROOT/experiments/E006_three_objects
 cd $EXP/code || exit 1
 mkdir -p $RUN/out $RUN/logs $RUN/transcripts $RUN/weights $RUN/replay
@@ -85,6 +89,7 @@ chat() {  # name model tag
 # ---------------- 0. no-GPU checks ----------------
 mkdir -p $S0
 log "QUEUE E006 START (run $RUNID)"
+log "every job of this run: PYTORCH_CUDA_ALLOC_CONF=$PYTORCH_CUDA_ALLOC_CONF"
 sha256sum *.py *.sh > ../logs/code_sha256_at_start_$RUNID.txt
 log "code sha256 at start: $(wc -l < ../logs/code_sha256_at_start_$RUNID.txt) files, digest" \
     "$(sha256sum < ../logs/code_sha256_at_start_$RUNID.txt | cut -c1-16)"

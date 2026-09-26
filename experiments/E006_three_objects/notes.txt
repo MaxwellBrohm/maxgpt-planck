@@ -563,3 +563,50 @@ scratch scripts in the session scratchpad)
     runs the same set before any scored job, and a failure stops the queue.
 
 POST-RUN LOG (kills, reruns, guard or queue edits, hand-run analyses; written as they happen)
+  2026-09-26 12:04-16:35  e005w1 killed by the gpu_mem verdict; allocator cap. DEVIATION (a killed job, its rerun, and
+    a queue and test edit after logs/code_sha256_at_start_20260926-060919.txt). No model was loaded on the Mac.
+    What stopped. queue.txt 12:04:57 "e005w1 exit=9 killed=gpu_mem (... peak_gpu_mem_mib 11602.0)", then QUEUE
+    STOPPED. e005w1 = E005's saved s1 weights rescored on CUDA (step 3: --steps 0 --weights, every set, chat). It was
+    in GEN e004/chat (286 of 640 written); every LIK file and GEN e004/plain (640) were complete.
+    How the guard reads memory. guard_e006_pc.py feeds pc/wsl/gpuguard.Guard with nvidia-smi memory.used of GPU 0,
+    the WHOLE card (Windows desktop and any other process included; WSL's nvidia-smi lists no processes, so the guard
+    has no per-process reading). Limit: gpuguard's default max_mem_mib 11,600 ("12 GB card reports ~12227 MiB total;
+    above this = runaway"), tripped by 3 samples in a row over it (5 s apart).
+    base nearly hit it: peak 11,600.0 exactly (the rule is > 11,600), at 11,597-11,600 from el 519 s to its end (180
+    samples). e005w1's trace is base's shifted by +2-3 MiB (2,378/2,381, 6,684/6,687, 9,589/9,591, 10,473/10,475,
+    11,597/11,599 MiB at the same elapsed seconds) and crossed at el 836 s (11,602 three times). The idle card read
+    455-652 MiB (after base; 14:28).
+    Cause: the job's own allocator cache, not other processes and not live tensors. base's run.json peak_cuda_gb
+    (max_memory_allocated) is 2.559 GiB. LIK scoring batches all candidates of an item (lik.score_item, unedited;
+    BIG chat: median 6, max 12 candidates, seq_len median 762, max 1,312) and the math SDPA kernel (NUMERICS) builds
+    candidates x 9 heads x L x L fp32 scores per layer (up to 561 MiB), so each new longest shape reserves new blocks
+    that torch keeps after freeing. Diagnostic (not a scored job, outputs outside out/; the untouched model, E006's
+    numerics and load path, E005's scoring calls unedited; LIK e004 plain+chat and BIG plain+chat in full, GEN
+    e004/chat and BIG chat first 48 each; nvidia-smi and torch read every 2 s; two runs under gpu.lock, 14:35-14:41
+    and 14:46-14:53): default allocator: reserved 5,802 -> 8,706 -> 10,714 MiB, allocated peak 2,620 MiB, card
+    11,493 MiB. Batch composition, fp32 and sequence length are the pre-registered scoring and were not changed.
+    Fix: queue_e006.sh exports PYTORCH_CUDA_ALLOC_CONF=per_process_memory_fraction:0.70 for every job it starts
+    (torch caps its cache at 0.70 x 12,226 MiB = 8,558 MiB and frees cached blocks at the cap; memory placement only)
+    and logs it in queue.txt. Same diagnostic with the cap: reserved peak 8,286 MiB, card peak 7,879 MiB, 1 cache
+    flush, 0 OOM, 381.9 s (default 382.9 s). Equality: every candidate score of all 2,432 LIK items (float ==) and
+    all 96 GEN replies (reply, stop, n_new) are identical in the capped run, the default run and base's queue records.
+    Training allocates at most 2.766 GiB (dryC6a/b, dryP) and 3.366 GiB (dryG) (run.json peak_cuda_gb), under the
+    cap. Unchanged: the guard, its whole-card reading and its 11,600 MiB limit; training, scoring, sets, rules.
+    Tests: test_queue_e006.sh check 10 (fake_py_e006.py records each GPU job's PYTORCH_CUDA_ALLOC_CONF; the test sets
+    it to "inherited" first, so the queue must set it itself) and mutant U5 in mutation_e006 (the export renamed);
+    U5 was watched red on the Mac before it was added (check 10 FAIL, every other check PASS). test_queue_e006.sh on
+    the Mac: ALL PASS. The queue's step 0 re-runs every check on the PC at the restart.
+    Rerun: the queue gives e005w1 a GAP (failed earlier); it is rerun by hand as e005w1_r2 (the same command with
+    --tag e005w1_r2, under the cap), the killed attempt's files kept. OPEN: the analyzer reads tags e005w1-5 only,
+    so it does not read e005w1_r2, and it reads the killed e005w1's LIK files because they are complete (analyze_e006_b
+    judges a file by its record count, not by a run.json); which of the two e005w1 serves is not decided here.
+    Restart (14:55:59, run 20260926-145559; queue.txt logs the setting). Step 0 on the PC: ALL PASS, including
+    mutation_e006 (49 mutants, 49 killed; U5 killed by check 10) and test_queue_e006 (check 10 PASS); dry runs,
+    base and chat_base skipped as done; compare_dry ALL PASS; e005w1 a GAP. chat_e005w1 exit 0 (peak 2,815 MiB).
+    e005w1_r2 (by hand, 15:35-15:54, under gpu.lock and the guard): exit 0, not killed, card peak 7,972 MiB (the
+    killed attempt: 11,602), weights_sha256 f846ac3d... (E005 s1's), run.json peak_cuda_gb 2.558. Its records equal
+    the killed attempt's exactly: all 20 LIK files (every item and candidate score) and GEN e004/plain (640 of 640)
+    and e004/chat (the 286 the killed attempt wrote): 0 differ.
+    e004w1 (the queue's next job after chat_e005w1): exit 0, not killed, card peak 8,046 MiB, weights_sha256
+    91a3aab0... (E004 s1's). The queue then wrote reading 20260926-163454__after_refs_s1 and at 16:35 was waiting on
+    gpu.lock for its next job (e005w2).

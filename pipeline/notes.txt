@@ -268,3 +268,84 @@ TEACHER PINS (2026-09-25 night, Mac, Hugging Face metadata only; no weights down
   raw prompt has no BOS; chat_body() sends no enable_thinking=false (Qwen) and no system message (Ministral's HF
   template then injects its "Le Chat" default); teacher_client.LICENSES has no Qwen key. Estimates, not measurements:
   the vLLM startup "Maximum concurrency" line replaces them.
+
+TEACHER PREP ON THE PC (2026-09-26, 00:00 to 05:00; RTX 5070 12 GB, WSL, vLLM 0.30.0 offline API, torch 2.13.0+cu132)
+  DRY: prompts are render_prompt.build() on 700 FAKE shard skeletons; every output stays on the PC or in scratch,
+  marked "dry"; nothing is training data. No model was loaded on the Mac. Holds of gpu.lock: one per load, released
+  between teachers (Ministral 6 min, Gemma 16 min, Qwen 10 min; failed attempts under 3 min each).
+  Downloads (nice + ionice, 372 GB free before, 347 GB after): the four repo@revision pins of hf_pins.json, 24.8 GB.
+  pipeline/teachers/serve.py: load(name) / generate(t, prompts, sampling, seeds, max_tokens) / unload(t) over
+  vllm.LLM; the caller holds gpu.lock from load to unload. Callers pass render_prompt.build(skel)["prompt"]; serve
+  renders the wire itself with the teacher's tokenizer and refuses a render that breaks an invariant:
+    gemma      tools/gemma_chat.py raw format plus '<bos>' (ids[0] == 2, one 2 only), ending in the empty thought
+               channel; equal to the official template with enable_thinking=False (tested).
+    ministral  mistral_common chat encoding from the OFFICIAL tekken.json: '<s>[INST]...[/INST]', no system prompt.
+    qwen       HF template with enable_thinking=False; the prompt must end '<think>\n\n</think>\n\n' (its default
+               with no kwarg ends '<think>\n', thinking ON: seen in a mutant).
+  Outputs decode with skip_special_tokens=False and carry the thought markers or thought token ids found.
+  Needed on this box: a venv-teach overlay of venv-vllm with transformers 5.16.0 (5.17.0 renamed
+  PixtralRotaryEmbedding, which vLLM 0.30's pixtral.py imports, so Ministral 3 failed inspection);
+  VLLM_USE_FLASHINFER_SAMPLER=0 (FlashInfer's sampler JIT needs nvcc, absent); Gemma max_num_seqs 32 and 2048
+  batched tokens (at 256 seqs: "No available memory for the cache blocks"); Qwen max_num_seqs 32 (vLLM refuses more
+  than its Mamba state block count).
+  Tests: teachers/test_serve.py, 9 tests (pure; tokenizer renders; a GPU smoke that loads Ministral, generates 2 and
+  checks memory comes back after unload), all pass on the PC (01:36). The current serve.py also ran the whole Qwen
+  bench (04:26). Mutants of serve.py (04:28, CPU): 9 of 11 killed; the Gemma end-of-prompt check and the Ministral
+  [THINK]-id check survive, no input to render() can reach them, so they are untested guards.
+
+MEASURED (util 0.88, max_model_len 2048; throughput = 200 forced output tokens per prompt, disjoint FAKE prompts of
+about 780 tokens; tok/s = output tokens per wall second)
+  teacher     load  weights  KV tokens  conc@2048  out tok/s at batch 1 / 16 / 64 / 128 / 256   peak MiB
+  gemma 12B   44 s  8.28 GiB   4,952     2.42x     46.7 / 185.1 / 180.9 / 180.4 / 181.8        11,807 (1 s trace)
+  ministral   34 s  5.99 GiB  21,808    10.65x     91.3 / 564.3 / 563.7 / 579.8 / 580.7        11,867 (spot)
+  qwen 9B     54 s  7.55 GiB   8,396     4.10x     76.0 / 230.5 / 285.0 / 290.2 / 296.0        10,427 (spot)
+  Above 16 the batch only queues: vLLM runs what the KV pool holds. Gemma's 2.42x matches the 2.5x case of the
+  hf_pins.json estimate. Peaks are device-wide and include about 500 MiB of Windows use.
+  Thinking off: 5 prompts each (3 that ask for step-by-step reasoning, 2 FAKE renders) and all 600 yield outputs:
+  zero thought markers and zero thought ids for all three.
+  Yield run: 200 FAKE renders, pipeline sampling and max_tokens, natural stops, all at once; checker path
+  render_prompt.build -> checker.run -> record_turns -> records.accepted, first attempt, no dedup, no retry.
+  teacher     accepted   out tok/s  accepted Planck tok/h  top primary rejects
+  gemma 12B   22 (11%)   191.7      55,433                 OFFTOPIC 68, REQ_SPAN 53, REQ_WORD 18, LEN_* 20
+  ministral    0 (0%)    681.0      0                      DASH 121, FORMAT_LINES 73 (em dash in 197 of 200)
+  qwen 9B      4 (2%)    333.4      16,065                 FORMAT_LINES 94 (turns past the script, no END), REQ_SPAN 32
+  All 200 per teacher ended on a stop; 76 to 79 had max_tokens clamped to fit 2048, but the longest prompt+output was
+  1,564 tokens, so 2048 fits these skeletons. FAKE banks: these rates show where the current prompt and checker
+  disagree with each teacher, not what the real pilot will yield.
+  Results: PC planck/runs/teachers/<teacher>.dry.json (+ .dry.outputs.jsonl), summary.dry.json. Scripts:
+  teachers/bench.py (one teacher per process), check_outputs.py (Mac, CPU), thinking_control.py (below).
+  THINKING CONTROL: queued behind other GPU jobs at 04:36; not run yet.
+
+TEACHER PREP VERIFIER (2026-09-26, 08:40 to 09:00, Mac only, CPU; no model loaded; the PC did not answer SSH or
+Tailscale ping from 08:43, so nothing was re-run on the GPU and the PC's ~/planck/data was not checked)
+  Licenses: HF API at the six pinned revisions (three official, three 4-bit): every sha equals its pin, card license
+  apache-2.0, none gated. Gemma 4's license_link serves the Apache 2.0 text (no Gemma Terms, no prohibited-use
+  policy); both Qwen LICENSE files are Apache 2.0 (same md5); Ministral's card says Apache 2.0; the cyankiwi
+  Ministral repo ships no LICENSE file (card YAML only).
+  Thinking off: read 20 seeded-sample raw yield outputs per teacher and scanned all 600: no <think>, </think>,
+  <|channel>, <channel|>, [THINK], <|turn>, <|im_*|> or "Thinking Process" anywhere (one Ministral "step by step"
+  is in-character dialogue). The 589 Gemma drive-run records below: also none.
+  CORRECTION to "THINKING CONTROL ... not run yet" above: the Qwen control ran 05:06 to 05:07 and FAILED its own
+  bar (qwen3.5-9b.control.dry.json: off 0/3 with a marker, on 1/3, '</think>' + id 248069). The other two ON
+  outputs are plain "Thinking Process: ..." text cut at 1500 tokens; the ON prompt already holds '<think>', so only
+  a closing tag can show. The detector has fired once on a real thought; it is not yet shown to catch an OPENING
+  tag in an output, and it cannot see untagged reasoning text. A rerun at 4096/3500 tokens and the Gemma control
+  were queued on the PC; their results were not seen.
+  Yield table: recomputed with check_outputs.py from the saved per-item outputs and skels.dry.jsonl; accepted,
+  yield, primary rejects, every code count and Planck tok/h equal the saved check.json for all three (only the
+  tie order inside the diversity top-3 lists differs). Em dash in 197 of 200 Ministral texts, longest
+  prompt+output 1,457 / 1,446 / 1,564, clamped 77 / 76 / 79: as stated above.
+  Throughput: not re-measured (PC down). The table above equals the saved bench JSON (out_tokens / wall_s).
+  A second Gemma measurement exists: the serve_http worker below did 154.6 out tok/s over 1,255 s with up to 32 in
+  flight, KV 3,911 tokens (1.91x) because 1,020 MiB of the card was in use before load (bench: 503 MiB, 4,952).
+  Gemma's KV room, already about 2 full 2048-token sequences, shrinks with anything else on the card.
+  Drive runs never written up (07:23 to 07:45; drive.py --serve through serve_http; Gemma only; dry run dirs in
+  scratch): shard 'teachdry', up to 2 attempts: 13 accepted of 389 attempts, first-attempt yield 5.0% (10/200),
+  13,227 accepted Planck tok/h over the 894 s session. The bench's own 200 skeletons, 1 attempt: 21/200 (10.5%;
+  offline bench 22/200) and 36,042 Planck tok/h (recounted here) against 55,433 offline. So a 200-skeleton yield
+  moved 2x between two FAKE shards, and the driver path at concurrency 16 gave about 0.65x the offline accepted
+  tok/h. Ministral and Qwen drive workers were started detached at 07:26 and 07:27 and never got a driver; not
+  seen whether they loaded or when they released gpu.lock (serve_http exits 900 s after load with no request).
+  Leaks: no teacher output, dry run dir or distinctive output line in the repo tree or in commits since 09-25
+  (sealed/ not read); pipeline/teachers holds code and hf_pins.json only; the drive records carry trainable false,
+  blocked FAKE_PROVENANCE and DECON_PENDING.

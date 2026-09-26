@@ -5,7 +5,8 @@
 # 2 a restart skips every finished job; 3 a failed scored job gives a GAP line, its chat probe is not run, the queue
 # goes on; 4 a temp verdict stops the queue and no later GPU job starts; 5 a step-0 check failure stops before any
 # GPU job; 6 a failed dry run stops; 7 a busy lock is retried; 8 the retry limit stops; 9 a job that failed in an
-# earlier run is not rerun (GAP). Exit 0 = every scenario passed.
+# earlier run is not rerun (GAP); 10 every GPU job runs with PYTORCH_CUDA_ALLOC_CONF=per_process_memory_fraction:0.70
+# (deviation 2026-09-26). Exit 0 = every scenario passed.
 set -u
 HERE=$(cd "$(dirname "$0")" && pwd)
 REAL_PY=$(command -v python3)
@@ -49,6 +50,7 @@ setup() {  # a fresh tree; $1 = scenario name
   export E006T_CALLS=$S/calls E006T_REAL_PY=$REAL_PY E006_PY=$T/bin/python3 E006_ROOT=$S/root E006_RUN=$S/run
   export E006_LOCK=$S/gpu.lock E006_FLOCK=$T/bin/fakeflock E006_LOCK_TRIES=3 E006_DATA=$S/data PATH=$T/bin:$PATH
   export E006T_FAIL="${2:-}" E006T_VERDICT="${3:-}" E006T_BUSY="${4:-}" E006T_REFUSE=""
+  export PYTORCH_CUDA_ALLOC_CONF=inherited  # the queue must set the cap itself, not inherit it
   : > $S/calls
 }
 runq() { (cd $C && bash queue_e006.sh > $S/stdout 2>&1); }
@@ -65,6 +67,8 @@ check "1 step-0 checks ran before the first GPU job" \
 check "1 compare_dry ran after the dry runs, before base" \
   '[ $(grep -n "RUN compare_dry_e006.py" $S/calls | cut -d: -f1) -gt $(grep -n "GUARD drychat" $S/calls | cut -d: -f1) ]'
 check "1 an analysis after every scored arm job and a final one" '[ $(grep -c "RUN analyze_e006.py" $S/calls) -ge 22 ]'
+check "10 every GPU job runs with the allocator cap (deviation 2026-09-26)" \
+  '[ $(grep -c "^GUARD" $S/calls) -gt 0 ] && [ $(grep -c "^GUARD .* alloc=per_process_memory_fraction:0.70$" $S/calls) == $(grep -c "^GUARD" $S/calls) ]'
 runq
 check "2 a restart skips every finished job" '[ "$(grep -c "^GUARD" $S/calls)" == "$(echo $EXPECT_GPU | wc -w | tr -d " ")" ]'
 check "2 the restart logs 'done earlier' and ends DONE" \

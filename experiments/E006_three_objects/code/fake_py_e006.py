@@ -1,6 +1,6 @@
 """Fake interpreter for test_queue_e006.sh (never loads a model, never touches a GPU). queue_e006.sh calls it as
 $E006_PY; `-c CODE` is passed to the real python3 (the queue's json reads); `-B script args` is logged to $E006T_CALLS
-and simulated:
+and simulated (a GUARD line also records the job's PYTORCH_CUDA_ALLOC_CONF):
   guard_e006_pc.py --name N ... -- cmd   writes ../logs/N.log and N.guard.json; exit 1 if N is in $E006T_FAIL,
                                          killed "temp" (exit 9) if N is in $E006T_VERDICT, exit 3 with no files for
                                          the first k calls if "N:k" is in $E006T_REFUSE; a successful e006_ft_test
@@ -20,7 +20,8 @@ def main():
     script = os.path.basename(a[0]) if a else ""
     env = lambda k: os.environ.get(k, "").split()
     with open(os.environ["E006T_CALLS"], "a") as f:
-        f.write(("GUARD " + a[a.index("--name") + 1] if script == "guard_e006_pc.py" else "RUN " + script) + "\n")
+        f.write(("GUARD " + a[a.index("--name") + 1] + " alloc=" + os.environ.get("PYTORCH_CUDA_ALLOC_CONF", "unset")
+                 if script == "guard_e006_pc.py" else "RUN " + script) + "\n")
     if script != "guard_e006_pc.py":
         if script.replace(".py", "") in env("E006T_FAIL"):
             print("fake failure")

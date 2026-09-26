@@ -100,6 +100,8 @@ M = [  # (id, module, old, new, suite)
      "$PY -B guard_e006_pc.py", "queue"),
     ("U4 a failed scored job stops the queue", "queue_e006.sh", '--save 1 || log "GAP: $arm$s"', '--save 1 || stop "GAP: $arm$s"',
      "queue"),
+    ("U5 GPU jobs run without the allocator cap", "queue_e006.sh",
+     "export PYTORCH_CUDA_ALLOC_CONF=per_process_memory_fraction:0.70", "export E006_ALLOC_CONF_UNUSED=0.70", "queue"),
 ]
 
 
