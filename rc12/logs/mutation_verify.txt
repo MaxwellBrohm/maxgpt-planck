@@ -1,0 +1,20 @@
+baseline: exit 0
+KILLED   #1 dev_batch.py: engines.json's dtype ignored
+KILLED   #2 dev_batch.py: decode not recorded
+KILLED   #3 verify_dev_runs.py: missing twin passes
+KILLED   #4 verify_dev_runs.py: decode not checked
+KILLED   #5 verify_dev_runs.py: stop set and strip not checked
+KILLED   #6 verify_dev_runs.py: plain cut not checked
+KILLED   #7 verify_dev_runs.py: twin ids not compared
+KILLED   #8 verify_dev_runs.py: row seeds unchecked
+KILLED   #9 verify_dev_runs.py: seed-blind sampling passes
+KILLED   #10 verify_dev_runs.py: row count unchecked
+KILLED   #11 verify_dev_runs.py: no sampled replay
+KILLED   #12 verify_dev_runs.py: no greedy replay
+KILLED   #13 verify_dev_runs.py: vLLM defaults unchecked
+KILLED   #14 verify_dev_runs.py: gen-config stop ids unchecked
+KILLED   #15 verify_dev_runs.py: vLLM kwargs unchecked
+KILLED   #16 verify_dev_runs.py: HF generation_config fields unchecked
+KILLED   #17 verify_dev_runs.py: replay comparison blind
+17 mutants, 0 problems, 92 s
+ALL MUTANTS KILLED

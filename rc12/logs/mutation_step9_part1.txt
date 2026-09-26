@@ -1,0 +1,20 @@
+RC-12 mutation_step9.py part 1/3: 16 of 47 mutants, fresh process each, 50 s. No model.
+baseline: ran, failures: none
+KILLED    #00 lockstep [lock]: replies go back to the wrong conversations  <- IDEAL plain seeds=[None] ctx=None own_cf=False: 640 vs 640 rows, first differing row 0
+KILLED    #03 lockstep [lock]: history not fitted to the context in lockstep  <- FORGETFUL plain seeds=[None] ctx=556 own_cf=False: 640 vs 640 rows, first differing row 0
+KILLED    #06 lockstep [lock]: lockstep rows lose the own_cf flag  <- IDEAL plain seeds=[None] ctx=None own_cf=True: 48 vs 48 rows, first differing row 0
+KILLED    #09 runner [lock]: sequential play sends the wrong turn index  <- IDEAL plain seeds=[None] ctx=None own_cf=False: 640 vs 640 rows, first differing row 0
+KILLED    #12 runner [vllm]: untested vLLM path runs without the flag  <- refuse: no refusal, runner tried to build it (ModuleNotFoundError)
+KILLED    #15 vllm_responder [vllm]: greedy samples  <- params: seed None turn 1: {'top_p': 1.0, 'top_k': -1, 'repetition_penalty': 1.0, 'max_tokens': 256, 'stop_token_ids': [0, 2], 'skip_special_
+KILLED    #18 vllm_responder [vllm]: stop token not appended when vLLM leaves it out  <- stops: eos <|endoftext|> [5, 6] stop None: ([5, 6], 'eos') (HF eos, want eos)
+KILLED    #21 vllm_responder [vllm]: special tokens in the text  <- stops: special token in the decoded text '3. list: \n the list: 3. Okay, 3. Tuesday <|im_end|>'
+KILLED    #24 vllm_responder [vllm]: context not capped at 32768  <- ctx: [2048, 131072, 32768, 4096]
+KILLED    #27 parity_hf_vllm [parity]: prompt mismatch not failed  <- verdict: NEAR_TIE != FAIL_PROMPT
+KILLED    #30 parity_hf_vllm [parity]: HF prompt never compared with vLLM's  <- stages: HF renders thinking off, vLLM not: DIFFERS, 0
+KILLED    #33 parity_hf_vllm [parity]: --pick spread repeats records  <- pick: first 20, spread 20 over 12 families
+KILLED    #36 dev_batch [batch]: the engines.json decision is ignored  <- gate: engines.json names vllm, a DIFFERS verdict still refused (parity gate: org/NoModel has parity verdict DIFFERS; run parity_hf_vllm.py f
+KILLED    #39 dev_batch [batch]: hfb runs without parity  <- checks raised ModuleNotFoundError: No module named 'torch'
+KILLED    #42 hf_batched [hfb]: the stop token is cut off a batched reply  <- split [4, 5, 7, 2, 2]: ([4, 5], 'eos') != ([4, 5, 7], 'eot')
+KILLED    #45 dev_batch [batch]: the cf twin runs every family  <- rows: /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmpqktkor0h/IDEAL_ALT/plain/greedy_owncf differs from runner.run
+killed 16 | survived 0 | crashed 0 | malformed 0
+ALL MUTANTS KILLED

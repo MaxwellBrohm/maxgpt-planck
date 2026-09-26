@@ -5,7 +5,10 @@ Responders: fake:<NAME> (fakes.py / fakes_family.py, no model), hf:<model id or 
 UNTESTED: no model has been loaded through it; it runs only with --hf-untested-ok) or planck:<checkpoint.pt>
 (planck_responder.py: a harness checkpoint rendered with Planck's own role tokens; ctx = its seq_len; flags
 --planck-config, --planck-tokenizer, --planck-device (default cpu), --planck-precision; needs torch, so run it with
-a Python that has torch and tokenizers).
+a Python that has torch and tokenizers) or vllm:<model id> (vllm_responder.py, STEP 9, UNTESTED on a real model:
+--vllm-untested-ok; --gpu-mem, --max-model-len, --batch-invariant).
+--lockstep (lockstep.py): turn t of every conversation (x seed) in one reply_batch call, through the same
+play_steps() loop, so the rows equal the sequential ones for a deterministic responder (test_lockstep.py).
 Loop per conversation: send u1, generate a1, append a1 as the assistant message, send u2, ... to a12. Nothing from a
 gold, IDEAL reply or annotation is ever put in the history. The fed-back reply is the decoded text after the stop
 rule, stripped; it is stored verbatim with its stop reason (eos | eot | role | cap).
@@ -55,12 +58,24 @@ def play(rec, responder, render="plain", seed=None, ctx=None, own_cf=False):
     """one conversation through the real feedback loop; returns the per-turn transcript. own_cf: the OWN
     counterfactual-history run (own_cf.py); score.py uses its rows only to gate OWN (OD1 b), never as a history."""
     responder.start(rec, seed, render)
+    steps = play_steps(rec, responder, render, ctx, own_cf)
+    try:
+        req = next(steps)
+        while True:
+            req = steps.send(responder.reply(*req))
+    except StopIteration as done:
+        return done.value
+
+
+def play_steps(rec, responder, render="plain", ctx=None, own_cf=False):
+    """the loop of play() as a generator: yields (history, turn) for every reply, is sent (raw, stop) back, returns
+    the transcript. play() drives one conversation; lockstep.py drives many through this same code (STEP 9)."""
     budget = None if ctx is None else ctx - RD.MAX_NEW_TOKENS
     msgs, out = [], []
     for t in sorted(rec["turns"], key=lambda x: x["i"]):
         msgs.append({"role": "user", "content": t["text"]})
         hist, dropped = RD.fit(msgs, budget, lambda m: responder.count(m, render))
-        raw, stop = responder.reply([dict(m) for m in hist], t["i"])
+        raw, stop = yield [dict(m) for m in hist], t["i"]
         text = raw
         if render == "plain":
             text, cut = RD.cut_plain(raw)
@@ -102,6 +117,10 @@ def grade(rec, played):
 
 def run_one(rec, responder, render, seed, ctx, name="?", train_seed=0, own_cf=False):
     played = play(rec, responder, render, seed, ctx, own_cf)
+    return make_row(rec, played, render, seed, name, train_seed, own_cf)
+
+
+def make_row(rec, played, render, seed, name="?", train_seed=0, own_cf=False):
     g = grade(rec, played)
     return dict(id=rec["id"], family=rec["family"], cell=rec["cell"], knowledge=rec["knowledge"],
                 pair_id=rec["meta"].get("pair_id"), responder=name, render=render, seed=seed,
@@ -110,8 +129,13 @@ def run_one(rec, responder, render, seed, ctx, name="?", train_seed=0, own_cf=Fa
                 cf_unswapped=any(x.get("cf_unswapped") for x in played))
 
 
-def run(recs, responder, render="plain", seeds=(None,), ctx=None, out_dir=None, name="?", train_seed=0, own_cf=False):
-    rows = [run_one(r, responder, render, s, ctx, name, train_seed, own_cf) for s in seeds for r in recs]
+def run(recs, responder, render="plain", seeds=(None,), ctx=None, out_dir=None, name="?", train_seed=0, own_cf=False,
+        lockstep=False):
+    if lockstep:                                 # same rows, same order; turn t of every conversation in one batch
+        import lockstep as LS
+        rows = LS.rows(recs, responder, render, seeds, ctx, name, train_seed, own_cf)
+    else:
+        rows = [run_one(r, responder, render, s, ctx, name, train_seed, own_cf) for s in seeds for r in recs]
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
         with open(os.path.join(out_dir, "transcripts.jsonl"), "w") as f:
@@ -127,11 +151,23 @@ def make_responder(spec, args):
     kind, _, name = spec.partition(":")
     if kind == "fake":
         import fakes_family as FF
+        if getattr(args, "lockstep", False):     # a fake keeps state per conversation: one instance each
+            import lockstep as LS
+            return LS.PerConv(lambda: FF.make(name), args.render), name
         return FF.make(name), name
-    if kind == "hf":
+    if kind == "vllm":
+        import vllm_responder as VR
+        if not (VR.VLLM_TESTED or args.vllm_untested_ok):
+            sys.exit("vllm responder is UNTESTED (no parity check has passed); rerun with --vllm-untested-ok")
+        return VR.VLLMResponder(name, render=args.render, dtype=args.dtype, gpu_memory_utilization=args.gpu_mem,
+                                max_model_len=args.max_model_len, batch_invariant=args.batch_invariant), name
+    if kind in ("hf", "hfb"):                   # hfb: hf_batched.HFBatched (STEP 9), the same responder batched
         if not args.hf_untested_ok:
             sys.exit("hf responder is UNTESTED (no model was ever loaded through it); rerun with --hf-untested-ok")
         import hf_responder as H
+        if kind == "hfb":
+            import hf_batched as HB
+            return HB.HFBatched(name, render=args.render, dtype=args.dtype, device=args.device), name
         return H.HFResponder(name, render=args.render, dtype=args.dtype, device=args.device), name
     if kind == "planck":
         import planck_responder as PR
@@ -166,13 +202,18 @@ def main():
     ap.add_argument("--planck-tokenizer", default=None, help="planck: tokenizer.json (overrides the config's)")
     ap.add_argument("--planck-device", default="cpu", help="planck: cpu | mps | cuda (default cpu)")
     ap.add_argument("--planck-precision", default="auto", help="planck: auto | fp32 | bf16 (auto: bf16 off cpu)")
+    ap.add_argument("--lockstep", action="store_true", help="turn t of every conversation in one batch (lockstep.py)")
+    ap.add_argument("--vllm-untested-ok", action="store_true")
+    ap.add_argument("--gpu-mem", type=float, default=0.85, help="vllm: gpu_memory_utilization")
+    ap.add_argument("--max-model-len", type=int, default=None, help="vllm: context (default min(native, 32768))")
+    ap.add_argument("--batch-invariant", action="store_true", help="vllm: VLLM_BATCH_INVARIANT=1")
     args = ap.parse_args()
     recs = load(args.data, args.families.split(",") if args.families else None, args.limit)
     responder, name = make_responder(args.responder, args)
     t0 = time.time()
     ctx = args.ctx if args.ctx is not None else getattr(responder, "ctx", None)
     rows = run(recs, responder, args.render, parse_seeds(args.seeds), ctx, args.out, name, args.train_seed,
-               args.own_cf)
+               args.own_cf, args.lockstep)
     summary = S.summarize(rows)
     print(json.dumps({k: summary[k] for k in ("R", "R_ungated", "own_gate", "families", "level_a_met", "loop_rate",
                                               "ack_repeat", "t0")}, indent=1))

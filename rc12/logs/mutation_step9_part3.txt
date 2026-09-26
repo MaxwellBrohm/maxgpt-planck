@@ -1,0 +1,19 @@
+RC-12 mutation_step9.py part 3/3: 15 of 47 mutants, fresh process each, 47 s. No model.
+baseline: ran, failures: none
+KILLED    #02 lockstep [lock vllm]: --own-cf rewrite skipped in lockstep  <- IDEAL plain seeds=[None] ctx=None own_cf=True: 48 vs 48 rows, first differing row 0
+KILLED    #05 lockstep [lock]: Serial drops the seed  <- serial: StubHF through lockstep.Serial: 152 vs 152 rows, first differing row 76
+KILLED    #08 lockstep [lock]: a bare fake runs through Serial  <- refuse: lockstep ran a bare fake (shared per-conversation state)
+KILLED    #11 runner [lock]: runner --lockstep shares one fake instance  <- refuse: runner --lockstep does not wrap a fake in PerConv
+KILLED    #14 vllm_responder [vllm]: top-k on  <- params: seed None turn 1: {'top_p': 1.0, 'top_k': 20, 'repetition_penalty': 1.0, 'max_tokens': 256, 'stop_token_ids': [0, 2], 'skip_special_
+KILLED    #17 vllm_responder [vllm]: end-of-turn tokens do not stop  <- params: seed None turn 1: {'top_p': 1.0, 'top_k': -1, 'repetition_penalty': 1.0, 'max_tokens': 256, 'stop_token_ids': [0], 'skip_special_tok
+KILLED    #20 vllm_responder [vllm]: length finish not a cap  <- c_stops: raised ValueError: vLLM finish reason 'length' (expected stop or length)
+KILLED    #23 vllm_responder [vllm]: vLLM re-tokenizes a text prompt  <- c_params: raised KeyError: 'prompt_token_ids'
+KILLED    #26 parity_hf_vllm [parity]: any difference passes as a near-tie  <- verdict: NEAR_TIE != DIFFERS
+KILLED    #29 parity_hf_vllm [parity]: a strict prefix counts as equal  <- diff: [2, None, None, None]
+KILLED    #32 parity_hf_vllm [parity]: --pick first skips the first record  <- pick: first 20, spread 20 over 12 families
+KILLED    #35 dev_batch [batch]: parity gate off  <- checks raised ModuleNotFoundError: No module named 'transformers'
+KILLED    #38 dev_batch [batch]: engines.json never read  <- gate: engines.json names vllm, a DIFFERS verdict still refused (parity gate: org/NoModel has parity verdict DIFFERS; run parity_hf_vllm.py f
+KILLED    #41 parity_hf_vllm [parity]: --engine hfb loads vLLM anyway  <- c_stages raised AssertionError
+KILLED    #44 dev_batch [batch]: a run is never marked DONE  <- checks raised FileNotFoundError: [Errno 2] No such file or directory: '/var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmpco1_rqe4/IDEAL_AL
+killed 15 | survived 0 | crashed 0 | malformed 0
+ALL MUTANTS KILLED

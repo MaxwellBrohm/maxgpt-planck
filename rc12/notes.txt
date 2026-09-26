@@ -1089,3 +1089,122 @@ RESULTS (Mac, no model, load about 6; logs under logs/, scratch copies of every 
 LEFT AS IS
   P6 (above). "It's X, and I did write it down" fails a user fact (the "I did" frame after the gold). The quote
     rule reads only double quotes.
+
+STEP 9 QUEUE (2026-09-26 morning): the dev-baseline queue (queue_dev_baselines.sh), written and tested on the Mac with
+fakes; NOT started: the PC was unreachable. No model loaded anywhere, nothing committed.
+BUILT
+  queue_dev_baselines.sh  bash, runs on the PC in WSL, detached (pcdetach.sh), code from ~/planck/dev/rc12_q9 (a
+                   fresh pcsync of rc12), runs to ~/planck/runs/rc12_dev. Order: Qwen2.5-0.5B-Instruct (comparator)
+                   first; the rest of the core panel by size (Falcon-H1-Tiny-90M, SmolLM2-135M, Doge-160M,
+                   LFM2.5-230M, LFM2.5-350M, SmolLM2-360M, Qwen3.5-0.8B, LFM2-2.6B); then the extras by size
+                   (gemma-3-270m-it, Qwen3-0.6B, LFM2-700M, LFM2-1.2B). Per model: template, then plain; per render:
+                   greedy, 1, 2, 3. Per (model, render, seed) ONE dev_batch.py process: loads the engine engines.json
+                   names, plays the 640 dev conversations in lockstep (<seed>/), then the seed's --own-cf twin on the
+                   48 OWN records (<seed>_owncf/), exits. gpu.lock (flock -w 7200) is held for that process only, so
+                   other GPU jobs interleave between seeds; a lock timeout (exit 75) is retried 3 times. A seed whose
+                   two runs are DONE is skipped (dev_batch never overwrites a finished run and redoes a stale
+                   .partial), so a restart resumes. A model missing from engines.json is not run (NOENGINE). After a
+                   failed process the rest of that model and render is skipped (SKIP; a restart retries it).
+                   timeout 3 h per process (Q_TIMEOUT). Single instance (flock -n on locks/rc12_dev_queue.lock).
+                   Stop between processes: touch ~/planck/logs/rc12_dev_queue.STOP. Log ~/planck/logs/
+                   rc12_dev_queue.log, per process ~/planck/logs/rc12_dev/<model>_<render>_<seed>.log; marker
+                   ~/planck/logs/rc12_dev_queue.DONE (its first line: "complete X of 208 runs").
+  queue_status.py  one line per run appended to <root>/queue_status.txt: model render seed engine dev|owncf start end
+                   exit done convs replies stops (reason:count) secs (the run itself, from meta.json) lock_secs (the
+                   process under the lock, load included) [note]. --progress: X of 208 runs, per model and render.
+  queue_progress.sh  read-only progress check on the PC (queue alive, last log and status lines, per-model table).
+  test_queue.py    Mac, fakes, shim flock: plan order, one lock call per process, status counts, seed / render /
+                   engine reaching the run, the own-cf twin, NOENGINE, failure then SKIP, lock-timeout retries,
+                   restart adds nothing and leaves finished runs byte-identical, a half-finished seed runs only its
+                   missing run, STOP, DONE, the default 13-model plan (208 runs), queue_status on hand-made runs.
+  mutation_queue.py  30 mutants of the two files, each in a scratch copy of rc12, test_queue.py must fail.
+DECISIONS
+  One process per seed, not per run: the own-cf twin is 48 conversations, and a separate process would reload the
+  model for it (208 loads instead of 104). Per (model, render) would be 26 loads but would hold the lock for 8 runs.
+  The engine is read from engines.json (dev_batch.py's engine gate), never guessed by the queue.
+RESULTS (Mac, no model, load 5 to 7)
+  test_queue       exit 0 (8 to 15 s)
+  mutation_queue   baseline pass; 30 / 30 killed, 0 survived, 0 malformed (394 s; logs/mutation_queue.txt). A first
+                   round had a failing baseline (the scratch copy could not import quick_shortcuts' text_e004), so
+                   its 30 kills meant nothing; fixed with PYTHONPATH, rerun as above.
+NOT DONE (the PC)
+  From about 08:30 the PC was offline in Tailscale ("offline, last seen ...") and ssh timed out; still offline at
+  09:45. So: parity results not read (the PARITY step returned nothing to this step), engines.json not written (it
+  does not exist in rc12 or, as far as the last read showed, on the PC), the queue not synced or started, no GPU time
+  estimate, no run checked. Order when the PC is back: read every parity.json (bf16 and fp32, Doge's hfb), write
+  rc12/engines.json (one engine per model, each family member takes its family's verdict), pcsync rc12 as rc12_q9,
+  pcdetach queue_dev_baselines.sh, check the first two runs (Qwen2.5 template greedy and greedy_owncf).
+
+STEP 9 VERIFY (2026-09-26, 09:50 to 10:45 EDT, with a break at a usage limit): adversarial check that the dev
+baselines follow the draft (s3, s4, s9 OD1, s12). No dev baseline run exists (the queue never started; the PC has
+been offline in Tailscale since about 08:30, "last seen 2h ago" at 10:33), so every check that needs a run or a GPU
+is NOT RUN. No model loaded anywhere; nothing committed. The checks below ran on the Mac (code, stubs, fakes, and the
+tokenizers / generation_config.json files already in the Mac's HF cache, which may be other revisions than the PC's).
+RESULTS
+  (1) decoding  vllm_responder.sampling_kwargs, seen through the real lockstep path with a stub LLM that records its
+                params (5 records, seeds 1 and greedy in one pass): every sampled request carries temperature 0.6,
+                top_p 1.0, top_k -1, repetition_penalty 1.0, max_tokens 256, the HF stop list and its md5 seed; every
+                greedy request temperature 0.0 and no seed. LLM(generation_config="vllm"). PROBLEM (gemma only):
+                unsloth/gemma-3-270m-it's generation_config.json has eos_token_id [1, 106] and HF's stop list is
+                [106] (tokenizer eos <end_of_turn>; "<eos>" is not in hf_responder.EOT_TOKENS). vLLM also stops on the
+                file's eos ids (not seen on 0.30: from the vLLM source as I know it; vllm_responder.audit() records
+                the real list in meta.json at run time), so a gemma <eos> (id 1) makes stop_of raise and the
+                dev_batch process die (loud); on HF, generate is given eos_token_id [106] and runs past <eos> (silent:
+                the draft says stop at eos). Not fixed: hf_responder.py is outside this step's files and the fix
+                changes the HF protocol and gemma's parity. Proposed: add "<eos>" to hf_responder.EOT_TOKENS (both
+                engines then stop there, as "eot"), redo gemma's parity. The other cached models (Qwen2.5-0.5B-Instruct,
+                Qwen3-0.6B, SmolLM2-135M / 360M, LFM2.5-230M / 350M, LFM2-2.6B, Falcon-H1-Tiny-90M) have no
+                generation_config eos id outside HF's list; Qwen3.5-0.8B, Doge-160M, LFM2-700M, LFM2-1.2B unchecked
+                (not in the Mac cache). HF path: temperature, top_p, top_k, repetition_penalty, max_new_tokens and
+                eos are passed explicitly, but any OTHER generation_config.json field (min_new_tokens,
+                no_repeat_ngram_size, ...) still applies; meta.json's audit.hf_generation_config records the file and
+                verify_dev_runs C1 fails on such a field. Doge's file unread.
+  (2) seeds     hf_responder.conv_seed == int(md5("seed:id:turn")[:8], 16), recomputed independently: 0 mismatches
+                (50 records x 12 turns x seeds 1-3); 21,984 per-reply seeds over dev x 3 seeds, all distinct; turn =
+                the user turn number 1..12. Replay of 5 finished conversations: NOT RUN (no run, no PC).
+  (3) template  turn-3 prompt strings (history u1, a1, u2, a2, u3 of rc12-dev-recall-001, placeholder replies), built
+                by the vLLM path's own encode and decoded with special tokens: Qwen2.5-0.5B-Instruct starts with its
+                default system block ("You are Qwen, created by Alibaba Cloud. ..."), which the template adds when no
+                system message is passed: the draft's "no system prompt, the model's default system behavior";
+                Qwen3-0.6B: no system block, ends "<|im_start|>assistant\n<think>\n\n</think>\n\n" (the documented
+                enable_thinking=False form); gemma-3-270m-it: "<bos><start_of_turn>user\n...<end_of_turn>\n
+                <start_of_turn>model\n", no system turn; SmolLM2 adds its default SmolLM system block; LFM2 / LFM2.5
+                "<|startoftext|><|im_start|>user\n..."; Falcon-H1-Tiny starts with "\n", its assistant turns end
+                "\n<|im_end|>", no BOS. No double BOS anywhere (decode(ids) == the template string). The runner never
+                passes a system message. Qwen3.5-0.8B's prompt unchecked (not on the Mac).
+  (4) plain     render.cut_plain on 11 edge cases cuts at "\n" + optional spaces + user / assistant / human (any case)
+                + ":", keeps "Username:", inline "User:" and "**User:**". vLLM gets no stop strings and generates on;
+                the runner cuts afterwards, which gives the same text and stop reason as a streaming stop (raw keeps
+                the rest). Note: an end-of-turn token also stops the plain render (both engines), beyond the draft's
+                "eos or role tag"; for Qwen, SmolLM2 and LFM2 it is the eos anyway.
+  (5) own-cf    by construction in dev_batch.py: the twin runs in the same process on the same engine, seed, render,
+                name and train seed, on the OWN records; score.twin joins by id + responder + render. On real runs:
+                NOT RUN. dev_batch --limit N pairs only by accident (first N records vs first N OWN records): smoke
+                runs only; the queue never passes it.
+  (6) lockstep  fakes only (test_lockstep, 58 fakes). A real model: NOT RUN.
+  Risk (not a violation): a dev run's turn batches hold 640 requests, its own-cf twin's 48, a replay's N; vLLM runs
+  without --batch-invariant and with its default prefix cache, so a near-tie token can flip with the batch, and a
+  replay or the twin's OWN conversations need not match the dev run bit for bit. verify_dev_runs R1 / R2 measure it.
+CHANGED (all in rc12, none in graders, fixtures, fakes, pools, dev records or the scorer)
+  vllm_responder.py  audit(): the run config for meta.json (stop list, thinking flag, ctx, the kwargs passed, vLLM's
+                     sampling defaults from generation_config.json, and vLLM's final stop ids per request).
+  dev_batch.py       engines.json may name a dtype per model (overrides --dtype); meta.json records dtype,
+                     max_model_len, batch_invariant, decode (hf_responder.DECODE) and audit (engine_audit).
+  verify_dev_runs.py NEW: checks a model's finished runs: C1 run config, C2 own-cf pairing and R not None, C3 row seeds
+                     and turn-1 replies across sampling seeds, C4 stop reasons and the plain cut, C5 the turn-3 prompt
+                     from the run's own history (tokenizer); --rerun N (GPU, under gpu.lock): R1 sampled replay vs
+                     stored, R2 greedy lockstep vs sequential vs stored.
+  test_verify_dev_runs.py  NEW: fake:SAMPLER runs made by dev_batch, 14 corrupted copies each reported, a seed-dependent
+                     copy passes, meta holds decode, audit and engines.json's dtype.
+  mutation_verify.py NEW: 17 mutants of verify_dev_runs.py and dev_batch.py's meta fields; logs/mutation_verify.txt.
+GATES (Mac, no model) test_vllm_responder, test_parity, test_dev_batch, test_queue: exit 0. mutation_step9 parts 1-3:
+  47 / 47 killed, 0 malformed. test_verify_dev_runs: exit 0. mutation_verify: 17 / 17 killed, baseline clean (92 s).
+  A first scratch mutation round of the verifier test had a failing baseline (a scratch copy cannot import
+  quick_shortcuts' text_e004), so its "all killed" meant nothing; mutation_verify.py sets PYTHONPATH and checks the
+  baseline first.
+WHEN THE PC IS BACK, before engines.json: read the parity verdicts; decide the gemma <eos> fix; after the first runs:
+  <venv python> -B verify_dev_runs.py --root ~/planck/runs/rc12_dev --model <id> --render <r> (no model), and once
+  per engine family with --rerun 5 under gpu.lock. A ready PC job (scratch, not in the repo) syncs rc12 as rc12_v9,
+  prints the Qwen3.5 / Doge / LFM2-700M / LFM2-1.2B prompts and generation configs, asks vLLM 0.30's own ModelConfig
+  for its stop ids (no weights), and runs Qwen2.5-0.5B on 24 records (2 per family) to ~/planck/runs/rc12_verify
+  (never rc12_dev), template and plain, greedy, 1, 2, then verify --rerun 5.

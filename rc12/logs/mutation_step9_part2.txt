@@ -1,0 +1,20 @@
+RC-12 mutation_step9.py part 2/3: 16 of 47 mutants, fresh process each, 32 s. No model.
+baseline: ran, failures: none
+KILLED    #01 lockstep [lock vllm]: every conversation gets the first conversation's seed  <- SAMPLER plain seeds=[None, 1, 2] ctx=None own_cf=False: 1920 vs 1920 rows, first differing row 640
+KILLED    #04 lockstep [lock]: PerConv starts every conversation greedy  <- SAMPLER plain seeds=[None, 1, 2] ctx=None own_cf=False: 1920 vs 1920 rows, first differing row 640
+KILLED    #07 lockstep [lock vllm]: lockstep row order differs from runner.run  <- SAMPLER plain seeds=[None, 1, 2] ctx=None own_cf=False: 1920 vs 1920 rows, first differing row 1
+KILLED    #10 runner [lock vllm]: --lockstep ignored by runner.run  <- compare: raised AttributeError: 'PerConv' object has no attribute 'start'
+KILLED    #13 vllm_responder [vllm]: per-reply seed ignores the turn  <- params: seed 1 turn 1: {'top_p': 1.0, 'top_k': -1, 'repetition_penalty': 1.0, 'max_tokens': 256, 'stop_token_ids': [0, 2], 'skip_special_tok
+KILLED    #16 vllm_responder [vllm]: 512 new tokens  <- params: seed None turn 1: {'top_p': 1.0, 'top_k': -1, 'repetition_penalty': 1.0, 'max_tokens': 512, 'stop_token_ids': [0, 2], 'skip_special_
+KILLED    #19 vllm_responder [vllm]: eot reported as eos  <- stops: eos <|endoftext|> [5, 6, 2] stop 2: ([5, 6, 2], 'eos') (HF eot, want eot)
+KILLED    #22 vllm_responder [vllm]: a template that takes enable_thinking renders thinking on  <- thinking: lfm2 / 'x enable_thinking y': {'add_generation_prompt': True, 'tokenize': False} differs=False
+KILLED    #25 vllm_responder [vllm]: sequential reply drops the seed  <- lockstep: template seeds [None, 1] own_cf False: rows differ
+KILLED    #28 parity_hf_vllm [parity]: stop reasons not compared  <- verdict: IDENTICAL != FAIL_STOP
+KILLED    #31 parity_hf_vllm [parity]: margins never computed  <- stages: flip True margin 0.2: DIFFERS != NEAR_TIE
+KILLED    #34 dev_batch [batch]: finished runs not skipped  <- skip: a rerun changed files
+KILLED    #37 dev_batch [batch]: a model runs on an engine engines.json did not choose  <- gate: engines.json names vllm, hfb not refused (parity gate: org/NoModel has parity verdict DIFFERS; run parity_hf_vllm.py first)
+KILLED    #40 parity_hf_vllm [parity]: the report does not say which engine was compared  <- stages: engine None or the header does not name vLLM
+KILLED    #43 hf_batched [hfb]: a capped reply reads as eos  <- split [4, 5, 6, 8, 9]: ([4, 5, 6, 8, 9], 'eos') != ([4, 5, 6, 8, 9], 'cap')
+KILLED    #46 dev_batch [batch]: a stale .partial is kept  <- partial: a stale .partial was not replaced by a clean finished run
+killed 16 | survived 0 | crashed 0 | malformed 0
+ALL MUTANTS KILLED

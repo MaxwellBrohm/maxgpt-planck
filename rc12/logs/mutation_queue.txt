@@ -1,0 +1,32 @@
+baseline: pass
+KILLED    queue_dev_baselines.sh: finished seeds rerun
+KILLED    queue_dev_baselines.sh: plain before template
+KILLED    queue_dev_baselines.sh: greedy last
+KILLED    queue_dev_baselines.sh: seed 3 missing
+KILLED    queue_dev_baselines.sh: comparator not first
+KILLED    queue_dev_baselines.sh: core not by size
+KILLED    queue_dev_baselines.sh: an extra missing
+KILLED    queue_dev_baselines.sh: the seed does not reach the run
+KILLED    queue_dev_baselines.sh: the render does not reach the run
+KILLED    queue_dev_baselines.sh: another lock file
+KILLED    queue_dev_baselines.sh: lock wait not 7200 s
+KILLED    queue_dev_baselines.sh: no retry on a lock timeout
+KILLED    queue_dev_baselines.sh: a lock timeout is not retried
+KILLED    queue_dev_baselines.sh: a failure does not skip the rest of the render
+KILLED    queue_dev_baselines.sh: one failure skips every later render and model
+KILLED    queue_dev_baselines.sh: STOP file ignored
+KILLED    queue_dev_baselines.sh: a model without an engine is run
+KILLED    queue_dev_baselines.sh: status for a run finished earlier
+KILLED    queue_dev_baselines.sh: no status for the own-cf twin
+KILLED    queue_dev_baselines.sh: (test speed) limit dropped: full dev
+KILLED    queue_dev_baselines.sh: no DONE marker
+KILLED    queue_dev_baselines.sh: the engine or model does not reach the run
+KILLED    queue_dev_baselines.sh: engines.json unread
+KILLED    queue_status.py: first turn not counted
+KILLED    queue_status.py: runs swapped
+KILLED    queue_status.py: start is the end
+KILLED    queue_status.py: stop reasons unsorted
+KILLED    queue_status.py: progress total wrong
+KILLED    queue_status.py: run in progress not shown
+KILLED    queue_status.py: lock seconds wrong
+MUTANTS killed 30/30; 394 s
