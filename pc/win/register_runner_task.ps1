@@ -36,7 +36,9 @@ $userPart = ""
 if ($LinuxUser) { $userPart = " -u $LinuxUser" }
 $argLine = ('-d {0}{1} --exec /bin/bash -lc "bash ~/planck/repo/pc/wsl/runner_start.sh"' -f $Distro, $userPart)
 
-$me = "$env:USERDOMAIN\$env:USERNAME"
+# Over SSH, USERDOMAIN reads WORKGROUP, which maps to no account (measured 2026-09-25); the
+# token's own name is always right (PCNAME\user).
+$me = [Security.Principal.WindowsIdentity]::GetCurrent().Name
 $action = New-ScheduledTaskAction -Execute $wsl -Argument $argLine
 if ($AtLogon) {
     $trigger = New-ScheduledTaskTrigger -AtLogOn -User $me
