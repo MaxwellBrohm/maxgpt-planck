@@ -17,7 +17,7 @@
 # harness (or E1's choice), keeping a key on only if its parity and mutation tests pass there; set
 # engine_fixed to "<date> <commit>"; append the values to E2 notes' FIXED log; commit. Changing any value
 # afterwards reruns every run of the affected comparison (DEVIATIONS POLICY).
-engine_fixed: null
+engine_fixed: "2026-09-26 93ea41c"
 
 train:
   device: cuda

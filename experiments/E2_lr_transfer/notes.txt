@@ -247,3 +247,73 @@ CHANGES AFTER CRITIQUE (2026-09-26; no run existed, nothing committed)
   12 SCOPE added: curve LR, per-arm LRs, per-vocab r, WD rule, refresh, margins (PLAN 5, LEDGER rows 19-20).
   13 Queue: a queue-owned code directory, divergence handling, the smoke covers the new trunk layout and the shares.
     The line "the 5M stages fit tonight if the queue starts by about 01:00" was removed (stale).
+
+FIXED LOG (2026-09-26, before any E2 run; the FIXING step at commit 93ea41c. Checks run on the PC on a clone of the
+93ea41c bundle; nothing of E2 had run.)
+  1 Engine: configs/engine.yaml, engine_fixed "2026-09-26 93ea41c". harness/ last changed in c19dc09 (screen flags
+    S004-S007, all default off; its commit reports flag-off runs bit-identical to 5c5a30a). No value changed from the
+    file the smoke ran with; only engine_fixed was set.
+      Read by this harness: train.precision bf16; train.doc_attn varlen (its auto default on cuda + bf16);
+      optim.batched true (its auto default on cuda); train.lazy_metrics false (default, opt-in); data.mode pack,
+      window_tokens 131072, max_item_len 2048.
+      Not read by this harness (the compile, lean-loss and memory candidates did not land; harness/notes.txt SPEED
+      INTEGRATE 2), written at their off values, which preflight.py accepts: train.compile false (compile_backend
+      inductor, compile_dynamic null), ce_chunk_rows 0, cuda_mem_cap_gib null (cuda_mem_margin_gib 0.5),
+      auto_micro_on_oom false. selftest true.
+    Tests of the two switches that are on (varlen, batched), at 93ea41c on the PC: harness suite with CUDA hidden
+      666 passed, 30 skipped; the CUDA test files on the 5070 under gpu.lock (test_docattn_curve,
+      test_optim_batched, test_optim_batched_cuda, test_s3_docattn, test_s3_resume, test_speed_combined,
+      test_s3_leak, test_train and the six test_screen_* files) 384 passed, 0 skipped; mutation_check.py
+      groups docattn 5/5, optim 5/5, loss 6/6, resume 3/3 behaved as expected. The adversarial math review
+      (93ea41c vs b04d104, deterministic CUDA, the PC) found them SAFE: 5M and 20M curves inside the 1e-7
+      weight-perturbation floor, varlen leak probes exactly 0, grad_accum 2 and 4 bitwise equal to sum / n_sup,
+      CUDA resume bitwise, batched Newton-Schulz equal to per-matrix to 3.3e-7 in fp64 (bf16 error at most
+      1.157x the per-matrix error).
+  2 Code: commit 93ea41c (harness/ at c19dc09, data_prep/ at b04d104). sha256: data_prep/bpb.py 4f73dbda3ea2f3eb,
+    data_prep/evalwin.py e31107725df25771, harness/train.py d6898e7ceb84a3aa, trainer.py c1f3ff03477d8776,
+    optim.py 2a070d507a93e869, optim_batched.py 128afabc37ffb591, docattn.py 4e42363c0d1eb2dd, data.py
+    cc9b0acf0a2665fd, model.py 1997098ed2d39b67, blocks.py f1962a5cb7ead3d3, runio.py 438d4f5438aeee79.
+    All 84 tracked .py files of harness/ and data_prep/:
+      git ls-files harness data_prep | grep '\.py$' | LC_ALL=C sort | xargs sha256sum | sha256sum
+      = 92deaef0f4f99f827080b4a6aef0e192d70c4991cc8dbdc57274eafec108f9e0
+    Every queue start also writes the full per-file list to runs/E2/code_sha256_<time>.txt on the PC.
+    Scorer tests (METRIC) at 93ea41c on the PC: data_prep/tests 49 passed; data_prep/mutation_check.py, the 16 bpb
+    and evalwin mutants: 16/16 killed. E2 tooling tests (experiments/E2_lr_transfer/tests): 39 passed.
+  3 Tokenizer: tok_v0_8k.json 078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5,
+    tok_v0_manifest.json 0260aad9f6c938a7a979af6bfd9b72f48ca7d00364cdd82ed86d51ff7c1713f4 (preflight on the PC:
+    files equal the recorded values).
+  4 Data: shard manifest 23647db746de12075cdd96929f004e41c1a5b1ed5ab7bb57b1ccef090ef41344; eval manifest
+    b28e4cc445582cefaee5e6638586903899bbc5eefce9059d081332eb6b41afe2, evalset_sha256 fe1b55bb...505b (preflight on
+    the PC: the PC's files equal these). Shares as DATA in every config (preflight, normalised: cccc 0.414241,
+    stackexchange 0.221922, gutenberg 0.147915, wikimedia 0.147915, irc 0.040004, dolly 0.016002, oasst2 0.012001);
+    files matched per source: cccc 31, stackexchange 11, gutenberg 6, irc 6, wikimedia 3, dolly 1, oasst2 1.
+    Pre-checks: the eval build's manifest (data_prep/stats/evalsets_v0/manifest.json) records 0 matches by id, split
+    key and text sha1 in every source over 1,127,418 training docs, and 0 OOD-H reserve trees among 1,094 checked.
+    Passes (shard manifest token counts x pinned shares): the longest 5M trajectory (7,630 steps) reads oasst2 1.71
+    and dolly 1.72 times, every other source 0.41 or less; the longest 20M trajectory (15,259 steps) oasst2 and
+    dolly 3.42. At most 4 holds.
+  5 Configs, stage A (plans/stageA.txt 8c12bcedabb451c1bfc24ce7f5e45eefd4a55dd76e6fe6cdd8055afafc6836f8; prereg.yaml
+    4f2e61253cc42b43c3297f3099d962f82dd1caa52997ab399523b00b42b8544d;
+    engine.yaml c95b65f9d796c497b735dc53cc00c6588c0c016025e711b0a481488e728269a4; base5m.yaml
+    070d32cd1985d4285ae0104ba9b21b415e00ec314f16b060c1ec013d3eface02). File sha256 (first 16) and config_sha256
+    (first 16, from preflight --strict on the PC with this engine_fixed; train.py records the full value):
+      5m_e0.75_r1_trunk 36c0383c4abbde87 a6440108c739cce9   5m_e0.75_r1_b62M  ecf36138ac329841 ca8697e35b455404
+      5m_e0.75_r1_b125M d5bf7dc9605aa55b 9ea9b014a389366b   5m_e0.75_r1_b250M 24be86235dff5461 167ab242d15e0511
+      5m_e1.5_r1_trunk  bb332d955aeb9690 840bccaee0375148   5m_e1.5_r1_b62M   2b89bf63e6cd4401 e978b6d08d5fff1a
+      5m_e1.5_r1_b125M  280f9575e493bb69 f82294edf777bd1d   5m_e1.5_r1_b250M  e7d74f3955148ec0 e157bf2711393cfd
+      5m_e3_r1_trunk    adaca1ee34ce6adb 6a6b2e8c4bb5091c   5m_e3_r1_b62M     8b6652608383a061 eeca9b3a051f2f4b
+      5m_e3_r1_b125M    1107ec9dadfba5a5 89a5dd80975b999c   5m_e3_r1_b250M    357bf28dcd5e45e4 3a360351229ca339
+      5m_e6_r1_trunk    5a62920d85899122 86eb4a5fcae13929   5m_e6_r1_b62M     7ab758adb35ca03e 1106749cdfa756b7
+      5m_e6_r1_b125M    d76ad556bbd48b0e d6ecf4dd236d1168   5m_e6_r1_b250M    cb334d0b79de59af 6130d3f172250993
+      5m_e12_r1_trunk   45bda2700e9f8801 c6c62cb1a7c29238   5m_e12_r1_b62M    ca4673ae8880a9c0 03b0fb9c14a4ccd2
+      5m_e12_r1_b125M   d4a52fbee4b6cc16 f9ca9f896c85fa26   5m_e12_r1_b250M   a1e4f2d36c0a92ff 3c8bcc4e77f68c5a
+    preflight.py --strict --no-init-check on all 20: at 93ea41c as committed, refused only for "engine_fixed is
+    null" (20 of 20); with engine_fixed set as above, 0 refusals.
+  6 Smoke: passed 2026-09-26 02:16 (smoke_check.py, all 11 checks true) on a pre-commit harness snapshot whose
+    train.py, trainer.py, optim.py, docattn.py, model.py and blocks.py differ from 93ea41c. Rerun at 93ea41c (same
+    smoke.sh on a git archive of the commit; its 84 .py files give item 2's digest 92deaef0...): 2026-09-26 17:07
+    to 17:15, 487 s under gpu.lock, smoke_check.py all 11 checks true (throughput median 250,423 tok/s, trunk row
+    fill 0.9885; varlen and batched recorded in runs.jsonl; drawn shares within one item per source). engine_fixed
+    was still null in that copy; everything else in engine.yaml was as fixed here.
+  7 Starter-corpus exception: accepted by whoever commits this log (calibration checkpoints only; never released,
+    never an init for a recipe run, never on the curve).
