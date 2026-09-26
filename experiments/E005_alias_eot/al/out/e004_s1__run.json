@@ -1,0 +1,136 @@
+{
+ "model": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E004_general_updating/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s1",
+ "tag": "e004_s1",
+ "dry": false,
+ "device": "mps",
+ "items": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E005_alias_eot/al/al_items.jsonl",
+ "items_sha256": "e99b40d6b56c9c2d47ea0daf19316f409b850cd09dcf3f778b5cac5357c4a06d",
+ "weights_file": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E004_general_updating/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s1/model.safetensors",
+ "weights_sha256": "91a3aab0e5569da3deef7e82bcf40a17bf273cf17612b948cdf4c7966935cf7e",
+ "torch": "2.13.0",
+ "max_new": 48,
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "checks": {
+  "params_config": {
+   "total": 134515008,
+   "embedding": 28311552,
+   "body": 106203456,
+   "tok_emb": 28311552,
+   "out_head": 0,
+   "pos_emb": 0,
+   "layers": 30,
+   "d": 576,
+   "vocab": 49152,
+   "n_ctx": 8192
+  },
+  "params_model": 134515008,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": true,
+  "config_says_tied": true,
+  "sanity_nll": 2.3437
+ },
+ "summary": {
+  "LIK al/plain": {
+   "all": [
+    53,
+    64
+   ],
+   "AL1": [
+    16,
+    16
+   ],
+   "AL2": [
+    9,
+    16
+   ],
+   "AL3": [
+    12,
+    16
+   ],
+   "AL4": [
+    16,
+    16
+   ]
+  },
+  "LIK al/chat": {
+   "all": [
+    52,
+    64
+   ],
+   "AL1": [
+    16,
+    16
+   ],
+   "AL2": [
+    9,
+    16
+   ],
+   "AL3": [
+    11,
+    16
+   ],
+   "AL4": [
+    16,
+    16
+   ]
+  },
+  "GEN al/plain": {
+   "all": [
+    49,
+    64
+   ],
+   "AL1": [
+    16,
+    16
+   ],
+   "AL2": [
+    6,
+    16
+   ],
+   "AL3": [
+    11,
+    16
+   ],
+   "AL4": [
+    16,
+    16
+   ],
+   "capped": 0,
+   "lenient": 49
+  },
+  "GEN al/chat": {
+   "all": [
+    2,
+    64
+   ],
+   "AL1": [
+    1,
+    16
+   ],
+   "AL2": [
+    1,
+    16
+   ],
+   "AL3": [
+    0,
+    16
+   ],
+   "AL4": [
+    0,
+    16
+   ],
+   "capped": 62,
+   "lenient": 53
+  }
+ },
+ "selftest_fail": [],
+ "peak_mps_driver_gb": 1.113,
+ "total_s": 87.9,
+ "right_rule": "metrics_ft.right: gold > every other candidate"
+}

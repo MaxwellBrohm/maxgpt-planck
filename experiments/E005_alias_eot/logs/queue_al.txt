@@ -1,0 +1,18 @@
+2026-09-25 09:44:38 QUEUE AL WAITING (pid 26193): until logs/queue.txt has QUEUE E005 DONE / QUEUE STOPPED, no queue_e005.sh runs and no other model job, then 60 s
+2026-09-25 20:31:30 QUEUE AL START (E005's last line: 2026-09-25 20:29:40 QUEUE STOPPED: swap_grew_1302MB in chat_135m_s5)
+2026-09-25 20:31:30 al_items_check exit=0 (AL items: sha256 matches al_items.sha256, rebuilt byte-identical, 64 items)
+2026-09-25 20:31:40 test_al exit=0 (RESULT: ALL PASS (19 checks))
+2026-09-25 20:31:47 al_dry exit=0 killed=None (elapsed_s peak_rss_mb min_free: 7 857 71) scored al/plain: [2, 4] scored al/chat: [1, 4] generated al/plain: strict [0, 4] generated al/chat: strict [0, 4] 
+2026-09-25 20:32:57 al_base exit=0 killed=None (elapsed_s peak_rss_mb min_free: 69 912 68) scored al/plain: [14, 64] scored al/chat: [12, 64] generated al/plain: strict [6, 64] generated al/chat: strict [5, 64] 
+2026-09-25 20:33:59 al_e005_s1 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 62 625 71) scored al/plain: [63, 64] scored al/chat: [62, 64] generated al/plain: strict [64, 64] generated al/chat: strict [62, 64] 
+2026-09-25 20:35:01 al_e005_s2 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 61 622 70) scored al/plain: [62, 64] scored al/chat: [63, 64] generated al/plain: strict [64, 64] generated al/chat: strict [62, 64] 
+2026-09-25 20:36:04 al_e005_s3 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 63 623 71) scored al/plain: [62, 64] scored al/chat: [63, 64] generated al/plain: strict [63, 64] generated al/chat: strict [63, 64] 
+2026-09-25 20:37:06 al_e005_s4 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 61 621 71) scored al/plain: [64, 64] scored al/chat: [64, 64] generated al/plain: strict [64, 64] generated al/chat: strict [64, 64] 
+2026-09-25 20:38:06 al_e005_s5 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 60 623 68) scored al/plain: [62, 64] scored al/chat: [63, 64] generated al/plain: strict [63, 64] generated al/chat: strict [64, 64] 
+2026-09-25 20:39:36 al_e004_s1 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 90 626 43) scored al/plain: [53, 64] scored al/chat: [52, 64] generated al/plain: strict [49, 64] generated al/chat: strict [2, 64] 
+2026-09-25 20:40:57 al_e004_s2 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 80 626 54) scored al/plain: [51, 64] scored al/chat: [55, 64] generated al/plain: strict [54, 64] generated al/chat: strict [27, 64] 
+2026-09-25 20:42:29 al_e004_s3 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 92 640 49) scored al/plain: [49, 64] scored al/chat: [47, 64] generated al/plain: strict [48, 64] generated al/chat: strict [2, 64] 
+2026-09-25 20:44:10 al_e004_s4 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 101 626 53) scored al/plain: [49, 64] scored al/chat: [49, 64] generated al/plain: strict [50, 64] generated al/chat: strict [14, 64] 
+2026-09-25 20:45:30 al_e004_s5 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 79 637 58) scored al/plain: [51, 64] scored al/chat: [50, 64] generated al/plain: strict [51, 64] generated al/chat: strict [38, 64] 
+2026-09-25 20:45:30 tables: SUMMARY (LIK/GEN plain, all 64): base 0.22/0.09; e005_s1 0.98/1.00; e005_s2 0.97/1.00; e005_s3 0.97/0.98; e005_s4 1.00/1.00; e005_s5 0.97/0.98; e004_s1 0.83/0.77; e004_s2 0.80/0.84; e004_s3 0.77/0.75; e004_s4 0.77/0.78; e004_s5 0.80/0.80 (al/tables_al.txt)
+2026-09-25 20:45:30 QUEUE AL DONE

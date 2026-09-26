@@ -18,6 +18,9 @@ runs/fakes/<NAME>/transcripts.jsonl + scores.jsonl, READ BACK from disk and scor
      ORDER_ABS is gated on the cells it targets (RECALL:abstain, LOOKUP:*) at the cell bar; MYONLY, MARKER_OBJ
      (the skill a cell measures), CONSIST (OWN, see notes) and VARIED (LOOP, see notes) are reported, not gated.
      The G4 histogram is also written for the 11 generic + the audit value rules together (diagnostic).
+  The table prints the loop rate and, beside it, the OD6 (iii) ack-repeat rate over every reply (reported only).
+  No --own-cf runs here: OWN is the own-history score (keys), R is None (OD1 b) and the table prints R_ungated;
+     the OD1 b gate itself is checked in validate_machinery.c_owngate.
 Writes logs/e2e_fakes.txt; exit 1 if G1-G3 fail, 2 if only G4 fails (items to rebuild), 0 if all pass.
 Run: python3 -B validate_e2e.py"""
 import os
@@ -86,7 +89,7 @@ def g2(name, s, us, cells):
     fams, only = targets(name)
     bad = []
     if only is None:
-        bad += [f"family {f}={s['families'][f]:.2f}" for f in fams if s["families"][f] > BAR["family"]]
+        bad += [f"family {f}={s['keys'][f]:.2f}" for f in fams if s["keys"][f] > BAR["family"]]
     for (f, c), v in sorted(cells.items()):
         if f in fams and (only is None or c == only) and v > BAR["cell"]:
             bad.append(f"cell {f}:{c}={v:.2f}")
@@ -112,10 +115,11 @@ def g3(name, s):
 
 def table(summ):
     keys = S.COMPOSITE + ["CORR:U", "CORR:C_noupd", "CORR:C_twoslot", "T0", "K:followup"]
-    lines = [f"{'fake':11s}" + "".join(f"{k.replace('CORR:', '')[:8]:>9s}" for k in keys) + "   loop   R"]
+    lines = [f"{'fake':11s}" + "".join(f"{k.replace('CORR:', '')[:8]:>9s}" for k in keys) + "   loop    ack  R_ug"]
     for n, s in summ.items():
         vals = "".join(f"{s['keys'].get(k, float('nan')):9.2f}" for k in keys)
-        lines.append(f"{n:11s}{vals}  {s['loop_rate']:.3f} {s['R']:5.1f}")
+        ack = "  None" if s["ack_repeat"] is None else f"{s['ack_repeat']:.3f}"
+        lines.append(f"{n:11s}{vals}  {s['loop_rate']:.3f}  {ack} {s['R_ungated']:5.1f}")
     return lines
 
 

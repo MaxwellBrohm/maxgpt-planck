@@ -3,7 +3,8 @@
    of a record (PERSIST and LOOP: the first probe and the one with the shortest question). Every fixture must get
    its stated verdict from the real graders (correct replies pass; empty, loop, copy, leak, cap, hedge, negation,
    question, guess list, shotgun, user voice, wrong candidate, stale, echo fail).
-2. Conversation tests: unit scores (mean / all) and the role-leak scan on patched IDEAL conversations.
+2. Conversation tests: unit scores (mean / all), the role-leak scan and the OD6 (iii) loop / ack-repeat flags
+   (fixtures_more.conv_loop_fixtures) on patched IDEAL conversations.
 3. Mutants (mutants_graders.py): each must be KILLED (a fixture or conversation test gets the wrong verdict), not
    crash. Writes logs/mutation_graders.txt; exits 1 on any fixture miss, surviving mutant or crash."""
 import json
@@ -81,7 +82,14 @@ def conv_tests(index):
     for rid, rec in index.items():
         g = G.grade_conv(rec, history(rec, {}), ["eos"] * rec["n_turns"])
         out.append((f"ideal_unit:{rid}", g["unit"], 1.0 if rec["probes"] else None))
-        out.append((f"ideal_clean:{rid}", bool(g["leaks"]) or any(g["flags"]), False))
+        out.append((f"ideal_clean:{rid}", bool(g["leaks"]) or any(g["flags"]) or any(g["ack_repeat"])
+                    or any(g["ack_of_answer"]), False))
+    for label, rec, patch, want in F2.conv_loop_fixtures(index.values()):     # OD6 (iii)
+        g = G.grade_conv(rec, history(rec, patch), ["eos"] * rec["n_turns"])
+        got = ([i + 1 for i, f in enumerate(g["flags"]) if "LOOP" in f],
+               [i + 1 for i, a in enumerate(g["ack_repeat"]) if a],
+               [i + 1 for i, a in enumerate(g["ack_of_answer"]) if a])
+        out.append((f"od6_{label}:{rec['id']}", got, want))
     first = {}
     for rec in index.values():
         first.setdefault(rec["family"], rec)

@@ -1,0 +1,97 @@
+E005 AL diagnostic (al/al_items.jsonl, 64 items; groups n: all 64, AL1+AL2+AL4 48, needs linking 14, AL1 16, pl:other_obj 16, pl:filler 16, pl:adjacent 32, AL2 16, AL3 16, AL4 16)
+
+model     measure              all         AL1         AL2         AL3         AL4 AL1+AL2+AL4    adjacent      filler   other_obj needs linki
+----------------------------------------------------------------------------------------------------------------------------------------------
+base      LIK plain           0.22        0.44        0.19        0.00        0.25        0.29        0.25        0.25        0.12        0.29
+base      GEN plain           0.09        0.31        0.00        0.00        0.06        0.12        0.16        0.06        0.00        0.00
+base      LIK chat            0.19        0.31        0.25        0.00        0.19        0.25        0.19        0.25        0.12        0.29
+base      GEN chat            0.08        0.19        0.06        0.00        0.06        0.10        0.09        0.06        0.06        0.07
+          LIK plain picks LN's value where LN is wrong: 7/48
+          LIK plain picks T's value where T is wrong: 5/16
+          LIK chat picks LN's value where LN is wrong: 6/48
+          LIK chat picks T's value where T is wrong: 5/16
+e005_s1   LIK plain           0.98        1.00        1.00        1.00        0.94        0.98        0.97        1.00        1.00        1.00
+e005_s1   GEN plain           1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+e005_s1   LIK chat            0.97        1.00        1.00        1.00        0.88        0.96        0.94        1.00        1.00        1.00
+e005_s1   GEN chat            0.97        1.00        1.00        1.00        0.88        0.96        0.94        1.00        1.00        1.00
+          LIK plain picks LN's value where LN is wrong: 1/48
+          LIK plain picks T's value where T is wrong: 0/16
+          LIK chat picks LN's value where LN is wrong: 2/48
+          LIK chat picks T's value where T is wrong: 0/16
+e005_s2   LIK plain           0.97        0.94        1.00        1.00        0.94        0.96        0.94        1.00        1.00        1.00
+e005_s2   GEN plain           1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+e005_s2   LIK chat            0.98        1.00        1.00        1.00        0.94        0.98        0.97        1.00        1.00        1.00
+e005_s2   GEN chat            0.97        1.00        1.00        1.00        0.88        0.96        0.97        1.00        0.94        1.00
+          LIK plain picks LN's value where LN is wrong: 0/48
+          LIK plain picks T's value where T is wrong: 0/16
+          LIK chat picks LN's value where LN is wrong: 1/48
+          LIK chat picks T's value where T is wrong: 0/16
+e005_s3   LIK plain           0.97        1.00        1.00        1.00        0.88        0.96        0.97        0.94        1.00        1.00
+e005_s3   GEN plain           0.98        1.00        1.00        1.00        0.94        0.98        1.00        0.94        1.00        1.00
+e005_s3   LIK chat            0.98        1.00        1.00        1.00        0.94        0.98        0.97        1.00        1.00        1.00
+e005_s3   GEN chat            0.98        1.00        1.00        1.00        0.94        0.98        0.97        1.00        1.00        1.00
+          LIK plain picks LN's value where LN is wrong: 2/48
+          LIK plain picks T's value where T is wrong: 0/16
+          LIK chat picks LN's value where LN is wrong: 1/48
+          LIK chat picks T's value where T is wrong: 0/16
+e005_s4   LIK plain           1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+e005_s4   GEN plain           1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+e005_s4   LIK chat            1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+e005_s4   GEN chat            1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+          LIK plain picks LN's value where LN is wrong: 0/48
+          LIK plain picks T's value where T is wrong: 0/16
+          LIK chat picks LN's value where LN is wrong: 0/48
+          LIK chat picks T's value where T is wrong: 0/16
+e005_s5   LIK plain           0.97        1.00        0.94        0.94        1.00        0.98        1.00        0.88        1.00        1.00
+e005_s5   GEN plain           0.98        1.00        0.94        1.00        1.00        0.98        1.00        0.94        1.00        1.00
+e005_s5   LIK chat            0.98        1.00        0.94        1.00        1.00        0.98        1.00        0.94        1.00        1.00
+e005_s5   GEN chat            1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+          LIK plain picks LN's value where LN is wrong: 0/48
+          LIK plain picks T's value where T is wrong: 0/16
+          LIK chat picks LN's value where LN is wrong: 0/48
+          LIK chat picks T's value where T is wrong: 0/16
+e004_s1   LIK plain           0.83        1.00        0.56        0.75        1.00        0.85        0.97        0.69        0.69        0.71
+e004_s1   GEN plain           0.77        1.00        0.38        0.69        1.00        0.79        0.94        0.62        0.56        0.64
+e004_s1   LIK chat            0.81        1.00        0.56        0.69        1.00        0.85        0.91        0.69        0.75        0.71
+e004_s1   GEN chat            0.03        0.06        0.06        0.00        0.00        0.04        0.03        0.00        0.06        0.14
+          LIK plain picks LN's value where LN is wrong: 0/48
+          LIK plain picks T's value where T is wrong: 5/16
+          LIK chat picks LN's value where LN is wrong: 0/48
+          LIK chat picks T's value where T is wrong: 4/16
+e004_s2   LIK plain           0.80        1.00        0.69        0.50        1.00        0.90        0.91        0.69        0.69        0.71
+e004_s2   GEN plain           0.84        1.00        0.81        0.56        1.00        0.94        0.94        0.81        0.69        0.79
+e004_s2   LIK chat            0.86        1.00        0.81        0.69        0.94        0.92        0.97        0.69        0.81        0.86
+e004_s2   GEN chat            0.42        0.38        0.44        0.31        0.56        0.46        0.50        0.31        0.38        0.57
+          LIK plain picks LN's value where LN is wrong: 0/48
+          LIK plain picks T's value where T is wrong: 3/16
+          LIK chat picks LN's value where LN is wrong: 1/48
+          LIK chat picks T's value where T is wrong: 2/16
+e004_s3   LIK plain           0.77        0.94        0.50        0.62        1.00        0.81        0.91        0.62        0.62        0.57
+e004_s3   GEN plain           0.75        0.94        0.50        0.56        1.00        0.81        0.88        0.69        0.56        0.57
+e004_s3   LIK chat            0.73        1.00        0.38        0.56        1.00        0.79        0.88        0.56        0.62        0.57
+e004_s3   GEN chat            0.03        0.06        0.00        0.06        0.00        0.02        0.03        0.00        0.06        0.07
+          LIK plain picks LN's value where LN is wrong: 2/48
+          LIK plain picks T's value where T is wrong: 7/16
+          LIK chat picks LN's value where LN is wrong: 1/48
+          LIK chat picks T's value where T is wrong: 7/16
+e004_s4   LIK plain           0.77        1.00        0.50        0.56        1.00        0.83        0.88        0.69        0.62        0.64
+e004_s4   GEN plain           0.78        0.94        0.50        0.69        1.00        0.81        0.91        0.75        0.56        0.57
+e004_s4   LIK chat            0.77        0.94        0.44        0.69        1.00        0.79        0.84        0.75        0.62        0.50
+e004_s4   GEN chat            0.22        0.25        0.12        0.12        0.38        0.25        0.28        0.12        0.19        0.29
+          LIK plain picks LN's value where LN is wrong: 0/48
+          LIK plain picks T's value where T is wrong: 5/16
+          LIK chat picks LN's value where LN is wrong: 1/48
+          LIK chat picks T's value where T is wrong: 6/16
+e004_s5   LIK plain           0.80        1.00        0.62        0.56        1.00        0.88        0.91        0.75        0.62        0.57
+e004_s5   GEN plain           0.80        1.00        0.62        0.56        1.00        0.88        0.94        0.69        0.62        0.64
+e004_s5   LIK chat            0.78        1.00        0.56        0.56        1.00        0.85        0.91        0.69        0.62        0.57
+e004_s5   GEN chat            0.59        0.81        0.31        0.44        0.81        0.65        0.66        0.62        0.44        0.43
+          LIK plain picks LN's value where LN is wrong: 0/48
+          LIK plain picks T's value where T is wrong: 5/16
+          LIK chat picks LN's value where LN is wrong: 0/48
+          LIK chat picks T's value where T is wrong: 4/16
+
+ADDITION check: E005 alias reading 'DATA GAP'; E005 seeds with AL1+AL2+AL4 LIK plain < 0.5: 0 of 5 planned ([]); scored 5.
+  -> the ADDITION's sentence does not apply (it needs DATA GAP and >= 3 of 5 seeds < 0.5)
+
+SUMMARY (LIK/GEN plain, all 64): base 0.22/0.09; e005_s1 0.98/1.00; e005_s2 0.97/1.00; e005_s3 0.97/0.98; e005_s4 1.00/1.00; e005_s5 0.97/0.98; e004_s1 0.83/0.77; e004_s2 0.80/0.84; e004_s3 0.77/0.75; e004_s4 0.77/0.78; e004_s5 0.80/0.80

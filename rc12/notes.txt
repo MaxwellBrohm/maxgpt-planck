@@ -1,5 +1,7 @@
-RC-12 notes (append-only; SPEC.txt is the design, this file records choices SPEC leaves open, deviations and
-results). No model was loaded for anything below. Nothing outside rc12/ was written.
+RC-12 notes (append-only, except superseded-by pointers added in place; SPEC.txt is the design, this file records
+choices SPEC leaves open, deviations and results). No model was loaded for anything below. Outside rc12/, only
+harness/ files were written (STEP 6 and STEP 7) and, in STEP 7, a short pointer paragraph appended to each of
+harness/notes.txt and pipeline/notes.txt.
 
 STEP 2 (2026-09-24 night): conversation generators and the DEV split
 BUILT
@@ -411,11 +413,15 @@ FINAL CHEATER TABLE (validate_e2e, plain render; worst composite family and wors
 NEXT STEP MUST KNOW
   Full check order (each under 2 minutes): python3 -B build_dev.py; test_gens.py; audit_rules.py; audit_graders.py;
   validate_e2e.py; validate_machinery.py; mutation_graders.py; mutation_gens.py > logs/mutation_gens.txt;
-  mutation_audit.py (about 90 s); mutation_e2e.py --part 1/3, 2/3, 3/3. Mutants match exact source text: edit
+  mutation_audit.py (about 90 s); mutation_e2e.py --part 1/3, 2/3, 3/3. (Superseded by STEP 7 VERIFIER FIXES:
+  mutation_audit.py --part 1/2, 2/2 and mutation_e2e.py --part 1/6 to 6/6.) Mutants match exact source text: edit
   mutants_graders.py / mutants_e2e.py / mutation_audit.py with the line they target.
-  For model runs, also run OWN with --own-cf (--families OWN) and report it beside OWN.
+  For model runs, also run OWN with --own-cf (--families OWN) and report it beside OWN. (Superseded by STEP 7: the
+  cf run now GATES OWN, OD1 (b); without it R is None.)
   Open for the lock: OWN-CF as a gate or a report; LOOP in the composite; the strict cases (a)-(c); PERSIST drop
   list; G10 / G11 as prereg gates; the sealed split needs its own include-word pool in grade_fmt_dyn.STUFF_POOL.
+  (STEP 7: Max ruled the gate, LOOP, strict cases and G10 / G11 on 2026-09-25; the PERSIST drop list and the sealed
+  include-word pool are still open.)
 
 STEP 6 (2026-09-25 night): RC-12 responder for Planck checkpoints (planck_responder.py) + runner flag
 BUILT
@@ -459,3 +465,153 @@ TESTS (harness side, they need torch: harness/test_rc12_eval.py, test_rc12_hook.
 NOT DONE
   No trained Planck model and no Planck tokenizer exist yet; nothing real has been scored. No batching across
   conversations (one sequence at a time). The plain render through Planck is untested beyond its prompt string.
+
+STEP 7 (2026-09-25 evening): Max's rulings on OD1-OD8 (prereg draft s17) and the code for OD1 and OD6
+RULINGS (Max: "do everything you recommended, i trust you", later "you have full permission"; every pick is the one
+the draft recommended)
+  OD1 (b)   an OWN unit is right only if right in BOTH the own-history run and the --own-cf run.
+  OD2 (a)   LOOP stays 1 of the 10 composite families.
+  OD3 (a)   ORDER_ABS accepted at 0.50, gated at the cell bar only, stated in the prereg; the training pipeline's
+            lookup events must balance the abstain position.
+  OD4 (c)   F6, F7, F8 out of RC-12, with the reasons stated in the draft s17.
+  OD5 (a)   program-written lookup lines allowed as program output, with the three conditions of s17 (syntax tokens
+            listed in the provenance record; the sealed session picks its LOOKUP table format without reading the
+            pipeline's; 13-gram decontamination covers these lines).
+  OD6 (iii) loop equality counts only on replies to asking turns (P, X, Q, D; LOOP requests are P), at any length;
+            identical replies to statement turns (S, L, C, I, O, T) are reported as an ack-repeat rate.
+  OD7       strict primary, lenient twins reported beside.
+  OD8       yes: G10 (audit_rules) and G11 (audit_graders) are locked gates for dev and sealed.
+  OD2, OD3, OD4, OD5, OD7 and OD8 keep the machinery as it was: no code change.
+CODE (files as listed in the OD1 and OD6 step reports; nothing committed)
+  OD1  score.py: GATE / SLOT; units() sets cf rows aside, emits OWN_CF units, and OWN_GATED units (1.0 only if 1.0 in
+       both runs, joined by conversation id within train_seed and seed) only when every OWN row of the run has its
+       twin; key_scores() drops OWN_GATED if any run lacks it, so families["OWN"] and R are None, never the ungated
+       value; summarize() keeps cf rows out of every other statistic and adds R_ungated and own_gate.
+       score_stats.py: bootstrap OWN slot gated (refuses without cf rows); headroom on the gated OWN; sensitivity R
+       None when a family is missing; PERSIST base rates leave cf rows out.
+       validate_machinery.py: new group c_owngate; c_stats adds each fake's cf OWN rows and two refusal checks;
+       c_scoring checks R None without cf rows. validate_e2e.py: G2 reads keys, the table prints R_ungated.
+       mutants_e2e.py #50-#60 (#50: the AND replaced by the own-history result alone). runner.py and own_cf.py:
+       docstrings; main prints R_ungated and own_gate. harness/rc12_eval.py and harness/test_rc12_eval.py record
+       R_ungated and own_gate (the test expects R None); NOT RUN (they need torch and a model load).
+  OD6  grade_loop.py: KINDS, ASKS, asks(kind); classify, degenerate and conversation_flags take the turn kind; new
+       ack_repeat and conversation_acks. Equality is charged only when the later reply answers P, X, Q or D, and
+       it is compared with EVERY earlier reply of the conversation (whatever turn that one answered). Self-copy is
+       unchanged, so an identical statement-turn reply of 12+ words is still a LOOP (fixture long_stated).
+       graders.py, grade_fmt_dyn.py, grade_role.py pass probe["kind"]; grade_conv returns an ack_repeat list.
+       runner.py rows record ack_repeat. score.py: ack_stats; summarize adds ack_repeat and ack_repeat_of_statements
+       (None if any row lacks the record); Level A untouched.
+       fixtures_more.py: lfix loop_request_short_ok, loop_request_repeat; conv_loop_fixtures (ack_fixed,
+       same_answer, loop_request, ack_as_answer, stated_after, long_stated). mutation_graders.py: conv_tests;
+       ideal_clean also requires no ack-repeats. mutants_graders.py: +7 (144). fakes_family.py: ACKER (IDEAL, but
+       "Got it." on every statement turn). validate_machinery.py: c_ackrep (11 groups). validate_e2e.py: ack column.
+       mutants_e2e.py: #61-#65 (66). harness/rc12_eval.py does NOT record ack_repeat.
+  Numbers reported by the steps (fakes only, dev): one fixed ack on every statement turn: loop rate 0.1771 under the
+  old clause, 0.0000 now, ack_repeat 0.1771 of all replies and 0.6956 of statement-turn replies. Fixed-ack cheaters'
+  loop rate 0.51 to 0.61 (was 0.58 to 0.82; corrected in VERIFIER FIXES below: those are the 12 generic
+  cheaters, the audit cheaters reach 0.67); they still fail the loop bar because they also ack D turns. CONSIST
+  with cf rows: gated OWN 0.00, R 13.7, R_ungated 23.7.
+CONSEQUENCES
+  Every real model's R, bootstrap, headroom and sensitivity need its --own-cf --families OWN run with the same seeds
+  and --train-seed; without it they return None or refuse. The trainer hook's R is therefore always None (it records
+  R_ungated). Transcripts graded before OD6 carry no ack_repeat (reported None) and their stored flags follow the old
+  rule; no real-model transcripts exist yet.
+DOCS
+  prereg/RC-12.draft.txt: RULED lines in s17; the header, s0, s5, s6, s7, s8 (G2, G3, G10, G11, cheater table), s9,
+  s10, s13 (S2, S6), s15, s16, s18 and s19 item 1 updated to match. The step 5 "NEXT STEP MUST KNOW" above carries
+  pointers here. NOT updated: SPEC.txt. (The OD6 report said validate_e2e.py's docstring says "near 0.8"; grep finds
+  no "near" in it, only "the fixed ... ack already fails the loop criterion", which still holds.)
+  The draft's s6 and s8 counts (137 grader mutants, 50 e2e mutants) predate this step; s0 says so.
+CHECK ORDER (superseded by the one at the end of VERIFIER FIXES below): 2026-09-25 21:04 EDT, full step 5 order on
+  the real tree (OD1 + OD6 code in), each step alone under
+  timeout 115, no fix needed, ALL PASS:
+  build_dev          exit 0, 640 records (608 twelve-turn); dev/rc12_dev.jsonl sha256 c5074e68...991ecd before AND
+                     after (unchanged; also equal to git HEAD, git status shows no change under rc12/dev)
+  test_gens          exit 0, 0 failures over 640 records (15 s)
+  audit_rules        exit 0, GATE PASS (cell <= 0.50, family <= 0.40); log identical to HEAD
+  audit_graders      exit 0, 0 wrong verdicts over 21012 graded variants; log identical to HEAD
+  validate_e2e       exit 0, G1-G3 PASS, G4 PASS (41 fakes; histogram 0:310 1:43 2:76 3:53); new ack and R_ug columns
+                     (IDEAL / IDEAL_ALT / VARIED ack 0.000, R_ug 100.0; CONSIST R_ug 23.7)
+  validate_machinery exit 0, ALL 11 CHECK GROUPS PASS
+  mutation_graders   exit 0, baseline 0 fixture misses and 0 conversation-test misses, 144 / 144 killed (37 s)
+  mutation_gens      exit 0, clean records 0 failures, 28 / 28 killed; log identical to HEAD
+  mutation_audit     exit 0, unmutated build clean, 13 / 13 killed (90 s)
+  mutation_e2e       exit 0 in each part, 22 + 22 + 22 = 66 / 66 killed, 0 survived / crashed / malformed, baseline
+                     failures none; parts took 100 s, 94 s and 86 s (was about 55 s at 50 mutants), so the next
+                     mutant added should move to --part i/4 to keep each run under 2 minutes.
+  Not in this order and not run: harness/test_rc12_eval.py, test_rc12_hook.py (need torch and a model load).
+VERIFIER FIXES (2026-09-25 night): the OD1, OD6 and prereg verifiers reported 21 problems; each was re-checked on the
+real tree before any change (reproductions in the step report). Nothing committed.
+OD1 GATE
+  own_cf.py  swap() finds the commitment with G-DYN's own rules: grade_fmt_dyn.list_spans (new; parse_list is now
+             built on it: same regex, same head cut, str.splitlines) for lists, asserted_hits for picks, and option
+             names are exchanged with pools_vals.value_re (G-DYN's matcher). Before, its ITEM regex took empty items
+             and it split on "\n" only, so a padded list ("4. (or mix them)"), a blank bullet ("- ") or U+2028
+             separators left the history unswapped and the unit effectively ungated (LISTPAD re-run on the real
+             tree: OWN 1.0, OWN_CF 0.3333, OWN_GATED 0.3333; now 1.0 / 0.0 / 0.0 for LISTPAD, LISTBLANK, LISTLS).
+             A pick rewrite that does not parse back as the next option returns UNSWAPPED: runner.play marks the
+             turn and run_one the row (cf_unswapped), score.py counts that unit 0 in OWN_GATED and own_gate reports
+             how many. The docstring claim "they are source failures either way" is corrected.
+  score.py   twin(): a cf row is a twin only with the same responder and render (before: CONSIST history + IDEAL cf
+             rows gave OWN_GATED 1.0; now None, so R is None). select(): seeds are chosen from the own-history rows
+             (before: greedy history + sampled cf rows kept only the cf rows, replies 0). summarize() keeps the
+             selected rows as sel; the ack and answer-repeat rates read only the own-history rows.
+  tests      fakes_family NEXT (CONSIST off by one: wrong on its own history, right on the cf one), LISTPAD,
+             LISTBLANK, LISTLS. c_owncf adds the three list fakes (OWN 1.00 without cf, 0.00 with, every Q reply
+             swapped). c_owngate adds NEXT (OWN 0, OWN_CF 1, gated 0 in both cells), a cf run of another responder
+             and one in another render (gated OWN missing), greedy history + sampled cf rows, random per-unit
+             outcomes over 2 training x 2 sampling seeds with the cf rows shuffled against a per-unit AND made in
+             the test, and an UNSWAPPED run (own_cf._exchange stubbed to a no-op: the 32 pick rows marked,
+             OWN_GATED:pick 0, OWN_GATED:list 1).
+  mutants    mutants_e2e #66-#76: the cf result alone (the verifier's survivor m2), product of rates (m5),
+             misaligned join (m4), unswapped mark ignored, responder check dropped, render check dropped, seeds from
+             the cf rows, runner mark dropped (turn, row), pick verification dropped, the pre-fix list line rule.
+             Before the fixes m2, m4 and m5 survived gates + checks on the real tree ("SURVIVED m2 / m4 / m5");
+             all are killed now. #47, #48, #50, #51, #53 and #64 retargeted to the edited lines.
+OD6 REPORTS (the ruling's letter is unchanged)
+  grade_loop.answer_repeat / conversation_answer_repeats; graders.grade_conv ack_of_answer; runner rows
+  ack_of_answer; score.answer_repeat_stats -> summary ack_repeat_of_answers (share of statement-turn replies equal to
+  an earlier reply to an ASKING turn: an answer said again, a subset of the ack-repeats). harness/rc12_eval.py records
+  ack_repeat, ack_repeat_of_statements and ack_repeat_of_answers (checked without torch: evaluate() on a stub ACKER
+  responder returns the three keys; harness/test_rc12_eval.py and test_rc12_hook.py NOT RUN, they need torch).
+  fakes_family PARROT. c_ackrep: PARROT loop 0 and the Level A loop criterion met (the ruling's letter), answer-repeat
+  rate 360 / 1866 = 0.193, equal to a count made in the test; ACKER and IDEAL answer-repeat 0; ACKER's and PARROT's
+  rates unchanged by their --own-cf rows (the verifier's cf-ack mutant, #77 / #78, now dies).
+  fixtures_more.conv_loop_fixtures: want = (LOOP turns, ack-repeat turns, answer-repeat turns); new q_copy (an OWN Q
+  reply copying an earlier reply: LOOP at Q) and x_copy (the same on a ROLE X turn). mutants_graders +6 (150): Q
+  exempted, ASKS "PXD", ASKS "PQD", answer set = every earlier reply, answer_repeat always False, ack_of_answer taken
+  from conversation_acks; each killed by its conversation test. mutants_e2e #77-#80: cf rows in the ack and answer
+  rates, answer repeats never counted, runner drops ack_of_answer.
+OPEN FOR MAX (not changed here; prereg draft s17 OD6 follow-up)
+  (1) PARROT (its last short answer again on later statement turns) meets the Level A loop criterion under the
+  ruling's letter; only the answer-repeat rate (0.193) shows it. (2) 20 of the 90 dev fillers (904 of 4,010 D turns)
+  are small-talk statements, yet D counts as asking: one fixed reply on those turns alone gives loop rate 0.0600.
+  (3) A terse OWN answer that repeats the model's own Q reply ("Quizzards." twice) fails the probe as a LOOP (draft
+  s6 strict case d); its rate is to be measured on the dev baselines.
+CORRECTIONS
+  Probes: 1,404 dev probes (P 1,248, X 156), all on P or X turns (a step report said 1,020; no file carried it).
+  Numbers above: the loop rates 0.51 to 0.61 are the 12 generic cheaters (ECHO 0.506 to DEFLECT / ABSTAIN 0.610;
+  0.575 to 0.820 under the original clause); audit and reported cheaters reach 0.674 (PENULT_MARKER; 0.883 before).
+  Timing: mutation_audit and mutation_e2e are split into parts now (--part), each well under 2 minutes.
+DOCS
+  prereg draft s0, s3, s6 (150 of 150; strict case d), s7 (answer repeats; D small-talk statements), s8 (G3 ranges,
+  test counts, machinery fakes), s9 (twin rule, unswapped, the Level R wording), s13 S6 and s15 (the OD5
+  decontamination condition is ruled), s16, s17 (OD5 fact, OD6 follow-up). A short pointer paragraph appended to
+  pipeline/notes.txt and harness/notes.txt (OD5 ruled with its three conditions; OD3's lookup balance obligation).
+  NOT updated: SPEC.txt (its s1 still calls every filler a request).
+CHECK ORDER: 2026-09-25 21:51 to 22:02 EDT, full order on the real tree after the fixes, each step alone under
+  timeout 115 (E004's guard.py training ran beside it; load average 2.5 to 8.2), ALL PASS:
+  build_dev          exit 0 (6 s), 640 records (608 twelve-turn); dev sha256 c5074e68...991ecd before AND after
+  test_gens          exit 0 (12 s), 0 failures over 640 records
+  audit_rules        exit 0, GATE PASS (cell <= 0.50, family <= 0.40); log unchanged vs HEAD
+  audit_graders      exit 0 (3 s), 0 wrong verdicts over 21012 graded variants; log unchanged vs HEAD
+  validate_e2e       exit 0 (10 s), G1-G3 PASS, G4 PASS (histogram 0:310 1:43 2:76 3:53); logs/e2e_fakes.txt
+                     byte-identical to the 21:04 log
+  validate_machinery exit 0 (10 s), ALL 11 CHECK GROUPS PASS
+  mutation_graders   exit 0 (36 s), baseline 0 fixture misses and 0 conversation-test misses, 150 / 150 killed
+  mutation_gens      exit 0 (13 s), clean records 0 failures, 28 / 28 killed; log unchanged vs HEAD
+  mutation_audit     --part 1/2 exit 0 (56 s, 7 / 7), --part 2/2 exit 0 (47 s, 6 / 6); unmutated build clean in both
+                     (logs/mutation_audit_part1.txt, _part2.txt; logs/mutation_audit.txt is the 21:04 whole run)
+  mutation_e2e       --part 1/6 .. 6/6, exit 0 each (59 to 64 s), 14 + 14 + 14 + 13 + 13 + 13 = 81 / 81 killed,
+                     0 survived / crashed / malformed, baseline failures none in every part
+  Not in this order and not run: harness/test_rc12_eval.py, test_rc12_hook.py (need torch and a model load).

@@ -72,7 +72,7 @@ def g_fmt(reply, stop, prior, rec, probe):
     text = T.norm(reply)
     f = probe["fmt"]
     fails = []
-    if L.degenerate(reply, stop, prior):
+    if L.degenerate(reply, stop, prior, probe["kind"]):
         fails.append("f1_degen")
     if T.echo(text, probe["question"]):
         fails.append("f2_echo")
@@ -85,17 +85,23 @@ def g_fmt(reply, stop, prior, rec, probe):
     return dict(ok=not fails, fails=fails, lenient=rule_ok(f["rule"], f["arg"], text))
 
 
-def parse_list(t):
-    """items of a numbered / bulleted list, cut to their head words (E001 battery.parse_list)."""
-    items = []
-    for line in (t or "").splitlines():
+def list_spans(t):
+    """(line number in t.splitlines(), span of the item text in that line, item cut to its head words) for every
+    line that parse_list keeps. The ONE list rule: G-DYN parses with it and own_cf.swap rewrites with it."""
+    out = []
+    for k, line in enumerate((t or "").splitlines()):
         m = re.match(r"^\s*(?:\d+[.)]|[-*\u2022])\s+(.*\S)", line)
         if m:
             s = re.sub(r"[*_`\"]", "", m.group(1))
             s = re.split(r"\s[-\u2013\u2014:(]|[:(,]", s)[0].strip()
             if s:
-                items.append(s)
-    return items
+                out.append((k, m.span(1), s))
+    return out
+
+
+def parse_list(t):
+    """items of a numbered / bulleted list, cut to their head words (E001 battery.parse_list)."""
+    return [s for _, _, s in list_spans(t)]
 
 
 def stems(t):
@@ -127,7 +133,7 @@ def g_list(reply, stop, prior, rec, probe):
     text = T.norm(reply)
     have = stems(text)
     fails = []
-    if L.degenerate(reply, stop, prior):
+    if L.degenerate(reply, stop, prior, probe["kind"]):
         fails.append("d1_degen")
     if not gold_st or not all(s in have for s in gold_st):
         fails.append("d2_gold")

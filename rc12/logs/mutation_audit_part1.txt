@@ -1,0 +1,13 @@
+RC-12 mutation_audit.py: generator mutants that undo a step 5 fix; the named detector must go red.
+part 1/2: 7 of 13 mutants
+unmutated build: gate and family checks clean
+
+KILLED  echo balance off [gate] <- [('ANTI_OVERLAP_E', 'RECALL', 0.4166666666666667), ('ANTI_OVERLAP_E', 'RECALL:d1-3', 0.625), ('ANTI_OVERLAP_L', 'RECALL', 0.4375)]
+KILLED  TWOHOP echo on lures only [test] <- ["TWOHOP echo chain gold / lure 4 / 8 per schema (audit) Counter({('door', False): 12, ('city', False): 12, ('day', False): 12, ('month', False): 12})"]
+KILLED  CORR lures all plain [test] <- ["CORR U-diff tails after A's latest [(('after', ('B0', 'B1', 'Lp')), 1), (('after', ('Lp', 'B0', 'B1')), 7), (('before', ()), 2), (('before', ('Lp',)), 2), (('before', ('Lp', 'Lp')), 4)]", "CORR U-same tails after A's latest [(('after', ('B0', 'B1', 'Lp')), 3), (('after', ('Lp', 'B0', 'B1')), 5), (('before', ('Lp',)), 3), (('before', ('Lp', 'Lp')), 5)]"]
+KILLED  C_noupd echo lure dropped [test] <- ['rc12-dev-corr-033 C_noupd echo lure', 'rc12-dev-corr-034 C_noupd echo lure']
+KILLED  CORR gold length rank off [gate] <- [('SHORTEST', 'CORR:U-diff', 0.625)]
+KILLED  TOPIC open project never updated [test] <- ['rc12-dev-topic-001 later update roles', 'rc12-dev-topic-007 later update roles']
+KILLED  RECALL abstain X always first [test] <- ['RECALL abstain X/P order (audit: 6/6) Counter({True: 12})']
+
+killed 7 of 7 in 56 s

@@ -1,0 +1,14 @@
+20:29:09 start free=73% swap=3481MB cmd=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B run_chat.py ../weights/HuggingFaceTB__SmolLM2-135M-Instruct__s5 --mode greedy --out ../transcripts/HuggingFaceTB__SmolLM2-135M-Instruct__s5__greedy.jsonl
+20:29:35 KILL: swap_grew_1302MB
+20:29:40 end exit=-15 killed=swap_grew_1302MB active=26s paused=0s pauses=0 min_free=31% max_swap=4783MB peak_rss=558MB
+20:46:40 start free=77% swap=4522MB cmd=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B run_chat.py ../weights/HuggingFaceTB__SmolLM2-135M-Instruct__s5 --mode greedy --out ../transcripts/HuggingFaceTB__SmolLM2-135M-Instruct__s5__greedy.jsonl
+20:47:12 t=   32s active=   32s free=58% swap=4514MB rss=380MB
+20:47:22 KILL: swap_grew_3162MB
+20:47:27 end exit=-15 killed=swap_grew_3162MB active=42s paused=0s pauses=0 min_free=31% max_swap=7683MB peak_rss=559MB
+20:47:59 start free=74% swap=7491MB cmd=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B run_chat.py ../weights/HuggingFaceTB__SmolLM2-135M-Instruct__s5 --mode greedy --out ../transcripts/HuggingFaceTB__SmolLM2-135M-Instruct__s5__greedy.jsonl
+20:48:31 t=   32s active=   32s free=70% swap=6970MB rss=560MB
+20:49:02 t=   63s active=   63s free=77% swap=7905MB rss=370MB
+20:49:33 t=   94s active=   94s free=78% swap=7785MB rss=371MB
+20:50:03 t=  124s active=  124s free=79% swap=7585MB rss=371MB
+20:50:34 t=  155s active=  155s free=74% swap=9528MB rss=242MB
+20:50:49 end exit=0 killed=None active=170s paused=0s pauses=0 min_free=58% max_swap=9536MB peak_rss=568MB

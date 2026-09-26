@@ -1,22 +1,19 @@
-RC-12 mutation_e2e.py part 1/3: 17 of 50 mutants, fresh process each, 59 s. No model.
+RC-12 mutation_e2e.py part 1/6: 14 of 81 mutants, fresh process each, 64 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #00 runner: history gets the IDEAL reply instead of the model's own  <- G1 IDEAL_ALT: OWN:list=0.00
-KILLED    #03 runner: role cut not recorded as the stop reason  <- stops: CONTINUER plain: fake user turn not cut
 KILLED    #06 runner: dropped-turn off by one  <- trunc: ctx 556: verdict, runner's lost turns and the fake's history disagree [('rc12-dev-t0-008', 12), ('rc12-dev-t0-022', 12), ('rc12-dev-t0-029', 12
-KILLED    #09 runner: unit not recomputed after truncation  <- trunc: ctx 556: units not recomputed after truncation ['rc12-dev-t0-001', 'rc12-dev-t0-003', 'rc12-dev-t0-004']
 KILLED    #12 render: role cut case-sensitive  <- render: cut_plain('A\nAssistant: B')
-KILLED    #15 render: fit overshoots the budget  <- render: fit drops whole oldest pairs until it fits
 KILLED    #18 score: COMPOSE counted in TWOHOP  <- G2 LONGEST: family TWOHOP=0.41
-KILLED    #21 score: greedy scored when sampling seeds exist  <- seeds: default scoring did not select the sampling seed
 KILLED    #24 score: loop bar raised  <- G3 L_REPEAT: loop rate 0.060 meets the loop bar
-KILLED    #27 score: CORR:U without U-diff  <- scoring: CORR:U is not U-diff and U-same pooled
 KILLED    #30 score_stats: headroom ceiling bar  <- stats: headroom ceiling
-KILLED    #33 score_stats: PERSIST replies counted in base rates  <- stats: PERSIST base rates {'brackets:None': 0.006277292576419214, 'caps:None': 0.008187772925764192, 'closing:over and out': 0.0049126637554585155, 'c
 KILLED    #36 fakes: ECHO answers right  <- G2 ECHO: 394 value-graded units above 0 (e.g. ['rc12-dev-recall-001', 'rc12-dev-recall-002', 'rc12-dev-recall-003'])
-KILLED    #39 fakes: USERVOICE keeps the assistant voice  <- G2 ROLECAP: 37 value-graded units above 0 (e.g. ['rc12-dev-own-001', 'rc12-dev-own-002', 'rc12-dev-own-003'])
 KILLED    #42 fakes_family: L_REPEAT does not loop  <- G2 L_REPEAT: cell LOOP:story=1.00
-KILLED    #45 fakes_audit: audit value cheaters get the gold  <- G2 ANTEPENULT: cell BIND:owner=1.00
 KILLED    #48 own_cf: OWN-CF list not swapped  <- owncf: CONSIST OWN under --own-cf = 0.33, want 0.0
-killed 17 | survived 0 | crashed 0 | malformed 0
+KILLED    #54 score: OD1 b: cf rows counted as own-history units  <- owngate: CONSIST: --own-cf rows counted outside the gate (replies 576 vs 576, OWN 0.5 vs 1.0)
+KILLED    #60 score_stats: OD1 b: cf replies counted in PERSIST base rates  <- stats: cf rows in PERSIST base rates
+KILLED    #66 score: OD1 b: the gate takes the cf result alone (NEXT passes)  <- owngate: NEXT: bootstrap OWN slot not gated
+KILLED    #72 score: OD1 b: cf rows choose the seeds  <- owngate: greedy history + sampled cf rows: seeds taken from the cf rows (replies 0, {'OWN': None, 'OWN_CF': 1.0, 'OWN_GATED': None, 'cf_unswapped': 0}
+KILLED    #78 score: OD6 iii: --own-cf rows counted in the answer-repeat rate  <- ackrep: PARROT: --own-cf rows moved the ack-repeat rates: [0.04912663755458515, 0.19292604501607716, 0.2018348623853211] vs [0.04912663755458515, 0.19
+killed 14 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

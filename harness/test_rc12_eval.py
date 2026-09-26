@@ -227,6 +227,7 @@ def test_e2e_scores_through_score_py(e2e):
                         timeout=60)
     assert rc.returncode == 0, rc.stderr[-500:]
     s = json.loads(rc.stdout)
-    assert s["R"] is not None and 0 <= s["R"] <= 15, s["R"]
+    assert s["R"] is None, s["R"]              # OD1 b: no --own-cf run here, so the gated OWN (and R) is missing
+    assert s["R_ungated"] is not None and 0 <= s["R_ungated"] <= 15, s["R_ungated"]
     assert set(s["families"]) == {"RECALL", "CORR", "BIND", "TWOHOP", "PERSIST", "OWN", "TOPIC", "ROLE", "LOOKUP",
                                   "LOOP"}

@@ -1,0 +1,26 @@
+{
+ "name": "drychat_135m",
+ "cmd": [
+  "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+  "-B",
+  "run_chat.py",
+  "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "--mode",
+  "greedy",
+  "--only",
+  "R_d2_name",
+  "--out",
+  "../transcripts/dry_chat.jsonl"
+ ],
+ "started": "2026-09-25 09:45:33",
+ "ended": "2026-09-25 09:45:40",
+ "exit": 0,
+ "killed": null,
+ "min_free": 71,
+ "max_swap_mb": 2754.5,
+ "peak_rss_mb": 854,
+ "elapsed_s": 7,
+ "active_s": 7,
+ "paused_s": 0,
+ "n_pauses": 0
+}

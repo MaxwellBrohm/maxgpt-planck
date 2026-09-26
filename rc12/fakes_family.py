@@ -24,12 +24,25 @@ Each is IDEAL outside its own family, so it isolates one failure mode.
                from runner.py, so it is an independent oracle) are missing from the history it was given gets
                "I don't remember that." (records the probes it forgot)
     T0WRONG    IDEAL, but deflects on T0, K and COMPOSE probes (R must not move)
-    BINDHALF   IDEAL, but gives the other candidate on the "asked_first" BIND twin (pair rate must be 0)"""
+    BINDHALF   IDEAL, but gives the other candidate on the "asked_first" BIND twin (pair rate must be 0)
+    ACKER      IDEAL, but "Got it." on every statement turn (S L C I O T): OD6 (iii), no LOOP, ack-repeats only
+    PARROT     IDEAL, but on a statement turn after a short (< 12 words) reply to an asking turn it says that reply
+               again (verifier 2026-09-25): no LOOP under OD6 (iii) as ruled; every repeat is an answer repeat
+  OD1 (b) gate tests (validate_machinery c_owncf, c_owngate; verifier 2026-09-25). None reads its own Q reply:
+    NEXT       CONSIST off by one: picks option 1 at Q, later names option 2 of the USER's list; lists: names item
+               3 of the annotated list. Wrong on its own history, right on the --own-cf one (gated OWN must be 0)
+    LISTPAD    CONSIST, its list Q reply ends with a marker line G-DYN drops ("4. (or mix them)")
+    LISTBLANK  CONSIST, a blank bullet line ("- ") between list items 1 and 2
+    LISTLS     CONSIST, the list lines joined by U+2028 (str.splitlines splits there, split("\n") does not)"""
 import re
 
 import common as C
 import fam_persist as FP
 import fakes as F
+import fakes_audit as FA
+import grade_fmt_dyn as FD
+import grade_text as T
+import pools_vals as V
 import render as RD
 
 BASE = dict(C.FILLERS)
@@ -167,11 +180,60 @@ class BindHalf(F.Fake):
         return super().probe(history, t, p)
 
 
+class Acker(F.Fake):
+    name = "ACKER"
+
+    def nonprobe(self, history, t):
+        return "Got it." if t["kind"] in ("S", "L", "C", "I", "O", "T") else super().nonprobe(history, t)
+
+
+class Parrot(F.Fake):
+    name = "PARROT"
+
+    def nonprobe(self, history, t):
+        if t["kind"] not in ("S", "L", "C", "I", "O", "T"):
+            return super().nonprobe(history, t)
+        mine = [m["content"] for m in history if m["role"] == "assistant"]        # no truncation in its tests
+        short = [mine[i - 1] for i in range(1, t["i"]) if self.turns[i]["kind"] in "PXQD"
+                 and len(T.lwords(T.norm(mine[i - 1]))) < 12]
+        return short[-1] if short else super().nonprobe(history, t)
+
+
+class Next(FA.Consist):
+    name = "NEXT"
+
+    def value_probe(self, history, t, p):
+        if p["grader"] != "DYN":
+            return super().value_probe(history, t, p)
+        gf = p["gold_fn"]
+        if gf["type"] == "pick":
+            hits = V.scan(self.turns[gf["src_turn"]]["text"], gf["options"])
+            return F.own_sentence(p, hits[1]) if len(hits) > 1 else F.ACK
+        it3 = FD.parse_list(self.turns[gf["src_turn"]]["ideal"])[2]
+        return p["ideal"].replace(p["ideal_gold"], it3[:1].lower() + it3[1:])
+
+
+class ListPad(FA.Consist):
+    name = "LISTPAD"
+    LIST = {"LISTPAD": lambda s: s + "\n4. (or mix them)",
+            "LISTBLANK": lambda s: s.replace("\n2.", "\n- \n2.", 1),
+            "LISTLS": lambda s: s.replace("\n", "\u2028")}
+
+    def __init__(self, name="LISTPAD"):
+        self.name = name
+
+    def q_reply(self, t):
+        if self.q_probe[t["i"]]["gold_fn"]["type"] != "pick":
+            return self.LIST[self.name](t["ideal"])
+        return super().q_reply(t)
+
+
 FAMILY = {"P_NEVER": ("PERSIST", None), "P_ONCE": ("PERSIST", None), "P_FIRST5": ("PERSIST", None),
           "P_UNIVERSAL": ("PERSIST", None),
           "P_OBEYALL": ("PERSIST", "override"), "L_REPEAT": ("LOOP", None), "L_SELFCOPY": ("LOOP", None),
           "L_STUTTER": ("LOOP", None)}
-TESTS = ["CONTINUER", "HISTCHECK", "CAPPER", "SAMPLER", "FORGETFUL", "T0WRONG", "BINDHALF"]
+TESTS = ["CONTINUER", "HISTCHECK", "CAPPER", "SAMPLER", "FORGETFUL", "T0WRONG", "BINDHALF", "ACKER", "PARROT",
+         "NEXT", "LISTPAD", "LISTBLANK", "LISTLS"]
 
 
 def make(name):
@@ -179,6 +241,9 @@ def make(name):
         return Persist(name[2:].lower())
     if name.startswith("L_"):
         return Loop(name[2:].lower())
+    if name in ListPad.LIST:
+        return ListPad(name)
     extra = {"CONTINUER": Continuer, "HISTCHECK": HistCheck, "CAPPER": Capper, "SAMPLER": Sampler,
-             "FORGETFUL": Forgetful, "T0WRONG": T0Wrong, "BINDHALF": BindHalf}
+             "FORGETFUL": Forgetful, "T0WRONG": T0Wrong, "BINDHALF": BindHalf, "ACKER": Acker, "PARROT": Parrot,
+             "NEXT": Next}
     return extra[name]() if name in extra else F.make(name)

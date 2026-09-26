@@ -1,7 +1,9 @@
 """RC-12 per-probe graders (SPEC s4) and the conversation grader. Pure Python, no model.
 
 grade_conv(rec, replies, stops) -> dict: probes (one result per graded probe), unit (the conversation's unit score
-under rec.meta.unit), flags (loop-rule flags per turn), leaks (role-leak scan, diagnostic).
+under rec.meta.unit), flags (loop-rule flags per turn), ack_repeat (per turn: None on asking turns, else whether the
+reply repeats an earlier one; OD6 iii, reported only), ack_of_answer (per turn: None on asking turns, else whether
+the reply repeats an earlier reply to an asking turn; reported only), leaks (role-leak scan, diagnostic).
 replies[i] / stops[i] answer user turn i+1; stop is "eos" | "eot" | "role" | "cap".
 A result: ok (strict), lenient (diagnostic), fails (names of the clauses that failed), plus grader extras.
 
@@ -79,7 +81,7 @@ def g_val(reply, stop, prior, rec, probe, gold=None):
     outside = [v for v in pool if v not in gs and v not in cands and v not in ctx]
     stale = set(probe.get("stale") or [])
     fails = []
-    if L.degenerate(reply, stop, prior):
+    if L.degenerate(reply, stop, prior, probe["kind"]):
         fails.append("v1_degen")
     gold_ok = any(T.asserted_hits(text, g, pool) for g in gs)
     if not gold_ok:
@@ -140,7 +142,7 @@ def g_abs(reply, stop, prior, rec, probe):
     text = T.norm(reply)
     pool = pool_values(probe)
     fails = []
-    if L.degenerate(reply, stop, prior):
+    if L.degenerate(reply, stop, prior, probe["kind"]):
         fails.append("a1_degen")
     cue = "cue" in T.OFF or T.ABS_CUE.search(text) is not None
     if not cue:
@@ -158,7 +160,7 @@ def g_abs(reply, stop, prior, rec, probe):
 
 
 def g_loop(reply, stop, prior, rec, probe):
-    flags, why = L.classify(reply, stop, prior)
+    flags, why = L.classify(reply, stop, prior, probe["kind"])
     fails = [f"loop_{f}" for f in flags]
     if T.echo(T.norm(reply), probe["question"]):
         fails.append("loop_echo")
@@ -188,6 +190,8 @@ def grade_conv(rec, replies, stops):
     import grade_role as R
     assert len(replies) == len(stops) == rec["n_turns"], rec["id"]
     results = [grade_probe(rec, p, replies, stops) for p in rec["probes"]]
+    kinds = [t["kind"] for t in sorted(rec["turns"], key=lambda t: t["i"])]
     return dict(id=rec["id"], family=rec["family"], cell=rec["cell"], probes=results,
-                unit=unit_score(rec, results), flags=L.conversation_flags(replies, stops),
-                leaks=R.role_leaks(rec, replies))
+                unit=unit_score(rec, results), flags=L.conversation_flags(replies, stops, kinds),
+                ack_repeat=L.conversation_acks(replies, kinds),
+                ack_of_answer=L.conversation_answer_repeats(replies, kinds), leaks=R.role_leaks(rec, replies))

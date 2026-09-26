@@ -2,6 +2,10 @@
 the claim it breaks). A mutant is KILLED when validate_e2e.gates() plus validate_machinery.checks() report a
 different set of failures than the unmutated baseline; it must not crash. Pure data."""
 
+GATED = 'score=float(r["unit"] == 1.0 and c.get("unit") == 1.0 and not c.get("cf_unswapped"))))'
+OLD_LIST_RULE = (r'spans = [(k, m.span(2), m.group(2)) for k, m in enumerate(FD.re.match('
+                 r'r"^(\s*(?:\d+[.)]|[-*\u2022])\s+)(.*)$", s) for s in text.split("\n")) if m]')
+
 MUTANTS = [
     # runner.py: the feedback loop, stop rule, truncation accounting, HF refusal
     ("runner", 'msgs.append({"role": "assistant", "content": text})',
@@ -81,9 +85,72 @@ MUTANTS = [
      "audit value cheaters get the gold"),
     ("fakes_audit", "            if first:\n                return F.ABSTAIN\n",
      '            if p["grader"] == "ABS":\n                return F.ABSTAIN\n', "ORDER_ABS abstains where it should"),
-    ("own_cf", "return _exchange(text, picked[0], opts[(opts.index(picked[0]) + 1) % len(opts)])", "return text",
+    ("own_cf", "new = _exchange(text, picked[0], opts[(opts.index(picked[0]) + 1) % len(opts)])", "new = text",
      "OWN-CF pick not swapped"),
-    ("own_cf", "lines[idx[1]], lines[idx[2]] = ma.group(1) + mb.group(2), mb.group(1) + ma.group(2)", "pass",
+    ("own_cf", "lines[ka], lines[kb] = la[:a0] + lb[b0:b1] + la[a1:], lb[:b0] + la[a0:a1] + lb[b1:]", "pass",
      "OWN-CF list not swapped"),
     ("runner", 'alt = OC.swap(rec, t["i"], text) if own_cf else None', "alt = None", "runner ignores --own-cf"),
+    # OD1 (b), 2026-09-25: the OWN gate over the own-history and --own-cf runs (validate_machinery.c_owngate)
+    ("score", GATED, 'score=r["unit"]))', "OD1 b: the AND replaced by the own-history result alone"),
+    ("score", "gated = bool(own) and all(twin(r, cf) is not None for r in own)", "gated = bool(own)",
+     "OD1 b: a run missing --own-cf twins still gets a gated OWN"),
+    ("score", 'if set(per.get("OWN_GATED", {})) != set(per.get("OWN", {})):', "if False:",
+     "OD1 b: gated OWN from only the runs that have cf rows"),
+    ("score", 'rows = [r for r in sel if not r.get("own_cf")]', "rows = sel",
+     "OD1 b: cf rows counted in the loop rate and diagnostics"),
+    ("score", 'if r.get("own_cf"):', "if False:", "OD1 b: cf rows counted as own-history units"),
+    ("score", "fam = {f: ks.get(GATE.get(f, f)) for f in COMPOSITE}", "fam = {f: ks.get(f) for f in COMPOSITE}",
+     "OD1 b: R uses the ungated OWN"),
+    ("score_stats", 'and u["family"] not in S.GATE and', 'and u["family"] not in S.SLOT and',
+     "OD1 b: bootstrap OWN slot takes the ungated units"),
+    ("score_stats", "assert all(uids.values()),", "assert True,", "OD1 b: bootstrap runs without the cf rows"),
+    ("score_stats",
+     'vals = {m: s["families"][k] if k in s["families"] else s["keys"].get(k) for m, s in panel.items()}',
+     'vals = {m: s["keys"].get(k) for m, s in panel.items()}', "OD1 b: headroom judges the ungated OWN"),
+    ("score_stats", 'if any(s["families"][f] is None for s in (summary, comparator) for f in S.COMPOSITE):',
+     "if False:", "OD1 b: sensitivity row computed with OWN missing"),
+    ("score_stats", ' and not r.get("own_cf")\n', "\n", "OD1 b: cf replies counted in PERSIST base rates"),
+    # OD6 (iii), 2026-09-25: statement-turn repeats are ack-repeats, reported beside the loop rate
+    # (validate_machinery.c_ackrep)
+    ("score", "hits = sum(a is True for a in stated)", "hits = 0", "OD6 iii: ack-repeats never counted"),
+    ("score", "(hits / len(stated) if stated else None)", "(hits / len(marks) if stated else None)",
+     "OD6 iii: ack-repeat-of-statements rate over every reply"),
+    ("score", 'level_a(ks, degen.get("LOOP"),', 'level_a(ks, degen.get("LOOP") + ack_all,',
+     "OD6 iii: ack-repeats counted in the Level A loop criterion"),
+    ("runner", 'ack_repeat=g["ack_repeat"], ack_of_answer=', "ack_of_answer=",
+     "OD6 iii: runner drops the ack-repeat record"),
+    ("fakes_family", 'return "Got it." if t["kind"] in ("S", "L", "C", "I", "O", "T") else',
+     'return "Got it." if t["kind"] in ("S", "L", "C", "I", "O", "T", "D") else',
+     "OD6 iii: ACKER also acks D questions (those repeats are LOOPs)"),
+    # verifier 2026-09-25: the OD1 b gate (validate_machinery c_owncf, c_owngate) and the OD6 reports (c_ackrep)
+    ("score", GATED, 'score=float(c.get("unit") == 1.0 and not c.get("cf_unswapped"))))',
+     "OD1 b: the gate takes the cf result alone (NEXT passes)"),
+    ("score", GATED, 'score=float(r["unit"] == 1.0) * (sum(x["unit"] for x in cf.values()) / len(cf))))',
+     "OD1 b: product of rates (own-history unit x the cf run's rate)"),
+    ("score", 'cf = {r["id"]: r for r in run_rows if r.get("own_cf") and r["family"] == "OWN"}',
+     'cf = dict(zip(reversed([r["id"] for r in run_rows if r["family"] == "OWN" and not r.get("own_cf")]), '
+     '[r for r in run_rows if r.get("own_cf") and r["family"] == "OWN"]))',
+     "OD1 b: misaligned join (cf rows zipped to the own ids in reverse order)"),
+    ("score", GATED, 'score=float(r["unit"] == 1.0 and c.get("unit") == 1.0)))',
+     "OD1 b: a cf rewrite that did not take still counts"),
+    ("score", '(c.get("responder"), c.get("render")) == (r.get("responder"), r.get("render"))',
+     'c.get("render") == r.get("render")', "OD1 b: a cf run of another responder is a twin"),
+    ("score", '(c.get("responder"), c.get("render")) == (r.get("responder"), r.get("render"))',
+     'c.get("responder") == r.get("responder")', "OD1 b: a cf run in another render is a twin"),
+    ("score", 'sampled = {r["seed"] for r in rows if r["seed"] is not None and not r.get("own_cf")}',
+     'sampled = {r["seed"] for r in rows if r["seed"] is not None}', "OD1 b: cf rows choose the seeds"),
+    ("runner", 'out[-1]["cf_unswapped"] = True', "pass", "OD1 b: runner does not mark a cf rewrite that did not take"),
+    ("runner", 'cf_unswapped=any(x.get("cf_unswapped") for x in played))', "cf_unswapped=False)",
+     "OD1 b: the row drops the cf_unswapped mark"),
+    ("own_cf", "return new if _picked(new, opts) == [opts[(opts.index(picked[0]) + 1) % len(opts)]] else UNSWAPPED",
+     "return new", "OD1 b: a pick rewrite that did not take passes as swapped"),
+    ("own_cf", "spans = FD.list_spans(T.norm(text))", OLD_LIST_RULE,
+     "OD1 b: own_cf finds list lines with a looser rule than G-DYN (the pre-fix ITEM rule)"),
+    ("score", "ack_all, ack_stated = ack_stats(rows)", "ack_all, ack_stated = ack_stats(sel)",
+     "OD6 iii: --own-cf rows counted in the ack-repeat rates"),
+    ("score", "ack_repeat_of_answers=answer_repeat_stats(rows)", "ack_repeat_of_answers=answer_repeat_stats(sel)",
+     "OD6 iii: --own-cf rows counted in the answer-repeat rate"),
+    ("score", "return sum(a is True for a in marks) / len(marks) if marks else None", "return 0.0 if marks else None",
+     "OD6 iii: answer repeats never counted"),
+    ("runner", 'ack_of_answer=g["ack_of_answer"], ', "", "OD6 iii: runner drops the answer-repeat record"),
 ]

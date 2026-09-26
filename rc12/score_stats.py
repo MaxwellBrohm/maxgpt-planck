@@ -4,12 +4,15 @@ the PERSIST base-rate drop rule and the sensitivity row. Pure Python.
 bootstrap_diff(rows_a, rows_b, n)  D = R(a) - R(b). Each resample: units resampled within each family (stratified,
     the SAME draw for both models: paired), training seeds resampled per model, sampling seeds resampled inside
     each drawn training seed (nested); percentile 95% CI. Level R holds when the CI's lower bound is >= -3 points
-    (level_r); the OOD-H wording rule of PLAN s1 is not implemented here (it needs the OOD split).
+    (level_r); the OOD-H wording rule of PLAN s1 is not implemented here (it needs the OOD split). The OWN slot
+    holds the OD1 b gated units (score.py), so both models need their --own-cf OWN rows; without them it refuses.
 headroom(panel)  panel {model: score.summarize(...)} (template render, mean of 3 seeds, core panel only). A family
-    or Level A key fails if EVERY model is <= 0.05 (floor) or EVERY model is >= 0.95 (ceiling).
+    or Level A key fails if EVERY model is <= 0.05 (floor) or EVERY model is >= 0.95 (ceiling). A composite family
+    is judged on the score that enters R (summary families: OWN = OWN_GATED, OD1 b).
 persist_base_rates(rows, rules)  compliance share of each (rule, arg) over every reply of every NON-PERSIST
     conversation; rules above 0.30 for any core baseline are dropped (persist_drops).
-sensitivity(summary, comparator)  the composite without the families where the comparator is <= 0.05."""
+sensitivity(summary, comparator)  the composite without the families where the comparator is <= 0.05 (R None when
+    a composite family is missing, e.g. OWN without the --own-cf rows)."""
 import random
 
 import grade_fmt_dyn as FD
@@ -23,13 +26,15 @@ PERSIST_DROP = 0.30
 
 
 def unit_table(rows):
-    """{train_seed: {seed: {family: {uid: score}}}} over the composite families (BIND = pairs)."""
+    """{train_seed: {seed: {family: {uid: score}}}} over the composite families (BIND = pairs; the OWN slot holds
+    the OWN_GATED units, never the ungated OWN ones: OD1 b)."""
     out = {}
     for (tr, sd), rr in S.runs(S.select(rows)).items():
         fam = {f: {} for f in S.COMPOSITE}
         for u in S.units(rr):
-            if u["family"] in fam and (u["family"], u["cell"]) not in S.DIAG:
-                fam[u["family"]][u["uid"]] = u["score"]
+            f = S.SLOT.get(u["family"], u["family"])
+            if f in fam and u["family"] not in S.GATE and (u["family"], u["cell"]) not in S.DIAG:
+                fam[f][u["uid"]] = u["score"]
         out.setdefault(tr, {})[sd] = fam
     return out
 
@@ -56,6 +61,7 @@ def bootstrap_diff(rows_a, rows_b, n=10000, seed=0):
     ta, tb = unit_table(rows_a), unit_table(rows_b)
     first = next(iter(next(iter(ta.values())).values()))
     uids = {f: sorted(first[f]) for f in S.COMPOSITE}
+    assert all(uids.values()), f"no units for {[f for f in uids if not uids[f]]} (OWN needs the --own-cf rows, OD1 b)"
     for t in (ta, tb):
         for by_seed in t.values():
             for fam in by_seed.values():
@@ -79,7 +85,7 @@ def level_r(ci):
 def headroom(panel):
     out = {}
     for k in HEADROOM_KEYS:
-        vals = {m: s["keys"].get(k) for m, s in panel.items()}
+        vals = {m: s["families"][k] if k in s["families"] else s["keys"].get(k) for m, s in panel.items()}
         known = [v for v in vals.values() if v is not None]
         floor = bool(known) and len(known) == len(vals) and all(v <= HEADROOM["floor"] for v in known)
         ceil = bool(known) and len(known) == len(vals) and all(v >= HEADROOM["ceiling"] for v in known)
@@ -93,7 +99,8 @@ def persist_rules(recs):
 
 
 def persist_base_rates(rows, rules):
-    replies = [T.norm(t["reply"]) for r in S.select(rows) if r["family"] != "PERSIST" for t in r["turns"]]
+    replies = [T.norm(t["reply"]) for r in S.select(rows) if r["family"] != "PERSIST" and not r.get("own_cf")
+               for t in r["turns"]]
     return {f"{rule}:{arg}": sum(FD.rule_ok(rule, arg, x) for x in replies) / len(replies) for rule, arg in rules}
 
 
@@ -104,6 +111,8 @@ def persist_drops(panel_rates):
 
 
 def sensitivity(summary, comparator):
+    if any(s["families"][f] is None for s in (summary, comparator) for f in S.COMPOSITE):
+        return dict(kept=None, dropped=None, R=None)
     keep = [f for f in S.COMPOSITE if comparator["families"][f] > HEADROOM["floor"]]
     r = 100 * sum(summary["families"][f] for f in keep) / len(keep) if keep else None
     return dict(kept=keep, dropped=[f for f in S.COMPOSITE if f not in keep], R=r)

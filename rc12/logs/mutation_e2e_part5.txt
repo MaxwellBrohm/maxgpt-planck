@@ -1,0 +1,18 @@
+RC-12 mutation_e2e.py part 5/6: 13 of 81 mutants, fresh process each, 61 s. No model.
+baseline failures (expected: only the G4 item lines):
+  none
+KILLED    #04 runner: truncated probes not failed  <- trunc: ctx 556: only 0 truncated probes
+KILLED    #10 runner: untested HF path runs without the flag  <- hf: runner went past the refusal to load a model (ModuleNotFoundError)
+KILLED    #16 render: own_reply off by one  <- G1 IDEAL: OWN:list=0.00
+KILLED    #22 score: loop rate counts runaways  <- stops: CAPPER: R 0.0, loop 1.0, runaway 1.0
+KILLED    #28 score: Level A keys double-count cell units  <- scoring: unit counts {'BIND': 30, 'BIND:owner': 12, 'BIND:perspective': 10, 'BIND:third-party': 8, 'CORR': 64, 'CORR:C_noupd': 32, 'CORR:C_twoslot': 3
+KILLED    #34 score_stats: PERSIST drop bar  <- stats: PERSIST base rates {'brackets:None': 0.0, 'caps:None': 0.0, 'closing:over and out': 0.0, 'closing:stay curious': 0.0, 'closing:that is all': 0.
+KILLED    #40 fakes: ABSTAIN answers right  <- G2 ABSTAIN: 394 value-graded units above 0 (e.g. ['rc12-dev-recall-001', 'rc12-dev-recall-002', 'rc12-dev-recall-003'])
+KILLED    #46 fakes_audit: ORDER_ABS abstains where it should  <- G2 ORDER_ABS: cell LOOKUP:menu=1.00
+KILLED    #52 score: OD1 b: gated OWN from only the runs that have cf rows  <- owngate: cf rows for 1 of 2 training seeds: gated OWN not missing ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0})
+KILLED    #58 score_stats: OD1 b: headroom judges the ungated OWN  <- owngate: headroom OWN not gated {'scores': {'IDEAL': 1.0, 'CONSIST': 1.0}, 'fail': True, 'reason': 'ceiling'}
+KILLED    #64 runner: OD6 iii: runner drops the ack-repeat record  <- ackrep: ACKER ack-repeat None / None, want 0.17712882096069868 / 0.6956055734190782
+KILLED    #70 score: OD1 b: a cf run of another responder is a twin  <- owngate: cf run of another responder: gated OWN not missing ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0})
+KILLED    #76 own_cf: OD1 b: own_cf finds list lines with a looser rule than G-DYN (the pre-fix ITEM rule)  <- owncf: LISTBLANK OWN under --own-cf = 0.33, want 0.0
+killed 13 | survived 0 | crashed 0 | malformed 0
+ALL MUTANTS KILLED

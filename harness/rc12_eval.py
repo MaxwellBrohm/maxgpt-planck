@@ -15,8 +15,10 @@ Config (a run's config.yaml; absent or every: 0 = off, and train.py then never i
 
 Each eval runs rc12/runner.run on the live model through rc12/planck_responder.PlanckResponder (ctx = the model's
 seq_len, the runner's truncation rule), grades with rc12's graders, scores with rc12/score.summarize, and appends
-one line to out_dir/rc12_eval.jsonl: step, n_conv, seconds, and per seed kind (greedy, sampled) R (None unless all
-10 composite families are in the subset), families, loop_rate, degenerate rates, t0, k. The eval never changes
+one line to out_dir/rc12_eval.jsonl: step, n_conv, seconds, and per seed kind (greedy, sampled) R (None: the OD1 b
+OWN gate needs an --own-cf run, which the hook does not make), R_ungated (None unless all 10 composite families are
+in the subset), families (OWN None for the same reason), loop_rate, the OD6 ack-repeat rates (ack_repeat,
+ack_repeat_of_statements, ack_repeat_of_answers), degenerate rates, t0, k. The eval never changes
 training: no_grad, the model's train/eval mode restored, sampling from a private generator (the global torch RNG
 is untouched), the loader and optimizer are not read. test_rc12_eval.py checks a run with the hook on is bitwise
 identical to the same run with it off. An exception inside an eval is logged to rc12_eval.jsonl (error) and
@@ -98,7 +100,10 @@ class RC12Eval:
             kinds.append(("sampled", [s for s in self.seeds if s is not None]))
         for name, seeds in kinds:
             s = S.summarize(rows, seeds=seeds)
-            rec[name] = {"R": s["R"], "families": s["families"], "loop_rate": s["loop_rate"],
+            rec[name] = {"R": s["R"], "R_ungated": s["R_ungated"], "families": s["families"],
+                         "own_gate": s["own_gate"], "loop_rate": s["loop_rate"],
+                         "ack_repeat": s["ack_repeat"], "ack_repeat_of_statements": s["ack_repeat_of_statements"],
+                         "ack_repeat_of_answers": s["ack_repeat_of_answers"],
                          "degenerate": s["degenerate_rates"], "t0": s["t0"]["score"], "k": s["k"]}
         rec["seconds"] = round(time.time() - t0, 2)
         return rec

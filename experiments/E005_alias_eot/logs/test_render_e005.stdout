@@ -1,0 +1,26 @@
+loss self-check [first] hf=13.79367 answer_only=13.79367
+loss mutants [first] {'no_shift': 14.179925918579102, 'prompt_labelled': 14.947507858276367} (must all differ from 13.79367)
+loss self-check [plain] hf=14.28470 answer_only=14.28470
+loss mutants [plain] {'no_shift': 12.51802921295166, 'prompt_labelled': 14.552724838256836} (must all differ from 14.28470)
+loss self-check [chat] hf=14.38090 answer_only=14.38090
+loss mutants [chat] {'no_shift': 14.797934532165527, 'prompt_labelled': 14.766633033752441} (must all differ from 14.38090)
+loss self-check [first] hf=14.94751 answer_only=13.79367
+loss self-check [plain] hf=14.55272 answer_only=14.28470
+loss self-check [chat] hf=14.76663 answer_only=14.38090
+-- HuggingFaceTB/SmolLM2-135M-Instruct: eos '<|im_end|>' id 2, <|im_end|> id 2, pad 2
+PASS labels right on 2400/2400 examples of seeds 0-5 (plain 1174, chat 1226, tokenization {'joint': 2400, 'split': 0}) []
+PASS both renders present; every chat target tokenized jointly
+PASS every chat input ends at <|im_end|>; the template's trailing newline is not in the input
+PASS the trained end-of-turn token is one that gen_run stops on
+PASS loss mask by gradients: trained tokens decode to exactly the target on 40/40 examples
+PASS check_batches consumes exactly bs examples of the training iterator (E004's first batch)
+PASS plain and chat check batches hold only their render {'plain': ['plain', 'plain'], 'chat': ['chat', 'chat']}
+PASS self-check passes on first/plain/chat with a correct HF loss; mutants differ []
+PASS the plain and chat check batches have labelled tokens
+PASS a prompt-scoring HF loss is caught on every batch (['first', 'plain', 'chat'])
+PASS stream keeps <= 768 tokens, both renders {'plain': 296, 'chat': 304}
+PASS stream_summary shares sum to 1 per key
+PASS rejection at 350 tokens: drawn 341, rejected 241 (= 241 over-limit), kept <= 350
+PASS label-layout mutants flagged: 7/7 {'eot_unlabelled': True, 'last_prompt_labelled': True, 'first_answer_unlabelled': True, 'shifted': True, 'all_labelled': True, 'none_labelled': True, 'eot_only': True}
+PASS encoder mutants flagged: 6/6 {'no_eot': True, 'trailing_newline': True, 'leading_space': True, 'all_plain': True, 'no_generation_prompt': True, 'prompt_labelled': True}
+0 failures; ALL PASS

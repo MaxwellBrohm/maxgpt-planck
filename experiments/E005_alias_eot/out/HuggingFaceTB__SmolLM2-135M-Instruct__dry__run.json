@@ -1,0 +1,336 @@
+{
+ "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+ "seed": 0,
+ "steps": 5,
+ "lr": 0.00015,
+ "bs": 4,
+ "accum": 4,
+ "eff_batch": 16,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "mps",
+ "dry": true,
+ "tag": "dry",
+ "sets": [
+  "cont",
+  "eval",
+  "know"
+ ],
+ "chat": true,
+ "max_new": 48,
+ "params": 134515008,
+ "checks": {
+  "params_config": {
+   "total": 134515008,
+   "embedding": 28311552,
+   "body": 106203456,
+   "tok_emb": 28311552,
+   "out_head": 0,
+   "pos_emb": 0,
+   "layers": 30,
+   "d": 576,
+   "vocab": 49152,
+   "n_ctx": 8192
+  },
+  "params_model": 134515008,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": true,
+  "config_says_tied": true,
+  "sanity_nll": 1.9598
+ },
+ "trained_ctx": 8192,
+ "torch": "2.13.0",
+ "train_stream": "train_e005.stream(seed): R_mix = Random(1000 * seed + 46) draws block (E004 .70 = train_e004.stream(seed) in order, ALIAS .20, IND .10; R_new = Random(1000 * seed + 45)) then render (chat .50)",
+ "p_chat": 0.5,
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "loss_selfcheck": {
+  "first": {
+   "hf": 2.1984565258026123,
+   "answer_only": 2.1984567642211914,
+   "n_labelled": 30
+  },
+  "plain": {
+   "hf": 1.9983314275741577,
+   "answer_only": 1.9983313083648682,
+   "n_labelled": 32
+  },
+  "chat": {
+   "hf": 2.401355504989624,
+   "answer_only": 2.401355266571045,
+   "n_labelled": 29
+  }
+ },
+ "loss_mutants": {
+  "first": {
+   "no_shift": 11.456640243530273,
+   "prompt_labelled": 2.2410085201263428
+  },
+  "plain": {
+   "no_shift": 11.100797653198242,
+   "prompt_labelled": 2.4256949424743652
+  },
+  "chat": {
+   "no_shift": 12.05963134765625,
+   "prompt_labelled": 2.1964478492736816
+  }
+ },
+ "train_s": 50.2,
+ "s_per_step": 10.04,
+ "renders_trained": {
+  "plain": 40,
+  "chat": 40
+ },
+ "train_stats": {
+  "n": 84,
+  "rejected_long": 3,
+  "mean_len": 439.3,
+  "len_max": {
+   "plain": 659,
+   "chat": 728
+  },
+  "split": {
+   "plain": 0,
+   "chat": 0
+  },
+  "shares": {
+   "kind": {
+    "alias_earlier": {
+     "drawn": 0.023,
+     "kept": 0.0238
+    },
+    "alias_latest": {
+     "drawn": 0.1149,
+     "kept": 0.0952
+    },
+    "alias_other": {
+     "drawn": 0.023,
+     "kept": 0.0238
+    },
+    "cross": {
+     "drawn": 0.0575,
+     "kept": 0.0595
+    },
+    "ind_x": {
+     "drawn": 0.069,
+     "kept": 0.0714
+    },
+    "ind_y": {
+     "drawn": 0.046,
+     "kept": 0.0476
+    },
+    "mid": {
+     "drawn": 0.0575,
+     "kept": 0.0595
+    },
+    "noupd": {
+     "drawn": 0.1379,
+     "kept": 0.1429
+    },
+    "noupd_b": {
+     "drawn": 0.069,
+     "kept": 0.0595
+    },
+    "noupd_incid": {
+     "drawn": 0.0115,
+     "kept": 0.0119
+    },
+    "revert": {
+     "drawn": 0.0345,
+     "kept": 0.0357
+    },
+    "twoslot": {
+     "drawn": 0.1494,
+     "kept": 0.1548
+    },
+    "twoslot_b": {
+     "drawn": 0.0345,
+     "kept": 0.0357
+    },
+    "upd": {
+     "drawn": 0.1724,
+     "kept": 0.1786
+    }
+   },
+   "block": {
+    "alias": {
+     "drawn": 0.1609,
+     "kept": 0.1429
+    },
+    "e004": {
+     "drawn": 0.7241,
+     "kept": 0.7381
+    },
+    "ind": {
+     "drawn": 0.1149,
+     "kept": 0.119
+    }
+   },
+   "render": {
+    "chat": {
+     "drawn": 0.5057,
+     "kept": 0.4881
+    },
+    "plain": {
+     "drawn": 0.4943,
+     "kept": 0.5119
+    }
+   },
+   "case": {
+    "None": {
+     "drawn": 0.7241,
+     "kept": 0.7381
+    },
+    "ask_x": {
+     "drawn": 0.069,
+     "kept": 0.0714
+    },
+    "ask_y": {
+     "drawn": 0.046,
+     "kept": 0.0476
+    },
+    "earlier": {
+     "drawn": 0.023,
+     "kept": 0.0238
+    },
+    "latest": {
+     "drawn": 0.1149,
+     "kept": 0.0952
+    },
+    "other": {
+     "drawn": 0.023,
+     "kept": 0.0238
+    }
+   },
+   "placement": {
+    "None": {
+     "drawn": 0.8391,
+     "kept": 0.8571
+    },
+    "adjacent": {
+     "drawn": 0.069,
+     "kept": 0.0714
+    },
+    "filler": {
+     "drawn": 0.046,
+     "kept": 0.0238
+    },
+    "other_obj": {
+     "drawn": 0.046,
+     "kept": 0.0476
+    }
+   }
+  },
+  "max_share_shift": 0.0222
+ },
+ "losses": [
+  2.67135,
+  2.9149,
+  2.26236,
+  2.35828,
+  2.59002
+ ],
+ "probe": [
+  {
+   "step": 0,
+   "H1": 0.0,
+   "H2": 0.0,
+   "H3": 0.0,
+   "H4": 1.0,
+   "H5": 0.0,
+   "H6": 0.0,
+   "H7": 0.0,
+   "C_noupd": 0.0,
+   "C_twoslot": 0.0
+  },
+  {
+   "step": 5,
+   "H1": 0.0,
+   "H2": 0.0,
+   "H3": 0.0,
+   "H4": 1.0,
+   "H5": 0.0,
+   "H6": 0.0,
+   "H7": 0.0,
+   "C_noupd": 0.0,
+   "C_twoslot": 0.0
+  }
+ ],
+ "lock_in_step": null,
+ "loss_finite": true,
+ "eval_s": 3.8,
+ "eval_counts": {
+  "e004/plain": 2,
+  "e004/chat": 2,
+  "new/plain": 2,
+  "extra/plain": 2,
+  "old/plain": 2,
+  "uprobe/plain": 2,
+  "cross/plain": 2,
+  "new/chat": 2,
+  "extra/chat": 2,
+  "cross/chat": 2,
+  "khard/plain": 2,
+  "kbig/plain": 2,
+  "gen_e004/plain": 2,
+  "gen_e004/chat": 2,
+  "gen_cont/plain": 2
+ },
+ "summary": {
+  "LIK e004/plain": {
+   "H1": 0.0,
+   "H2": null,
+   "H3": null,
+   "H4": null,
+   "H5": null,
+   "H6": null,
+   "H7": null,
+   "C_noupd": null,
+   "C_twoslot": null,
+   "ID": null
+  },
+  "LIK e004/chat": {
+   "H1": 0.0,
+   "H2": null,
+   "H3": null,
+   "H4": null,
+   "H5": null,
+   "H6": null,
+   "H7": null,
+   "C_noupd": null,
+   "C_twoslot": null,
+   "ID": null
+  },
+  "GEN e004/plain": {
+   "strict": 0,
+   "lenient": 0,
+   "n": 2,
+   "capped": 0,
+   "bare": 2
+  },
+  "GEN e004/chat": {
+   "strict": 1,
+   "lenient": 1,
+   "n": 2,
+   "capped": 0,
+   "bare": 1
+  },
+  "GEN cont/plain": {
+   "strict": 0,
+   "lenient": 0,
+   "n": 2,
+   "capped": 0,
+   "bare": 2
+  }
+ },
+ "selftest_fail": [],
+ "peak_mps_driver_gb": 5.145,
+ "peak_mps_alloc_gb": 3.726,
+ "total_s": 63.2
+}

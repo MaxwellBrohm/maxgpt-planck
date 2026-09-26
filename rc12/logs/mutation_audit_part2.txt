@@ -1,0 +1,12 @@
+RC-12 mutation_audit.py: generator mutants that undo a step 5 fix; the named detector must go red.
+part 2/2: 6 of 13 mutants
+unmutated build: gate and family checks clean
+
+KILLED  length rank off [gate] <- [('LONGEST', 'BIND:perspective', 0.6), ('LONGEST', 'RECALL', 0.5208333333333334), ('LONGEST', 'RECALL:d1-3', 0.5625)]
+KILLED  CORR U-same tails dropped (B-before ends on A) [test] <- ["CORR U-same ends on A's latest in 8 items"]
+KILLED  C_twoslot blocks only [gate] <- [('PREV_FRESH', 'CORR:C_twoslot', 1.0)]
+KILLED  C_noupd anchor left last [test] <- ['rc12-dev-corr-035 C_noupd anchor is the last turn', 'rc12-dev-corr-036 C_noupd anchor is the last turn']
+KILLED  TOPIC no later updates [test] <- ['TOPIC updates 16/16/16']
+KILLED  LOOKUP abstain always first [test] <- ["LOOKUP X/P order (audit: 8/8) Counter({('rota', True): 16, ('menu', True): 16, ('tour', True): 16})"]
+
+killed 6 of 6 in 47 s

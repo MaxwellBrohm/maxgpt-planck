@@ -406,3 +406,15 @@ running queue edited
     E005's logs/code_sha256_at_start.txt (09:41) already lists items_al, checks_al, purity_al, e005_al_ft_test and
       analyze_al with their current hashes; test_al.py changed after it (the scratch fix) and queue_e005_al.sh did
       not exist yet. None of these files is used by queue_e005.sh.
+
+POST-RUN LOG (2026-09-25 evening, written after all seeds finished; no reading depends on it)
+  1 The seed 5 chat probe (EXTRA REPORT 6, descriptive) was killed twice by guard.py's swap rule (20:29 at 31% free,
+    swap +1302 MB; 20:47 at 31% free, swap +3162 MB). The probe itself used 560 MB; the dips came from browser tabs
+    (a 3 s sample fell 71% -> 30% -> 66%). Re-run by hand at 20:48-20:51 with the same weights, code and prompts: exit 0.
+  2 guard.py (E002 master, E004 and E005 copies) changed at 20:51: the swap kill now needs the low-free reading on 2
+    consecutive 5 s samples; the < 15% kill stays immediate. Tested with a scripted child (isolated dips survive, two
+    low samples kill; the old one-sample rule fails the test). No scored E005 job ran under the new guard.
+  3 analyze_e005.py was re-run by hand at 20:53 after the probe. The queue's final readings line was never written
+    (the queue had stopped at the first kill); the interim 4-seed reading (FAIL) was overwritten, and the audit
+    recomputed it (AUDIT.md Q1).
+  4 Independent audit: AUDIT.md (all stored readings reproduce; PARTIAL-X rests on seed 5 and a 2-item margin).

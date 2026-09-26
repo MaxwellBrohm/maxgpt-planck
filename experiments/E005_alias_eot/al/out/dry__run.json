@@ -1,0 +1,136 @@
+{
+ "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+ "tag": "dry",
+ "dry": true,
+ "device": "mps",
+ "items": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E005_alias_eot/al/al_items.jsonl",
+ "items_sha256": "e99b40d6b56c9c2d47ea0daf19316f409b850cd09dcf3f778b5cac5357c4a06d",
+ "weights_file": "/Users/brohm/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-135M-Instruct/snapshots/12fd25f77366fa6b3b4b768ec3050bf629380bac/model.safetensors",
+ "weights_sha256": "5af571cbf074e6d21a03528d2330792e532ca608f24ac70a143f6b369968ab8c",
+ "torch": "2.13.0",
+ "max_new": 48,
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "checks": {
+  "params_config": {
+   "total": 134515008,
+   "embedding": 28311552,
+   "body": 106203456,
+   "tok_emb": 28311552,
+   "out_head": 0,
+   "pos_emb": 0,
+   "layers": 30,
+   "d": 576,
+   "vocab": 49152,
+   "n_ctx": 8192
+  },
+  "params_model": 134515008,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": true,
+  "config_says_tied": true,
+  "sanity_nll": 1.9598
+ },
+ "summary": {
+  "LIK al/plain": {
+   "all": [
+    2,
+    4
+   ],
+   "AL1": [
+    1,
+    1
+   ],
+   "AL2": [
+    0,
+    1
+   ],
+   "AL3": [
+    0,
+    1
+   ],
+   "AL4": [
+    1,
+    1
+   ]
+  },
+  "LIK al/chat": {
+   "all": [
+    1,
+    4
+   ],
+   "AL1": [
+    0,
+    1
+   ],
+   "AL2": [
+    0,
+    1
+   ],
+   "AL3": [
+    0,
+    1
+   ],
+   "AL4": [
+    1,
+    1
+   ]
+  },
+  "GEN al/plain": {
+   "all": [
+    0,
+    4
+   ],
+   "AL1": [
+    0,
+    1
+   ],
+   "AL2": [
+    0,
+    1
+   ],
+   "AL3": [
+    0,
+    1
+   ],
+   "AL4": [
+    0,
+    1
+   ],
+   "capped": 0,
+   "lenient": 0
+  },
+  "GEN al/chat": {
+   "all": [
+    0,
+    4
+   ],
+   "AL1": [
+    0,
+    1
+   ],
+   "AL2": [
+    0,
+    1
+   ],
+   "AL3": [
+    0,
+    1
+   ],
+   "AL4": [
+    0,
+    1
+   ],
+   "capped": 0,
+   "lenient": 0
+  }
+ },
+ "selftest_fail": [],
+ "peak_mps_driver_gb": 2.059,
+ "total_s": 6.3,
+ "right_rule": "metrics_ft.right: gold > every other candidate"
+}

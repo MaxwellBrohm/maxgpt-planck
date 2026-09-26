@@ -66,6 +66,63 @@ def lfix(rec, p):
            fx(rec, p, "loop_hedge_ok", "I'm not sure what happens next, but the lantern keeps glowing.", True)]
     out += generic_degenerate(rec, p, ideal)
     out.append(fx(rec, p, "echo", p["question"], False))
+    if p["turn"] > 1:     # OD6 (iii) case c: the request before is also a P turn; the same reply twice loops. Short
+        out += [fx(rec, p, "loop_request_short_ok", STORY, True),    # (< 12 words): equality alone, not self-copy
+                fx(rec, p, "loop_request_repeat", STORY, False, patch={p["turn"] - 1: STORY})]
+    return out
+
+
+ACK = "Got it."                     # in the IDEAL ack pool: used only where every statement turn gets it
+NOTED = "Okay, noted."              # not in the IDEAL ack pool
+SHORT_ANS = "Start small and keep at it every day."                    # 8 words: equality clause only
+LONG_ANS = "You could start small and keep at it a little every day."  # 12 words: self-copy fires too
+STORY = "And then the rain stopped."
+STATEMENT = ("S", "L", "C", "I", "O", "T")
+
+
+def conv_loop_fixtures(recs):
+    """OD6 (iii) conversation fixtures on real records: (label, rec, patch {turn: reply}, want). want = (turns
+    flagged LOOP, turns counted as ack-repeats, turns counted as answer repeats) from graders.grade_conv on the
+    IDEAL history so patched.
+      ack_fixed        "Got it." on every statement turn (S L C I O T): no LOOP; every statement turn after the
+                       first is an ack-repeat (case a)
+      same_answer      one short answer to two different D questions: LOOP on the second (case b)
+      ack_as_answer    "Okay, noted." on a statement turn, then on a later D question: LOOP (the comparison set is
+                       every earlier reply, grade_loop docstring)
+      stated_after     a short D answer repeated on a later statement turn: an ack-repeat and an answer repeat, not
+                       a LOOP (OD6 iii as ruled; the answer-repeat rate reports it, verifier 2026-09-25)
+      long_stated      the same with a 12-word reply: LOOP through the unchanged self-copy clause, and an ack-repeat
+      loop_request     a LOOP-family request (kind P) answered like the request before it: LOOP (case c)
+      q_copy           an OWN Q reply that copies an earlier reply: LOOP at Q (Q asks; verifier 2026-09-25)
+      x_copy           a ROLE X reply that copies an earlier reply: LOOP at X"""
+    recs = list(recs)
+    out = []
+    def stated(r):
+        return [t["i"] for t in r["turns"] if t["kind"] in STATEMENT]
+    rec = max(recs, key=lambda r: (len({r["turns"][i - 1]["kind"] for i in stated(r)}), len(stated(r))))
+    st = stated(rec)                  # the record with the most statement kinds, then the most statement turns
+    out.append(("ack_fixed", rec, {i: ACK for i in st}, ([], st[1:], [])))
+    for rec in recs:
+        ds = [t["i"] for t in rec["turns"] if t["kind"] == "D"]
+        if len(ds) >= 2:
+            out.append(("same_answer", rec, {ds[0]: SHORT_ANS, ds[1]: SHORT_ANS}, ([ds[1]], [], [])))
+            break
+    for rec in recs:
+        st = [t["i"] for t in rec["turns"] if t["kind"] in STATEMENT]
+        ds = [t["i"] for t in rec["turns"] if t["kind"] == "D" and st and t["i"] > st[0]]
+        later = [i for i in st if ds and i > ds[0]]
+        if ds and later:
+            out += [("ack_as_answer", rec, {st[0]: NOTED, ds[0]: NOTED}, ([ds[0]], [], [])),
+                    ("stated_after", rec, {ds[0]: SHORT_ANS, later[0]: SHORT_ANS}, ([], [later[0]], [later[0]])),
+                    ("long_stated", rec, {ds[0]: LONG_ANS, later[0]: LONG_ANS}, ([later[0]], [later[0]], [later[0]]))]
+            break
+    loop = next(r for r in recs if r["family"] == "LOOP")
+    out.append(("loop_request", loop, {2: STORY, 3: STORY}, ([3], [], [])))
+    for label, fam, kind in (("q_copy", "OWN", "Q"), ("x_copy", "ROLE", "X")):
+        rec = next(r for r in recs if r["family"] == fam and any(t["kind"] == kind and t["i"] > 1 for t in r["turns"]))
+        k = next(t["i"] for t in rec["turns"] if t["kind"] == kind and t["i"] > 1)
+        out.append((label, rec, {1: SHORT_ANS, k: SHORT_ANS}, ([k], [], [])))
+    assert len(out) == 8, [x[0] for x in out]
     return out
 
 

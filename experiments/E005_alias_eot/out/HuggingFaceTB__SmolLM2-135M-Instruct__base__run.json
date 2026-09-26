@@ -1,0 +1,136 @@
+{
+ "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+ "seed": 0,
+ "steps": 0,
+ "lr": 5e-05,
+ "bs": 4,
+ "accum": 4,
+ "eff_batch": 16,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "mps",
+ "dry": false,
+ "tag": "base",
+ "sets": [
+  "cont",
+  "eval",
+  "know"
+ ],
+ "chat": true,
+ "max_new": 48,
+ "params": 134515008,
+ "checks": {
+  "params_config": {
+   "total": 134515008,
+   "embedding": 28311552,
+   "body": 106203456,
+   "tok_emb": 28311552,
+   "out_head": 0,
+   "pos_emb": 0,
+   "layers": 30,
+   "d": 576,
+   "vocab": 49152,
+   "n_ctx": 8192
+  },
+  "params_model": 134515008,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": true,
+  "config_says_tied": true,
+  "sanity_nll": 1.9598
+ },
+ "trained_ctx": 8192,
+ "torch": "2.13.0",
+ "train_stream": "train_e004.stream(seed) = Random(1000 * seed + 44)",
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "train_stats": {
+  "n": 0,
+  "rejected_long": 0,
+  "drawn": {},
+  "kept": {},
+  "len_sum": 0,
+  "len_max": 0,
+  "split": 0,
+  "mean_len": null,
+  "shares": {},
+  "max_share_shift": null
+ },
+ "losses": [],
+ "probe": [],
+ "lock_in_step": null,
+ "loss_finite": true,
+ "eval_s": 1558.5,
+ "eval_counts": {
+  "e004/plain": 640,
+  "e004/chat": 640,
+  "new/plain": 1728,
+  "extra/plain": 192,
+  "old/plain": 1116,
+  "uprobe/plain": 576,
+  "cross/plain": 384,
+  "new/chat": 1728,
+  "extra/chat": 192,
+  "cross/chat": 384,
+  "khard/plain": 80,
+  "kbig/plain": 441,
+  "gen_e004/plain": 640,
+  "gen_e004/chat": 640,
+  "gen_cont/plain": 416
+ },
+ "summary": {
+  "LIK e004/plain": {
+   "H1": 0.0469,
+   "H2": 0.0625,
+   "H3": 0.0625,
+   "H4": 0.1562,
+   "H5": 0.1562,
+   "H6": 0.1719,
+   "H7": 0.1875,
+   "C_noupd": 0.3906,
+   "C_twoslot": 0.1562,
+   "ID": 0.4062
+  },
+  "LIK e004/chat": {
+   "H1": 0.0625,
+   "H2": 0.0312,
+   "H3": 0.0781,
+   "H4": 0.2188,
+   "H5": 0.1094,
+   "H6": 0.1406,
+   "H7": 0.2188,
+   "C_noupd": 0.3125,
+   "C_twoslot": 0.1719,
+   "ID": 0.3125
+  },
+  "GEN e004/plain": {
+   "strict": 68,
+   "lenient": 74,
+   "n": 640,
+   "capped": 1,
+   "bare": 184
+  },
+  "GEN e004/chat": {
+   "strict": 32,
+   "lenient": 40,
+   "n": 640,
+   "capped": 1,
+   "bare": 64
+  },
+  "GEN cont/plain": {
+   "strict": 75,
+   "lenient": 81,
+   "n": 416,
+   "capped": 1,
+   "bare": 62
+  }
+ },
+ "peak_mps_driver_gb": 4.274,
+ "peak_mps_alloc_gb": 0.501,
+ "total_s": 1560.3
+}

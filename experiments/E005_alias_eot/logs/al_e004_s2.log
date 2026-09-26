@@ -1,0 +1,7 @@
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 11455.01it/s]
+loaded /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E004_general_updating/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s2 params=134,515,008 sanity_nll=2.294 2.5s mps_alloc=0.50G driver=1.06G peak_driver=1.06G
+scored al/plain: [51, 64] in 17s mps_alloc=0.50G driver=1.11G peak_driver=1.11G
+scored al/chat: [55, 64] in 20s mps_alloc=0.50G driver=1.11G peak_driver=1.11G
+generated al/plain: strict [54, 64] in 10s
+generated al/chat: strict [27, 64] in 29s
+DONE /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E004_general_updating/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s2 e004_s2 total 78s peak_driver=1.113G

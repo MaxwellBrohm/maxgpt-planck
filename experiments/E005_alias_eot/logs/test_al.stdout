@@ -1,0 +1,166 @@
+ok   baseline items: rule + structure gates clean
+ok   M1 own-object lure flagged by G2 (['G2 LN latest statement with a name 0.500 > 0.3'])
+ok   M2 wrong gold flagged by G1
+ok   M3 value in a question flagged by G5
+ok   M4 unbalanced question form flagged by G4
+names: 21 AL surnames, 20 used; titles {'Ms.': 24, 'Dr.': 27, 'Mrs.': 28, 'Mr.': 33}; aliases per item {2: 48, 1: 16}
+ok   M5 training surname in the AL list flagged by G6
+ok   M6 alias correction naming its object flagged by G4
+purity: 7000 training examples (seeds (1,), first 7000 draws each; blocks {'e004': 4898, 'alias': 1419, 'ind': 683}), 21978 distinct training texts, 33921 training 5-grams; AL: 96 alias corrections, 197 frames, 868 filler turns; shared 5-grams 0, shared frames 0
+ok   baseline purity (seed 1) clean
+purity: 7000 training examples (seeds (1,), first 7000 draws each; blocks {'e004': 4898, 'alias': 1419, 'ind': 683}), 21978 distinct training texts, 33921 training 5-grams; AL: 96 alias corrections, 198 frames, 868 filler turns; shared 5-grams 0, shared frames 0
+ok   P1 training surname in AL text flagged
+purity: 7000 training examples (seeds (1,), first 7000 draws each; blocks {'e004': 4898, 'alias': 1419, 'ind': 683}), 21978 distinct training texts, 33921 training 5-grams; AL: 96 alias corrections, 198 frames, 868 filler turns; shared 5-grams 2, shared frames 1
+ok   P2 training alias template flagged
+purity: 7000 training examples (seeds (1,), first 7000 draws each; blocks {'e004': 4898, 'alias': 1419, 'ind': 683}), 21978 distinct training texts, 33921 training 5-grams; AL: 96 alias corrections, 197 frames, 868 filler turns; shared 5-grams 13, shared frames 0
+ok   P3 and P5 training filler flagged
+purity: 7000 training examples (seeds (1,), first 7000 draws each; blocks {'e004': 4898, 'alias': 1419, 'ind': 683}), 21978 distinct training texts, 33921 training 5-grams; AL: 96 alias corrections, 197 frames, 868 filler turns; shared 5-grams 0, shared frames 1
+ok   P4 training sentence frame flagged ('The {o} is planned for {v}.')
+E005 AL diagnostic (al/al_items.jsonl, 64 items; groups n: all 64, AL1+AL2+AL4 48, needs linking 14, AL1 16, pl:other_obj 16, pl:filler 16, pl:adjacent 32, AL2 16, AL3 16, AL4 16)
+
+model     measure              all         AL1         AL2         AL3         AL4 AL1+AL2+AL4    adjacent      filler   other_obj needs linki
+----------------------------------------------------------------------------------------------------------------------------------------------
+base      LIK plain           1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+base      GEN plain           1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+base      LIK chat            1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+base      GEN chat            1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+          LIK plain picks LN's value where LN is wrong: 0/48
+          LIK plain picks T's value where T is wrong: 0/16
+          LIK chat picks LN's value where LN is wrong: 0/48
+          LIK chat picks T's value where T is wrong: 0/16
+e005_s1   LIK plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s1   GEN plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s1   LIK chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s1   GEN chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+          LIK plain picks LN's value where LN is wrong: 48/48
+          LIK plain picks T's value where T is wrong: 10/16
+          LIK chat picks LN's value where LN is wrong: 48/48
+          LIK chat picks T's value where T is wrong: 10/16
+e005_s2   LIK plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s2   GEN plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s2   LIK chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s2   GEN chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+          LIK plain picks LN's value where LN is wrong: 48/48
+          LIK plain picks T's value where T is wrong: 10/16
+          LIK chat picks LN's value where LN is wrong: 48/48
+          LIK chat picks T's value where T is wrong: 10/16
+e005_s3   LIK plain           0.75        0.75        0.38        0.88        1.00        0.71        0.84        0.94        0.38        0.00
+e005_s3   GEN plain           0.75        0.75        0.38        0.88        1.00        0.71        0.84        0.94        0.38        0.00
+e005_s3   LIK chat            0.75        0.75        0.38        0.88        1.00        0.71        0.84        0.94        0.38        0.00
+e005_s3   GEN chat            0.75        0.75        0.38        0.88        1.00        0.71        0.84        0.94        0.38        0.00
+          LIK plain picks LN's value where LN is wrong: 10/48
+          LIK plain picks T's value where T is wrong: 16/16
+          LIK chat picks LN's value where LN is wrong: 10/48
+          LIK chat picks T's value where T is wrong: 16/16
+
+ADDITION check: E005 alias reading 'DATA GAP'; E005 seeds with AL1+AL2+AL4 LIK plain < 0.5: 2 of 5 planned (['e005_s1', 'e005_s2']); scored 3.
+  -> the ADDITION's sentence does not apply (it needs DATA GAP and >= 3 of 5 seeds < 0.5)
+
+SUMMARY (LIK/GEN plain, all 64): base 1.00/1.00; e005_s1 0.25/0.25; e005_s2 0.25/0.25; e005_s3 0.75/0.75
+ok   IDEAL model 1.00 everywhere
+ok   LN model: all .25, AL3 1.00, AL1+AL2+AL4 0, needs linking 0
+ok   LN model picks LN's value on all 48 items where LN is wrong
+ok   T model: all .75, needs linking 0
+ok   ADDITION sentence off with 2 low seeds
+E005 AL diagnostic (al/al_items.jsonl, 64 items; groups n: all 64, AL1+AL2+AL4 48, needs linking 14, AL1 16, pl:other_obj 16, pl:filler 16, pl:adjacent 32, AL2 16, AL3 16, AL4 16)
+
+model     measure              all         AL1         AL2         AL3         AL4 AL1+AL2+AL4    adjacent      filler   other_obj needs linki
+----------------------------------------------------------------------------------------------------------------------------------------------
+base      LIK plain           1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+base      GEN plain           1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+base      LIK chat            1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+base      GEN chat            1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+          LIK plain picks LN's value where LN is wrong: 0/48
+          LIK plain picks T's value where T is wrong: 0/16
+          LIK chat picks LN's value where LN is wrong: 0/48
+          LIK chat picks T's value where T is wrong: 0/16
+e005_s1   LIK plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s1   GEN plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s1   LIK chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s1   GEN chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+          LIK plain picks LN's value where LN is wrong: 48/48
+          LIK plain picks T's value where T is wrong: 10/16
+          LIK chat picks LN's value where LN is wrong: 48/48
+          LIK chat picks T's value where T is wrong: 10/16
+e005_s2   LIK plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s2   GEN plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s2   LIK chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s2   GEN chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+          LIK plain picks LN's value where LN is wrong: 48/48
+          LIK plain picks T's value where T is wrong: 10/16
+          LIK chat picks LN's value where LN is wrong: 48/48
+          LIK chat picks T's value where T is wrong: 10/16
+e005_s3   LIK plain           0.75        0.75        0.38        0.88        1.00        0.71        0.84        0.94        0.38        0.00
+e005_s3   GEN plain           0.75        0.75        0.38        0.88        1.00        0.71        0.84        0.94        0.38        0.00
+e005_s3   LIK chat            0.75        0.75        0.38        0.88        1.00        0.71        0.84        0.94        0.38        0.00
+e005_s3   GEN chat            0.75        0.75        0.38        0.88        1.00        0.71        0.84        0.94        0.38        0.00
+          LIK plain picks LN's value where LN is wrong: 10/48
+          LIK plain picks T's value where T is wrong: 16/16
+          LIK chat picks LN's value where LN is wrong: 10/48
+          LIK chat picks T's value where T is wrong: 16/16
+e005_s4   LIK plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s4   GEN plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s4   LIK chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s4   GEN chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+          LIK plain picks LN's value where LN is wrong: 48/48
+          LIK plain picks T's value where T is wrong: 10/16
+          LIK chat picks LN's value where LN is wrong: 48/48
+          LIK chat picks T's value where T is wrong: 10/16
+
+ADDITION check: E005 alias reading 'DATA GAP'; E005 seeds with AL1+AL2+AL4 LIK plain < 0.5: 3 of 5 planned (['e005_s1', 'e005_s2', 'e005_s4']); scored 4.
+  -> resolved by alias recency, not by linking
+
+SUMMARY (LIK/GEN plain, all 64): base 1.00/1.00; e005_s1 0.25/0.25; e005_s2 0.25/0.25; e005_s3 0.75/0.75; e005_s4 0.25/0.25
+ok   ADDITION sentence on with 3 low seeds and DATA GAP
+E005 AL diagnostic (al/al_items.jsonl, 64 items; groups n: all 64, AL1+AL2+AL4 48, needs linking 14, AL1 16, pl:other_obj 16, pl:filler 16, pl:adjacent 32, AL2 16, AL3 16, AL4 16)
+
+model     measure              all         AL1         AL2         AL3         AL4 AL1+AL2+AL4    adjacent      filler   other_obj needs linki
+----------------------------------------------------------------------------------------------------------------------------------------------
+base      LIK plain           1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+base      GEN plain           1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+base      LIK chat            1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+base      GEN chat            1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00        1.00
+          LIK plain picks LN's value where LN is wrong: 0/48
+          LIK plain picks T's value where T is wrong: 0/16
+          LIK chat picks LN's value where LN is wrong: 0/48
+          LIK chat picks T's value where T is wrong: 0/16
+e005_s1   LIK plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s1   GEN plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s1   LIK chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s1   GEN chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+          LIK plain picks LN's value where LN is wrong: 48/48
+          LIK plain picks T's value where T is wrong: 10/16
+          LIK chat picks LN's value where LN is wrong: 48/48
+          LIK chat picks T's value where T is wrong: 10/16
+e005_s2   LIK plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s2   GEN plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s2   LIK chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s2   GEN chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+          LIK plain picks LN's value where LN is wrong: 48/48
+          LIK plain picks T's value where T is wrong: 10/16
+          LIK chat picks LN's value where LN is wrong: 48/48
+          LIK chat picks T's value where T is wrong: 10/16
+e005_s3   LIK plain           0.75        0.75        0.38        0.88        1.00        0.71        0.84        0.94        0.38        0.00
+e005_s3   GEN plain           0.75        0.75        0.38        0.88        1.00        0.71        0.84        0.94        0.38        0.00
+e005_s3   LIK chat            0.75        0.75        0.38        0.88        1.00        0.71        0.84        0.94        0.38        0.00
+e005_s3   GEN chat            0.75        0.75        0.38        0.88        1.00        0.71        0.84        0.94        0.38        0.00
+          LIK plain picks LN's value where LN is wrong: 10/48
+          LIK plain picks T's value where T is wrong: 16/16
+          LIK chat picks LN's value where LN is wrong: 10/48
+          LIK chat picks T's value where T is wrong: 16/16
+e005_s4   LIK plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s4   GEN plain           0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s4   LIK chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+e005_s4   GEN chat            0.25        0.00        0.00        1.00        0.00        0.00        0.25        0.25        0.25        0.00
+          LIK plain picks LN's value where LN is wrong: 48/48
+          LIK plain picks T's value where T is wrong: 10/16
+          LIK chat picks LN's value where LN is wrong: 48/48
+          LIK chat picks T's value where T is wrong: 10/16
+
+ADDITION check: E005 alias reading 'INCONCLUSIVE'; E005 seeds with AL1+AL2+AL4 LIK plain < 0.5: 3 of 5 planned (['e005_s1', 'e005_s2', 'e005_s4']); scored 4.
+  -> the ADDITION's sentence does not apply (it needs DATA GAP and >= 3 of 5 seeds < 0.5)
+
+SUMMARY (LIK/GEN plain, all 64): base 1.00/1.00; e005_s1 0.25/0.25; e005_s2 0.25/0.25; e005_s3 0.75/0.75; e005_s4 0.25/0.25
+ok   ADDITION sentence off without DATA GAP
+
+RESULT: ALL PASS (19 checks)

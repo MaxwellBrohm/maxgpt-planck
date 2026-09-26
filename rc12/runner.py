@@ -17,13 +17,17 @@ Context: with --ctx N, the history is fitted to N - 256 tokens by dropping the o
 src turns, was dropped when its reply was generated (SPEC s1; notes D13: every such turn, not only the probe's own).
 
 Output (--out DIR): transcripts.jsonl (one line per conversation x seed: turns [{i, kind, user, reply, stop,
-dropped, raw}], probes (grader results), unit, flags, leaks) and scores.jsonl (per seed: every family and cell;
+dropped, raw}], probes (grader results), unit, flags, leaks, ack_repeat and ack_of_answer (OD6 iii reports), own_cf
+and cf_unswapped (a --own-cf rewrite that did not take: own_cf.py)) and scores.jsonl (per seed: every family and cell;
 score.py computes the composites). CLI:
   python3 -B runner.py --responder fake:IDEAL --render plain --seeds greedy --out runs/fake_IDEAL
   python3 -B runner.py --responder hf:Qwen/Qwen2.5-0.5B-Instruct --render template --seeds 1,2,3 \\
       --ctx 32768 --out runs/qwen05 --hf-untested-ok
   <venv python> -B runner.py --responder planck:../runs/x/out/final_00001000.pt --planck-config ../runs/x/config.yaml \\
-      --render template --seeds greedy,1,2,3 --out runs/planck_x"""
+      --render template --seeds greedy,1,2,3 --out runs/planck_x
+OD1 (b): R needs the OWN counterfactual run too (same responder, render, seeds, --train-seed, plus --own-cf
+--families OWN --out <dir>_owncf); score both: score.py <dir>/transcripts.jsonl <dir>_owncf/transcripts.jsonl.
+A run alone prints R null and R_ungated (the composite with the own-history OWN)."""
 import argparse
 import json
 import os
@@ -49,7 +53,7 @@ def load(path=DEV, families=None, limit=None):
 
 def play(rec, responder, render="plain", seed=None, ctx=None, own_cf=False):
     """one conversation through the real feedback loop; returns the per-turn transcript. own_cf: the OWN
-    counterfactual-history DIAGNOSTIC (own_cf.py), never the scored protocol."""
+    counterfactual-history run (own_cf.py); score.py uses its rows only to gate OWN (OD1 b), never as a history."""
     responder.start(rec, seed, render)
     budget = None if ctx is None else ctx - RD.MAX_NEW_TOKENS
     msgs, out = [], []
@@ -64,11 +68,16 @@ def play(rec, responder, render="plain", seed=None, ctx=None, own_cf=False):
                 stop = "role"
         text = text.strip()
         alt = OC.swap(rec, t["i"], text) if own_cf else None
+        failed = alt is OC.UNSWAPPED               # G-DYN parses it, but the rewrite did not take (own_cf.py)
+        if failed:
+            alt = None
         if alt is not None:
             raw, text = raw, alt                     # the model's own text stays in raw
         msgs.append({"role": "assistant", "content": text})
         out.append(dict(i=t["i"], kind=t["kind"], user=t["text"], reply=text, stop=stop, dropped=dropped,
                         raw=None if raw == text else raw))
+        if failed:
+            out[-1]["cf_unswapped"] = True           # score.py: this OWN unit counts 0 in OWN_GATED
     return out
 
 
@@ -97,7 +106,8 @@ def run_one(rec, responder, render, seed, ctx, name="?", train_seed=0, own_cf=Fa
     return dict(id=rec["id"], family=rec["family"], cell=rec["cell"], knowledge=rec["knowledge"],
                 pair_id=rec["meta"].get("pair_id"), responder=name, render=render, seed=seed,
                 train_seed=train_seed, unit=g["unit"], probes=g["probes"], flags=g["flags"], leaks=g["leaks"],
-                turns=played, own_cf=own_cf)
+                ack_repeat=g["ack_repeat"], ack_of_answer=g["ack_of_answer"], turns=played, own_cf=own_cf,
+                cf_unswapped=any(x.get("cf_unswapped") for x in played))
 
 
 def run(recs, responder, render="plain", seeds=(None,), ctx=None, out_dir=None, name="?", train_seed=0, own_cf=False):
@@ -164,7 +174,8 @@ def main():
     rows = run(recs, responder, args.render, parse_seeds(args.seeds), ctx, args.out, name, args.train_seed,
                args.own_cf)
     summary = S.summarize(rows)
-    print(json.dumps({k: summary[k] for k in ("R", "families", "level_a_met", "loop_rate", "t0")}, indent=1))
+    print(json.dumps({k: summary[k] for k in ("R", "R_ungated", "own_gate", "families", "level_a_met", "loop_rate",
+                                              "ack_repeat", "t0")}, indent=1))
     print(f"{len(rows)} conversations in {time.time() - t0:.1f} s -> {args.out}")
 
 

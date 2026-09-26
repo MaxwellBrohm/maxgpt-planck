@@ -2,7 +2,10 @@
 in the generator source, the whole dev split is rebuilt IN MEMORY (dev/ is never touched), and the detector that
 is meant to catch it must go red: the audit_rules.py gate (a cheap rule above the bars) or a named check of
 test_gens_fam.py. A kill by another detector does not count; a crash is never a kill.
-Writes logs/mutation_audit.txt; exit 1 unless every mutant is killed. Run: python3 -B mutation_audit.py"""
+Writes logs/mutation_audit.txt (or mutation_audit_part<i>.txt); exit 1 unless every mutant is killed.
+Run: python3 -B mutation_audit.py [--part i/n]   (--part: every n-th mutant, to keep each run under 2 minutes; each
+part re-checks the unmutated build first)"""
+import argparse
 import os
 import sys
 import time
@@ -87,12 +90,17 @@ def detect(recs, det):
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--part", default="1/1")
+    i, n = (int(x) for x in ap.parse_args().part.split("/"))
+    todo = [m for k, m in enumerate(MUTANTS) if k % n == i - 1]
     t0 = time.time()
     base_ok = not AR.violations(build()) and not TF.run(build())
     lines = ["RC-12 mutation_audit.py: generator mutants that undo a step 5 fix; the named detector must go red.",
+             f"part {i}/{n}: {len(todo)} of {len(MUTANTS)} mutants",
              f"unmutated build: gate and family checks {'clean' if base_ok else 'NOT CLEAN'}", ""]
     killed = 0
-    for name, mod, old, new, det in MUTANTS:
+    for name, mod, old, new, det in todo:
         try:
             ok, why = with_source(mod, old, new, lambda: detect(build(), det))
         except Exception as e:  # a crash is never a kill
@@ -100,12 +108,13 @@ def main():
         status = "KILLED " if ok else "CRASHED" if ok is None else "SURVIVE"
         killed += bool(ok)
         lines.append(f"{status} {name} [{det[0]}] <- {why}")
-    lines += ["", f"killed {killed} of {len(MUTANTS)} in {time.time() - t0:.0f} s"]
+    lines += ["", f"killed {killed} of {len(todo)} in {time.time() - t0:.0f} s"]
     text = "\n".join(lines) + "\n"
-    with open(os.path.join(HERE, "logs", "mutation_audit.txt"), "w") as f:
+    name = "mutation_audit.txt" if n == 1 else f"mutation_audit_part{i}.txt"
+    with open(os.path.join(HERE, "logs", name), "w") as f:
         f.write(text)
     print(text)
-    return 0 if base_ok and killed == len(MUTANTS) else 1
+    return 0 if base_ok and killed == len(todo) else 1
 
 
 if __name__ == "__main__":

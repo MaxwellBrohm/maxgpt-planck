@@ -1,0 +1,7 @@
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 7387.11it/s]
+loaded HuggingFaceTB/SmolLM2-135M-Instruct params=134,515,008 sanity_nll=1.9598 1.9s mps_alloc=0.50G driver=1.06G peak_driver=1.06G
+scored al/plain: [14, 64] in 17s mps_alloc=0.50G driver=1.11G peak_driver=1.11G
+scored al/chat: [12, 64] in 20s mps_alloc=0.50G driver=1.11G peak_driver=1.11G
+generated al/plain: strict [6, 64] in 13s
+generated al/chat: strict [5, 64] in 17s
+DONE HuggingFaceTB/SmolLM2-135M-Instruct base total 68s peak_driver=1.113G

@@ -1,1 +1,28 @@
 2026-09-25 08:51:49 QUEUE E005 WAITING (pid 20479): until E004 queue.txt has QUEUE E004-TS1M DONE / E004-TS1M not started / QUEUE STOPPED, no queue_e004 script runs and no other model job, then 60 s
+2026-09-25 09:33:41 waiting: 1 other model job(s) running (22837 /Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B e004_ft_test.py roneneldan/TinyStories-3M --bs 4 )
+2026-09-25 09:40:42 other model jobs ended; continuing
+2026-09-25 09:41:42 QUEUE E005 START
+2026-09-25 09:41:42 code sha256 at start: 97 files, digest 94c1ba4dd5e882b5 (logs/code_sha256_at_start.txt)
+2026-09-25 09:41:43 eval_identity_e005 exit=0 (RESULT: ALL PASS)
+2026-09-25 09:43:30 validate_e005 exit=0 (RESULT: ALL PASS (oracles, drawn-vs-kept shift <= 2 points, purity 0, on every seed's kept examples))
+2026-09-25 09:43:49 test_train_e005 exit=0 (RESULT: ALL PASS)
+2026-09-25 09:43:55 test_render_e005 exit=0 (0 failures; ALL PASS)
+2026-09-25 09:43:57 selfcheck_e005 exit=0 (0 failures; ALL PASS)
+2026-09-25 09:44:00 test_analyze_e005 exit=0 (0 failures; ALL PASS)
+2026-09-25 09:44:28 test_queue_tools_e005 exit=0 (RESULT: ALL PASS (16 cases))
+2026-09-25 09:45:33 dry_135m exit=0 killed=None (elapsed_s peak_rss_mb min_free: 64 866 55)
+2026-09-25 09:45:40 drychat_135m exit=0 killed=None (elapsed_s peak_rss_mb min_free: 7 854 71)
+2026-09-25 09:45:44 base: REUSED E004's untouched-model records, not rescored (REUSE OK: 17 files copied, sha256 source = copy (logs/base_reuse_sha256.txt); checks in logs/reuse_base_e005.stdout)
+2026-09-25 14:55:40 ft_135m_s1 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 18595 2529 47)
+2026-09-25 14:58:30 chat_135m_s1 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 170 560 46)
+2026-09-25 16:17:32 ft_135m_s2 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 4740 2344 39)
+2026-09-25 16:18:40 chat_135m_s2 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 68 573 55)
+2026-09-25 17:45:02 ft_135m_s3 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 5179 2644 37)
+2026-09-25 17:47:14 chat_135m_s3 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 132 561 51)
+2026-09-25 19:06:37 ft_135m_s4 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 4761 2330 37)
+2026-09-25 19:07:28 chat_135m_s4 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 50 561 69)
+2026-09-25 20:29:08 ft_135m_s5 exit=0 killed=None (elapsed_s peak_rss_mb min_free: 4899 2277 27)
+2026-09-25 20:29:40 chat_135m_s5 exit=1 killed=swap_grew_1302MB (elapsed_s peak_rss_mb min_free: 32 558 31)
+2026-09-25 20:29:40 QUEUE STOPPED: swap_grew_1302MB in chat_135m_s5
+2026-09-25 20:46:39 RERUN by Claude: chat_135m_s5 (killed at 20:29 by swap_grew_1302MB at 31% free; the swap growth came from other work on the Mac, not the probe: peak rss 558 MB), then analyze_e005.py
+2026-09-25 20:53:57 chat_135m_s5 re-run exit=0 (attempts 2 and 3; attempt 2 killed by the same one-sample swap rule); analyze_e005 re-run; readings: see results.json

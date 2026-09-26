@@ -1,0 +1,211 @@
+E005 tables (analyze_e005.py; pass rule notes.txt PASS RULE, alias reading notes.txt ALIAS READING)
+
+== HuggingFaceTB/SmolLM2-135M-Instruct E005: reading PARTIAL-X (updating with a named limit: H5 (3 seeds pass everything else))
+   run   part        H1        H2        H3        H4        H5        H6        H7   C_noupd C_twoslot        ID  pass
+   base  LIK      0.047     0.062     0.062     0.156     0.156     0.172     0.188     0.391     0.156     0.406  fail
+   base  GEN      0.094     0.125     0.000     0.031     0.109     0.109     0.062     0.297     0.078     0.156  
+   s1    LIK      0.906     0.953     0.844     0.953     0.609     0.891     0.906     0.812     0.859     0.938  fail
+   s1    GEN      0.906     0.953     0.891     0.953     0.578     0.938     0.922     0.797     0.859     0.953  
+   s2    LIK      0.906     0.938     0.859     0.922     0.719     0.891     0.953     0.891     0.891     0.938  fail
+   s2    GEN      0.906     0.953     0.891     0.938     0.703     0.953     0.938     0.875     0.891     0.906  
+   s3    LIK      0.906     0.953     0.844     0.922     0.656     0.891     0.938     0.875     0.859     0.938  fail
+   s3    GEN      0.922     0.984     0.859     0.922     0.688     0.891     0.953     0.844     0.859     0.938  
+   s4    LIK      0.938     0.922     0.891     0.922     0.641     0.891     0.922     0.812     0.812     0.953  fail
+   s4    GEN      0.938     0.922     0.891     0.906     0.641     0.938     0.938     0.812     0.781     0.953  
+   s5    LIK      0.891     0.922     0.891     0.906     0.656     0.859     0.953     0.938     0.828     0.938  fail
+   s5    GEN      0.906     0.938     0.891     0.906     0.656     0.938     0.953     0.891     0.828     0.938  
+   alias reading (E005): DATA GAP (HIGH 5, LOW 0 of 5 planned)
+   alias base: LIK 0.048 GEN 0.119 (n 42) [-]; H1 0.048/0.143, H2 0.048/0.095; placement LIK/GEN adjacent 0.111/0.333 (n 9), filler 0.000/0.000 (n 14), B_sep 0.053/0.105 (n 19)
+   alias s1: LIK 0.929 GEN 0.976 (n 42) [HIGH]; H1 0.857/0.952, H2 1.000/1.000; placement LIK/GEN adjacent 1.000/1.000 (n 9), filler 0.857/0.929 (n 14), B_sep 0.947/1.000 (n 19)
+   alias s2: LIK 0.929 GEN 0.952 (n 42) [HIGH]; H1 0.905/0.905, H2 0.952/1.000; placement LIK/GEN adjacent 0.889/1.000 (n 9), filler 0.857/0.857 (n 14), B_sep 1.000/1.000 (n 19)
+   alias s3: LIK 0.929 GEN 0.929 (n 42) [HIGH]; H1 0.857/0.857, H2 1.000/1.000; placement LIK/GEN adjacent 1.000/1.000 (n 9), filler 0.786/0.786 (n 14), B_sep 1.000/1.000 (n 19)
+   alias s4: LIK 0.952 GEN 0.952 (n 42) [HIGH]; H1 0.905/0.905, H2 1.000/1.000; placement LIK/GEN adjacent 1.000/1.000 (n 9), filler 0.857/0.857 (n 14), B_sep 1.000/1.000 (n 19)
+   alias s5: LIK 0.881 GEN 0.905 (n 42) [HIGH]; H1 0.809/0.857, H2 0.952/0.952; placement LIK/GEN adjacent 0.889/1.000 (n 9), filler 0.786/0.786 (n 14), B_sep 0.947/0.947 (n 19)
+   chat (E005, not ruled): stopping learned = True (seeds within 0.1 of plain GEN on every pass family: [True, True, True, True, True])
+   chat base strict      0.016  0.031  0.031  0.031  0.047  0.047  0.016  0.141  0.062  0.078
+   chat base first_line  0.016  0.031  0.031  0.031  0.047  0.047  0.016  0.141  0.062  0.078
+   chat base capped      0.000  0.000  0.000  0.000  0.000  0.000  0.016  0.000  0.000  0.000
+   chat base strict - plain GEN over pass families: min -0.156 max 0.031
+   chat s1 strict      0.922  0.969  0.844  0.953  0.641  0.906  0.922  0.828  0.875  0.938
+   chat s1 first_line  0.922  0.969  0.844  0.953  0.641  0.906  0.922  0.828  0.875  0.938
+   chat s1 capped      0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+   chat s1 strict - plain GEN over pass families: min -0.047 max 0.062
+   chat s2 strict      0.906  0.953  0.828  0.938  0.719  0.922  0.969  0.859  0.875  0.891
+   chat s2 first_line  0.906  0.953  0.828  0.938  0.719  0.922  0.969  0.859  0.875  0.891
+   chat s2 capped      0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+   chat s2 strict - plain GEN over pass families: min -0.062 max 0.031
+   chat s3 strict      0.938  0.953  0.844  0.891  0.703  0.922  0.953  0.828  0.859  0.953
+   chat s3 first_line  0.938  0.953  0.844  0.891  0.703  0.922  0.953  0.828  0.859  0.953
+   chat s3 capped      0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+   chat s3 strict - plain GEN over pass families: min -0.031 max 0.031
+   chat s4 strict      0.953  0.969  0.922  0.938  0.641  0.938  0.938  0.828  0.812  0.938
+   chat s4 first_line  0.953  0.969  0.922  0.938  0.641  0.938  0.938  0.828  0.812  0.938
+   chat s4 capped      0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+   chat s4 strict - plain GEN over pass families: min 0.000 max 0.047
+   chat s5 strict      0.953  0.922  0.828  0.938  0.703  0.969  0.953  0.828  0.828  0.938
+   chat s5 first_line  0.953  0.922  0.828  0.938  0.703  0.969  0.953  0.828  0.828  0.938
+   chat s5 capped      0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+   chat s5 strict - plain GEN over pass families: min -0.062 max 0.047
+   evidence: H1 LIK by the latest statement's reference form (range over seeds): alias 0.809-0.905, ell 0.809-0.952, pron 0.909-1.000
+   evidence: H2 LIK by the latest statement's reference form (range over seeds): alias 0.952-1.000, ell 0.809-0.905, pron 0.909-1.000
+   evidence: H1+H2 alias items by placement, LIK (range over seeds): adjacent 0.889-1.000 (n 9), filler 0.786-0.857 (n 14), B_sep 0.947-1.000 (n 19)
+   evidence: wrong LIK picks, H1/H2 alias, pooled over seeds: 16 wrong: other_after 12, A_prev 4; of them lures 2
+   evidence: wrong GEN picks, H1/H2 alias, pooled over seeds: 12 wrong: other_after 11, A_prev 1; of them lures 0
+   evidence: wrong LIK picks, H1/H2 not alias, pooled over seeds: 33 wrong: A_prev 28, other_after 5; of them lures 19
+   evidence: wrong GEN picks, H1/H2 not alias, pooled over seeds: 31 wrong: A_prev 25, other_after 6; of them lures 18
+   evidence: wrong LIK picks, H5, pooled over seeds: 110 wrong: other_after 83, A_prev 20, other_before 7; of them lures 0
+   evidence: wrong GEN picks, H5, pooled over seeds: 111 wrong: other_after 83, A_prev 21, other_before 7; of them lures 0
+   evidence: wrong LIK picks, C_noupd, pooled over seeds: 43 wrong: other_after 43; of them lures 0
+   evidence: wrong GEN picks, C_noupd, pooled over seeds: 50 wrong: other_after 50; of them lures 0
+   evidence: wrong LIK picks, C_twoslot, pooled over seeds: 48 wrong: other_after 29, A_prev 19; of them lures 2
+   evidence: wrong GEN picks, C_twoslot, pooled over seeds: 50 wrong: other_after 35, A_prev 15; of them lures 0
+   (E004 rescored by this code: reading FAIL)
+   E004 evidence: H1 LIK by the latest statement's reference form (range over seeds): alias 0.095-0.333, ell 0.762-0.857, pron 1.000-1.000
+   E004 evidence: H2 LIK by the latest statement's reference form (range over seeds): alias 0.238-0.524, ell 0.667-0.905, pron 0.955-0.955
+   E004 evidence: H1+H2 alias items by placement, LIK (range over seeds): adjacent 0.667-0.778 (n 9), filler 0.000-0.286 (n 14), B_sep 0.053-0.368 (n 19)
+   E004 evidence: wrong LIK picks, H1/H2 alias, pooled over seeds: 147 wrong: A_prev 139, A_earlier 5, other_before 2, other_after 1; of them lures 57
+   E004 evidence: wrong GEN picks, H1/H2 alias, pooled over seeds: 140 wrong: A_prev 133, A_earlier 5, other_after 1, other_before 1; of them lures 51
+   E004 evidence: wrong LIK picks, H1/H2 not alias, pooled over seeds: 46 wrong: A_prev 39, other_after 7; of them lures 24
+   E004 evidence: wrong GEN picks, H1/H2 not alias, pooled over seeds: 42 wrong: A_prev 37, other_after 5; of them lures 23
+   E004 evidence: wrong LIK picks, H5, pooled over seeds: 78 wrong: other_after 49, A_prev 26, other_before 3; of them lures 0
+   E004 evidence: wrong GEN picks, H5, pooled over seeds: 78 wrong: other_after 51, A_prev 24, other_before 3; of them lures 0
+   E004 evidence: wrong LIK picks, C_noupd, pooled over seeds: 35 wrong: other_after 35; of them lures 0
+   E004 evidence: wrong GEN picks, C_noupd, pooled over seeds: 41 wrong: other_after 38, none 3; of them lures 0
+   E004 evidence: wrong LIK picks, C_twoslot, pooled over seeds: 50 wrong: A_prev 40, other_after 10; of them lures 4
+   E004 evidence: wrong GEN picks, C_twoslot, pooled over seeds: 50 wrong: A_prev 38, other_after 12; of them lures 3
+   alias reading (E004, same code): REAL LIMIT (HIGH 0, LOW 4 of 5 planned)
+   alias base: LIK 0.048 GEN 0.119 (n 42) [-]; H1 0.048/0.143, H2 0.048/0.095; placement LIK/GEN adjacent 0.111/0.333 (n 9), filler 0.000/0.000 (n 14), B_sep 0.053/0.105 (n 19)
+   alias s1: LIK 0.214 GEN 0.191 (n 42) [LOW]; H1 0.191/0.143, H2 0.238/0.238; placement LIK/GEN adjacent 0.667/0.667 (n 9), filler 0.143/0.143 (n 14), B_sep 0.053/0.000 (n 19)
+   alias s2: LIK 0.429 GEN 0.429 (n 42) [LOW]; H1 0.333/0.333, H2 0.524/0.524; placement LIK/GEN adjacent 0.778/0.889 (n 9), filler 0.286/0.286 (n 14), B_sep 0.368/0.316 (n 19)
+   alias s3: LIK 0.357 GEN 0.524 (n 42) [MID]; H1 0.333/0.476, H2 0.381/0.571; placement LIK/GEN adjacent 0.667/0.889 (n 9), filler 0.286/0.643 (n 14), B_sep 0.263/0.263 (n 19)
+   alias s4: LIK 0.262 GEN 0.262 (n 42) [LOW]; H1 0.191/0.191, H2 0.333/0.333; placement LIK/GEN adjacent 0.667/0.667 (n 9), filler 0.000/0.000 (n 14), B_sep 0.263/0.263 (n 19)
+   alias s5: LIK 0.238 GEN 0.262 (n 42) [LOW]; H1 0.095/0.095, H2 0.381/0.429; placement LIK/GEN adjacent 0.667/0.778 (n 9), filler 0.143/0.143 (n 14), B_sep 0.105/0.105 (n 19)
+   chat (E004, same code, not ruled): stopping learned = False (seeds within 0.1 of plain GEN on every pass family: [False, False, False, False, False])
+   chat base strict      0.016  0.031  0.031  0.031  0.047  0.047  0.016  0.141  0.062  0.078
+   chat base first_line  0.016  0.031  0.031  0.031  0.047  0.047  0.016  0.141  0.062  0.078
+   chat base capped      0.000  0.000  0.000  0.000  0.000  0.000  0.016  0.000  0.000  0.000
+   chat base strict - plain GEN over pass families: min -0.156 max 0.031
+   chat s1 strict      0.000  0.000  0.000  0.109  0.016  0.031  0.031  0.031  0.000  0.000
+   chat s1 first_line  0.609  0.719  0.859  0.922  0.719  0.891  0.922  0.781  0.859  0.938
+   chat s1 capped      1.000  1.000  1.000  0.891  0.984  0.953  0.969  0.953  1.000  1.000
+   chat s1 strict - plain GEN over pass families: min -0.906 max -0.656
+   chat s2 strict      0.062  0.172  0.172  0.703  0.234  0.359  0.219  0.281  0.188  0.328
+   chat s2 first_line  0.703  0.750  0.859  0.984  0.672  0.828  0.875  0.688  0.828  0.922
+   chat s2 capped      0.875  0.797  0.797  0.281  0.641  0.594  0.781  0.562  0.812  0.672
+   chat s2 strict - plain GEN over pass families: min -0.750 max -0.266
+   chat s3 strict      0.016  0.000  0.000  0.094  0.031  0.109  0.094  0.078  0.016  0.016
+   chat s3 first_line  0.688  0.719  0.781  0.891  0.719  0.797  0.859  0.797  0.781  0.859
+   chat s3 capped      0.984  1.000  1.000  0.906  0.969  0.875  0.906  0.922  0.984  0.984
+   chat s3 strict - plain GEN over pass families: min -0.859 max -0.750
+   chat s4 strict      0.031  0.141  0.016  0.391  0.141  0.219  0.047  0.219  0.031  0.078
+   chat s4 first_line  0.672  0.688  0.812  0.922  0.719  0.906  0.922  0.750  0.859  0.922
+   chat s4 capped      0.969  0.828  0.984  0.609  0.797  0.781  0.953  0.719  0.969  0.922
+   chat s4 strict - plain GEN over pass families: min -0.875 max -0.516
+   chat s5 strict      0.328  0.344  0.297  0.719  0.531  0.516  0.266  0.625  0.438  0.547
+   chat s5 first_line  0.641  0.766  0.781  0.922  0.797  0.844  0.859  0.797  0.781  0.891
+   chat s5 capped      0.484  0.594  0.656  0.250  0.344  0.391  0.734  0.266  0.516  0.438
+   chat s5 strict - plain GEN over pass families: min -0.688 max -0.219
+   E005 s1 H1 by form LIK/GEN: alias 0.857/0.952 (n 21), ell 0.857/0.857 (n 21), pron 1.000/0.909 (n 22)
+   E005 s1 H2 by form LIK/GEN: alias 1.000/1.000 (n 21), ell 0.857/0.857 (n 21), pron 1.000/1.000 (n 22)
+   E005 s1 ellipsis latest, another object after (True) or not, LIK: C_twoslot True=0.667/18; H1 False=1.000/11 True=0.700/10; H2 False=1.000/11 True=0.700/10; H3 False=0.625/8 True=0.500/8; H4 False=1.000/8 True=0.750/8; H5 True=0.421/19; H6 False=0.875/8 True=0.500/8; H7 False=0.875/8 True=0.500/8; ID False=0.667/3 True=0.750/8
+   E005 s1 H5 LIK: other object's indirect correction after the asked latest True 0.500 (n 32), False 0.719 (n 32); by asked latest form ell 0.421 (n 19), full 0.714 (n 7), head 0.889 (n 9), orig 0.500 (n 16), pron 0.769 (n 13)
+   E005 s2 H1 by form LIK/GEN: alias 0.905/0.905 (n 21), ell 0.809/0.809 (n 21), pron 1.000/1.000 (n 22)
+   E005 s2 H2 by form LIK/GEN: alias 0.952/1.000 (n 21), ell 0.857/0.857 (n 21), pron 1.000/1.000 (n 22)
+   E005 s2 ellipsis latest, another object after (True) or not, LIK: C_twoslot True=0.722/18; H1 False=0.909/11 True=0.700/10; H2 False=1.000/11 True=0.700/10; H3 False=1.000/8 True=0.500/8; H4 False=1.000/8 True=0.750/8; H5 True=0.526/19; H6 False=0.750/8 True=0.750/8; H7 False=1.000/8 True=0.750/8; ID False=0.667/3 True=0.875/8
+   E005 s2 H5 LIK: other object's indirect correction after the asked latest True 0.656 (n 32), False 0.781 (n 32); by asked latest form ell 0.526 (n 19), full 0.857 (n 7), head 0.778 (n 9), orig 0.688 (n 16), pron 0.923 (n 13)
+   E005 s3 H1 by form LIK/GEN: alias 0.857/0.857 (n 21), ell 0.857/0.905 (n 21), pron 1.000/1.000 (n 22)
+   E005 s3 H2 by form LIK/GEN: alias 1.000/1.000 (n 21), ell 0.905/1.000 (n 21), pron 0.955/0.955 (n 22)
+   E005 s3 ellipsis latest, another object after (True) or not, LIK: C_twoslot True=0.722/18; H1 False=1.000/11 True=0.700/10; H2 False=1.000/11 True=0.800/10; H3 False=0.875/8 True=0.750/8; H4 False=1.000/8 True=0.750/8; H5 True=0.632/19; H6 False=0.875/8 True=0.875/8; H7 False=0.875/8 True=0.750/8; ID False=0.667/3 True=0.750/8
+   E005 s3 H5 LIK: other object's indirect correction after the asked latest True 0.500 (n 32), False 0.812 (n 32); by asked latest form ell 0.632 (n 19), full 0.857 (n 7), head 0.778 (n 9), orig 0.438 (n 16), pron 0.769 (n 13)
+   E005 s4 H1 by form LIK/GEN: alias 0.905/0.905 (n 21), ell 0.905/0.905 (n 21), pron 1.000/1.000 (n 22)
+   E005 s4 H2 by form LIK/GEN: alias 1.000/1.000 (n 21), ell 0.809/0.809 (n 21), pron 0.955/0.955 (n 22)
+   E005 s4 ellipsis latest, another object after (True) or not, LIK: C_twoslot True=0.667/18; H1 False=1.000/11 True=0.800/10; H2 False=1.000/11 True=0.600/10; H3 False=0.750/8 True=0.625/8; H4 False=1.000/8 True=0.750/8; H5 True=0.684/19; H6 False=0.875/8 True=0.750/8; H7 False=1.000/8 True=0.625/8; ID False=0.667/3 True=0.750/8
+   E005 s4 H5 LIK: other object's indirect correction after the asked latest True 0.500 (n 32), False 0.781 (n 32); by asked latest form ell 0.684 (n 19), full 0.429 (n 7), head 0.889 (n 9), orig 0.500 (n 16), pron 0.692 (n 13)
+   E005 s5 H1 by form LIK/GEN: alias 0.809/0.857 (n 21), ell 0.952/0.952 (n 21), pron 0.909/0.909 (n 22)
+   E005 s5 H2 by form LIK/GEN: alias 0.952/0.952 (n 21), ell 0.905/0.905 (n 21), pron 0.909/0.955 (n 22)
+   E005 s5 ellipsis latest, another object after (True) or not, LIK: C_twoslot True=0.833/18; H1 False=1.000/11 True=0.900/10; H2 False=0.909/11 True=0.900/10; H3 False=0.750/8 True=1.000/8; H4 False=1.000/8 True=0.750/8; H5 True=0.579/19; H6 False=0.750/8 True=0.750/8; H7 False=1.000/8 True=0.625/8; ID False=1.000/3 True=0.750/8
+   E005 s5 H5 LIK: other object's indirect correction after the asked latest True 0.625 (n 32), False 0.688 (n 32); by asked latest form ell 0.579 (n 19), full 0.571 (n 7), head 0.778 (n 9), orig 0.562 (n 16), pron 0.846 (n 13)
+   E004 s1 H1 by form LIK/GEN: alias 0.191/0.143 (n 21), ell 0.809/0.809 (n 21), pron 1.000/1.000 (n 22)
+   E004 s1 H2 by form LIK/GEN: alias 0.238/0.238 (n 21), ell 0.905/0.905 (n 21), pron 0.955/0.955 (n 22)
+   E004 s1 ellipsis latest, another object after (True) or not, LIK: C_twoslot True=0.667/18; H1 False=0.909/11 True=0.700/10; H2 False=0.909/11 True=0.900/10; H3 False=0.625/8 True=0.500/8; H4 False=1.000/8 True=0.750/8; H5 True=0.579/19; H6 False=0.875/8 True=0.750/8; H7 False=0.750/8 True=0.750/8; ID False=0.667/3 True=0.750/8
+   E004 s1 H5 LIK: other object's indirect correction after the asked latest True 0.562 (n 32), False 0.844 (n 32); by asked latest form ell 0.579 (n 19), full 0.857 (n 7), head 0.889 (n 9), orig 0.625 (n 16), pron 0.769 (n 13)
+   E004 s2 H1 by form LIK/GEN: alias 0.333/0.333 (n 21), ell 0.762/0.809 (n 21), pron 1.000/1.000 (n 22)
+   E004 s2 H2 by form LIK/GEN: alias 0.524/0.524 (n 21), ell 0.905/0.905 (n 21), pron 0.955/1.000 (n 22)
+   E004 s2 ellipsis latest, another object after (True) or not, LIK: C_twoslot True=0.778/18; H1 False=0.909/11 True=0.600/10; H2 False=1.000/11 True=0.800/10; H3 False=1.000/8 True=0.625/8; H4 False=1.000/8 True=0.875/8; H5 True=0.579/19; H6 False=0.750/8 True=0.625/8; H7 False=1.000/8 True=0.875/8; ID False=1.000/3 True=0.750/8
+   E004 s2 H5 LIK: other object's indirect correction after the asked latest True 0.625 (n 32), False 0.812 (n 32); by asked latest form ell 0.579 (n 19), full 0.714 (n 7), head 0.778 (n 9), orig 0.750 (n 16), pron 0.846 (n 13)
+   E004 s3 H1 by form LIK/GEN: alias 0.333/0.476 (n 21), ell 0.762/0.809 (n 21), pron 1.000/1.000 (n 22)
+   E004 s3 H2 by form LIK/GEN: alias 0.381/0.571 (n 21), ell 0.667/0.762 (n 21), pron 0.955/1.000 (n 22)
+   E004 s3 ellipsis latest, another object after (True) or not, LIK: C_twoslot True=0.778/18; H1 False=0.818/11 True=0.700/10; H2 False=0.909/11 True=0.400/10; H3 False=0.375/8 True=0.500/8; H4 False=1.000/8 True=0.750/8; H5 True=0.684/19; H6 False=0.875/8 True=0.750/8; H7 False=0.625/8 True=0.750/8; ID False=0.667/3 True=0.750/8
+   E004 s3 H5 LIK: other object's indirect correction after the asked latest True 0.750 (n 32), False 0.875 (n 32); by asked latest form ell 0.684 (n 19), full 0.857 (n 7), head 1.000 (n 9), orig 0.688 (n 16), pron 1.000 (n 13)
+   E004 s4 H1 by form LIK/GEN: alias 0.191/0.191 (n 21), ell 0.809/0.762 (n 21), pron 1.000/1.000 (n 22)
+   E004 s4 H2 by form LIK/GEN: alias 0.333/0.333 (n 21), ell 0.667/0.667 (n 21), pron 0.955/0.955 (n 22)
+   E004 s4 ellipsis latest, another object after (True) or not, LIK: C_twoslot True=0.611/18; H1 False=0.909/11 True=0.700/10; H2 False=0.818/11 True=0.500/10; H3 False=0.500/8 True=0.375/8; H4 False=0.875/8 True=0.500/8; H5 True=0.579/19; H6 False=0.875/8 True=0.625/8; H7 False=0.750/8 True=0.625/8; ID False=0.667/3 True=0.625/8
+   E004 s4 H5 LIK: other object's indirect correction after the asked latest True 0.688 (n 32), False 0.812 (n 32); by asked latest form ell 0.579 (n 19), full 0.714 (n 7), head 0.889 (n 9), orig 0.688 (n 16), pron 1.000 (n 13)
+   E004 s5 H1 by form LIK/GEN: alias 0.095/0.095 (n 21), ell 0.857/0.857 (n 21), pron 1.000/1.000 (n 22)
+   E004 s5 H2 by form LIK/GEN: alias 0.381/0.429 (n 21), ell 0.905/0.857 (n 21), pron 0.955/0.955 (n 22)
+   E004 s5 ellipsis latest, another object after (True) or not, LIK: C_twoslot True=0.611/18; H1 False=0.909/11 True=0.800/10; H2 False=0.909/11 True=0.900/10; H3 False=0.875/8 True=0.625/8; H4 False=0.875/8 True=0.625/8; H5 True=0.789/19; H6 False=1.000/8 True=0.750/8; H7 False=0.875/8 True=0.875/8; ID False=0.667/3 True=0.625/8
+   E004 s5 H5 LIK: other object's indirect correction after the asked latest True 0.719 (n 32), False 0.875 (n 32); by asked latest form ell 0.789 (n 19), full 0.714 (n 7), head 0.889 (n 9), orig 0.688 (n 16), pron 0.923 (n 13)
+   E005 - E004 LIK (mean over seeds): H1=+0.228 H2=+0.222 H3=+0.025 H4=+0.000 H5=-0.100 H6=-0.000 H7=+0.013 C_noupd=-0.025 C_twoslot=+0.006 ID=+0.003
+   E005 - E004 GEN (mean over seeds): H1=+0.225 H2=+0.209 H3=+0.031 H4=-0.003 H5=-0.103 H6=+0.016 H7=-0.006 C_noupd=-0.028 C_twoslot=-0.000 ID=-0.003
+   knowledge s1 kbig441: 0.848 -> 0.775 d=-0.073 CI[-0.1043, -0.0431] margin -0.991 CI[-1.3021, -0.6788] gained 11 lost 43 McNemar p=1.40e-05
+   knowledge s1 khard40: 0.775 -> 0.750 d=-0.025 CI[-0.1, 0.05] margin -1.174 CI[-2.7196, 0.3716] gained 1 lost 2 McNemar p=1.0000
+   knowledge s1 K_closedbook60: 0.867 -> 0.833 d=-0.033 CI[-0.1, 0.0167] margin -0.733 CI[-1.1622, -0.3041] gained 1 lost 3 McNemar p=0.6250
+   knowledge s2 kbig441: 0.848 -> 0.764 d=-0.084 CI[-0.1156, -0.0544] margin -1.143 CI[-1.438, -0.8485] gained 8 lost 45 McNemar p=2.37e-07
+   knowledge s2 khard40: 0.775 -> 0.725 d=-0.050 CI[-0.15, 0.05] margin -1.200 CI[-2.5742, 0.1739] gained 1 lost 3 McNemar p=0.6250
+   knowledge s2 K_closedbook60: 0.867 -> 0.817 d=-0.050 CI[-0.1333, 0.0333] margin -0.956 CI[-1.5139, -0.3973] gained 2 lost 5 McNemar p=0.4531
+   knowledge s3 kbig441: 0.848 -> 0.778 d=-0.070 CI[-0.0998, -0.0408] margin -0.771 CI[-1.0367, -0.5056] gained 8 lost 39 McNemar p=5.54e-06
+   knowledge s3 khard40: 0.775 -> 0.725 d=-0.050 CI[-0.15, 0.05] margin -1.142 CI[-2.4462, 0.1627] gained 1 lost 3 McNemar p=0.6250
+   knowledge s3 K_closedbook60: 0.867 -> 0.767 d=-0.100 CI[-0.2, -0.0167] margin -0.573 CI[-1.0545, -0.092] gained 1 lost 7 McNemar p=0.0703
+   knowledge s4 kbig441: 0.848 -> 0.757 d=-0.091 CI[-0.1247, -0.059] margin -1.334 CI[-1.6595, -1.0076] gained 9 lost 49 McNemar p=8.96e-08
+   knowledge s4 khard40: 0.775 -> 0.725 d=-0.050 CI[-0.15, 0.05] margin -1.436 CI[-2.9931, 0.1218] gained 1 lost 3 McNemar p=0.6250
+   knowledge s4 K_closedbook60: 0.867 -> 0.733 d=-0.133 CI[-0.2333, -0.0333] margin -1.333 CI[-1.9063, -0.7593] gained 1 lost 9 McNemar p=0.0215
+   knowledge s5 kbig441: 0.848 -> 0.789 d=-0.059 CI[-0.0907, -0.0295] margin -0.711 CI[-0.9847, -0.4372] gained 10 lost 36 McNemar p=1.56e-04
+   knowledge s5 khard40: 0.775 -> 0.750 d=-0.025 CI[-0.1, 0.05] margin -0.627 CI[-1.9636, 0.7088] gained 1 lost 2 McNemar p=1.0000
+   knowledge s5 K_closedbook60: 0.867 -> 0.833 d=-0.033 CI[-0.1, 0.0167] margin -0.693 CI[-1.1398, -0.247] gained 1 lost 3 McNemar p=0.6250
+   knowledge kbig441 E005 vs E004 (per item mean over seeds): 0.773 vs 0.763 d=+0.009 CI[-0.0018, 0.0222] (seeds 5/5)
+   format base: n=1056, bare=0.233, long=0.697, mean_words=7.57, voice=0.0, capped=0.0019
+   format s1: n=1056, bare=0.0, long=0.9905, mean_words=4.94, voice=0.0, capped=0.0
+   format s2: n=1056, bare=0.0, long=0.9706, mean_words=4.96, voice=0.0, capped=0.0
+   format s3: n=1056, bare=0.0, long=0.965, mean_words=4.93, voice=0.0, capped=0.0
+   format s4: n=1056, bare=0.0, long=0.9574, mean_words=5.15, voice=0.0, capped=0.0
+   format s5: n=1056, bare=0.0, long=0.9602, mean_words=4.68, voice=0.0, capped=0.0
+   continuity base: new=0.37, extra=0.98, old=0.49, uprobe=0.14, cross=0.20
+   continuity s1: new=0.97, extra=1.00, old=0.90, uprobe=0.95, cross=1.00
+   continuity s2: new=0.98, extra=1.00, old=0.84, uprobe=0.96, cross=1.00
+   continuity s3: new=1.00, extra=1.00, old=0.88, uprobe=0.88, cross=1.00
+   continuity s4: new=1.00, extra=1.00, old=0.89, uprobe=0.95, cross=1.00
+   continuity s5: new=1.00, extra=1.00, old=0.88, uprobe=0.90, cross=1.00
+   chat render base (not ruled): LIK 0.06 0.03 0.08 0.22 0.11 0.14 0.22 0.31 0.17 | GEN 0.02 0.03 0.03 0.03 0.05 0.05 0.02 0.14 0.06
+   chat render s1 (not ruled): LIK 0.91 0.97 0.89 0.92 0.61 0.86 0.88 0.83 0.88 | GEN 0.92 0.97 0.84 0.95 0.64 0.91 0.92 0.83 0.88
+   chat render s2 (not ruled): LIK 0.94 0.94 0.80 0.91 0.73 0.91 0.95 0.91 0.86 | GEN 0.91 0.95 0.83 0.94 0.72 0.92 0.97 0.86 0.88
+   chat render s3 (not ruled): LIK 0.91 0.94 0.84 0.92 0.69 0.91 0.92 0.86 0.86 | GEN 0.94 0.95 0.84 0.89 0.70 0.92 0.95 0.83 0.86
+   chat render s4 (not ruled): LIK 0.95 0.95 0.89 0.94 0.64 0.91 0.92 0.84 0.81 | GEN 0.95 0.97 0.92 0.94 0.64 0.94 0.94 0.83 0.81
+   chat render s5 (not ruled): LIK 0.91 0.91 0.83 0.91 0.70 0.91 0.95 0.86 0.86 | GEN 0.95 0.92 0.83 0.94 0.70 0.97 0.95 0.83 0.83
+   chat probe base: n_conv=53, control=0.4643, correction=0.0, followup=0.2857, instruction=0.3571, loop=0.0, own_answer=0.0, recall=0.1, role=0.0, topic_return=0.0
+   chat probe s1: n_conv=53, control=0.7037, correction=0.3333, followup=0.4286, instruction=0.0714, loop=0.0, own_answer=0.0, recall=0.4, role=0.3333, topic_return=0.3333
+   chat probe s2: n_conv=53, control=0.6296, correction=1.0, followup=0.5714, instruction=0.0, loop=0.0, own_answer=0.0, recall=0.6, role=0.6667, topic_return=0.3333
+   chat probe s3: n_conv=53, control=0.6071, correction=0.6667, followup=0.5714, instruction=0.2308, loop=0.0, own_answer=0.0, recall=0.4, role=0.6667, topic_return=0.3333
+   chat probe s4: n_conv=53, control=0.6296, correction=1.0, followup=0.4286, instruction=0.1429, loop=0.0, own_answer=0.0, recall=0.4, role=0.6667, topic_return=0.3333
+   chat probe s5: n_conv=53, control=0.5357, correction=0.6667, followup=0.4286, instruction=0.0909, loop=0.0, own_answer=0.0, recall=0.5, role=0.6667, topic_return=0.3333
+   LIK by length base: H1 0.00/0.05 (60>512, 2>768); H2 0.00/0.08 (53>512, 0>768); H3 0.00/0.06 (62>512, 4>768); H4 -/0.16 (64>512, 64>768); H5 -/0.16 (64>512, 22>768); H6 0.21/0.16 (50>512, 0>768); H7 0.35/0.11 (44>512, 0>768); C_noupd 0.46/0.37 (51>512, 13>768); C_twoslot 0.17/0.16 (58>512, 10>768); ID 0.48/0.37 (43>512, 0>768)
+   LIK by length s1: H1 1.00/0.90 (60>512, 2>768); H2 0.91/0.96 (53>512, 0>768); H3 1.00/0.84 (62>512, 4>768); H4 -/0.95 (64>512, 64>768); H5 -/0.61 (64>512, 22>768); H6 0.93/0.88 (50>512, 0>768); H7 0.85/0.93 (44>512, 0>768); C_noupd 0.85/0.80 (51>512, 13>768); C_twoslot 1.00/0.84 (58>512, 10>768); ID 0.95/0.93 (43>512, 0>768)
+   LIK by length s2: H1 0.75/0.92 (60>512, 2>768); H2 0.91/0.94 (53>512, 0>768); H3 1.00/0.85 (62>512, 4>768); H4 -/0.92 (64>512, 64>768); H5 -/0.72 (64>512, 22>768); H6 0.79/0.92 (50>512, 0>768); H7 0.95/0.95 (44>512, 0>768); C_noupd 0.92/0.88 (51>512, 13>768); C_twoslot 1.00/0.88 (58>512, 10>768); ID 0.95/0.93 (43>512, 0>768)
+   LIK by length s3: H1 1.00/0.90 (60>512, 2>768); H2 0.91/0.96 (53>512, 0>768); H3 1.00/0.84 (62>512, 4>768); H4 -/0.92 (64>512, 64>768); H5 -/0.66 (64>512, 22>768); H6 0.93/0.88 (50>512, 0>768); H7 0.90/0.95 (44>512, 0>768); C_noupd 0.92/0.86 (51>512, 13>768); C_twoslot 0.83/0.86 (58>512, 10>768); ID 0.95/0.93 (43>512, 0>768)
+   LIK by length s4: H1 1.00/0.93 (60>512, 2>768); H2 0.82/0.94 (53>512, 0>768); H3 1.00/0.89 (62>512, 4>768); H4 -/0.92 (64>512, 64>768); H5 -/0.64 (64>512, 22>768); H6 0.79/0.92 (50>512, 0>768); H7 0.95/0.91 (44>512, 0>768); C_noupd 0.85/0.80 (51>512, 13>768); C_twoslot 1.00/0.79 (58>512, 10>768); ID 0.95/0.95 (43>512, 0>768)
+   LIK by length s5: H1 0.75/0.90 (60>512, 2>768); H2 0.82/0.94 (53>512, 0>768); H3 1.00/0.89 (62>512, 4>768); H4 -/0.91 (64>512, 64>768); H5 -/0.66 (64>512, 22>768); H6 0.86/0.86 (50>512, 0>768); H7 0.95/0.95 (44>512, 0>768); C_noupd 0.92/0.94 (51>512, 13>768); C_twoslot 0.67/0.84 (58>512, 10>768); ID 1.00/0.91 (43>512, 0>768)
+   untouched vs E002 base new/plain: records 1728 vs 1728, distinct hashes matched 1723, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E002 base new/chat: records 1728 vs 1728, distinct hashes matched 1723, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E002 base extra/plain: records 192 vs 192, distinct hashes matched 192, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E002 base extra/chat: records 192 vs 192, distinct hashes matched 192, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E002 base old/plain: records 1116 vs 1116, distinct hashes matched 1116, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E002 base uprobe/plain: records 576 vs 576, distinct hashes matched 574, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E002 base cross/plain: records 384 vs 384, distinct hashes matched 384, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E002 base cross/chat: records 384 vs 184, distinct hashes matched 184, flips 0, only here 200, only there 0, max |score diff| 0.000
+   untouched vs E004 base (the copy) new/plain: records 1728 vs 1728, distinct hashes matched 1723, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E004 base (the copy) new/chat: records 1728 vs 1728, distinct hashes matched 1723, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E004 base (the copy) extra/plain: records 192 vs 192, distinct hashes matched 192, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E004 base (the copy) extra/chat: records 192 vs 192, distinct hashes matched 192, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E004 base (the copy) old/plain: records 1116 vs 1116, distinct hashes matched 1116, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E004 base (the copy) uprobe/plain: records 576 vs 576, distinct hashes matched 574, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E004 base (the copy) cross/plain: records 384 vs 384, distinct hashes matched 384, flips 0, only here 0, only there 0, max |score diff| 0.000
+   untouched vs E004 base (the copy) cross/chat: records 384 vs 384, distinct hashes matched 384, flips 0, only here 0, only there 0, max |score diff| 0.000

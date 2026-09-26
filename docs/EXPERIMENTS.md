@@ -121,9 +121,9 @@ The untouched model is below chance on seven families: it actively picks a wrong
 
 **What it changed.** E004 is recorded as "FAIL, but a transferable updating rule was learned; the failures are untrained forms plus a format gap". The audit's proposed next experiment became E005.
 
-## E005: data gap or real limit? (running now)
+## E005: data gap or real limit?
 
-Files: [notes](../experiments/E005_alias_eot/notes.txt), [queue log](../experiments/E005_alias_eot/logs/queue.txt)
+Files: [notes](../experiments/E005_alias_eot/notes.txt), [audit](../experiments/E005_alias_eot/AUDIT.md), [queue log](../experiments/E005_alias_eot/logs/queue.txt)
 
 **Question.** Was E004's alias failure missing training data, or a limit of a 135M model? And does training an end-of-turn token fix the chat-format stopping failure?
 
@@ -138,7 +138,17 @@ Same model, learning rate 1.5e-4, 400 steps, seeds 1-5, and E004's unchanged tes
 
 One gap in that design: every alias correction in the E004 test is also the right answer, so "the latest statement by a named person wins" would score perfectly without linking anything. A 64-item diagnostic set (AL) with new test-only names, where that rule scores 0.25, was built and hashed before E005 started. It will be scored on the untouched model, on E004's seeds and on E005's seeds. No rule reads it, but a DATA GAP with AL below 0.5 would be reported as "resolved by alias recency, not by linking".
 
-**Status.** Running since the morning of Sep 25. Every pre-run check passed: cheater rules on each seed's training stream (all at or below 0.63), purity against the test vocabulary, test identity with E004, 47 of 47 generator mutants caught, and a dry run in both formats. No results yet.
+**Pre-run checks.** Every check passed before training: cheater rules on each seed's training stream (all at or below 0.63), purity against the test vocabulary, test identity with E004, 47 of 47 generator mutants caught, and a dry run in both formats.
+
+**Result (audited).** All three stored readings reproduce from the raw outputs.
+- **Pass rule: PARTIAL-X (H5), barely.** Three seeds (2, 3, 5) pass every family except three objects (H5). No seed passes H5 (0.61-0.72). The margin is 2 items: after four seeds the reading was FAIL, and two more wrong answers on seed 5's two-slot control would make it FAIL again. At 64 items per family the 95% interval is about plus or minus 0.10.
+- **Alias reading: DATA GAP, 5 of 5 seeds high.** Alias items score 0.88-0.95 (E004: 0.21-0.43).
+- **Name linking (AL).** 0.97-1.00 on every seed, but that number alone is weak evidence: E004 already scores 0.77-0.83, and a name-free rule found after the fact scores 60 of 64. The real evidence is the few items no tested shortcut can solve: 4 of 4 on every seed where the other object is the named one, and 100 of 100 (E004: 41 of 100) where both objects carry two alias corrections under the same title, a structure absent from training. So: consistent with linking through the name, on a small number of items.
+- **Stopping: learned.** Every seed stops after one short sentence in the chat format (640 of 640), and chat accuracy tracks plain accuracy within 0.06.
+- **Three objects got worse:** 0.66 against E004's 0.76. The model answers with the dialogue's most recent value even when that statement is about another object, and the two controls slipped the same way (two seeds fail a control in free generation). A candidate cause: in E005's training streams the asked object's latest statement comes last more often than in E004's. Untested.
+- **Costs.** Closed-book knowledge -7.5 points, the same as E004 within noise. General chat is mixed: far fewer runaway turns than E004 and more of the chat probe's checks passed than the untouched model (29-33 of 73 against 21), but over half of its first sentences are training answer templates (untouched: 1%), used even for unrelated questions.
+
+**What it changed.** Name-based corrections and stopping were data gaps at 135M, not limits. Three objects is still unsolved and is now the main open skill in this line, alongside the damage narrow training does to general chat. The audit proposes a one-change follow-up (balance where the latest statement sits in training) and a larger eval draw before any headline claim.
 
 ## What we know so far
 
@@ -148,11 +158,12 @@ One gap in that design: every alias correction in the E004 test is also the righ
 - It did not learn to link a person's name to an object, which it never saw in training, or to keep three objects apart. E004 failed its rule because of these (E004).
 - The fine-tunes are not free: 7.5-9.5 points of closed-book knowledge in E004, and a model that does not stop in chat format when end-of-turn is not trained (E004).
 - Nothing is known yet about models of 30M and under. Untouched base models are near chance (E003), and the only fine-tunes so far are single-seed learning-rate searches that stayed near chance (E004).
-- The audits changed the reading of both fine-tuning results: E002's pass came with a shortcut, and E004's printed explanation for its failure was wrong.
+- Name-based corrections and end-of-turn stopping were missing training data at 135M, not limits: E005 fixes both (DATA GAP on 5 of 5 seeds; stops cleanly in chat format). Keeping three objects apart is still unsolved and got worse (E005).
+- The audits changed the reading of every fine-tuning result: E002's pass came with a shortcut, E004's printed explanation for its failure was wrong, and E005's high name-linking score rests on a small number of items that shortcuts cannot solve.
 
 ## What comes next
 
-- **E005 results.** The alias reading (data gap, real limit or inconclusive), the AL diagnostic, whether stopping is learned, and what the new data costs on the families E004 passed.
-- **The tiny ladder.** If E005 reads DATA GAP, a new pre-registration runs the E005 recipe on Pythia and TinyStories models of 30M and under. The paused E004 learning-rate searches finish either way, and if the tiny models fail, E003 becomes the easy-version diagnostic.
+- **Three objects.** The E005 audit's one-change follow-up: balance where the asked object's latest statement sits in training, same eval and rule.
+- **The tiny ladder.** E005 read DATA GAP, so a new pre-registration runs the E005 recipe on Pythia and TinyStories models of 30M and under. The paused E004 learning-rate searches finish either way, and if the tiny models fail, E003 becomes the easy-version diagnostic.
 - **RC-12, the main test.** A battery of 12-turn conversations covering recall, corrections, keeping facts apart, instructions, loops and lookups. Its dev split (640 conversations) and graders are built and mutation-tested, and its pre-registration is drafted. It is locked, with a hash of its sealed split published, before any Planck model is scored on it.
 - **Planck models from scratch.** A curve of small models, with most of the effort at 30M total parameters and under, trained on a corpus built for conversation skill and compared with much larger public models on the same sealed test.
