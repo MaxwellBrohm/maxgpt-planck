@@ -1,0 +1,86 @@
+# E2/E3 base, 5M. Every 5M run config (E2 stages, E3 Parts 1 and 3, the smoke) extends this file and sets
+# only name, out_dir, the LRs, the schedule and the checkpoint cadence. E2 notes: MODEL, DATA, SCHEDULE.
+#
+# Paths are relative to the RUN CONFIG's directory (train.py resolves them there), and every run config sits
+# three levels below the code root (experiments/<exp>/<dir>/). planck_root is a symlink at the code root to
+# the PC's planck home, made by the queue or the smoke script, so no config holds a machine path.
+extends: engine.yaml
+seed: 1
+runs_jsonl: ../../../planck_root/runs/runs.jsonl
+
+# Recorded in config_sha256 and in every checkpoint; preflight.py checks each hash against the file before
+# a run starts and refuses on a mismatch. Paths: tokenizer relative to the code root, the rest relative to
+# planck_root.
+provenance:
+  tokenizer: tokenizer/v0/tok_v0_8k.json
+  tokenizer_sha256: 078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5
+  tokenizer_manifest: tokenizer/v0/tok_v0_manifest.json
+  tokenizer_manifest_sha256: 0260aad9f6c938a7a979af6bfd9b72f48ca7d00364cdd82ed86d51ff7c1713f4
+  shard_manifest: data/shards/starter_v0_8k/manifest.json
+  shard_manifest_sha256: 23647db746de12075cdd96929f004e41c1a5b1ed5ab7bb57b1ccef090ef41344
+  evalset_dir: data/evalsets/v0
+  evalset_sha256: fe1b55bbe3612d0c968934cbad831a17fd3d73d84aa8f1b7cb2f4523cf4d505b
+  evalset_manifest_sha256: b28e4cc445582cefaee5e6638586903899bbc5eefce9059d081332eb6b41afe2
+
+# The scorer invocation (E2 METRIC, fixed): read by the queue, not by train.py.
+eval_bpb:
+  sets: all
+  precision: fp32
+  batch_tokens: 16384
+  score: [final, last_two_rolling]   # F = final; M = mean of final and the 2 rolling saves before it
+
+model:                          # harness/budget.py --target 5e6 --vocab 8192: 5,010,133 params
+  vocab_size: 8192
+  d_model: 192
+  n_layers: 8
+  n_heads: 3
+  n_kv_heads: 3
+  head_dim: 64
+  mlp_hidden: 488
+  seq_len: 2048
+  tie_embeddings: true
+
+data:
+  pad_id: 0
+  chat:
+    loss: assistant
+    role_ids: {system: 2, user: 3, assistant: 4, tool: 6}
+    end_id: 5
+  # Pinned shares by drawn tokens (E2 DATA, critique change 1). The order is the shard manifest's and must
+  # not change: source k's shard order is seeded by seed * 1000 + k. The shares sum to 0.9999; the loader
+  # divides by the sum.
+  sources:
+    - {name: cccc, kind: tokens, eot_id: 1, share: 0.4142,
+       paths: ["../../../planck_root/data/shards/starter_v0_8k/cccc/cccc-*.bin"]}
+    - {name: dolly, kind: chat, share: 0.0160,
+       paths: ["../../../planck_root/data/shards/starter_v0_8k/dolly/dolly-*.jsonl"]}
+    - {name: gutenberg, kind: tokens, eot_id: 1, share: 0.1479,
+       paths: ["../../../planck_root/data/shards/starter_v0_8k/gutenberg/gutenberg-*.bin"]}
+    - {name: irc, kind: tokens, eot_id: 1, share: 0.0400,
+       paths: ["../../../planck_root/data/shards/starter_v0_8k/irc/irc-*.bin"]}
+    - {name: oasst2, kind: chat, share: 0.0120,
+       paths: ["../../../planck_root/data/shards/starter_v0_8k/oasst2/oasst2-*.jsonl"]}
+    - {name: stackexchange, kind: tokens, eot_id: 1, share: 0.2219,
+       paths: ["../../../planck_root/data/shards/starter_v0_8k/stackexchange/stackexchange-*.bin"]}
+    - {name: wikimedia, kind: tokens, eot_id: 1, share: 0.1479,
+       paths: ["../../../planck_root/data/shards/starter_v0_8k/wikimedia/wikimedia-*.bin"]}
+
+optim:                          # lr, embed_lr, scalar_lr are set per run (E2: eta, r, g)
+  kind: normuon
+  weight_decay: 0.1
+  cautious_wd: true
+  momentum: 0.95
+  betas: [0.9, 0.95]
+  eps: 1.0e-8
+
+schedule:
+  warmup_steps: 76              # written in every run (E2 change 6)
+  warmup_frac: 0.01             # unused while warmup_steps is set
+  decay_frac: 0.2
+
+train:
+  micro_batch: 16               # 16 x 2048 = 32,768 token slots per step
+  grad_accum: 1
+  grad_clip: 1.0
+  log_every: 10
+  keep_last: 2

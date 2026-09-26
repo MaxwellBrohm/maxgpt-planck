@@ -1,0 +1,246 @@
+OOD-H PART 1: DESIGN (public; no item content. Threads, probes and golds live only in sealed/oodh/, gitignored.)
+Written 2026-09-26. Serves prereg/RC-12.draft.txt s1 (the OOD-H wording rule), s3, s6, s8, s14 and s19 item 7.
+Status: selection built and run (oodh/select.py); three probe batches written; build, play and gate built and run
+  (oodh/build.py, play.py, gate.py, hashes.py, leaks.py; s10). The primary rule gives 107 usable threads, not 150,
+  and the gate FAILS on the 107 (s10). Adversarial review, item fixes and a held-out scan on the PC: s11 (L2 and
+  VAL now pass; G2 and G4 still fail). Nothing is locked.
+
+1. SOURCE, RESERVE AND LEAKS
+  Source: OASST2 2023-11-05_oasst2_all.trees.jsonl.gz (70,642 trees).
+  Reserve: corpus/oodh.in_oodh_reserve (sha256("planck-oodh-v1:" + tree id) mod 8 == 0), imported, never
+    re-implemented. The whole reserved tree is out of every training corpus and the tokenizer sample, so any path in
+    a reserved tree is held out.
+  Leaks: corpus/oodh.leaked_reserve_trees(all trees, every Dolly instruction) is dropped. Measured: 54 reserved
+    trees leak (a user turn of 40+ normalized chars occurs whole outside the reserve); Dolly adds none; 11 of the 54
+    are English ready_for_export (the "11" of the CORPUS.md addendum), 5 of those with 2+ user turns.
+  The chosen threads still get the CORPUS 3.2 step 6 13-gram decontamination (their user turns and the probe turns
+    go into the decontamination list, as RC-12's do).
+
+2. WHICH PATH PER TREE (one thread per tree)
+  Primary rule: the highest-ranked usable path, exactly the corpus extractor's (corpus/readers_chat.best_path,
+    imported): from the root take the usable reply with the lowest rank (unranked after ranked, ties to file
+    order), stop where no usable reply exists, cut trailing user turns, so the thread ends on an assistant turn.
+  Usable message (readers_chat.message_problem): not deleted, not synthetic or model-written, review not failed,
+    not spam, English, non-empty, and passes the AI-ism filter (corpus/hygiene.aiism). An unusable reply is
+    skipped for its best usable sibling, so an AI-ism removes a turn, not a tree, unless it is the prompt.
+  Tree gates: prompt.lang 'en', tree_state 'ready_for_export'. Thread gate: hygiene.hygiene_reason on the rendered
+    thread with the extractor's defaults (200 bytes, 30% non-ASCII, 10% English function words).
+  Keep: 2 or more user turns.
+  Fallback path rule F1 (select.py --path deepest, NOT adopted): the usable path with the most user turns that
+    ends on an assistant turn, ties to the better-ranked reply. See s8.
+
+3. KNOWLEDGE-LIGHT, OPERATIONALLY
+  Meaning: the conversation is about the user's own situation, plans, preferences or a task the user sets (write,
+    plan, suggest, rewrite), so the user turns carry facts, constraints and requests a probe can ask about. Not a
+    trivia or encyclopedic question, not code, not math. (Every probe's gold is in a user turn whatever the topic;
+    the rule is about there being user-stated material to probe, and about staying near RC-12's scope.)
+  KL1, classifier-free rule on the user turns only (select.kl_rule; curly apostrophes folded), first match wins:
+    code     code syntax (fences, def/import/#include lines, tags, lines ending in ; or {) or a programming word
+             (a language or tool name, "programming", "algorithm", "code" except dress/zip/postal/area/morse/
+             promo/discount/bar code)                                                        -> drop
+    math     LaTeX, an operator between digits (= + * ^; "-" and "1/2" do not count), x/y/z equations, or a math
+             word (equation, integral, derivative, theorem, solve for, algebra, ...)          -> drop
+    personal "my <word>" (not my own/question/previous/last/first/next) at least once, or 2+ first-person
+             state phrases (I am, I have, I want, we moved, I'd like, ...)                     -> keep
+    task     a sentence that opens (after a greeting and an optional "can you" / "please" / "I want you to") with
+             write, compose, draft, create, make, generate, give me, suggest, recommend, plan, design, invent,
+             imagine, pretend, draw, act as, role-play, let's, rewrite, rephrase, edit, proofread, brainstorm,
+             come up with, help me                                                            -> keep
+    trivia   anything else (only questions about the world)                                   -> drop
+  KL2, manual read (at probe-writing time, every KL1 pass, one by one): drop a thread, with a reason from a closed
+    list, when it is (a) really encyclopedic or expert (the user turns hold nothing personal and no request detail
+    beyond the topic), (b) code or math the rule missed, (c) abusive or unsafe, or (d) has no user-stated value a
+    probe can ask for. Counts per reason are recorded. A thread is never dropped for being hard.
+  Rule quality, seen once on a peek (20 random KL1 passes, first two user turns, read in the terminal, not saved):
+    9 clearly knowledge-light, 5 borderline, 6 not (5 encyclopedic or expert, 1 code thread; "swiftui" was then
+    added to the code words and "draw" to the task verbs, and the run below is after that change). Treat KL1 as
+    roughly 45 to 70% precise; a sample of 20 is small, so the range is wide.
+
+4. WHICH ASSISTANT TURNS, AND HOW OWN HISTORY APPLIES
+  History: the thread's original human-written OASST2 assistant turns, verbatim (extractor normalization), are
+    kept as the assistant messages of the history. The evaluated model generates NOTHING for the thread part:
+    later OASST2 user turns answer those exact assistant words, so replacing them with the model's replies would
+    make the human turns incoherent.
+  Probes: 1 to 3 graded user turns appended after the thread's last assistant turn. The model replies to each.
+    Between probes, s3's own-history rule applies: the model's reply to probe k (decoded text after the s4 stop
+    rule, stripped, stored with its stop reason) is appended before probe k+1. Nothing from any gold, IDEAL reply
+    or annotation is injected. Probe text never depends on the model's replies.
+  So: fixed human history, own-history probe block. s14 must say this at the lock (it is a stated difference from
+    RC-12, whose every reply is the model's own). Rendering and decoding: s4 unchanged, each model in its template.
+  Budget: thread proxy tokens (1.35 x words + 4 per message) <= 1,492.5, so thread + 3 probes (each <= 20 words
+    with a 50-word reply) stays within RC-12's 1,800 (G7) and a 2k-context model never truncates.
+
+5. PROBE KINDS (Claude-written, a gold set under D8; each asks about what the HUMAN user said)
+  H-FACT  recall of a value the user stated (a number, place, name, object, time, attribute, choice).
+          Grader VAL. Gold: a span copied verbatim from a user turn.
+  H-CORR  a correction or clarification the user made in a later turn (a changed or restated value). Grader VAL,
+          gold = the corrected value, stale = the earlier value(s) (a stale value is allowed only in a change
+          phrase, as in RC-12). Only where the thread has one; not forced.
+  H-ASK   the user's own earlier question or request ("What did I first ask you to help with?"). Grader VAL, gold =
+          the key phrase of the request, with an accepted list of the user's own alternate wordings.
+  H-ABS   abstain: asks for a value of a type the user never stated and that appears nowhere in the thread,
+          assistant turns included. Grader ABS.
+  Never about the assistant turns' content (those words are not the evaluated model's).
+  Per thread: 1 to 3 probes, at least one VAL, at most one ABS. Over the 150 threads, ABS is about 1 probe in 5
+    and H-CORR is used wherever a thread has a correction. Probe questions <= 20 words.
+
+6. GOLD FORMAT (the RC-12 record, read by rc12/graders.grade_conv unchanged)
+  One JSONL record per thread: id oodh-NNN, split "oodh", family "OODH", cell = the probe-kind mix, seed null,
+    knowledge false, n_turns = thread user turns + probe turns, meta.unit "mean" (each thread weighs 1).
+  turns [{i, kind, text, ideal, facts, vals, asks}]: thread user turns are kind S (holds a probe's gold), C (holds
+    a correction a probe asks about), else D with a hand-set asks label (true for a question or request, false for
+    a plain statement), as RC-12's fillers; probe turns are P (last) and X (earlier). Each thread user turn also
+    carries history_reply (the OASST2 assistant turn that followed it). facts: [{holder "user", object, value,
+    role gold|stale|corr}].
+  probes [{turn, kind P|X, grader VAL|ABS, question, gold, accepted, candidates, pool_values, stale, holder "user",
+    object_words, src, d, dc, prefix, ideal}]. candidates = every same-type value in the thread (user or assistant
+    turns); pool_values = candidates plus >= 8 Claude-written same-type values not in the thread (RC-12's named
+    pools do not cover OASST2 content; graders.pool_values reads this field, so v3_guess and a3_value work).
+  Scoring input: replies = [history_reply of each thread turn] + [model replies to the probes], stops "eos" for
+    history. Only probe-turn results count; loop flags and role-leak events on history turns are ignored
+    (grade_role.role_leaks scans every reply, so the scorer filters by turn).
+  Checks carried from s2 and s8: L2 (no probe question or prefix contains its gold), G8 (every VAL gold occurs
+    whole-word in its src user turn), G7 (budget above), G1 (IDEAL probe replies score 1.00, 0 degenerate, 0 leaks
+    at probe turns), G2 on the generic cheaters that apply to free-text golds (FIRST, LAST, WORDING, OVERLAP,
+    ECHO, DEFLECT, SHOTGUN, USERVOICE, ABSTAIN) with the RC-12 bars, and a never-abstain cheater fails every ABS.
+  OPEN for the build: graders.g_val turns v3_shotgun OFF whenever pool_values is set. Either OOD-H runs without the
+    shotgun clause (stated in s14), or, once the rc12 workflow is done with graders.py, a probe flag re-enables it.
+
+7. HOW LEVEL R USES IT (s1)
+  Score per thread = mean of its probe results (strict primary, lenient twins reported). Per model: the mean over
+    threads (and seeds), in points. The reported number is the paired difference Planck minus
+    Qwen2.5-0.5B-Instruct on the same threads, with a 95% CI by bootstrap over threads (and seeds). {h} = threads.
+  Wording rule: if the paired point estimate is worse than -5 points, Level R is worded "non-inferior on RC-12's
+    format", with the OOD-H result beside it. Part 2 (January rater scripts) is added under the same rule; Level R
+    statements made in December are provisional until then.
+  All OOD-H probes are knowledge-free (the gold is in a user turn), so they never pool with family K. OOD-H is
+    never used for a mix, recipe or checkpoint decision (CORPUS.md).
+  At the lock s14 gets only: the path rule, KL1 and KL2 as written here, the protocol of s4, the thread count, the
+    probe count per kind, sha256 of the sorted newline-joined chosen tree ids, and sha256 of the sealed item file.
+
+8. MEASURED COUNTS (select.py run on the PC, 2026-09-26; select_stats.json in sealed/oodh/)
+                                                        primary (best path)    F1 (deepest path)
+  trees in the file                                      70,642                 70,642
+  in the reserve                                          8,892                  8,892
+  not leaked                                              8,838                  8,838
+  minus not English (prompt)                             -5,764                 -5,764
+  minus not ready_for_export                             -2,377                 -2,377
+  minus no usable path                                       -7                     -7
+  minus extractor hygiene                                   -27                    -11
+  threads                                                   663                    679
+  2+ user turns (candidates file)                           355                    602
+    of which 3+ user turns                                   13                     72
+  KL1: code / math / trivia dropped                  57 / 7 / 157          83 / 11 / 289
+  KL1 pass (personal + task)                        134 (62 + 72)         219 (108 + 111)
+  KL1 pass within the token budget                          130                    212
+  The CORPUS.md addendum's 376 (14 with 3+) differs from 355 (13): 5 are leaked trees; the rest is not reconciled
+    here (the addendum does not state its filters).
+  candidates.jsonl: 355 records, sha256 f1d0f4f9714e87f3eaeb93c19e9cd49c8a63996997a45baba10b1f1b43ce2e4d, id-list
+    sha256 fe1062672b9aa09cbcfadf3857dc8255473a863b0122481f087ec1cfb99fa51d. candidates_deepest.jsonl: 602
+    records, sha256 1b4533e435273ab149e2e9cd69fe8c42d582f324940bb1e563e598d64ed2adad.
+
+9. IS 150 REACHABLE, AND THE FALLBACKS
+  Primary rule: NO. 130 pass KL1 and the budget before the manual read; at the peeked precision about 60 to 90
+    would survive KL2.
+  F1, deepest usable path per reserved tree (no reserve change, no training text lost, one thread per tree):
+    212 pass KL1 and the budget, about 95 to 150 after KL2. Probably short on its own. Costs a change of the path
+    rule in s14.
+  F2, keep a cut trailing user turn (the model answers it on its own history, ungraded, before the probes): 520
+    best-path threads with 2+ user turns, 196 pass KL1 (scratch count, not in select.py). Weaker than F1: one
+    ungraded own-history turn in every such thread.
+  F3, widen the reserve to mod 4 (sha256 mod 4 == 0; allowed only before tokenizer v1 freezes, CORPUS addendum):
+    ESTIMATE, leak check skipped for the added trees: +313 best-path threads with 2+ user turns (+110 KL1), or
+    +549 (+196 KL1) with F1. Costs about one more eighth of OASST2's 6-7M training tokens.
+  F4, relax knowledge-light to "not code, not math": 291 best-path threads. Changes the s14 wording
+    ("knowledge-light"), so it is the last resort.
+  Recommended: F1 and F3 together, decided before tokenizer v1 freezes (F3's hard deadline): about 400 KL1 passes
+    (212 within budget + 196 from the added trees, budget not measured there), so about 180 to 285 after KL2, a
+    real margin over 150. F1 alone is the fallback only if Max will not give up the extra eighth of OASST2; then
+    KL2 runs first and the shortfall, if any, is reported. F1 and F3 are Max's call (s14 and CORPUS change);
+    nothing is adopted in this file.
+
+10. BUILD, PLAY AND GATE (run 2026-09-26; hashes and counts in oodh/HASHES.txt, items only in sealed/oodh/)
+  Batches: every KL1 pass within budget in the three i mod 3 slices of candidates.jsonl was read under KL2 and
+    probed: 40 + 34 + 33 = 107 usable threads, 289 probes (H-FACT 178, H-ASK 51, H-CORR 1, H-ABS 59; 75 threads
+    with 3 probes, 32 with 2). The primary rule is exhausted at 107, short of 150 (s9 estimated 60 to 90).
+  build.py: joins each batch record to its thread in candidates.jsonl (tree id and message ids must match), maps the
+    three batch shapes to one RC-12 record (module docstring). Departures from s6, stated: a thread user turn that
+    mentions a candidate or pool value of a VAL probe but holds no gold is kind L (a same-type lure), not D, so the
+    RC-12 cheaters (which skip D turns) see every value-bearing user turn; src is recomputed as EVERY thread user
+    turn mentioning the gold (d from the latest); D turns of batch 1 got hand asks labels (sealed file). The holder
+    field is kept as each batch wrote it (batch 2: "assistant" on 47 probes, against s6's "user"; relabelled in s11).
+  Selection rule (for when more than --n threads are usable): every thread with an H-CORR probe, then greedily the
+    thread that brings the pooled kind shares closest (L1) to H-FACT 0.40, H-ASK 0.40, H-ABS 0.20, ties by
+    sha256("planck-oodh-pick-v1:" + tree id). With fewer usable threads than --n it chooses nothing and exits 3;
+    --allow-short writes them all and HASHES.txt says SHORT (done for the 107, so the gate could run on them).
+  Play: play.FixedHistory wraps any rc12 responder; thread turns get their OASST2 assistant turn (stop eos) and the
+    responder is asked only at probe turns, through rc12/runner.run and graders.grade_conv unchanged (s4 above).
+  Gate on the 107 (gate.py; its docstring lists each check):
+    pass   ids (reserve, 54-tree leak list recomputed on the PC by leaks.py, unique), struct, G1 (IDEAL and the bare
+           gold score 1.00 on every thread, every accepted form alone passes, history unchanged), G8, ABS, G7.
+    FAIL   (fixed in s11) L2, 7 probes in 6 threads: 2 threads where an earlier probe question holds a later probe's gold or
+           accepted form (a leak inside the probe block), 2 where a later question restates an earlier gold, 1 question
+           naming its own candidate, 1 prefix holding an accepted form. VAL, 1 probe: gold missing from candidates.
+    FAIL   G2. The 6 value pickers and 10 of the 14 audit rules score 0.74 to 0.77 on the family (bar 0.40): 205 of
+           the 230 VAL probes have exactly one value of the probe's pool in the user turns before it, so any reader
+           that knows the answer's type is right. SHOTGUN passes 178 VAL probes (one candidate: listing every
+           candidate IS the right answer). USERVOICE and ROLECAP pass 64: all 47 assistant-held probes, plus 17
+           user-held ones where the swapped IDEAL reads "I said ...", "I mentioned ..." or "I did ..." (neutral
+           verbs in grade_text.FIRST_BIND, so no capture). LATEST_USER (the human's last turn, verbatim) passes 7.
+           ORDER_ABS passes 1 abstain cell (n=3). Not flagged: ECHO, DEFLECT, ABSTAIN, POS2, PENULT, ANTEPENULT,
+           PENULT_MARKER, LATEST_USER_SWAP (0.06).
+    FAIL   G4: 39 threads are passed by more than 3 of the 11 generic cheaters.
+  Diagnostic (not applied): holder "user" on all probes makes IDEAL fail 9 VAL probes (replies with "me", the
+    batch 1 finding) and USERVOICE still passes 32.
+  What this means: on natural threads a probe usually asks for the one value of its kind the user gave, so OOD-H
+    as written measures lure-free recall, and RC-12's cheater gates (built for items with placed lures) cannot pass
+    without other probes. Choices for Max, none taken: (a) OOD-H keeps RC-12's graders but not G2 and G4, stated in
+    s14, with the cheater table (type-matcher near 0.75) reported beside the result; (b) keep only probes whose
+    thread holds 2+ values of the kind (24 of 230 today), which shrinks the pool further; (c) the rc12 workflow
+    fixes the "I said X" and "you asked me to X" grader cases. The L2 and VAL items go back to their batch writers.
+  Tests: oodh/tests/test_build.py 8/8, test_gate.py 8/8, test_leaks.py 1/1 on a synthetic fixture (tests/fixture.py,
+    no OASST2 text). A scratch mutation runner broke 65 behaviours of build, hashes, gate, play and leaks one at a
+    time; every one turned a test red by an assertion (one also crashed a CLI test).
+
+11. ADVERSARIAL REVIEW (2026-09-26, after s10; no model loaded; item text only in sealed/)
+  Read: 40 threads picked by sha256("planck-oodh-review-v1:" + tree id), every turn and probe; the probe lists of
+    the other 67; every thread sentence (user or assistant) that touches an ABS probe's object.
+  On the sample: all 40 fit s3's knowledge-light (kept as borderline under KL2: 4 expert or encyclopedic topics that
+    carry user-set request details, and 1 thread whose request is near KL2 (c), Max's call); every ABS
+    probe read is unanswerable from the thread, assistant turns included; every gold sits in the user turn stated.
+  Confirmed problems, fixed by sealed/oodh/review_patch_2026-09-26.py (patches the batch files FROM the untouched
+    copies in sealed/oodh/pre_review/, asserting each old value; a rerun gives the same files):
+    L2      7 flagged probes in 6 threads: 6 questions reworded (3 named another probe's gold, 1 its own candidate,
+            2 ABS questions repeated an earlier gold), 1 IDEAL and prefix reworded (the prefix held an accepted form).
+    VAL     1 gold added to its own candidate list.
+    ambig.  1 H-ASK question matched two either-or questions in the same user turn: reworded to name one.
+    holder  batch 2's "assistant" on 47 probes: 42 ask about the user's own statement or request, set to "user"
+            (s6); 5 keep "assistant" (a name, role, persona or reply language the user gave the assistant). 5 IDEALs
+            then failed G1 on "You asked me to <gold>" (grade_text.captures binds the gold to "me"): reworded
+            without "me". This hides nothing: the grader finding below reports the same false fail for real replies.
+    accepted  3 probes got ordinary paraphrases of the user's word; 1 accepted form taken from the assistant's
+            story (not the user's request) removed.
+  Reproducibility: build.py on the pre_review copies rebuilds 79a9478b... byte for byte; the field diff to the new
+    file is exactly the edits above (34 records: holder 42, question 7, ideal 9, prefix 9, accepted 4, candidates 1).
+  Gate after the fixes (HASHES.txt): ids, struct, G1, L2, G8, ABS, VAL, G7 pass. G2 FAIL: type matchers 0.74 to 0.77
+    (structural, s10); SHOTGUN 179 VAL probes; USERVOICE and ROLECAP 28 (was 64: 23 user-held "I said / mentioned /
+    did X", which FIRST_BIND treats as neutral, and the 5 assistant-held); LATEST_USER 7 (at d=1 the parroted last
+    user turn holds the gold, and the grader's echo clause only compares with the probe question); ORDER_ABS 1 cell
+    (n=3). G4 FAIL: 38 threads (was 39).
+  Grader finding for the rc12 workflow (not fixed here; rc12/ is read-only for this workflow): with holder "user",
+    "You told me it was <gold>." fails v4_voice on 183 of 183 user-held OOD-H VAL probes and on 60 of 60 user-held
+    VAL probes of RC-12 dev RECALL; "You asked me about the <gold>." on 183 of 183. audit_graders.py has no "told me"
+    or "asked me" variant, so G11 cannot see it. With holder "assistant" the voice clause passes "My answer is X",
+    "I said X" and "I asked you about X" on 47 of 47. Either way a model's natural answer or voice error is misgraded.
+  Held-out check on the PC (detached scan; the log holds counts only, the hits stay in the PC's sealed/oodh/): the
+    107 tree ids, their 438 message ids and 185 plain 50-char snippets of their user turns (34 of the 219 user turns
+    have no 40-char plain run) against every text file under data/ except raw/ (extracted v0, v0b, v0c; tok_sample
+    v0, v0b, v0c; shards with their .ids document lists; evalsets; core_v0_smoke; core_v0_work; nd_accept_sig;
+    se_probe_out; the two .zst files decompressed on the Mac): 0 hits of any kind. Positive controls (10 non-reserved
+    trees from the v0 extract, 10 from evalsets) are found by the same scan in the extracts, tok samples, shard .ids
+    lists and evalsets. Token binaries (.bin, .npy, .u64) cannot be searched and were skipped; data/core_v0 does not
+    exist yet. Every oasst2 record with a tree id in extracted, tok_sample_v0/b/c and evalsets (27,914) is outside
+    the reserve. Noted for F1 and F3: snippets of 8 NON-chosen candidate threads (tongue twisters, quoted assistant
+    boilerplate, common openers) do occur in training text, so the 13-gram decontamination still matters.
+  Still short: 107 threads, not 150, and G2 and G4 fail. Nothing is locked; the prereg's s14 is not edited
+    (oodh/PREREG_PARAGRAPH.txt holds the status paragraph).

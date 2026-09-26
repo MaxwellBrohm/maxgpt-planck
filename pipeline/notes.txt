@@ -254,3 +254,17 @@ draft s17): the lookup call and tool result are allowed as program output, on th
 listed in the provenance record; the sealed RC-12 session picks its LOOKUP table format without reading this
 pipeline's; the 13-gram decontamination against sealed covers these lines. OD3 (a) also binds this pipeline: the
 lookup events must balance the abstain position, so the positional abstain rule is not learnable from the data.
+
+TEACHER PINS (2026-09-25 night, Mac, Hugging Face metadata only; no weights downloaded, no model loaded)
+  pipeline/teachers/hf_pins.json pins repo + revision + license + vLLM 0.30 serve args for the three teachers.
+  All three official repos are Apache-2.0 on the card (Gemma 4's license_link serves the plain Apache 2.0 text).
+  4-bit picks: google/gemma-4-12B-it-qat-w4a16-ct (Google's own, same QAT weights as the LM Studio path),
+  cyankiwi/Ministral-3-8B-Instruct-2512-AWQ-4bit and cyankiwi/Qwen3.5-9B-AWQ-4bit (no org 4-bit exists for either;
+  Red Hat's Qwen w4a16 keeps DeltaNet bf16 and loads about 10 GB, leaving no KV room on 12 GB).
+  Estimated from safetensors headers: loaded weights 8.25 / 6.32 / 7.97 GB; at util 0.88 about 4.7 / 13 / 22
+  concurrent 2048-token sequences (Gemma about 2.5 if vLLM does not free KV outside its 1024 window). The 2 GB
+  embedding tables are why: the plan's "fits 4x more in 12 GB" holds as a ratio but the absolute Gemma batch is tiny.
+  Found, not fixed (outside my write scope): gemma_raw() lacks '<bos>' and the Gemma 4 tokenizer adds none, so a vLLM
+  raw prompt has no BOS; chat_body() sends no enable_thinking=false (Qwen) and no system message (Ministral's HF
+  template then injects its "Le Chat" default); teacher_client.LICENSES has no Qwen key. Estimates, not measurements:
+  the vLLM startup "Maximum concurrency" line replaces them.

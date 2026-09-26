@@ -1,0 +1,142 @@
+{
+ "bytes_per_token": 2.6863,
+ "code_sha256": {
+  "corpus/oodh.py": "b256d5554d531bd76c531a8bc59c287f57f60e94cc224e3f136add75594987d1",
+  "corpus/sample_plan.py": "a50209255798b4f50117208777cf4429e3d7994f3f37d687caa5aee4e27a9e57",
+  "data_prep/prep_common.py": "7c8fce2b5eccc466070e848e2e55f25cd3a3b247acfc6d66a06334536ac15ada",
+  "data_prep/pretok_worker.py": "616a8e41c5d265e35e7a8fcf9910c755b4d312004a6a0ff79eb9317057b0891a",
+  "data_prep/pretokenize.py": "ad16bf9b782fa0c40729735da5334a9113a8a6f63d2c06fd7c568da1a631ad82",
+  "harness/chat_template.py": "16f5aa51d6c94b01afa7324a8ed119cb585aae1d8122a92eeb99a3d919196774"
+ },
+ "counts": {
+  "chat_docs": 0,
+  "chat_over_2048": 0,
+  "chat_over_2048_tokens": 0,
+  "chat_over_4096": 0,
+  "chat_over_4096_tokens": 0,
+  "docs": 31063,
+  "docs_in": 31305,
+  "empty_docs": 0,
+  "excluded_docs": 242,
+  "excluded_text_bytes": 4983607,
+  "max_doc_tokens": 483868,
+  "special_replaced_docs": 7,
+  "sup_tokens": 0,
+  "text_bytes": 659153929,
+  "text_docs": 31063,
+  "tokens": 245404478
+ },
+ "dtype": "uint16",
+ "format": "planck-pretok-v1",
+ "heldout": {
+  "dir": "~/planck/data/tok_sample_v0c/heldout",
+  "manifest_sha256": "d0fa0838a6aa4ee8a6c62d6ffe496f812e8335d90266d34689c97cd9e13cfa63",
+  "source_file": {
+   "docs": 242,
+   "file": "irc.jsonl",
+   "keys": 242,
+   "sha256": "498e285c349b33349fc2db42e52aab6a2c9078e99703d129c59f64a4464eee6f"
+  }
+ },
+ "input": {
+  "bytes": 692196417,
+  "dir": "~/planck/data/extracted/starter_v0c",
+  "extract_stats_sha256": "8d6452ae8c3be7b0c43e4ba149b273fcb5e59f4ab5c2bd33baaec0b1499872d9",
+  "files": [
+   "irc/irc-00000.jsonl",
+   "irc/irc-00001.jsonl",
+   "irc/irc-00002.jsonl"
+  ]
+ },
+ "kind": "tokens",
+ "n_shards": 6,
+ "seed": 0,
+ "shard_mb": 128,
+ "shards": [
+  {
+   "bytes": 83491596,
+   "docs": 5119,
+   "ids": "irc/irc-00000.ids",
+   "path": "irc/irc-00000.bin",
+   "sha256": "01717bb12654e862e24a28a5ceb9e0aea4bb99d31d6dc3130ec1ec84e147a6c1",
+   "sup_tokens": 0,
+   "text_bytes": 111996436,
+   "tokens": 41745798
+  },
+  {
+   "bytes": 85107004,
+   "docs": 5078,
+   "ids": "irc/irc-00001.ids",
+   "path": "irc/irc-00001.bin",
+   "sha256": "27ab7b55f6ec7d77d5063fe9bdb51583d310ae725bf04789e062d2e804ec067f",
+   "sup_tokens": 0,
+   "text_bytes": 114293702,
+   "tokens": 42553502
+  },
+  {
+   "bytes": 79257650,
+   "docs": 5237,
+   "ids": "irc/irc-00002.ids",
+   "path": "irc/irc-00002.bin",
+   "sha256": "71b2daed182824a84d56b2f2ef3e8cd94a3ea33fd4884972a4cf1ca3d49e9b9f",
+   "sup_tokens": 0,
+   "text_bytes": 106617754,
+   "tokens": 39628825
+  },
+  {
+   "bytes": 83558612,
+   "docs": 5252,
+   "ids": "irc/irc-00003.ids",
+   "path": "irc/irc-00003.bin",
+   "sha256": "b59c60ab876ddfdbc4ab0e1751b3727e66bfd5a33583a7f3fed5f1776feaec1f",
+   "sup_tokens": 0,
+   "text_bytes": 112020530,
+   "tokens": 41779306
+  },
+  {
+   "bytes": 76746904,
+   "docs": 5262,
+   "ids": "irc/irc-00004.ids",
+   "path": "irc/irc-00004.bin",
+   "sha256": "42cb35d5aac1192d6de4565fe6729b4aec8fd0514f877bca07982787eaa12ea9",
+   "sup_tokens": 0,
+   "text_bytes": 103304830,
+   "tokens": 38373452
+  },
+  {
+   "bytes": 82647190,
+   "docs": 5115,
+   "ids": "irc/irc-00005.ids",
+   "path": "irc/irc-00005.bin",
+   "sha256": "e0831742be4a75efe06fcf4efb75255e48598d74a93d778cc102ab67581070a7",
+   "sup_tokens": 0,
+   "text_bytes": 110920677,
+   "tokens": 41323595
+  }
+ ],
+ "source": "irc",
+ "tokenizer": {
+  "control_ids": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "end_id": 5,
+  "eot_id": 1,
+  "file": "tok_v0_8k.json",
+  "n_special": 15,
+  "pad_id": 0,
+  "role_ids": {
+   "assistant": 4,
+   "system": 2,
+   "tool": 6,
+   "user": 3
+  },
+  "sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5",
+  "vocab": 8192
+ }
+}

@@ -1,0 +1,173 @@
+E3: seed noise, common random numbers and the minimum detectable effect per metric (PLAN Phase 3a; LEDGER "Measure
+seed noise first and pair arms"; research/followup/loop.md E3)
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model for E3: it writes configs and reads result JSON.
+
+PRE-REGISTRATION WRITTEN 2026-09-25 23:58 (before E2 has run; E3's arms are defined by E2's results, below. No E3
+config, data shard, eval set or run exists. Run for this entry, no model: t and chi-square quantiles (scipy) for the
+factors below, and a patch file for Part 3, written to the workflow scratchpad, not applied and not tested.)
+REVISED 2026-09-26 after an adversarial critique, before any commit, config or run (CHANGES AFTER CRITIQUE, at the
+end; quantiles recomputed with scipy the same day).
+
+WHY
+  Every Phase 3 decision reads a difference between arms against noise. Without a measured seed SD a 2-seed screen
+  cannot say whether a 1% bits-per-byte gain is real (loop.md 5.2: the seeds needed run from 1 to 11 depending on
+  sigma, and Planck's sigma at 5M and 20M is unmeasured). E3 gives, per metric and size: the seed SD; the SD of a
+  paired arm difference under common random numbers (CRN); the parts due to init, data order and GPU
+  nondeterminism; the minimum detectable effect (MDE) at 80% power for 1-5 seeds; and the seeds a screen needs. It
+  also re-checks E2's single-seed LR pick.
+
+ARMS (defined by E2; no E3 run starts before "E2 5M DONE")
+  A        E2's final 5M pick (eta_5, r_5).
+  B        E2's runner-up: the pick's neighbour on E2's stage C axis (all LRs x0.5 or x2 together) with the lower 250M
+           F(CHAT). A and B differ only in their LRs: a real but small change, like the ones screens test.
+  A20, B20 E2's 20M argmin at 500M, and its neighbour on the 20M grid with the lower 500M F(CHAT).
+  Model, optimizer, engine flags, data (E2's pinned shares), tokenizer, eval sets and scorer are exactly E2's FIXED
+  block; the analyzer checks every recorded hash against it. E3 adds no engine or data setting.
+  Schedule, full WSD, batch 32,768 slots per step, schedule.warmup_steps: 76 written in every config:
+    5M   7,630 steps (250.0M slots, 50 tokens per parameter), decay from step 6,104 to 0: E2's 250M branch schedule.
+    20M  15,259 steps (500.0M slots, 25 tokens per parameter), decay from step 12,207: E2's 500M branch schedule.
+  Checkpoints as E2: ckpt_every = round(2% of total steps) (153 at 5M, 305 at 20M), keep_last 2, plus final.
+
+DESIGN
+  CRN: the harness seeds init and data order from one seed, so A and B at the same seed start from identical weights
+  and read an identical token stream. Seed s is one pair (A_s, B_s).
+  What a data seed changes in this loader (read from harness/data.py and sources.py, 2026-09-26): the order of each
+  source's shards (so which documents of a multi-shard source a run reaches) and the row shuffle inside each packing
+  window. Documents inside a shard keep the pretokenize order (seed 0), and dolly and oasst2 are one shard each, so
+  every seed reads them in the same order. sigma_data below is the noise of this loader, the one screens use.
+  Part 1, 5M, 18 runs: A_s and B_s for s = 1..8 in the order A1 B1 A2 B2 ... A8 B8 (a stopped queue leaves whole
+    pairs), then R2 and R3: A1 again twice (config bytes identical except name and out_dir).
+  Part 2, 20M, 6 runs: A20_s and B20_s for s = 1..3, in the order A1 B1 A2 B2 A3 B3.
+  Part 3, 5M, 8 runs of arm A, needing one harness change (below):
+    INIT  data seed 1 fixed, init seeds 2, 3, 4, 5;
+    DATA  init seed 1 fixed, data seeds 2, 3, 4, 5.
+    With A1 (init 1, data 1) each family has 5 runs. If the change is not in the committed harness when Part 3 is
+    reached, Part 3 is not run and the report says "not run"; nothing substitutes for it.
+  Part 4 (no training; each item gets its own addendum here, with its scorer and items, before it runs). Scored on
+    the final checkpoints of Parts 1-2, which are kept until Part 4 closes (E4 reads the same series, LEDGER P-046):
+    a Tier 0 log-prob margins (P-004), after the RC-12 lock;
+    b RC-12 dev pass-or-fail families by generation (PLAN decoding), after the lock: the seed spread of pass rates
+      at 5M (8 seeds) and 20M (3 seeds). This is the MDE in points that P-053's gate reads ("E3's minimum detectable
+      effect at or below 5", PLAN Phase 2) and E3's only lock-in reading; PLAN's 30M lock-in rule is not decided by
+      E3. Pass rates near chance (E004 saw that at 1M-31M) are reported as uninformative, not as zero noise;
+    c CORPUS 6.1 (a) assistant turns of dev renders and (c) planted-fact answer spans, once those sets exist;
+    d the induction score and history dependence (LEDGER row 39), once they exist.
+  Harness change for Part 3 (patch file only; this workflow does not edit harness/): e2e3/data_seed.patch in the
+    workflow scratchpad, 4 lines in harness/train.py. data_seed = int(cfg.get("data_seed", seed)) goes to
+    build_loader in place of seed and into the checkpoint meta; a config without data_seed behaves exactly as now.
+    It was written against train.py sha256 0d7597b4...; the parallel workflow has since changed train.py (sha256
+    8d2a9302... on 2026-09-26), and a dry run of the patch on a scratch copy of that file applied cleanly. Before
+    Part 3 it needs a test (two runs with equal data_seed and different seed read identical batches and start from
+    different weights), watched failing on a mutant.
+  A free extra pair: E2's seed-1 run at the pick (trunk + branch) vs A1 (full run), the same seed and schedule by two
+    code paths; reported beside the replays.
+
+METRICS (E2's definitions: the built sets v0, data_prep/bpb.py, CHAT = oasst2, PROSE = cccc + gutenberg + wikimedia)
+  F(CHAT) and F(PROSE), final-checkpoint bpb, are the primary metrics (every rule reads F, as in E2). Each of these
+  also gets its own MDE: M(CHAT) and M(PROSE) (mean of the last 3 checkpoints); CHAT user turns and assistant turns;
+  PROSE per source; stackexchange, irc and dolly; and the mean training loss over the last 2% of steps (paired
+  training loss on an identical stream, LEDGER row 39).
+
+STATISTICS (per metric and size; fixed now)
+  a_s, b_s the arms' values at seed s; d_s = b_s - a_s; N = 8 pairs at 5M, 3 at 20M.
+  sigma_seed   pooled SD of A and B across seeds, df N - 1 (7 at 5M, 2 at 20M): under CRN a_s and b_s are
+               correlated, so the two variance estimates are not independent and pooling does not add df.
+  SD_d         SD of d_s (df N - 1: 7 at 5M, 2 at 20M); rho = corr(a, b).
+  sigma_rep    SD over A1, R2, R3 (df 2): GPU nondeterminism at a fixed seed. Share of the paired noise it explains:
+               2 * sigma_rep^2 / SD_d^2, reported.
+  sigma_init, sigma_data   SD within each Part 3 family (df 4).
+  MDE, two-sided alpha 0.05, 80% power, the reference SD borrowed from E3 (so df is E3's):
+    paired    MDE_p(k) = (t(0.975, df) + t(0.80, df)) * SD_d / sqrt(k); the factor is 3.261 at df 7, 5.363 at df 2
+    unpaired  MDE_u(k) = (t(0.975, df) + t(0.80, df)) * sigma_seed * sqrt(2 / k); the same factors (df 7 and 2)
+    for k = 1, 2, 3, 5, in bpb and as % of A's mean. Sensitivity column, not read: the same with each SD at its
+    one-sided 80% upper bound (x1.353 at df 7, x2.117 at df 2).
+  k_needed(delta) = the smallest k with MDE_p(k) <= delta, for delta = 0.5%, 1% and 2% of A's mean.
+  CRN ratio = sqrt(2) * sigma_seed / SD_d. loop.md's rule: a ratio of 2 or more makes CRN mandatory for every
+    screen. Below 2, CRN stays the default (PLAN 5) and a screen may use unpaired seeds without a deviation.
+  Averaging (loop.md ledger idea 15): SD_d of M vs SD_d of F, per metric and size. Later screens may decide on M only
+    where M's SD_d is at least 30% below F's at 5M, and then only with its checkpoints at fixed fractions of the run
+    (a harness change; E2 showed that rolling saves land at different decay points per run length).
+  Descriptive: over the 28 two-seed subsets at 5M, the share in which both d_s carry the sign of the 8-seed mean d
+    (how often a 2-seed screen agrees with 8 seeds on this contrast).
+  Seed 1 chose A over B in E2, so d_1 is selected. The noise table uses all 8 seeds and prints the seeds 2..8 values
+    (N = 7, df 6, factor 3.353) beside them.
+  E2 re-check: a paired t-test on F(CHAT) d_s over seeds 2..8 (df 6). If B is lower with two-sided p < 0.05, the 5M
+    LR becomes B (E2's rule), and screens use B; the noise numbers are unaffected. At 20M the same test over seeds
+    2..3 is reported (df 1) and moves nothing.
+
+HOW LATER SCREENS USE IT (defaults; a bet's pre-registration may be stricter, and says why if it is looser)
+  1 Reference SD, by what the two arms share (each bet's pre-registration names its class):
+      same init, same stream   LR, optimizer, schedule, weight decay, clip, loss masks        SD_ref = SD_d
+      same stream, new init    architecture or shape, anything that changes the init draws  sqrt(2) * sigma_init
+      same init, new stream    mix, shares, filtering, curriculum, templates                sqrt(2) * sigma_data
+      both differ                                                                           sqrt(2) * sigma_seed
+    Without Part 3, the middle two use sqrt(2) * sigma_seed. SDs travel as a fraction of A's mean; df_ref is the
+    df of the SD used. A new mix keeps each source's internal order at the same seed, so its arms share part of the
+    stream; sqrt(2) * sigma_data is the conservative end.
+    Decay-branch screens (PLAN 5: data and post-training bets as branches off a shared trunk): a seed is an
+    independent trunk. Two branches off one trunk share their whole trunk, so their difference is not a seed pair,
+    and branch replays off one trunk are never counted as seeds.
+  2 Seeds: k = max(2, k_needed(delta_bet)), where delta_bet is the bet's stated minimum effect (default 1% bpb). A
+    bet whose k_needed exceeds 5 runs as registered with the label "underpowered", and a null reads "not resolved",
+    never "no effect".
+  3 Default decision: WIN if the mean paired improvement over k seeds exceeds t(0.975, df_ref) * SD_ref / sqrt(k)
+    and every seed pair improves; NULL only if the 95% interval (same SD_ref) excludes delta_bet; else INCONCLUSIVE.
+  4 20M confirmations use the larger of the 20M and 5M relative SDs, with the df of the one used. These are
+    continuous metrics only; generative pass rates stay reserved for effects of 5 points or more (PLAN Phase 3).
+  5 Refresh: when the engine flags, tokenizer version, training mix, corpus build or eval sets change, A and B are
+    rerun at 5M for seeds 9, 10 and 11 (6 runs, about 3 h; the seed-9 pair also serves E2's refresh g check). Part 1
+    reruns under the new setting before the next screen decision if the mean of the 3 d's falls outside E3's 95%
+    prediction interval for a 3-pair mean, or if their SD exceeds SD_d by more than the chi-square 95% bound for
+    df 2 (x1.731). One pair, as first written, could not show a change in the noise, which is what a refresh is for.
+
+FIXED BEFORE THE FIRST SCORED E3 RUN (a FIXED log appended to this file)
+  Everything in E2's FIXED block, with the same values: engine flags written explicitly in every config and recorded
+  in every run (config_sha256 in runs.jsonl, config in every checkpoint), the harness and data_prep commits, the
+  tokenizer sha256 (tok_v0_8k.json, 078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5), the pinned
+  shares, the training and eval manifest hashes, the scorer's sha256, and E2's starter-corpus exception (FIXED 7);
+  plus the E2 result lines that define A, B, A20 and B20, the sha256 of every E3 config, the seed list and the run
+  order above. The smoke run is E2's (labelled smoke; never read).
+
+DEVIATIONS POLICY
+  E2's, unchanged (a non-finite loss is a divergence and is never resumed). Also: an E3 run is never rerun because
+  its value looks odd. Only a crash (one resume from its checkpoint) or a recorded engine or data mismatch reruns a
+  run, and the reason is logged before the rerun. A diverged E3 run is a GAP and its pair is dropped from every SD.
+
+OUTPUTS
+  PC: ~/planck/runs/E3/<run>/ laid out as E2's. Repo, copied back: configs/ (prereg.yaml and one config per run,
+  relative paths only), out/<run>/, results.json (the noise table: every statistic above per metric and size, with n
+  and df), tables.txt, logs/queue_e3.txt. Later pre-registrations cite results.json by its sha256. No machine
+  address, user name or key path in any of them.
+
+QUEUE ON THE PC (queue_e3.sh, a later step; started detached)
+  Waits for "E2 5M DONE" in E2's logs/queue_e2.txt and for E2's analyzer to write A and B. Preconditions as E2 (this
+  file, prereg.yaml and configs committed by Max or the orchestrator; code on the PC by git bundle, in a directory
+  the queue owns). One GPU job at a time: each run holds ~/planck/locks/gpu.lock (flock) for its training plus
+  scoring; the same pre-run checks as E2 (PAUSE, STOP, 75 C, 25 GB free); train.py --require-committed.
+  Joint order with E2: E2 5M stages, E3 Part 1, E2 20M grid, E3 Part 2, E3 Part 3 (if the patch has landed), then
+  E2's D1 and D2. Part 1 runs pair by pair, and the analyzer prints interim numbers after each pair; interim numbers
+  decide nothing.
+  Estimates (eager bench plus 15%, as E2): a 5M run about 29 min, Part 1 about 8.8 h; a 20M run about 2.8 h, Part 2
+  about 16.7 h; Part 3 about 3.9 h. About 29 GPU-hours in all, on top of E2's (E2 plus E3 about 45 h, about 55 h with
+  every allowed extension). PLAN's Phase 1 teacher pilot needs the 5070 from about Oct 1; if the queue must yield,
+  E2's D1 and D2 go first, then Part 3 (reported "not run").
+
+KNOWN LIMITS
+  With 8 pairs SD_d is known to within about a factor of 1.35 (80% upper bound); at 20M, with 3 pairs, much less.
+  The A/B contrast is an LR change; bets that move the model more may be noisier, which is why the classes above
+  fall back to sigma_init, sigma_data or sigma_seed. Lock-in at 30M (PLAN: 5 seeds if seed pass rates spread by more
+  than 0.3 at 30M) is not measured here; Part 4b gives the 5M and 20M spread only. The numbers hold for tok_v0_8k,
+  the pinned starter mix and this loader until a refresh (rule 5) says otherwise.
+
+CHANGES AFTER CRITIQUE (2026-09-26; no run existed, nothing committed)
+  1 F decides (arms, re-check, as in E2); M gets its own MDE, and loop.md's idea 15 test sets when screens may use M.
+  2 sigma_seed has df N - 1, not 2N - 2 (CRN correlates a_s and b_s); the unpaired factors were 3.013 and 3.717.
+  3 The E2 re-check uses seeds 2..8 (df 6): seed 1 selected A, which biases a test that includes it toward A.
+  4 Decay-branch screens: a seed is an independent trunk (PLAN 5 runs data bets as branches off a shared trunk).
+  5 Refresh uses 3 pairs with a mean test and an SD test instead of one pair; corpus rebuilds trigger it.
+  6 Part 4 now names what PLAN reads from E3 beyond bpb: P-053's pass-rate MDE gate, the lock-in reading at 5M and
+    20M, Tier 0 margins, CORPUS (a)/(c), induction and history dependence; final checkpoints are kept for it.
+  7 Patch status recorded (still applies to the changed train.py; still untested).
+  8 What a data seed changes in this loader is recorded, so sigma_data is read as this loader's noise.
+  9 Data are E2's pinned shares (E2 change 1); warmup_steps and ckpt_every written explicitly.
+  10 The budget line and the yield order were added.

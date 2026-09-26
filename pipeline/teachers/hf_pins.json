@@ -1,0 +1,92 @@
+{
+  "_what": "Phase 1 teacher pins for vLLM 0.30.0 on the RTX 5070 (sm_120, 12 GB). Metadata only: pinned from the Hugging Face API on 2026-09-25 from the Mac (model info, config.json, chat_template.jinja, tokenizer files, safetensors HEADERS by HTTP range). No weights downloaded, no model loaded. VRAM numbers are ESTIMATES from header byte counts and config shapes; the vLLM startup log line 'Maximum concurrency for 2048 tokens per request' is the measurement that replaces them.",
+  "_status": "dry: prep config, not training data",
+  "vram_assumptions": {
+    "card_total_mib": 12227,
+    "gpu_memory_utilization": 0.88,
+    "vllm_budget_mib": 10760,
+    "assumed_non_kv_overhead_mib": 1200,
+    "why_0.88": "pc/wsl/gpuguard.py stops a job above 11,600 MiB used for 3 samples; vLLM preallocates util x total, and the Windows desktop also holds VRAM. Use 0.88, or give vLLM jobs a guard override."
+  },
+  "teachers": {
+    "gemma-4-12b": {
+      "official": {"repo": "google/gemma-4-12B-it", "revision": "707f0a3b8a3c7ad586ed01e27eafbad8a27dd0f7", "license": "apache-2.0",
+        "license_evidence": "card YAML license: apache-2.0; license_link ai.google.dev/gemma/docs/gemma_4_license serves the plain Apache License 2.0 text"},
+      "quant": {"repo": "google/gemma-4-12B-it-qat-w4a16-ct", "revision": "1d2c2d7f2466070e69d6fb3fd5ce9a7d75f2f6ee", "license": "apache-2.0",
+        "who": "Google (teacher org's own release)", "base": "google/gemma-4-12B-it-qat-q4_0-unquantized (same QAT weights as the LM Studio q4_0 path)",
+        "scheme": "compressed-tensors pack-quantized W4A16, int4 symmetric, group 32 (Marlin path; vLLM 0.30 MARLIN_SUPPORTED_GROUP_SIZES includes 32)",
+        "file_gb": 10.26, "loaded_gb_est": 8.25,
+        "loaded_breakdown": "text linear 6.13 (int4 + bf16 scales) + tied embed 2.01 bf16 + vision embedder 0.10; the checkpoint's separate lm_head copy (2.01) is skipped because vLLM ties it to embed_tokens",
+        "alternatives_not_chosen": [
+          "RedHatAI/gemma-4-12B-it-NVFP4 @ 8965ad1c93dccb43e05e7882d98f2d32c0dd434d: W4A4 NVFP4, same 10.26 GB file, activations also 4-bit (quality risk), sm120 FP4 kernels exist in 0.30",
+          "cyankiwi/gemma-4-12B-it-AWQ-INT4 @ ad2d7e521f3eaee492973ab130025e610b216d2c: stored in F32 (11.22 GB), not the QAT weights"]},
+      "arch": {"model_type": "gemma4_unified", "layers": 48, "sliding_layers": 40, "sliding_window": 1024, "sliding_kv_heads": 8, "sliding_head_dim": 256,
+        "global_layers": 8, "global_kv_heads": 1, "global_head_dim": 512, "attention_k_eq_v": true, "vocab": 262144},
+      "kv_est": {"bytes_per_token_all_layers": 344064, "per_2048_seq_mib_window_freed": 357, "per_2048_seq_mib_no_window": 672,
+        "kv_room_mib": 1691, "concurrent_2048_seqs": "about 4.7 if vLLM frees KV outside the 1024 window, about 2.5 if not; roughly x2 with --kv-cache-dtype fp8 (untested on this card)"},
+      "download": "hf download google/gemma-4-12B-it-qat-w4a16-ct --revision 1d2c2d7f2466070e69d6fb3fd5ce9a7d75f2f6ee --include 'model.safetensors' '*.json' 'chat_template.jinja' 'recipe.yaml' 'README.md' --local-dir ~/planck/models/gemma-4-12B-it-qat-w4a16-ct",
+      "serve": "vllm serve ~/planck/models/gemma-4-12B-it-qat-w4a16-ct --served-model-name gemma-4-12b-it-qat-w4a16 --host 127.0.0.1 --port 8000 --max-model-len 2048 --gpu-memory-utilization 0.88 --language-model-only --max-num-seqs 32",
+      "wire": "completions (raw prompt, render_prompt.completion_body)",
+      "thinking_off": "Raw prompt ending '<|turn>model\\n<|channel>thought\\n<channel|>' (identical to the official template with enable_thinking false; vLLM 0.30 tests/renderers/test_gemma4_chat_template.py asserts that suffix). Chat alternative: omit enable_thinking (template default false) and send no <|think|>.",
+      "bos_warning": "Gemma 4 tokenizer.json post_processor adds NO <bos> and tokenizer_config has no add_bos_token; the official template emits bos_token itself. transformers >= 5.10 (vLLM 0.30 pin) therefore adds no BOS to a raw /v1/completions prompt. render_prompt.gemma_raw() has no '<bos>', so under vLLM the prompt starts without BOS (llama.cpp/LM Studio adds it from GGUF metadata). Prefix '<bos>' for vLLM and confirm with POST /tokenize that ids[0] == 2 exactly once.",
+      "detect_thinking": "request skip_special_tokens false (vLLM default true would hide <|channel> id 100 / <channel|> id 101); reject any output containing them",
+      "sampling_card": {"temperature": 1.0, "top_p": 0.95, "top_k": 64},
+      "stop": ["<turn|>", "<|turn>"], "eos_ids": [1, 106, 50]
+    },
+    "ministral-3-8b": {
+      "official": {"repo": "mistralai/Ministral-3-8B-Instruct-2512", "revision": "5b26027e7b19eeb4b7352e1fed3926375dd2cb4d", "license": "apache-2.0",
+        "license_evidence": "card YAML license: apache-2.0 and '## License: Apache 2.0'",
+        "note": "the official Instruct repo IS FP8 (quant_method fp8, 10.42 GB); BF16 is mistralai/Ministral-3-8B-Instruct-2512-BF16 @ f6fae9795746f63c9be8344932f01275f3c63734. Mistral publishes no 4-bit safetensors (GGUF only)."},
+      "quant": {"repo": "cyankiwi/Ministral-3-8B-Instruct-2512-AWQ-4bit", "revision": "e3a799844ba08f27fddbf118e154057eb0105889", "license": "apache-2.0",
+        "who": "cyankiwi (widely used llm-compressor AWQ quantizer; no Red Hat release for this model; no published recovery numbers)",
+        "scheme": "compressed-tensors pack-quantized W4A16 (AWQ), int4 symmetric, group 32; vision tower, projector, lm_head, embed kept bf16",
+        "file_gb": 7.18, "loaded_gb_est": 6.32,
+        "loaded_breakdown": "text 4.17 + embed 1.07 + lm_head 1.07 (untied); vision 0.86 skipped by --language-model-only (mistral3.py _mark_tower_model)",
+        "tokenizer_warning": "cyankiwi's tekken.json differs from the official one: ids 34/35 are '[THINK]'/'[/THINK]' (non-control) there vs '<SPECIAL_34>'/'<SPECIAL_35>' (control) in the official Instruct file. Serve with the OFFICIAL tokenizer files.",
+        "repo_warning": "the repo also ships consolidated.safetensors (7.18 GB duplicate) and a params.json with no quantization entry; exclude both and force HF format",
+        "alternatives_not_chosen": [
+          "official FP8 (W8A8): loaded about 9.56 GB, leaves about 440 MiB KV = under 2 sequences of 2048",
+          "unsloth/Ministral-3-8B-Instruct-2512-bnb-4bit @ 628055830d53521a80d2b1d32e7cb876e2ba16e9: bitsandbytes NF4, slower kernels than Marlin (would bias the tokens/hour comparison)",
+          "Firworks/...-nvfp4 @ f3047cadaaf50cb0a595f23b9843148b99cc5238 and ppetermann/...-textonly-NVFP4 @ 6eaeb223416db3b3528d5719a27dae0fedb5c40f: W4A4, low-download uploaders"]},
+      "arch": {"model_type": "mistral3/ministral3", "layers": 34, "kv_heads": 8, "head_dim": 128, "sliding_window": null, "vocab": 131072},
+      "kv_est": {"bytes_per_token_all_layers": 139264, "per_2048_seq_mib": 272, "kv_room_mib": 3533, "concurrent_2048_seqs": "about 13 (about 26 with fp8 KV)"},
+      "download": "hf download cyankiwi/Ministral-3-8B-Instruct-2512-AWQ-4bit --revision e3a799844ba08f27fddbf118e154057eb0105889 --include 'model-*.safetensors' 'model.safetensors.index.json' 'config.json' 'generation_config.json' 'processor_config.json' 'tokenizer.json' 'tokenizer_config.json' 'recipe.yaml' 'README.md' --local-dir ~/planck/models/Ministral-3-8B-Instruct-2512-AWQ-4bit",
+      "download_tokenizer": "hf download mistralai/Ministral-3-8B-Instruct-2512 --revision 5b26027e7b19eeb4b7352e1fed3926375dd2cb4d --include 'tekken.json' 'tokenizer.json' 'tokenizer_config.json' 'chat_template.jinja' 'SYSTEM_PROMPT.txt' 'README.md' --local-dir ~/planck/models/Ministral-3-8B-Instruct-2512-official-tok",
+      "serve": "vllm serve ~/planck/models/Ministral-3-8B-Instruct-2512-AWQ-4bit --tokenizer ~/planck/models/Ministral-3-8B-Instruct-2512-official-tok --tokenizer-mode mistral --config-format hf --load-format safetensors --served-model-name ministral-3-8b-instruct-awq --host 127.0.0.1 --port 8000 --max-model-len 2048 --gpu-memory-utilization 0.88 --language-model-only --max-num-seqs 64",
+      "wire": "chat (render_prompt.chat_body); mistral_common does not parse [INST] control strings inside a raw completions prompt",
+      "thinking_off": "none needed: the Instruct model has no thinking mode (the Reasoning variant is a separate repo). Confirm with skip_special_tokens false that no id 34/35 appears.",
+      "system_prompt_warning": "the HF chat template injects Mistral's default system prompt (model name, 'Le Chat', today's date) when no system message is sent; chat_body sends a user message only. --tokenizer-mode mistral avoids the HF template; confirm with POST /tokenize on a messages body before the run.",
+      "sampling_card": "temperature below 0.1 for production; higher is the card's 'experiment' zone"
+    },
+    "qwen3.5-9b": {
+      "official": {"repo": "Qwen/Qwen3.5-9B", "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a", "license": "apache-2.0",
+        "license_evidence": "card YAML license: apache-2.0; repo LICENSE file is Apache License 2.0",
+        "note": "Qwen publishes GPTQ-Int4/FP8 only for 27B and larger; none for 9B."},
+      "quant": {"repo": "cyankiwi/Qwen3.5-9B-AWQ-4bit", "revision": "156edc4bbeb8d1910ee7be9196bafaf1bc052156", "license": "apache-2.0",
+        "who": "cyankiwi (AWQ via llm-compressor); tokenizer, chat template, vocab, merges byte-identical to the official repo",
+        "scheme": "compressed-tensors pack-quantized W4A16 (AWQ), int4 symmetric, group 32; Gated DeltaNet in_proj_qkv/in_proj_z/out_proj ARE quantized (only in_proj_a/b, embed, lm_head, visual kept bf16)",
+        "provenance_warning": "the repo's recipe.yaml says ignore 're:.*linear_attn.*' but config.json and the weights quantize linear_attn; the config/weights are what vLLM loads",
+        "file_gb": 9.07, "loaded_gb_est": 7.97,
+        "loaded_breakdown": "text 3.90 + embed 2.03 + lm_head 2.03 (untied); visual 0.91 skipped by --language-model-only; MTP 0.19 not loaded without speculative decoding",
+        "alternatives_not_chosen": [
+          "RedHatAI/Qwen3.5-9B-quantized.w4a16 @ a398088c4228b0ae0c8c78df88fd1e4bf445f068: GPTQ W4A16 g128, keeps linear_attn bf16, published recovery 97.9-100.1% (IFEval strict 87.7 vs 89.5). Loaded about 10.04 GB: no KV room at util 0.88. Use only for a small-batch quality cross-check.",
+          "AxionML/Qwen3.5-9B-NVFP4 @ 97aef92393f126bf649f310cd40861be8dad3279: W4A4, lesser-known uploader",
+          "RedHatAI/Qwen3.5-9B-FP8-dynamic @ 790f0576d2d77dd5322aa0603a470bd9e3a3d1f6: 13.5 GB, does not fit"]},
+      "arch": {"model_type": "qwen3_5", "layers": 32, "full_attention_layers": 8, "linear_attention_layers": 24, "kv_heads": 4, "head_dim": 256,
+        "gdn_v_heads": 32, "gdn_head_dim": 128, "vocab": 248320},
+      "kv_est": {"bytes_per_token_all_layers": 32768, "gdn_state_per_seq_mib_bf16": 25.1, "per_2048_seq_mib": 89, "kv_room_mib": 1958,
+        "concurrent_2048_seqs": "about 22 (state is bf16 under mamba_ssm_cache_dtype auto; float32 state makes it about 113 MiB/seq, about 17 seqs)"},
+      "download": "hf download cyankiwi/Qwen3.5-9B-AWQ-4bit --revision 156edc4bbeb8d1910ee7be9196bafaf1bc052156 --include 'model-*.safetensors' '*.json' 'chat_template.jinja' 'merges.txt' 'recipe.yaml' 'README.md' 'LICENSE' --local-dir ~/planck/models/Qwen3.5-9B-AWQ-4bit",
+      "serve": "vllm serve ~/planck/models/Qwen3.5-9B-AWQ-4bit --served-model-name qwen3.5-9b-awq --host 127.0.0.1 --port 8000 --max-model-len 2048 --gpu-memory-utilization 0.88 --language-model-only --max-num-seqs 64 --default-chat-template-kwargs '{\"enable_thinking\": false}'",
+      "wire": "chat with chat_template_kwargs {\"enable_thinking\": false} per request (the server default above is a backstop). Raw alternative: '<|im_start|>user\\n{prompt}<|im_end|>\\n<|im_start|>assistant\\n<think>\\n\\n</think>\\n\\n' with stop ['<|im_end|>'].",
+      "thinking_off": "template emits the empty '<think>\\n\\n</think>\\n\\n' block when enable_thinking is false. Qwen3.5 does NOT support /think or /no_think soft switches (card). Serve WITHOUT --reasoning-parser so any stray <think> (id 248068, non-special, visible in text) reaches the checker.",
+      "sampling_card": {"temperature": 0.7, "top_p": 0.8, "top_k": 20, "min_p": 0.0, "presence_penalty": 1.5},
+      "stop": ["<|im_end|>"], "eos_ids": [248046, 248044]
+    }
+  },
+  "pipeline_gaps_seen_not_fixed": [
+    "teacher_client.LICENSES has no Qwen key: license_of('qwen3.5-9b-awq') returns UNKNOWN",
+    "render_prompt.chat_body sends no chat_template_kwargs (Qwen thinking stays ON unless the server default is set) and no system message (Ministral HF-template default prompt)",
+    "render_prompt.gemma_raw has no '<bos>' (see bos_warning)"
+  ]
+}

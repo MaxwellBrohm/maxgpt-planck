@@ -1,0 +1,262 @@
+{
+ "checks": {
+  "oodh_reserved_found": 0,
+  "oodh_trees_checked": 1094,
+  "train_overlap": {
+   "cccc": {
+    "id": 0,
+    "split_key": 0,
+    "text_sha1": 0
+   },
+   "dolly": {
+    "id": 0,
+    "split_key": 0,
+    "text_sha1": 0
+   },
+   "gutenberg": {
+    "id": 0,
+    "split_key": 0,
+    "text_sha1": 0
+   },
+   "irc": {
+    "id": 0,
+    "split_key": 0,
+    "text_sha1": 0
+   },
+   "oasst2": {
+    "id": 0,
+    "split_key": 0,
+    "text_sha1": 0
+   },
+   "stackexchange": {
+    "id": 0,
+    "split_key": 0,
+    "text_sha1": 0
+   },
+   "wikimedia": {
+    "id": 0,
+    "split_key": 0,
+    "text_sha1": 0
+   }
+  }
+ },
+ "code_sha256": {
+  "corpus/oodh.py": "b256d5554d531bd76c531a8bc59c287f57f60e94cc224e3f136add75594987d1",
+  "corpus/sample_plan.py": "a50209255798b4f50117208777cf4429e3d7994f3f37d687caa5aee4e27a9e57",
+  "data_prep/eval_sets.py": "0667b5e4ef21e4fe894422ebecaad1be2154bcf0182edfa6bcdb31f31951c957",
+  "data_prep/evalwin.py": "e31107725df257719a5696b4125f6bef402c0d8c28d8d00dfb818c4f5af27169",
+  "data_prep/prep_common.py": "7c8fce2b5eccc466070e848e2e55f25cd3a3b247acfc6d66a06334536ac15ada"
+ },
+ "config": {
+  "chat_context_bytes": 3072,
+  "context_bytes": 1024,
+  "lookback": 256,
+  "offsets": "UTF-8 byte offsets, at character starts",
+  "scored_chat_roles": [
+   "user",
+   "assistant"
+  ],
+  "window_bytes": 2048
+ },
+ "evalset_sha256": "fe1b55bbe3612d0c968934cbad831a17fd3d73d84aa8f1b7cb2f4523cf4d505b",
+ "format": "planck-evalset-v1",
+ "heldout_dir": "~/planck/data/tok_sample_v0c/heldout",
+ "heldout_manifest_sha256": "d0fa0838a6aa4ee8a6c62d6ffe496f812e8335d90266d34689c97cd9e13cfa63",
+ "inputs": {
+  "cccc": {
+   "file": "cccc.jsonl",
+   "records": 878,
+   "sha256": "2b9b07a919c0a31c590365a46aa05c8bd5506067a89ed1f871c8af609dee0293"
+  },
+  "dolly": {
+   "file": "dolly.jsonl",
+   "records": 2854,
+   "sha256": "42126122b7dc94b742b2a0984eb5bb6090bc4ca5ea5944308d53a944c267a5c2"
+  },
+  "gutenberg": {
+   "file": "gutenberg.jsonl",
+   "records": 31,
+   "sha256": "7fd251f138b63e0e9721d9d6d0cce9b2b2dcba5cdb283b98d4edfd4337fa4e20"
+  },
+  "irc": {
+   "file": "irc.jsonl",
+   "records": 242,
+   "sha256": "498e285c349b33349fc2db42e52aab6a2c9078e99703d129c59f64a4464eee6f"
+  },
+  "oasst2": {
+   "file": "oasst2.jsonl",
+   "records": 1094,
+   "sha256": "627252b36f11d958e54b26b886adab51b99dd58f34094a09fe73e39893db1ee1"
+  },
+  "stackexchange": {
+   "file": "stackexchange.jsonl",
+   "records": 1308,
+   "sha256": "ba737dc808d2d3bb95098651f792c10c6406666608d99f1c60ca723999e3d6c1"
+  },
+  "wikimedia": {
+   "file": "wikimedia.jsonl",
+   "records": 1317,
+   "sha256": "9c7b5f9425a853e3401019d7f5c12b5fd53d5d2a5a018b4d053091d9b2699509"
+  }
+ },
+ "sets": {
+  "cccc": {
+   "corpus_metric": "d: held-out pre-2023 web text",
+   "doc_bytes": 5005233,
+   "docs": 878,
+   "docs_in": 878,
+   "files": {
+    "docs": {
+     "path": "cccc.docs.jsonl",
+     "sha256": "2055aeae20987697c2ef3f585e654cd08d40976a5d7ca8f0c1b70c3e4895c483"
+    },
+    "windows": {
+     "path": "cccc.windows.jsonl",
+     "sha256": "8f1fa02e272ab0c0cf0326d261c32637102ca10e8c8a3eb7d2f2b4c28664769a"
+    }
+   },
+   "kind": "text",
+   "scored_bytes": 4998448,
+   "skipped_docs": 0,
+   "special_replaced_docs": 0,
+   "windows": 2954
+  },
+  "dolly": {
+   "corpus_metric": "held-out human instruction/response turns",
+   "doc_bytes": 2770108,
+   "docs": 2854,
+   "docs_in": 2854,
+   "files": {
+    "docs": {
+     "path": "dolly.docs.jsonl",
+     "sha256": "bfcedbf87054f3086c308bad436b8ccabf3567b30e6ef8a98d92b4e210922ce4"
+    },
+    "windows": {
+     "path": "dolly.windows.jsonl",
+     "sha256": "f7d64322f40ba80669d3e1e88b160af7105331bbb6296f8afe363c5547cf6160"
+    }
+   },
+   "kind": "chat",
+   "scored_bytes": 2770108,
+   "scored_bytes_assistant": 1280215,
+   "scored_bytes_user": 1489893,
+   "skipped_docs": 0,
+   "special_replaced_docs": 0,
+   "windows": 5976
+  },
+  "gutenberg": {
+   "corpus_metric": "d: held-out strict-open prose",
+   "doc_bytes": 5063066,
+   "docs": 31,
+   "docs_in": 31,
+   "files": {
+    "docs": {
+     "path": "gutenberg.docs.jsonl",
+     "sha256": "0c04c7d2e015e03e7e0684e8572b34f147f45f6e054728f819be5de6a1d6ce12"
+    },
+    "windows": {
+     "path": "gutenberg.windows.jsonl",
+     "sha256": "de1334160e263ccdb9e222895045679273b3d47836f75d403025aa01b0e3d846"
+    }
+   },
+   "kind": "text",
+   "scored_bytes": 5062889,
+   "skipped_docs": 0,
+   "special_replaced_docs": 0,
+   "windows": 2491
+  },
+  "irc": {
+   "corpus_metric": "b: held-out human conversational text (IRC)",
+   "doc_bytes": 4983607,
+   "docs": 242,
+   "docs_in": 242,
+   "files": {
+    "docs": {
+     "path": "irc.docs.jsonl",
+     "sha256": "3fea1aa8d5ae6b2fd0ef87d8cc71de231da37da7a3bae3585480e7e4dee564ca"
+    },
+    "windows": {
+     "path": "irc.windows.jsonl",
+     "sha256": "3b1e89bda9b1d94ddedac9b0b4be75820ecddc07aea21ff76ac08cfa274f6403"
+    }
+   },
+   "kind": "text",
+   "scored_bytes": 4982734,
+   "skipped_docs": 0,
+   "special_replaced_docs": 0,
+   "windows": 2566
+  },
+  "oasst2": {
+   "corpus_metric": "b: held-out human conversational turns (OASST2 dev slice, disjoint from OOD-H)",
+   "doc_bytes": 2169078,
+   "docs": 1094,
+   "docs_in": 1094,
+   "files": {
+    "docs": {
+     "path": "oasst2.docs.jsonl",
+     "sha256": "1860549d10bee16beec63b09f47d6d8e1f7e4eed6fe71dea6793e3777d408982"
+    },
+    "windows": {
+     "path": "oasst2.windows.jsonl",
+     "sha256": "a646ee3bc21ad5dda59cfe39b38ae1f34c162fa2334aae509751ebc17c9e0967"
+    }
+   },
+   "kind": "chat",
+   "scored_bytes": 2169078,
+   "scored_bytes_assistant": 1920210,
+   "scored_bytes_user": 248868,
+   "skipped_docs": 0,
+   "special_replaced_docs": 0,
+   "windows": 3627
+  },
+  "stackexchange": {
+   "corpus_metric": "held-out Q&A prose",
+   "doc_bytes": 5000464,
+   "docs": 1308,
+   "docs_in": 1308,
+   "files": {
+    "docs": {
+     "path": "stackexchange.docs.jsonl",
+     "sha256": "d74d75333e84297ca2af638182b017879cad4bf709dfe866d26360f2828cbc81"
+    },
+    "windows": {
+     "path": "stackexchange.windows.jsonl",
+     "sha256": "fb8fefbd748877b59ea71c442048c5a5adfbeed8755435c945bc6aa0255a54fa"
+    }
+   },
+   "kind": "text",
+   "scored_bytes": 4994122,
+   "skipped_docs": 0,
+   "special_replaced_docs": 0,
+   "windows": 3079
+  },
+  "wikimedia": {
+   "corpus_metric": "d: held-out strict-open prose",
+   "doc_bytes": 4994979,
+   "docs": 1317,
+   "docs_in": 1317,
+   "files": {
+    "docs": {
+     "path": "wikimedia.docs.jsonl",
+     "sha256": "6896279b036396cc2c0416330f789bea9148de199362c27bf5d5a64d5add31e4"
+    },
+    "windows": {
+     "path": "wikimedia.windows.jsonl",
+     "sha256": "d723108d488a8373ebd2cb81b19501972bb3df0640adb408c196607b76aab178"
+    }
+   },
+   "kind": "text",
+   "scored_bytes": 4983466,
+   "skipped_docs": 0,
+   "special_replaced_docs": 0,
+   "windows": 3151
+  }
+ },
+ "train_docs_checked": 1127418,
+ "train_shards": [
+  {
+   "dir": "~/planck/data/shards/starter_v0_8k",
+   "manifest_sha256": "23647db746de12075cdd96929f004e41c1a5b1ed5ab7bb57b1ccef090ef41344"
+  }
+ ]
+}

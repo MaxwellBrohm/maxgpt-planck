@@ -1,0 +1,10 @@
+# SMOKE trunk (label smoke): 5M, E2 base and engine settings, LR at stage A's middle point. Trunk of 1,201 steps
+# with stable checkpoints at 400 and 1,200: one step longer than its last branch point, as E2's trunks.
+# keep_last 0 keeps every rolling checkpoint so the first one (step 100) can be scored.
+extends: ../configs/base5m.yaml
+name: smoke_trunk
+out_dir: ../../../planck_root/runs/smoke/smoke_trunk
+runs_jsonl: ../../../planck_root/runs/smoke/runs.jsonl
+optim: {lr: 3.0e-3, embed_lr: 3.0e-3, scalar_lr: 3.0e-3}
+schedule: {mode: trunk, branch_points: [400, 1200]}
+train: {total_steps: 1201, ckpt_every: 100, keep_last: 0}

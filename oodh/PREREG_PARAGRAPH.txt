@@ -1,0 +1,22 @@
+OOD-H Part 1: paragraph for prereg/RC-12.draft.txt s14 (written 2026-09-26 by the adversarial review; public, no item
+content).
+
+NOT appended to the draft. The draft had not been modified in the 10 minutes before the check (mtime 2026-09-26
+00:14:18, checked 03:40), but the paragraph the workflow asked for ("Part 1 BUILT 2026-09-26: 150 threads ...") would
+be false: only 107 threads exist under the primary rule, and the gate fails. s14 still reads "NOT BUILT", which is
+true. The status paragraph below is what could go into s14 now, if Max wants a status line there:
+
+  Part 1 status 2026-09-26, NOT BUILT: 107 of the 150 threads exist under the primary rule (the extractor's
+  highest-ranked path, KL1 and KL2 in oodh/DESIGN.txt s2 and s3), with 289 probes (H-FACT 178, H-ASK 51, H-CORR 1,
+  H-ABS 59). This SHORT file, sha256 86ec858fef43fd10b45358eb6f90f7f9467567abc687676b372a3dcb28e4c5ad, sorted
+  tree-id list sha256 265d6185b6b1d3bf4c9a76c615505ffca9ec4354758a7ff315dc6fad167bd5e5, is not the lock set. Its gate
+  fails G2 and G4 because a natural thread usually holds one value of the asked kind (DESIGN s10, s11). None of the
+  107 tree ids, message ids or user-turn snippets occurs in any training or eval artifact built so far (DESIGN s11).
+  Reaching 150 needs F1 and/or F3 (DESIGN s9), decided before tokenizer v1 freezes. Items in sealed/ (not public
+  until release).
+
+The paragraph the workflow asked for, to be filled in only when a 150-thread set passes the gate:
+
+  Part 1 BUILT <date>: 150 threads, <N> probes (H-FACT <a>, H-ASK <b>, H-CORR <c>, H-ABS <d>), selection rule in
+  oodh/DESIGN.txt, file sha256 <from oodh/HASHES.txt>, tree-id list sha256 <from oodh/HASHES.txt>; items in sealed/
+  (not public until release).

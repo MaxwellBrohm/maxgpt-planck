@@ -1,0 +1,42 @@
+# E2 and E3 engine settings (E2 notes, FIXED 1). ONE file for both experiments: E2's base5m.yaml and
+# base20m.yaml extend it, and E3's configs extend those, so the two can never differ.
+#
+# Every key is written explicitly, never "auto", so the resolved config (runs.jsonl config_sha256) and
+# every checkpoint (payload "config") record what ran. preflight.py compares these keys with the harness
+# it runs against:
+#   - a key the harness reads but this file does not set is refused (a silent default would go unrecorded);
+#   - a key set to anything but its off value that the harness does not read is refused (the config would
+#     claim a speed setting that never ran);
+#   - --strict (every scored run) also refuses engine_fixed: null and any "auto".
+# The values below are the resolved defaults of the harness snapshot the smoke ran on (2026-09-26 01:31):
+# optim.batched auto -> true on cuda, train.doc_attn auto -> varlen on cuda+bf16, lazy_metrics off. The
+# compile, lean-loss and memory keys are the speed workflow's names with its off defaults; the harness
+# snapshot did not read them yet, so they ran as written (eager, full-vocab loss, no cap).
+#
+# FIXING STEP (before the first scored run): set each key to the default that has landed in the committed
+# harness (or E1's choice), keeping a key on only if its parity and mutation tests pass there; set
+# engine_fixed to "<date> <commit>"; append the values to E2 notes' FIXED log; commit. Changing any value
+# afterwards reruns every run of the affected comparison (DEVIATIONS POLICY).
+engine_fixed: null
+
+train:
+  device: cuda
+  precision: bf16
+  doc_attn: varlen            # packed rows: varlen (flash, cuda bf16) | mask (SDPA + dense mask, reference)
+  lazy_metrics: false         # true: loss and grad norm read on log steps only
+  compile: false              # torch.compile of the training forward (speed workflow key)
+  compile_backend: inductor
+  compile_dynamic: null
+  ce_chunk_rows: 0            # lean loss: chunked lm_head + CE; 0 = off
+  cuda_mem_cap_gib: null      # no per-process memory cap
+  cuda_mem_margin_gib: 0.5
+  auto_micro_on_oom: false    # must stay false: the batch shape may not change per run
+  selftest: true
+
+optim:
+  batched: true               # optim_batched (foreach / stacked Newton-Schulz), same update
+
+data:
+  mode: pack                  # document-masked packed rows (unless E1 chooses otherwise)
+  window_tokens: 131072
+  max_item_len: 2048

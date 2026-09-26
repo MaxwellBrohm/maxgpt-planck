@@ -1,0 +1,6 @@
+[train] leak self-test passed {'causal_grad': 0.0, 'causal_masked_grad': 0.0, 'document_grad': 0.0021013921723141583, 'causal_nograd': 0.0, 'causal_masked_nograd': 0.0, 'document_nograd': 0.0021013921723141583, 'scr_causal_grad': 0.0, 'scr_causal_masked_grad': 0.0, 'scr_document_grad': 0.007590132827324478, 'scr_causal_nograd': 0.0, 'scr_causal_masked_nograd': 0.0, 'scr_document_nograd': 0.007590132827324478}
+[train] smoke_trunk: 5,010,133 params, cuda/bf16, steps 0->1201 (trunk), 32,768 tokens/step
+[train] paused at step 250, loss 4.950684134721914
+[train] leak self-test passed {'causal_grad': 0.0, 'causal_masked_grad': 0.0, 'document_grad': 0.0021013921723141583, 'causal_nograd': 0.0, 'causal_masked_nograd': 0.0, 'document_nograd': 0.0021013921723141583, 'scr_causal_grad': 0.0, 'scr_causal_masked_grad': 0.0, 'scr_document_grad': 0.007590132827324478, 'scr_causal_nograd': 0.0, 'scr_causal_masked_nograd': 0.0, 'scr_document_nograd': 0.007590132827324478}
+[train] smoke_trunk: 5,010,133 params, cuda/bf16, steps 250->1201 (trunk), 32,768 tokens/step
+[train] finished at step 1201, loss 3.4841784053610505

@@ -1,0 +1,22 @@
+# E2 stage A: eta 0.75..12 x 1e-3, r 1 (e2plan.py). train = preflight, train, then score if it is a branch
+train 5m_e0.75_r1_trunk
+train 5m_e0.75_r1_b62M
+train 5m_e0.75_r1_b125M
+train 5m_e0.75_r1_b250M
+train 5m_e1.5_r1_trunk
+train 5m_e1.5_r1_b62M
+train 5m_e1.5_r1_b125M
+train 5m_e1.5_r1_b250M
+train 5m_e3_r1_trunk
+train 5m_e3_r1_b62M
+train 5m_e3_r1_b125M
+train 5m_e3_r1_b250M
+train 5m_e6_r1_trunk
+train 5m_e6_r1_b62M
+train 5m_e6_r1_b125M
+train 5m_e6_r1_b250M
+train 5m_e12_r1_trunk
+train 5m_e12_r1_b62M
+train 5m_e12_r1_b125M
+train 5m_e12_r1_b250M
+mark E2 STAGE A DONE

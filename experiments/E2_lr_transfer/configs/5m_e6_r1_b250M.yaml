@@ -1,0 +1,7 @@
+# E2 5M arm eta 0.006, r 1 (written by e2plan.py; E2 notes, SCHEDULE)
+extends: base5m.yaml
+name: 5m_e6_r1_b250M
+out_dir: ../../../planck_root/runs/E2/5m_e6_r1_b250M
+optim: {lr: 0.006, embed_lr: 0.006, scalar_lr: 0.006}
+schedule: {mode: branch, init_from: ../../../planck_root/runs/E2/5m_e6_r1_trunk/stable_00006104.pt, decay_steps: 1526}
+train: {total_steps: 7630, ckpt_every: 153}

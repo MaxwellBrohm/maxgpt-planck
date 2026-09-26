@@ -1,0 +1,7 @@
+# E2 5M arm eta 0.012, r 1 (written by e2plan.py; E2 notes, SCHEDULE)
+extends: base5m.yaml
+name: 5m_e12_r1_trunk
+out_dir: ../../../planck_root/runs/E2/5m_e12_r1_trunk
+optim: {lr: 0.012, embed_lr: 0.012, scalar_lr: 0.012}
+schedule: {mode: trunk, branch_points: [1526, 3052, 6104]}
+train: {total_steps: 6105, ckpt_every: 122}

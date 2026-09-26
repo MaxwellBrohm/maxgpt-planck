@@ -1,0 +1,249 @@
+E2: learning rates at 5M, and whether they transfer to 20M (PLAN Phase 3a; LEDGER "Tune LR at 5M, check transfer to
+20M"; research/followup/loop.md E2)
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model for E2: it writes configs and reads result JSON.
+
+PRE-REGISTRATION WRITTEN 2026-09-25 23:53 (before any E2 config, training shard, eval set or run exists. Run for this
+entry, no model: harness/budget.py for the two shapes, harness/schedule.py arithmetic for the step counts below, and
+sha256 of tokenizer/v0/tok_v0_8k.json. Nothing of E2 is queued.)
+REVISED 2026-09-26 after an adversarial critique, before any commit, config or run (CHANGES AFTER CRITIQUE, at the
+end). The starter shards and eval sets v0 were built between the two; nothing has trained on them.
+
+WHY
+  Every Phase 3 screen runs at the 5M learning rate. A mistuned LR confounds any bet that changes the effective step
+  size (LEDGER: a shared LR already confounded Max's A/B), and the 20-30M confirmations assume the 5M LR carries
+  over. PLAN: if the optimum moves 2x or more between 5M and 20M, muP/CompleteP comes before any cross-size claim.
+  E2 also sets the operating point at which E3 measures noise. It needs no RC-12 (PLAN Phase 0: E1-E3 may run).
+
+QUESTIONS
+  Q1 Which NorMuon matrix LR and which AdamW LR (embeddings and scalars) minimise held-out chat bits per byte at 5M
+     for a 250M-token run, the PLAN 5M screening budget?
+  Q2 Does the 5M optimum hold at 20M within one grid step (a factor of 2)?
+  Q3 (reported, no rule) How does the optimum move with run length (62.5M, 125M, 250M at 5M; 250M, 500M at 20M)?
+
+MODEL (harness/budget.py, vocab 8192, head_dim 64, tied embeddings, every block flag on; printed 2026-09-25)
+  5M   d 192, 8 layers, 3 heads, SwiGLU 488: 5,010,133 params (embedding 1,572,864, body 3,437,269)
+  20M  d 320, 14 layers, 5 heads, SwiGLU 864: 20,001,511 params (embedding 2,621,440, body 17,380,071)
+  seq_len 2048; everything else PlanckConfig's default (RoPE 10k, QK-norm, gate, value residual, norm scaling).
+
+DATA (pinned by change 1; every E2 and E3 config writes these shares)
+  Starter shards, data_prep/stats/starter_v0_8k (tok_v0_8k; 2,029,365,441 tokens, 1,127,418 docs). Shares by drawn
+  tokens: cccc 0.4142, stackexchange 0.2219, gutenberg 0.1479, wikimedia 0.1479, irc 0.0400, dolly 0.0160, oasst2
+  0.0120. Rule: OASST2 and Dolly each at most 4 passes in 550M slots, IRC at its 4% cap (corpus/sample_plan.py
+  IRC_MAX_SHARE), the rest split 28:15:10:10 as sample_plan's web, se, books and wiki shares. Passes in the longest
+  trajectory (20M, 500M slots): oasst2 and dolly 3.4, wikimedia 0.83, the others 0.34 or less; at 5M (250M): oasst2
+  and dolly 1.7, the others 0.41 or less. Gutenberg is 15.9% of prose (CORPUS cap 25%). data.mode pack,
+  window_tokens 131072, max_item_len 2048, chat loss assistant. The manifest's harness_data block supplies paths,
+  kinds and control ids only; it has no shares.
+
+WHAT IS TUNED (harness/optim.py groups. Fixed, not tuned: weight decay 0.1 cautious, momentum 0.95 Nesterov, AdamW
+betas (0.9, 0.95), eps 1e-8, clip 1.0)
+  eta  optim.lr, the NorMuon matrix group (update RMS 0.2, so AdamW-scale LRs apply).
+  r    AdamW ratio: optim.embed_lr = optim.scalar_lr = r * eta. Both AdamW groups move together; a separate scalar
+       sweep is not worth its runs (diagnostic D2 looks once).
+  g    global multiplier: eta and both AdamW LRs times g, ratio kept. The one knob the 20M grid moves.
+  All grids are factor 2.
+  Stage A (5 arms, r = 1): eta in {0.75, 1.5, 3, 6, 12} x 1e-3. The harness default 3e-3 is the middle; Max's
+          Ultra 124M NorMuon A/B used lr 6e-4 (its configs/ab/normuon_arch.yaml).
+  Stage B (4 new arms): at eta_A (stage A's pick), r in {0.5, 2, 4, 8}; r = 1 is stage A's pick, reused.
+  Stage C (2 new arms): at (eta_A, r_B), g in {0.5, 2}; g = 1 is stage B's pick, reused.
+  Extensions: when a stage's pick sits at an edge of its grid, one more factor-2 point is added beyond that edge, at
+          most 2 per stage. Stage C is also extended while its argmin at the 125M branch is at an edge (Q2 needs it
+          bracketed), at most 2. Extensions follow this rule, so they are not deviations; each is logged when queued.
+  20M grid (3 arms): g in {0.5, 1, 2} around the final 5M pick (eta_5, r_5); g = 1 is the 5M LRs unchanged. It is
+          extended by the same rule while the 20M argmin at 500M is at an edge, at most 2.
+  Divergence: a run whose loss goes non-finite (trainer.py raises) scores +inf on every metric and is never resumed
+          or rerun (change 8).
+
+SCHEDULE: WSD trunks with decay branches (harness/schedule.py modes trunk and branch, the P-186 mechanics)
+  Batch 16 x 2048 = 32,768 token slots per step at both sizes (5M micro 16 x accum 1; 20M micro 8 x accum 2; both
+  shapes were mem_fit ok in harness/notes.txt's docmask bench). Warmup 76 steps at both sizes (1% of the 250M run at
+  5M; the same tokens at 20M, so width and depth are the only differences in Q2). Every config writes
+  schedule.warmup_steps: 76; the harness default (1% of total_steps) would give 61 on the 5M trunk, 122 on the 20M
+  trunk and 153 on a 20M full run (change 6). Each branch decays linearly to 0.
+  5M arm: trunk total_steps 6,105 with branch_points 1,526 / 3,052 / 6,104 (change 5: a trunk of exactly 6,104 steps
+      is in its decay phase at step 6,104, and trainer.py asserts a stable phase at every branch point, so that save
+      would crash the trunk at its last step; the one extra step is discarded). Decay branches from those stable
+      checkpoints with decay_steps 382 / 763 / 1,526 give runs of 1,908 / 3,815 / 7,630 steps = 62.5M / 125.0M /
+      250.0M slots (12.5 / 25 / 50 tokens per parameter). Each branch's schedule equals schedule.full for its length
+      with warmup 76 and 20% decay (checked with schedule.py 2026-09-25 and 2026-09-26). One arm = 8,776 steps.
+  20M arm: trunk total_steps 12,208 with branch_points 6,104 / 12,207; decay_steps 1,526 / 3,052 give 7,630 /
+      15,259 steps = 250.0M / 500.0M slots (12.5 / 25 tokens per parameter). One arm = 16,786 steps = 550.0M slots.
+  Why these lengths: every 5M screen will run 250M, so the LR is tuned at the screens' own length, and the two short
+  branches add the length trend for 15% more compute. At 20M, 500M is the equal tokens-per-parameter point for Q2
+  (matching 5M at 125M) and 250M the equal-tokens point, at about 3 h per arm. Slots include row padding; the real
+  token count is logged per run (log.jsonl "tokens").
+  Checkpoints: train.ckpt_every = round(2% of the run's total steps) (38 / 76 / 153 at 5M; 153 / 305 at 20M) with
+  keep_last 2, plus final; stable ones kept; train.log_every 10. Rolling saves fall at multiples of ckpt_every, so
+  the two before the final sit at different points of the decay per branch (LR factors 0.19 and 0.09 at 5M 250M,
+  0.12 and 0.02 at 5M 62.5M, 0.10 and 0.003 at 20M 500M). This is one reason F, not M, decides (METRIC).
+
+SEEDS AND COMMON RANDOM NUMBERS
+  One seed (1) for every E2 run. The harness seeds init (torch.manual_seed) and data order (sources and packing)
+  from the same seed, so all arms of one size start from identical weights and read an identical token stream: they
+  differ only in their LRs. E3 measures the paired noise and re-checks the 5M pick against its runner-up with 7
+  fresh paired seeds (RULES).
+
+METRIC (identical in E3; the built eval sets and scorer, changes 2-4)
+  Eval sets v0 (data_prep/eval_sets.py, evalset_sha256
+  fe1b55bbe3612d0c968934cbad831a17fd3d73d84aa8f1b7cb2f4523cf4d505b) hold one set per starter source, disjoint from
+  every training shard by id, split key (OASST2 tree, Dolly context) and exact text hash, with 0 OOD-H reserve trees.
+    CHAT   the oasst2 set only: the CORPUS 6.1 (b) OASST2 dev slice, 1,094 English trees, 3,627 windows, 2,169,078
+           scored bytes (88.5% assistant turns, 11.5% user turns). Pooling the builder's other (b) set, irc, by bytes
+           would make CHAT 70% IRC.
+    PROSE  the cccc, gutenberg and wikimedia sets pooled (the builder's (d) sets, about 5.0M scored bytes each).
+    Reported per set, no rule: stackexchange, irc, dolly; CHAT by user and by assistant turns; PROSE per source.
+  Windows (data_prep/evalwin.py): targets tile each text doc, and each user and assistant turn, in about 2048 UTF-8
+  bytes cut at whitespace; context is up to 1024 bytes of the same doc (text) or up to 3072 bytes of the conversation
+  so far, rendered with role and <|end|> tokens (chat). A doc's first word, system turns, role tokens and <|end|> are
+  never scored. Every tokenizer is scored on the same target and context bytes; context is cut from the left only
+  when an input exceeds seq_len (24 of 23,844 windows with tok_v0_8k), and bpb.py counts those per set.
+  Scorer: data_prep/bpb.py: each window alone in one causal pass, fp32 log-softmax; bpb = total target NLL / ln 2 /
+  total target bytes per set (pooled over windows). Invocation fixed: all 7 sets, --precision fp32, --batch-tokens
+  16384, no --max-windows. Its tests (a uniform model matches the closed form, batch invariance, an unbatched
+  reference loop, the CLI on a saved checkpoint) and its mutants (data_prep/mutation_check.py, bpb and evalwin
+  entries) pass on the PC at the committed code before the first scored run; the result goes in the FIXED log.
+  F(set, run) = bpb of the run's final checkpoint. Every rule below reads F.
+  M(set, run) = mean bpb over the final and the 2 rolling checkpoints before it (PLAN 5), reported beside F. E3
+  tests whether averaging lowers the paired SD (loop.md ledger idea 15) before any screen decides on M.
+  Reported, not ruled: the mean training loss over the last 2% of steps, max gradient norm, tokens/s, hours, and
+  each source's drawn tokens (log.jsonl drawn_*) against the pinned shares.
+
+RULES (fixed now)
+  Stage pick: the argmin of F(CHAT) at the 250M branch on that stage's axis. Guard: if that point's F(PROSE) is more
+    than 1% (relative) above the best F(PROSE) on the same axis, the pick moves one grid step toward the PROSE best
+    and the report says so. Exact ties (equal to 4 decimals) go to the lower LR.
+  Final 5M pick (Q1) = stage C's pick: eta_5 = g_C * eta_A, r_5 = r_B. Runner-up = the pick's neighbour on the
+    stage C axis with the lower 250M F(CHAT); it is E3's arm B. E3 overrides the pick: if E3's paired seeds 2..8
+    show the runner-up lower on F(CHAT) with two-sided p < 0.05 (paired t, df 6), the runner-up becomes the 5M LR.
+    Seed 1 is left out of that test because seed 1 chose the pick (change 9).
+  Vertex: along the axis that moves all LRs together at ratio r_5 (stage C at 5M, the 20M grid), a parabola in
+    log2(eta) through the F(CHAT) argmin and its two neighbours; v = log2(eta) at its minimum. If the argmin is still
+    at a grid edge after the allowed extensions, v is only a bound (at or beyond that edge).
+  Transfer (Q2), primary at equal tokens per parameter (25): s = v20(500M) - v5(125M).
+    HOLDS  |s| < 1, within one factor-2 grid step. 20M and larger runs use the 20M argmin (a measured grid point);
+           the report says whether it is g = 1.
+    MOVES  |s| >= 1, 2x or more. PLAN's branch: E2b, a new pre-registration (a harness patch adding muP width
+           multipliers and CompleteP depth scaling with the 5M shape as base, so 5M results stay valid), before any
+           cross-size claim. Until E2b reads, 20M runs use the 20M argmin.
+    UNRESOLVED  a vertex is only a bound and the bound does not by itself give |s| >= 1. Reported as such; 20M runs
+           use the 20M argmin, and no cross-size claim is made (change 7).
+    Secondary, reported: s at equal tokens, v20(250M) - v5(250M). If primary and secondary disagree on HOLDS vs
+    MOVES the report says so; the primary reads.
+  Length trend (Q3, no rule): v at 62.5M, 125M, 250M (5M) and 250M, 500M (20M), and v's change per doubling.
+  After E3: each stage decision is labelled "resolved at one seed" when its best-vs-second difference exceeds E3's
+    paired MDE at k = 1 (for F(CHAT)), else "not resolved". Picks stand either way, except by the E3 override above.
+
+DIAGNOSTICS (no rule reads them; run last, only if time allows)
+  D1 The final 5M pick at batch 32 x 2048 (250M slots, full schedule): does the pick depend on batch size?
+  D2 The final 5M pick with scalar_lr = eta_5 (only the embedding at r_5): do the scalars care?
+
+FIXED BEFORE THE FIRST SCORED RUN (a FIXED log appended to this file; the analyzer refuses a run whose recorded value
+differs)
+  1 Engine: train.compile, train.doc_attn, train.ce_chunk_rows (lean loss), optim.batched, train.lazy_metrics,
+    train.cuda_mem_cap_gib, train.auto_micro_on_oom (false: the batch shape must not change per run), precision
+    bf16, data.mode (pack with document mask unless E1 has chosen otherwise), data.window_tokens, max_item_len. The
+    speed flags are being added by a parallel workflow; every E2 and E3 config writes each flag explicitly with the
+    value chosen at this step (the defaults that have landed, or E1's choice), so every run's config, its
+    config_sha256 in runs.jsonl and every checkpoint record them. A flag is on only if its parity and mutation tests
+    pass in the committed harness. No comparison ever mixes engine settings.
+  2 Code: the git commit of harness/ and data_prep/, and the sha256 of every .py used, bpb.py and evalwin.py included.
+  3 Tokenizer: tokenizer/v0/tok_v0_8k.json, sha256 078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5
+    (measured 2026-09-25), and the sha256 of tok_v0_manifest.json.
+  4 Data: the training manifest's sha256 (every shard's sha256; the eval build recorded 23647db7...ef41344), the
+    pinned shares (DATA), identical in every E2 and E3 config, and the eval manifest (evalset_sha256 above).
+    Pre-checks, logged: 0 eval docs or trees in any training shard (done at the v0 build: id, split key, exact text);
+    0 OOD-H reserve trees; at most 4 passes over any source in any trajectory (3.4 at most with the pinned shares).
+    Near-duplicates (other Gutenberg editions, mirrored web pages, StackExchange cross-posts, adjacent IRC logs) are
+    not excluded by the build. Measured 2026-09-26 (data_prep/ngram_overlap.py, data_prep/stats/ngram_overlap_v0.json):
+    share of sampled eval 13-grams found in training, cccc 31.5% (246 of 878 docs at 50% or more: other crawls or
+    revisions of one page), wikimedia 10.2%, irc 8.3%, dolly 5.9%, oasst2 1.6%, gutenberg 1.6%, stackexchange 1.4%.
+    E2 reports these; the cccc set needs near-dedup before any mix decision reads it. It does not gate E2: every
+    arm reads the same data, and at under one pass over each text source (wikimedia 0.83 at 20M 500M is the most,
+    cccc 0.18) a 5-20M model's recall of a once-seen duplicate is too small to move an LR optimum (LR does change
+    memorization, so "shifts all arms alike" alone was not the reason).
+  5 Configs: stage A's 5 trunks and 15 branches are fixed now; every later config is generated by the rules above
+    from recorded results and listed with its sha256 when queued.
+  6 The smoke run (labelled smoke, tiny budget) has passed end to end on the PC: prereg gate, real shards, pinned
+    shares and tokenizer, a trunk one step longer than its last branch point, branches from an interior and from
+    the last stable checkpoint, the scorer on a branch's checkpoints, gpu.lock, output layout; drawn_* tokens match
+    the shares to within one item per source. Its numbers are never read.
+  7 Starter-corpus exception: CORPUS's 2026-09-25 addendum lists near-dedup, StackExchange per-post dates and the
+    OOD-H leaked-tree skip as open "before any model trains on this corpus". E2 and E3 train on it only as a recorded
+    exception, accepted by whoever commits this file: their checkpoints are calibration only, never released, never
+    an init for a recipe run, never on the curve. When the rebuilt corpus (Core v0) exists, the refresh runs (SCOPE).
+
+DEVIATIONS POLICY (E005's)
+  Anything that differs from this entry after it is committed is a numbered DEVIATION with time and reason, written
+  before the affected run starts or, if found later, before its results are read; the reading is reported both ways
+  when the deviation could change it. A crashed run resumes once from its last checkpoint (exact resume; logged, not
+  a deviation); a second crash makes it a GAP. A non-finite loss is a divergence, not a crash (RULES). A GAP next to
+  a stage's argmin stops the queue for a person; any other GAP is logged and the stage decides without it. If an
+  engine flag must change mid-experiment, every run of the affected comparison reruns under the new setting.
+
+OUTPUTS
+  PC: ~/planck/runs/E2/<run>/ (log.jsonl; stable, final and 2 rolling checkpoints; bpb.jsonl, one line per
+  checkpoint x set x split with bits, bytes, tokens, windows, bpb) and start/end lines in ~/planck/runs/runs.jsonl.
+  Repo, copied back: configs/ (prereg.yaml and one config per run, relative paths only), out/<run>/ (log.jsonl,
+  bpb.jsonl, the start line), results.json (picks, vertices, s, verdicts, labels), tables.txt, logs/queue_e2.txt.
+  No machine address, user name or key path in any of them. Final checkpoints are kept until Part 4 of E3 reads.
+
+QUEUE ON THE PC (queue_e2.sh, a later step; started detached, never tied to an SSH session)
+  0 Preconditions: this file, prereg.yaml and the configs committed (Max's or the orchestrator's commit; this
+    workflow does not commit); code on the PC as a git bundle (pc/mac/send_kit.sh) so --require-committed can check,
+    checked out in a directory the queue owns (not ~/planck/dev, which another process cleaned near 01:00 on
+    2026-09-26); data_prep shards and eval sets on the PC with the FIXED hashes; the smoke run passed.
+  1 One GPU job at a time: each run takes ~/planck/locks/gpu.lock with flock for its training plus scoring and
+    releases it after, so other GPU users wait their turn. Nothing of E2 or E3 runs beside another GPU job, even
+    when memory would allow it (E1 has not shown that two jobs pay). Before each run: ~/planck/PAUSE and STOP
+    honoured, GPU at or below 75 C, at least 25 GB free (PLAN guards); train.py --require-committed. A run whose
+    error line or log.jsonl says "non-finite loss" is recorded as diverged and never resumed.
+  2 Order: stage A arm by arm (trunk, then its three branches, scoring after each branch); the analyzer (CPU, JSON
+    only) writes stage B's configs; stage B; stage C and any extensions; "E2 5M DONE". Then E3 Part 1 (E3 notes),
+    then the 20M grid trunk by trunk with any extension, "E2 20M DONE", then D1 and D2 if time allows.
+  Estimates from the eager bench (5M docmask B16 163k tok/s, 20M docmask B8 57.5k tok/s; upper bounds at full rows)
+  plus 15% for loader, checkpoints and scoring: a 5M arm about 34 min, stages A-C (11 arms) about 6.2 h, plus 34 min
+  per extension; a 20M arm about 3.1 h, the 3-arm grid about 9.2 h. Compile flags, if they land, shorten both.
+
+SCOPE AND HAND-OFF (changes 12-13)
+  The picks hold for batch 16 x 2048, weight decay 0.1 (applied as lr * wd, so the LR grid also moves the effective
+  decay), WSD with 20% linear decay, tok_v0_8k, the pinned starter mix, and 250M slots at 5M, up to 500M at 20M.
+  - The curve is not covered: about 5,000 tokens per parameter at 5M and 2,000 at 20M (CORPUS addendum) are 6-7
+    doublings past E2's longest runs. Q3's change of v per doubling is reported for P-186, which checks the LR at its
+    own length (at least g in {0.5, 1} as branches off its trunk) before a curve run uses it.
+  - Per-arm LRs (PLAN 5, LEDGER row 19): a bet that changes shape, optimizer, normalization, batch or vocab runs a
+    g in {0.5, 1, 2} check at 5M, seed 1, for its arm before its screen; data and loss-mask bets use E2's LRs. P-158
+    checks r per vocab (LEDGER row 20). A run-length weight-decay rule (PLAN 5) is a new check too.
+  - Refresh: when the Phase 3 baseline mix (chat pool), tokenizer v1 or Core v0 first exists, a g in {0.5, 1, 2}
+    check at 5M, 250M, seed 9, full schedule, runs before the first screen on it; if its F(CHAT) argmin is not
+    g = 1, screens use the new argmin. E3's refresh (its rule 5) runs on the same setting and reuses these runs.
+  - Multi-turn signal: after the RC-12 lock, Tier 0 margins (and the induction score, once it exists) are scored on
+    the stage C final checkpoints and reported beside F. LR moves induction timing (LEDGER P-046), so a margin argmin
+    2x or more from the bpb argmin is reported; nothing here acts on it.
+
+KNOWN LIMITS
+  One seed per arm (E3 re-checks the decision that matters most). The AdamW ratio is tuned at 5M only and moves with
+  g at 20M. Weight decay, betas, warmup and batch are not tuned. The optimum is conditional on tokenizer v0 and the
+  starter-corpus mix (SCOPE: refresh). Q2 on CHAT carries a repetition difference: under the pinned shares OASST2 is
+  read 0.86 times at 5M 125M and 3.4 times at 20M 500M; PROSE's sources stay under one pass. Inside a shard, docs
+  keep their pretokenize order, and a long doc (Gutenberg) arrives as consecutive 2048-token chunks, so one batch
+  can hold several chunks of one book; every arm shares this.
+
+CHANGES AFTER CRITIQUE (2026-09-26; no run existed, nothing committed)
+  1 Mix pinned (DATA). The harness_data block has no shares and build_loader defaults each to 1.0, so an unpinned
+    config draws 1/7 from each source: OASST2 20 passes at 250M and 45 at 550M, Dolly 15 and 34. That fails FIXED
+    4's own 4-pass check and turns CHAT (held-out OASST2) into a test of fitting 1.75M repeated tokens.
+  2 CHAT and PROSE are named built sets ("plus any other human-dialogue slice" was open; irc is labelled (b) too).
+  3 METRIC text follows the built scorer. The old text cut windows in tok_v0_8k tokens, which makes the windows
+    depend on the tokenizer, against CORPUS 6.1 and evalwin.py. The scorer now exists with tests and mutants.
+  4 Rules read F, not M (SCHEDULE, Checkpoints): M mixes checkpoints at different LR factors per length and size, so
+    it cannot serve Q2 or Q3, and inside a stage it credits arms by how little loss they still had to lose in the
+    last 4% of decay, which depends on LR. loop.md's E2 rule read bpb "after decay".
+  5 Trunks one step longer (6,105; 12,208), found by reading trainer.py and checking phase() in schedule.py.
+  6 warmup_steps 76 written in every config. 7 A vertex at a grid edge is a bound; Q2 can read UNRESOLVED.
+  8 A divergence is never resumed: under GPU nondeterminism a resume from a pre-divergence checkpoint can finish
+    finite on a partly different trajectory.
+  9 The E3 override uses seeds 2..8 (df 6); seed 1 selected the pick.
+  10 Near-duplicate leakage is measured and reported; FIXED 4's reason for not gating was corrected. 11 FIXED 7.
+  12 SCOPE added: curve LR, per-arm LRs, per-vocab r, WD rule, refresh, margins (PLAN 5, LEDGER rows 19-20).
+  13 Queue: a queue-owned code directory, divergence handling, the smoke covers the new trunk layout and the shares.
+    The line "the 5M stages fit tonight if the queue starts by about 01:00" was removed (stale).
