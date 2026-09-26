@@ -82,7 +82,7 @@ def _conv(rng, num, cell, rules, i_turn, o_turn, checked):
     for t in range(1, C.N_TURNS + 1):
         if t in conv.turns:
             continue
-        q, a = fillers.pop()
+        q, a, label = fillers.pop()
         if t < i_turn:
             ideal = a
         elif o_turn and t > o_turn:
@@ -99,7 +99,7 @@ def _conv(rng, num, cell, rules, i_turn, o_turn, checked):
             conv.add_probe(t, "P", "FMT", q, ideal, fmt=spec, src=src, d=t - (o_turn or i_turn),
                            gold=None, candidates=[], pool=None)
         else:
-            conv.put(t, "D", q, ideal=ideal)
+            conv.put(t, "D", q, ideal=ideal, asks=C.ASKING[label])
     conv.meta.update(unit="mean", rules=[list(r) for r in rules], i_turn=i_turn, o_turn=o_turn,
                      checked=sorted(checked))
     return conv.record()

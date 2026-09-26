@@ -20,13 +20,18 @@ Each check returns a list of failure strings; main() writes logs/e2e_machinery.t
              here; a rewrite that did not take (cf_unswapped) scores 0
   ackrep     OD6 (iii): ACKER ("Got it." on every statement turn) has no LOOP, meets the Level A loop criterion,
              and its ack-repeat rates equal a count made here from the records; IDEAL has none; --own-cf rows do
-             not move the rates; PARROT (its last short answer again on statement turns) has no LOOP either, and
-             its answer-repeat rate equals a count made here
+             not move the rates (nor equality_only); PARROT (its last short answer again on statement turns) is
+             charged a LOOP on every such turn (F1, decided 2026-09-25), fails the Level A loop criterion, and its
+             loop and answer-repeat rates equal a count made here; F3 / strict case (d) measurement: RESTATE and
+             TERSE_VAL (a right answer repeating the model's own confirmation) fail every restated probe as a
+             LOOP, and score.equality_only counts per family exactly the ones that fail by equality alone;
+             TERSE_VAL_CTRL and IDEAL have none
 Without --own-cf rows R is None (OD1 b), so the checks of other machinery read R_ungated (the same composite with
 the own-history OWN); c_stats adds each fake's --own-cf OWN rows so the bootstrap and the sensitivity row run."""
 import argparse
 import os
 import sys
+from collections import Counter
 
 import fakes_family as FF
 import grade_text as T
@@ -335,9 +340,11 @@ def owngate_units(hist, cf):
 def c_ackrep(recs):
     """OD6 (iii), ruled 2026-09-25: an identical reply to a statement turn is an ack-repeat, not a LOOP. Expected
     counts come from the records (every statement turn after a conversation's first repeats "Got it."), not from
-    grade_loop."""
+    grade_loop. Since F2 (decided 2026-09-25) a small-talk D turn (asks: false) is a statement turn for the loop
+    rule, so the per-statement rates count it in their denominator (nonask, read with fakes_family.asks_rec)."""
     out = []
     stated = [sum(t["kind"] in "SLCIOT" for t in r["turns"]) for r in recs]
+    nonask = sum(not FF.asks_rec(t) for r in recs for t in r["turns"])
     n_turns = sum(r["n_turns"] for r in recs)
     hits = sum(max(0, n - 1) for n in stated)
     s = S.summarize(run(recs, "ACKER"))
@@ -345,8 +352,8 @@ def c_ackrep(recs):
           and s["level_a"]["LOOP"]["met"], f"ACKER: R {s['R_ungated']}, loop {s['loop_rate']}, "
           f"degenerate {s['degenerate_rates']}, Level A loop criterion met {s['level_a']['LOOP']['met']}", out)
     check(s["replies"] == n_turns and s["ack_repeat"] == hits / n_turns and s["ack_repeat_of_statements"]
-          == hits / sum(stated), f"ACKER ack-repeat {s['ack_repeat']} / {s['ack_repeat_of_statements']}, want "
-          f"{hits / n_turns} / {hits / sum(stated)}", out)
+          == hits / nonask, f"ACKER ack-repeat {s['ack_repeat']} / {s['ack_repeat_of_statements']}, want "
+          f"{hits / n_turns} / {hits / nonask}", out)
     check(s["ack_repeat_of_answers"] == 0, f"ACKER answer-repeat {s['ack_repeat_of_answers']}, want 0", out)
     acker = run(recs, "ACKER")
     for fake in ("ACKER", "PARROT"):       # PARROT: its OWN cf rows hold answer repeats, so they would move the rate
@@ -354,7 +361,7 @@ def c_ackrep(recs):
         a = S.summarize(rows)
         c = S.summarize(rows + run([r for r in recs if r["family"] == "OWN"], fake, own_cf=True))
         check([c[k] for k in ACK_KEYS] == [a[k] for k in ACK_KEYS], f"{fake}: --own-cf rows moved the ack-repeat "
-              f"rates: {[c[k] for k in ACK_KEYS]} vs {[a[k] for k in ACK_KEYS]}", out)
+              f"or equality-only reports: {[c[k] for k in ACK_KEYS]} vs {[a[k] for k in ACK_KEYS]}", out)
     i = S.summarize(run(recs, "IDEAL"))
     check(i["ack_repeat"] == 0 and i["ack_repeat_of_statements"] == 0 and i["ack_repeat_of_answers"] == 0,
           f"IDEAL ack-repeat {i['ack_repeat']} / {i['ack_repeat_of_answers']}", out)
@@ -362,18 +369,52 @@ def c_ackrep(recs):
     check(S.ack_stats(rows) == (None, None), "rows without the ack_repeat record not reported as None", out)
     rows = [{k: v for k, v in r.items() if k != "ack_of_answer"} for r in acker[:5]]
     check(S.answer_repeat_stats(rows) is None, "rows without the ack_of_answer record not reported as None", out)
-    # PARROT (verifier 2026-09-25): its last short (< 12 words) answer again on each later statement turn. Under OD6
-    # (iii) as ruled that is an ack-repeat, not a LOOP; the answer-repeat rate reports it (count made here).
-    hits = sum(any(u["kind"] in "PXQD" and len(T.lwords(T.norm(u["ideal"]))) < 12 for u in r["turns"][:t["i"] - 1])
+    # PARROT (verifier 2026-09-25): its last short (< 12 words) answer again on each later statement turn. Under F1
+    # (decided 2026-09-25, prereg draft s17 OD6 follow-up) each is a LOOP (an answer parroted on a statement turn),
+    # so PARROT fails the Level A loop criterion; still an ack-repeat and an answer repeat (counts made here).
+    hits = sum(any(FF.asks_rec(u) and len(T.lwords(T.norm(u["ideal"]))) < 12 for u in r["turns"][:t["i"] - 1])
                for r in recs for t in r["turns"] if t["kind"] in "SLCIOT")
     p = S.summarize(run(recs, "PARROT"))
-    check(p["loop_rate"] == 0 and p["level_a"]["LOOP"]["met"] and p["ack_repeat"] == hits / n_turns
-          and p["ack_repeat_of_answers"] == p["ack_repeat_of_statements"] == hits / sum(stated) and hits > 0,
-          f"PARROT loop {p['loop_rate']}, answer-repeat {p['ack_repeat_of_answers']}, want {hits / sum(stated)}", out)
+    check(p["loop_rate"] == hits / n_turns > S.BARS["loop"] and not p["level_a"]["LOOP"]["met"]
+          and p["R_ungated"] == 100 and p["ack_repeat"] == hits / n_turns
+          and p["ack_repeat_of_answers"] == p["ack_repeat_of_statements"] == hits / nonask and hits > 0,
+          f"PARROT loop {p['loop_rate']} (want {hits / n_turns}), Level A loop criterion met "
+          f"{p['level_a']['LOOP']['met']}, R {p['R_ungated']}, answer-repeat {p['ack_repeat_of_answers']}, want "
+          f"{hits / nonask}", out)
+    # SMALLTALK (F2): one fixed reply on every small-talk D turn (asks: false). Those turns ask nothing, so the
+    # repeats are ack-repeats, not LOOPs (before F2 each was a LOOP); counts made here from the annotation.
+    hits = sum(max(0, sum(t["kind"] == "D" and t["asks"] is False for t in r["turns"]) - 1) for r in recs)
+    m = S.summarize(run(recs, "SMALLTALK"))
+    check(m["loop_rate"] == 0 and m["level_a"]["LOOP"]["met"] and m["R_ungated"] == 100 and hits > 0
+          and m["ack_repeat"] == hits / n_turns and m["ack_repeat_of_statements"] == hits / nonask
+          and m["ack_repeat_of_answers"] == 0, f"SMALLTALK loop {m['loop_rate']} (want 0), Level A loop criterion met "
+          f"{m['level_a']['LOOP']['met']}, R {m['R_ungated']}, ack-repeat {m['ack_repeat']} (want {hits / n_turns}), "
+          f"answer-repeat {m['ack_repeat_of_answers']}", out)
+    # F3 / strict case (d) (verifier 2026-09-25): a right answer equal to the model's own earlier confirmation is a
+    # LOOP in every value family, not only OWN. Expected counts made here from the records (FF.restated: the probes
+    # the fakes confirm): every restated probe fails; equality alone for a sentence under 12 words (RESTATE) and for
+    # the bare gold (TERSE_VAL); a longer sentence is a self-copy too, so not equality-only.
+    said = [(r["family"], p) for r in recs for p in FF.restated(r).values()]
+    n_probes = Counter(r["family"] for r in recs for _ in r["probes"])
+    for fake, want in (("RESTATE", Counter(f for f, p in said if len(T.lwords(T.norm(p["ideal"]))) < 12)),
+                       ("TERSE_VAL", Counter(f for f, _ in said)), ("TERSE_VAL_CTRL", Counter())):
+        rows = run(recs, fake)
+        e = S.summarize(rows)
+        eo = e["equality_only"] or {}
+        n_fail = sum(not p["ok"] for r in rows for p in r["probes"])
+        loops = 0 if fake == "TERSE_VAL_CTRL" else len(said)
+        check(e["loop_rate"] == loops / n_turns and n_fail == loops and len(said) > 0
+              and {f: v[0] for f, v in eo.items() if v[0]} == dict(want)
+              and {f: v[1] for f, v in eo.items()} == dict(n_probes)
+              and (e["R_ungated"] == 100) == (fake == "TERSE_VAL_CTRL"),
+              f"{fake}: loop {e['loop_rate']} (want {loops / n_turns}), failing probes {n_fail}, equality-only "
+              f"{eo}, want {dict(want)}, R {e['R_ungated']}", out)
+    check(i["equality_only"] == {f: [0, n] for f, n in n_probes.items()}, f"IDEAL equality-only {i['equality_only']}",
+          out)
     return out
 
 
-ACK_KEYS = ("ack_repeat", "ack_repeat_of_statements", "ack_repeat_of_answers")
+ACK_KEYS = ("ack_repeat", "ack_repeat_of_statements", "ack_repeat_of_answers", "equality_only")
 
 
 CHECKS = [c_render, c_history, c_stops, c_trunc, c_seeds, c_scoring, c_stats, c_hf, c_owncf, c_owngate, c_ackrep]

@@ -4,9 +4,12 @@
    its stated verdict from the real graders (correct replies pass; empty, loop, copy, leak, cap, hedge, negation,
    question, guess list, shotgun, user voice, wrong candidate, stale, echo fail).
 2. Conversation tests: unit scores (mean / all), the role-leak scan and the OD6 (iii) loop / ack-repeat flags
-   (fixtures_more.conv_loop_fixtures) on patched IDEAL conversations.
+   (fixtures_more.conv_loop_fixtures) on patched IDEAL conversations; the F3 measurement (graders.eq_only: a right
+   answer repeating the model's own confirmation is equality-only, a looped wrong answer or a 3-gram stutter is
+   not); a D turn without its asks annotation is refused by the grader (F2; verifier 2026-09-25).
 3. Mutants (mutants_graders.py): each must be KILLED (a fixture or conversation test gets the wrong verdict), not
    crash. Writes logs/mutation_graders.txt; exits 1 on any fixture miss, surviving mutant or crash."""
+import copy
 import json
 import os
 from concurrent.futures import ProcessPoolExecutor
@@ -83,13 +86,22 @@ def conv_tests(index):
         g = G.grade_conv(rec, history(rec, {}), ["eos"] * rec["n_turns"])
         out.append((f"ideal_unit:{rid}", g["unit"], 1.0 if rec["probes"] else None))
         out.append((f"ideal_clean:{rid}", bool(g["leaks"]) or any(g["flags"]) or any(g["ack_repeat"])
-                    or any(g["ack_of_answer"]), False))
+                    or any(g["ack_of_answer"]) or any(p["eq_only"] for p in g["probes"]), False))
     for label, rec, patch, want in F2.conv_loop_fixtures(index.values()):     # OD6 (iii)
         g = G.grade_conv(rec, history(rec, patch), ["eos"] * rec["n_turns"])
         got = ([i + 1 for i, f in enumerate(g["flags"]) if "LOOP" in f],
                [i + 1 for i, a in enumerate(g["ack_repeat"]) if a],
                [i + 1 for i, a in enumerate(g["ack_of_answer"]) if a])
         out.append((f"od6_{label}:{rec['id']}", got, want))
+    out += eq_only_tests(index)
+    rec = copy.deepcopy(next(r for r in index.values() if any(t["kind"] == "D" for t in r["turns"])))
+    del next(t for t in rec["turns"] if t["kind"] == "D")["asks"]
+    try:
+        G.grade_conv(rec, history(rec, {}), ["eos"] * rec["n_turns"])
+        got = "graded"
+    except AssertionError as e:                  # F2: never a silent default (grade_loop.loop_kind)
+        got = "no asks annotation" in str(e)
+    out.append(("asks_missing_refused", got, True))
     first = {}
     for rec in index.values():
         first.setdefault(rec["family"], rec)
@@ -113,6 +125,31 @@ def conv_tests(index):
     out.append(("leak_user_voice", [e["kind"] for e in ev], ["user_voice"]))
     ev = R.role_leaks(twohop, history(twohop, {2: "Sure.\nUser: and now?"}))
     out.append(("leak_turn", [e["kind"] for e in ev], ["turn_leak"]))
+    return out
+
+
+def eq_only_tests(index):
+    """F3 / strict case (d) measurement: (label, (ok, fails, eq_only) of the probe, want). A VAL probe whose latest
+    source is an S or C turn: that turn confirmed with the probe's IDEAL sentence (< 12 words), the probe answered
+    with it again (equality alone: eq_only); a non-answer said at both turns (loops AND wrong: not eq_only); the
+    IDEAL answer with a 3-gram said 4 times (a loop, not by equality: not eq_only)."""
+    kinds = {}
+    for rec in index.values():
+        kinds = {t["i"]: t["kind"] for t in rec["turns"]}
+        p = next((p for p in rec["probes"] if p["grader"] == "VAL" and len(T.lwords(p["ideal"])) < 12
+                  and any(kinds[x] in "SC" for x in p["src"])), None)
+        if p:
+            break
+    src = max(x for x in p["src"] if kinds[x] in "SC")
+    stutter = p["ideal"] + " It went on and on and on and on and on."
+    out = []
+    for label, patch, want in (("restate", {src: p["ideal"]}, (False, ["v1_degen"], True)),
+                               ("wrong", {src: "I have no idea.", p["turn"]: "I have no idea."}, (False, None, False)),
+                               ("stutter", {p["turn"]: stutter}, (False, ["v1_degen"], False))):
+        r = next(x for x in G.grade_conv(rec, history(rec, patch), ["eos"] * rec["n_turns"])["probes"]
+                 if x["turn"] == p["turn"])
+        got = (r["ok"], r["fails"] if want[1] else len(r["fails"]) > 1 and r["fails"][0] == "v1_degen", r["eq_only"])
+        out.append((f"eq_only_{label}:{rec['id']}", got, want if want[1] else (False, True, False)))
     return out
 
 

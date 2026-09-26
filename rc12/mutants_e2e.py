@@ -153,4 +153,24 @@ MUTANTS = [
     ("score", "return sum(a is True for a in marks) / len(marks) if marks else None", "return 0.0 if marks else None",
      "OD6 iii: answer repeats never counted"),
     ("runner", 'ack_of_answer=g["ack_of_answer"], ', "", "OD6 iii: runner drops the answer-repeat record"),
+    # F1, decided 2026-09-25 (prereg draft s17 OD6 follow-up): a statement-turn reply equal to an earlier reply to
+    # an asking turn is a LOOP; ack after ack stays exempt (validate_machinery.c_ackrep: PARROT, ACKER)
+    ("grade_loop", "return [p for p, k in zip(prior_ws, prior_kinds) if asks(k)]", "return []",
+     "F1: parroted answers exempt again (PARROT meets the Level A loop criterion)"),
+    ("grade_loop", "return [p for p, k in zip(prior_ws, prior_kinds) if asks(k)]", "return prior_ws",
+     "F1: ack after ack charged again (ACKER loops)"),
+    # F2, decided 2026-09-25 (prereg draft s17 OD6 follow-up (2)): a small-talk D filler (asks: false) is a statement
+    # turn for the loop rule (validate_machinery.c_ackrep: SMALLTALK; PARROT and the denominators read the record)
+    ("grade_loop", 'return "D" if t["asks"] else "d"', 'return "D"',
+     "F2: small-talk fillers ask again (SMALLTALK loops)"),
+    ("fakes_family", 'return t["kind"] in "PXQ" or (t["kind"] == "D" and t["asks"])', 'return t["kind"] in "PXQD"',
+     "F2: the machinery checks read every D turn as asking (their expected counts ignore the annotation)"),
+    # verifier 2026-09-25 (round 2): the F3 / strict case (d) measurement (score.equality_only, graders.eq_only;
+    # validate_machinery.c_ackrep: RESTATE, TERSE_VAL, TERSE_VAL_CTRL, IDEAL)
+    ("score", 'out[f][0] += p["eq_only"] is True', 'out[f][0] += not p["ok"]',
+     "F3 report: every failing probe counted as equality-only (RESTATE's self-copies too)"),
+    ("score", "equality_only=equality_only_stats(rows),", "equality_only=equality_only_stats(sel),",
+     "F3 report: --own-cf rows counted"),
+    ("fakes_family", 'if p is None or self.name == "TERSE_VAL_CTRL":', "if p is None:",
+     "F3: the control fake confirms with the bare gold too (it loops)"),
 ]

@@ -1,19 +1,16 @@
-RC-12 mutation_e2e.py part 1/6: 14 of 81 mutants, fresh process each, 64 s. No model.
+RC-12 mutation_e2e.py part 1/8: 11 of 88 mutants, fresh process each, 60 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #00 runner: history gets the IDEAL reply instead of the model's own  <- G1 IDEAL_ALT: OWN:list=0.00
-KILLED    #06 runner: dropped-turn off by one  <- trunc: ctx 556: verdict, runner's lost turns and the fake's history disagree [('rc12-dev-t0-008', 12), ('rc12-dev-t0-022', 12), ('rc12-dev-t0-029', 12
-KILLED    #12 render: role cut case-sensitive  <- render: cut_plain('A\nAssistant: B')
-KILLED    #18 score: COMPOSE counted in TWOHOP  <- G2 LONGEST: family TWOHOP=0.41
+KILLED    #08 runner: history truncated but the drop not recorded  <- trunc: ctx 556: only 0 truncated probes
+KILLED    #16 render: own_reply off by one  <- G1 IDEAL: OWN:list=0.00
 KILLED    #24 score: loop bar raised  <- G3 L_REPEAT: loop rate 0.060 meets the loop bar
-KILLED    #30 score_stats: headroom ceiling bar  <- stats: headroom ceiling
-KILLED    #36 fakes: ECHO answers right  <- G2 ECHO: 394 value-graded units above 0 (e.g. ['rc12-dev-recall-001', 'rc12-dev-recall-002', 'rc12-dev-recall-003'])
-KILLED    #42 fakes_family: L_REPEAT does not loop  <- G2 L_REPEAT: cell LOOP:story=1.00
+KILLED    #32 score_stats: Level R margin  <- stats: bootstrap FIRST-IDEAL {'D': -86.29166666666667, 'lo': -88.84375, 'hi': -83.95833333333334, 'n': 200}
+KILLED    #40 fakes: ABSTAIN answers right  <- G2 ABSTAIN: 394 value-graded units above 0 (e.g. ['rc12-dev-recall-001', 'rc12-dev-recall-002', 'rc12-dev-recall-003'])
 KILLED    #48 own_cf: OWN-CF list not swapped  <- owncf: CONSIST OWN under --own-cf = 0.33, want 0.0
-KILLED    #54 score: OD1 b: cf rows counted as own-history units  <- owngate: CONSIST: --own-cf rows counted outside the gate (replies 576 vs 576, OWN 0.5 vs 1.0)
-KILLED    #60 score_stats: OD1 b: cf replies counted in PERSIST base rates  <- stats: cf rows in PERSIST base rates
-KILLED    #66 score: OD1 b: the gate takes the cf result alone (NEXT passes)  <- owngate: NEXT: bootstrap OWN slot not gated
+KILLED    #56 score_stats: OD1 b: bootstrap OWN slot takes the ungated units  <- owngate: CONSIST: bootstrap OWN slot not gated
+KILLED    #64 runner: OD6 iii: runner drops the ack-repeat record  <- ackrep: ACKER ack-repeat None / None, want 0.17712882096069868 / 0.46859205776173285
 KILLED    #72 score: OD1 b: cf rows choose the seeds  <- owngate: greedy history + sampled cf rows: seeds taken from the cf rows (replies 0, {'OWN': None, 'OWN_CF': 1.0, 'OWN_GATED': None, 'cf_unswapped': 0}
-KILLED    #78 score: OD6 iii: --own-cf rows counted in the answer-repeat rate  <- ackrep: PARROT: --own-cf rows moved the ack-repeat rates: [0.04912663755458515, 0.19292604501607716, 0.2018348623853211] vs [0.04912663755458515, 0.19
-killed 14 | survived 0 | crashed 0 | malformed 0
+KILLED    #80 runner: OD6 iii: runner drops the answer-repeat record  <- ackrep: ACKER answer-repeat None, want 0
+killed 11 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

@@ -12,11 +12,15 @@ Level A (proposal thresholds, SPEC s6): CORR:U (U-diff + U-same units pooled) >=
   CORR:C_twoslot >= 0.80, BIND pair rate >= 0.80, LOOP rate over every reply of every conversation (all
   families, LOOP flag only) <= 2% and no higher than the comparator's. Claimable only with >= 3 training seeds
   and T0 >= 0.90. Without a comparator the last sub-criterion is unknown and Level A is not met.
-Ack-repeat (OD6 iii, ruled 2026-09-25): a reply to a statement turn (S L C I O T) equal to an earlier reply is not
-  a LOOP (grade_loop.py); its rate is reported beside the loop rate (ack_repeat over every reply,
-  ack_repeat_of_statements over statement-turn replies) and never enters Level A. ack_repeat_of_answers (over
+Ack-repeat (OD6 iii, ruled 2026-09-25): a reply to a statement turn (S L C I O T, and since F2 a small-talk D filler
+  with asks: false) equal to an earlier reply; the mark is never a flag (grade_loop.py); its rate is reported
+  beside the loop rate (ack_repeat over every reply, ack_repeat_of_statements over statement-turn replies) and
+  never enters Level A. ack_repeat_of_answers (over
   statement-turn replies) is the part that repeats an earlier reply to an asking turn: an answer said again, not an
-  acknowledgement said twice (verifier 2026-09-25; reported only, the OD6 scope question is Max's).
+  acknowledgement said twice (verifier 2026-09-25). Since F1 (decided 2026-09-25, prereg draft s17 OD6 follow-up)
+  those replies are LOOPs too, so they count in the loop rate; the rate stays reported beside it.
+equality_only (F3 / strict case d measurement, reported, never scored): per family, the probes whose only failing
+  clause is the loop rule's equality clause (graders.eq_only), with the number of probes graded.
 OWN gate (OD1 b, ruled 2026-09-25): score the model's --own-cf OWN run (runner --own-cf --families OWN, same seeds
   and --train-seed) together with its normal run (pass both transcripts files). An OWN unit then counts right in R
   only if it is right in BOTH runs: OWN_GATED, which fills the OWN slot of families and R. OWN (own-history run
@@ -164,6 +168,20 @@ def answer_repeat_stats(rows):
     return sum(a is True for a in marks) / len(marks) if marks else None
 
 
+def equality_only_stats(rows):
+    """F3 / strict case (d) measurement (prereg draft s6, s17 OD6 follow-up (3); verifier 2026-09-25): per family,
+    [probes failing ONLY through the loop rule's equality clause (graders.eq_only), probes graded]. Reported, never
+    scored. None when any probe was graded without the eq_only record."""
+    ps = [(r["family"], p) for r in rows for p in r["probes"]]
+    if not ps or any("eq_only" not in p for _, p in ps):
+        return None
+    out = defaultdict(lambda: [0, 0])
+    for f, p in ps:
+        out[f][0] += p["eq_only"] is True
+        out[f][1] += 1
+    return dict(out)
+
+
 def composite(fam):
     missing = [f for f in COMPOSITE if fam.get(f) is None]
     if missing:
@@ -205,6 +223,7 @@ def summarize(rows, comparator=None, seeds=None):
         R=composite(fam), R_ungated=composite({f: ks.get(f) for f in COMPOSITE}), families=fam, keys=ks,
         loop_rate=degen.get("LOOP"), degenerate_rates=degen,
         ack_repeat=ack_all, ack_repeat_of_statements=ack_stated, ack_repeat_of_answers=answer_repeat_stats(rows),
+        equality_only=equality_only_stats(rows),
         replies=n_rep, level_a=crit, level_a_met=met, level_a_claimable=claimable, n_train_seeds=n_train,
         seeds=sorted({str(r["seed"]) for r in rows}),
         t0=dict(score=t0, met=t0 is not None and t0 >= BARS["t0"],

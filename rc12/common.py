@@ -1,11 +1,14 @@
 """RC-12 generator core: the conversation builder, placement helpers and the record format (SPEC s1).
 
 Record (one JSON line): id, split, family, cell, seed, knowledge, n_turns, turns [{i, kind, text, ideal, facts,
-vals}], probes [{turn, kind, grader, question, gold, gold_fn, candidates, pool, stale, holder, object_words,
+vals, asks (D turns only)}], probes [{turn, kind, grader, question, gold, gold_fn, candidates, pool, stale, holder, object_words,
 pair_id, d, dc, src, prefix, ideal, ...}], meta {...}.
   kind   S L C I O Q T D P X (SPEC s1 turn kinds). ideal = the IDEAL reply for that turn (never shown to a model).
   facts  statement annotations [{holder, object, value, role}] (role: gold, lure, stale, orig, corr, ...).
   vals   every RC-12 pool value in the user text, in order (strict-case whole words).
+  asks   D turns only (F2, decided 2026-09-25): False when the filler is a plain statement that asks nothing (its
+         hand label in pools_fill_a / _b is "statement"), else True. The loop rule's equality clause reads it
+         (grade_loop.turn_kinds); for every other purpose the turn stays kind D. Non-D turns carry no asks field.
   src    user turns that carry the probe's gold (for the L2/G8 checks); d = probe turn - latest src turn."""
 import random
 import re
@@ -14,7 +17,8 @@ import pools_vals as V
 from pools_fill_a import FILLERS_A
 from pools_fill_b import FILLERS_B
 
-FILLERS = FILLERS_A + FILLERS_B
+FILLERS = FILLERS_A + FILLERS_B          # (user turn, IDEAL reply, label) entries
+ASKING = {"question": True, "request": True, "statement": False}     # filler label -> the D turn's asks field (F2)
 SEED = 1212
 N_TURNS = 12
 REPLY_WORDS = 50          # SPEC s1 budget: every reply counted as 50 words
@@ -90,7 +94,7 @@ class Conv:
     def free(self):
         return [i for i in range(1, self.n + 1) if i not in self.turns]
 
-    def put(self, i, kind, text, ideal=None, facts=None):
+    def put(self, i, kind, text, ideal=None, facts=None, asks=None):
         text = articles(text)
         ideal = articles(ideal) if ideal is not None else None
         if i in self.turns:
@@ -99,6 +103,10 @@ class Conv:
             raise ValueError(f"{self.rid}: turn {i} out of range")
         self.turns[i] = dict(i=i, kind=kind, text=text, ideal=ideal if ideal is not None else self.ack(),
                              facts=facts or [])
+        if (kind == "D") != (asks is not None):
+            raise ValueError(f"{self.rid}: turn {i}: asks is set on D turns only, and on every one")
+        if asks is not None:
+            self.turns[i]["asks"] = asks
 
     def add_probe(self, turn, kind, grader, question, ideal, **kw):
         self.put(turn, kind, question, ideal=ideal)
@@ -114,18 +122,18 @@ class Conv:
     def filler_pool(self):
         bad = {w.lower() for w in self.avoid}
         out = []
-        for q, a in FILLERS:
+        for q, a, label in FILLERS:
             low = (q + " " + a).lower()
             if not any(_has_word(low, w) for w in bad):
-                out.append((q, a))
+                out.append((q, a, label))
         return out
 
     def fill(self, transform=None):
         pool = self.filler_pool()
         self.rng.shuffle(pool)
         for i in self.free():
-            q, a = pool.pop()
-            self.put(i, "D", q, ideal=transform(a) if transform else a)
+            q, a, label = pool.pop()
+            self.put(i, "D", q, ideal=transform(a) if transform else a, asks=ASKING[label])
 
     def record(self, seed=SEED):
         assert not self.free(), f"{self.rid}: unfilled turns {self.free()}"

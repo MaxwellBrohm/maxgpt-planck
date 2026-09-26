@@ -58,17 +58,18 @@ SOURCE = [
     ("grade_loop", 'stop == "cap"', 'stop == "length"'),
     # OD6 (iii), 2026-09-25: equality charges only replies to asking turns (P X Q D); statement-turn repeats are
     # ack-repeats (killed by fixtures_more.lfix loop_request_* and the od6_* conversation tests)
-    ("grade_loop", "asks(kind) and equals_earlier(ws, prior_ws)", "equals_earlier(ws, prior_ws)"),
-    ("grade_loop", '"equal" not in T.OFF and asks(kind) and', '"equal" not in T.OFF and not asks(kind) and'),
+    ("grade_loop", "equals_earlier(ws, equality_set(prior_ws, prior_kinds, kind))", "equals_earlier(ws, prior_ws)"),
+    ("grade_loop", "equals_earlier(ws, equality_set(prior_ws, prior_kinds, kind))",
+     "not asks(kind) and equals_earlier(ws, prior_ws)"),
     ("grade_loop", 'ASKS = frozenset("PXQD")', 'ASKS = frozenset("PXQ")'),
-    ("grade_loop", "classify(r, s, replies[:i], k)[0]",
-     "classify(r, s, [x for x, y in zip(replies[:i], kinds) if asks(y)], k)[0]"),
+    ("grade_loop", "classify(r, s, replies[:i], k, kinds[:i])[0]",
+     "classify(r, s, [x for x, y in zip(replies[:i], kinds) if asks(y)], k, [y for y in kinds[:i] if asks(y)])[0]"),
     ("grade_loop", "return equals_earlier(T.lwords(T.norm(reply)), [T.lwords(T.norm(p)) for p in prior])",
      "return False"),
     # verifier 2026-09-25: equality is charged on Q and X replies (conversation tests q_copy, x_copy), and the
     # answer-repeat report (ack_of_answer: a statement-turn reply equal to an earlier reply to an asking turn)
-    ("grade_loop", '"equal" not in T.OFF and asks(kind) and',
-     '"equal" not in T.OFF and asks(kind) and kind != "Q" and'),
+    ("grade_loop", '"equal" not in T.OFF and equals_earlier(',
+     '"equal" not in T.OFF and kind != "Q" and equals_earlier('),
     ("grade_loop", 'ASKS = frozenset("PXQD")', 'ASKS = frozenset("PXD")'),
     ("grade_loop", 'ASKS = frozenset("PXQD")', 'ASKS = frozenset("PQD")'),
     ("grade_loop", "answers = [p for p, k in zip(prior, prior_kinds) if asks(k)]", "answers = list(prior)"),
@@ -76,9 +77,38 @@ SOURCE = [
      "return False"),
     ("graders", "ack_of_answer=L.conversation_answer_repeats(replies, kinds)",
      "ack_of_answer=L.conversation_acks(replies, kinds)"),
-    ("graders", 'kinds = [t["kind"] for t in sorted(rec["turns"], key=lambda t: t["i"])]',
-     'kinds = ["P"] * len(replies)'),
-    ("graders", 'L.classify(reply, stop, prior, probe["kind"])', 'L.classify(reply, stop, prior, "S")'),
+    # F1, decided 2026-09-25 (prereg draft s17 OD6 follow-up): on a statement turn the equality set is the earlier
+    # replies to ASKING turns (grade_loop.equality_set). Killed by the od6_* conversation tests (stated_after,
+    # ack_twice, ack_fixed) and lfix loop_request_repeat.
+    ("grade_loop", "return [p for p, k in zip(prior_ws, prior_kinds) if asks(k)]", "return []"),
+    ("grade_loop", "return [p for p, k in zip(prior_ws, prior_kinds) if asks(k)]", "return prior_ws"),
+    ("grade_loop", "zip(prior_ws, prior_kinds) if asks(k)]", "zip(prior_ws, prior_kinds) if not asks(k)]"),
+    ("grade_loop", "classify(r, s, replies[:i], k, kinds[:i])[0]", 'classify(r, s, replies[:i], k, ["S"] * i)[0]'),
+    ("grade_loop", "classify(r, s, replies[:i], k, kinds[:i])[0]", "classify(r, s, replies[:i], k, kinds[1:i + 1])[0]"),
+    ("graders", "kinds = L.turn_kinds(rec)", 'kinds = ["P"] * len(replies)'),
+    ("grade_loop", 'return [loop_kind(t) for t in sorted(rec["turns"], key=lambda t: t["i"])]',
+     'return ["P"] * len(rec["turns"])'),
+    # F2, decided 2026-09-25 (prereg draft s17 OD6 follow-up (2)): a D turn annotated asks: false (a small-talk
+    # statement filler) has loop kind "d", which does not ask (grade_loop.loop_kind). Killed by the od6_* tests
+    # smalltalk_ack, smalltalk_parrot (small talk asks again), same_answer, question_after, request_twice (every D
+    # exempt; asks read off the question mark instead of the annotation).
+    ("grade_loop", 'return "D" if t["asks"] else "d"', 'return "D"'),
+    ("grade_loop", 'return "D" if t["asks"] else "d"', 'return "d"'),
+    ("grade_loop", 'return "D" if t["asks"] else "d"', 'return "D" if t["text"].endswith("?") else "d"'),
+    ("grade_loop", 'ASKS = frozenset("PXQD")', 'ASKS = frozenset("PXQDd")'),
+    ("graders", 'L.classify(reply, stop, prior, probe["kind"], L.turn_kinds(rec)[:len(prior)])',
+     'L.classify(reply, stop, prior, "S", ["S"] * len(prior))'),
+    # verifier 2026-09-25 (round 2): a ONE-word answer parroted on a statement turn is a LOOP (od6_one_word_stated);
+    # a D turn without asks is refused at grading, never read as asking (asks_missing_refused); the F3 measurement
+    # graders.eq_only (eq_only_restate, eq_only_wrong, eq_only_stutter)
+    ("grade_loop", "return [p for p, k in zip(prior_ws, prior_kinds) if asks(k)]",
+     "return [p for p, k in zip(prior_ws, prior_kinds) if asks(k) and len(p) > 1]"),
+    ("grade_loop", 'assert type(t.get("asks")) is bool, f"D turn u{t[\'i\']} has no asks annotation (F2)"',
+     'if type(t.get("asks")) is not bool: return "D"'),
+    ("graders", 'return flags == ["LOOP"] and why == ["equal"]', 'return flags == ["LOOP"]'),
+    ("graders", 'if len(res["fails"]) != 1 or res["fails"][0] not in DEGEN_CLAUSES:',
+     'if not res["fails"] or res["fails"][0] not in DEGEN_CLAUSES:'),
+    ("graders", "eq_only=eq_only(res, *args))", "eq_only=False)"),
     ("graders", "v in stale and gold_ok", "v in stale and not gold_ok"),
     ("graders", "all(T.mentioned(text, v) for v in cands)", "any(T.mentioned(text, v) for v in cands)"),
     ("graders", "for v in outside)", "for v in outside[1:])"),

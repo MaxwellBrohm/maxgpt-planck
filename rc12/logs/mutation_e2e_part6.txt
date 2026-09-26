@@ -1,18 +1,16 @@
-RC-12 mutation_e2e.py part 6/6: 13 of 81 mutants, fresh process each, 61 s. No model.
+RC-12 mutation_e2e.py part 6/8: 11 of 88 mutants, fresh process each, 64 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #05 runner: needed turn kinds narrowed  <- trunc: ctx 556: verdict, runner's lost turns and the fake's history disagree [('rc12-dev-lookup-001', 11), ('rc12-dev-lookup-002', 9), ('rc12-dev-look
-KILLED    #11 render: plain render without the generation tag  <- render: plain render string
-KILLED    #17 score: BIND scored per conversation, not per pair  <- G2 ANTI_OVERLAP: family BIND=0.50
-KILLED    #23 score: Level A bar lowered  <- G3 ANTEPENULT: CORR:C_twoslot=0.50 meets its Level A criterion
+KILLED    #13 render: role cut without the newline  <- render: cut_plain('A\nAssistant: B')
+KILLED    #21 score: greedy scored when sampling seeds exist  <- owngate: random units: OWN_GATED:list None, per-unit AND 0.3125
 KILLED    #29 score_stats: headroom floor bar  <- stats: headroom floor bar (DEFLECT PERSIST sits between 0 and 0.05)
-KILLED    #35 score_stats: sensitivity drops nothing  <- stats: sensitivity
-KILLED    #41 fakes_family: P_NEVER obeys  <- G2 P_NEVER: cell PERSIST:hold=1.00
-KILLED    #47 own_cf: OWN-CF pick not swapped  <- owncf: CONSIST OWN under --own-cf = 0.67, want 0.0
-KILLED    #53 score: OD1 b: cf rows counted in the loop rate and diagnostics  <- ackrep: ACKER: --own-cf rows moved the ack-repeat rates: [0.17029352226720648, 0.6860346585117227, 0.0] vs [0.17712882096069868, 0.6956055734190782, 0
-KILLED    #59 score_stats: OD1 b: sensitivity row computed with OWN missing  <- stats: sensitivity without the cf rows
-KILLED    #65 fakes_family: OD6 iii: ACKER also acks D questions (those repeats are LOOPs)  <- ackrep: ACKER ack-repeat 0.21411026200873362 / 0.8408360128617364, want 0.17712882096069868 / 0.6956055734190782
-KILLED    #71 score: OD1 b: a cf run in another render is a twin  <- owngate: cf run in another render: gated OWN not missing ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0})
-KILLED    #77 score: OD6 iii: --own-cf rows counted in the ack-repeat rates  <- ackrep: ACKER: --own-cf rows moved the ack-repeat rates: [0.17029352226720648, 0.6860346585117227, 0.0] vs [0.17712882096069868, 0.6956055734190782, 0
-killed 13 | survived 0 | crashed 0 | malformed 0
+KILLED    #37 fakes: value cheaters get the gold  <- G2 FIRST: cell BIND:owner=1.00
+KILLED    #45 fakes_audit: audit value cheaters get the gold  <- G2 ANTEPENULT: cell BIND:owner=1.00
+KILLED    #53 score: OD1 b: cf rows counted in the loop rate and diagnostics  <- ackrep: ACKER: --own-cf rows moved the ack-repeat or equality-only reports: [0.17029352226720648, 0.45611657065401556, 0.0, {'T0': [0, 96], 'RECALL': 
+KILLED    #61 score: OD6 iii: ack-repeats never counted  <- ackrep: ACKER ack-repeat 0.0 / 0.0, want 0.17712882096069868 / 0.46859205776173285
+KILLED    #69 score: OD1 b: a cf rewrite that did not take still counts  <- owngate: random units: OWN_GATED:pick 0.3671875, per-unit AND 0.3359
+KILLED    #77 score: OD6 iii: --own-cf rows counted in the ack-repeat rates  <- ackrep: ACKER: --own-cf rows moved the ack-repeat or equality-only reports: [0.17029352226720648, 0.45611657065401556, 0.0, {'T0': [0, 96], 'RECALL': 
+KILLED    #85 score: F3 report: every failing probe counted as equality-only (RESTATE's self-copies too)  <- ackrep: RESTATE: loop 0.060043668122270744 (want 0.060043668122270744), failing probes 440, equality-only {'T0': [96, 96], 'RECALL': [60, 72], 'CORR':
+killed 11 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

@@ -1,5 +1,6 @@
 """RC-12 DEV generator tests, part 1: structure, counts, L2 (no answer word in any question or later user
-turn), G5 filler purity, G7 length, G8 knowledge-free golds, determinism. Part 2 (family layouts, distances,
+turn), G5 filler purity and the filler labels, the D-turn asks annotation (F2), G7 length, G8 knowledge-free
+golds, determinism. Part 2 (family layouts, distances,
 balance of mention orders) is test_gens_fam.py. Run: python3 -B test_gens.py (exits non-zero on any failure)."""
 import json
 import os
@@ -149,14 +150,19 @@ def grams(text, n=5):
 
 def test_fillers(recs):
     check(len(C.FILLERS) >= 80, f"only {len(C.FILLERS)} fillers")
-    check(len({q for q, _ in C.FILLERS}) == len(C.FILLERS), "duplicate filler questions")
+    check(len({q for q, *_ in C.FILLERS}) == len(C.FILLERS), "duplicate filler questions")
+    labels = Counter(lab for *_, lab in C.FILLERS)          # F2 hand labels, pinned for the dev pools only
+    if all(r["split"] == "dev" for r in recs):                 # (a sealed build pins its own counts, s13 S1)
+        check(labels == {"question": 50, "request": 20, "statement": 20}, f"filler labels count {dict(labels)}")
     old = set()
     for s in _e_fillers():
         old |= grams(s)
     rule_words = FIRST_WORDS + CLOSINGS + WORDS
     holder_words = V.HOLDERS + ["mom", "dad", "friend"]
-    for q, a in C.FILLERS:
+    for q, a, lab in C.FILLERS:
         both = q + " " + a
+        check(lab in C.ASKING and (lab == "question") == q.endswith("?"),      # a test-time cross-check of the
+              f"filler label {lab!r} does not fit its text: {q}")             # hand labels, never used to grade
         check(not (grams(q) | grams(a)) & old, f"filler shares a 5-gram with E001/E004: {q}")
         check(not re.search(r"\d", both), f"filler has a digit: {q}")
         for v in V.ALL_VALUES + rule_words + holder_words:
@@ -169,6 +175,26 @@ def test_fillers(recs):
     for r in recs:
         ds = [t["text"] for t in r["turns"] if t["kind"] == "D"]
         check(len(ds) == len(set(ds)), f"{r['id']} filler used twice")
+
+
+def test_asks(recs):
+    """F2 (decided 2026-09-25): every D turn carries asks (bool) equal to its filler's hand label (asks nothing only
+    for "statement"); no other turn carries it. Pinned dev counts: 4,010 D turns, 904 of them asks: false."""
+    label = {q: lab for q, _, lab in C.FILLERS}
+    n = Counter()
+    for r in recs:
+        for t in r["turns"]:
+            if t["kind"] != "D":
+                check("asks" not in t, f"{r['id']} u{t['i']} asks on a non-D turn")
+                continue
+            if type(t.get("asks")) is not bool:
+                check(False, f"{r['id']} u{t['i']} D turn without a bool asks")
+                continue
+            n[t["asks"]] += 1
+            check(t["text"] in label and t["asks"] == C.ASKING[label[t["text"]]],
+                  f"{r['id']} u{t['i']} D asks differs from the filler label")
+    if all(r["split"] == "dev" for r in recs):                 # the dev counts; a sealed build pins its own
+        check((n[True], n[False]) == (3106, 904), f"D asks counts {dict(n)}, want 3106 / 904")
 
 
 def test_pools():
@@ -190,7 +216,7 @@ def test_determinism(recs):
 
 def main():
     recs = load()
-    for fn in (test_counts, test_structure, test_l2, test_g8, test_fillers, test_determinism):
+    for fn in (test_counts, test_structure, test_l2, test_g8, test_fillers, test_asks, test_determinism):
         fn(recs)
     test_pools()
     import test_gens_fam

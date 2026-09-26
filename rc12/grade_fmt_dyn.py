@@ -72,7 +72,7 @@ def g_fmt(reply, stop, prior, rec, probe):
     text = T.norm(reply)
     f = probe["fmt"]
     fails = []
-    if L.degenerate(reply, stop, prior, probe["kind"]):
+    if L.degenerate(reply, stop, prior, probe["kind"], L.turn_kinds(rec)[:len(prior)]):
         fails.append("f1_degen")
     if T.echo(text, probe["question"]):
         fails.append("f2_echo")
@@ -133,7 +133,7 @@ def g_list(reply, stop, prior, rec, probe):
     text = T.norm(reply)
     have = stems(text)
     fails = []
-    if L.degenerate(reply, stop, prior, probe["kind"]):
+    if L.degenerate(reply, stop, prior, probe["kind"], L.turn_kinds(rec)[:len(prior)]):
         fails.append("d1_degen")
     if not gold_st or not all(s in have for s in gold_st):
         fails.append("d2_gold")

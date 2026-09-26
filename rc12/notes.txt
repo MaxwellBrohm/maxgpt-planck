@@ -615,3 +615,214 @@ CHECK ORDER: 2026-09-25 21:51 to 22:02 EDT, full order on the real tree after th
   mutation_e2e       --part 1/6 .. 6/6, exit 0 each (59 to 64 s), 14 + 14 + 14 + 13 + 13 + 13 = 81 / 81 killed,
                      0 survived / crashed / malformed, baseline failures none in every part
   Not in this order and not run: harness/test_rc12_eval.py, test_rc12_hook.py (need torch and a model load).
+F1 (2026-09-25 late): PARROTED ANSWERS, decided by Claude under Max's standing permission (reversible before the
+lock; prereg draft s17 OD6 follow-up (1), DECIDED line). Nothing committed.
+RULE  On a statement turn (S L C I O T) the equality clause compares r with the earlier replies to ASKING turns
+      (P X Q D) only: an answer said again on a statement turn is a LOOP; an acknowledgement said again after an
+      acknowledgement stays exempt (ack_repeat). Asking turns unchanged (compared with every earlier reply).
+      Self-copy and tri-gram unchanged. D small-talk fillers still count as asking until F2 lands, so a
+      statement-turn copy of a reply to one of them is a LOOP too.
+CODE  grade_loop.py: turn_kinds(rec); equality_set(prior_ws, prior_kinds, kind); classify / degenerate now REQUIRE
+      prior_kinds (the kinds of the turns the prior replies answered; length asserted), conversation_flags passes
+      kinds[:i]. graders.py (g_val, g_abs, g_loop, grade_conv), grade_fmt_dyn.py (g_fmt, g_list), grade_role.py
+      (g_rolex) pass L.turn_kinds(rec)[:len(prior)] (a first cut left the probe graders without kinds; the ASKS
+      "PQD" mutant then crashed on the X probes, so every caller passes kinds now). ack_repeat and answer_repeat
+      unchanged: answer_repeat now marks exactly the statement-turn replies the equality clause charges (kept as a
+      report and an independent cross-check; documented in grade_loop, score.py, graders.py).
+TESTS fixtures_more.conv_loop_fixtures: stated_after flips to LOOP ([t], [t], [t]); new ack_twice ("Okay, noted." on
+      two statement turns with a D answer between: ack-repeat only, no LOOP); 9 fixtures. validate_machinery
+      c_ackrep: PARROT loop rate == a count made in the test (360 / 7328 = 0.0491) > the 0.02 bar, Level A loop
+      criterion NOT met, R_ungated 100, answer-repeat 0.1929 as before. fakes_family PARROT docstring.
+MUTANTS mutants_graders: #61, #62, #64, #70, #79, #81 retargeted to the edited lines (same semantics; #81 now also
+      treats every earlier turn as a statement, since "S" alone equals "P" on the all-P LOOP records); new: statement
+      set empty (exempt parrots again), statement set = every earlier reply (charge ack after ack again), statement
+      set = earlier STATEMENT replies, conversation_flags prior kinds all "S", prior kinds off by one, turn_kinds all
+      "P" (156). mutants_e2e #81 (exempt parrots: killed by c_ackrep PARROT) and #82 (ack after ack charged: killed
+      by c_ackrep ACKER) (83).
+CHECKS 2026-09-25 22:12 to 22:27 EDT, each under timeout 115, beside E004's training (no model loaded here):
+  test_gens          exit 0, 0 failures over 640 records (11 s)
+  validate_machinery exit 0, ALL 11 CHECK GROUPS PASS (9 s)
+  validate_e2e       exit 0, G1-G3 PASS, G4 PASS (histogram unchanged 0:310 1:43 2:76 3:53); logs/e2e_fakes.txt
+                     differs from the pre-F1 log in the loop column only (30 rows): generic cheaters 0.574 (ROLECAP)
+                     to 0.774 (DEFLECT, ABSTAIN), was 0.506 to 0.610; audit cheaters up to 0.837 (PENULT_MARKER),
+                     was 0.674; every family score and R_ug unchanged
+  mutation_graders   exit 0 (31 s), baseline 0 fixture misses and 0 conversation-test misses, 156 / 156 killed,
+                     0 crashed. F1 mutants: "return []" killed by od6_stated_after; "return prior_ws" killed by
+                     od6_ack_fixed and od6_ack_twice
+  mutation_e2e       --part 1/6 .. 6/6, exit 0 each (53 to 56 s), 14 x 5 + 13 = 83 / 83 killed, baseline failures
+                     none in every part
+  audit_graders      exit 0, 0 wrong verdicts over 21012; log byte-identical to the pre-F1 one
+  Not re-run (untouched by F1): build_dev (dev sha256 c5074e68...991ecd unchanged), audit_rules, mutation_gens,
+  mutation_audit; harness tests (need torch).
+STEP 8 (2026-09-25 late): F2 SMALL-TALK FILLERS, decided by Claude under Max's standing permission (reversible before
+the lock; prereg draft s17 OD6 follow-up (2), DECIDED line; F3, strict case d, stays open). Nothing committed.
+RULE  A D filler that is a plain statement (asks nothing) is a statement turn for the loop rule's equality clause:
+      its reply is compared only with earlier replies to asking turns (F1), and the same reply on two such turns is
+      an ack-repeat, not a LOOP. Requests without a question mark stay asking. The record kind stays D everywhere
+      else (fixtures, audits, fakes, runner truncation, test_gens_fam layouts).
+LABELS Every filler text read and labeled by hand; the label is the third element of each pool entry
+      (pools_fill_a.py, pools_fill_b.py), never inferred from punctuation at grading time. 50 question, 20 request,
+      20 statement. Part A: all 45 are questions (each ends with "?"). Part B:
+      statement (20): "I finally repotted all my succulents this afternoon.", "I'm feeling a bit nervous about a
+        presentation coming up.", "I just finished a really good mystery novel.", "It's been raining nonstop here
+        all week.", "I tried a new hiking trail this morning.", "I've been sleeping much better lately.", "I managed
+        to fix the leaky faucet myself.", "I'm thinking about learning to paint with watercolors.", "Today felt
+        really long for some reason.", "I spotted a hummingbird at the feeder this morning.", "I cleaned out my
+        inbox for the first time in ages.", "I'm trying to drink more water during the day.", "I rearranged the
+        furniture in the living room.", "I've started going for short walks after dinner.", "I'm a little tired of
+        cooking every night.", "I found an old photo album in the attic.", "The sunrise was really pretty
+        today.", "I'm finally caught up on laundry.", "I signed up for an evening pottery class.", "I've been
+        trying to spend less time on my phone." (Six of them, water, nervous, cooking, phone, raining,
+        watercolors, have IDEAL replies that give advice or a suggestion ("a warm drink and a good film might
+        help", "simple landscapes are a forgiving place to start"), but the user text asks nothing, so they are
+        statements. Corrected from "Four" by the second verifier review, 2026-09-26; the labels were right.)
+      request (20): Compose two rhyming lines; Give me a riddle; Write a short haiku; Describe a sleepy snail; Give
+        me a tongue twister; Write one line about a quiet morning; Describe the smell of rain; Give me a gentle
+        compliment; Describe a cozy little bookstore; Write a one-sentence story; Recommend something soothing;
+        Give me an idea for a simple weekend project; Suggest a way to make a boring commute; Give me a short
+        motivational line; Suggest a simple stretch; Give me a cheerful way to start the morning; Invent a silly
+        holiday; Describe a thunderstorm; Help me word a thank-you card; Suggest a calm activity.
+      question (5 in part B): "What's a nice way to thank someone for a small favor?", "What's a fun question to
+        ask at a dinner party?", "After work I struggle to switch off, any ideas?", "How do I go easier on
+        myself?", "What's a good habit to build this year?"
+DESIGN (least invasive) common.ASKING maps label -> asks; Conv.filler_pool returns (text, IDEAL, label) (same list
+      length, so the seeded shuffles are unchanged); Conv.fill and fam_persist put asks on every D turn; Conv.put
+      refuses asks on a non-D turn and a D turn without it. Record: turns[].asks on D turns only (true 3,106, false
+      904 on dev). grade_loop.loop_kind(t) returns "d" for a D turn with asks false ("d" is in KINDS, not in ASKS)
+      and asserts the field exists on every D turn; turn_kinds uses it, so every grading call (probe graders and
+      grade_conv) sees it through the one hook F1 left. ack_repeat / answer_repeat need no change: small-talk D
+      turns now enter the statement-turn denominators (2,770 on dev = 1,866 S L C I O T + 904).
+      PERSIST's graded P turns reuse filler text (216 dev P turns, 46 of them statement fillers): they stay kind P,
+      which asks under the ruling, and carry no asks field. Not covered by F2; recorded as open in the draft s17.
+DEV   sha256 before c5074e68137c9e419fdd8245799c5a569261fe6da7f9544a9b95533dfe991ecd (md5
+      a290f9c535475d2db2368940ba5f9a13); after 3e543f8d5638e6ab9fd106099fc2584e810dd90544f212146a3cd73bd66689a0
+      (md5 008dda4bb10d67d51bbe43a59c6efff0). A script (not kept in the repo) loaded both files, removed asks from
+      every new turn and compared the records: 0 of 640 differ; asks present on all 4,010 D turns and on no other
+      turn, equal to the label of the turn's text. Mutation-tested: one IDEAL edited -> 1 record differs, exit 1;
+      one asks flipped -> assertion fails.
+TESTS test_gens: filler labels pinned (50 / 20 / 20), a question label iff the text ends with "?" (a test-time
+      cross-check of the hand labels; statement vs request cannot be checked this way), test_asks (asks bool on every
+      D turn, equal to the label; absent elsewhere; dev counts 3,106 / 904). mutation_gens: m_asks_flipped,
+      m_asks_dropped, m_asks_on_statement, two mislabeled filler items (33 mutants). fixtures_more: the D fixtures
+      pick D turns by label (d_turns); new smalltalk_ack (exempt ack-repeat), smalltalk_parrot (F1 on a small-talk
+      turn: LOOP), question_after (LOOP), request_twice (LOOP): 13 conversation fixtures. fakes_family: SMALLTALK
+      (IDEAL, "That sounds lovely." on every asks-false D turn); PARROT and the c_ackrep counts read asking from the
+      record (asks_rec), not from grade_loop. validate_machinery c_ackrep: denominators = non-asking turns; SMALLTALK
+      loop 0, criterion met, ack-repeat 440 / 7,328.
+MUTANTS mutants_graders (160): the turn_kinds mutant retargeted to the new return line; new loop_kind -> "D" (killed by
+      od6_smalltalk_ack, od6_smalltalk_parrot), -> "d" (7 conversation tests, e.g. od6_same_answer), asks from the
+      "?" (od6_request_twice), ASKS "PXQDd" (od6_smalltalk_ack). mutants_e2e (85): #83 loop_kind -> "D" (killed in
+      c_ackrep), #84 asks_rec reads every D as asking (killed in c_ackrep).
+NUMBERS (fakes, dev) SMALLTALK loop 0.0600 under the pre-F2 rule, 0 now (ack-repeat 0.0600, of statements 0.1588).
+      PARROT (now repeats only replies to asking turns) loop 0.0235 = 172 / 7,328 > 0.02, criterion not met, answer
+      repeat 0.0621; it was 0.0491 under F1 alone because it also repeated small-talk replies. ACKER loop 0,
+      ack-repeat 0.1771, of statements 0.4686 (was 0.6956: the denominator gained 904 turns). logs/e2e_fakes.txt:
+      only the loop and ack columns moved (30 rows each); generic cheaters loop 0.567 (ROLECAP) to 0.747 (DEFLECT,
+      ABSTAIN), was 0.574 to 0.774; audit cheaters up to 0.811 (PENULT_MARKER), was 0.837; every family score, R_ug
+      and the G4 histogram (0:310 1:43 2:76 3:53) unchanged.
+CHECKS 2026-09-25 22:51 to 23:00 EDT, full order, each step alone under timeout 115, beside E004's training (no
+      model loaded here), ALL PASS:
+  build_dev          exit 0 (5 s), 640 records (608 twelve-turn); sha256 3e543f8d...689a0 before and after this run
+  test_gens          exit 0 (11 s), 0 failures over 640 records
+  audit_rules        exit 0, GATE PASS; log byte-identical to the pre-F2 one
+  audit_graders      exit 0 (2 s), 0 wrong verdicts over 21012; log byte-identical to the pre-F2 one
+  validate_e2e       exit 0 (10 s), G1-G3 PASS, G4 PASS, histogram unchanged
+  validate_machinery exit 0 (9 s), ALL 11 CHECK GROUPS PASS
+  mutation_graders   exit 0 (30 s), baseline 0 fixture and 0 conversation-test misses, 160 / 160 killed, 0 crashed
+  mutation_gens      exit 0 (12 s), clean records 0 failures, 33 / 33 killed
+  mutation_audit     --part 1/2 exit 0 (46 s, 7 / 7), --part 2/2 exit 0 (39 s, 6 / 6); unmutated build clean in both
+  mutation_e2e       --part 1/6 .. 6/6, exit 0 each (55 to 57 s), 15 + 14 x 5 = 85 / 85 killed, baseline failures
+                     none in every part
+  Not run: harness/test_rc12_eval.py, test_rc12_hook.py (need torch and a model load). harness/rc12_eval.py needs
+  no change (it grades through graders.grade_conv on the dev file). NOT updated: SPEC.txt (its s1 still calls every
+  filler a request).
+DOCS  prereg draft s0 (dev hash, F2 re-run), s3 (turn kinds, fillers, record), s6 (160 mutants), s7 (asking turns,
+      PARROT, SMALLTALK), s8 (G3 ranges, test counts, machinery fakes), s13 S1 (sealed fillers carry the same
+      labels and asks), s15, s16, s17 (F2 and F3 DECIDED lines, the P-turn note), s18, s19 item 1, header.
+CHECK ORDER (verifier re-run after F1 + F2): 2026-09-25 23:03 to 23:15 EDT, full order on the real tree, each step
+      alone under timeout 115, no fix needed, ALL PASS (load average 2 to 9; no model loaded here):
+  build_dev          exit 0 (5 s), 640 records (608 twelve-turn); dev sha256 3e543f8d...689a0 (md5 008dda4b...efff0)
+                     before AND after, equal to F2's new hash; byte-identical to a copy taken before the run
+  test_gens          exit 0 (11 s), 0 failures over 640 records
+  audit_rules        exit 0 (under 1 s), GATE PASS (cell <= 0.50, family <= 0.40); log byte-identical to HEAD
+  audit_graders      exit 0 (2 s), 0 wrong verdicts over 21012; log byte-identical to HEAD
+  validate_e2e       exit 0 (9 s), G1-G3 PASS, G4 PASS (histogram 0:310 1:43 2:76 3:53); logs/e2e_fakes.txt
+                     byte-identical to F2's
+  validate_machinery exit 0 (9 s), ALL 11 CHECK GROUPS PASS
+  mutation_graders   exit 0 (31 s), baseline 0 fixture and 0 conversation-test misses, 160 / 160 killed, 0 crashed
+  mutation_gens      exit 0 (12 s), clean records 0 failures, 33 / 33 killed; log identical to F2's
+  mutation_audit     --part 1/2 exit 0 (48 s, 7 / 7), --part 2/2 exit 0 (39 s, 6 / 6); unmutated build clean in both
+  mutation_e2e       --part 1/6 .. 6/6, exit 0 each (58, 55, 79, 89, 96, 94 s; load average 7 to 9 measured
+                     before parts 4, 5 and 6), 15 + 14 x 5 = 85 / 85 killed, 0 survived / crashed / malformed,
+                     baseline failures none in every part. At 96 s a part is near the 115 s limit under load: the
+                     next mutants added should move to --part i/8.
+  Logs differ from F2's only in the timing lines. No rc12/*.py file changed during the run.
+  Loop rates recomputed (each fake through the tree's own runner and score.summarize; STEP 7 = the committed tree
+  51c0868 run from a git archive copy with its dev file c5074e68...; now = this tree), loops of 7,328 replies:
+    ACKER      STEP 7 0 (0.0000), met; now 0 (0.0000), met; ack-repeat of statements 0.6956 -> 0.4686
+    PARROT     STEP 7 0 (0.0000), met; now 172 (0.0235), NOT met; answer-repeat of statements 0.1929 -> 0.0621
+    SMALLTALK  STEP 7 440 (0.0600), NOT met; now 0 (0.0000), met; ack-repeat 0 -> 0.0600. (SMALLTALK is not in
+               51c0868: a stand-in with the same policy, small-talk D turns found by their text, 904 of 4,010.)
+    generic    STEP 7 -> now: FIRST, LAST, WORDING, OVERLAP_A, OVERLAP_B, MARKER, SHOTGUN 0.5998 -> 0.7369;
+               USERVOICE 0.5954 -> 0.7325; DEFLECT, ABSTAIN 0.6101 -> 0.7473; ECHO 0.5059 -> 0.6430;
+               ROLECAP 0.5662 -> 0.5669. Range 0.506 to 0.610 -> 0.567 to 0.747, equal to the loop column of
+               logs/e2e_fakes.txt at HEAD and now. Audit cheaters (log): up to 0.674 -> 0.811 (PENULT_MARKER).
+VERIFIER FIXES (round 2, 2026-09-26 after F1 + F2): 10 findings checked on the real tree, all confirmed, none
+      rejected. No rule changed; nothing committed; no model loaded. Measurement scripts (scratchpad, not in the
+      repo): vfix/measure.py (fakes through runner.run + score.summarize), vfix/one_mutant.py (named mutants against
+      mutation_graders' fixtures, validate_e2e and validate_machinery in-process).
+  1 MAJOR, confirmed. A right answer equal to an earlier reply of the model is a LOOP in every value family, not
+      only OWN (F3 was scoped to OWN). RESTATE (each VAL probe's latest S / C source confirmed with that probe's IDEAL
+      sentence) loop 0.0600 (440 / 7,328), R_ungated 40.0, RECALL CORR BIND TWOHOP TOPIC ROLE 0.00, T0 0.00;
+      TERSE_VAL (bare gold "Green." as the confirmation and the answer) the same; TERSE_VAL_CTRL (bare gold
+      answers, IDEAL acks) loop 0, R 100. (The verifier's own RESTATE gave 436 loops, TERSE_VAL 380: its fakes
+      chose slightly different turns; same finding.) Fix (measurement only, F3 stays open): graders.eq_only on
+      every probe result (fails only by its degenerate clause, loop reason only "equal"); score.equality_only per
+      family [eq-only, probes]; fakes RESTATE / TERSE_VAL / TERSE_VAL_CTRL (fakes_family.Restate, restated()) in
+      validate_machinery c_ackrep with counts made from the records: RESTATE eq-only 413 of 440 failing probes
+      (27 TOPIC IDEAL sentences are 12+ words, self-copy too), TERSE_VAL 440 of 440, CTRL and IDEAL 0; the
+      --own-cf invariance check covers equality_only. Draft s6 (d), s7, s17 (3) widened with options (i) keep,
+      (ii) exempt equality with a statement-turn reply on a probe turn, (iii) exempt equality with the reply to
+      the probe's own source turns; no pick until the dev baselines' counts.
+  2 minor, confirmed. Near-duplicates escape: PARROT_PLUS loop 0.0052 (38, all self-copy on 11-word answers made
+      12), met, answer-repeat 0; NEAR_D loop 0, met, R 100. Draft s7 states the scope; s17 (4) OPEN option: a
+      near-duplicate rate reported beside the loop rate.
+  3 minor, confirmed. The statement-turn exemption covers any content: SMALLPARROT loop 0.0647 pre-F2 (loop_kind
+      patched in-process to the record kind) -> 0, ack-repeat 0.0647; ADVICE_FIXED 0.0600 -> 0. Draft s7, s17 (2).
+  4 minor, confirmed. Mutant F1a (equality_set statement branch "if asks(k) and len(p) > 1") SURVIVED (0 fixture,
+      0 conversation misses; validate_e2e + validate_machinery 0 failures). Fix: fixture one_word_stated
+      ("Patience.", not a pool value) in fixtures_more (14 conversation fixtures); mutant added: killed by it.
+  5 minor, confirmed. Mutant F2b (loop_kind assert -> silent "D") SURVIVED the same way. Fix: mutation_graders
+      conversation test asks_missing_refused (asks deleted from one D turn of a record copy; grade_conv must raise
+      the F2 AssertionError); mutant added: killed by it.
+  6 minor, confirmed. Read all 20 statement IDEALs: raining and watercolors also suggest. LABELS note fixed above.
+  7 minor, confirmed. Draft s6 (c) said equality is charged only on asking turns; reworded to the F1 + F2 rule.
+  8 minor, confirmed. Draft s17 (1) "(0.19 on dev, s7)" -> "(0.19 on dev at STEP 7, before F1 and F2; notes F1)".
+  9 minor, confirmed. test_gens pinned 50 / 20 / 20 with no split guard. Now pinned only when every record is dev
+      (as test_asks); watched: one statement relabeled request -> "filler labels count" on dev records, nothing on
+      records marked sealed. Draft s13 S1: the sealed session pins its own label and asks counts.
+  10 minor, confirmed (Counter: PERSIST P question 115, request 55, statement 46). Draft s16 lists the OPEN
+      judgment items (F3, PERSIST P-turn statement fillers, near-duplicate report); s19 item 4 has Max decide them.
+MUTANTS mutants_graders 165 (+5: F1a, F2b, eq_only "why" dropped (killed by eq_only_stutter), "one failing
+      clause" dropped (eq_only_wrong), eq_only=False (eq_only_restate)); mutants_e2e 88 (+3: #85 every failing probe
+      counted equality-only, #86 cf rows counted, #87 TERSE_VAL_CTRL confirms too; each killed in c_ackrep).
+      mutation_e2e moves to --part i/8 (the verifier re-run saw 96 s of 115 at 6 parts).
+      First mutation_graders run: 164 / 165, 1 CRASH (my own "one failing clause" mutant indexed an empty fails
+      list); mutant rewritten to 'if not res["fails"] or ...', re-run below.
+CHECK ORDER (round 2): 2026-09-25 23:56 to 2026-09-26 00:10 EDT, each step alone under timeout 115, beside E004's
+      training (load average 4 to 12; no model loaded here), ALL PASS:
+  build_dev          exit 0 (7 s), 640 records; dev sha256 3e543f8d...689a0 (md5 008dda4b...efff0) before and
+                     after, byte-identical to a copy taken before the run
+  test_gens          exit 0 (14 s), 0 failures over 640 records
+  audit_rules        exit 0 (1 s), GATE PASS; log byte-identical to HEAD
+  audit_graders      exit 0 (2 s), 0 wrong verdicts over 21012; log byte-identical to HEAD
+  validate_e2e       exit 0 (14 s), G1-G3 PASS, G4 PASS (0:310 1:43 2:76 3:53); e2e_fakes.txt byte-identical
+  validate_machinery exit 0 (15 s), ALL 11 CHECK GROUPS PASS (13 s again after a docstring-only rewrap)
+  mutation_graders   exit 0 (48 s), baseline 0 fixture / 0 conversation-test misses (272 conversation tests),
+                     165 / 165 killed, 0 crashed
+  mutation_gens      exit 0 (13 s), clean records 0 failures, 33 / 33 killed
+  mutation_audit     --part 1/2 exit 0 (52 s, 7 / 7), --part 2/2 exit 0 (42 s, 6 / 6); unmutated build clean
+  mutation_e2e       --part 1/8 .. 8/8, exit 0 each (61, 60, 60, 59, 65, 64, 66, 61 s), 11 x 8 = 88 / 88
+                     killed, 0 survived / crashed / malformed, baseline failures none in every part
+  Not run: harness/test_rc12_eval.py, test_rc12_hook.py (need torch). harness/rc12_eval.py grades through
+  graders.grade_conv, so its probe results now carry eq_only too; not re-run here.

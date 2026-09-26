@@ -1,18 +1,16 @@
-RC-12 mutation_e2e.py part 4/6: 13 of 81 mutants, fresh process each, 61 s. No model.
+RC-12 mutation_e2e.py part 4/8: 11 of 88 mutants, fresh process each, 59 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #03 runner: role cut not recorded as the stop reason  <- stops: CONTINUER plain: fake user turn not cut
-KILLED    #09 runner: unit not recomputed after truncation  <- trunc: ctx 556: units not recomputed after truncation ['rc12-dev-t0-001', 'rc12-dev-t0-003', 'rc12-dev-t0-004']
-KILLED    #15 render: fit overshoots the budget  <- render: fit drops whole oldest pairs until it fits
-KILLED    #21 score: greedy scored when sampling seeds exist  <- owngate: random units: OWN_GATED:list None, per-unit AND 0.3125
+KILLED    #11 render: plain render without the generation tag  <- render: plain render string
+KILLED    #19 score: T0 in the composite  <- G2 ANTI_OVERLAP: cell T0:t0=1.00
 KILLED    #27 score: CORR:U without U-diff  <- scoring: CORR:U is not U-diff and U-same pooled
-KILLED    #33 score_stats: PERSIST replies counted in base rates  <- stats: PERSIST base rates {'brackets:None': 0.006277292576419214, 'caps:None': 0.008187772925764192, 'closing:over and out': 0.0049126637554585155, 'c
-KILLED    #39 fakes: USERVOICE keeps the assistant voice  <- G2 ROLECAP: 37 value-graded units above 0 (e.g. ['rc12-dev-own-001', 'rc12-dev-own-002', 'rc12-dev-own-003'])
-KILLED    #45 fakes_audit: audit value cheaters get the gold  <- G2 ANTEPENULT: cell BIND:owner=1.00
+KILLED    #35 score_stats: sensitivity drops nothing  <- stats: sensitivity
+KILLED    #43 fakes_family: P_OBEYALL lets the newest rule win (correct on 3 of 4 override pairs)  <- G2 P_OBEYALL: cell PERSIST:override=0.75
 KILLED    #51 score: OD1 b: a run missing --own-cf twins still gets a gated OWN  <- G1 IDEAL: OWN_GATED:list=0.00
-KILLED    #57 score_stats: OD1 b: bootstrap runs without the cf rows  <- stats: bootstrap refusal ZeroDivisionError: division by zero
-KILLED    #63 score: OD6 iii: ack-repeats counted in the Level A loop criterion  <- ackrep: ACKER: R 100.0, loop 0.0, degenerate {'LOOP': 0.0, 'RUNAWAY': 0.0, 'EMPTY': 0.0, 'LEAK': 0.0}, Level A loop criterion met False
-KILLED    #69 score: OD1 b: a cf rewrite that did not take still counts  <- owngate: random units: OWN_GATED:pick 0.3671875, per-unit AND 0.3359
+KILLED    #59 score_stats: OD1 b: sensitivity row computed with OWN missing  <- stats: sensitivity without the cf rows
+KILLED    #67 score: OD1 b: product of rates (own-history unit x the cf run's rate)  <- owngate: random units: OWN_GATED:list 0.3391927083333333, per-unit AND 0.3125
 KILLED    #75 own_cf: OD1 b: a pick rewrite that did not take passes as swapped  <- owngate: unswapped cf rows not scored 0 in OWN_GATED ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0}, pick 1.0)
-killed 13 | survived 0 | crashed 0 | malformed 0
+KILLED    #83 grade_loop: F2: small-talk fillers ask again (SMALLTALK loops)  <- ackrep: ACKER ack-repeat 0.17712882096069868 / 0.6956055734190782, want 0.17712882096069868 / 0.46859205776173285
+killed 11 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

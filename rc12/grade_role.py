@@ -39,7 +39,7 @@ def user_fact_values(rec, upto=None):
 def g_rolex(reply, stop, prior, rec, probe):
     text = T.norm(reply)
     fails = []
-    if L.degenerate(reply, stop, prior, probe["kind"]):
+    if L.degenerate(reply, stop, prior, probe["kind"], L.turn_kinds(rec)[:len(prior)]):
         fails.append("r1_degen")
     if T.echo(text, probe["question"]):
         fails.append("r2_echo")

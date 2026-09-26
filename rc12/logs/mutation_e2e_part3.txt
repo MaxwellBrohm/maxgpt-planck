@@ -1,19 +1,16 @@
-RC-12 mutation_e2e.py part 3/6: 14 of 81 mutants, fresh process each, 61 s. No model.
+RC-12 mutation_e2e.py part 3/8: 11 of 88 mutants, fresh process each, 59 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #02 runner: plain stop rule not applied  <- stops: CONTINUER plain: fake user turn not cut
-KILLED    #08 runner: history truncated but the drop not recorded  <- trunc: ctx 556: only 0 truncated probes
-KILLED    #14 render: fit drops half pairs  <- history: HISTCHECK plain ctx=556: 1032 bad histories [('rc12-dev-t0-001', 9), ('rc12-dev-t0-001', 10), ('rc12-dev-t0-001', 11)]
-KILLED    #20 score: flat mean instead of nested seed means  <- scoring: nested seed means
+KILLED    #10 runner: untested HF path runs without the flag  <- hf: runner went past the refusal to load a model (ModuleNotFoundError)
+KILLED    #18 score: COMPOSE counted in TWOHOP  <- G2 LONGEST: family TWOHOP=0.41
 KILLED    #26 score: claimable with one training seed  <- scoring: claimable needs 3 training seeds
-KILLED    #32 score_stats: Level R margin  <- stats: bootstrap FIRST-IDEAL {'D': -86.29166666666667, 'lo': -88.84375, 'hi': -83.95833333333334, 'n': 200}
-KILLED    #38 fakes: IDEAL answers OWN from the annotation, not its own reply  <- G1 IDEAL_ALT: OWN:list=0.00
-KILLED    #44 hf_responder: HF path claims to be tested  <- hf: hf_responder import is not light or claims to be tested
+KILLED    #34 score_stats: PERSIST drop bar  <- stats: PERSIST base rates {'brackets:None': 0.0, 'caps:None': 0.0, 'closing:over and out': 0.0, 'closing:stay curious': 0.0, 'closing:that is all': 0.
+KILLED    #42 fakes_family: L_REPEAT does not loop  <- G2 L_REPEAT: cell LOOP:story=1.00
 KILLED    #50 score: OD1 b: the AND replaced by the own-history result alone  <- owngate: CONSIST: bootstrap OWN slot not gated
-KILLED    #56 score_stats: OD1 b: bootstrap OWN slot takes the ungated units  <- owngate: CONSIST: bootstrap OWN slot not gated
-KILLED    #62 score: OD6 iii: ack-repeat-of-statements rate over every reply  <- ackrep: ACKER ack-repeat 0.17712882096069868 / 0.17712882096069868, want 0.17712882096069868 / 0.6956055734190782
-KILLED    #68 score: OD1 b: misaligned join (cf rows zipped to the own ids in reverse order)  <- owngate: random units: OWN_GATED:list 0.296875, per-unit AND 0.3125
+KILLED    #58 score_stats: OD1 b: headroom judges the ungated OWN  <- owngate: headroom OWN not gated {'scores': {'IDEAL': 1.0, 'CONSIST': 1.0}, 'fail': True, 'reason': 'ceiling'}
+KILLED    #66 score: OD1 b: the gate takes the cf result alone (NEXT passes)  <- owngate: NEXT: bootstrap OWN slot not gated
 KILLED    #74 runner: OD1 b: the row drops the cf_unswapped mark  <- owngate: unswapped cf rows not scored 0 in OWN_GATED ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0}, pick 1.0)
-KILLED    #80 runner: OD6 iii: runner drops the answer-repeat record  <- ackrep: ACKER answer-repeat None, want 0
-killed 14 | survived 0 | crashed 0 | malformed 0
+KILLED    #82 grade_loop: F1: ack after ack charged again (ACKER loops)  <- ackrep: ACKER: R 100.0, loop 0.17712882096069868, degenerate {'LOOP': 0.17712882096069868, 'RUNAWAY': 0.0, 'EMPTY': 0.0, 'LEAK': 0.0}, Level A loop cr
+killed 11 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

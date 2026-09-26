@@ -27,7 +27,17 @@ Each is IDEAL outside its own family, so it isolates one failure mode.
     BINDHALF   IDEAL, but gives the other candidate on the "asked_first" BIND twin (pair rate must be 0)
     ACKER      IDEAL, but "Got it." on every statement turn (S L C I O T): OD6 (iii), no LOOP, ack-repeats only
     PARROT     IDEAL, but on a statement turn after a short (< 12 words) reply to an asking turn it says that reply
-               again (verifier 2026-09-25): no LOOP under OD6 (iii) as ruled; every repeat is an answer repeat
+               again (verifier 2026-09-25): every repeat is a LOOP under F1 (decided 2026-09-25) and an answer repeat.
+               Asking is read from the record (asks_rec: P X Q, or D with asks: true; F2), not from grade_loop
+    SMALLTALK  IDEAL, but one fixed reply (SMALL_ACK) on every small-talk D turn (asks: false): F2 (decided
+               2026-09-25), no LOOP, ack-repeats only (one fixed reply on those turns was a LOOP before F2)
+  F3 / strict case (d) measurement (verifier 2026-09-25; validate_machinery c_ackrep). restated(rec) picks, for
+  each VAL probe whose latest source turn is an S or C turn, that source turn (one probe per turn):
+    RESTATE    IDEAL, but confirms each such source turn with its probe's IDEAL sentence ("Your bike is green."),
+               then gives the same IDEAL sentence at the probe: a right answer charged as a LOOP (equality; and
+               self-copy too when the sentence has 12+ words)
+    TERSE_VAL  the bare gold ("Green.") as that confirmation and as the probe answer: LOOP by equality alone
+    TERSE_VAL_CTRL  the bare gold as the probe answer, IDEAL acknowledgements: no LOOP, every probe right
   OD1 (b) gate tests (validate_machinery c_owncf, c_owngate; verifier 2026-09-25). None reads its own Q reply:
     NEXT       CONSIST off by one: picks option 1 at Q, later names option 2 of the USER's list; lists: names item
                3 of the annotated list. Wrong on its own history, right on the --own-cf one (gated OWN must be 0)
@@ -45,8 +55,15 @@ import grade_text as T
 import pools_vals as V
 import render as RD
 
-BASE = dict(C.FILLERS)
+BASE = {q: a for q, a, _ in C.FILLERS}
 STUTTER = "and then it went on and then it went on and then it went on and then it went on."
+SMALL_ACK = "That sounds lovely."
+
+
+def asks_rec(t):
+    """whether user turn t asks something, read from the record itself (kind P, X or Q, or a D turn with asks: true;
+    F2): the fakes' and the machinery checks' own reading, independent of grade_loop."""
+    return t["kind"] in "PXQ" or (t["kind"] == "D" and t["asks"])
 
 
 class Persist(F.Fake):
@@ -194,9 +211,53 @@ class Parrot(F.Fake):
         if t["kind"] not in ("S", "L", "C", "I", "O", "T"):
             return super().nonprobe(history, t)
         mine = [m["content"] for m in history if m["role"] == "assistant"]        # no truncation in its tests
-        short = [mine[i - 1] for i in range(1, t["i"]) if self.turns[i]["kind"] in "PXQD"
+        short = [mine[i - 1] for i in range(1, t["i"]) if asks_rec(self.turns[i])
                  and len(T.lwords(T.norm(mine[i - 1]))) < 12]
         return short[-1] if short else super().nonprobe(history, t)
+
+
+class SmallTalk(F.Fake):
+    name = "SMALLTALK"
+
+    def nonprobe(self, history, t):
+        return SMALL_ACK if t["kind"] == "D" and t["asks"] is False else super().nonprobe(history, t)
+
+
+def restated(rec):
+    """{source turn: VAL probe} for the VAL probes whose latest source turn is an S or C turn (the last such probe
+    wins a shared turn): the turns RESTATE and TERSE_VAL confirm, read from the record."""
+    kinds = {t["i"]: t["kind"] for t in rec["turns"]}
+    out = {}
+    for p in rec["probes"]:
+        src = [s for s in p["src"] if kinds[s] in "SC"] if p["grader"] == "VAL" else []
+        if src:
+            out[max(src)] = p
+    return out
+
+
+def bare(p):
+    return p["gold"][:1].upper() + p["gold"][1:] + "."
+
+
+class Restate(F.Fake):
+    def __init__(self, name="RESTATE"):
+        self.name = name
+
+    def start(self, rec, seed=None, render="plain"):
+        super().start(rec, seed, render)
+        self.said = restated(rec)
+        self.asked = [p["turn"] for p in self.said.values()]
+
+    def nonprobe(self, history, t):
+        p = self.said.get(t["i"])
+        if p is None or self.name == "TERSE_VAL_CTRL":
+            return super().nonprobe(history, t)
+        return p["ideal"] if self.name == "RESTATE" else bare(p)
+
+    def probe(self, history, t, p):
+        if self.name != "RESTATE" and t["i"] in self.asked:
+            return bare(p)
+        return super().probe(history, t, p)
 
 
 class Next(FA.Consist):
@@ -233,7 +294,7 @@ FAMILY = {"P_NEVER": ("PERSIST", None), "P_ONCE": ("PERSIST", None), "P_FIRST5":
           "P_OBEYALL": ("PERSIST", "override"), "L_REPEAT": ("LOOP", None), "L_SELFCOPY": ("LOOP", None),
           "L_STUTTER": ("LOOP", None)}
 TESTS = ["CONTINUER", "HISTCHECK", "CAPPER", "SAMPLER", "FORGETFUL", "T0WRONG", "BINDHALF", "ACKER", "PARROT",
-         "NEXT", "LISTPAD", "LISTBLANK", "LISTLS"]
+         "SMALLTALK", "RESTATE", "TERSE_VAL", "TERSE_VAL_CTRL", "NEXT", "LISTPAD", "LISTBLANK", "LISTLS"]
 
 
 def make(name):
@@ -243,7 +304,9 @@ def make(name):
         return Loop(name[2:].lower())
     if name in ListPad.LIST:
         return ListPad(name)
+    if name in ("RESTATE", "TERSE_VAL", "TERSE_VAL_CTRL"):
+        return Restate(name)
     extra = {"CONTINUER": Continuer, "HISTCHECK": HistCheck, "CAPPER": Capper, "SAMPLER": Sampler,
              "FORGETFUL": Forgetful, "T0WRONG": T0Wrong, "BINDHALF": BindHalf, "ACKER": Acker, "PARROT": Parrot,
-             "NEXT": Next}
+             "SMALLTALK": SmallTalk, "NEXT": Next}
     return extra[name]() if name in extra else F.make(name)

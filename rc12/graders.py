@@ -2,10 +2,15 @@
 
 grade_conv(rec, replies, stops) -> dict: probes (one result per graded probe), unit (the conversation's unit score
 under rec.meta.unit), flags (loop-rule flags per turn), ack_repeat (per turn: None on asking turns, else whether the
-reply repeats an earlier one; OD6 iii, reported only), ack_of_answer (per turn: None on asking turns, else whether
-the reply repeats an earlier reply to an asking turn; reported only), leaks (role-leak scan, diagnostic).
+reply repeats an earlier one; OD6 iii, reported), ack_of_answer (per turn: None on asking turns, else whether the
+reply repeats an earlier reply to an asking turn; reported, and a LOOP in flags too since F1), leaks (role-leak scan,
+diagnostic). Every loop-rule call passes the kinds of the earlier turns (grade_loop.turn_kinds).
 replies[i] / stops[i] answer user turn i+1; stop is "eos" | "eot" | "role" | "cap".
-A result: ok (strict), lenient (diagnostic), fails (names of the clauses that failed), plus grader extras.
+A result: ok (strict), lenient (diagnostic), fails (names of the clauses that failed), plus grader extras, and
+eq_only (grade_probe, every grader): the probe fails ONLY through the loop rule's equality clause, i.e. its one
+failing clause is its degenerate clause (DEGEN_CLAUSES) and the loop rule's only reason is "equal" (a right answer
+that repeats an earlier reply of the model). Reported per family by score.py (equality_only), never scored: the
+measurement for strict case (d) and F3 (prereg draft s6, s17 OD6 follow-up (3); verifier 2026-09-25).
 
 G-VAL clauses (a reply is right only if none fails):
   v1_degen    degenerate by the loop rule (LOOP, RUNAWAY, EMPTY, LEAK: grade_loop.py)
@@ -81,7 +86,7 @@ def g_val(reply, stop, prior, rec, probe, gold=None):
     outside = [v for v in pool if v not in gs and v not in cands and v not in ctx]
     stale = set(probe.get("stale") or [])
     fails = []
-    if L.degenerate(reply, stop, prior, probe["kind"]):
+    if L.degenerate(reply, stop, prior, probe["kind"], L.turn_kinds(rec)[:len(prior)]):
         fails.append("v1_degen")
     gold_ok = any(T.asserted_hits(text, g, pool) for g in gs)
     if not gold_ok:
@@ -142,7 +147,7 @@ def g_abs(reply, stop, prior, rec, probe):
     text = T.norm(reply)
     pool = pool_values(probe)
     fails = []
-    if L.degenerate(reply, stop, prior, probe["kind"]):
+    if L.degenerate(reply, stop, prior, probe["kind"], L.turn_kinds(rec)[:len(prior)]):
         fails.append("a1_degen")
     cue = "cue" in T.OFF or T.ABS_CUE.search(text) is not None
     if not cue:
@@ -160,11 +165,23 @@ def g_abs(reply, stop, prior, rec, probe):
 
 
 def g_loop(reply, stop, prior, rec, probe):
-    flags, why = L.classify(reply, stop, prior, probe["kind"])
+    flags, why = L.classify(reply, stop, prior, probe["kind"], L.turn_kinds(rec)[:len(prior)])
     fails = [f"loop_{f}" for f in flags]
     if T.echo(T.norm(reply), probe["question"]):
         fails.append("loop_echo")
     return dict(ok=not fails, fails=fails, lenient=not flags, why=why)
+
+
+DEGEN_CLAUSES = ("v1_degen", "a1_degen", "f1_degen", "d1_degen", "r1_degen", "loop_LOOP")
+
+
+def eq_only(res, reply, stop, prior, rec, probe):
+    """whether the probe fails only through the equality clause (module docstring; reported, never scored)."""
+    if len(res["fails"]) != 1 or res["fails"][0] not in DEGEN_CLAUSES:
+        return False
+    earlier = L.turn_kinds(rec)[:len(prior)]
+    flags, why = L.classify(reply, stop, prior, probe["kind"], earlier)
+    return flags == ["LOOP"] and why == ["equal"]
 
 
 def grade_probe(rec, probe, replies, stops):
@@ -174,7 +191,7 @@ def grade_probe(rec, probe, replies, stops):
     args = (replies[i], stops[i], replies[:i], rec, probe)
     fn = {"VAL": g_val, "ABS": g_abs, "LOOP": g_loop, "FMT": FD.g_fmt, "DYN": FD.g_dyn, "ROLEX": R.g_rolex}
     res = fn[probe["grader"]](*args)
-    res.update(turn=probe["turn"], kind=probe["kind"], grader=probe["grader"])
+    res.update(turn=probe["turn"], kind=probe["kind"], grader=probe["grader"], eq_only=eq_only(res, *args))
     return res
 
 
@@ -190,7 +207,7 @@ def grade_conv(rec, replies, stops):
     import grade_role as R
     assert len(replies) == len(stops) == rec["n_turns"], rec["id"]
     results = [grade_probe(rec, p, replies, stops) for p in rec["probes"]]
-    kinds = [t["kind"] for t in sorted(rec["turns"], key=lambda t: t["i"])]
+    kinds = L.turn_kinds(rec)
     return dict(id=rec["id"], family=rec["family"], cell=rec["cell"], probes=results,
                 unit=unit_score(rec, results), flags=L.conversation_flags(replies, stops, kinds),
                 ack_repeat=L.conversation_acks(replies, kinds),

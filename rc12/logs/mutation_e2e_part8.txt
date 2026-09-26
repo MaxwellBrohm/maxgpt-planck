@@ -1,0 +1,16 @@
+RC-12 mutation_e2e.py part 8/8: 11 of 88 mutants, fresh process each, 61 s. No model.
+baseline failures (expected: only the G4 item lines):
+  none
+KILLED    #07 runner: no room kept for the 256 new tokens  <- trunc: ctx 556: only 0 truncated probes
+KILLED    #15 render: fit overshoots the budget  <- render: fit drops whole oldest pairs until it fits
+KILLED    #23 score: Level A bar lowered  <- G3 ANTEPENULT: CORR:C_twoslot=0.50 meets its Level A criterion
+KILLED    #31 score_stats: bootstrap not paired  <- stats: bootstrap is not paired: D(FIRST, FIRST) CI {'D': 0.0, 'lo': -3.4062500000000018, 'hi': 3.635416666666666, 'n': 200}
+KILLED    #39 fakes: USERVOICE keeps the assistant voice  <- G2 ROLECAP: 37 value-graded units above 0 (e.g. ['rc12-dev-own-001', 'rc12-dev-own-002', 'rc12-dev-own-003'])
+KILLED    #47 own_cf: OWN-CF pick not swapped  <- owncf: CONSIST OWN under --own-cf = 0.67, want 0.0
+KILLED    #55 score: OD1 b: R uses the ungated OWN  <- owngate: CONSIST: gated OWN 1.0 {'OWN': 1.0, 'OWN_CF': 0.0, 'OWN_GATED': 0.0, 'cf_unswapped': 0}, want OWN_GATED 0.0
+KILLED    #63 score: OD6 iii: ack-repeats counted in the Level A loop criterion  <- ackrep: ACKER: R 100.0, loop 0.0, degenerate {'LOOP': 0.0, 'RUNAWAY': 0.0, 'EMPTY': 0.0, 'LEAK': 0.0}, Level A loop criterion met False
+KILLED    #71 score: OD1 b: a cf run in another render is a twin  <- owngate: cf run in another render: gated OWN not missing ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0})
+KILLED    #79 score: OD6 iii: answer repeats never counted  <- ackrep: PARROT loop 0.023471615720524017 (want 0.023471615720524017), Level A loop criterion met False, R 100.0, answer-repeat 0.0, want 0.06209386281
+KILLED    #87 fakes_family: F3: the control fake confirms with the bare gold too (it loops)  <- ackrep: TERSE_VAL_CTRL: loop 0.060043668122270744 (want 0.0), failing probes 440, equality-only {'T0': [96, 96], 'RECALL': [60, 72], 'CORR': [64, 64],
+killed 11 | survived 0 | crashed 0 | malformed 0
+ALL MUTANTS KILLED

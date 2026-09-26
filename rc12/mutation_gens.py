@@ -152,6 +152,23 @@ def m_loop_repeat_request(recs):
     first(recs, "LOOP")["turns"][5]["text"] = "Repeat the story again."
 
 
+def _d_turn(recs, asks):                  # F2 (decided 2026-09-25): the D-turn asks annotation
+    return next(t for r in recs for t in r["turns"] if t["kind"] == "D" and t["asks"] is asks)
+
+
+def m_asks_flipped(recs):
+    t = _d_turn(recs, False)
+    t["asks"] = True
+
+
+def m_asks_dropped(recs):
+    del _d_turn(recs, True)["asks"]
+
+
+def m_asks_on_statement(recs):
+    next(t for r in recs for t in r["turns"] if t["kind"] == "S")["asks"] = False
+
+
 # mutant -> a substring the INTENDED check's message must contain (so a kill by an unrelated check is not
 # counted as evidence for this one)
 MUTANTS = [(m_gold_in_question, "question contains"), (m_gold_after_source, "repeats the gold"),
@@ -163,12 +180,14 @@ MUTANTS = [(m_gold_in_question, "question contains"), (m_gold_after_source, "rep
            (m_persist_breaks_rule, "IDEAL breaks"), (m_persist_old_rule_kept, "old rule kept"),
            (m_lookup_absent_key, "X key placement"), (m_k_ref_in_question, "K ref"),
            (m_knowledge_flag, "knowledge flag"), (m_placement, "main probes at u12"),
-           (m_topic_names_gold, "question contains"), (m_loop_repeat_request, "repeat request")]
+           (m_topic_names_gold, "question contains"), (m_loop_repeat_request, "repeat request"),
+           (m_asks_flipped, "D asks differs"), (m_asks_dropped, "D turn without a bool asks"),
+           (m_asks_on_statement, "asks on a non-D turn")]
 
 
 def run_checks(recs):
     T.FAILS.clear()
-    for fn in (T.test_counts, T.test_structure, T.test_l2, T.test_g8):
+    for fn in (T.test_counts, T.test_structure, T.test_l2, T.test_g8, T.test_asks):
         fn(recs)
     return list(T.FAILS) + TF.run(recs)
 
@@ -176,13 +195,18 @@ def run_checks(recs):
 def filler_mutants():
     """the filler pool checks: a pool value, a digit, a name, a 2-sentence IDEAL, an E001 5-gram."""
     out = []
-    bad = [(("Why is the ocean teal on sunny days?", "Light scatters in the water, which is what you see."),
+    q = "question"
+    bad = [(("Why is the ocean teal on sunny days?", "Light scatters in the water, which is what you see.", q),
             "contains 'teal'"),
-           (("How do I fix a squeak in the stairs?", "Drive a screw near the nail, about 2 inches away."), "digit"),
-           (("Is it true Marcus likes rain?", "Some people love rain for the calm it brings."), "name-like"),
-           (("How do I clean a mug?", "Soak it first. Then scrub it gently."), "not one sentence"),
-           (("How can I stop my glasses from fogging up?", "A tiny bit of soap on the lenses helps a lot."),
-            "5-gram")]
+           (("How do I fix a squeak in the stairs?", "Drive a screw near the nail, about 2 inches away.", "question"),
+            "digit"),
+           (("Is it true Marcus likes rain?", "Some people love rain for the calm it brings.", "question"), "name-like"),
+           (("How do I clean a mug?", "Soak it first. Then scrub it gently.", "question"), "not one sentence"),
+           (("How can I stop my glasses from fogging up?", "A tiny bit of soap on the lenses helps a lot.", "question"),
+            "5-gram"),
+           (("How do I clean a mug?", "Soak it and then scrub it gently.", "statement"),     # F2: hand labels
+            "label 'statement' does not fit"),
+           (("I washed the mugs this morning.", "That is one small job done.", q), "label 'question' does not fit")]
     for item, want in bad:
         C.FILLERS.append(item)
         T.FAILS.clear()

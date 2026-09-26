@@ -7,7 +7,10 @@ DECISIONS FOR MAX (s17), RULED 2026-09-25 (Max took every recommended pick): OD1
 of both runs); OD2 LOOP in the composite (a, kept); OD3 positional-abstain cells at 0.50 (a, accepted at the cell
 bar); OD4 PLAN F6-F8 (c, out of RC-12); OD5 program-written lookup lines under D8 (a, allowed with three
 conditions); OD6 loop equality clause (iii, asking turns only); OD7 strict grader cases (strict primary); OD8
-G10/G11 as locked gates (yes). Code for OD1 and OD6: rc12/notes.txt STEP 7.
+G10/G11 as locked gates (yes). Code for OD1 and OD6: rc12/notes.txt STEP 7. OD6 follow-up, decided by Claude
+under Max's standing permission and reversible before the lock: F1 parroted answers are LOOPs (notes F1); F2
+small-talk statement fillers do not ask (notes STEP 8); F3 (strict case d, widened on 2026-09-26 to a right answer
+that repeats any earlier reply of the model, in every family) open until the dev baselines.
 Sources: rc12/SPEC.txt v0.1; rc12/notes.txt (steps 2-6: deviations D1-D22 and the step 5 audit); PLAN.md s1 (Level R
 and Level A wording, the re-anchor rule) and Phase 0 (headroom rule, sealed isolation, decoding, sizing, OOD-H, the
 public pre-registration); PLAN Phase 4 (the human test); LEDGER.md (P-003, P-004, P-033, P-045, P-049, P-082, P-137);
@@ -20,16 +23,36 @@ becomes training text). The two share the label D8 by accident.
   Built and tested (stdlib Python, no model loaded for any of it): the dev split, the graders, the loop rule and the
   role-leak scan, the 12-turn runner, scoring and the paired bootstrap, 41 fake responders, gates G1-G9 plus the
   audit gates, and the mutation tests of all of them (results in s8).
-  Dev file rc12/dev/rc12_dev.jsonl, 640 records: md5 a290f9c535475d2db2368940ba5f9a13,
-  sha256 c5074e68137c9e419fdd8245799c5a569261fe6da7f9544a9b95533dfe991ecd. The locked hash is the file at the push.
-  Re-run for this draft: test_gens.py, 0 failures over 640 records, dev md5 unchanged. (logs/test_gens.txt predates
+  Dev file rc12/dev/rc12_dev.jsonl, 640 records, rebuilt 2026-09-25 for F2 (s17 OD6 follow-up (2)): md5
+  008dda4bb10d67d51bbe43a59c6efff0, sha256 3e543f8d5638e6ab9fd106099fc2584e810dd90544f212146a3cd73bd66689a0.
+  Before F2: md5 a290f9c535475d2db2368940ba5f9a13, sha256
+  c5074e68137c9e419fdd8245799c5a569261fe6da7f9544a9b95533dfe991ecd. The only change is the new asks field on the
+  4,010 D turns (a script compared every record with the field removed: 0 of 640 differ; rc12/notes.txt STEP 8).
+  The locked hash is the file at the push.
+  Re-run for this draft: test_gens.py, 0 failures over 640 records (on the F2 rebuild). (logs/test_gens.txt predates
   the step 5 rebuild and is stale.) Every other result below is quoted from rc12/logs/ and notes.txt, not re-run.
   After the rulings (2026-09-25 evening, s17): the OD1 and OD6 code changed rc12/ (notes STEP 7), and the fixes from
   the verifiers' review of that code (same night, notes STEP 7 VERIFIER FIXES) added gate tests, fakes, mutants and
   the answer-repeat report. The counts in s6 and s8 are from the check order re-run after those fixes (notes STEP 7,
   2026-09-25 21:51 to 22:02 EDT, all pass): mutation_graders 150 of 150, mutation_e2e 81 of 81 (6 parts),
   mutation_audit 13 of 13 (2 parts), validate_machinery 11 groups; machinery fakes ACKER, PARROT, NEXT, LISTPAD,
-  LISTBLANK, LISTLS.
+  LISTBLANK, LISTLS. F1 (s17 OD6 follow-up, decided 2026-09-25) then changed the loop rule; re-run on that tree
+  (rc12/notes.txt F1): mutation_graders 156 of 156, mutation_e2e 83 of 83 (6 parts), validate_machinery 11 groups,
+  validate_e2e G1-G4, test_gens and audit_graders all pass; s6, s7 and s8 quote those runs where F1 moved a number.
+  F2 (s17 OD6 follow-up (2), decided 2026-09-25) then annotated the fillers and rebuilt dev; the full check order
+  was re-run on that tree (rc12/notes.txt STEP 8): build_dev, test_gens, audit_rules, audit_graders, validate_e2e
+  G1-G4, validate_machinery 11 groups, mutation_graders 160 of 160, mutation_gens 33 of 33, mutation_audit 13 of 13
+  (2 parts), mutation_e2e 85 of 85 (6 parts), all pass; s6, s7 and s8 quote those runs where F2 moved a number.
+  A verifier then re-ran the full order on the unchanged tree (rc12/notes.txt STEP 8, CHECK ORDER verifier re-run,
+  2026-09-25 23:03 to 23:15 EDT): the same counts, all pass, build_dev reproduced the dev hash above exactly, and
+  the loop rates it recomputed (ACKER, PARROT, SMALLTALK and the 12 generic cheaters, on the STEP 7 tree and on
+  this one) equal the ones quoted in s7 and s8.
+  A second verifier review (2026-09-26, rc12/notes.txt STEP 8, VERIFIER FIXES round 2) widened F3 (s6 (d), s17),
+  added its measurement (graders.eq_only, score.py equality_only), the fakes RESTATE, TERSE_VAL and TERSE_VAL_CTRL,
+  a one-word parrot fixture and a missing-asks refusal test; the full order was re-run on that tree (2026-09-25
+  23:56 to 2026-09-26 00:10 EDT): mutation_graders 165 of 165, mutation_e2e 88 of 88 (now 8 parts), mutation_gens
+  33 of 33, mutation_audit 13 of 13, validate_machinery 11 groups, validate_e2e G1-G4, all pass; dev hash
+  unchanged.
   Not done: no baseline scored on dev; the HF responder has never run on a real model (HF_TESTED = False); no vLLM
   responder exists; likelihood rows (s4) are not built; no sealed split; no OOD-H; no Planck tokenizer; no trained
   Planck model.
@@ -90,7 +113,10 @@ becomes training text). The two share the label D8 by accident.
   Turn kinds (annotation): S statement of a fact; L same-type lure (a value of the probe's type bound to another
     holder or object); C correction; I standing instruction; O override of an instruction; Q request that makes the
     model commit to an answer (OWN); T passage or table (LOOKUP); D distractor filler; P graded probe; X second
-    graded probe in the same conversation.
+    graded probe in the same conversation. Every D turn also carries asks (true or false), the hand label of its
+    filler (F2, s17 OD6 follow-up (2)): false for a plain statement that asks nothing, true for a question or a
+    request. It changes only which turns the loop rule counts as asking (s7); for every other purpose the turn is
+    kind D.
   Distance: d = index(P) - index(S) in user turns, 1..11; for corrections dc = index(P) - index(latest C of the
     asked object).
   Probe placement: the main probe (for RECALL-abstain and LOOKUP, the LATER of the two probes: D16) is at u12 in 3/4
@@ -99,9 +125,13 @@ becomes training text). The two share the label D8 by accident.
   Fillers (D): 90 dev fillers (45 how-to/why, 45 small talk/creative), each with a one-sentence IDEAL reply; no
     digit, name-like word, pool value, holder word or PERSIST rule word; 0 word 5-grams shared with E001/E004
     fillers; each used at most once per conversation. Filler replies are graded only by the loop and role-leak rules,
-    never for content, so knowledge in a filler answer never moves a knowledge-free score. 20 of the 45 small-talk
-    fillers are plain statements that ask nothing ("The sunrise was really pretty today."; 904 of the 4,010 dev D
-    turns); the loop rule still treats every D turn as asking (s7; open question in s17 OD6).
+    never for content, so knowledge in a filler answer never moves a knowledge-free score. Each filler carries a
+    hand label, read and set one by one (rc12/pools_fill_a.py, pools_fill_b.py): 50 questions (all 45 how-to/why
+    fillers and 5 of the small-talk/creative ones), 20 requests (imperatives without a question mark, such as
+    "Invent a silly holiday we could celebrate."), 20 statements ("The sunrise was really pretty today."). A D turn
+    built from a statement has asks: false (904 of the 4,010 dev D turns; 3,106 have asks: true); the label is data
+    copied by the builder and never inferred from the text or its punctuation at grading time (F2, s7, s17 OD6
+    follow-up (2)).
   Length: user turns <= 35 words (LOOKUP tables <= 70). Budget: with every reply set to 50 words a conversation stays
     <= 1,800 tokens (proxy 1.35 x words + 4 per turn until a Planck tokenizer exists, then measured). Checked on every
     conversation (G7).
@@ -110,7 +140,8 @@ becomes training text). The two share the label D8 by accident.
     turns, was dropped from the history its reply was generated from. (SPEC said the probe's own S/C/I/Q/T turn; the
     rule used is a superset and can only lower a score.) With IDEAL replies the longest dev conversation is 572 proxy
     tokens, so a model with a 2k+ context never triggers it.
-  Record (JSONL, one per conversation): id, split, family, cell, seed, turns [{i, kind, text, ideal, facts, vals}],
+  Record (JSONL, one per conversation): id, split, family, cell, seed, turns [{i, kind, text, ideal, facts, vals,
+    asks on D turns only}],
     probes [{turn, kind, grader, question, gold or gold_fn, candidates, pool, stale, holder, object_words, pair_id,
     d, dc, src, prefix, ideal, family fields}], meta.unit (mean | all | pair), knowledge flag. The full field list is
     the docstring of rc12/common.py. IDEAL replies are never shown to a model.
@@ -235,36 +266,77 @@ becomes training text). The two share the label D8 by accident.
     with its right owner fails ("Your name is Tobias, and I'm Kestrel."); (b) shotgun fails "It is the speech, not
     the shed or the bookshelf." and BIND "the banjo, not the trombone"; (c) the loop rule's equality clause (s7).
     RULED 2026-09-25: (a) and (b) stay strict as the primary score with the lenient twins reported beside (OD7);
-    (c) is settled by OD6 (iii): equality is charged only on replies to asking turns (s7).
-    (d) (found 2026-09-25, NOT ruled) a terse OWN answer that repeats the model's own Q reply word for word
-    ("Quizzards." at Q, "Quizzards." at the probe) is a LOOP under the equality clause, so the probe fails
-    (v1_degen); "I picked Quizzards." passes. Its rate is measured on the dev baselines and put to Max before the lock.
-  Evidence: mutation_graders 150 of 150 mutants killed (notes STEP 7 check order), none by a crash, each by the
-    fixture or conversation test aimed at it (fixtures built from real items: 6,321 at step 3, cue and stuffing
-    fixtures added at step 5; the conversation tests of the OD6 clause at STEP 7). audit_graders: 0 wrong
-    verdicts over 21,012 natural-paraphrase variants of correct, hedged, guessed, wrong, abstaining, ROLE X and OWN
-    replies (the first run had 2,364 wrong verdicts; the fixes are D21). IDEAL on all 640 records: 0 failing probes,
-    0 loop flags, 0 leak events.
+    (c) is settled by OD6 (iii) with F1 and F2 (s17): on an asking turn equality is charged against every earlier
+    reply, on a statement turn only against earlier replies to asking turns (s7).
+    (d) (found 2026-09-25, NOT ruled; widened 2026-09-26 by the second verifier review) a RIGHT answer that equals,
+    normalized, an earlier reply of the model is a LOOP under the equality clause, so the probe fails (v1_degen and
+    its twins), in every family, not only OWN: a terse OWN answer that repeats the model's own Q reply ("Quizzards."
+    at Q and at the probe; "I picked Quizzards." passes), and a model that confirms a stated fact with the sentence it
+    later answers with ("Your bike is green." after "I ride a green bike to work.", then again at the probe).
+    Measured on dev with fakes (validate_machinery c_ackrep, notes STEP 8 round 2): RESTATE (IDEAL, but each VAL
+    probe's latest S or C source turn confirmed with that probe's IDEAL sentence) loop rate 0.060 (440 of 7,328),
+    R_ungated 40.0, RECALL, CORR, BIND, TWOHOP, TOPIC and ROLE 0.00 and T0 0.00; TERSE_VAL (the bare gold, "Green.",
+    as that confirmation and as the answer) the same; TERSE_VAL_CTRL (the bare gold answers, IDEAL
+    acknowledgements) loop 0, R_ungated 100. Every probe records eq_only (it fails ONLY through the equality clause)
+    and score.py reports equality_only per family; on the dev baselines that count is the measurement, and the
+    options of s17 OD6 follow-up (3) are put to Max before the lock. Self-copy is separate: RESTATE's 12+ word TOPIC
+    sentences (27 of 48 TOPIC probes) fail by self-copy too, so they are not equality-only.
+  Evidence: mutation_graders 165 of 165 mutants killed (notes STEP 8: 160 after F2 and in the verifier re-run of
+    2026-09-25 23:03 to 23:15 EDT; 165 after the second review's fixes, re-run 2026-09-26), none by a crash, each
+    by the fixture or conversation test aimed at it (fixtures built from real items: 6,321 at step 3, cue and
+    stuffing fixtures added at step 5; the conversation tests of the OD6 clause at STEP 7, of F1, of F2 at STEP 8,
+    and of the one-word parrot, the missing-asks refusal and eq_only in the second review).
+    audit_graders: 0 wrong verdicts over 21,012 natural-paraphrase variants of correct, hedged, guessed, wrong,
+    abstaining, ROLE X and OWN replies (the first run had 2,364 wrong verdicts; the fixes are D21). IDEAL on all 640
+    records: 0 failing probes, 0 loop flags, 0 leak events.
 
 7. LOOP RULE (pre-registered exactly; rc12/grade_loop.py), per reply r at turn t given the earlier replies:
-  LOOP     some word 3-gram occurs >= 4 times in r; OR r answers a turn that asks something (kind P, X, Q or D;
-           LOOP requests are P) and r, normalized (lowercase word tokens, punctuation and spacing ignored), equals an
-           earlier reply of the conversation, at any length (every earlier reply counts, whatever turn it answered);
-           OR r has >= 12 words and >= 50% of its word 4-grams occur in ONE earlier reply (self-copy). The equality
-           clause is OD6 (iii), ruled 2026-09-25.
-  ACK-REPEAT (reported beside, never degenerate, never in Level A) r answers a statement turn (S, L, C, I, O or T)
-           and, normalized, equals an earlier reply. Rates: over every reply, and over statement-turn replies.
-           Self-copy is unchanged, so an identical statement-turn reply of 12+ words is still a LOOP (and an
-           ack-repeat); OD6 exempts only identical statement-turn replies under 12 words.
+  LOOP     some word 3-gram occurs >= 4 times in r; OR r, normalized (lowercase word tokens, punctuation and
+           spacing ignored), equals an earlier reply of its equality set, at any length: if r answers a turn that
+           asks something (kind P, X, Q, or D with asks: true; LOOP requests are P), every earlier reply of the
+           conversation, whatever turn it answered; if r answers a statement turn (S, L, C, I, O, T, or D with
+           asks: false), the earlier replies to asking turns (F1: an answer parroted on a statement turn); OR r has
+           >= 12 words and >= 50% of its word 4-grams occur in ONE earlier reply (self-copy). The equality clause is
+           OD6 (iii), ruled 2026-09-25, with F1 and F2 (s17 OD6 follow-up (1) and (2), decided 2026-09-25 by Claude
+           under Max's standing permission, reversible before the lock); rc12/grade_loop.equality_set, loop_kind.
+  Scope, stated plainly (second verifier review, 2026-09-26): the rule charges only these three things: a 3-gram
+           said 4+ times inside one reply, a normalized VERBATIM repeat, and a copy of 12+ words sharing >= 50% of
+           its 4-grams with one earlier reply. A short near-duplicate escapes, so "loops" in the Level A wording
+           (s1, s10) means this rule, not every repetition. Measured on dev (fakes, notes STEP 8 round 2):
+           PARROT_PLUS (PARROT with ", right" added to each parroted answer) loop 0.0052 (38 of 7,328, all
+           self-copies: 11-word answers that the added word brought to 12), criterion met, answer-repeat 0;
+           NEAR_D (a canned non-answer with the turn number appended, "Let me think about that one, number 4.",
+           on every asking D turn) loop 0, criterion met, R_ungated 100. A near-duplicate rate reported beside the
+           loop rate (never gated) is an open option for Max before the lock (s17 OD6 follow-up (4)).
+  ACK-REPEAT (reported beside, never in Level A; the mark itself is never a flag) r answers a statement turn and,
+           normalized, equals an earlier reply. Rates: over every reply, and over statement-turn replies. The
+           equality clause never charges an acknowledgement said again after an acknowledgement; self-copy is
+           unchanged, so an identical statement-turn reply of 12+ words is still a LOOP (and an ack-repeat), and one
+           that copies an earlier answer is a LOOP by F1 (and an ack-repeat). The exemption is by turn kind, not by
+           content: ANY short reply said again between two statement turns (S, L, C, I, O, T and, since F2, the
+           small-talk D turns) is exempt, advice or a parroted small-talk reply as much as "Got it.", and the
+           ack-repeat rate is its only signal. Measured on dev (fakes, notes STEP 8 round 2): SMALLPARROT (its first
+           short small-talk reply said again on every later S, L, C, I, O, T and small-talk turn) loop 0.0647 before
+           F2, 0 with F2, criterion met, ack-repeat 0.0647; ADVICE_FIXED ("Keeping your phone in another room can
+           make a difference." on every small-talk turn) loop 0.060 before F2, 0 with F2, ack-repeat 0.060.
   ANSWER REPEAT (reported beside, a subset of the ack-repeats; added 2026-09-25 after the verifiers' review) r
            answers a statement turn and equals an earlier reply to an ASKING turn: an answer said again, not an
-           acknowledgement said twice. Rate over statement-turn replies (ack_repeat_of_answers). OD6 (iii) as ruled
-           does not charge it: the machinery fake PARROT (IDEAL, but its last short answer again on every later
-           statement turn) has loop rate 0 and meets the Level A loop criterion, with an answer-repeat rate of 0.19
-           on dev. Open for Max (s17 OD6 follow-up).
-  Asking turns are P, X, Q and D as ruled. D includes the 20 small-talk statement fillers (s3), so the same short
-           reply to two of them is a LOOP: one fixed reply on those turns alone, IDEAL elsewhere, gives a loop rate
-           of 0.06 on dev, 3 times the Level A bar. Open for Max (s17 OD6 follow-up).
+           acknowledgement said twice. Rate over statement-turn replies (ack_repeat_of_answers). Since F1 these are
+           exactly the statement-turn replies the equality clause charges, so the rate overlaps the loop rate; it
+           stays reported. The machinery fake PARROT (IDEAL, but its last short reply to an ASKING turn again on
+           every later S, L, C, I, O or T turn) has answer-repeat rate 0.062 (172 of the 2,770 dev statement-turn
+           replies) and loop rate 0.023 (172 of 7,328 dev replies), so it fails the Level A loop criterion; under
+           OD6 (iii) before F1 it had loop rate 0 and met it. (Before F2 it also repeated replies to small-talk
+           fillers, which then counted as answers: loop rate 0.049, 360 replies.)
+  Asking turns (F2): P, X, Q, and D with asks: true (filler questions and requests). A D turn with asks: false (one
+           of the 20 small-talk statement fillers, s3) is a statement turn for this rule, and only for it. One fixed
+           reply on those turns alone, IDEAL elsewhere (the machinery fake SMALLTALK), had loop rate 0.060 on dev
+           under the ruling's letter, 3 times the Level A bar; with F2 its loop rate is 0 (ack-repeat rate 0.060,
+           440 of 7,328 replies). The rates over statement-turn replies count these turns too: 2,770 on dev (1,866
+           S, L, C, I, O, T and 904 small-talk D).
+  EQUALITY-ONLY (reported, never scored; strict case (d) of s6, F3) a probe that fails only through the equality
+           clause (graders.eq_only: its one failing clause is its degenerate one and the only loop reason is
+           equality); score.py equality_only gives per family [such probes, probes graded].
   RUNAWAY  r stopped at the 256-token cap.
   EMPTY    r has no word characters.
   LEAK     a role tag (User, Assistant, Human, System, AI, Bot, Model) at the start of any line of r, or a chat
@@ -298,8 +370,12 @@ becomes training text). The two share the label D8 by accident.
     G3  no cheater meets any Level A CONTENT criterion on its own (CORR:U, C_noupd, C_twoslot, BIND pair), and every
         cheater misses Level A. (The fixed ack alone gives every generic cheater a loop rate far above the bar, so
         Level A as a whole is not enough: 0.58 to 0.82 for the 12 generic cheaters under the original equality
-        clause; 0.51 to 0.61 under OD6 (iii), audit cheaters up to 0.67 (logs/e2e_fakes.txt), because the fixed ack
-        also answers D turns, which the ruling counts as asking, the small-talk statement fillers included.)
+        clause; 0.51 to 0.61 under OD6 (iii), audit cheaters up to 0.67, because the fixed ack also answers D
+        turns, which the ruling counts as asking; 0.57 to 0.77 with F1, audit cheaters up to 0.84, because each
+        statement-turn copy of that ack repeats an earlier D answer; 0.567 (ROLECAP) to 0.747 (DEFLECT, ABSTAIN)
+        with F2, audit cheaters up to 0.811 (PENULT_MARKER) (logs/e2e_fakes.txt, F2 re-run), because the fixed ack
+        still answers the D questions and requests, which ask, while on the small-talk statement fillers it is now
+        an acknowledgement that only loops when it copies one of those answers.)
     G4  per item: at most 3 of the 11 generic cheaters pass it (OVERLAP_A and _B counted as one: D14); failing items
         are rebuilt, never deleted silently; the histogram is written.
     G5  L2 on every item; fillers carry no name, digit or pool value.
@@ -312,8 +388,12 @@ becomes training text). The two share the label D8 by accident.
         six quick shortcuts on the real VAL probes, every non-reference rule <= 0.50 per cell and <= 0.40 per family.
     G11 (locked gate for dev and sealed, OD8 ruled 2026-09-25; D22) audit_graders.py: 0 wrong verdicts on the
         natural-paraphrase battery.
-    Tests of the tests: mutation_gens 28/28, mutation_audit 13/13 (each generator fix undone turns its detector
-    red; 2 parts), mutation_e2e 81/81 (6 parts; runner, render, score, stats, fakes, own_cf; notes STEP 7), harness
+    Tests of the tests: mutation_gens 33/33 (5 added for F2: the D-turn asks annotation and the filler labels),
+    mutation_audit 13/13 (each generator fix undone turns its detector red; 2 parts), mutation_e2e 88/88 (8 parts
+    since the second verifier review; runner, render, score, stats, fakes, own_cf, F1, F2 and the F3 measurement;
+    notes STEP 7 and STEP 8; 85 of 85 in 6 parts in the STEP 8 verifier re-run, 2026-09-25 23:03 to 23:15 EDT, and
+    88 of 88 in 8 parts after the second review, 2026-09-26, both with mutation_gens 33/33 and mutation_audit
+    13/13), harness
     mutation_rc12_eval 32/32 (run before the OD1 and OD6 edits of harness/rc12_eval.py and not re-run since: it
     needs torch).
   Results on dev (validate_e2e: plain render, greedy, no context limit, 640 records x 41 fakes through the real
@@ -332,9 +412,13 @@ becomes training text). The two share the label D8 by accident.
     reported  MYONLY RECALL .65, ROLE .60 | MARKER_OBJ CORR:U-same .12 | CONSIST OWN 1.00 (0.00 under --own-cf;
               gated OWN 0.00 under OD1, R 13.7 against R_ungated 23.7, OD1 step) | VARIED LOOP 1.00
     Level A   no gated cheater meets any content criterion; every cheater misses Level A.
-    machinery (validate_machinery only, not in this table): ACKER and PARROT (OD6 reports: loop 0 for both;
-              ack-repeat 0.18 and 0.05, answer-repeat 0.00 and 0.19); NEXT, LISTPAD, LISTBLANK, LISTLS (OD1 gate:
-              gated OWN 0.00 for each; NEXT is 0.00 on its own history and 1.00 on the --own-cf one).
+    machinery (validate_machinery only, not in this table): ACKER (loop 0, Level A loop criterion met,
+              ack-repeat 0.18 of all replies, 0.47 of statement-turn replies, answer-repeat 0.00), PARROT (F1 and
+              F2: loop 0.023, criterion NOT met, ack-repeat 0.023, answer-repeat 0.062) and SMALLTALK (F2: loop 0,
+              criterion met, ack-repeat 0.060; loop 0.060 before F2); RESTATE and TERSE_VAL (F3 / strict case d:
+              loop 0.060, R_ungated 40.0, equality-only 413 and 440 of the 440 probes they fail) and
+              TERSE_VAL_CTRL (loop 0, R_ungated 100); NEXT, LISTPAD, LISTBLANK, LISTLS (OD1 gate: gated OWN 0.00
+              for each; NEXT is 0.00 on its own history and 1.00 on the --own-cf one).
   Margins, stated plainly: several gated rules sit exactly at 0.50 on a 16-item cell (for example C_noupd: WORDING,
   EXL_WORDING; C_twoslot: ANTEPENULT, PENULT_MARKER, PREV_FRESH, EXL_MARKER) and at 0.33-0.35 per family. With
   48-item families a chance-level rule moves by about 0.07, so the 0.40 family bar is tight by design. A
@@ -425,6 +509,15 @@ becomes training text). The two share the label D8 by accident.
      banks and slot pools for every family; D8 provenance rule: a Claude-written gold set, never training text.
      It shares no template and no slot pool with dev (value pools included), and 0 word 5-grams of user text with
      dev (proposal). PERSIST gets its own include-word pool, added to grade_fmt_dyn.STUFF_POOL for sealed scoring.
+     Filler labels (F2, s17 OD6 follow-up (2); an obligation, not a proposal): every sealed filler gets the same hand
+     label as dev's, "question", "request" or "statement" (asks nothing), set by reading each one in the sealed
+     session and stored with the filler as data, and the sealed build copies it onto every D turn as asks (false
+     only for a statement; the same common.ASKING map), exactly as dev does. A request without a question mark is
+     asking. The label is never inferred from punctuation at grading time; a sealed D turn without asks fails
+     grading (grade_loop.loop_kind asserts it; tested by mutation_graders asks_missing_refused), and the S4 gates
+     include the test_gens asks and filler-label checks. test_gens pins the dev counts (50 question, 20 request, 20
+     statement fillers; 3,106 / 904 D turns) only when every record is a dev record: the sealed session pins its own
+     label and asks counts in test_gens (test_fillers, test_asks) before S4.
   S2 Isolation. The sealed session does not read pipeline/ banks, templates, teacher renders or lookup-line format
      (OD5: it picks its own LOOKUP table format), so sealed stays out of the training distribution. No pipeline,
      harness, corpus or training session ever reads sealed plaintext.
@@ -465,13 +558,14 @@ becomes training text). The two share the label D8 by accident.
 
 15. WHAT IS FIXED NOW (changes before the lock only through s16, s17 or a recorded deviation; none after it)
   Scope and the binding rules L1-L4; knowledge-free and knowledge-bearing never pooled (s2).
-  The conversation format, own-history protocol, stop reasons, turn kinds, placement rule and truncation rule (s3).
+  The conversation format, own-history protocol, stop reasons, turn kinds (with the D-turn asks annotation and the
+    filler labels, F2), placement rule and truncation rule (s3).
   Renders, decoding settings, seeds, per-reply seeding, lockstep batching and the parity check (s4).
   The families, cells, layouts and dev counts of s5, and the dev seed and streams (a rebuild forced by s11 or s17
     changes the dev hash, never the design).
   The grader clauses and cue lists as they stand in rc12/*.py at the push (code hashes in S9), strict cases (a) and
-    (b) as the primary score (OD7), and the loop rule with the OD6 (iii) equality clause and the ack-repeat report
-    (s6, s7).
+    (b) as the primary score (OD7), and the loop rule with the OD6 (iii) equality clause, F1 and F2, and the
+    ack-repeat and answer-repeat reports (s6, s7).
   The cheater set, gates G1-G9 with their bars (0.40 family, 0.50 cell, 3 generic cheaters per item), ORDER_ABS
     gated at the cell bar only (OD3), and G10 and G11 as locked gates for dev and sealed (OD8) (s8).
   The composite definition with the OD1 gate on OWN, LOOP kept (OD2) and F6-F8 out (OD4); the paired bootstrap; the
@@ -495,9 +589,21 @@ becomes training text). The two share the label D8 by accident.
     OWN runs in score.py and score_stats.py, mutants_e2e #50-#60; OD6 (iii): grade_loop plus fixtures, 7 grader
     mutants, mutants_e2e #61-#65, fake ACKER). The verifiers' review fixes (own_cf list rule, twin rule, seeds,
     unswapped rewrites, the answer-repeat report; 6 grader mutants, mutants_e2e #66-#80, fakes PARROT, NEXT,
-    LISTPAD, LISTBLANK, LISTLS) and the check order re-run: see rc12/notes.txt STEP 7 VERIFIER FIXES.
+    LISTPAD, LISTBLANK, LISTLS) and the check order re-run: see rc12/notes.txt STEP 7 VERIFIER FIXES. F1 (s17 OD6
+    follow-up): grade_loop.equality_set, fixtures stated_after (now LOOP) and ack_twice, 6 grader mutants,
+    mutants_e2e #81-#82, PARROT gated on failing the loop criterion (notes F1). F2 (s17 OD6 follow-up (2)): filler
+    labels, the D-turn asks field, grade_loop.loop_kind, a dev rebuild (new hash, s0), 4 conversation fixtures, 4
+    grader mutants, 5 generator mutants, mutants_e2e #83-#84, fake SMALLTALK, PARROT reading the annotation, and the
+    full check order re-run (notes STEP 8).
   Every dev baseline and scored run needs its OWN --own-cf run (same seeds, same training seed); without it R is None
     (OD1).
+  Also OPEN, needing Max's judgment before the lock (s17 OD6 follow-up; s19 item 4), listed here so none reaches the
+    lock undecided: F3 (strict case (d) as widened, s6: a right answer equal to an earlier reply of the model, any
+    family; decided after the dev baselines' equality_only counts); PERSIST's graded P turns that reuse a statement
+    filler (46 dev turns, kind P, asking; s17 (2)); a near-duplicate rate reported beside the loop rate (s17 (4)).
+  DONE 2026-09-26 (second verifier review, notes STEP 8 round 2): the F3 measurement (graders.eq_only, score.py
+    equality_only, fakes RESTATE, TERSE_VAL, TERSE_VAL_CTRL in validate_machinery c_ackrep), the one-word parrot
+    fixture and the missing-asks refusal test, 5 grader mutants, mutants_e2e #85-#87, mutation_e2e in 8 parts.
   File name: PLAN names the locked file prereg/RC-12.md; the content stays plain text either way.
   Schedule: parity -> dev baselines -> headroom, re-anchor, drop list, sizing -> sealed build -> push, all before
     Oct 11-14. If the lock slips, Planck chat-mix training slips with it; E1-E3 need no RC-12 and may run.
@@ -580,21 +686,82 @@ becomes training text). The two share the label D8 by accident.
       Code: grade_loop.py charges equality only when the later reply answers P, X, Q or D, comparing it with every
       earlier reply; identical replies on S, L, C, I, O, T go to ack_repeat (score.py: ack_repeat and
       ack_repeat_of_statements, outside Level A); self-copy is unchanged (s7); 6 conversation fixtures, 7 grader
-      mutants, 5 e2e mutants and the fake ACKER test it.
-      Follow-up for Max (verifiers' review, 2026-09-25 night; NOT ruled, the code keeps the ruling's letter):
+      mutants, 5 e2e mutants and the fake ACKER test it. (That was the code of the ruling; F1 and F2 below changed
+      the equality set since, and s7 states the rule as it now stands.)
+      Follow-up (verifiers' review, 2026-09-25 night; not ruled by Max; (1) and (2) decided by Claude under Max's
+      standing permission as F1 and F2, (3) left open as F3 and widened 2026-09-26, (4) added 2026-09-26 and open;
+      each reversible by Max before the lock):
         (1) Answer repeats. An identical statement-turn reply is an ack-repeat even when it copies an earlier ANSWER.
             PARROT (IDEAL, but its last short answer again on every later statement turn) has loop rate 0 and meets
-            the Level A loop criterion; only its answer-repeat rate (0.19 on dev, s7) shows it. Option: charge a
-            statement-turn reply equal to an earlier reply to an asking turn as a LOOP, so that only acknowledgement
-            repeated after acknowledgement stays exempt (the reason given for (iii) above).
+            the Level A loop criterion; only its answer-repeat rate (0.19 on dev at STEP 7, before F1 and F2;
+            rc12/notes.txt F1) shows it. Option: charge a statement-turn reply equal to an earlier reply to an
+            asking turn as a LOOP, so that only acknowledgement repeated after acknowledgement stays exempt (the
+            reason given for (iii) above).
+            DECIDED 2026-09-25 by Claude under Max's standing permission (reversible before the lock): F1 PARROTED
+            ANSWERS. A reply to a statement turn that equals (normalized) an earlier reply to an ASKING turn is a
+            LOOP. Equality between two statement-turn replies stays exempt (reported as ack_repeat). Equality on
+            asking turns is unchanged (a LOOP against any earlier reply). Reason: OD6 exempted consistent
+            acknowledgements; repeating an answer where it does not belong is degeneration (the PARROT fake met
+            Level A's loop criterion under the letter of OD6). Code: grade_loop.equality_set (s7). Measured on dev
+            (fakes): PARROT loop 0.049, criterion not met; ACKER and IDEAL loop 0; fixed-ack cheaters 0.57 to 0.77,
+            audit cheaters up to 0.84; R and every family score unchanged (rc12/notes.txt F1). (Those F1 numbers
+            predate F2, which moved them; the current ones are under (2).)
         (2) D small talk. The ruling counts D as asking, but 20 of the 90 dev fillers (904 of 4,010 D turns) are
             statements ("I managed to fix the leaky faucet myself."). One fixed reply on those turns alone gives a
-            loop rate of 0.06, 3 times the bar. Options: keep the letter (as now), or mark those fillers as a
+            loop rate of 0.06, 3 times the bar. Options: keep the letter (as it was), or mark those fillers as a
             non-asking kind at build time (a dev rebuild, a new dev hash and the full check order; the sealed
             fillers need the same split).
+            DECIDED 2026-09-25 by Claude under Max's standing permission (reversible before the lock): F2 SMALL-TALK
+            FILLERS. The dev D fillers that are plain statements (no question, no request: 20 distinct texts, 904 of
+            the 4,010 D turns, e.g. "The sunrise was really pretty today.") are annotated as non-asking, so for the
+            equality clause they behave like statement turns: the ack exemption applies, and so does F1's parrot
+            rule. Requests without a question mark ("Compose two rhyming lines about falling leaves.", "Invent a
+            silly holiday we could celebrate.") stay asking. The annotation lives in the filler pools as data (a
+            hand label on each of the 90 entries of rc12/pools_fill_a.py and pools_fill_b.py: 50 question, 20
+            request, 20 statement), never inferred from punctuation at grading time; the record carries it as a
+            per-turn field asks on every D turn (false on those 904), and the turn kind stays D for every other
+            purpose (grade_loop.loop_kind gives the loop rule the kind "d", which does not ask). The dev split is
+            rebuilt: sha256 c5074e68137c9e419fdd8245799c5a569261fe6da7f9544a9b95533dfe991ecd before,
+            3e543f8d5638e6ab9fd106099fc2584e810dd90544f212146a3cd73bd66689a0 after; a script checked that every
+            record is identical once the new field is removed. The sealed split applies the same annotation to its
+            fillers (s13 S1). Measured on dev (fakes, rc12/notes.txt STEP 8): SMALLTALK (one fixed reply on the
+            small-talk turns only) loop 0.060 before, 0 after; PARROT, which now repeats only replies to asking
+            turns, loop 0.023, criterion not met; ACKER and IDEAL loop 0; fixed-ack cheaters 0.567 to 0.747, audit
+            cheaters up to 0.811; R, every family score and the G4 histogram unchanged.
+            Note (second verifier review, 2026-09-26): the exemption is by turn kind, not content. Any reply said
+            again between two statement turns, small-talk D included, is exempt, not only an acknowledgement:
+            SMALLPARROT (its first short small-talk reply again on every later statement and small-talk turn) had
+            loop rate 0.0647 before F2 and has 0 now, ADVICE_FIXED (one advice sentence on every small-talk turn)
+            0.060 before and 0 now; the ack-repeat rate (0.0647, 0.060) is the only signal (s7).
+            Not covered by F2 (open, not decided): PERSIST's graded P turns reuse filler text (216 dev P turns, 46
+            of them statement fillers). They stay kind P, which asks under the ruling, so an identical reply to two
+            of them is a LOOP and fails G-FMT's freshness clause (f1_degen), as it did before F2.
         (3) The terse OWN restatement, strict case (d) of s6: measure its rate on the dev baselines first.
-      Suggested, not ruled: (1) and (2) together, since under (1) alone a statement-turn reply that repeats a reply
-      to a small-talk D statement would count as a LOOP.
+            DECIDED 2026-09-25 by Claude under Max's standing permission (reversible before the lock): F3 stays
+            open. Strict case (d) (a terse OWN restatement of the model's own Q reply, charged as a LOOP) is measured
+            on the dev baselines first and then put to Max before the lock; no code change until then.
+            WIDENED 2026-09-26 (second verifier review; still open, the rule is unchanged, only a measurement was
+            added): the case is not OWN-only. A RIGHT answer in any family that equals, normalized, an earlier
+            reply of the model is a LOOP and fails the probe, e.g. a model that confirms "I ride a green bike to
+            work." with "Your bike is green." and later answers the probe with the same sentence. Dev, fakes only
+            (s6 (d), s8): RESTATE loop 0.060, R_ungated 40.0, RECALL, CORR, BIND, TWOHOP, TOPIC, ROLE and T0 at
+            0.00; TERSE_VAL the same; TERSE_VAL_CTRL (same answers, IDEAL acknowledgements) loop 0, R_ungated 100.
+            Measurement on the dev baselines: score.py equality_only, per family, the probes whose only failing
+            clause is the equality clause (graders.eq_only). Options for Max before the lock, no pick until those
+            counts are in: (i) keep strict; (ii) on a probe turn, exempt equality with an earlier reply to a
+            STATEMENT turn (a confirmation may be repeated as the answer; the same answer to two questions stays a
+            LOOP; this does not cover the OWN case, whose Q reply answers an asking turn); (iii) on a probe turn,
+            exempt equality with the model's own reply to the probe's source turns (the turns that state the gold,
+            or the OWN Q turn): it would cover RESTATE, TERSE_VAL and the OWN case. Self-copy is unchanged under
+            each option, so a 12+ word restatement stays a LOOP (27 of RESTATE's 48 TOPIC probes fail by self-copy
+            as well).
+        (4) Near-duplicates (second verifier review, 2026-09-26; OPEN, not decided). The rule charges only verbatim
+            repeats and 12+ word copies (s7), so a parrot with one word added escapes it: PARROT_PLUS loop 0.0052,
+            criterion met, answer-repeat 0; NEAR_D (a canned non-answer with the turn number on every asking D turn)
+            loop 0. Option: a near-duplicate rate (for example a short reply within one word of an earlier one)
+            reported beside the loop rate, never gated, before the lock; or leave the rule as it is and say so.
+      (1) and (2) were taken together, as suggested: under (1) alone a statement-turn reply that repeated a reply to
+      a small-talk D statement counted as a LOOP.
   OD7 Strict cases (a) and (b) of s6 (right answer plus another candidate with its right owner; "X, not Y or Z").
       RECOMMENDED: keep strict as primary and report the lenient twins beside. Strict applies equally to Planck and
       the comparator. Revisit before the lock only if the dev baselines show strict-only failures are common.
@@ -630,13 +797,20 @@ becomes training text). The two share the label D8 by accident.
   From this draft: the sealed banks are written after the pipeline generator exists, not before (s13 S2).
   From the rulings (s17, 2026-09-25): the loop equality clause is charged only on replies to asking turns, with
   identical statement-turn replies reported as ack-repeats (OD6 iii; SPEC: every reply); OWN is gated by the --own-cf
-  run (OD1 b; SPEC has no cf run); F6-F8 are out of RC-12, not deferred (OD4 c).
+  run (OD1 b; SPEC has no cf run); F6-F8 are out of RC-12, not deferred (OD4 c). From the OD6 follow-up decisions
+  (s17, reversible before the lock): a statement-turn reply equal to an earlier answer is a LOOP (F1); fillers carry
+  a hand label and D turns an asks field, and small-talk statement fillers are statement turns for the loop rule
+  (F2; SPEC s1 calls every filler a request).
 
 19. LOCK CHECKLIST (in order)
   1 DONE 2026-09-25: Max ruled OD1-OD8 (every recommended pick, s17); the picks are implemented (code for OD1 and
-  OD6) and the mutant files updated. Check order re-run: see rc12/notes.txt STEP 7.
+  OD6) and the mutant files updated. Check order re-run: see rc12/notes.txt STEP 7. F1 and F2 (s17 OD6 follow-up)
+  decided and implemented, check order re-run: notes F1 and STEP 8; F3 open (widened 2026-09-26, its measurement
+  built: notes STEP 8 round 2).
   2 Parity check and engines (s16). 3 Dev baselines: every panel model, template and plain, 3 seeds and greedy; OWN
   also under --own-cf (required by OD1: without it R is None). 4 Headroom, re-anchor, PERSIST drop list, strict-case
-  rates; results written here; any rebuild re-runs every gate. 5 Sizing rule. 6 Sealed session (s13 S1-S8). 7 OOD-H
+  rates (strict case (d) as widened: score.py equality_only per family); Max decides the open OD6 follow-ups
+  (s16: F3, the PERSIST P-turn statement fillers, the near-duplicate report); results written here; any rebuild
+  re-runs every gate. 5 Sizing rule. 6 Sealed session (s13 S1-S8). 7 OOD-H
   Part 1 (IDs hashed). 8 Final pass on this file: every (proposal) resolved, every OPEN closed, DRAFT removed. 9 Push,
   release, Software Heritage snapshot, key copies checked in both places.

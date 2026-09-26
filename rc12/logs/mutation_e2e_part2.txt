@@ -1,19 +1,16 @@
-RC-12 mutation_e2e.py part 2/6: 14 of 81 mutants, fresh process each, 59 s. No model.
+RC-12 mutation_e2e.py part 2/8: 11 of 88 mutants, fresh process each, 60 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #01 runner: fed-back reply not stripped  <- history: HISTCHECK plain ctx=556: 6688 bad histories [('rc12-dev-t0-001', 2), ('rc12-dev-t0-001', 3), ('rc12-dev-t0-001', 4)]
-KILLED    #07 runner: no room kept for the 256 new tokens  <- trunc: ctx 556: only 0 truncated probes
-KILLED    #13 render: role cut without the newline  <- render: cut_plain('A\nAssistant: B')
-KILLED    #19 score: T0 in the composite  <- G2 ANTI_OVERLAP: cell T0:t0=1.00
+KILLED    #09 runner: unit not recomputed after truncation  <- trunc: ctx 556: units not recomputed after truncation ['rc12-dev-t0-001', 'rc12-dev-t0-003', 'rc12-dev-t0-004']
+KILLED    #17 score: BIND scored per conversation, not per pair  <- G2 ANTI_OVERLAP: family BIND=0.50
 KILLED    #25 score: loop-vs-comparator always met  <- scoring: Level A met without a comparator
-KILLED    #31 score_stats: bootstrap not paired  <- stats: bootstrap is not paired: D(FIRST, FIRST) CI {'D': 0.0, 'lo': -3.4062500000000018, 'hi': 3.635416666666666, 'n': 200}
-KILLED    #37 fakes: value cheaters get the gold  <- G2 FIRST: cell BIND:owner=1.00
-KILLED    #43 fakes_family: P_OBEYALL lets the newest rule win (correct on 3 of 4 override pairs)  <- G2 P_OBEYALL: cell PERSIST:override=0.75
+KILLED    #33 score_stats: PERSIST replies counted in base rates  <- stats: PERSIST base rates {'brackets:None': 0.006277292576419214, 'caps:None': 0.008187772925764192, 'closing:over and out': 0.0049126637554585155, 'c
+KILLED    #41 fakes_family: P_NEVER obeys  <- G2 P_NEVER: cell PERSIST:hold=1.00
 KILLED    #49 runner: runner ignores --own-cf  <- owncf: CONSIST OWN under --own-cf = 1.00, want 0.0
-KILLED    #55 score: OD1 b: R uses the ungated OWN  <- owngate: CONSIST: gated OWN 1.0 {'OWN': 1.0, 'OWN_CF': 0.0, 'OWN_GATED': 0.0, 'cf_unswapped': 0}, want OWN_GATED 0.0
-KILLED    #61 score: OD6 iii: ack-repeats never counted  <- ackrep: ACKER ack-repeat 0.0 / 0.0, want 0.17712882096069868 / 0.6956055734190782
-KILLED    #67 score: OD1 b: product of rates (own-history unit x the cf run's rate)  <- owngate: random units: OWN_GATED:list 0.3391927083333333, per-unit AND 0.3125
+KILLED    #57 score_stats: OD1 b: bootstrap runs without the cf rows  <- stats: bootstrap refusal ZeroDivisionError: division by zero
+KILLED    #65 fakes_family: OD6 iii: ACKER also acks D questions (those repeats are LOOPs)  <- ackrep: ACKER ack-repeat 0.3310589519650655 / 0.8758122743682311, want 0.17712882096069868 / 0.46859205776173285
 KILLED    #73 runner: OD1 b: runner does not mark a cf rewrite that did not take  <- owngate: unswapped cf rows not scored 0 in OWN_GATED ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0}, pick 1.0)
-KILLED    #79 score: OD6 iii: answer repeats never counted  <- ackrep: PARROT loop 0.0, answer-repeat 0.0, want 0.19292604501607716
-killed 14 | survived 0 | crashed 0 | malformed 0
+KILLED    #81 grade_loop: F1: parroted answers exempt again (PARROT meets the Level A loop criterion)  <- ackrep: PARROT loop 0.0 (want 0.023471615720524017), Level A loop criterion met True, R 100.0, answer-repeat 0.06209386281588448, want 0.0620938628158
+killed 11 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

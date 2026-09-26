@@ -1,0 +1,16 @@
+RC-12 mutation_e2e.py part 7/8: 11 of 88 mutants, fresh process each, 66 s. No model.
+baseline failures (expected: only the G4 item lines):
+  none
+KILLED    #06 runner: dropped-turn off by one  <- trunc: ctx 556: verdict, runner's lost turns and the fake's history disagree [('rc12-dev-t0-008', 12), ('rc12-dev-t0-022', 12), ('rc12-dev-t0-029', 12
+KILLED    #14 render: fit drops half pairs  <- history: HISTCHECK plain ctx=556: 1032 bad histories [('rc12-dev-t0-001', 9), ('rc12-dev-t0-001', 10), ('rc12-dev-t0-001', 11)]
+KILLED    #22 score: loop rate counts runaways  <- ackrep: PARROT loop 0.0 (want 0.023471615720524017), Level A loop criterion met False, R 100.0, answer-repeat 0.06209386281588448, want 0.062093862815
+KILLED    #30 score_stats: headroom ceiling bar  <- stats: headroom ceiling
+KILLED    #38 fakes: IDEAL answers OWN from the annotation, not its own reply  <- G1 IDEAL_ALT: OWN:list=0.00
+KILLED    #46 fakes_audit: ORDER_ABS abstains where it should  <- G2 ORDER_ABS: cell LOOKUP:menu=1.00
+KILLED    #54 score: OD1 b: cf rows counted as own-history units  <- owngate: CONSIST: --own-cf rows counted outside the gate (replies 576 vs 576, OWN 0.5 vs 1.0)
+KILLED    #62 score: OD6 iii: ack-repeat-of-statements rate over every reply  <- ackrep: ACKER ack-repeat 0.17712882096069868 / 0.17712882096069868, want 0.17712882096069868 / 0.46859205776173285
+KILLED    #70 score: OD1 b: a cf run of another responder is a twin  <- owngate: cf run of another responder: gated OWN not missing ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0})
+KILLED    #78 score: OD6 iii: --own-cf rows counted in the answer-repeat rate  <- ackrep: PARROT: --own-cf rows moved the ack-repeat or equality-only reports: [0.023471615720524017, 0.06209386281588448, 0.06980684513724161, {'T0': [
+KILLED    #86 score: F3 report: --own-cf rows counted  <- ackrep: ACKER: --own-cf rows moved the ack-repeat or equality-only reports: [0.17712882096069868, 0.46859205776173285, 0.0, {'T0': [0, 96], 'RECALL': 
+killed 11 | survived 0 | crashed 0 | malformed 0
+ALL MUTANTS KILLED

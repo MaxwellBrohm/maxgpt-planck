@@ -2,6 +2,7 @@
 fixtures_graders.py; all built from real dev items."""
 import re
 
+import common as C
 import fam_persist as FP
 from fixtures_graders import fx, generic_degenerate, cap, vfix, SELF
 
@@ -77,24 +78,41 @@ NOTED = "Okay, noted."              # not in the IDEAL ack pool
 SHORT_ANS = "Start small and keep at it every day."                    # 8 words: equality clause only
 LONG_ANS = "You could start small and keep at it a little every day."  # 12 words: self-copy fires too
 STORY = "And then the rain stopped."
+ONE_WORD = "Patience."                                                  # 1 word, no pool value: equality only
 STATEMENT = ("S", "L", "C", "I", "O", "T")
+LABEL = {q: lab for q, _, lab in C.FILLERS}     # hand labels of the filler pools (F2): fixture selection only
+
+
+def d_turns(rec, label, after=0):
+    """D turns of rec (after turn `after`) built from a filler with this hand label (pools_fill_a / _b). Fixture
+    selection only: the graders read the record's asks field, never these labels."""
+    return [t["i"] for t in rec["turns"] if t["kind"] == "D" and LABEL[t["text"]] == label and t["i"] > after]
 
 
 def conv_loop_fixtures(recs):
-    """OD6 (iii) conversation fixtures on real records: (label, rec, patch {turn: reply}, want). want = (turns
-    flagged LOOP, turns counted as ack-repeats, turns counted as answer repeats) from graders.grade_conv on the
-    IDEAL history so patched.
+    """OD6 (iii), F1 and F2 conversation fixtures on real records: (label, rec, patch {turn: reply}, want). want =
+    (turns flagged LOOP, turns counted as ack-repeats, turns counted as answer repeats) from graders.grade_conv on the
+    IDEAL history so patched. "D question" / "D request" / "small-talk D" pick D turns by their filler's hand label.
       ack_fixed        "Got it." on every statement turn (S L C I O T): no LOOP; every statement turn after the
                        first is an ack-repeat (case a)
       same_answer      one short answer to two different D questions: LOOP on the second (case b)
       ack_as_answer    "Okay, noted." on a statement turn, then on a later D question: LOOP (the comparison set is
                        every earlier reply, grade_loop docstring)
-      stated_after     a short D answer repeated on a later statement turn: an ack-repeat and an answer repeat, not
-                       a LOOP (OD6 iii as ruled; the answer-repeat rate reports it, verifier 2026-09-25)
+      stated_after     a short D answer repeated on a later statement turn: a LOOP (F1, decided 2026-09-25: an
+                       answer parroted on a statement turn), also an ack-repeat and an answer repeat (reported)
+      one_word_stated  the same with a ONE-word answer ("Patience."): a LOOP at any length (verifier 2026-09-25)
+      ack_twice        "Okay, noted." on a statement turn, a D question answered between, then "Okay, noted." on a
+                       later statement turn: an ack-repeat only, not a LOOP (F1 keeps ack after ack exempt)
       long_stated      the same with a 12-word reply: LOOP through the unchanged self-copy clause, and an ack-repeat
       loop_request     a LOOP-family request (kind P) answered like the request before it: LOOP (case c)
       q_copy           an OWN Q reply that copies an earlier reply: LOOP at Q (Q asks; verifier 2026-09-25)
-      x_copy           a ROLE X reply that copies an earlier reply: LOOP at X"""
+      x_copy           a ROLE X reply that copies an earlier reply: LOOP at X
+      smalltalk_ack    F2: "Okay, noted." on two small-talk D turns (asks: false): an ack-repeat, not a LOOP
+      smalltalk_parrot F2 with F1: a short D-question answer said again on a later small-talk D turn: LOOP, and an
+                       ack-repeat and an answer repeat (the small-talk turn is a statement turn for the loop rule)
+      question_after   F2: "Okay, noted." on a small-talk D turn, then on a later D question: LOOP (the question asks)
+      request_twice    F2: one short answer to two D requests (no question mark, label request): LOOP on the second
+                       (requests keep asks: true)"""
     recs = list(recs)
     out = []
     def stated(r):
@@ -103,17 +121,21 @@ def conv_loop_fixtures(recs):
     st = stated(rec)                  # the record with the most statement kinds, then the most statement turns
     out.append(("ack_fixed", rec, {i: ACK for i in st}, ([], st[1:], [])))
     for rec in recs:
-        ds = [t["i"] for t in rec["turns"] if t["kind"] == "D"]
+        ds = d_turns(rec, "question")
         if len(ds) >= 2:
             out.append(("same_answer", rec, {ds[0]: SHORT_ANS, ds[1]: SHORT_ANS}, ([ds[1]], [], [])))
             break
     for rec in recs:
-        st = [t["i"] for t in rec["turns"] if t["kind"] in STATEMENT]
-        ds = [t["i"] for t in rec["turns"] if t["kind"] == "D" and st and t["i"] > st[0]]
+        st = stated(rec)
+        ds = d_turns(rec, "question", after=st[0]) if st else []
         later = [i for i in st if ds and i > ds[0]]
         if ds and later:
             out += [("ack_as_answer", rec, {st[0]: NOTED, ds[0]: NOTED}, ([ds[0]], [], [])),
-                    ("stated_after", rec, {ds[0]: SHORT_ANS, later[0]: SHORT_ANS}, ([], [later[0]], [later[0]])),
+                    ("stated_after", rec, {ds[0]: SHORT_ANS, later[0]: SHORT_ANS},
+                     ([later[0]], [later[0]], [later[0]])),
+                    ("one_word_stated", rec, {ds[0]: ONE_WORD, later[0]: ONE_WORD},
+                     ([later[0]], [later[0]], [later[0]])),
+                    ("ack_twice", rec, {st[0]: NOTED, later[0]: NOTED}, ([], [later[0]], [])),
                     ("long_stated", rec, {ds[0]: LONG_ANS, later[0]: LONG_ANS}, ([later[0]], [later[0]], [later[0]]))]
             break
     loop = next(r for r in recs if r["family"] == "LOOP")
@@ -122,7 +144,29 @@ def conv_loop_fixtures(recs):
         rec = next(r for r in recs if r["family"] == fam and any(t["kind"] == kind and t["i"] > 1 for t in r["turns"]))
         k = next(t["i"] for t in rec["turns"] if t["kind"] == kind and t["i"] > 1)
         out.append((label, rec, {1: SHORT_ANS, k: SHORT_ANS}, ([k], [], [])))
-    assert len(out) == 8, [x[0] for x in out]
+    for rec in recs:                                                        # F2, decided 2026-09-25
+        sm = d_turns(rec, "statement")
+        if len(sm) >= 2:
+            out.append(("smalltalk_ack", rec, {sm[0]: NOTED, sm[1]: NOTED}, ([], [sm[1]], [])))
+            break
+    for rec in recs:
+        qd = d_turns(rec, "question")
+        sm = d_turns(rec, "statement", after=qd[0]) if qd else []
+        if sm:
+            out.append(("smalltalk_parrot", rec, {qd[0]: SHORT_ANS, sm[0]: SHORT_ANS}, ([sm[0]], [sm[0]], [sm[0]])))
+            break
+    for rec in recs:
+        sm = d_turns(rec, "statement")
+        qd = d_turns(rec, "question", after=sm[0]) if sm else []
+        if qd:
+            out.append(("question_after", rec, {sm[0]: NOTED, qd[0]: NOTED}, ([qd[0]], [], [])))
+            break
+    for rec in recs:
+        rq = d_turns(rec, "request")
+        if len(rq) >= 2:
+            out.append(("request_twice", rec, {rq[0]: SHORT_ANS, rq[1]: SHORT_ANS}, ([rq[1]], [], [])))
+            break
+    assert len(out) == 14, [x[0] for x in out]
     return out
 
 
