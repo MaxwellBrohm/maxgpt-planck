@@ -1,0 +1,351 @@
+SCREENS: the first Phase 3 screening batch at 5M (PLAN Phase 3; S001-S007, S008 dropped after critique)
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model for these screens: it writes configs and reads JSON.
+
+WRITTEN 2026-09-26 09:40, before any screen config, flag, run or E2/E3 result exists. Run for this entry, no model:
+harness/budget.py (count_analytic) for the arm shapes, and scipy t and chi-square quantiles. Nothing is queued.
+REVISED 2026-09-26 after a critique, still before any screen config, flag, run or E2/E3 result exists, nothing
+committed: see CHANGES AFTER CRITIQUE at the end. S008 is dropped from this batch; 7 screens, 9 contrasts remain.
+This file is the batch overview AND the COMMON block (C1-C9) that every S00x/notes.txt names as part of its
+pre-registration. Each notes.txt states only what differs.
+
+WHY THIS BATCH, AND WHY THESE BETS
+  PLAN Phase 3: "Each bet is one change against the baseline, pre-registered, with paired seeds (common random
+  numbers). Decisions rest on continuous metrics: fixed-window bits per byte, plus the Tier 0 log-prob margin.
+  Generative pass rates count only for effects of 5 points or more."
+  Constraints on this batch:
+  - RC-12 is not locked, and no Planck model is scored on any RC-12 split, dev included, before the lock (PLAN
+    Phase 0, hard rule). So the Tier 0 margin is not available: these screens DECIDE on bpb (E2/E3's CHAT and
+    PROSE) and REPORT non-RC-12 diagnostics (C6). Tier 0 is added after the lock (C8).
+  - No teacher-generated chat pool exists yet (PLAN Phase 2: 100M by Nov 8, 300M by Nov 22). The only training
+    data is the starter corpus, where the chat-kind sources are dolly and oasst2 at pinned shares 0.016 and 0.012
+    (E2 DATA; data_prep/stats/starter_v0_8k/manifest.json harness_data: irc is a plain token source). So every data
+    bet is out, and the batch is architecture, block, optimizer and objective bets.
+  - Loss is not a behaviour proxy for attention changes: a 1.2B replication found modifications within 2-3% of
+    baseline loss dropping 6-16 downstream points (research/lanes/arch.md 1.4, citing arXiv 2605.20798). So a bpb
+    WIN here only NOMINATES a bet for the post-lock Tier 0 reading and a 20-30M confirmation (PLAN 3: adopted only
+    if it passed at 5M AND held at 20-30M AND survived 3f).
+
+  id    ledger / source                      the one change                                  code to land   class (C4)
+  S001  P-021 (rank 21, must-run); row 19    attention gate off                              none (diag)    new init
+  S002  LEDGER baseline row 19               value residual off / QK-norm off / norm         none           SIA
+        (re-validate Max's block)            scaling off (3 arms, each one change)
+  S003  row 19 (re-validate optimizer);      AdamW (cautious WD) instead of NorMuon, each    none           same init
+        P-119                                at its own tuned LRs
+  S004  P-148 (must-run: P-022 or P-148);    Canon-AC layers (kernel 4, residual)            model flag     SIA or new
+        REPORT s6 lever 4
+  S005  P-020 (rank 20, must-run);           forget gate on attention logits (Forgetting     model flag     SIA or new
+        REPORT s6 lever 3                    Transformer variant), mask engine
+  S006  P-105 (rank 104)                     t+2 auxiliary prediction head (MTP), weight     model+loss     SIA or new
+                                             decaying with the LR factor
+  S007  P-024 (rank 24)                      smeared keys (previous-token path on keys)      model flag     SIA or new
+  S008  P-110 (rank 109)                     DROPPED from this batch: not one change (S008 notes, CHANGES AFTER
+                                             CRITIQUE)
+  SIA = same-init architecture, C4's loosened class (SD_ref = u x SD_d); "or new" = new init if the flag's
+  init-isolation test fails.
+
+CONSIDERED AND NOT IN THIS BATCH (reason, from the files named)
+  P-056 user-turn loss: config-only (data.chat.loss all), but chat-kind tokens are 2.8% of the starter stream;
+        run it on the first pool mix. P-052, P-053, P-009, P-007, P-008, P-026, P-051, P-057, P-025, P-162: need
+        the pool or skeleton renders (and D8 bars Claude-written training text). E8/E9/E10 (P-152/151/150): PLAN 3d
+        runs them at 5M only if E4 finds signal at 5M. P-158: E7 is its own experiment (Oct 24 - Nov 8). P-022:
+        needs a delta-rule kernel and the PLAN 3d toy first. P-106: E2's D1 diagnostic runs batch 32 x 2048. P-109:
+        SAN reached parity only at ~105B tokens at 24M (LEDGER). P-159: untied at 5M doubles the 1.57M table
+        (budget.py: 6.58M total untied). P-104: needs eval past 2k. Next batch candidates (code, bpb-decidable):
+        P-172 ReLU-squared, P-173 multipliers, P-174 TOP, P-112 hyper-connections. A run-length weight-decay rule
+        (PLAN 5; E2 SCOPE) is calibration, not a bet: it belongs with E2's refresh.
+  P-110 (was S008): at equal total it moves the sharing, a ninth layer, the MLP width and (through cfg.depth) every
+        layer's o/down init std and norm scale, so no verdict could say which one mattered; its depth half is E9,
+        which PLAN 3d runs at 5M only if E4 finds signal at 5M. Status "not run" (PLAN: never "failed").
+
+C1 SETTING (identical in every arm unless its notes.txt names the key)
+  BASE = E3's arm A config, key for key: 5M shape d 192, 8 layers, 3 heads, head_dim 64, SwiGLU 488, vocab 8192,
+  tied, every block flag on (5,010,133 params; E2 MODEL); tok_v0_8k; E2's pinned starter shares; data.mode pack,
+  window_tokens 131072, max_item_len 2048, chat loss assistant; batch 16 x 2048 = 32,768 slots per step; full WSD,
+  7,630 steps, warmup_steps 76, linear decay from step 6,104 to 0 (E3 ARMS, 5M schedule); ckpt_every 153,
+  keep_last 2, plus final; log_every 10; every engine flag written explicitly with E2's FIXED 1 values.
+  PARAMETERS FILLED FROM E2 (results.json, cited by sha256 in each screen's FIXED log):
+    LR5 = (eta_5, r_5): E2's final 5M pick, or E3's override (E3 "E2 re-check").
+    B = the run length of that pick: 250.0M slots (7,630 steps x 32,768 = 250,019,840), which E2 registered as
+        the length "every 5M screen will run" (E2 SCHEDULE, "Why these lengths"). If E2's recorded pick length or
+        E3's 5M schedule differs from these numbers, the batch stops for a person.
+  PARAMETERS FILLED FROM E3 (results.json, sha256 cited): per metric at 5M, SD_d, sigma_seed, sigma_init (Part 3,
+    if run), their df, k_needed(1%), and whether E3's refresh (its rule 5) is current for this setting.
+  Setting scope: tok_v0_8k and the starter mix. If tokenizer v1, Core v0 or a pool mix is the Phase 3 baseline
+  when the batch is queued, E2's refresh g-check and E3's refresh run first (E2 SCOPE; E3 rule 5), the parameters
+  above are refilled from them, and the batch runs on that setting instead (a DEVIATION, logged before any run).
+  Starter-corpus exception (E2 FIXED 7): screen checkpoints are decision runs only, never released, never an init
+  for a recipe run, never on the curve, never scored on OOD-H.
+
+C2 ONE CHANGE, ENFORCED
+  Each arm's config differs from BASE's by exactly the keys its notes.txt names, plus name, out_dir, seed and
+  (C3) the arm's g-scaled LRs. The config generator diffs every arm against BASE before queueing and refuses any
+  other difference. Arms are matched to BASE's total parameters within 2% (PLAN 5 budget solver; budget.py tol).
+  RC-12 GUARD (before the lock, i.e. for every run of this batch): harness/train.py turns on in-training RC-12 dev
+  scoring whenever a config has eval.rc12 (train.py, the eval.rc12 branch; harness/rc12_eval.py, default data
+  rc12/dev/rc12_dev.jsonl, writes out_dir/rc12_eval.jsonl). The generator refuses ANY config with an eval.rc12 key,
+  BASE included (the diff against BASE would not catch it in BASE itself), and the analyzer refuses any run directory
+  that contains rc12_eval.jsonl. Mutant: either check removed must fail a test. PLAN 5's "Tier 0 recall guard on every
+  checkpoint" stays off for these runs: Tier 0 items are RC-12 dev content (rc12/fam_recall.py line 1, "RC-12 DEV
+  builders: T0 (Tier 0 gate) and RECALL"). C8's post-lock scoring uses a separate scorer on kept final checkpoints.
+
+C3 PER-ARM LEARNING RATE (PLAN 5 "LR tuned at 5M for each arm"; E2 SCOPE "Per-arm LRs")
+  Every arm except BASE runs a g-check at seed 1 before its screen: g in {0.5, 1, 2} times all three LRs of LR5
+  (ratio r_5 kept), full 250M schedule, scored like E2. Pick = argmin F(CHAT), with E2's PROSE guard (1% relative)
+  and tie rule (lower LR); one more factor-2 point beyond an edge pick, at most 2 (E2's extension rule). S003 uses
+  E2's whole stage A-C search instead (its notes). Seed-1 runs select only and are never in a paired analysis
+  (E3 change 3). BASE stays at g = 1: LR5 was itself tuned at seed 1 by E2.
+
+C4 SEEDS, PAIRING, REFERENCE NOISE
+  Seeds 101, 102, ..., 100 + k (fresh: E2 used 1, E3 1-11). k = max(2, k_needed(1%)) for the arm's class, at most
+  5; if k_needed exceeds 5 the arm runs 5 seeds and is labelled "underpowered", and a null reads "not resolved"
+  (E3 rule 2). At seed s every arm reads the identical token stream: the loader draws from its own numpy
+  generators seeded by the run seed (harness/data.py, default_rng([seed, w, 11]); harness/sources.py,
+  default_rng([seed, epoch, 7])), not from the torch RNG, so an arm that draws a different number of init values
+  still gets BASE's stream. Every parameter created in the same order starts from identical draws.
+  Class (model.py reset_parameters draws only nn.Linear and nn.Embedding weights; RMSNorm gains and value-residual
+  scalars are constants):
+    same init   E3 rule 1's first row (LR, optimizer, schedule, weight decay, clip, loss masks): S003 only.
+                SD_ref = SD_d, df_ref its df; per-arm noise check below.
+    SIA         same-init architecture. E3 rule 1 puts "architecture or shape" in the NEW INIT row, and its
+                KNOWN LIMITS say "bets that move the model more may be noisier" than the LR-only contrast that
+                measured SD_d. E3 allows a looser rule only if the pre-registration says why, so this is recorded
+                as a LOOSENING: these arms keep every BASE draw bitwise (tested, below), so the init-noise term that
+                the new-init row adds is absent. The looser SD_d is not used bare: SD_ref = u x SD_d, u =
+                sqrt(df / chi2(0.20, df)), E3's 80% upper bound for SD_d (E3 KNOWN LIMITS "about a factor of
+                1.35"; scipy, 2026-09-26: u = 1.353 at df 7, 1.398 at df 6), df_ref = SD_d's df.
+                Members: S002's three arms, and S004, S005, S006, S007 when their init-isolation test passes in
+                the committed harness (each registers a constant init that draws nothing from the torch RNG).
+                S006 changes the objective, nearest E3's "loss masks" row, but it adds a trained module, so it is
+                put here, the stricter reading.
+    new init    removing or adding a drawn module shifts later draws (S001; any SIA candidate whose isolation test
+                fails): SD_ref = sqrt(2) * sigma_init (sqrt(2) * sigma_seed if E3 Part 3 did not run).
+  Noise checks. same init (S003): if the arm's own SD of d_s exceeds SD_d by more than sqrt(chi2(0.95, k-1) /
+  (k-1)) (1.731 at k = 3, E3's refresh bound), it is re-read with the new-init SD. SIA: a per-arm check has df 1
+  at k = 2, so the check is POOLED: before any SIA verdict is read, the residuals d_s - dbar of every SIA arm
+  finished so far are pooled (df = sum of (k - 1) over those arms); if the pooled SD exceeds u x SD_d by more than
+  sqrt(chi2(0.95, df) / df) (1.449 at df 6, 1.324 at df 12; scipy), every SIA arm is re-read with the new-init SD,
+  including verdicts read earlier (re-labelled "noise check failed later"). An arm re-read with a larger SD than
+  its k was chosen for is also labelled "underpowered" (a null reads "not resolved").
+  One BASE run per seed serves every default-engine screen. S005 has its own BASE in the mask engine at S005's
+  micro setting (registered micro 8 x accum 2, fallback 4 x 4, S005 notes), and S006 too if its memory needs micro
+  8 x accum 2. A BASE run pairs with an arm from a later harness commit only if every change between the commits
+  is a flag defaulting off and the flag-off equivalence test passes at the later commit; otherwise BASE reruns
+  (0.31 h).
+
+C5 METRICS (E2 METRIC and E3 METRICS, unchanged: eval sets v0, data_prep/bpb.py, fixed invocation)
+  Primary F(CHAT) (oasst2 set), guard F(PROSE) (cccc + gutenberg + wikimedia), final checkpoint. Reported, no
+  rule: CHAT user and assistant turns, PROSE per source, stackexchange, irc, dolly, M(.), mean training loss over
+  the last 2% of steps, tok/s, hours, and the clip rate (share of logged steps whose log.jsonl gnorm exceeds the
+  1.0 clip; harness/trainer.py clip_grad_norm_ returns the pre-clip norm). cccc carries 31.5% eval 13-gram
+  overlap with training (E2 FIXED 4): a PROSE guard reading driven by cccc alone (gutenberg and wikimedia both not
+  WORSE) is labelled CCCC-ONLY and does not block a nomination.
+
+C6 NON-RC-12 DIAGNOSTICS (continuous; reported; read with rule C7 only once an E3 Part 4d addendum has given the
+metric an SD on E3's kept checkpoints, otherwise descriptive: the paired mean and the number of seeds per sign)
+  E3 Part 4d ("the induction score and history dependence, once they exist") can give final IND and HD an SD from
+  E3's kept final checkpoints. IND ONSET can get one only if E3's runs carried the IND hook: that needs the hook
+  committed before E3 Part 1 starts, which E3's owner decides (this workflow edits no E3 file).
+  IND  induction: 64 fixed sequences of 128 uniform random non-control token ids (a committed file, sha256 in
+       FIXED), each fed twice as one document; IND = mean NLL (nats) on copy 1 minus copy 2, positions 2..128.
+       Logged in training every 153 steps by an eval hook, and on the final checkpoint. Two onsets, both reported:
+       onset_half = first logged step at which IND reaches half the run's own final value (the P-024 and P-105
+       reading: "earlier induction"); onset_abs = first logged step at which IND reaches L_s = half of BASE's final
+       IND at the same seed, one level for both arms of a pair ("not reached" if never), since onset_half moves
+       with the arm's own final IND. The hook calls the model as bpb.py does (one document per row, doc=None).
+       MATCHED LR (IND onset only): LR stretches induction emergence (LEDGER P-046 and P-106, citing 2609.19000:
+       "LR and batch each stretch induction emergence ~2.3x"; E2 SCOPE: "LR moves induction timing"), and each arm
+       runs at its own g pick while BASE runs at g = 1. So onset is compared only at matched LR: read from the
+       screen runs when the arm's pick is g = 1; otherwise, for S006 and S007 (onset is P-105's and P-024's own
+       win condition), the arm also runs at g = 1 on the screen seeds (IND-only runs, never in a bpb verdict,
+       0.31-0.40 h per seed); for every other arm onset is labelled "LR-confounded, not read". Final IND is
+       reported either way, with the arm's g.
+  HD   history dependence (LEDGER row 39; loop.md 7.4). CHAT target turns scored three ways: with their own
+       conversation context (the standard windows), with a FOREIGN context (the same number of context bytes, cut
+       from the left at whitespace, from the next conversation in eval-set order that has that many bytes; a fixed
+       rule, no RNG), and with no context (target turn and its role token only).
+       HD = bpb(foreign) - bpb(own) is the reading; HD_none = bpb(none) - bpb(own) is reported beside it (the no-
+       context target sits at RoPE position 0 with its role token first, and no file read here records whether
+       training chats open that way, so HD_none mixes history use with a position effect). Reported per turn
+       index, assistant and user turns separately; turn 1 is excluded (it has no prior conversation, E2 METRIC:
+       context is "the conversation so far", so its HD is 0 by construction). research/lanes/compute.md calls the
+       history score untested: HD is descriptive until E3 Part 4d gives it an SD.
+  SINK first-token attention mass: attention probability on each document's first token, per layer and head,
+       averaged over query positions 64 and later, on a fixed 200-window CHAT subset. GATE: mean 2*sigmoid(W x) per
+       head on the same windows (S001's BASE side; P-021 asks for both). The tool reads each arm's REAL attention:
+       it hooks q and k after every transform the arm applies (Canon-A input, the smear, QK-norm on or off, RoPE)
+       and adds S005's forget bias to the logits; its check compares the output it rebuilds from
+       those probabilities with the attention module's own output (not an SDPA call the tool makes itself), for
+       every arm of the batch.
+  E004 held-out updating items can score a harness model (likelihood, plain render, summed candidate log-probs:
+  E004 lik.py), through an adapter (tok_v0_8k, harness forward). Tokenizer-only scratch check, 2026-09-26 (E004
+  eval draw, seed 4004, 640 items; not committed, the adapter's tests redo it): every prompt plus candidate fits,
+  longest 1,356 tokens (H4, d 20); every candidate extends the prompt's tokens; but in 460 of 640 items the
+  candidates differ in token count under tok_v0_8k (E004 checked equal counts only for its own tokenizers), so
+  the adapter reports the 180 equal-count items separately.
+  They are NOT used before the lock: RC-12's CORR family is built on E004's dev.2 layout and its shortcut oracles
+  (rc12/fam_corr.py line 1; rc12/quick_shortcuts.py imports text_e004), so scores on Planck checkpoints would
+  preview CORR. Their pass rates would not decide anything: no untouched 1M-160M
+  base model passed E002's rule, and their cells track which mention they prefer rather than updating (E003
+  results.json baselines: pythia-160m LW10 0.10, TS10 0.05, NU10 0.80; pythia-14m NU10 0.97, LW10 0.20), and every
+  1M-31M E004 LR-search run stayed near chance (E003 notes, 2026-09-26 RESUME). That mention preference is still a
+  useful primacy reading (C8). After the lock they are reported, never decided on.
+
+C7 DECISION RULE (E3 "HOW LATER SCREENS USE IT" rule 3, both directions, per metric m in {CHAT, PROSE})
+  d_s = F_arm,s - F_BASE,s (bpb; negative = arm better); dbar = mean over the k seeds; SD_ref from C4 (E3 carries
+  it as a fraction of A's mean, so times BASE's mean F_m); thr_m = t(0.975, df_ref) * SD_ref / sqrt(k);
+  delta_m = 1% of BASE's mean F_m (E3's default delta_bet).
+  In E3's MDE units: MDE_p(k) = (t(0.975, df) + t(0.80, df)) * SD_ref / sqrt(k), so thr_m = c * MDE_p(k) with
+  c = t(0.975, df) / (t(0.975, df) + t(0.80, df)): 0.725 at df 7 and 0.747 at df 4 (scipy, 2026-09-26).
+    BETTER_m  -dbar > thr_m and every d_s < 0          WORSE_m  dbar > thr_m and every d_s > 0
+    EQUAL_m   |dbar| + thr_m < delta_m (95% interval inside +-1%)          else UNRESOLVED_m
+  Arm verdict: NOMINATE = BETTER_CHAT and not WORSE_PROSE. REJECT = WORSE_CHAT. TIE = EQUAL_CHAT and not
+  WORSE_PROSE. GUARD-FAIL = BETTER_CHAT or EQUAL_CHAT with WORSE_PROSE. Else INCONCLUSIVE. Each notes.txt says what
+  each verdict means for its bet.
+  DIVERGENCE (E2 RULES: a divergence "scores +inf on every metric"): an arm run that goes non-finite at a screen
+  seed gives d_s = +inf on every metric for that seed; it is never dropped (dropping it would bias the verdict
+  toward the unstable arm). So dbar = +inf: the arm can never be BETTER or EQUAL, never NOMINATE, TIE or
+  GUARD-FAIL; it is labelled UNSTABLE, and reads REJECT if every other d_s > 0, else INCONCLUSIVE. A diverged BASE
+  run drops that seed from every contrast that uses it (C9); fewer than 2 remaining seeds reads INCONCLUSIVE.
+  MULTIPLICITY: nine contrasts remain (S001 1, S002 3, S003 1, S004 1, S005 1, S006 1, S007 1), plus C8's second
+  chance (NOMINATE-MARGIN) after the lock. The raw verdicts above decide; the 20-30M confirmation is the error
+  control (PLAN 3 adoption rule). The analyzer also reports, beside each raw verdict, a Holm reading: the two-
+  sided p of dbar_CHAT / (SD_ref / sqrt(k)) on t(df_ref), Holm step-down at family 0.05 over every contrast of the
+  batch that ran (after the lock the family also holds each contrast's Tier 0 margin test), labelled "holds" or
+  "does not hold". A NOMINATE that does not hold under Holm says so in the ledger row.
+  TIE reach: when MDE_p(k) is just under 1% (k = k_needed) and thr_m = c x MDE_p, EQUAL needs |dbar| < about
+  0.275% at df 7, about 0.9 standard errors: a true null then reads TIE only about 63% of the time (normal
+  approximation, scipy, 2026-09-26). An INCONCLUSIVE null is therefore expected often and reads "not resolved",
+  never "no effect".
+
+C8 AFTER THE RC-12 LOCK (addendum per screen, before it is scored; final checkpoints kept until then)
+  Tier 0 margins (E3 Part 4a scorer and SD) on every screen run's final checkpoint, read with C7. Combined reading
+  (PLAN: bpb plus the Tier 0 margin): NOMINATE with Tier 0 WORSE = CONFLICT (to 20M with both named, never
+  adopted on 5M alone); TIE, INCONCLUSIVE or REJECT with Tier 0 BETTER = NOMINATE-MARGIN (to 20M). E004 items:
+  accuracy, margin and first-vs-latest pick shares, reported only. If E4 finds no multi-turn signal at 5M, PLAN
+  moves screening to 20M and no bpb verdict here is read as multi-turn evidence.
+
+C9 FIXED LOG, DEVIATIONS, OUTPUTS (E2's, unchanged)
+  Each screen appends a FIXED log before its first scored run: code commit and .py sha256s, tokenizer, data and
+  eval hashes, E2 and E3 results.json sha256s and the parameters read from them, each arm's g pick, k, seeds,
+  config sha256s, the smoke-run line. Deviations: E2's policy (numbered, logged before the affected run; a crash
+  resumes once; a non-finite loss is a divergence, never resumed: a diverged arm run scores d_s = +inf (C7,
+  DIVERGENCE) and is never dropped; a diverged BASE run drops that seed from every contrast that uses it).
+  Outputs: experiments/S00x_<slug>/ configs/, out/<run>/ (log.jsonl, bpb.jsonl, diag.jsonl), results.json,
+  tables.txt. No machine address, user name or key path.
+
+ORDER (must-run bets first within each stage; PLAN's must-run list names P-020, P-021 and "P-022 or P-148")
+  0 Preconditions: "E2 5M DONE" and E2 results.json; E3 Part 1 read (Part 3 if it ran); the shared code (below)
+    committed with its tests watched failing on mutants; one smoke run per new flag (labelled smoke, never read:
+    mem_fit ok, tok/s, leak self-test); E4 has not reported "no multi-turn signal at 5M" (E4 GATE).
+  1 Config-only screens: S001 g-check, S002 g-checks, then S003's search (seed 1); then BASE, S001, S002, S003 for
+    seed 101, then 102, and so on (a stopped queue leaves whole seed sets).
+  2 Code screens, same seed-major order, pairing per C4. Priority S005 (must-run P-020; mask engine, own BASE),
+    S004 (P-148), S007, S006; flags should land in that order. A lower-priority screen whose flag is ready runs
+    only when no higher-priority one is ready (the GPU is not held idle for priority).
+  CAP AND CUT RULE. The batch's cap is 25 GPU-hours: measured hours so far plus the queued estimate (GPU HOURS
+  below, at E3's actual k per class, extensions as they are queued). Before any screen's g-check and before each
+  new seed set, if the cap would be passed, whole screens are cut in this order until it fits: S006, S003, S007,
+  S002. S001, S004, S005 and the BASE runs are never cut by this rule; S004 only while P-148 is the must-run pick
+  (PLAN: "P-022 or P-148 (whichever the toy favors)"): if the PLAN 3d toy favours P-022, S004 is cut first. A
+  screen already in its seed sets finishes the current set and is reported with the seeds it has ("underpowered"
+  if fewer than its k). A cut screen's bet stays "not run" in the ledger.
+  E4 GATE (PLAN line 507: "E4 finds no multi-turn signal at 5M. All screening moves to 20M, and only the must-run
+  list runs"; E4 runs after the lock, PLAN 3a). If E4 reports no signal at 5M, no new screen starts, a screen in its
+  seed sets finishes the current set, and every verdict is a 5M loss reading only (C8); P-020, P-021 and P-148
+  move to 20M under new pre-registrations. If E4 has not reported, the batch runs: the hours spent before E4
+  reports are an accepted risk, at k = 3 about 14.7 h for the non-must-run screens (S002 5.6, S003 4.9, S006 2.4,
+  S007 1.9) and 9.5 h for S001, S004, S005 with the default-engine BASE runs.
+
+GPU HOURS (est.: 250.0M slots at the measured 255,660 slots/s, 5M docmask B16, integrated defaults, bench mix
+--docs-per-row 1.0, the closest to E2's data (harness/notes.txt SPEED INTEGRATE 2, "Realistic mix"); plus E2's
+15% for loader, checkpoints and scoring: 0.31 h per run. Mask engine: 162,849 slots/s, the same table's base
+column (old optimizer step, so an upper bound): 0.49 h. An E2 stage arm, 8,776 steps: 0.36 h. Assumed, to be
+replaced by each flag's smoke run: x1.1 for Canon and the forget gate; x1.3 for the MTP head; x1.0 otherwise.
+S005 now plans micro 8 x accum 2, whose speed is unmeasured: its 0.49 h is the micro-16 figure until the smoke run.)
+  selection runs at seed 1 (fixed): S001 0.93, S002 2.79, S003 3.96, S004 1.02, S005 1.62, S006 1.20, S007 0.93;
+    total 12.45 h (up to +7.8 h if every g-check and S003 stage takes its 2 extensions)
+  per seed: BASE 0.31, S001 0.31, S002 0.93, S003 0.31, S004 0.34, S005 1.03 (own BASE 0.49 + arm 0.54),
+    S006 0.40, S007 0.31; total 3.94 h; plus up to 0.71 h per seed of matched-LR IND runs (S006 0.40, S007 0.31,
+    only when that arm's pick is not g = 1; C6)
+  batch at one k for every class (illustration; SIA arms may need a larger k than S003 since u > 1): k = 2: 20.3 h;
+    k = 3: 24.3 h; k = 5: 32.2 h; plus up to 7.8 h of extensions and up to 1.4 / 2.1 / 3.6 h of matched-LR IND runs.
+  PLAN Phase 3 budgets 30-60 h for all 5M screens (PLAN "Compute (est.)"), and its 3b must-run data bets (P-053,
+  P-052, P-009, P-007, P-008, P-162) screen at 5M too. Under the 25 h cap this batch leaves 5-35 h of that range for
+  them. The LEDGER est.-hours column for their cheapest tests (P-053 20-30, P-052 30-50 with three 8M arms, P-162
+  about 5-10, P-009 about 20-40 for 5M and 30M together; P-007 and P-008's ledger tests are SmolLM2 fine-tunes)
+  mixes machines and sizes, so their 5M hours on the 5070 are not in any file read for this entry; read at face
+  value they exceed what is left. That is a PLAN-level budget question, flagged, not settled here. E2 plus E3 run
+  first (about 45-55 h, E3 notes).
+
+CODE THAT MUST LAND FIRST (this workflow writes none of it; each item: default off, tests watched failing)
+  Shared, before stage 1:
+  - Screen config generator + analyzer: writes arm configs from BASE with the C2 diff check (mutant: an extra key
+    passes); applies C3 and C7 from E2/E3 results.json (fixtures for every verdict branch, both directions, the
+    C4 noise fallbacks including the pooled SIA check, CCCC-ONLY, a diverged arm seed scored +inf, the Holm
+    reading, the cap and cut order; mutants: every-seed clause dropped, sign flipped, delta ignored, a diverged
+    pair dropped instead of scored, u left at 1). The C2 RC-12 GUARD: a config with eval.rc12 (BASE included)
+    and a run directory holding rc12_eval.jsonl are refused (mutant: each check removed).
+  - eval.induction hook (C6 IND): in-process, reads the fixed file, draws nothing from any RNG, calls the model with
+    doc=None as bpb.py does and reads the next-token logits; test: a CPU run with the hook on equals the hook-off
+    run bitwise (weights, optimizer, loader state, log records except the hook fields); fixtures: a uniform model
+    scores 0, a hand-built copy model scores near ln(V). It also logs GATE (C6) per layer and head on a fixed
+    32-window subset of the SINK windows for runs with attn_gate on (S001 asks when the gate closes; keep_last 2
+    keeps no early checkpoints). Best landed before E3 Part 1 starts (C6: IND onset noise).
+  - bpb.py HD modes (C6 HD) in data_prep: foreign context and no context, same target bytes, per-turn index in the
+    output; a uniform model gives HD 0 in both; mutants (context kept; foreign context equal to own) killed by a
+    fixture where the own context lowers loss.
+  - Attention diagnostic (C6 SINK, GATE) as C6 describes: q and k after every transform the arm applies, S005's
+    bias added, checked against the attention module's own output for every testutil arm and every new flag
+    (mutants: the tool skips QK-norm; the tool omits the forget bias).
+  - test_model_mask.py test_packed_equals_alone runs over testutil.ARMS (plus each new flag's arm) on
+    testutil.scramble'd weights. Today it has its own module-level ARMS list on unscrambled models, holds
+    attn_gate, qk_norm and norm_scaling off only inside one combined arm, and its check is vacuous for zero-init
+    flags (Canon, alpha = 0), so "added to testutil.ARMS, so test_model_mask.py runs it" was false as written.
+  - Per new flag (S004, S005, S007): model(idx) on one document (the doc=None path data_prep/bpb.py uses: it calls
+    model(idx) with no document ids, the plain is_causal branch in model.py and blocks.py) equals the packed mask
+    path, and for S004 and S007 the varlen path too (test_s3_docattn.py's CPU stand-in and its CUDA parity test),
+    on scrambled weights. Mutant: the flag applied only when doc is given.
+  Per screen: S004 model.canon, S005 model.forget_gate, S006 train.mtp, S007 model.smear_key (each notes.txt).
+  Among them: S005's gradient test for w and b through SDPA's float mask against an eager fp32 reference (mutant:
+  bias.detach()) and its fp32 cumulative-sum test; S006's decaying-weight test and its test that IND and bpb.py
+  read the next-token logits (mutant: the aux logits).
+  After the lock: the E004 item adapter (C6) and E3 Part 4a's Tier 0 scorer on Planck checkpoints.
+
+FILES: S001_attn_gate, S002_block_ablations, S003_adamw, S004_canon, S005_forget_gate, S006_mtp_aux,
+S007_smeared_key (experiments/<id>/notes.txt); S008_qk_share/notes.txt is kept as the record of the dropped screen.
+
+CHANGES AFTER CRITIQUE (2026-09-26; no config, flag, run or E2/E3 result existed; nothing committed. Verified
+against the files named before editing: harness train.py, rc12_eval.py, model.py, blocks.py, testutil.py,
+test_model_mask.py, test_s3_docattn.py, data.py, sources.py, trainer.py, optim.py; data_prep/bpb.py; E2 and E3
+notes; PLAN; LEDGER; research/lanes/arch.md and compute.md; research/followup/loop.md; rc12/fam_recall.py.)
+  1 C4: the same-init class for architecture arms is now labelled a loosening of E3 rule 1 (SIA), with SD_ref =
+    u x SD_d (E3's 80% upper bound, 1.353 at df 7) and a pooled noise check across SIA arms; S006 joins SIA.
+  2 C7, C9: a diverged arm seed scores d_s = +inf (E2 RULES) instead of dropping its pair; UNSTABLE arms can never
+    NOMINATE or TIE.
+  3 C6: IND onset is compared only at matched LR (g = 1 runs for S006 and S007 when needed, else "LR-confounded,
+    not read"), and onset_abs at BASE's half-final level is added.
+  4 C2: RC-12 GUARD on every config (BASE included) and run directory; PLAN 5's Tier 0 recall guard stays off.
+  5 CODE: test_model_mask.py moves to testutil.ARMS on scrambled weights (the old claim that testutil.ARMS reaches
+    it was false); each new flag is tested on the doc=None path that bpb.py uses.
+  6 C6, CODE: SINK and GATE read each arm's real attention and check against the module's own output.
+  7 ORDER: must-run first within each stage (stage 1 S001, S002, S003; stage 2 S005, S004, S007, S006); a 25 h cap
+    with cut order S006, S003, S007, S002; the hours left for the 3b data bets stated; an E4 gate.
+  8 S008 dropped: not one change (four things move at equal total), its depth half is E9 (gated on E4).
+  9 Also applied (cheap "should" items): Holm readings beside raw verdicts; the TIE-reach arithmetic; HD with a
+    foreign-context control, per turn, turn 1 excluded; GATE logged during training; clip rate reported (log.jsonl
+    gnorm against the 1.0 clip, trainer.py) for every arm; new-module LRs stated in each notes file (E2: scalar_lr
+    = embed_lr = r x eta).
+  10 Per-screen musts, each in its notes.txt under CHANGES AFTER CRITIQUE: S001 test claim corrected, GATE curve;
+    S002 SIA, divergence as +inf, REJECT's consequence; S003 each verdict's consequence (REJECT drops AdamW from row
+    19's 30M check), the NorMuon-favouring LR asymmetry, "AdamW with cautious WD"; S004 SIA, doc=None path, both C2
+    keys, conditional must-run (S004 is cut first if the toy favours P-022, ORDER); S005 micro 8 x accum 2 as the
+    plan (4 x 4 fallback), gradient test with the detach mutant, bias on the doc=None path, fp32 sums, SIA; S006 aux
+    weight decaying with the LR factor (the "no weighting in the repo" claim was wrong: research/lanes/arch.md
+    1.10), REJECT reworded, one head vs loop.md's 2-4, compute exposure, SIA; S007 SIA, doc=None path, matched-LR
+    onset, the unrun P-024 toy named; S008 the drop record with count_analytic numbers.
+  11 CODE: a stale line number for test_model_mask.py's ARMS list removed (the harness is being edited by others).
+  Not applied, with reason: S002's plain_block fourth arm (about 1.9 h at k = 3 against the cap; recorded as a known
+  risk in S002); a new-module LR multiplier for S004-S007 (another selection axis; each notes file states the LR
+  its new parameters get, and S005's b drift is read from its half-life diagnostic). Partly applied: the P-020 toy
+  runs before S005's g-check only if its code lands before stage 2 (no toy code exists in the repo: no .py file
+  mentions MQRAR).

@@ -1,0 +1,117 @@
+S002: block re-validation at 5M, three one-change ablations (LEDGER baseline row 19: "Carry Max's validated block ...
+and re-validate block and optimizer with per-arm tuned LRs"; the attention gate is S001, the optimizer S003)
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION WRITTEN 2026-09-26 09:58 (before any S002 config, run or E2/E3 result exists. Run for this entry,
+no model: harness/budget.py count_analytic for the arms.) experiments/SCREENS.txt C1-C9 are part of this entry.
+REVISED 2026-09-26 after a critique, before any config or run exists, nothing committed: CHANGES AFTER CRITIQUE.
+
+WHY
+  The baseline block (PLAN 5) carries four switches from Max's 124M A/B: per-head gated attention, normalized value
+  residual, 1/sqrt(depth) norm scaling and QK-norm. That A/B measured 4.5% (0.134 nats) of paired training loss for
+  the block and NorMuon together, at about 9 tokens per parameter, with an under-tuned AdamW arm (LEDGER row 19;
+  REPORT s4.1). REPORT s4.1 lists the other evidence: value residual +16% parameter-equivalent at 82M-468M
+  (ResFormer); gate and value residual inside noise at 1.2B. No switch has been tested alone, at 5M, or at 50
+  tokens per parameter. Row 19's own check is at 30M; this screen is the cheap 5M pre-screen for three of the four
+  switches, each alone against the full block.
+
+QUESTION (decided per arm, C7)
+  Does turning off ONE of value residual, QK-norm or norm scaling change held-out chat bits per byte at 5M, 250M?
+
+ARMS (each differs from BASE by one key; totals from budget.py count_analytic, 2026-09-26)
+  BASE          the shared C1 run                                   5,010,133 params
+  no_vres       model.value_residual: false                         5,010,112 (-21: no vr_scale / vr_alpha)
+  no_qknorm     model.qk_norm: false                                5,009,109 (-1,024: no q_norm / k_norm gains)
+  no_normscale  model.norm_scaling: false (pre-norm outputs unscaled) 5,010,133 (no parameters)
+  All inside the 2% budget rule; no shape is re-solved. All three fields exist in harness/config.py.
+
+WHAT STAYS IDENTICAL
+  Everything in C1, and (below) the initial value of every parameter the arm shares with BASE. LRs move only by
+  each arm's own g pick (C3).
+
+BUDGET
+  B from E2 (C1): 250.0M slots, 7,630 steps, WSD with decay from step 6,104.
+
+LEARNING RATE
+  C3 g-check per arm at seed 1: g in {0.5, 1, 2} x LR5, E2's pick rule and extensions (3 arms x 3 runs). QK-norm is
+  a stabiliser, so no_qknorm may diverge at g = 2: a divergence scores +inf there (E2 RULES) and the pick is made
+  among the finite points.
+
+SEEDS AND PAIRING
+  Seeds 101..100+k, each arm paired with the shared BASE run at the same seed (C4). Class: SIA (same-init
+  architecture), which is a LOOSENING of E3 rule 1: E3 puts "architecture or shape" in the new-init row, and its
+  KNOWN LIMITS say bets that move the model more may be noisier than the LR-only contrast that measured SD_d. Why it
+  is looser here: model.py reset_parameters draws only nn.Linear and nn.Embedding weights; RMSNorm gains are
+  torch.ones and the value-residual scalars are fixed tensors (blocks.py), so none of the three switches changes a
+  single draw: at a seed, every shared parameter starts bitwise equal to BASE's (tested, below), and the init-noise
+  term of E3's new-init row is absent. A larger training-path noise may remain, so SD_d is not used bare:
+  SD_ref = u x SD_d, u = 1.353 at df 7 (E3's 80% upper bound; C4), df_ref = SD_d's df. The noise check is C4's
+  POOLED SIA check (a per-arm SD has df 1 at k = 2): if it fails, every SIA arm is re-read with sqrt(2) *
+  sigma_init (sqrt(2) * sigma_seed without E3 Part 3) and labelled "underpowered" where its k was chosen for the
+  smaller SD. k = max(2, k_needed(1%)) for u x SD_d, at most 5; one k for all three arms (they share seeds and BASE
+  runs).
+
+METRIC AND DECISION RULE
+  C5 and C7, per arm against BASE: F(CHAT) decides, F(PROSE) guards, thresholds in E3 MDE units. The arm is the
+  ablation, so:
+    NOMINATE      removing the switch lowers chat bpb: a candidate to drop it, confirmed at 20M before any change.
+    REJECT        the switch earns its place on loss at 5M. What changes: the switch stays in the baseline, and no
+                  30M arm that removes this switch alone is queued under row 19 (row 19's 30M check of the block
+                  and optimizer still runs as the ledger states it).
+    TIE           loss-neutral at 5M/250M: the baseline keeps it (nothing is adopted on a tie); row 19's 30M check
+                  decides whether it stays.
+    GUARD-FAIL, INCONCLUSIVE  as C7.
+  Divergence (C7 DIVERGENCE, E2 RULES): an arm run that goes non-finite at a screen seed scores d_s = +inf on every
+  metric for that seed and is never dropped. The arm is labelled UNSTABLE and can never NOMINATE, TIE or GUARD-FAIL;
+  it reads REJECT if every other d_s > 0, else INCONCLUSIVE. no_qknorm is the arm most likely to diverge. Three
+  contrasts share one BASE, so their d's are correlated; each is read alone.
+
+DIAGNOSTICS (C6; reported)
+  Final IND, HD, SINK per arm; IND onset only at matched LR (C6: read if the arm's pick is g = 1, else "LR-confounded,
+  not read"). The training-loss trace near the end of warmup (steps 60-160) is printed per arm and seed: QK-norm and
+  norm scaling act on early stability, and a stability effect that washes out by step 7,630 would otherwise go
+  unseen. The clip rate per arm and seed (C5: share of logged steps whose gnorm exceeds the 1.0 clip; harness/
+  trainer.py clip_grad_norm_ at grad_clip 1.0): a stabiliser removed may show up as more clipped steps before it
+  shows up in bpb.
+
+AFTER THE LOCK (C8)
+  Tier 0 margins with C7 for each arm; E004 item pick shares reported.
+
+KNOWN RISKS
+  - Row 19's evidence is a bundle (block plus optimizer); a TIE here is about one switch at 5M, never about the
+    bundle.
+  - Per-switch effects at 5M may be under 1% and read TIE while mattering at 30M-150M (the ResFormer gain was
+    measured at 82M-468M). PLAN 3's SCALE-DEPENDENT label covers a later flip.
+  - no_qknorm may only work at a lower LR; the g-check covers a factor 2 each side plus up to two extensions.
+  - SIA is argued from the code and the init test, not from a measured noise; C4's pooled check falls back to the
+    new-init SD when the screen's own spread says the class is wrong.
+  - Leave-one-out cannot see redundancy: if QK-norm and norm scaling each cover for the other (both act on early
+    stability), each arm alone can read TIE while removing both would hurt. A fourth arm with all four switches off
+    (testutil "plain_block") would see it; it is not run in this batch (about 1.9 h at k = 3 against the 25 h cap,
+    SCREENS ORDER), so a TIE on either stabiliser says nothing about removing both.
+  - Starter mix and tok_v0_8k only (C1 scope).
+
+HARNESS CODE NEEDED
+  None for training. The three switches are in testutil.ARMS ("no_vr", "no_qknorm", "no_normscale", and all off in
+  "plain_block"), so test_decode.py (prefill and steps vs the full forward), test_s3_leak.py and test_s3_docattn.py
+  run them on scrambled weights, and test_budget.py's VARIANTS counts each one alone. test_model_mask.py runs
+  value_residual off alone but qk_norm and norm_scaling off only inside one combined arm (with attn_gate off), on
+  unscrambled models; SCREENS CODE moves it to testutil.ARMS on scrambled weights before stage 1 (the earlier claim
+  here that it already ran them was wrong). One test to add with the config generator: at seed s, a BASE model and
+  each ablation model share bitwise the initial values of every parameter name they have in common (this is what
+  SIA claims; mutant: a switch that draws from the RNG must fail it).
+
+COST (est., SCREENS GPU HOURS)
+  g-checks 9 x 0.31 = 2.8 h; 0.93 h per seed for the three arms (BASE shared). k = 3: 5.6 h. Not must-run: fourth in
+  SCREENS' cut order (S006, S003, S007, S002), and started only while E4 has not reported "no signal at 5M".
+
+CHANGES AFTER CRITIQUE (2026-09-26; no config or run existed, nothing committed. Checked before editing:
+harness/model.py reset_parameters, blocks.py (RMSNorm torch.ones, vr_scale and vr_alpha constants), testutil.py,
+test_model_mask.py, test_budget.py, trainer.py (clip); E3 notes rule 1 and KNOWN LIMITS; E2 notes RULES)
+  1 (must, M1) Class SAME INIT renamed SIA and labelled a loosening of E3 rule 1, with its reason; SD_ref = u x SD_d
+    (u = 1.353 at df 7) and C4's pooled SIA noise check replace SD_d with a per-arm check.
+  2 (must, M2) A diverged arm seed scores d_s = +inf and is never dropped; UNSTABLE arms cannot NOMINATE or TIE.
+    (It used to drop the pair, which biased the verdict toward the unstable arm.)
+  3 (must, M3) IND onset read only at matched LR.
+  4 (should) REJECT now says what it changes; the clip rate is reported; the test_model_mask.py claim is corrected.
+  Not applied: the plain_block fourth arm (cost against the cap), recorded as a known risk instead.

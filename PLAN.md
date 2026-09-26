@@ -18,8 +18,24 @@ Version 2, 2026-09-24. It is built from the draft plan and its 28-item review, `
 - **No reused data, a corpus built for Planck.** Nothing from the MaxGPT-Ultra build is reused (it was made for a 1.1B general model and spends about 18% on code and math that Planck does not need). Planck gets its own corpus built from scratch: selected for conversation skill and plain language, deliberately light on facts, deduplicated and filtered by classifiers trained for this model, with verified synthetic dialogue from an Apache-2.0 teacher, as large as the token budget requires. The design is in progress (corpus design v1).
 - **Final models train as long as the calendar allows.** Short runs are for decisions; every curve model then gets the longest run the machines can give it, because at this size even small gains matter. P-186 decides how the time is split across sizes, and WSD lets the best model keep training and be re-decayed whenever GPU time frees up.
 - **Priority: how small can it go (Max, Sep 24).** Models of 30M total parameters and under are now the main target and get most of the GPU time, seeds and experiments; 60M and 150M stay on the curve as upper anchors, with the 150M still on the Titans after mid-December. The curve extends downward (for example 3M, 5M, 10M, 20M, 30M) until the multi-turn skills break, and finding that floor is itself a headline result. Small sizes also make the token budget cheap: tens of thousands of tokens per parameter fit on the 5070.
-- **The 360M block of E002 was skipped.** The repaired correction test passed at 135M on 5 of 5 seeds (pending audit), which makes the 360M arm unnecessary under its own reading rule. That GPU time goes to E003, the same correction test on much smaller public models (Pythia 14M to 160M, TinyStories 1M to 33M) to find where learning corrections breaks down.
+- **The 360M block of E002 was skipped.** The repaired correction test passed at 135M on 5 of 5 seeds (its later audit found a wording shortcut, so general updating was not shown; see `docs/EXPERIMENTS.md`, E002), which makes the 360M arm unnecessary under its own reading rule. That GPU time goes to E003, the same correction test on much smaller public models (Pythia 14M to 160M, TinyStories 1M to 33M) to find where learning corrections breaks down.
 - **Corpus design v1 is in `CORPUS.md`.** Its data-rule defaults are adopted, and its token budgets are rebalanced toward 30M and under (addendum): about 5,000 tokens per parameter at 5-10M and 1,000-2,000 at 20-30M on the 5070, with 60M and 150M on the Titans.
+
+
+**Status and schedule changes, 2026-09-26** (details and sources in `docs/EXPERIMENTS.md`)
+- **Earlier than planned.**
+  - *Tokenizer v0* (Phase 1, planned Oct 1-18) was trained on Sep 25 on a sample of the openly licensed starter corpus instead of the planned mix of pilot output, OASST2 and a FineWeb-Edu slice (the pilot has not run). P-098 held exactly, P-101 failed its 5% bar, P-097 was counted; P-100 waits for the teacher pick. v0 is provisional, and the starter corpus is tokenized with it at 8k (2.03B tokens).
+  - *OOD-H Part 1* (a lock item) was built on Sep 26: 150 threads, 417 probes, every gating check passing, hashes in `oodh/HASHES.txt`. It is a lock candidate awaiting Max's review.
+  - *Core v0 corpus* (CORPUS.md 7.1, planned Oct 19 - Nov 1) has started: its download manifest (790 files, about 130 GB) and tiered build script are written and its OCR filter is calibrated. That code is not committed yet, and the build's progress is not recorded in the repo.
+  - *E006*, not in this plan: the three-object follow-up to E005 plus a general-chat replay arm, the first fine-tune on the 5070. Pre-registered and built, not scored.
+  - *bench_micro on the Planck harness* (planned Oct 4-5) ran on the 5070 on Sep 25; its measured rates for the 5M-30M shapes replace this plan's throughput estimates. Two speed-ups (batched optimizer step, variable-length attention) are under verification: +16% to +34% on plain rows.
+  - *E2 and E3* (Phase 3a, planned Oct 19-24) are pre-registered, critiqued, configured and smoke-tested on the 5070. The three teachers are pinned to exact revisions and 4-bit builds from metadata only; the pilot has not run.
+- **Critical path now.**
+  1. RC-12: the engine parity check, then the dev baselines (none scored yet; the HF path has never run on a real model).
+  2. Headroom, re-anchor, PERSIST drop list and strict-case rates; Max decides the open loop-rule items (F3, the PERSIST statement-filler turns, the near-duplicate report).
+  3. Sizing, the sealed build, the OOD-H hashes after Max's review, and the push.
+  4. Alongside, on the 5070 (one job at a time under the GPU lock): E2 then E3, E006, and the teacher pilot. On the Mac, E003 finishes (running).
+- **Dates.** E2 and E3 can start as soon as the 5070 is free, before Oct 19: they need no RC-12, and their estimates are about 6 h for E2's 5M stages and 9 h for its 20M grid (from the bench before the speed-ups). Not moved: the lock (Oct 11-14; only step 1 of its nine-step checklist is done) and tokenizer v1 (Oct 18).
 
 ---
 

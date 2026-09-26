@@ -1,0 +1,122 @@
+S004: Canon-AC layers at 5M (LEDGER P-148, known-apply; PLAN must-run list "P-022 or P-148 (whichever the toy
+favors)"; REPORT s6 lever 4, previous-token mixing; research/lanes/arch.md 1.6, and item 1 of its section 2 A/B list)
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION WRITTEN 2026-09-26 10:12 (before the flag, any S004 config, run or E2/E3 result exists. Run for this
+entry, no model: parameter arithmetic below.) experiments/SCREENS.txt C1-C9 are part of this entry. REVISED
+2026-09-26 after a critique, before the flag or any config or run exists, nothing committed: CHANGES AFTER CRITIQUE.
+
+WHY
+  Canon layers are residual, trainable causal 1-D convolutions with kernel 4, inserted before attention (A), inside it
+  (B), before the MLP (C) and inside the MLP (D) (arch.md 1.6, Physics of LMs 4.1). In-scale synthetic results:
+  reasoning depth +200-400% at 8L512D/12L768D; real pretraining at 1.3B "shows high noise and limited resolution";
+  cost under 0.45% extra parameters for GPT2-small, and Canon-AC +5.8% forward time at 1.3B (naive code). Their
+  claimed mechanism is faster formation of the local token-to-token circuits that induction and associative recall
+  are built from (arch.md), which REPORT s6 ties to binding (limit 2: multi-token keys need a previous-token path).
+  arch.md's first recommended A/B is Canon-AC or Canon-ACD at kernel 4. PLAN 3d tests P-148 at 30M after a 2-layer
+  toy. This 5M screen is the cheap first look at the loss cost or gain and at induction timing, before 30M.
+  Must-run status is conditional: PLAN's list names "P-022 or P-148 (whichever the toy favors)". If the PLAN 3d toy
+  favours P-022, this screen feeds no must-run bet; it then ranks as an ordinary bet in SCREENS' order and cut rule
+  (the cut rule protects S004 only while P-148 is the must-run pick).
+
+QUESTIONS
+  Q1 (decided, C7) Does Canon-AC change held-out chat bits per byte at 5M, 250M slots?
+  Q2 (reported) Is final IND higher, and does induction form earlier (IND onset, C6)? Onset is read only at matched
+     LR (C6 MATCHED LR): if S004's g pick is 1; otherwise it is printed and labelled "LR-confounded, not read" (S004
+     gets no extra g = 1 runs; S006 and S007, whose win condition is onset, do).
+
+THE CHANGE (one flag)
+  model.canon: "AC" (new field; default "" = off) with model.canon_kernel: 4 (new; used only when canon is on).
+  At every block: h = attn_norm(x) * norm_scale, then h = h + conv_A(h) before attention; h = mlp_norm(x) *
+  norm_scale, then h = h + conv_C(h) before the MLP. conv_* is depthwise (one kernel per channel), causal, kernel 4,
+  no bias, and never reaches across a document start in packed rows (taps at in-document position < j are zero).
+  Init: zero, created without drawing from the torch RNG (a registered choice: the arm then starts as the exact
+  BASE function, and every BASE parameter keeps its draw; the Canon paper's init is not recorded in the repo).
+  Parameters: 2 sites x 8 layers x 192 channels x 4 taps = 12,288; total 5,022,421 vs 5,010,133 (+0.25%, arithmetic
+  from budget.py's BASE count), inside the 2% rule, so the shape is not re-solved. The config generator's C2 check
+  allows exactly these two keys for this arm, model.canon and model.canon_kernel (a test: a third key is refused).
+
+WHAT STAYS IDENTICAL
+  Everything in C1, including the engine (the convolutions sit outside attention, so doc_attn varlen still
+  applies). LRs move only by the arm's g pick (C3). The conv weights go to the "scalar" group (AdamW at scalar_lr, no
+  weight decay), routed by name: harness/optim.py split_params would otherwise put any 2-D tensor in the NorMuon
+  "matrix" group, and orthogonalizing a 192 x 4 kernel bank is not what that group's LR was tuned for. The conv LR
+  is therefore the embedding LR: E2 sets optim.embed_lr = optim.scalar_lr = r x eta (E2 notes, "Both AdamW groups
+  move together"), so the kernels train at g x r_5 x eta_5, a value tuned for embeddings and norm gains, not for a
+  new module. No separate multiplier is registered (it would be another selection axis); the weight-size
+  diagnostic below shows whether the kernels moved.
+
+BUDGET
+  B from E2 (C1): 250.0M slots, 7,630 steps, WSD with decay from step 6,104.
+
+LEARNING RATE
+  C3 g-check at seed 1: g in {0.5, 1, 2} x LR5, E2's pick rule and extensions.
+
+SEEDS AND PAIRING
+  Seeds 101..100+k, paired with the shared BASE run (C4). Class: SIA if the init-isolation test (below) passes in
+  the committed harness, else NEW INIT (sqrt(2) * sigma_init). SIA is a loosening of E3 rule 1 (architecture is in
+  its new-init row), justified only by the bitwise-shared draws, so SD_ref = u x SD_d (u = 1.353 at df 7, C4) and
+  the verdict waits for C4's pooled SIA noise check. k = max(2, k_needed(1%)) for the class SD, at most 5.
+
+METRIC AND DECISION RULE
+  C5 and C7: F(CHAT) decides, F(PROSE) guards, in E3 MDE units. The arm is "Canon-AC on":
+    NOMINATE      Canon lowers chat bpb at 5M: a loss candidate; its behaviour test is PLAN 3d at 30M (binding,
+                  LEDGER P-148's win condition), which this does not replace.
+    REJECT        Canon raises chat bpb at 5M: reported to the PLAN 3d toy and the P-022-or-P-148 choice; not a
+                  behavioural verdict (arch.md 1.4: loss is not a behaviour proxy for attention-side changes).
+    TIE           loss-neutral at 5M: the 30M behaviour test decides.
+    GUARD-FAIL, INCONCLUSIVE  as C7.
+  Q2 reading (P-024-style, reported with C7 only if an E3 Part 4d addendum gives IND an SD): IND onset in tokens,
+  arm minus BASE per seed, and the number of seeds with an earlier onset.
+
+DIAGNOSTICS (C6; reported)
+  IND curve (every 153 steps) and onset, HD, SINK. Also the mean absolute conv weight per site and layer at the
+  final checkpoint (whether the zero-initialised convolutions were used at all).
+
+AFTER THE LOCK (C8)
+  Tier 0 margins with C7; E004 item pick shares reported (binding and first-mention preference are Canon's target).
+
+KNOWN RISKS
+  - A convolution that reaches across a document start leaks between packed documents; one that reads t+1 leaks the
+    future. Both are what harness/selftest.py's leak tests look for, and both get mutants below.
+  - Zero init may leave the convolutions little used in 7,630 steps; the weight-size diagnostic shows it.
+  - Throughput cost at 5M is unmeasured (arch.md: +5.8% forward at 1.3B for Canon-AC, naive); the smoke run times
+    it, and the report gives F(CHAT) per GPU-hour beside F(CHAT).
+  - Real-data evidence exists only at 1.3B and above, and is noisy (arch.md 1.6).
+  - Starter mix and tok_v0_8k only (C1 scope).
+
+HARNESS CODE NEEDED (default off; each test watched failing on its mutant)
+  - config.py: canon (str, "" off) and canon_kernel (int, 4). blocks.py: the two convolutions per Block when on,
+    reading in-document positions (model.py already derives pos from doc for RoPE) on EVERY path: the doc=None path
+    (plain causal over the row, is_causal SDPA in blocks.py), which is the one data_prep/bpb.py uses (it calls
+    model(idx) with no document ids, so F(CHAT) is scored there), the mask path and the varlen path.
+  - doc=None test (M5): on scrambled weights, model(idx) on one document equals that document's slice of the packed
+    mask path, and of the varlen path (test_s3_docattn.py's CPU stand-in; the CUDA parity test on the PC). Mutant:
+    the convolutions applied only when doc is given (F(CHAT) would then score a model without Canon).
+  - budget.py count_analytic counts them; test_budget.py's module-vs-analytic check covers the new arm.
+  - optim.py split_params routes the conv weights to "scalar" by name (test; mutant: they land in "matrix").
+  - testutil.ARMS gains "canon_ac", so test_decode.py (decode.py needs a per-site cache of the last 3 normalised
+    inputs per effective layer), test_s3_leak.py and test_s3_docattn.py run it on scrambled weights (scramble makes
+    the zero-init kernels non-zero, so the checks are not vacuous), and test_model_mask.py runs it once SCREENS CODE
+    moves that test to testutil.ARMS on scrambled weights (its own ARMS list today would not reach it). Mutants: a
+    centred (non-causal) kernel; a kernel that ignores document starts; the decode cache off by one position.
+  - Flag-off equivalence: a CPU run with canon "" is bitwise equal to the pre-flag commit's run (weights, optimizer,
+    loader state, log records).
+  - Init isolation: at a seed, every parameter the arm shares with BASE is bitwise equal at init, and at step 0 the
+    arm's logits equal BASE's on the same batch (zero init). Mutant: the conv built with nn.Conv1d defaults (draws
+    from the RNG) must fail it.
+  - A smoke run on the PC (labelled smoke): mem_fit ok at micro 16, tok/s, leak self-test passed.
+
+COST (est., SCREENS GPU HOURS, assumed x1.1 until the smoke run)
+  g-check 3 x 0.34 = 1.0 h; 0.34 h per seed (BASE shared). k = 3: 2.0 h. Second in stage 2 (after S005).
+
+CHANGES AFTER CRITIQUE (2026-09-26; no flag, config or run existed, nothing committed. Checked before editing:
+data_prep/bpb.py (model(idx), no doc), harness/model.py and blocks.py (the doc=None branch is is_causal SDPA),
+testutil.py (scramble), test_model_mask.py, test_s3_docattn.py, optim.py split_params; E2 notes (r); PLAN must-run
+list)
+  1 (must, M1) Class SAME INIT renamed SIA, a loosening of E3 rule 1; SD_ref = u x SD_d with C4's pooled check.
+  2 (must, M3) IND onset read only at matched LR; otherwise "LR-confounded, not read".
+  3 (must, M5) The flag is registered on every path including doc=None (the path bpb.py scores), with a test and a
+    mutant; the claim that testutil.ARMS reaches test_model_mask.py was false and is corrected.
+  4 (should) The C2 allowance names both keys; the conv LR (the embedding LR, g x r_5 x eta_5) is stated; the
+    conditional must-run status is stated.

@@ -1,0 +1,106 @@
+S003: "AdamW with cautious WD" instead of NorMuon for the matrix parameters, each at its own tuned LRs (LEDGER
+baseline row 19, "re-validate block and optimizer with per-arm tuned LRs"; related to P-119, Muon/NorMuon vs AdamW)
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION WRITTEN 2026-09-26 10:05 (before any S003 config, run or E2/E3 result exists. Run for this entry,
+no model: none beyond reading harness/optim.py.) experiments/SCREENS.txt C1-C9 are part of this entry. REVISED
+2026-09-26 after a critique, before any config or run exists, nothing committed: CHANGES AFTER CRITIQUE.
+
+WHY
+  The baseline optimizer is NorMuon with cautious weight decay on matrices and AdamW on embeddings, norms and gains
+  (PLAN 5). Its evidence (LEDGER row 19): Max's 124M A/B, 4.5% (0.134 nats) of paired training loss for block plus
+  optimizer, "with the AdamW arm at an under-tuned lr 6e-4"; Wen et al. about 1.4x at 0.1B against tuned AdamW; IMU-1
+  used NorMuon at 70M. Row 19: "The real gain at high tok/param is unknown." E2 tunes NorMuon's LRs at 5M with an
+  11-arm search (stages A-C). This screen gives AdamW the same search and then compares the two at fresh paired
+  seeds, which removes the confound row 19 names (an under-tuned AdamW arm). One asymmetry is left, and it favours
+  NorMuon: NorMuon's LR5 can be replaced by E3's 7-seed re-check (E3 "E2 re-check", seeds 2..8; SCREENS C1), while
+  AdamW's pick rests on E2's seed-1 search alone. The report states this beside every S003 verdict.
+
+QUESTION (decided, C7)
+  At 5M and 250M slots, with each optimizer at its own tuned LRs, does AdamW on the matrix parameters change held-out
+  chat bits per byte relative to NorMuon?
+
+THE CHANGE (one key, plus the arm's own LRs)
+  optim.kind: adamw. harness/optim.py make_optimizer then runs every group as AdamW (the documented comparison
+  arm): only the matrix group's update rule changes, since the embed and scalar groups are AdamW in both arms.
+  Unchanged in both: weight decay 0.1 applied as lr * wd, cautious WD, betas (0.9, 0.95), eps 1e-8, clip 1.0, no
+  decay on scalars, momentum setting (unused by AdamW). The AdamW arm's LRs come from its own search (below).
+
+WHAT STAYS IDENTICAL
+  Everything in C1: model, init, data, stream per seed, batch, schedule, engine flags, eval, scorer.
+
+BUDGET
+  B from E2 (C1): 250.0M slots, 7,630 steps, WSD with decay from step 6,104.
+
+LEARNING RATE: E2's search, repeated for AdamW (replaces C3's g-check for this arm)
+  At seed 1, E2's SCHEDULE (trunk 6,105 steps, decay branches at 62.5M / 125M / 250M), E2's grids and rules with
+  optim.kind adamw in every config: stage A eta in {0.75, 1.5, 3, 6, 12} x 1e-3 at r = 1; stage B r in
+  {0.5, 2, 4, 8} at eta_A; stage C g in {0.5, 2} at (eta_A, r_B); E2's extension rule (at most 2 per stage, and
+  stage C while its 125M argmin sits at an edge); E2's stage pick (argmin F(CHAT) at the 250M branch, PROSE guard,
+  ties to the lower LR); divergence scores +inf. Result: LR5_adamw = (eta_adamw, r_adamw). NorMuon keeps LR5 (E2's
+  pick, E3-checked). Both arms were thus chosen by the same procedure at the same seed; seed 1 is never in the paired
+  analysis. The branch F(CHAT) curves for AdamW (Q3 of E2: LR against run length) are reported beside E2's.
+
+SEEDS AND PAIRING
+  Seeds 101..100+k (C4). AdamW at LR5_adamw and the shared BASE run at each seed. Class: SAME INIT, SAME STREAM
+  (E3 rule 1 lists the optimizer in that row): SD_ref = SD_d, df_ref its df; C4's noise check applies.
+  k = max(2, k_needed(1%)), at most 5.
+
+METRIC AND DECISION RULE
+  C5 and C7: F(CHAT) decides, F(PROSE) guards, in E3 MDE units. The arm is AdamW (cautious WD), so, with what each
+  verdict changes in row 19's own check (30M, 1B tokens, 3 LRs per arm, paired loss plus battery):
+    NOMINATE      AdamW lowers chat bpb at 5M: a candidate to change the optimizer; row 19's 30M check runs its
+                  AdamW arm and decides (the asymmetry above favours NorMuon, so it cannot have produced this).
+    REJECT        NorMuon re-validated on loss at 5M, 50 tokens per parameter. What changes: row 19's 30M check
+                  drops its AdamW arm (at least 3 runs at 30M, 1B tokens: one per LR); the block part of that check
+                  still runs. The asymmetry above could have produced a small REJECT, so the report states it. A later
+                  optimizer flip at larger size is then not looked for (KNOWN RISKS).
+    TIE           no measurable difference at 5M: the baseline keeps NorMuon; row 19's 30M check keeps its AdamW
+                  arm (at 5M the two could not be told apart, so only the larger size can say whether NorMuon's
+                  extra step cost buys anything).
+    GUARD-FAIL, INCONCLUSIVE  as C7; row 19's 30M check runs as the ledger states it.
+  So the screen's only action is REJECT's saving; that is why it is second in SCREENS' cut order and runs after
+  S001 and S002 in stage 1.
+  Also reported, no rule: the gap in GPU hours per run (NorMuon's Newton-Schulz steps cost time; the batched
+  optimizer is the default on cuda, harness/optim.py resolve_batched), and F(CHAT) per GPU-hour.
+
+DIAGNOSTICS (C6; reported)
+  Final IND, HD, the clip rate (C5), and the mean training loss over the last 2% of steps (paired training loss on an
+  identical stream, LEDGER row 39) per seed. IND onset is printed and labelled "LR-confounded, not read" (C6): the
+  two optimizers run at different tuned LRs by design, so no matched-LR reading exists.
+
+AFTER THE LOCK (C8)
+  Tier 0 margins with C7; E004 item pick shares reported. P-119's own measure (bits per parameter, tail items) is
+  not in this screen.
+
+KNOWN RISKS
+  - Weight decay is applied as lr * wd, so the LR search also moves the effective decay (E2 SCOPE); WD itself is
+    tuned for neither optimizer.
+  - One search seed per optimizer (as E2). A pick that is off by one grid step biases the comparison toward
+    whichever optimizer is flatter around its optimum; the stage-C curves are printed so a reader can see this.
+  - 50 tokens per parameter is far from the curve's thousands (CORPUS addendum); an optimizer ranking can change
+    with run length and size. After a REJECT, row 19's 30M check no longer carries AdamW, so a flip at 30M would
+    go unseen; that is the price of the saving, recorded in the ledger row with the verdict.
+  - Starter mix and tok_v0_8k only (C1 scope).
+
+HARNESS CODE NEEDED
+  None for training. optim.kind adamw exists and is tested: test_s3_optim.py runs kind normuon, muon and adamw;
+  test_optim_schedule.py checks that adamw has no Muon group; test_optim_batched.py covers adamw under the batched
+  step. The config generator must write E2-style trunk and branch configs with optim.kind adamw (a check that the
+  only key differing from E2's stage configs is optim.kind, plus the LRs).
+
+COST (est., SCREENS GPU HOURS)
+  Search 11 x 0.36 = 4.0 h (up to +2.2 h for 6 extensions); 0.31 h per seed (BASE shared). k = 3: 4.9 h, up to
+  7.1 h with every extension. Not must-run: second in SCREENS' cut order, third in stage 1.
+
+CHANGES AFTER CRITIQUE (2026-09-26; no config or run existed, nothing committed. Checked before editing:
+harness/optim.py (the adamw kind switches only use_muon; cautious WD applies in the AdamW path too), LEDGER
+baseline row 19, E3 notes (E2 re-check), SCREENS C1)
+  1 (must) Each verdict now says what it changes. REJECT drops the AdamW arm from row 19's 30M check, which gives
+    the screen an action; without one, 4.9 h (7.1 h with extensions) bought no decision. S003 is also second in the
+    cut order and runs after S001 and S002.
+  2 (should) The remaining tuning asymmetry is stated (NorMuon's LR can get E3's 7-seed override; AdamW's cannot)
+    with its direction (it favours NorMuon). The old line "no tuning asymmetry" was wrong.
+  3 (should) The arm is labelled "AdamW with cautious WD".
+  4 IND onset labelled LR-confounded (C6); the clip rate is reported (C5).
+  Unchanged after checking: the class (same init, E3 rule 1's optimizer row).

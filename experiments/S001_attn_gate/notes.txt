@@ -1,0 +1,113 @@
+S001: attention gate off at 5M (LEDGER P-021, rank 21, on PLAN's must-run list; LEDGER baseline row 19, "re-validate
+block and optimizer with per-arm tuned LRs")
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION WRITTEN 2026-09-26 09:50 (before any S001 config, run or E2/E3 result exists. Run for this entry,
+no model: harness/budget.py count_analytic for the two arms.) experiments/SCREENS.txt C1-C9 (the COMMON block) are
+part of this entry; this file states what differs. REVISED 2026-09-26 after a critique, still before any config or
+run exists, nothing committed: see CHANGES AFTER CRITIQUE at the end.
+
+WHY
+  P-021 asks whether Max's per-head attention gate reduces primacy (LEDGER prior art: gated attention cut
+  first-token attention from 46.7% to 4.8% at 1.7B; at OPT-125M-1.3B gating removed no-op attention to first
+  tokens; SinkProbe at ~1M, 3 seeds: the gate effect sat inside seed noise and the gate stayed open after 1,500
+  steps; Max's 124M A/B measured loss only). PLAN 3d tests it at 30M with correction dialogues, "logging gate
+  openness and sink mass". Nothing at 5M says whether the gate earns its place in the baseline at all (row 19),
+  whether it engages in a 7,630-step run, or whether it moves first-token attention. This screen answers those three
+  cheaply; the primacy question itself needs correction items and waits for the lock and 30M.
+
+QUESTIONS
+  Q1 (decided, C7) Does removing the gate change held-out chat bits per byte at 5M, 250M slots?
+  Q2 (reported) Does the gate engage in BASE (GATE), and does first-token attention (SINK) differ between the arms?
+  Q3 (reported) Final IND and HD in both arms. IND onset is read only if the arm's g pick is 1 (C6 MATCHED LR);
+     otherwise it is printed and labelled "LR-confounded, not read" (S001 gets no extra g = 1 runs).
+
+THE CHANGE (one key)
+  model.attn_gate: false. The field exists (harness/config.py); with it off, blocks.py builds no attn_gate_proj and
+  skips the 2*sigmoid(W x) multiply. Parameters: 5,005,525 vs BASE 5,010,133 (-0.09%; budget.py count_analytic,
+  2026-09-26), inside the 2% budget rule, so the shape is not re-solved.
+
+WHAT STAYS IDENTICAL
+  Everything in C1: shape, vocab, data, shares, stream per seed, batch, schedule, engine flags, eval, scorer. The
+  LRs move only by the arm's g pick (C3).
+
+BUDGET
+  B from E2 (C1): 250.0M slots, 7,630 steps at 32,768 slots per step, WSD with decay from step 6,104.
+
+LEARNING RATE
+  C3 g-check at seed 1: g in {0.5, 1, 2} x LR5 (all three groups, ratio r_5 kept), E2's pick rule and extensions.
+
+SEEDS AND PAIRING
+  Seeds 101..100+k (C4), paired with the shared BASE run at each seed. Class: NEW INIT. The gate projection is an
+  nn.Linear that reset_parameters draws from the torch RNG before zeroing it (model.py), so removing it shifts every
+  later draw. SD_ref = sqrt(2) * sigma_init from E3 Part 3 (sqrt(2) * sigma_seed if Part 3 did not run), df_ref its
+  df; k = max(2, k_needed(1%)) for that SD, at most 5 (E3 rule 2).
+
+METRIC AND DECISION RULE
+  C5 and C7: F(CHAT) decides, F(PROSE) guards, thresholds in units of E3's MDE_p(k) (parameters from E3
+  results.json). The arm is "gate off", so:
+    NOMINATE      removing the gate lowers chat bpb: a candidate to drop it, confirmed at 20M (with its own g-check)
+                  before any recipe change. P-021's 30M test still runs (must-run: its target is primacy, not loss).
+    REJECT        the gate earns its place on loss at 5M: row 19 re-validated for the gate at this size.
+    TIE           no measurable loss effect at 5M/250M (95% interval inside +-1%): the baseline keeps the gate (no
+                  change is ever adopted on a tie), and the ledger records "loss-neutral at 5M".
+    GUARD-FAIL, INCONCLUSIVE  as C7; nothing changes.
+
+DIAGNOSTICS (C6; reported, no threshold: no repo file gives one for gate openness or sink mass at this size)
+  GATE  in BASE, per layer and head: mean, 10th and 90th percentile of 2*sigmoid(W x) over the 200 CHAT windows,
+        on the final checkpoint. "Measurably closed" is a question about time, and a full-schedule run keeps no
+        early checkpoints (keep_last 2), so the in-training hook (SCREENS CODE, eval.induction) also logs the per-head
+        mean every 153 steps on a fixed 32-window subset: the GATE curve. The ledger's P-021 win needs the gate
+        "measurably closed"; this is the first look at whether and when a 5M, 250M-slot run gets there (SinkProbe's
+        gate did not, at ~1M and 1,500 steps).
+        The gate is also a per-head output scale in (0, 2) (blocks.py: gate = 2.0 * sigmoid(attn_gate_proj(x)),
+        multiplied into the head output), so a bpb difference between the arms can come from that scale alone: Q1's
+        verdict is not evidence about sinks. SINK is the sink reading.
+  SINK  both arms, per layer: first-token attention mass; the per-seed paired difference (gate on minus off) and
+        the number of seeds in which it is negative (the ledger's "first-token attention falls with the gate on").
+  IND, HD  both arms, as C6.
+
+AFTER THE LOCK (C8)
+  Tier 0 margins with C7. The E004 held-out items' first-vs-latest pick shares, gate on vs off, per seed: the
+  closest non-generative look at P-021's primacy question at 5M. Reported, never decided on; E004's items are
+  expected at or below chance at this size (SCREENS C6).
+
+KNOWN RISKS
+  - The gate may stay open for the whole run (SinkProbe). Then Q1 compares an unused gate with none and a TIE is
+    the expected reading; GATE shows whether that happened.
+  - Loss is not behaviour for attention changes (research/lanes/arch.md 1.4): a TIE or REJECT here says nothing about
+    primacy, which is why the 30M test runs regardless.
+  - New-init noise is larger than the paired LR noise E3's SD_d measures; k may reach 5 and the label
+    "underpowered" (C4).
+  - Starter mix: chat-kind tokens are 2.8% of the stream (C1). The gate's effect at the Phase 3 chat share may
+    differ; the refresh rule (C1) applies when the pool mix exists.
+  - At initialization the gate is exactly 1 (zero-init projection), so a leak routed through it is invisible on a
+    fresh model; harness/selftest.py already runs its checks on a scrambled copy for this reason.
+
+HARNESS CODE NEEDED
+  Training: none. attn_gate exists. testutil.ARMS "no_gate" runs, on testutil.scramble'd weights, through
+  test_decode.py (prefill and steps vs the full forward), test_s3_leak.py and test_s3_docattn.py (varlen vs mask on
+  the CPU stand-in kernel); test_budget.py counts it (its VARIANTS list). test_model_mask.py does NOT run it alone:
+  it has its own ARMS list, holds attn_gate off only inside one combined arm, and builds unscrambled models, so its
+  packed-equals-alone check (packed doc path vs model(d) with doc=None) has not seen no_gate by itself. SCREENS CODE
+  moves that test to testutil.ARMS on scrambled weights before stage 1.
+  Diagnostics: the shared attention diagnostic (SCREENS CODE, C6 SINK and GATE: q and k read after every transform
+  the arm applies, and the rebuilt output checked against the attention module's own output, not an SDPA call the
+  tool makes) and the IND hook, which also logs GATE (above). For the gate-off arm the tool applies no gate multiply
+  (a test on testutil "no_gate"; mutant: the tool multiplies by a gate the arm does not have).
+
+COST (est., SCREENS GPU HOURS)
+  g-check 3 x 0.31 = 0.93 h; 0.31 h per seed for the arm (BASE is shared). k = 3: 1.9 h. Must-run (P-021): never
+  cut by SCREENS' cap rule; first in stage 1 (SCREENS ORDER).
+
+CHANGES AFTER CRITIQUE (2026-09-26; no config or run existed, nothing committed. Checked before editing:
+harness/blocks.py (gate multiply), model.py (reset_parameters), testutil.py, test_model_mask.py, test_decode.py,
+test_s3_leak.py, test_s3_docattn.py, test_budget.py; LEDGER P-021)
+  1 (must, M5) The test claim was false: test_model_mask.py has its own ARMS list and runs attn_gate off only inside
+    a combined arm, on unscrambled models. Corrected above; the fix is in SCREENS CODE.
+  2 (must, M6) SINK and GATE read the arm's real attention and are checked against the module's own output, not
+    against SDPA outputs.
+  3 (must, M3) IND onset is read only at matched LR (C6); final IND is reported either way.
+  4 (should) GATE is logged during training (the IND hook), since keep_last 2 keeps no early checkpoints.
+  5 (should) Recorded that the gate is also a per-head output scale in (0, 2), so Q1 is not evidence about sinks.
+  Unchanged after checking: the NEW INIT class (model.py draws attn_gate_proj as an nn.Linear, then zeroes it).

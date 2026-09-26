@@ -1,0 +1,153 @@
+S005: a forget gate on attention logits at 5M, the recency path (LEDGER P-020, rank 20, on PLAN's must-run list;
+REPORT s6 lever 3; the Forgetting Transformer idea, research/lanes/arch.md 1.4)
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION WRITTEN 2026-09-26 10:22 (before the flag, any S005 config, run or E2/E3 result exists. Run for this
+entry, no model: the parameter and init arithmetic below.) experiments/SCREENS.txt C1-C9 are part of this entry.
+REVISED 2026-09-26 after a critique, before the flag or any config or run exists, nothing committed: CHANGES AFTER
+CRITIQUE at the end.
+
+WHY
+  Limit 1 (updating after a correction) looks like a winner-take-all bias toward early encodings; a recency or
+  overwrite path in a few attention layers is REPORT's lever 3 (forget gate, stick-breaking, Selective Attention;
+  nothing measured at 150M). LEDGER P-020 lists the variants (forget gate, stick-breaking, PaTH, Selective Attention,
+  learned ALiBi slopes) and its test: a 2-layer toy, then 5M/30M A/B with correction items. REPORT puts the forget
+  gate first, and arch.md notes the Forgetting Transformer keeps the needle-in-a-haystack advantage over SSMs. This
+  screen is the 5M loss and diagnostics look at that variant; correction items wait for the lock, and the variant
+  choice for PLAN 3d's 30M test stays with its toy (a different variant there is a new pre-registration).
+
+QUESTIONS
+  Q1 (decided, C7) Does the forget gate change held-out chat bits per byte at 5M, 250M slots?
+  Q2 (reported) What forgetting do the heads learn (half-life per head), and does history dependence (HD) fall?
+
+THE CHANGE (one flag)
+  model.forget_gate: true (new field; default false). Registered form (this entry's definition; its match to the
+  paper's exact parameterisation is not checked from the repo): in every layer, per head h and token t,
+  f[t,h] = sigmoid(w_h . a_t + b_h), a_t = the attention sublayer input (after attn_norm and norm scaling); the
+  attention logit of query i on key j (j <= i, same document) gets the additive bias sum over l in (j, i] of
+  log f[l,h] (0 when j = i). Init: w_h = 0 and b_h = 7.99 for every head, so every gate starts at f = 2^(-1/2048)
+  (half-life = the 2,048-token training window: attention to the far end of a full window starts halved, nearby
+  context is almost untouched); both created without drawing from the torch RNG. Parameters: 8 layers x 3 heads x
+  (192 + 1) = 4,632; total 5,014,765 vs 5,010,133 (+0.09%), inside the 2% rule. Gate parameters go to the AdamW
+  "scalar" group (no weight decay), routed by name, so they train at the embedding LR: E2 sets optim.embed_lr =
+  optim.scalar_lr = r x eta ("Both AdamW groups move together"), i.e. g x r_5 x eta_5. No new-module multiplier is
+  registered (another selection axis); whether b drifts from 7.99 is read from the half-life diagnostic.
+  Unlike S004 and S007, the arm does NOT start as the BASE function: at b = 7.99 every f is below 1, so the bias is
+  non-zero from step 0 (down to about -ln 2 across a full 2,048-token window). Its init draws are BASE's (SIA below),
+  its initial function is not.
+  Precision: the per-token log f at init is ln(2^(-1/2048)) = about -3.4e-4, below bf16's resolution near the sums
+  it is added to, so log f, its in-document cumulative sum and the differences c_i - c_j are computed in fp32 under
+  bf16 autocast; the bias is cast to the attention dtype only when it is added to the logits.
+  Every path builds the bias: the doc=None path too (plain causal over the row: an explicit causal mask plus the
+  bias replaces is_causal SDPA when the flag is on). data_prep/bpb.py calls model(idx) with no document ids, so
+  without this F(CHAT) would score the arm without its gate; train.py's startup assertion does not reach bpb.py.
+
+ENGINE (the one other difference from C1, applied to BOTH arms of this screen)
+  The additive bias cannot go through the flash varlen kernel, so S005 runs train.doc_attn: mask (SDPA with the
+  document-causal mask plus the bias) in both arms, with its OWN BASE run per seed in that engine (E2 FIXED 1: no
+  comparison mixes engine settings). Memory: a float bias of 16 x 3 x 2048 x 2048 is 768 MiB in fp32 for ONE layer
+  (arithmetic). With 8 gated layers each bias stays alive until its backward pass, so about 6 GiB at micro 16
+  (inference from the arithmetic, not measured) on top of the mask path's 9.38 GiB reserved at 5M B16
+  (harness/notes.txt, base column): not expected to fit the 12 GB card (PLAN machine table). REGISTERED PLAN: both
+  arms run micro 8 x accum 2 (384 MiB per layer, about 3 GiB for 8 layers, arithmetic); if the smoke run's mem_fit
+  is not ok there, both run micro 4 x accum 4. Either way the step is 16 rows (auto_micro_on_oom stays false); a
+  loader test checks whether a step's rows match micro 16's in order, and its result and the setting are recorded
+  in FIXED before the g-check. Both arms always share the micro setting, so the pairing holds whichever it is.
+
+WHAT STAYS IDENTICAL
+  Everything else in C1. LRs move only by the arm's g pick (C3); BASE_mask stays at g = 1.
+
+BUDGET
+  B from E2 (C1): 250.0M slots, 7,630 steps, WSD with decay from step 6,104.
+
+LEARNING RATE
+  C3 g-check at seed 1 in the mask engine: g in {0.5, 1, 2} x LR5, E2's pick rule and extensions.
+
+SEEDS AND PAIRING
+  Seeds 101..100+k; forget_gate arm paired with BASE_mask at the same seed. Class: SIA if the init-isolation test
+  passes (w and b are constants, so no draw moves), else NEW INIT. SIA is a loosening of E3 rule 1 (architecture
+  is in its new-init row), so SD_ref = u x SD_d (u = 1.353 at df 7, C4), with C4's pooled SIA noise check before the
+  verdict is read. SD_d was measured in the default engine at micro 16 (see risks). k = max(2, k_needed(1%)) for the
+  class SD, at most 5.
+
+METRIC AND DECISION RULE
+  C5 and C7: F(CHAT) decides, F(PROSE) guards, in E3 MDE units. The arm is "forget gate on":
+    NOMINATE      lower chat bpb at 5M: a loss candidate; its behaviour test is PLAN 3d at 30M (P-020's win: MQRAR
+                  capacity x1.5, +10 on corrections, latest-wins >= 0.8 on 4/5 seeds), which this does not replace.
+    REJECT        higher chat bpb at 5M: reported to the PLAN 3d toy; not a behavioural verdict (arch.md 1.4).
+    TIE           loss-neutral: the 30M behaviour test decides.
+    GUARD-FAIL, INCONCLUSIVE  as C7.
+
+DIAGNOSTICS (C6; reported)
+  Per layer and head at the final checkpoint: the mean of -log f over the 200 CHAT windows, as a half-life in
+  tokens (ln 2 / mean(-log f)), and its 10th and 90th percentiles over tokens (does any head learn to forget
+  selectively, for example at turn boundaries?). HD, arm minus BASE_mask per seed (a recency path could buy loss by
+  using less history: an arm that is BETTER on CHAT with lower HD is flagged in the report). Final IND and the IND
+  curve; onset only at matched LR (C6: read if the pick is g = 1, else "LR-confounded, not read"). SINK, with the
+  forget bias added to the logits the tool rebuilds (C6).
+
+AFTER THE LOCK (C8)
+  Tier 0 margins with C7. E004 held-out items: first-vs-latest pick shares, arm vs BASE_mask per seed, reported:
+  this is P-020's own question (does a recency path move picks from the first mention to the latest?) at a size
+  where pass rates are expected at or below chance (SCREENS C6).
+
+KNOWN RISKS
+  - Engine: E3 measured its SDs in the default engine at micro 16; the mask engine at micro 8 x accum 2 differs in
+    kernels, speed and summation order, not in the function computed. The BASE_mask vs BASE difference at each seed
+    is reported (free: both exist) as a check on that assumption; it is never part of any rule.
+  - No P-020 toy runs first: LEDGER P-020's test starts with a 2-layer MQRAR toy, and PLAN 3d says a toy runs first,
+    but no toy code exists in the repo (no .py file mentions MQRAR). This is the costliest screen per seed, so the
+    toy, if it lands before stage 2, runs before S005's g-check; if it favours a different variant, S005 still runs
+    (it is P-020's must-run 5M screen) and the variant choice for 30M stays with the toy.
+  - The init (half-life 2,048 tokens) is a choice. A gate that learns b far above 7.99 has turned itself off (read
+    from the half-life diagnostic); one that starts too recency-biased could cost long-range CHAT context.
+  - Loss is not behaviour (arch.md 1.4); P-020 is decided at 30M on corrections.
+  - Memory and speed at 5M are unmeasured for the bias path; the smoke run measures both before the g-check.
+  - Starter mix and tok_v0_8k only (C1 scope).
+
+HARNESS CODE NEEDED (default off; each test watched failing on its mutant)
+  - config.py forget_gate (bool). blocks.py: the gate per Attention and the bias passed to SDPA on the mask path
+    and on the doc=None path (explicit causal mask plus the bias). model.py: the in-document cumulative sum of
+    log f, in fp32. A startup assertion that forget_gate refuses doc_attn varlen (mutant: varlen silently drops the
+    bias and the run trains a plain model).
+  - budget.py count_analytic counts the gate; test_budget.py covers the arm. optim.py routes it to "scalar" by name.
+  - testutil.ARMS gains "forget_gate": test_decode.py (decode.py caches the running sum of log f per effective
+    layer) and the leak self-tests (test_s3_leak.py) run it on scrambled weights, and test_model_mask.py once SCREENS
+    CODE moves it to testutil.ARMS (its own ARMS list today would not reach it). test_s3_docattn.py's varlen arms must
+    skip or refuse it (the flag requires the mask path). Mutants: the sum includes l = j (off by one), the sum runs
+    across a document start, the bias sign flipped.
+  - A constructed case: with f < 1 on one head, attention on that head moves toward recent keys; with every f = 1
+    the output equals the gate-free model's.
+  - Gradient test: on scrambled weights and a packed batch, the gradients of w and b through SDPA's float mask equal
+    an eager fp32 reference (explicit softmax with the bias) within tolerance, and are non-zero. Mutant:
+    bias.detach() (it would train a fixed recency bias with w and b never moving, and no other test here sees it).
+  - doc=None test (M5): model(idx) on one document equals that document's slice of the packed mask path, on
+    scrambled weights with f < 1. Mutant: the bias built only when doc is given (F(CHAT) would score the arm
+    without its gate).
+  - Precision test: under bf16 autocast, on a 2,048-token row at init, the bias for (i = 2047, j = 0) equals
+    2047 x log sigmoid(7.99) = -0.69348 (float64, computed 2026-09-26; not -ln 2 x 2047/2048 = -0.69281, since
+    7.99 is a rounded b) within 1e-4. Mutant: the cumulative sum taken in bf16 (it stalls once the sum is large
+    next to 3.4e-4).
+  - Memory: the smoke run measures mem_fit at micro 8 (then 4 if needed) in both arms before the g-check.
+  - Flag-off equivalence (bitwise, CPU) and init isolation (every BASE parameter bitwise equal at init).
+  - A smoke run on the PC (labelled smoke): mem_fit, tok/s, leak self-test, both arms in the mask engine.
+
+COST (est., SCREENS GPU HOURS: mask engine 0.49 h per run at micro 16, the base column of an older optimizer step;
+arm assumed x1.1; micro 8 x accum 2 is unmeasured and may be slower, so these are placeholders until the smoke run)
+  g-check 3 x 0.54 = 1.6 h; per seed 0.49 (BASE_mask) + 0.54 = 1.03 h. k = 3: 4.7 h. Must-run (P-020): first in
+  stage 2, never cut by SCREENS' cap rule.
+
+CHANGES AFTER CRITIQUE (2026-09-26; no flag, config or run existed, nothing committed. Checked before editing:
+data_prep/bpb.py (model(idx), no doc), harness/model.py and blocks.py (doc=None is is_causal SDPA), train.py,
+harness/notes.txt (9.38 GiB, mask path, 5M B16), PLAN machine table (12 GB), E2 notes (r), LEDGER P-020; a search
+for MQRAR in every .py file found none)
+  1 (must) Memory: one layer's bias is 768 MiB at micro 16, and 8 layers' biases live until backward (about 6 GiB,
+    inferred, not measured). Micro 8 x accum 2 is now the registered plan, micro 4 x accum 4 the fallback.
+  2 (must) A gradient test for w and b against an eager fp32 reference, with the bias.detach() mutant.
+  3 (must, M5) The bias is built on the doc=None path that bpb.py scores, with a test and mutant.
+  4 (must, M1) Class SAME INIT renamed SIA, a loosening of E3 rule 1; SD_ref = u x SD_d with C4's pooled check.
+  5 (must, M3) IND onset read only at matched LR.
+  6 (should) fp32 for log f, its cumulative sum and c_i - c_j, with a test; the gate's LR (the embedding LR) is
+    stated; the arm is recorded as not starting at the BASE function.
+  7 (should, partly) The P-020 toy runs before S005's g-check only if its code lands before stage 2; none exists.
+  Not applied: a new-module LR multiplier for w and b (another selection axis).

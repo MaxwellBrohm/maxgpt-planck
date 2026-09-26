@@ -1,0 +1,108 @@
+S007: smeared keys, a previous-token path on attention keys, at 5M (LEDGER P-024, rank 24; REPORT s4.1 "Previous-token
+path (short causal conv, token shift, or Canon layers, kernel ~4)")
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION WRITTEN 2026-09-26 10:40 (before the flag, any S007 config, run or E2/E3 result exists. Run for this
+entry, no model: harness/budget.py count_analytic plus the arithmetic below.) experiments/SCREENS.txt C1-C9 are part
+of this entry. REVISED 2026-09-26 after a critique, before the flag or any config or run exists, nothing committed:
+CHANGES AFTER CRITIQUE at the end.
+
+WHY
+  Vanilla attention needs 2 layers for induction and 1 with a smeared key (REPORT s4.1; LEDGER P-024 prior art:
+  Olsson's smeared-key 1-layer in-context learning in small attention-only models; KV-shifting attention, arXiv
+  2411.19574). Induction is the copying mechanism behind multi-turn recall (loop.md 4.2), and REPORT's limit 2
+  (binding) needs multi-token keys, which a previous-token path makes cheap. P-024's win: "induction forms with one
+  layer fewer, or earlier in training, at 5M on 2 seeds". The timing half is measurable now without RC-12 (C6 IND).
+  S004 (Canon-AC) tests a heavier previous-token path; S007 is the minimal one, touching keys only. The two are read
+  side by side in the report (no rule compares them).
+
+QUESTIONS
+  Q1 (decided, C7) Do smeared keys change held-out chat bits per byte at 5M, 250M slots?
+  Q2 (P-024's own question; C7 only if an E3 Part 4d addendum gives IND an SD, else descriptive) Does induction form
+     earlier in training (IND onset in tokens), and is final IND higher? Onset is compared at MATCHED LR (C6): from
+     the screen runs if the arm's pick is g = 1; otherwise the arm also runs at g = 1 on the screen seeds for IND
+     only (0.31 h per seed, never in a bpb verdict). Both onsets, onset_half and onset_abs (C6). The "one layer
+     fewer" half would change the shape and is not tested here, and LEDGER P-024's first step (a toy, induction at
+     1 vs 2 layers) is not run: a null here leaves that half open.
+
+THE CHANGE (one flag)
+  model.smear_key: true (new field; default false). Registered form: in every layer, for each KV head h, a learned
+  scalar alpha_h; the raw key (after k_proj, before QK-norm and RoPE) becomes k_t + alpha_h * k_(t-1), where
+  k_(t-1) is the previous position's raw key in the SAME document (zero at a document's first token). alpha_h
+  starts at 0 (a constant: no RNG draw), so the arm starts as the exact BASE function. Values are not smeared (with
+  kv_tie, which BASE does not use, V keeps the unsmeared key). Parameters: 8 layers x 3 KV heads = 24; total
+  5,010,157 vs 5,010,133 (budget.py BASE count + 24). 1-D, so harness/optim.py split_params puts them in "scalar"
+  (AdamW, no decay), at the embedding LR: E2 sets optim.embed_lr = optim.scalar_lr = r x eta, so alpha trains at
+  g x r_5 x eta_5 (no new-module multiplier; the learned alpha is reported). The smear applies on EVERY path: the
+  doc=None path (plain causal over the row, where the previous position is simply t-1), which data_prep/bpb.py
+  uses (model(idx), no document ids) and so is where F(CHAT) is scored, the mask path and the varlen path.
+
+WHAT STAYS IDENTICAL
+  Everything in C1, including the engine (the smear happens before attention, so doc_attn varlen still applies).
+  LRs move only by the arm's g pick (C3).
+
+BUDGET
+  B from E2 (C1): 250.0M slots, 7,630 steps, WSD with decay from step 6,104.
+
+LEARNING RATE
+  C3 g-check at seed 1: g in {0.5, 1, 2} x LR5, E2's pick rule and extensions.
+
+SEEDS AND PAIRING
+  Seeds 101..100+k, paired with the shared BASE run (C4). Class: SIA if the init-isolation test passes, else NEW
+  INIT. SIA is a loosening of E3 rule 1 (architecture is in its new-init row), so SD_ref = u x SD_d (u = 1.353 at
+  df 7, C4) with C4's pooled SIA noise check before the verdict. k = max(2, k_needed(1%)) for the class SD, at most
+  5. The ledger's "2 seeds" is a floor here, not the count: k comes from E3.
+
+METRIC AND DECISION RULE
+  C5 and C7: F(CHAT) decides, F(PROSE) guards, in E3 MDE units. The arm is "smeared keys on":
+    NOMINATE      lower chat bpb at 5M: a candidate, confirmed at 20M.
+    REJECT        higher chat bpb at 5M. If Q2 reads an earlier onset, the ledger row says "earlier induction at a
+                  loss cost"; otherwise P-024 is recorded as failed at 5M on this form.
+    TIE           loss-neutral: Q2 and, after the lock, Tier 0 decide whether it goes to 20M.
+    GUARD-FAIL, INCONCLUSIVE  as C7.
+
+DIAGNOSTICS (C6; reported)
+  IND curve every 153 steps and onset (Q2), per seed, arm minus BASE. The learned alpha_h per layer and head at the
+  final checkpoint (a full-schedule run keeps no early checkpoints). HD; SINK.
+
+AFTER THE LOCK (C8)
+  Tier 0 margins with C7; E004 item pick shares reported.
+
+KNOWN RISKS
+  - A previous-token path through keys can be learned by BASE's own attention (induction forms anyway, in 2 layers);
+    at 8 layers the gain may be only in timing, which is why Q2 is the ledger's reading.
+  - IND is a random-token probe; earlier IND onset need not mean better conversational recall (Tier 0 after the
+    lock is the check).
+  - Smearing before QK-norm changes the key's direction but not its normalised scale; smearing after QK-norm would
+    be a different arm, not tested.
+  - Starter mix and tok_v0_8k only (C1 scope).
+
+HARNESS CODE NEEDED (default off; each test watched failing on its mutant)
+  - config.py smear_key (bool). blocks.py Attention: the smear on the raw key, reading the in-document position
+    (model.py derives pos from doc) on the doc=None, mask and varlen paths.
+  - doc=None test (M5): on scrambled weights, model(idx) on one document equals that document's slice of the packed
+    mask path and of the varlen path (test_s3_docattn.py's CPU stand-in; the CUDA parity test on the PC). Mutant:
+    the smear applied only when doc is given (F(CHAT) would then score a model without it).
+  - budget.py count_analytic counts alpha; test_budget.py covers the arm.
+  - testutil.ARMS gains "smear_key": test_decode.py (decode.py keeps the last raw key per effective layer),
+    test_s3_leak.py and test_s3_docattn.py run it on scrambled weights (scramble sets 1-D parameters to 1 + noise,
+    so alpha is non-zero and the checks are not vacuous), and test_model_mask.py once SCREENS CODE moves it to
+    testutil.ARMS (its own ARMS list today would not reach it). Mutants: k_(t+1) used (a future leak), the smear
+    crosses a document start (a document leak), the decode cache holds the smeared instead of the raw key.
+  - Flag-off equivalence (bitwise, CPU) and init isolation: every BASE parameter bitwise equal at init, and at step
+    0 the arm's logits equal BASE's on the same batch (alpha = 0).
+  - A smoke run on the PC (labelled smoke): tok/s, leak self-test.
+
+COST (est., SCREENS GPU HOURS, assumed x1.0)
+  g-check 3 x 0.31 = 0.93 h; 0.31 h per seed (BASE shared). k = 3: 1.9 h; plus 0.31 h per seed of matched-LR IND
+  runs if the pick is not g = 1. Not must-run (rank 24): third in stage 2, third in SCREENS' cut order.
+
+CHANGES AFTER CRITIQUE (2026-09-26; no flag, config or run existed, nothing committed. Checked before editing:
+data_prep/bpb.py (model(idx), no doc), harness/model.py and blocks.py (doc=None is is_causal SDPA), testutil.py
+(scramble), test_model_mask.py, test_s3_docattn.py, optim.py split_params; E2 notes (r); LEDGER P-024, P-046, P-106)
+  1 (must, M1) Class SAME INIT renamed SIA, a loosening of E3 rule 1; SD_ref = u x SD_d with C4's pooled check.
+  2 (must, M3) IND onset, P-024's own win condition, is compared only at matched LR (LR stretches induction
+    emergence, LEDGER P-046 and P-106), with g = 1 IND-only runs when the pick is not g = 1; onset_abs added.
+  3 (must, M5) The smear is registered on every path, including doc=None (the path bpb.py scores), with a test and
+    a mutant; the claim that testutil.ARMS reaches test_model_mask.py was false and is corrected.
+  4 (should) alpha's LR (the embedding LR) is stated; the unrun P-024 toy (1 vs 2 layers) is named.

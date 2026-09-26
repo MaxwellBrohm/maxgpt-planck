@@ -1,0 +1,142 @@
+S006: a t+2 auxiliary prediction head during training at 5M (LEDGER P-105, rank 104, "Multi-token-prediction
+auxiliary loss below 30M"; research/lanes/arch.md 1.10)
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION WRITTEN 2026-09-26 10:32 (before the flag, any S006 config, run or E2/E3 result exists. Run for this
+entry, no model: the parameter arithmetic below.) experiments/SCREENS.txt C1-C9 are part of this entry. REVISED
+2026-09-26 after a critique, before the flag or any config or run exists, nothing committed: CHANGES AFTER CRITIQUE.
+
+WHY
+  arch.md 1.10 (Gloeckle et al., arXiv 2404.19737): on children's stories, 2-token prediction "vastly improved"
+  induction for models of 30M non-embedding parameters and below, with the advantage gone at 100M and above; on code
+  at 300M-13B it was worse than baseline at small sizes; exact MTP hurt at 340M (TOP paper); a forward NTP-to-MTP
+  curriculum helps small LMs (arXiv 2505.22757). Induction is the in-context copying mechanism behind multi-turn
+  recall (loop.md 4.2). Planck's screening size, 5M (3.44M body), is inside the band where the induction gain was
+  seen. LEDGER P-105's win: "earlier induction and better binding at 5M". Induction is measurable now without RC-12
+  (C6 IND); binding waits for the lock. research/followup/loop.md idea 5 specifies 2-4 MTP heads and a cheapest test
+  of "MTP=0 vs 2 extra heads"; this arm has ONE extra head (t+2), so it is a narrower form than loop.md's, and a
+  null here says nothing about 2 or more heads.
+
+QUESTIONS
+  Q1 (decided, C7) Does the auxiliary head change held-out chat bits per byte of the next-token model at 5M, 250M?
+  Q2 (P-105's own question; C7 only if an E3 Part 4d addendum gives IND an SD, else descriptive) Does induction form
+     earlier (IND onset in tokens), and is final IND higher?
+
+THE CHANGE (one training switch; the deployed model is unchanged)
+  train.mtp: 1 (new; default 0 = off) with train.mtp_weight: 1.0 (new; used only when mtp > 0). Registered form:
+  z_t = the final hidden state after the model's final norm; aux logits_t = lm_head(RMSNorm_mtp(W_mtp z_t)), the
+  tied output head shared; W_mtp (192 x 192) initialised to the identity and RMSNorm_mtp's gain to ones, neither
+  drawing from the torch RNG (so the aux head starts as a copy of the next-token head). Target of position t: the
+  token at t + 2, only where positions t, t+1 and t+2 are in one document and the t+1 target is supervised (not
+  -100). Loss per step = (sum of next-token losses + w_t x sum of aux losses) / n_sup, n_sup = the step's
+  next-token supervised count (harness/trainer.py normalisation), so at w_t = 1 each aux token weighs as a
+  next-token token.
+  WEIGHT (registered): w_t = mtp_weight x lr_factor_t, mtp_weight = 1.0, where lr_factor_t is the schedule factor
+  at step t (harness/schedule.py factor, which trainer.py applies to every LR and logs as lr_factor): (t + 1)/76
+  over warmup, 1 through the stable phase, then linear from 1 at step 6,104 down to 1/1,526 on the last step. So the
+  aux weight fades to nearly 0 by the final checkpoint, where F(CHAT) is read. Why: research/lanes/arch.md 1.10
+  records the speedrun's "MTP with weights decaying to 0" and an NTP-to-MTP curriculum (2505.22757) that helps
+  small LMs; a constant weight would keep pulling the tied embedding toward t+2 up to the scored checkpoint. (An
+  earlier draft said the repo records no weighting: wrong.) The forward curriculum (aux weight rising from 0) is a
+  later arm only if this one reads BETTER on IND at a bpb cost.
+  Parameters: W_mtp 36,864 + gain 192 = 37,056, training only. Deployed model: 5,010,133 (BASE's count, unchanged);
+  the aux module is saved in checkpoints for resume, never scored, and never counted in the model's total (it is
+  reported as "training-only parameters"). W_mtp goes to the NorMuon matrix group, the gain to "scalar" (AdamW at
+  the embedding LR, g x r_5 x eta_5: E2 sets embed_lr = scalar_lr = r x eta). W_mtp must not be an nn.Linear
+  among the model's modules: model.py reset_parameters normal-inits every nn.Linear, which would overwrite the
+  identity (the init-isolation test below catches it). The config generator's C2 check allows exactly two keys for
+  this arm, train.mtp and train.mtp_weight (a test: a third key is refused).
+
+WHAT STAYS IDENTICAL
+  Everything in C1, including the engine. Evaluation reads the next-token logits only (the model's forward output is
+  unchanged; bpb.py is unchanged). LRs move only by the arm's g pick (C3).
+
+BUDGET
+  B from E2 (C1): 250.0M slots, 7,630 steps, WSD with decay from step 6,104. Tokens, not FLOPs, are matched: the aux
+  head costs extra compute per step, reported as hours.
+
+LEARNING RATE
+  C3 g-check at seed 1: g in {0.5, 1, 2} x LR5 (the objective changes the gradient scale), E2's rule and extensions.
+
+SEEDS AND PAIRING
+  Seeds 101..100+k, paired with the shared BASE run (C4). Class: SIA if the init-isolation test passes, else NEW
+  INIT. The objective change is nearest E3 rule 1's "loss masks" row (same init), but the arm adds a trained module,
+  so it takes the stricter SIA reading: SD_ref = u x SD_d (u = 1.353 at df 7, C4) with C4's pooled SIA noise check.
+  k = max(2, k_needed(1%)) for the class SD, at most 5. If the smoke run's mem_fit is not ok at micro 16
+  (the aux logits add a second 16 x 2048 x 8192 logit tensor), both S006 arms run micro 8 x accum 2 and S006 gets
+  its own BASE per seed in that setting (E2 FIXED 1), recorded in FIXED before the g-check.
+
+METRIC AND DECISION RULE
+  C5 and C7 on the next-token model: F(CHAT) decides, F(PROSE) guards, in E3 MDE units. The arm is "t+2 aux on":
+    NOMINATE      lower chat bpb at 5M: a candidate, confirmed at 20M; arch.md's evidence says the induction gain
+                  fades by 100M non-embedding, so a SCALE-DEPENDENT reading at 20-30M is expected and would keep it
+                  out of the recipe (PLAN 3: anything that flips between sizes is left out).
+    REJECT        higher chat bpb at 5M. If Q2 reads an earlier onset, the ledger row says "earlier induction at a
+                  loss cost at 5M" and P-105 moves to the curriculum arm; otherwise the row says "failed at 5M in
+                  this form (one t+2 head, weight decaying with the LR)", never "P-105 failed".
+    TIE           loss-neutral: Q2 and, after the lock, Tier 0 decide whether it goes to 20M.
+    GUARD-FAIL, INCONCLUSIVE  as C7.
+
+DIAGNOSTICS (C6; reported)
+  IND curve every 153 steps and onset (Q2), per seed, arm minus BASE, at MATCHED LR (C6): read from the screen runs
+  if the arm's pick is g = 1; otherwise the arm also runs at g = 1 on the screen seeds for IND only (0.40 h per
+  seed, never in a bpb verdict). Both onsets (onset_half and onset_abs at BASE's half-final level, C6). HD; SINK.
+  The aux loss itself (log.jsonl), w_t, the training loss of the next-token head alone (so the two parts of the
+  objective can be read apart), and the clip rate (C5).
+  Compute exposure (reported, no rule): tokens are matched, compute is not (x1.3 assumed until the smoke run). The
+  arm's F(CHAT) gain is also given as equivalent BASE slots from E2's seed-1 branch curve (62.5M, 125M, 250M;
+  "beyond 250M" if the arm beats the 250M point). If the arm NOMINATEs, a compute-matched BASE (slots x the
+  measured compute ratio, the same WSD shape) runs on the screen seeds before any 20M confirmation is queued, and
+  the ledger row says "at equal tokens" unless the arm also beats that run.
+
+AFTER THE LOCK (C8)
+  Tier 0 margins with C7 (P-105's "better binding" half); E004 item pick shares reported.
+
+KNOWN RISKS
+  - The weight, its decay and the normalisation are choices; a different weight could flip the bpb reading. The
+    ledger's 3-arm test (NTP, MTP, curriculum) is cut to 2 arms here; the curriculum arm is conditional (above).
+  - One extra head where loop.md idea 5 asks for 2-4 (above).
+  - Extra compute per step (a second pass through the 8,192-way head at every position): tokens are matched, FLOPs
+    are not. The report gives F(CHAT) per GPU-hour beside F(CHAT).
+  - IND is an out-of-distribution random-token probe; an earlier IND onset need not mean better conversational
+    recall. Tier 0 after the lock is the check.
+  - Starter mix and tok_v0_8k only (C1 scope).
+
+HARNESS CODE NEEDED (default off; each test watched failing on its mutant)
+  - config keys train.mtp (int, 0) and train.mtp_weight (float); the aux module built only when mtp > 0, with
+    identity and ones init that draw nothing from the RNG; the loss in the model or trainer as registered above.
+  - Loss-path test as harness/notes.txt requires for any loss-path flag: a fixed batch with grad_accum >= 2 and
+    unequal supervised counts, logged loss AND gradients against an eager sum / n_sup reference (mutant: aux losses
+    normalised per micro-batch).
+  - Target construction on packed rows with masked user turns: fixtures where t+2 crosses a document start and where
+    the t+1 target is -100 (mutants: either one counted).
+  - mtp 0: bitwise equal to the pre-flag commit (CPU run). mtp 1 with mtp_weight 0: the next-token loss and every
+    shared parameter's gradient equal the mtp-0 model's.
+  - Evaluation: bpb.py on an mtp checkpoint scores the next-token logits (mutant: the aux logits are returned).
+    The IND hook too: on an mtp model, IND equals the value computed from the model's next-token forward output
+    (mutant: the hook reads the aux logits).
+  - Weight schedule: w_t equals mtp_weight x the schedule factor at warmup, stable and decay steps, checked from
+    the logged w_t and lr_factor (mutant: a constant w_t).
+  - Init isolation: every BASE parameter bitwise equal at init, and W_mtp exactly the identity after model init
+    (mutant: W_mtp as an nn.Linear, which reset_parameters re-draws). Counting: budget.py and the run record report
+    the deployed total and the training-only parameters separately.
+  - A smoke run on the PC (labelled smoke): mem_fit at micro 16, tok/s.
+
+COST (est., SCREENS GPU HOURS, assumed x1.3 until the smoke run)
+  g-check 3 x 0.40 = 1.2 h; 0.40 h per seed (BASE shared; +0.31 per seed if S006 needs its own BASE). k = 3: 2.4 h;
+  plus 0.40 h per seed of matched-LR IND runs if the pick is not g = 1. Not must-run (rank 104): last in stage 2 and
+  first in SCREENS' cut order.
+
+CHANGES AFTER CRITIQUE (2026-09-26; no flag, config or run existed, nothing committed. Checked before editing:
+research/lanes/arch.md 1.10 (speedrun MTP weights decaying to 0; NTP-to-MTP curriculum), research/followup/loop.md
+idea 5 (2-4 heads; "2 extra heads"), harness/schedule.py factor, trainer.py (lr_factor, clip), model.py
+reset_parameters, E2 notes (branch lengths, r))
+  1 (must) The claim "the repo records no weighting" was wrong (arch.md 1.10). The aux weight now decays with the
+    LR factor, so it is nearly 0 at the scored checkpoint, and a REJECT reads "failed at 5M in this form", never
+    "P-105 failed".
+  2 (must, M3) IND onset, P-105's own win condition, is compared only at matched LR, with g = 1 IND-only runs when
+    the pick is not g = 1; onset_abs added (C6).
+  3 (must, M1) Class moved to SIA (C4's stricter reading for an added trained module): SD_ref = u x SD_d.
+  4 (should) One head vs loop.md's 2-4 stated; a test that IND reads next-token logits; clip rate; compute exposure
+    as equivalent BASE slots, and a compute-matched BASE if the arm nominates. The aux norm gain's LR is stated,
+    and the C2 allowance names both keys.

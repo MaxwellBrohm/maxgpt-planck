@@ -21,15 +21,26 @@ Every experiment, its pre-registered rule, its result and its independent audit 
 
 - **Research and idea ledger: done (Sep 23 2026).** Start with [`research/REPORT.md`](research/REPORT.md),
   section 1; every idea is ranked in [`LEDGER.md`](LEDGER.md).
-- **E001-E005: done, each checked by an independent audit.** Below 2.6B, small instruct models keep the
-  first value after a correction (E001). A 135M model fine-tuned for 400 steps passed E002's rule, but
-  the audit showed a wording shortcut. On E004's harder held-out test it failed the pre-registered rule
-  on 5 of 5 seeds, yet learned an updating rule that transfers to new wording, longer distances and
-  more corrections. It fails on name-based references it never saw in training and on three objects.
-- **E005: done and audited.** Adding name-based corrections and end-of-turn training fixed both at 135M (they were missing data, not a size limit). Keeping three objects apart is still unsolved and got worse, and narrow training still costs general chat and some knowledge.
-- **Now:** the Planck toolchain. The RC-12 test decisions are being recorded, our own tokenizer is being built on an openly licensed starter corpus, and the training code is being sped up on an RTX 5070.
-- **Next:** the same question for models of 30M and under, and locking the 12-turn RC-12 test before
-  any Planck model is scored on it.
+- **E001, E002, E004, E005: done (E002, E004 and E005 independently audited; E001's checks were built
+  into the run).** Below 2.6B, small instruct models keep the first value after a correction (E001). A 135M model fine-tuned for 400 steps passed E002's rule by a
+  wording shortcut; on E004's harder held-out test it failed the rule but learned an updating rule that
+  transfers to new wording, longer distances and more corrections. Name-based corrections and
+  end-of-turn stopping turned out to be missing data, not a size limit (E005). Keeping three objects
+  apart is still unsolved, and narrow training costs general chat and some knowledge.
+- **Running:** E003, the easy version of the correction test on public base models (TinyStories-1M to
+  Pythia-160M), on the laptop. No result is claimed until the queue finishes and its tables are checked;
+  the five smallest stayed near chance on E004's harder test.
+  E006 (three objects, and protecting general chat) is pre-registered and waits for the RTX 5070.
+- **RC-12, the 12-turn test:** Max's rulings are recorded, two loop-rule follow-ups are decided and three
+  items stay open for Max, a grader bug found while building the OOD-H set (real human conversations with
+  Claude-written probes) was fixed before any model was scored, and OOD-H Part 1 (150 held-out
+  conversations) is built as a lock candidate. No model is scored on it yet.
+- **Toolchain:** tokenizer v0 is built (its 8k cut matches a separately trained 8k; no superword tokens),
+  the openly licensed starter corpus is tokenized (2.0B tokens), the learning-rate and seed-noise
+  calibration runs (E2, E3) are ready, three candidate teacher models are pinned, and two training speed-ups
+  are under verification.
+- **Next:** dev baselines on RC-12, then the sealed split and the lock (planned Oct 11-14) before any
+  Planck model is scored on it; E2 and E3; the teacher pilot.
 
 ## Ground rules
 
@@ -52,7 +63,7 @@ Every experiment, its pre-registered rule, its result and its independent audit 
 | `research/diagnosis_*.md`, `research/CRITIQUE.md` | Three independent diagnoses and the adversarial review of the report |
 | `research/probe/`, `research/capacity_probe/` | Code, transcripts and scores from the hands-on probes of real small models |
 | `LEDGER.md` | The idea ledger |
-| `tools/gemma_chat.py` | Terminal chat with Gemma 4 through LM Studio with thinking truly off (the teacher model) |
+| `tools/gemma_chat.py` | Terminal chat with Gemma 4 through LM Studio with thinking truly off (Gemma 4 is one of three candidate teachers; the pick waits for the teacher pilot) |
 
 ## Credits
 
