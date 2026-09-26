@@ -36,6 +36,7 @@ VARIANTS = [
     {"qk_share": 2}, {"qk_share": 3, "n_layers": 5},
     {"kv_tie": True}, {"kv_tie": True, "qk_share": 2, "n_heads": 4, "n_kv_heads": 2},
     {"n_loops": 2, "n_prelude": 2, "qk_share": 2, "value_residual": False},
+    {"smear_key": True}, {"smear_key": True, "n_heads": 4, "n_kv_heads": 2, "n_loops": 2, "qk_share": 2},  # S007
 ]
 
 

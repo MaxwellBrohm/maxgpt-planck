@@ -49,6 +49,9 @@ def set_doc_attn(model, impl: str, device: str | None = None) -> None:
     """Select the packed-row attention for a PlanckLM. varlen needs CUDA; say so up front."""
     if impl not in IMPLS:
         raise ValueError(f"doc_attn must be one of {IMPLS}, got {impl!r}")
+    if impl == "varlen" and getattr(getattr(model, "cfg", None), "forget_gate", False):
+        raise ValueError("forget_gate (S005) needs doc_attn mask: its logit bias cannot enter flash varlen "
+                         "(set train.doc_attn: mask; auto picks varlen on cuda+bf16)")
     if impl == "varlen" and device is not None and device != "cuda":
         raise ValueError(f"doc_attn varlen needs device cuda (flash varlen), got {device!r}")
     model.doc_attn = impl

@@ -6,6 +6,8 @@ test files failed. A mutant is KILLED when pytest exits 1 (tests failed). Exit c
 (collection or usage errors) count as INVALID, never as killed. The unmutated copy is run
 first and must be green. Also reports whether the STARTUP self-test (train.py's gate,
 test_model_mask.py::test_selftest_passes_clean_model) caught each mask/causal mutant.
+A mutant with a tests list (mutants.py; the screen flags' groups) runs those files instead of
+the suite, and the baseline runs every file the selected mutants use.
 
   python mutation_check.py --group mask          # one group (keeps each call short)
   python mutation_check.py --id opt_wrong_sign   # one mutant
@@ -65,7 +67,7 @@ def run_suite(d: str, files: list[str], timeout: int = 110) -> tuple[int, list[s
 def check(mutant: dict, files: list[str]) -> dict:
     d = make_copy(mutant)
     try:
-        code, failed, dt = run_suite(d, files)
+        code, failed, dt = run_suite(d, mutant.get("tests") or files)   # tests: a screen flag's own files
     finally:
         shutil.rmtree(d, ignore_errors=True)
     by_file = sorted({f.split("::")[0] for f in failed if "::" in f})
@@ -95,8 +97,9 @@ def main() -> int:
     for m in todo:                                   # fail fast on a stale target string
         shutil.rmtree(make_copy(m), ignore_errors=True)
     base = make_copy(None)
+    base_files = list(dict.fromkeys(f for m in todo for f in (m.get("tests") or files))) or files
     try:
-        code, failed, dt = run_suite(base, files)
+        code, failed, dt = run_suite(base, base_files)
     finally:
         shutil.rmtree(base, ignore_errors=True)
     print(f"baseline (unmutated copy): exit {code}, {len(failed)} failed, {dt:.1f}s", flush=True)

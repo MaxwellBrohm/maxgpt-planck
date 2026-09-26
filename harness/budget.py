@@ -43,10 +43,22 @@ def count_analytic(cfg: PlanckConfig) -> dict:
             n += 3                              # vr_scale + vr_alpha[2]
         if cfg.mlp_hidden > 0:
             n += d + 3 * d * cfg.mlp_hidden     # mlp_norm + SwiGLU
+        n += len(cfg.canon_sites()) * d * cfg.canon_kernel   # S004 Canon kernels (0 when off)
+        if cfg.forget_gate:
+            n += cfg.n_heads * (d + 1)          # S005 forget gate w (H, d) + b (H,)
+        if cfg.smear_key:
+            n += cfg.n_kv_heads                 # S007 smeared-key alpha, one per KV head
         blocks += n
     emb = cfg.vocab_size * d * (1 if cfg.tie_embeddings else 2)
     body = blocks + d                           # + final norm
     return {"total": emb + body, "embedding": emb, "body": body}
+
+
+def count_mtp(cfg: PlanckConfig, mtp: int) -> int:
+    """S006 (train.mtp; mtp.MTPHead): TRAINING-ONLY parameters of the t+2 aux head, W_mtp (d x d) plus its
+    norm gain (d) per head. Never in count_analytic: the deployed model (BASE's total) is unchanged, and the
+    run record reports the two apart (runs.jsonl start: n_params and mtp.training_only_params)."""
+    return mtp * (cfg.d_model * cfg.d_model + cfg.d_model)
 
 
 @dataclass

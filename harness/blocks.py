@@ -14,6 +14,12 @@ scaling. Changes for Planck, all marked "Planck:" below:
   - document masking for packed rows: an optional boolean attention mask (True = attend)
     replaces the plain causal flag, and RoPE tables may be per-row (positions restart at
     every document), see model.py.
+  - S004 Canon layers (config canon, default off): CanonConv, residual causal depthwise convs
+    on the normed inputs of attention and the MLP, stopped at document starts.
+  - S005 forget gate (config forget_gate, default off): Attention.forget_bias, an additive logit
+    bias sum over l in (j, i] of log f[l], in fp32, on the mask path and the doc=None path.
+  - S007 smeared keys (config smear_key, default off): Attention.smear, raw key k_t + alpha_h * k_(t-1)
+    (same document) before QK-norm and RoPE, on every path (doc=None, mask, varlen); values unsmeared.
 """
 from __future__ import annotations
 
@@ -69,6 +75,9 @@ def repeat_kv(x: torch.Tensor, n_rep: int) -> torch.Tensor:
     return x[:, :, None].expand(B, n_kv, n_rep, T, hd).reshape(B, n_kv * n_rep, T, hd)
 
 
+FORGET_B0 = 7.99   # S005 gate bias init: f = sigmoid(7.99) = 2^(-1/2048) to 3 digits (half-life 2,048 tokens)
+
+
 class Attention(nn.Module):
     def __init__(self, cfg: PlanckConfig, has_vr: bool,
                  shared_qk: tuple[nn.Linear, nn.Linear] | None = None):
@@ -101,16 +110,58 @@ class Attention(nn.Module):
         if has_vr:
             self.vr_scale = nn.Parameter(torch.ones(()))
             self.vr_alpha = nn.Parameter(torch.tensor([1.0, 0.0]))
+        # Planck (S005, P-020): forget gate f[t, h] = sigmoid(forget_w[h] . x_t + forget_b[h]) on the
+        # attention input x. Constants, no RNG draw (every other parameter keeps its draw): w = 0, b = 7.99.
+        self.forget_gate = cfg.forget_gate
+        if cfg.forget_gate:
+            self.forget_w = nn.Parameter(torch.zeros(cfg.n_heads, d))
+            self.forget_b = nn.Parameter(torch.full((cfg.n_heads,), FORGET_B0))
+        # Planck (S007, P-024): smeared keys, alpha[h] per KV head. A constant 0 (no RNG draw), so the arm starts
+        # as the exact flag-off function and every other parameter keeps its draw. 1-D: AdamW 'scalar' group.
+        self.smear_key = cfg.smear_key
+        if cfg.smear_key:
+            self.smear_alpha = nn.Parameter(torch.zeros(cfg.n_kv_heads))
 
-    def forward(self, x, cos, sin, v1=None, mask=None):
+    def smear(self, k, starts=None):
+        """S007: raw keys k (B, T, Hkv, hd) -> k_t + alpha_h * k_(t-1). k_(t-1) reads zero at t = 0 and, with
+        starts (B, T) bool (True where a document starts; model.forward, from doc), at every document start."""
+        prev = F.pad(k[:, :-1], (0, 0, 0, 0, 1, 0))       # prev[:, t] = k[:, t - 1], 0 at t = 0
+        if starts is not None:
+            prev = prev.masked_fill(starts[:, :, None, None], 0.0)
+        return k + self.smear_alpha.to(k.dtype).view(-1, 1) * prev
+
+    def forget_logf(self, x):
+        """S005: log f, fp32 (B, H, T), from the attention input x (B, T, d); autocast off (at init
+        log f = -3.4e-4, below bf16's resolution next to the sums it joins)."""
+        with torch.autocast(x.device.type, enabled=False):
+            z = F.linear(x.float(), self.forget_w.float(), self.forget_b.float())
+            return F.logsigmoid(z).transpose(1, 2)
+
+    def forget_bias(self, x, fg):
+        """S005: fp32 (B, H, T, T) logit bias, -inf where attention is not allowed. fg = (allowed bool
+        (B|1, 1, T, T), seg = allowed as fp32 (B|1, T, T)), built once per forward (model.forget_segments).
+        c = seg @ log f is the IN-DOCUMENT cumulative sum (c[t] = sum of log f[l], l <= t in t's document)
+        with no arithmetic path from another document, and c[i] - c[j] = sum over l in (j, i] of log f[l]."""
+        allowed, seg = fg
+        with torch.autocast(x.device.type, enabled=False):
+            logf = self.forget_logf(x)
+            c = torch.matmul(seg, logf.transpose(1, 2)).transpose(1, 2)          # (B, H, T)
+            bias = c.unsqueeze(-1) - c.unsqueeze(-2)
+            return bias.masked_fill(~allowed, float("-inf"))
+
+    def forward(self, x, cos, sin, v1=None, mask=None, fg=None, smear=None):
         """Returns (out, v_local). v_local is this layer's own pre-mix values.
         mask: None (plain causal), bool (B, 1, T, T), True = may attend (Planck), or a
-        docattn.VarlenDocs (packed rows without a mask, doc_attn "varlen")."""
+        docattn.VarlenDocs (packed rows without a mask, doc_attn "varlen").
+        fg: S005 (forget_gate only), model.forget_segments of the same mask (doc=None: plain causal).
+        smear: S007 (smear_key only), document starts (B, T) bool, or None (the row is one sequence)."""
         B, T, _ = x.shape
         q = self.q_proj(x).view(B, T, self.n_heads, self.head_dim)
         k_raw = self.k_proj(x).view(B, T, self.n_kv_heads, self.head_dim)
         v = k_raw if self.kv_tie else self.v_proj(x).view(B, T, self.n_kv_heads, self.head_dim)
         k = k_raw
+        if self.smear_key:                    # S007: every path (doc=None, mask, varlen); V keeps k_raw
+            k = self.smear(k_raw, smear)
         if self.qk_norm:
             q, k = self.q_norm(q), self.k_norm(k)
         q, k, v = q.transpose(1, 2), k.transpose(1, 2), v.transpose(1, 2)
@@ -119,11 +170,16 @@ class Attention(nn.Module):
             a1, a2 = self.vr_alpha[0], self.vr_alpha[1]
             v = self.vr_scale * (a1 * v + a2 * v1) * torch.rsqrt(a1 * a1 + a2 * a2)
         q, k = apply_rope(q, cos, sin), apply_rope(k, cos, sin)
+        bias = None
+        if self.forget_gate:                  # S005: every path, doc=None included (model refuses varlen)
+            bias = self.forget_bias(x, fg)
         if mask is not None and not isinstance(mask, torch.Tensor):
             out = mask.attend(q, k, v)        # docattn.VarlenDocs (GQA inside the kernel)
         else:
             k_, v_ = repeat_kv(k, self.n_rep), repeat_kv(v, self.n_rep)
-            if mask is None:
+            if bias is not None:              # S005: allowed-or--inf plus the forget bias, cast here only
+                out = F.scaled_dot_product_attention(q, k_, v_, attn_mask=bias.to(q.dtype))
+            elif mask is None:
                 out = F.scaled_dot_product_attention(q, k_, v_, is_causal=True)
             else:  # Planck: causal AND same-document, built by the model
                 out = F.scaled_dot_product_attention(q, k_, v_, attn_mask=mask)
@@ -147,6 +203,34 @@ class SwiGLU(nn.Module):
         return self.down_proj(F.silu(self.gate_proj(x)) * self.up_proj(x))
 
 
+class CanonConv(nn.Module):
+    """Planck (S004, P-148; experiments/S004_canon/notes.txt): a Canon layer, a residual causal
+    depthwise 1-D convolution over time, one K-tap kernel per channel, no bias:
+        out[t] = h[t] + sum_{j=0..K-1} weight[:, j] * h[t - j]
+    A tap that would read before the start of t's document (in-document position of t < j)
+    reads zero: before the row start by zero padding, at packed document starts through
+    skip[j - 1] (model.canon_skip_masks). Zero init from torch.zeros, no RNG draw, so the arm
+    starts as the exact flag-off function and every other parameter keeps its draw."""
+
+    def __init__(self, d: int, kernel: int):
+        super().__init__()
+        self.weight = nn.Parameter(torch.zeros(d, kernel))
+
+    def forward(self, h, skip=None):
+        """h (B, T, d). skip: None (the row is one sequence: the doc=None path) or K-1 bool
+        (B, T, 1) masks, skip[j - 1] True where tap j must read zero."""
+        K, T = self.weight.size(1), h.size(1)
+        w = self.weight.to(h.dtype)
+        hp = F.pad(h, (0, 0, K - 1, 0))                 # hp[:, K - 1 + t] = h[:, t]
+        out = torch.addcmul(h, h, w[:, 0])              # h + tap 0
+        for j in range(1, K):
+            s = hp[:, K - 1 - j:K - 1 - j + T]          # s[:, t] = h[:, t - j], 0 before t = 0
+            if skip is not None:
+                s = s.masked_fill(skip[j - 1], 0.0)
+            out = torch.addcmul(out, s, w[:, j])
+        return out
+
+
 class Block(nn.Module):
     """From Ultra: pre-norm attention + SwiGLU with residuals. Planck: the norm scale is
     passed per call (effective depth), and mlp_hidden = 0 drops the MLP sublayer."""
@@ -159,17 +243,26 @@ class Block(nn.Module):
         if self.has_mlp:
             self.mlp_norm = RMSNorm(cfg.d_model, cfg.rms_eps)
             self.mlp = SwiGLU(cfg.d_model, cfg.mlp_hidden)
+        # Planck (S004): Canon convs on the normed input of attention (A) and of the MLP (C)
+        sites = cfg.canon_sites()
+        self.canon_a = CanonConv(cfg.d_model, cfg.canon_kernel) if "A" in sites else None
+        self.canon_c = CanonConv(cfg.d_model, cfg.canon_kernel) if "C" in sites else None
 
-    def forward(self, x, cos, sin, v1=None, norm_scale: float = 1.0, mask=None):
+    def forward(self, x, cos, sin, v1=None, norm_scale: float = 1.0, mask=None, canon_skip=None, fg=None,
+                smear=None):
         h = self.attn_norm(x)
         if norm_scale != 1.0:
             h = h * norm_scale
-        a, v_local = self.attn(h, cos, sin, v1, mask)
+        if self.canon_a is not None:        # every path (doc=None, mask, varlen); skip from doc
+            h = self.canon_a(h, canon_skip)
+        a, v_local = self.attn(h, cos, sin, v1, mask, fg, smear)
         x = x + a
         if self.has_mlp:
             h = self.mlp_norm(x)
             if norm_scale != 1.0:
                 h = h * norm_scale
+            if self.canon_c is not None:
+                h = self.canon_c(h, canon_skip)
             x = x + self.mlp(h)
         return x, v_local
 

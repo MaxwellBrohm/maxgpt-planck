@@ -131,6 +131,53 @@ HARNESS CODE NEEDED (default off; each test watched failing on its mutant)
   - Memory: the smoke run measures mem_fit at micro 8 (then 4 if needed) in both arms before the g-check.
   - Flag-off equivalence (bitwise, CPU) and init isolation (every BASE parameter bitwise equal at init).
   - A smoke run on the PC (labelled smoke): mem_fit, tok/s, leak self-test, both arms in the mask engine.
+  LANDED 2026-09-26, NOT committed (Mac CPU only; the PC was offline, so no CUDA test and no smoke run yet):
+  - Flag: model.forget_gate (bool, default false; a non-bool is refused). With false, to_dict() omits the key, so
+    an off run's checkpoint model_cfg is the pre-flag dict (train.py resume and init_from, E2 preflight).
+  - blocks.Attention: forget_w (H, d) from torch.zeros and forget_b (H,) from torch.full(7.99) (FORGET_B0), no RNG
+    draw. a_t = the Attention module's input: attn_norm(x) * norm_scale (after Canon-A when canon is also on).
+    forget_logf: log f = logsigmoid(w . a_t + b) in fp32 with autocast off. forget_bias: c = seg @ log f (fp32,
+    autocast off), where seg is the allowed matrix as 0/1, i.e. the in-document cumulative sum; bias = c_i - c_j,
+    -inf where attention is not allowed; cast to the attention dtype only at the SDPA call (autocast then casts
+    to bf16 on the PC). One SDPA call with that float mask replaces both the bool-mask call and is_causal.
+  - Implementation choice (not in the entry above): the in-document sum is a matmul with the 0/1 mask, not
+    torch.cumsum. A row cumsum minus a per-document offset is equal in exact arithmetic, but earlier documents
+    stay in the float sums, and the bitwise leak probes fail on it (mutant fg_sum_across_doc_start: 4 packed leak
+    tests red). Cost (arithmetic, unmeasured): B x T x T x H multiply-adds per layer, and one fp32 (B, T, T) seg
+    per forward shared by every layer (128 MiB at micro 8, T 2048), on top of the per-layer bias.
+  - model.py: forget_segments(allowed) builds (allowed, seg) once per forward; the mask path uses
+    document_causal_mask(doc), doc=None (bpb.py) an explicit causal tril. PlanckLM.forward raises when forget_gate
+    is on and doc_attn is not "mask"; docattn.set_doc_attn refuses varlen for it (train.py and pc/bench_micro.py
+    call it at startup). train.doc_attn auto resolves to varlen on cuda+bf16 and is then refused: S005 configs
+    must write train.doc_attn: mask (as ENGINE registers).
+  - optim.split_params sends ".forget_" names to "scalar" (AdamW, scalar_lr, no decay) before the 2-D rule.
+    budget.count_analytic adds H x (d + 1) per unique block: BASE 5,010,133, forget gate 5,014,765 (analytic ==
+    meta build, tested).
+  - decode.KVDecoder keeps per effective layer the fp32 running sums c of log f for every cached key.
+  - testutil.ARMS gains "forget_gate" (test_s3_leak and test_decode run it); test_s3_docattn's CPU varlen parity
+    test asserts the refusal for it instead of comparing. test_model_mask.py is unchanged (SCREENS shared code).
+  - Tests, harness/test_screen_forget_gate.py: test_init_isolation, test_bias_equals_plain_loop_reference (causal,
+    packed; float64 loops), test_f_one_is_gate_free_and_f_below_one_moves_toward_recent_keys,
+    test_gradients_match_eager_fp32_reference (w and b through SDPA's float mask vs explicit softmax, non-zero),
+    test_precision_bf16_row_2048 (bias(2047, 0) within 1e-4 of -0.69348; cpu, cuda case skipped), test_leak_probes
+    (causal, packed with padding), test_bf16_autocast_no_leak, test_doc_none_equals_packed_slice (M5); CUDA only:
+    test_cuda_leak_probes_forget_gate, test_cuda_bf16_gate_gradients_near_fp32. harness/test_screen_forget_gate_run.py
+    (split off for the file-size limit): test_config_values_and_dict, test_off_equals_absent_20_steps,
+    test_off_equals_preflag_commit_20_steps (git show 5c5a30a:harness/*.py, skipped without git),
+    test_gradient_reaches_gate_and_scalar_group, test_resume_20_plus_20_equals_40_with_forget_gate (per-matrix and
+    batched), test_train_refuses_varlen, test_varlen_refused, test_startup_selftest_passes,
+    test_budget_counts_forget_gate, test_budget_5m_base_and_arm, test_decode_matches_full_forward.
+  - Mutants, harness/mutants.py group "forget" (mutation_check.py --group forget): fg_sum_includes_j,
+    fg_sum_across_doc_start, fg_sign_flipped, fg_bias_detached, fg_only_with_doc (M5), fg_cumsum_bf16,
+    fg_logf_bf16, fg_varlen_allowed_setter, fg_varlen_allowed_forward, fg_init_draws_rng, fg_bias_init,
+    fg_built_when_off, fg_budget_no_bias, fg_decode_no_carry, fg_off_in_model_cfg, fg_in_normuon.
+  - Results (Mac CPU, 2026-09-26): test_screen_forget_gate.py 25 passed, 3 skipped (the CUDA cases);
+    test_screen_forget_gate_run.py 26 passed (the pre-flag 5c5a30a test ran in the tree; in mutation_check's
+    scratch copies it skips). mutation_check.py --group forget: 16/16 killed. Re-run with the gate in the tree:
+    --group canon 10/10, mask 7/7, causal 5/5, docattn 5/5 killed. Full harness suite: 556 passed, 25 skipped
+    (every skip a CUDA case), 122 s, exit 0.
+  - Still open: the PC CUDA tests and the smoke run (mem_fit at micro 8, then 4; tok/s); the C6 SINK tool adding
+    this bias; the half-life diagnostic reads forget_logf on the 200 CHAT windows (not written).
 
 COST (est., SCREENS GPU HOURS: mask engine 0.49 h per run at micro 16, the base column of an older optimizer step;
 arm assumed x1.1; micro 8 x accum 2 is unmeasured and may be slower, so these are placeholders until the smoke run)

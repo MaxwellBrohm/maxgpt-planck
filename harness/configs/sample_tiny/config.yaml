@@ -24,6 +24,9 @@ model:                                   # every PlanckConfig field (config.py) 
   n_coda: 0
   qk_share: 1
   kv_tie: false
+  # canon: AC                            # S004 Canon layers ("" = off, the default); canon_kernel: 4
+  # forget_gate: true                    # S005 forget gate (false = off, the default); needs train.doc_attn: mask
+  # smear_key: true                      # S007 smeared keys (false = off, the default); any doc_attn
 
 data:
   mode: pack                             # pack (doc-masked rows) | bucket (one conversation per row)
@@ -68,6 +71,7 @@ train:
   ckpt_every: 20
   keep_last: 2
   selftest: true                         # causal and document leak test at startup
+  # mtp: 1                               # S006 t+2 aux head, training only (0 = off, the default); mtp_weight: 1.0
   # lazy_metrics: false                  # true: loss/gnorm read on log steps only (no per-step sync)
   doc_attn: auto                         # packed rows: auto (varlen on cuda+bf16, else mask) | mask
                                          # (SDPA + dense mask, the reference) | varlen (flash, cuda bf16)

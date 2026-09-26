@@ -124,6 +124,10 @@ def test_varlen_equals_mask_cpu_reference_kernel(arm, monkeypatch):
     batches = make_batches(ROWS[:2], 97, "cpu")
     lm, sm, gm = fwd_bwd(m, "mask", batches)
     assert not calls                                          # the default never takes varlen
+    if m.cfg.forget_gate:        # S005: the bias needs the mask path; varlen refuses, never runs plain
+        with pytest.raises(RuntimeError, match="forget_gate"):
+            fwd_bwd(m, "varlen", batches)
+        return
     lv, sv, gv = fwd_bwd(m, "varlen", batches)
     assert len(calls) == m.cfg.depth * len(batches)           # every layer, every micro-batch
     assert torch.allclose(lv, lm, atol=1e-5, rtol=1e-5) and abs(sv - sm) < 1e-5 * abs(sm)

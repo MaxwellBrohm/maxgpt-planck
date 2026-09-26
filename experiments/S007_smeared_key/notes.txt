@@ -92,6 +92,40 @@ HARNESS CODE NEEDED (default off; each test watched failing on its mutant)
   - Flag-off equivalence (bitwise, CPU) and init isolation: every BASE parameter bitwise equal at init, and at step
     0 the arm's logits equal BASE's on the same batch (alpha = 0).
   - A smoke run on the PC (labelled smoke): tok/s, leak self-test.
+  LANDED 2026-09-26, NOT committed (Mac CPU only; the PC was offline, so no CUDA test and no smoke run yet):
+  - Flag: model.smear_key (bool, default false; anything but true/false refused). Off: to_dict() omits the key, so
+    an off run's checkpoint model_cfg is the pre-flag dict (resume, init_from, E2 preflight).
+  - blocks.Attention.smear_alpha: (n_kv_heads,) from torch.zeros (no RNG draw), one per unique block (a looped
+    block reuses its alpha; qk_share followers keep their own). Attention.smear: k = k_raw + alpha_h * k_raw[t - 1]
+    after k_proj, before QK-norm and RoPE; V (kv_tie: k_raw) unsmeared. k_raw[t - 1] is zero at t = 0 and, when doc
+    is given, at every document start: model.forward passes docattn.doc_starts(doc) (runs of equal ids, the mask's
+    and varlen's rule), never a loader-given pos; doc=None (bpb.py) smears over the row, stopping at the row start.
+    Mask engine and varlen get the same starts (the smear is outside attention), so doc_attn auto is allowed.
+  - Optimizer: 1-D, so split_params' dim rule puts alpha in "scalar" (AdamW, scalar_lr, no decay); optim.py is
+    unchanged. budget.count_analytic adds n_kv_heads per unique block: 5,010,133 -> 5,010,157 (analytic == meta
+    build, tested). decode.KVDecoder keeps the last raw key per effective layer and runs the block's own smear.
+  - testutil.ARMS gains "smear_key" (test_s3_leak, test_s3_docattn's CPU stand-in and test_decode run it);
+    test_budget.py VARIANTS gains two smear arms. test_model_mask.py unchanged (SCREENS shared code).
+  - Tests, harness/test_screen_smear_key.py: test_init_isolation (RNG untouched, BASE bitwise, alpha 0, step-0
+    logits equal on doc=None, mask and varlen stand-in), test_attention_equals_plain_loop_reference (smear order,
+    doc starts, GQA head map, V unsmeared), test_leak_probes, test_leak_probes_varlen_cpu_reference_kernel,
+    test_bf16_autocast_no_leak, test_doc_none_equals_packed_slice (M5, mask and varlen),
+    test_startup_selftest_passes, test_budget_counts_smear, test_budget_5m_base_and_arm,
+    test_decode_matches_full_forward; CUDA only (skipped on the Mac): test_cuda_leak_probes_smear (mask, varlen),
+    test_cuda_varlen_parity_smear. harness/test_screen_smear_key_run.py (split for the file-size limit):
+    test_config_values_and_dict, test_off_equals_absent_20_steps, test_off_equals_preflag_commit_20_steps (git
+    show 5c5a30a), test_gradient_reaches_alpha_and_scalar_group, test_resume_20_plus_20_equals_40_with_smear
+    (per-matrix and batched optimizer), test_varlen_allowed.
+  - Mutants, harness/mutants_smear.py (imported by mutants.py; mutation_check.py --group smear): smear_future_key,
+    smear_crosses_doc_start, smear_start_off_by_one, smear_only_with_doc (M5), smear_after_qk_norm,
+    smear_values_too, smear_init_draws_rng, smear_alpha_init_nonzero, smear_built_when_off,
+    smear_alpha_2d_in_normuon, smear_off_in_model_cfg, smear_budget_per_query_head, smear_decode_caches_smeared.
+  - Results (Mac CPU, 2026-09-26): test_screen_smear_key.py 56 passed, 3 skipped (CUDA); the run file 7 passed
+    (the pre-flag test ran in the tree, not skipped); mutation_check --group smear 13/13 killed; re-run after the
+    edits: mask 7/7, causal 5/5, docattn 5/5, budget 5/5, canon 10/10, forget 16/16, mtp 16/16 killed; full
+    harness suite 663 passed, 30 skipped, 215 s, exit 0 (S006's report: 589 passed, 27 skipped; +74 = 63 new
+    + 11 smear cases in the shared files; the 3 new skips are this flag's CUDA tests).
+  - Still open: the PC CUDA tests and the smoke run (tok/s; the smear adds a few elementwise ops per layer).
 
 COST (est., SCREENS GPU HOURS, assumed x1.0)
   g-check 3 x 0.31 = 0.93 h; 0.31 h per seed (BASE shared). k = 3: 1.9 h; plus 0.31 h per seed of matched-LR IND

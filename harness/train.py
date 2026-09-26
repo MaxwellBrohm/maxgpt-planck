@@ -34,6 +34,7 @@ from data import build_loader          # noqa: E402
 from device import amp_factory, env_info, pick_device, resolve_precision  # noqa: E402
 from docattn import resolve_doc_attn, set_doc_attn  # noqa: E402
 from model import build_model          # noqa: E402
+from mtp import MTPHead, mtp_settings   # noqa: E402
 from optim import make_optimizer       # noqa: E402
 from selftest import run_selftests     # noqa: E402
 from trainer import Trainer            # noqa: E402
@@ -98,6 +99,8 @@ def main(argv=None) -> int:
     mcfg = PlanckConfig.from_dict(cfg["model"])
     model = build_model(mcfg, "cpu").to(device)
     n_params = count_module(model)["total"]
+    mtp, mtp_weight = mtp_settings(tc)     # S006 (train.mtp, mtp.py): 0 = off, the default
+    head = MTPHead(mcfg.d_model, mcfg.rms_eps).to(device) if mtp else None   # training only, draws nothing
     dmode = cfg["data"].get("mode", "pack")
     # packed-row attention kernel (docattn.py); auto = varlen on cuda+bf16, else mask
     doc_attn = resolve_doc_attn(tc.get("doc_attn", "auto"), device, precision)
@@ -112,7 +115,7 @@ def main(argv=None) -> int:
     batch_tokens = per_micro * accum
     total_steps = int(tc["total_steps"]) if "total_steps" in tc else \
         S.steps_for_tokens(float(tc["total_tokens"]), batch_tokens)
-    opt = make_optimizer(model, oc, device)
+    opt = make_optimizer(model, oc, device, extra=head)
 
     init_ck = None
     if sc.get("init_from"):
@@ -122,11 +125,13 @@ def main(argv=None) -> int:
 
     meta = {"model_cfg": mcfg.to_dict(), "n_params": n_params, "prereg_sha256": prereg["sha256"],
             "config_sha256": cfg_sha, "seed": seed, "precision": precision}
+    if head is not None:                   # n_params stays the deployed model's total
+        meta["mtp_params"] = sum(p.numel() for p in head.parameters())
     tr = Trainer(model=model, optimizer=opt, loader=loader, sched=sched, device=device, amp=amp,
                  cfg=cfg, out_dir=out_dir, grad_accum=accum, grad_clip=float(tc.get("grad_clip", 1.0)),
                  log_every=int(tc.get("log_every", 10)), ckpt_every=int(tc.get("ckpt_every", 500)),
                  keep_last=int(tc.get("keep_last", 2)), stable_points=stable_pts, meta=meta,
-                 lazy_metrics=bool(tc.get("lazy_metrics", False)))
+                 lazy_metrics=bool(tc.get("lazy_metrics", False)), mtp=head, mtp_weight=mtp_weight)
 
     if (cfg.get("eval") or {}).get("rc12"):   # off unless eval.rc12.every > 0 (rc12_eval.py)
         from rc12_eval import make_hook
@@ -160,6 +165,8 @@ def main(argv=None) -> int:
         start["optim_batched"] = True
     if tr.lazy_metrics:
         start["lazy_metrics"] = True
+    if head is not None:                    # S006: deployed total (n_params) and training-only, apart
+        start["mtp"] = {"heads": mtp, "weight": mtp_weight, "training_only_params": meta["mtp_params"]}
     runio.append_jsonl(runs_jsonl, start)
     print(f"[train] {name}: {n_params:,} params, {device}/{precision}, steps {tr.step}->"
           f"{sched.total_steps} ({sched.mode}), {batch_tokens:,} tokens/step", flush=True)

@@ -2,13 +2,15 @@
 (it must occur exactly once) in a scratch copy of the harness; the step-3 suite must go red.
 
 Fields: id, group, file, old, new, why. equivalent=True marks a mutant that is known to
-change nothing observable (it is reported, and expected to survive).
+change nothing observable (it is reported, and expected to survive). tests: the test files
+this mutant runs instead of the step-3 suite (the screen flags' own files); None = the suite.
 """
 M = []
 
 
-def mut(id, group, file, old, new, why, equivalent=False):
-    M.append(dict(id=id, group=group, file=file, old=old, new=new, why=why, equivalent=equivalent))
+def mut(id, group, file, old, new, why, equivalent=False, tests=None):
+    M.append(dict(id=id, group=group, file=file, old=old, new=new, why=why, equivalent=equivalent,
+                  tests=tests))
 
 
 # ---------------- document masking ----------------
@@ -144,3 +146,81 @@ mut("budget_share_ignored", "budget", "budget.py", "if cfg.qk_owner(u) == u:", "
     "shared W_q/W_k counted per layer")
 mut("count_no_dedup", "budget", "count_params.py", "model.parameters())",
     "model.parameters(remove_duplicate=False))", "ground truth counts tied weights twice")
+# ---------------- S004 Canon layers (model.canon; killed by test_screen_canon*.py) ----------------
+CANON = ["test_screen_canon.py", "test_screen_canon_run.py"]
+mut("canon_centred_kernel", "canon", "blocks.py", "hp = F.pad(h, (0, 0, K - 1, 0))",
+    "hp = F.pad(h, (0, 0, K // 2 - 1, K - K // 2))",
+    "centred (non-causal) kernel: at K 3-5 tap 1 reads t + 1 or later", tests=CANON)
+mut("canon_ignores_doc_starts", "canon", "blocks.py", "s = s.masked_fill(skip[j - 1], 0.0)", "s = s",
+    "taps reach across packed document starts", tests=CANON)
+mut("canon_skip_off_by_one", "canon", "model.py", "return [p < j for j in range(1, kernel)]",
+    "return [p < j - 1 for j in range(1, kernel)]", "tap j reads one token of the previous document",
+    tests=CANON)
+mut("canon_only_with_doc", "canon", "blocks.py", "if self.canon_a is not None:",
+    "if self.canon_a is not None and canon_skip is not None:",
+    "Canon-A skipped on the doc=None path (the one bpb.py scores)", tests=CANON)
+mut("canon_init_draws_rng", "canon", "blocks.py", "self.weight = nn.Parameter(torch.zeros(d, kernel))",
+    "self.weight = nn.Parameter(nn.Conv1d(d, d, kernel, groups=d, bias=False).weight.detach().view(d, kernel))",
+    "kernels built with nn.Conv1d defaults (RNG draws, non-zero)", tests=CANON)
+mut("canon_built_when_off", "canon", "blocks.py", "sites = cfg.canon_sites()", 'sites = "AC"',
+    "Canon kernels exist (and train) with the flag off", tests=CANON)
+mut("canon_off_in_model_cfg", "canon", "config.py", 'del d["canon"], d["canon_kernel"]', "pass",
+    "flag-off model_cfg differs from the pre-flag dict (old checkpoints refuse to resume)", tests=CANON)
+mut("canon_in_normuon", "canon", "optim.py", 'elif ".canon_" in name:', "elif False:",
+    "Canon kernels land in the NorMuon matrix group", tests=CANON)
+mut("canon_budget_c_without_mlp", "canon", "budget.py",
+    "n += len(cfg.canon_sites()) * d * cfg.canon_kernel", "n += len(cfg.canon) * d * cfg.canon_kernel",
+    "budget counts a C kernel on attention-only blocks", tests=CANON)
+mut("canon_decode_cache_short", "canon", "decode.py",
+    "self.hist[key] = full[:, -(conv.weight.size(1) - 1):]",
+    "self.hist[key] = full[:, -(conv.weight.size(1) - 2):]", "decode keeps K - 2 past inputs, not K - 1",
+    tests=CANON)
+# ---------------- S005 forget gate (model.forget_gate; killed by test_screen_forget_gate*.py) ----------------
+FG, FG_RUN = ["test_screen_forget_gate.py"], ["test_screen_forget_gate_run.py"]
+mut("fg_sum_includes_j", "forget", "blocks.py", "bias = c.unsqueeze(-1) - c.unsqueeze(-2)",
+    "bias = c.unsqueeze(-1) - c.unsqueeze(-2) + logf.unsqueeze(-2)",
+    "off by one: the sum runs over [j, i], not (j, i]", tests=FG)
+mut("fg_sum_across_doc_start", "forget", "model.py", "return allowed, allowed[:, 0].to(torch.float32)",
+    "return allowed, torch.ones_like(allowed[:, 0]).tril().to(torch.float32)",
+    "row-wide cumulative sum: equal in exact arithmetic, but earlier documents enter the float sums", tests=FG)
+mut("fg_sign_flipped", "forget", "blocks.py", "bias = c.unsqueeze(-1) - c.unsqueeze(-2)",
+    "bias = c.unsqueeze(-2) - c.unsqueeze(-1)", "bias sign flipped: attention pushed toward old keys", tests=FG)
+mut("fg_bias_detached", "forget", "blocks.py", 'return bias.masked_fill(~allowed, float("-inf"))',
+    'return bias.masked_fill(~allowed, float("-inf")).detach()',
+    "bias.detach(): a fixed recency bias, w and b never move", tests=FG)
+mut("fg_only_with_doc", "forget", "blocks.py", "if self.forget_gate:                  # S005",
+    "if self.forget_gate and mask is not None:  # S005",
+    "no bias on the doc=None path (the one bpb.py scores)", tests=FG)
+mut("fg_cumsum_bf16", "forget", "blocks.py",
+    "with torch.autocast(x.device.type, enabled=False):\n            logf = self.forget_logf(x)",
+    "if True:\n            logf = self.forget_logf(x)",
+    "in-document sums and c_i - c_j under autocast (bf16 on the PC)", tests=FG)
+mut("fg_logf_bf16", "forget", "blocks.py",
+    "with torch.autocast(x.device.type, enabled=False):\n            z = F.linear(",
+    "if True:\n            z = F.linear(", "forget_logf's gate logits in bf16 under autocast (b 7.99 -> 8.0)",
+    tests=FG)
+mut("fg_varlen_allowed_setter", "forget", "docattn.py",
+    'if impl == "varlen" and getattr(getattr(model, "cfg", None), "forget_gate", False):', "if False:",
+    "set_doc_attn (train.py startup) accepts varlen with the gate on", tests=FG_RUN)
+mut("fg_varlen_allowed_forward", "forget", "model.py",
+    'if self.cfg.forget_gate and self.doc_attn != "mask":', "if False:",
+    "a model with doc_attn varlen runs flash varlen without the bias (a plain model)", tests=FG_RUN)
+mut("fg_init_draws_rng", "forget", "blocks.py", "self.forget_w = nn.Parameter(torch.zeros(cfg.n_heads, d))",
+    "self.forget_w = nn.Parameter(nn.Linear(d, cfg.n_heads, bias=False).weight.detach().clone())",
+    "w built with nn.Linear defaults (RNG draws, non-zero)", tests=FG)
+mut("fg_bias_init", "forget", "blocks.py", "FORGET_B0 = 7.99", "FORGET_B0 = 8.0",
+    "b initialised at 8.0 instead of the registered 7.99", tests=FG)
+mut("fg_built_when_off", "forget", "blocks.py", "if cfg.forget_gate:\n            self.forget_w",
+    "if True:\n            self.forget_w", "gate parameters exist (unused) with the flag off", tests=FG)
+mut("fg_budget_no_bias", "forget", "budget.py", "n += cfg.n_heads * (d + 1)", "n += cfg.n_heads * d",
+    "budget leaves out the gate biases b", tests=FG_RUN)
+mut("fg_decode_no_carry", "forget", "decode.py", "c = c + self.c[i][..., -1:]", "c = c + 0.0",
+    "decode restarts the running sum of log f at every call", tests=FG_RUN)
+mut("fg_off_in_model_cfg", "forget", "config.py", 'del d["forget_gate"]', "pass",
+    "flag-off model_cfg differs from the pre-flag dict (old checkpoints refuse to resume)", tests=FG_RUN)
+mut("fg_in_normuon", "forget", "optim.py", 'elif ".forget_" in name:', "elif False:",
+    "gate w (2-D) lands in the NorMuon matrix group", tests=FG_RUN)
+# ---------------- S006 t+2 aux head: mutants_mtp.py (split off for the file size; it appends to M) --------
+import mutants_mtp  # noqa: E402,F401
+# ---------------- S007 smeared keys: mutants_smear.py (same split; it appends to M) ----------------
+import mutants_smear  # noqa: E402,F401

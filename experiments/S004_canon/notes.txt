@@ -106,6 +106,44 @@ HARNESS CODE NEEDED (default off; each test watched failing on its mutant)
     arm's logits equal BASE's on the same batch (zero init). Mutant: the conv built with nn.Conv1d defaults (draws
     from the RNG) must fail it.
   - A smoke run on the PC (labelled smoke): mem_fit ok at micro 16, tok/s, leak self-test passed.
+  LANDED 2026-09-26, NOT committed (Mac CPU only; the PC was offline, so no CUDA test and no smoke run yet):
+  - Flag: model.canon ("" off, the default; "A", "C" or "AC"; anything else refused) and model.canon_kernel (int
+    >= 2, default 4). PlanckConfig.canon_sites() drops "C" when mlp_hidden = 0. With canon "" to_dict() omits both
+    keys, so an off run's checkpoint model_cfg is the pre-flag dict (train.py resume and init_from, E2 preflight).
+  - blocks.CanonConv: weight (d_model, K) from torch.zeros (no RNG draw), out[t] = h[t] + sum_j weight[:, j] *
+    h[t - j]. Block.canon_a acts on attn_norm(x) * norm_scale before attention (the gate reads that same h),
+    Block.canon_c on mlp_norm(x) * norm_scale before the MLP. Names blocks.<u>.canon_a.weight and .canon_c.weight;
+    a looped block's kernels are shared like its other weights.
+  - Document starts: model.canon_skip_masks(doc, K) builds the K - 1 tap masks from doc (runs of equal ids, the
+    mask's and varlen's rule), never from a loader-given pos; doc=None zero-pads before the row start only. Mask
+    engine and doc_attn varlen get the same masks (the convs sit outside attention).
+  - optim.split_params sends names containing ".canon_" to "scalar" (AdamW, scalar_lr, no decay) before the 2-D
+    rule; optim_batched's AdamW step is shape-agnostic. budget.count_analytic adds len(canon_sites()) x d x K per
+    unique block: BASE 5,010,133, Canon-AC 5,022,421 (analytic == meta build, tested).
+  - decode.KVDecoder keeps the last K - 1 conv inputs per (effective layer, site) and runs the block's own conv.
+  - testutil.ARMS gains "canon_ac" (test_s3_leak, test_s3_docattn's CPU stand-in and test_decode now run it).
+    test_model_mask.py and test_budget.py are unchanged (the move to testutil.ARMS is SCREENS shared code; the
+    module-vs-analytic count for Canon is in test_screen_canon.py). The C2 generator's two-key test is not written
+    (no generator exists yet).
+  - Tests, harness/test_screen_canon.py: test_init_isolation, test_conv_equals_plain_loop_reference,
+    test_leak_probes, test_leak_probes_varlen_cpu_reference_kernel, test_doc_none_equals_packed_slice (M5, mask
+    and varlen), test_startup_selftest_passes, test_budget_counts_canon, test_budget_5m_base_and_arm,
+    test_decode_matches_full_forward; CUDA only (skipped on the Mac): test_cuda_leak_probes_canon (mask, varlen),
+    test_cuda_varlen_parity_canon. harness/test_screen_canon_run.py (split off for the file-size limit):
+    test_config_values_and_dict, test_off_equals_absent_20_steps, test_off_equals_preflag_commit_20_steps (git show
+    5c5a30a:harness/*.py, skipped without git), test_gradient_reaches_every_tap_and_scalar_group,
+    test_resume_20_plus_20_equals_40_with_canon (per-matrix and batched optimizer).
+  - Mutants, harness/mutants.py group "canon" (mutation_check.py --group canon; a mutant's new tests field runs
+    those two files): canon_centred_kernel, canon_ignores_doc_starts, canon_skip_off_by_one, canon_only_with_doc
+    (M5), canon_init_draws_rng (nn.Conv1d defaults), canon_built_when_off, canon_off_in_model_cfg,
+    canon_in_normuon, canon_budget_c_without_mlp, canon_decode_cache_short.
+  - Results (Mac CPU, 2026-09-26): the two files 60 passed, 3 skipped (CUDA); mutation_check --group canon 10/10
+    killed; full harness suite 498 passed, 22 skipped (CUDA), 106 s (harness/notes.txt records 431 passed, 19
+    skipped before the flag; not re-run here; +67 = 60 new + 7 canon_ac cases in the shared files). The pre-flag test ran (not skipped) in the tree; in
+    scratch copies it skips unless GIT_DIR is set, and with GIT_DIR it also killed canon_built_when_off and
+    canon_off_in_model_cfg.
+  - Still open: the PC CUDA tests and the smoke run (tok/s: the tap loop adds about 8 elementwise launches per
+    site on packed rows, 16 sites at 5M, unmeasured).
 
 COST (est., SCREENS GPU HOURS, assumed x1.1 until the smoke run)
   g-check 3 x 0.34 = 1.0 h; 0.34 h per seed (BASE shared). k = 3: 2.0 h. Second in stage 2 (after S005).

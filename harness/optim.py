@@ -123,16 +123,26 @@ class Muon(torch.optim.Optimizer):
             p.add_(u, alpha=-lr)
 
 
-def split_params(model) -> dict[str, list[tuple[str, torch.nn.Parameter]]]:
+def split_params(model, extra=None) -> dict[str, list[tuple[str, torch.nn.Parameter]]]:
     """Planck: 'matrix' = 2D block weights (NorMuon); 'embed' = token embedding and an untied
-    head (AdamW); 'scalar' = norms, gains, value-residual scalars (AdamW, no decay).
-    named_parameters() dedups, so tied and shared weights appear once."""
+    head (AdamW); 'scalar' = norms, gains, value-residual scalars, the S004 Canon kernels and the
+    S005 forget gate's w and b (AdamW at scalar_lr, no decay; 2-D, so routed by name).
+    named_parameters() dedups, so tied and shared weights appear once. extra: the S006 training-only
+    aux head (mtp.MTPHead, not a module of the model), named "mtp.*" after the model's parameters and
+    routed by the same rules: W_mtp (2-D) to 'matrix' (NorMuon), its norm gain to 'scalar'."""
     out = {"matrix": [], "embed": [], "scalar": []}
-    for name, p in model.named_parameters():
+    named = model.named_parameters()
+    if extra is not None:
+        named = [*named, *extra.named_parameters(prefix="mtp")]
+    for name, p in named:
         if not p.requires_grad:
             continue
         if name.startswith(("tok_emb.", "lm_head.")):
             out["embed"].append((name, p))
+        elif ".canon_" in name:
+            out["scalar"].append((name, p))
+        elif ".forget_" in name:
+            out["scalar"].append((name, p))
         elif p.dim() >= 2:
             out["matrix"].append((name, p))
         else:
@@ -151,18 +161,18 @@ def resolve_batched(value, device_type: str) -> bool:
     raise ValueError(f"optim.batched must be true, false or auto, got {value!r}")
 
 
-def make_optimizer(model, ocfg: dict, device_type: str = "cpu") -> Muon:
+def make_optimizer(model, ocfg: dict, device_type: str = "cpu", extra=None) -> Muon:
     """ocfg keys (defaults): kind 'normuon' | 'muon' | 'adamw'; lr 3e-3; embed_lr (=lr);
     scalar_lr (=lr); weight_decay 0.1; embed_wd (=weight_decay); cautious_wd True;
     momentum 0.95; betas [0.9, 0.95]; eps 1e-8; batched auto. kind 'adamw' runs every group
     as AdamW (the comparison arm). batched True: optim_batched's foreach/stacked steps, the
     same update to float rounding (test_optim_batched.py) with far fewer kernel launches;
-    auto (the default, see resolve_batched) = True on cuda, False on cpu/mps."""
+    auto (the default, see resolve_batched) = True on cuda, False on cpu/mps. extra: see split_params."""
     kind = ocfg.get("kind", "normuon")
     assert kind in ("normuon", "muon", "adamw"), kind
     lr = float(ocfg.get("lr", 3e-3))
     wd = float(ocfg.get("weight_decay", 0.1))
-    parts = split_params(model)
+    parts = split_params(model, extra)
     groups = [
         {"name": "matrix", "params": [p for _, p in parts["matrix"]], "base_lr": lr,
          "weight_decay": wd, "use_muon": kind != "adamw"},

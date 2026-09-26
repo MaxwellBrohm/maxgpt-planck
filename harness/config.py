@@ -46,6 +46,16 @@ class PlanckConfig:
     qk_share: int = 1            # consecutive unique layers sharing one W_q and W_k
     kv_tie: bool = False         # K = V: no separate value projection
 
+    # --- S004 Canon layers (P-148; experiments/S004_canon/notes.txt). Default off. ---
+    canon: str = ""              # "" off; sites: "A" before attention, "C" before the MLP ("AC")
+    canon_kernel: int = 4        # causal depthwise taps per Canon conv (used only when canon is on)
+
+    # --- S005 forget gate on attention logits (P-020; experiments/S005_forget_gate/notes.txt). Default off.
+    forget_gate: bool = False    # per head f = sigmoid(w.a + b); logit (i, j) += sum over (j, i] of log f
+
+    # --- S007 smeared keys (P-024; experiments/S007_smeared_key/notes.txt). Default off. ---
+    smear_key: bool = False      # raw key k_t + alpha_h * k_(t-1) in the same document; alpha per KV head, 0 at init
+
     def __post_init__(self) -> None:
         assert self.vocab_size > 0 and self.d_model > 0
         assert self.n_layers >= 1, "need at least one core layer"
@@ -57,6 +67,10 @@ class PlanckConfig:
         assert self.n_loops >= 1 and self.n_prelude >= 0 and self.n_coda >= 0
         assert self.loop_order in ("cyclic", "immediate"), self.loop_order
         assert self.qk_share >= 1
+        assert self.canon in ("", "A", "C", "AC"), f"canon must be '', 'A', 'C' or 'AC', got {self.canon!r}"
+        assert self.canon_kernel >= 2, "canon_kernel must be >= 2 (tap 0 is the token itself)"
+        assert isinstance(self.forget_gate, bool), f"forget_gate must be true or false, got {self.forget_gate!r}"
+        assert isinstance(self.smear_key, bool), f"smear_key must be true or false, got {self.smear_key!r}"
 
     # ------------------------------------------------------------------ #
     # Derived layer bookkeeping (used by both the model and the counter)
@@ -92,8 +106,20 @@ class PlanckConfig:
         """Unique block whose W_q/W_k block u uses (the first of its share group)."""
         return (u // self.qk_share) * self.qk_share
 
+    def canon_sites(self) -> str:
+        """Canon sites every block has: "A" (before attention), "C" (before the MLP, so only
+        when mlp_hidden > 0)."""
+        return "".join(s for s in self.canon if s == "A" or self.mlp_hidden > 0)
+
     def to_dict(self) -> dict:
-        return dataclasses.asdict(self)
+        d = dataclasses.asdict(self)
+        if not self.canon:   # S004 off: exactly the pre-flag dict (checkpoint model_cfg, resume
+            del d["canon"], d["canon_kernel"]   # and init_from checks against older checkpoints)
+        if not self.forget_gate:   # S005 off: the same rule
+            del d["forget_gate"]
+        if not self.smear_key:     # S007 off: the same rule
+            del d["smear_key"]
+        return d
 
     @classmethod
     def from_dict(cls, d: dict) -> "PlanckConfig":

@@ -64,7 +64,7 @@ class PlanckLM(nn.Module):
 
     def forward(self, idx: torch.Tensor, targets: torch.Tensor | None = None,
                 doc: torch.Tensor | None = None, pos: torch.Tensor | None = None,
-                reduction: str = "mean"):
+                reduction: str = "mean", return_hidden: bool = False):
         """idx, targets: (B, T) int64. targets uses -100 for positions without loss
         (assistant-only masking is applied by the data side).
         Planck (packing): doc (B, T) gives each token a document id; attention is then causal
@@ -72,9 +72,12 @@ class PlanckLM(nn.Module):
         doc when not given). doc=None is plain causal attention over the whole row.
         reduction "mean" (default) or "sum" (the trainer divides by the supervised-token
         count of the whole step, so micro-batches of different fill weigh correctly).
-        Returns (logits, loss)."""
+        Returns (logits, loss); return_hidden (S006, train.mtp): (logits, loss, z), z the final
+        hidden state after the final norm, which the trainer's t+2 aux head (mtp.py) reads."""
         B, T = idx.shape
         assert T <= self.cfg.seq_len, f"T={T} exceeds seq_len {self.cfg.seq_len}"
+        if self.cfg.forget_gate and self.doc_attn != "mask":   # S005: never run varlen without the bias
+            raise RuntimeError(f"forget_gate needs doc_attn mask, got {self.doc_attn!r} (varlen takes no bias)")
         x = self.tok_emb(idx)
         mask = None
         if doc is None and pos is None:
@@ -89,12 +92,27 @@ class PlanckLM(nn.Module):
                 mask = docattn.VarlenDocs(doc)     # no mask: one flash sequence per document
             elif doc is not None:
                 mask = document_causal_mask(doc)
+        canon_skip = None   # S004: Canon taps stop at document starts (doc=None: row start only)
+        if self.cfg.canon and doc is not None:
+            canon_skip = canon_skip_masks(doc, self.cfg.canon_kernel)
+        fg = None           # S005: one (allowed, seg) pair for every layer; doc=None: plain causal
+        if self.cfg.forget_gate:
+            if mask is None:
+                mask_fg = torch.ones(T, T, dtype=torch.bool, device=idx.device).tril()[None, None]
+            else:
+                mask_fg = mask
+            fg = forget_segments(mask_fg)
+        smear = None        # S007: keys smear up to document starts, from doc (doc=None: the row start only)
+        if self.cfg.smear_key and doc is not None:
+            smear = docattn.doc_starts(doc)
         v1 = None
         for i, u in enumerate(self.sched):
-            x, v_loc = self.blocks[u](x, cos, sin, v1, norm_scale_for(self.cfg, i), mask)
+            x, v_loc = self.blocks[u](x, cos, sin, v1, norm_scale_for(self.cfg, i), mask,
+                                      canon_skip=canon_skip, fg=fg, smear=smear)
             if i == 0 and self.cfg.value_residual:
                 v1 = v_loc
-        logits = self.lm_head(self.norm(x))
+        z = self.norm(x)
+        logits = self.lm_head(z)
         loss = None
         if targets is not None:
             flat = logits.view(-1, logits.size(-1)).float()
@@ -103,6 +121,8 @@ class PlanckLM(nn.Module):
                 loss = F.cross_entropy(flat, tgt, ignore_index=-100, reduction=reduction)
             else:
                 loss = flat.sum() * 0.0
+        if return_hidden:
+            return logits, loss, z
         return logits, loss
 
 
@@ -115,6 +135,21 @@ def positions_from_doc(doc: torch.Tensor) -> torch.Tensor:
     start[:, 1:] = doc[:, 1:] != doc[:, :-1]
     first = torch.where(start, ar, torch.zeros_like(ar))
     return ar - torch.cummax(first, dim=1).values
+
+
+def canon_skip_masks(doc: torch.Tensor, kernel: int) -> list[torch.Tensor]:
+    """S004: (B, T) document ids -> kernel - 1 bool (B, T, 1) masks; [j - 1] is True where
+    Canon tap j would read before the token's document start (in-document position < j).
+    Built from doc (runs of equal ids, the mask's and varlen's rule), never from a given pos."""
+    p = positions_from_doc(doc).unsqueeze(-1)
+    return [p < j for j in range(1, kernel)]
+
+
+def forget_segments(allowed: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    """S005: allowed bool (B|1, 1, T, T) -> (allowed, seg), seg = allowed as fp32 (B|1, T, T): row t is 1 on
+    t's own document up to t, so seg @ log f is the in-document cumulative sum (blocks.Attention.forget_bias).
+    Built once per forward, so every layer's matmul saves the same tensor for backward."""
+    return allowed, allowed[:, 0].to(torch.float32)
 
 
 def document_causal_mask(doc: torch.Tensor) -> torch.Tensor:

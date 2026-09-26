@@ -12,6 +12,12 @@ the GPU (float(loss) after backward stopped the optimizer's launches from overla
 The logged numbers are the same floats. Non-finite losses are caught by a device-side flag
 that is read on log steps and before every checkpoint save (so no NaN state is saved), not
 after every step.
+
+mtp (S006, train.mtp; mtp.py): a training-only t+2 aux head. Loss per step = (sum of next-token
+losses + w_t * sum of aux losses) / n_sup, n_sup the step's NEXT-TOKEN supervised count, w_t =
+mtp_weight * the schedule factor of the step. "loss" stays the next-token loss alone; log records
+add mtp_loss (aux CE per aux target), mtp_w (w_t) and mtp_n (aux targets). The grad norm and its clip
+cover the head too; checkpoints hold its state under "mtp". Off (mtp=None): the pre-flag step.
 """
 from __future__ import annotations
 
@@ -24,6 +30,7 @@ import torch
 
 import runio
 from device import sync
+from mtp import mtp_targets
 from optim import set_lr
 
 
@@ -31,7 +38,7 @@ class Trainer:
     def __init__(self, *, model, optimizer, loader, sched, device, amp, cfg: dict, out_dir: str,
                  grad_accum: int, grad_clip: float, log_every: int, ckpt_every: int,
                  keep_last: int, stable_points: set[int], meta: dict, hooks=None,
-                 lazy_metrics: bool = False):
+                 lazy_metrics: bool = False, mtp=None, mtp_weight: float = 1.0):
         self.model, self.opt, self.loader, self.sched = model, optimizer, loader, sched
         self.device, self.amp, self.cfg, self.out_dir = device, amp, cfg, out_dir
         self.grad_accum, self.grad_clip = grad_accum, grad_clip
@@ -47,6 +54,8 @@ class Trainer:
         self.lazy_metrics = bool(lazy_metrics)
         self._finite = None                  # lazy_metrics: device bool, all losses finite since the last check
         self._checked_at = 0
+        self.mtp, self.mtp_weight = mtp, float(mtp_weight)   # S006: the aux head (mtp.MTPHead) or None
+        self._hid = {} if mtp is None else {"return_hidden": True}
 
     # ------------------------------------------------------------------ #
     def _to(self, t):
@@ -60,18 +69,25 @@ class Trainer:
         n_sup = sum(int((b["tgt"] != -100).sum()) for b in batches)
         n_real = 0
         loss_sum, parts = 0.0, []
+        aux = None if self.mtp is None else {"w": self.mtp_weight * self.sched.factor(self.step),
+                                             "n": 0, "parts": []}
         for b in batches:
             n_real += int((b["idx"] != self.loader.pad).sum())   # pad_id is reserved
             ctx = self.amp() if self.amp else nullcontext()
             with ctx:
-                _, ls = self.model(self._to(b["idx"]), self._to(b["tgt"]), self._to(b["doc"]),
-                                   self._to(b["pos"]), reduction="sum")
-            (ls / max(1, n_sup)).backward()
+                out = self.model(self._to(b["idx"]), self._to(b["tgt"]), self._to(b["doc"]),
+                                 self._to(b["pos"]), reduction="sum", **self._hid)
+                ls = obj = out[1]
+                if aux is not None:
+                    obj = ls + aux["w"] * self._mtp_sum(out[2], b, aux)
+            (obj / max(1, n_sup)).backward()
             if self.lazy_metrics:
                 parts.append(ls.detach())
             else:
                 loss_sum += float(ls.detach())
-        gnorm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_clip)
+        params = self.model.parameters() if self.mtp is None else [*self.model.parameters(),
+                                                                   *self.mtp.parameters()]
+        gnorm = torch.nn.utils.clip_grad_norm_(params, self.grad_clip)
         if not self.lazy_metrics:
             gnorm = float(gnorm)
         self.opt.step()
@@ -82,9 +98,31 @@ class Trainer:
         if self.lazy_metrics:
             parts = torch.stack(parts)
             ok = torch.isfinite(parts).all()
+            if aux is not None:
+                aux["parts"] = torch.stack(aux["parts"])
+                ok = ok & torch.isfinite(aux["parts"]).all()
             self._finite = ok if self._finite is None else self._finite.logical_and_(ok)
-            return {"loss_parts": parts, "gnorm": gnorm, "n_sup": n_sup, "lr_factor": applied}
-        return {"loss": loss_sum / max(1, n_sup), "gnorm": gnorm, "n_sup": n_sup, "lr_factor": applied}
+            return {"loss_parts": parts, "gnorm": gnorm, "n_sup": n_sup, "lr_factor": applied,
+                    **self._mtp_out(aux)}
+        return {"loss": loss_sum / max(1, n_sup), "gnorm": gnorm, "n_sup": n_sup, "lr_factor": applied,
+                **self._mtp_out(aux)}
+
+    def _mtp_sum(self, z, b: dict, aux: dict):
+        """S006: one micro-batch's summed aux loss (t+2 targets from the loader's CPU tensors)."""
+        t2 = mtp_targets(b["idx"], b["tgt"], b["doc"])
+        n = int((t2 != -100).sum())
+        aux["n"] += n
+        s = self.mtp.loss_sum(z, self.model.lm_head, self._to(t2), n)
+        aux["parts"].append(s.detach())
+        return s
+
+    def _mtp_out(self, aux) -> dict:
+        if aux is None:
+            return {}
+        if self.lazy_metrics:
+            return {"mtp_parts": aux["parts"], "mtp_w": aux["w"], "mtp_n": aux["n"]}
+        s = sum((float(p) for p in aux["parts"]), 0.0)
+        return {"mtp_loss": s / max(1, aux["n"]), "mtp_w": aux["w"], "mtp_n": aux["n"]}
 
     def read_metrics(self, out: dict) -> dict:
         """lazy_metrics: a train_step result's device values -> the floats the eager path
@@ -92,7 +130,9 @@ class Trainer:
         if "loss_parts" not in out:
             return out
         loss_sum = sum(out["loss_parts"].tolist(), 0.0)
-        rest = {k: v for k, v in out.items() if k != "loss_parts"}
+        rest = {k: v for k, v in out.items() if k not in ("loss_parts", "mtp_parts")}
+        if "mtp_parts" in out:
+            rest["mtp_loss"] = sum(out["mtp_parts"].tolist(), 0.0) / max(1, out["mtp_n"])
         return {**rest, "loss": loss_sum / max(1, out["n_sup"]), "gnorm": float(out["gnorm"])}
 
     def check_finite(self) -> None:
@@ -112,6 +152,8 @@ class Trainer:
              "rng_torch": torch.get_rng_state(), **self.meta}
         if self.device == "cuda":
             p["rng_cuda"] = torch.cuda.get_rng_state_all()
+        if self.mtp is not None:
+            p["mtp"] = self.mtp.state_dict()
         return p
 
     def save(self, tag: str | None = None) -> str:
@@ -120,6 +162,10 @@ class Trainer:
         return runio.save_checkpoint(self.out_dir, self.payload(), self.step, self.keep_last, tag)
 
     def load_state(self, ck: dict, with_schedule_step: bool = True) -> None:
+        if ("mtp" in ck) != (self.mtp is not None):
+            raise ValueError("checkpoint and run disagree on train.mtp (the S006 aux head)")
+        if self.mtp is not None:
+            self.mtp.load_state_dict(ck["mtp"])
         self.model.load_state_dict(ck["model"])
         self.opt.load_state_dict(ck["optimizer"])
         self.loader.load_state_dict(ck["data_state"])
@@ -143,7 +189,7 @@ class Trainer:
                 self.check_finite()
             if "loss" in out:                # every step; only log steps under lazy_metrics
                 last_loss = out["loss"]
-                if not math.isfinite(last_loss):
+                if not (math.isfinite(last_loss) and math.isfinite(out.get("mtp_loss", 0.0))):
                     runio.append_jsonl(self.log_path, {"step": self.step, "error": "non-finite loss"})
                     raise FloatingPointError(f"non-finite loss at step {self.step}")
             if self.step in self.stable_points:
@@ -158,6 +204,9 @@ class Trainer:
                        "sup_tokens": self.sup_tokens,
                        "tok_per_s": round((self.tokens - tok0) / dt, 1),
                        "phase": self.sched.phase(self.step - 1), **self.loader.stats()}
+                if "mtp_w" in out:            # S006
+                    rec.update(mtp_loss=round(out["mtp_loss"], 5), mtp_w=round(out["mtp_w"], 6),
+                               mtp_n=out["mtp_n"])
                 runio.append_jsonl(self.log_path, rec)
                 t0, tok0 = time.time(), self.tokens
             if self.ckpt_every and self.step % self.ckpt_every == 0 and self.step < self.sched.total_steps:

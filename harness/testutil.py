@@ -45,6 +45,9 @@ ARMS = {
     "loop3_immediate": {"n_loops": 3, "loop_order": "immediate"},
     "prelude_loop_coda": {"n_layers": 1, "n_loops": 3, "n_prelude": 1, "n_coda": 1},
     "loop_share_tie": {"n_loops": 2, "qk_share": 2, "kv_tie": True},
+    "canon_ac": {"canon": "AC"},     # S004 (zero init; scramble makes the kernels non-zero)
+    "forget_gate": {"forget_gate": True},   # S005 (scramble: f about 0.7, a strong recency bias)
+    "smear_key": {"smear_key": True},       # S007 (zero init; scramble makes alpha about 1 + N(0, 0.25))
 }
 
 

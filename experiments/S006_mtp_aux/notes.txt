@@ -121,6 +121,69 @@ HARNESS CODE NEEDED (default off; each test watched failing on its mutant)
     (mutant: W_mtp as an nn.Linear, which reset_parameters re-draws). Counting: budget.py and the run record report
     the deployed total and the training-only parameters separately.
   - A smoke run on the PC (labelled smoke): mem_fit at micro 16, tok/s.
+  LANDED 2026-09-26, NOT committed (Mac CPU only; the PC was offline, so no CUDA test and no smoke run yet):
+  - Keys (mtp.mtp_settings): train.mtp, int 0 or 1, default 0 = off (2 or more, a bool or a float are refused;
+    only the one t+2 head is built). train.mtp_weight, a finite number >= 0, default 1.0, checked always, used
+    only when mtp is 1. These are train keys, so model_cfg, the model's state_dict and n_params stay BASE's either
+    way (the E2 preflight, resume and init_from shape checks see the pre-flag dict).
+  - harness/mtp.py MTPHead: W_mtp is a bare Parameter from torch.eye (not an nn.Linear, and not a module of the
+    model), plus a blocks.RMSNorm gain of ones; no RNG draw. Aux logits = model.lm_head(RMSNorm_mtp(F.linear(z,
+    W_mtp))), the tied head shared. PlanckLM.forward(..., return_hidden=True) also returns z = the final norm's
+    output; the default call is unchanged. mtp_targets(idx, tgt, doc): out[t] = idx[t + 2] where tgt[t + 1] !=
+    -100 and doc[t] == doc[t + 1] == doc[t + 2] (runs of equal ids, the mask's rule; doc=None is one document per
+    row), else -100.
+  - trainer.py: per step, (sum NTP + w_t x sum aux) / n_sup, with n_sup the step's next-token count and w_t =
+    mtp_weight x sched.factor(step), the factor set_lr applies. "loss" stays the next-token loss alone. Log records
+    add mtp_loss (aux CE per aux target), mtp_w (w_t) and mtp_n (aux targets). The grad norm and its clip cover the
+    model and the head together. A non-finite aux loss stops the run: eager mode in the NaN step; lazy_metrics
+    at the next log step or checkpoint save (the aux joins the next-token loss in the device flag, which is read
+    only there), so the steps in between run, possibly on NaN weights, and no NaN checkpoint is written.
+    Checkpoints hold the head under "mtp", and a resume whose checkpoint and run disagree on train.mtp is refused.
+  - Engine: the head reads z from whichever engine ran (mask or varlen), and the targets use doc ids only, so
+    neither engine is refused. Tested on doc=None, the mask path and the varlen CPU stand-in. The CUDA probes are
+    written but have not run.
+  - optim.split_params(model, extra=head): the head's parameters come after the model's as "mtp.*" under the
+    same rules. W_mtp (2-D) goes to NorMuon 'matrix' (matrix LR, cautious decay), the gain to 'scalar' (scalar_lr,
+    no decay). The model's parameters keep their groups and order.
+  - Counting: budget.count_mtp(cfg, mtp) = mtp x (d^2 + d), never in count_analytic. At 5M the deployed total is
+    5,010,133 (unchanged) and the training-only count is 37,056. The checkpoint carries n_params (deployed) and
+    mtp_params; the runs.jsonl start record carries n_params and mtp.training_only_params.
+  - Found while testing: at init the aux head is a copy of the next-token head only up to a scale. z has already
+    been through the final RMSNorm (eps 1e-5), and RMSNorm_mtp rescales it again by rsqrt(mean(z^2) + eps), so
+    the aux logits are the next-token logits times that per-position factor. On the tiny test model the factor
+    is about 1.01 (up to 2% relative on the logits); the test checks the exact relation. THE CHANGE's "starts as
+    a copy" holds up to this factor.
+  - Tests. harness/test_screen_mtp_aux.py: test_targets_match_plain_loop_reference,
+    test_targets_explicit_cases (t+2 across a document start; t+1 target -100), test_init_isolation_and_identity,
+    test_leak_probes_aux (doc=None and packed with padding, grad on and off),
+    test_leak_probes_aux_varlen_cpu_reference_kernel, test_jacobian_aux, test_budget_counts_head,
+    test_budget_5m_deployed_and_training_only, and test_cuda_leak_probes_aux (CUDA only; mask and varlen, bf16).
+    harness/test_screen_mtp_aux_step.py (split off for the file-size limit):
+    test_gradient_reaches_head_and_trunk_and_groups, test_loss_path_accum2_against_eager_reference (eager and
+    lazy), test_weight_zero_equals_off, test_nonfinite_aux_stops_the_run (step 1 a checkpoint step),
+    test_nonfinite_aux_stop_step (added after review: only step 1's aux value is NaN, step 1 neither a log nor a
+    checkpoint step; eager stops at 1, lazy at the next log step 3 or save 4, nothing saved; watched failing on
+    mtp_nan_eager_unchecked, mtp_nan_lazy_unchecked, a check-every-step mutant and a save-without-check mutant).
+    harness/test_screen_mtp_aux_run.py: test_settings_values, test_off_equals_absent_20_steps,
+    test_off_equals_preflag_commit_20_steps (git show 5c5a30a), test_weight_follows_schedule_factor,
+    test_resume_20_plus_20_equals_40_with_mtp (per-matrix and batched), test_resume_refuses_mtp_mismatch,
+    test_lazy_metrics_equals_eager_with_mtp, test_bf16_cpu_runs_with_mtp, test_record_counts_and_plain_model_load,
+    and test_bpb_scores_next_token_logits (data_prep/bpb.py on an mtp checkpoint with a scrambled head).
+  - Mutants, harness/mutants_mtp.py (imported by mutants.py; mutation_check.py --group mtp):
+    mtp_targets_cross_doc, mtp_targets_unsup_counted, mtp_norm_per_micro, mtp_weight_constant,
+    mtp_hidden_before_norm, mtp_z_detached, mtp_init_linear, mtp_head_in_model, mtp_not_optimized,
+    mtp_matrix_to_scalar, mtp_clip_excludes_head, mtp_ckpt_without_head, mtp_on_by_default, mtp_budget_no_gain,
+    mtp_nan_eager_unchecked, mtp_nan_lazy_unchecked.
+  - Results (Mac CPU, 2026-09-26): the three files 33 passed, 2 skipped (CUDA); the pre-flag test ran in the tree
+    (not skipped). mutation_check --group mtp 16/16 killed. Re-run after the shared edits (trainer, train, optim,
+    model, budget): mask 7/7, loss 6/6, resume 3/3, schedule 5/5, optim 5/5, budget 5/5, canon 10/10, forget
+    16/16 killed. Full harness suite 589 passed, 27 skipped (all CUDA), 179 s, exit 0 (the forget-gate entry
+    recorded 556 passed, 25 skipped; +33 passed and +2 skipped are these files). After the review fix (the lazy
+    stop-step wording and test_nonfinite_aux_stop_step): the three files 36 passed, 2 skipped; the full harness
+    suite, run in 5 chunks with the other screens' files, 666 passed, 30 skipped.
+  - Not done: the IND-hook test (no IND hook exists yet; it is SCREENS shared code); the C2 generator's two-key
+    test (no generator yet); the CUDA tests and the PC smoke run (mem_fit at micro 16 with the second logit
+    tensor, tok/s).
 
 COST (est., SCREENS GPU HOURS, assumed x1.3 until the smoke run)
   g-check 3 x 0.40 = 1.2 h; 0.40 h per seed (BASE shared; +0.31 per seed if S006 needs its own BASE). k = 3: 2.4 h;
