@@ -104,7 +104,8 @@ class Attention(nn.Module):
 
     def forward(self, x, cos, sin, v1=None, mask=None):
         """Returns (out, v_local). v_local is this layer's own pre-mix values.
-        mask: None (plain causal) or bool (B, 1, T, T), True = may attend (Planck)."""
+        mask: None (plain causal), bool (B, 1, T, T), True = may attend (Planck), or a
+        docattn.VarlenDocs (packed rows without a mask, doc_attn "varlen")."""
         B, T, _ = x.shape
         q = self.q_proj(x).view(B, T, self.n_heads, self.head_dim)
         k_raw = self.k_proj(x).view(B, T, self.n_kv_heads, self.head_dim)
@@ -118,11 +119,14 @@ class Attention(nn.Module):
             a1, a2 = self.vr_alpha[0], self.vr_alpha[1]
             v = self.vr_scale * (a1 * v + a2 * v1) * torch.rsqrt(a1 * a1 + a2 * a2)
         q, k = apply_rope(q, cos, sin), apply_rope(k, cos, sin)
-        k_, v_ = repeat_kv(k, self.n_rep), repeat_kv(v, self.n_rep)
-        if mask is None:
-            out = F.scaled_dot_product_attention(q, k_, v_, is_causal=True)
-        else:  # Planck: causal AND same-document, built by the model
-            out = F.scaled_dot_product_attention(q, k_, v_, attn_mask=mask)
+        if mask is not None and not isinstance(mask, torch.Tensor):
+            out = mask.attend(q, k, v)        # docattn.VarlenDocs (GQA inside the kernel)
+        else:
+            k_, v_ = repeat_kv(k, self.n_rep), repeat_kv(v, self.n_rep)
+            if mask is None:
+                out = F.scaled_dot_product_attention(q, k_, v_, is_causal=True)
+            else:  # Planck: causal AND same-document, built by the model
+                out = F.scaled_dot_product_attention(q, k_, v_, attn_mask=mask)
         if self.attn_gate:
             gate = 2.0 * torch.sigmoid(self.attn_gate_proj(x))           # (B, T, H)
             out = out * gate.transpose(1, 2).unsqueeze(-1).to(out.dtype)

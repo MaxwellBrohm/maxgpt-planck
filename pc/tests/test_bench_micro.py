@@ -127,3 +127,75 @@ def test_mem_report_uses_reservation_and_free_memory(monkeypatch, free_before, r
     assert r["mem_fit"] == fit
     assert (r["peak_mem_gib"], r["peak_reserved_gib"], r["free_gib"], r["reserved_before_gib"]) == \
         (round(alloc, 2), round(reserved, 2), round(free_after, 2), round(res_before, 2))
+
+
+def test_optimizer_switches_reach_the_step(tmp_path, monkeypatch):
+    """--batched-optim builds the batched optimizer, --lazy-loss and --phase-times change
+    only when the loss is read and what is timed: the same losses as the reference step."""
+    built = []
+    real = bench_micro.make_optimizer
+
+    def spy(*a, **k):
+        built.append(real(*a, **k))
+        return built[-1]
+    monkeypatch.setattr(bench_micro, "make_optimizer", spy)
+    out = tmp_path / "s.jsonl"
+    base = TINY[:-3] + ["4", "--warmup", "1", "--targets", "3e5", "--batches", "2",
+                        "--modes", "causal", "--out", str(out)]
+    bench_micro.main(base)
+    bench_micro.main(base + ["--batched-optim", "--lazy-loss", "--phase-times"])
+    ref, new = rows(out)
+    assert [o.batched for o in built] == [False, True]
+    assert (ref["batched_optim"], ref["lazy_loss"], new["batched_optim"], new["lazy_loss"]) == \
+        (False, False, True, True)
+    assert "opt_cpu_ms_median" not in ref and new["opt_cpu_ms_median"] > 0
+    assert new["opt_ms_median"] is None                 # CUDA events only on CUDA
+    assert new["loss_first"] == ref["loss_first"] and new["loss_first"] != new["loss_last"]
+    assert new["loss_last"] == pytest.approx(ref["loss_last"], rel=1e-5)
+
+
+def test_doc_attn_flag_recorded_and_varlen_refused_off_cuda(tmp_path, monkeypatch):
+    out = tmp_path / "d.jsonl"
+    bench_micro.main(TINY + ["--targets", "3e5", "--batches", "2", "--modes", "docmask",
+                             "--out", str(out)])
+    assert [r["doc_attn"] for r in rows(out)] == ["mask"]           # default: the reference
+    seen = []
+    real = bench_micro.set_doc_attn
+    monkeypatch.setattr(bench_micro, "set_doc_attn",
+                        lambda m, impl, dev: seen.append(impl) or real(m, impl, dev))
+    with pytest.raises(ValueError, match="cuda"):
+        bench_micro.main(TINY + ["--targets", "3e5", "--batches", "2", "--doc-attn", "varlen",
+                                 "--out", str(tmp_path / "v.jsonl")])
+    assert seen == ["varlen"]
+
+
+def test_batched_optim_flag_maps_to_the_harness_key(tmp_path, monkeypatch):
+    """--batched-optim: absent = the harness default (auto: on for cuda), bare or on = True,
+    off = False (so off really forces the reference step on cuda too)."""
+    seen = []
+    real = bench_micro.resolve_batched
+    monkeypatch.setattr(bench_micro, "resolve_batched", lambda v, d: seen.append(v) or real(v, d))
+    base = TINY + ["--targets", "3e5", "--batches", "2", "--modes", "causal",
+                   "--out", str(tmp_path / "f.jsonl")]
+    for extra in ([], ["--batched-optim"], ["--batched-optim", "on"], ["--batched-optim", "off"]):
+        bench_micro.main(base + extra)
+    assert seen == ["auto", True, True, False]
+    assert [r["batched_optim"] for r in rows(tmp_path / "f.jsonl")] == [False, True, True, False]
+
+
+def test_tokens_per_step_is_rows_times_seq_len_times_accum(tmp_path):
+    """tok_per_s counts B x T x accum tokens per optimizer step (a B4 x accum 2 vs B8 comparison
+    depends on it); docs_per_row is recorded on docmask rows only."""
+    out = tmp_path / "t.jsonl"
+    for acc in ("1", "2"):
+        bench_micro.main(TINY[:-3] + ["3", "--warmup", "1", "--targets", "3e5", "--batches", "3",
+                                      "--accum", acc, "--docs-per-row", "2.5", "--out", str(out)])
+    rs = rows(out)
+    assert [(r["mode"], r["accum"]) for r in rs] == \
+        [("causal", 1), ("docmask", 1), ("causal", 2), ("docmask", 2)]
+    for r in rs:
+        per_step = 3 * 64 * r["accum"]
+        # tok_per_s is rounded to 0.1 and step_s to 1e-4: bound the product's rounding error
+        err = r["tok_per_s"] * 5e-5 + r["step_s"] * 0.05 + 1e-4
+        assert r["step_s"] > 0 and abs(r["tok_per_s"] * r["step_s"] - per_step) <= err
+        assert r["docs_per_row"] == (2.5 if r["mode"] == "docmask" else None)

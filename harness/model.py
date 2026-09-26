@@ -13,6 +13,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+import docattn
 from blocks import Block, RMSNorm, norm_scale_for, precompute_rope
 from config import PlanckConfig
 
@@ -41,6 +42,7 @@ class PlanckLM(nn.Module):
         cos, sin = precompute_rope(cfg.head_dim, cfg.seq_len, cfg.rope_theta)
         self.register_buffer("rope_cos", cos, persistent=False)
         self.register_buffer("rope_sin", sin, persistent=False)
+        self.doc_attn = "mask"   # packed-row attention kernel, docattn.set_doc_attn (not in cfg)
         self.reset_parameters()
 
     @torch.no_grad()
@@ -83,7 +85,9 @@ class PlanckLM(nn.Module):
                 pos = positions_from_doc(doc)
             cos = self.rope_cos[pos].to(x.dtype)[:, None]          # (B, 1, T, hd)
             sin = self.rope_sin[pos].to(x.dtype)[:, None]
-            if doc is not None:
+            if doc is not None and self.doc_attn == "varlen":
+                mask = docattn.VarlenDocs(doc)     # no mask: one flash sequence per document
+            elif doc is not None:
                 mask = document_causal_mask(doc)
         v1 = None
         for i, u in enumerate(self.sched):

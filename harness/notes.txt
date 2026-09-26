@@ -59,6 +59,20 @@ Files
                    (NorMuon), embed (tok_emb + untied head, AdamW, own embed_lr/embed_wd),
                    scalar (norms, gains, VR scalars, AdamW, no decay). Every group has base_lr;
                    set_lr(opt, factor). kind: normuon | muon | adamw.
+  optim_batched.py optim key batched: true | false | auto (DEFAULT auto since 2026-09-26 =
+                   on for cuda, off for cpu/mps; optim.resolve_batched): the same NorMuon/AdamW
+                   update with foreach ops and one Newton-Schulz per oriented shape on a stacked
+                   tensor (the per-matrix loop was ~4,300 launches/step at 5M). Same per-param
+                   state, so checkpoints resume across the flag. trainer.py train key
+                   lazy_metrics: true (default FALSE, opt-in): loss/gnorm read on log steps only
+                   (no per-step sync); non-finite checked on log steps and before every save.
+  docattn.py       train key doc_attn: auto | mask | varlen (DEFAULT auto since 2026-09-26 =
+                   varlen on cuda with bf16, else mask; docattn.resolve_doc_attn). varlen: packed
+                   rows run flash varlen attention (torch.nn.attention.varlen), one causal
+                   sequence per document, no (B,1,T,T) mask; mask = the reference SDPA path. A
+                   per-model attribute (model.doc_attn, default "mask"), not in PlanckConfig, so
+                   checkpoints and decode/RC-12 are unchanged. runs.jsonl start records
+                   doc_attn / optim_batched / lazy_metrics only when not the reference.
   schedule.py      WSD factor. full (1% warmup, linear decay to 0 over last 20%), trunk (never
                    decays; stable checkpoints at branch_points or branch_points_tpp), branch
                    (from a trunk stable ckpt at step s: decay_steps = s*f/(1-f) or explicit;
@@ -147,10 +161,27 @@ Files
   test_s3_optim.py       (e) groups by parameter NAME (independent of split_params' dim rule),
                          lrs/decay per group, NorMuon flag, one step lowers loss and moves every
                          param, matrix group alone lowers loss, toy regression, tiny LM.
+  test_optim_batched.py  batched == per-matrix optimizer on CPU fp32 (every orientation, 3D,
+                         missing grads, no nesterov, every kind/decay switch, the 5M/30M shapes,
+                         state_dicts moved both ways, a 40-step LM curve); *_cuda.py: bf16 NS
+                         update and a 200-step deterministic curve vs the reference's own noise.
+  test_trainer_lazy.py   lazy_metrics: accum 2 with 61 vs 5 supervised tokens gives the same
+                         loss floats and gradients; logs and weights equal eager; a one-step NaN
+                         stops the run before a checkpoint; resume across batched/lazy.
+  test_s3_docattn.py     doc_attn varlen == mask: cu_seqlens vs allowed_matrix, all 18 ARMS through
+                         an exact per-document SDPA stand-in (CPU, fp32, 2 micro-batches of unequal
+                         supervised counts), leak probes; CUDA: the real kernel vs an fp32 reference,
+                         bitwise leak probes, the startup self-test. test_docattn_curve.py: varlen
+                         refused off cuda; a 200-step bf16 curve vs the mask path's own floors.
+  test_speed_combined.py the auto rule; a default cpu run == an explicit reference run bit for bit;
+                         CUDA, deterministic: defaults + lazy resume 20+20 == 40 exactly; accum 2 vs
+                         1 micro-batch, eager and compiled, vs an independent fp32 loss/grad;
+                         30-step compiled vs eager curve; bitwise leak probes through compile.
   test_s3_resume.py      (f) 20 + resume + 20 == 40 straight, tolerance NONE: weights, every
                          optimizer tensor, loader state, per-step loss/gnorm/lr/tokens. Cases:
                          pack fp32; bucket + looped/shared/K=V; bf16 autocast + prelude/coda +
-                         grad_accum 3. Plus a guard that step 10/20/40 states really differ.
+                         grad_accum 3; optim batched + lazy_metrics (log_every 5). Plus a guard
+                         that step 10/20/40 states really differ.
   test_s3_overfit.py     (g) 510,534-param model, 16 dialogues, follow-up user turns identical so
                          replies 2 and 3 need history; 200 steps via train.py. Pack dense, bucket
                          dense, pack looped x2: final loss 1e-5 / 1.2e-4 / 0.0, greedy decoding
@@ -355,3 +386,107 @@ POINTER (2026-09-25 night, from rc12/notes.txt STEP 7): Max's D8 question on pro
 with its three conditions (prereg draft s17; summary in pipeline/notes.txt). rc12_eval.py now also records the OD6
 rates ack_repeat, ack_repeat_of_statements and ack_repeat_of_answers per seed kind; test_rc12_eval.py and
 test_rc12_hook.py were not re-run after that edit (they need torch).
+
+SPEED INTEGRATE 2 (2026-09-26, about 01:40; review fixes the same morning, marked "Review fix"): two
+GPU-speed winners merged, two new CUDA defaults.
+Merged: the optim candidate (optim_batched.py; trainer.py lazy_metrics) and the docattn candidate
+(docattn.py: flash varlen attention for packed rows). The compile (train.compile) and memory
+(chunked CE, memfit) candidates were not handed to Integrate as winners and are NOT in the tree;
+torch.compile stays bench-only (pc/bench_micro.py --compile).
+Defaults. The rule: a switch defaults on only if it passes its tests alone and combined AND wins
+its A/B.
+  optim.batched     auto (NEW DEFAULT; optim.resolve_batched) = optim_batched on cuda, the per-matrix
+                    reference on cpu and mps. Nothing was measured or tested on mps. Same optimizer
+                    state layout, so old checkpoints resume under it (test_trainer_lazy).
+  train.doc_attn    auto (NEW DEFAULT; docattn.resolve_doc_attn) = varlen on cuda with bf16 when torch
+                    has torch.nn.attention.varlen, else mask. An explicit varlen off cuda raises at
+                    startup. model.doc_attn itself defaults to "mask", so decode, RC-12 and tests that
+                    build a model directly keep the reference path.
+  train.lazy_metrics  false (UNCHANGED, opt-in). On top of the two defaults it adds +0.4 to +1.7
+                    percent (median). That clears the 0.3 to 0.8 percent run spread only at 5M and
+                    10M, and it moves NaN detection to the next log step or checkpoint save.
+  runs.jsonl start records doc_attn, optim_batched and lazy_metrics only when not the reference.
+  The old step exactly: optim.batched false + train.doc_attn mask (bench: --batched-optim off
+  --doc-attn mask). configs/sample_tiny/config.yaml documents all three keys.
+Tests (new): test_optim_batched.py (CPU, batched == per-matrix), test_optim_batched_cuda.py,
+test_trainer_lazy.py, test_s3_docattn.py, test_docattn_curve.py, test_speed_combined.py (the auto
+rule, and a default cpu run == an explicit reference run bit for bit). The CUDA combined checks
+run in deterministic mode:
+  - defaults + lazy: 20 + resume + 20 == 40 exactly (weights, optimizer, loader, every log record).
+  - accum 2 vs 1 micro-batch, eager and compiled, measured against an independent fp32 sum / n_sup:
+    loss rel err 4.9e-5 (compiled 5.9e-5) vs the bf16 reference's 4.2e-5; grad 1.77e-2 (compiled
+    1.62e-2) vs 1.79e-2.
+  - 30 steps compiled vs eager: max |dloss| 1.05e-3 against a 1e-7 weight-perturbation floor of 1.57e-3.
+  - leak probes through the compiled varlen forward: bitwise.
+test_s3_resume.py gains a batched + lazy case. test_trainer_lazy.py no longer compares the log's
+wall-clock "time" field, which failed whenever the two runs straddled a second.
+Review fix: pc/tests/test_bench_micro.py pins the bench token count per optimizer step (tok_per_s x
+step_s == B x T x accum, accum 1 and 2; killed: accum dropped, +2 percent, docs_per_row missing or
+on causal rows). bench rows now record docs_per_row (docmask rows; null on causal).
+Results:
+  Mac CPU: harness 431 passed, 19 skipped (CUDA only); pc/tests 60 passed. After the review fix
+  (08:50): harness 431 passed, 19 skipped; pc/tests 61 passed. The PC suite was NOT re-run after
+  the review fix (the PC was offline from about 08:32); the fix touched only bench_micro's row and
+  docstring, a CPU test and these notes.
+  PC 5070, on a lean copy byte-identical (md5) to this tree: harness 450 passed, CUDA tests
+  included. pc/tests: 58 passed, 1 failed, 1 skipped. The failure,
+  test_runner_start.py::test_low_disk_during_a_job_checkpoints_and_requeues, fails the same way on
+  pristine HEAD on the PC and passes on the Mac; it is not from this change.
+  Lean copy (review fix): harness/ pc/ rc12/ alone is NOT enough for the harness suite.
+  test_rc12_eval.py reaches rc12/quick_shortcuts.py, which imports text_e004 from
+  experiments/E004_general_updating/code; the test_from_pipeline*.py fixtures run
+  make_pipeline_fake.py, which needs pipeline/. The review's run without them stopped at collection
+  (exit 2) and, with E004 added, gave 12 setup errors. pc/RUNBOOK.txt STEP 8 has the recipe.
+Mutation checks:
+  CUDA (6 of 6 killed): the lazy read drops micro-batch 2, documents span rows, varlen not causal,
+  resume skips the optimizer, per-micro-batch normalization, auto gives mask on cuda.
+  CPU (all killed): auto on for every device, auto on for mps, auto ignores precision, bench
+  --batched-optim off mapped to auto.
+  All 45 mutants.py target strings occur exactly once in the merged code. mutation_check.py itself
+  was not re-run after the merge; the implementers ran their groups.
+Final A/B, RTX 5070, torch 2.13.0+cu130, bf16, NorMuon, T=2048, 20 steps + 5 warmup. Pristine HEAD
+(base) vs this tree's defaults (integ) vs integ + --lazy-loss. 3 arms interleaved with the order
+rotated, 5 repeats, one pc_heavy + gpu hold, medians. Every cell is fit ok. paired = per-repeat
+integ/base range. Raw rows: PC ~/planck/dev/integ_out/ab_{base,integ,integ_lazy}.jsonl.
+  cell         B base->integ  base tok/s  integ tok/s  gain (paired)            +lazy    resGiB base->integ  first_step_s  h/1B base->integ
+  5M causal    16             214,725     255,915      +19.2% (+18.4..+19.5)   260,373  8.27 -> 8.28        0.52 -> 0.53  1.29 -> 1.09
+  5M docmask   16             162,224     268,594      +65.6% (+64.9..+72.3)   272,829  9.38 -> 8.31        0.26 -> 0.17  1.71 -> 1.03
+  10M causal   8              124,471     166,163      +33.5% (+32.6..+40.6)   167,681  5.60 -> 5.63        0.51 -> 0.51  2.23 -> 1.67
+  10M docmask  8              94,435      175,031      +85.3% (+83.1..+97.0)   176,761  6.28 -> 5.64        0.23 -> 0.15  2.94 -> 1.59
+  20M causal   8              75,092      93,291       +24.2% (+23.2..+25.0)   93,658   7.88 -> 7.88        0.28 -> 0.24  3.70 -> 2.98
+  20M docmask  8              57,138      98,319       +72.1% (+71.3..+77.7)   98,848   8.79 -> 7.88        0.34 -> 0.23  4.86 -> 2.83
+  30M causal   8              58,933      68,225       +15.8% (+15.0..+17.2)   68,536   9.48 -> 9.49        0.64 -> 0.64  4.71 -> 4.07
+  30M docmask  4x2 -> 8       47,011      71,425       +51.9% (+51.3..+52.6)   71,878   5.82 -> 9.50        0.72 -> 0.62  5.91 -> 3.89
+  30M docmask at B8 (integ): 0.97 GiB free after the steps (fit ok, above the 0.5 edge line). HEAD
+  B8 was "edge" (0.08 GiB free), so HEAD's best there is B4 x accum 2. Run spread, (max-min)/median:
+  base 0.5 to 7.1 percent, integ 0.3 to 0.7. loss_first is identical base vs integ in every
+  same-batch cell. Every docmask cell above uses bench_micro's default --docs-per-row 8 (9.06
+  documents per row, sum of squared document lengths 0.221 T^2 per row): short documents, where
+  varlen attends little, so docmask beats causal at every shape. That mix flatters docmask (see
+  Realistic mix below).
+  Projected hours at 100 percent row fill are LOWER bounds on hours (best case: full rows, no pads).
+  bench tok/s counts every row position; train.py counts non-pad tokens only (trainer.py n_real), so
+  any padding adds hours. (REVIEW FIX above calls its hour projections UPPER BOUNDS and says to
+  multiply by the fill fraction: they are lower bounds, and hours are DIVIDED by the fill fraction.)
+    25B tokens at 5M:   causal 32.3 -> 27.1 h, docmask (8 docs/row) 42.8 -> 25.9 h
+    30B tokens at 30M:  causal 141.4 -> 122.1 h, docmask (8 docs/row) 177.3 -> 116.7 h (B4x2 -> B8)
+  Realistic mix (review fix). The review's fill check (PC, CPU) on the E2 starter data as the E2 5M
+  config packs it (base5m.yaml data block, B16, T 2048, 640 rows): docs/row median 1, mean 2.53;
+  non-pad fill 0.9892; sum L^2 per row 0.750 T^2. The closest bench mix is --docs-per-row 1.0 (2.01
+  docs/row, 0.732 T^2; 8.0 gives 9.06 and 0.221, recomputed on the Mac from random_docs). At 1.0
+  (review A/B, gpu.lock only, 5 interleaved repeats, medians, all fit ok; medians and paired ranges
+  recomputed from its raw rows; not re-timed after the fix because the PC was offline):
+    cell      base docmask  integ docmask  integ causal  docmask gain (paired)
+    5M B16    162,849       255,660        257,115       +57.0% (+56.6..+61.7)
+    20M B8    57,350        94,826         93,306        +65.3% (+64.3..+69.4)
+  On E2's data docmask runs at causal speed (-0.6 and +1.6 percent), not faster. 25B tokens at 5M
+  docmask: 27.2 h at full rows, 27.5 h at 0.989 fill (not 25.9). 30M was not measured at this mix.
+  Host load (review fix). HEAD's per-matrix step is launch bound and slows when the CPU is busy; the
+  batched step hardly moves. Interleaving spreads the load over both arms but cannot cancel that, so
+  a loaded A/B overstates the gain. The table above ran holding pc_heavy (no corpus job) and is the
+  conservative figure. A review A/B during a corpus job (load 2.0 at start, 14.8 peak, 5.5 at end):
+  30M causal B8 base repeats 51,234 to 58,340 (spread 13 percent), integ 67,995 to 68,541, median
+  gain +27.4 percent against +15.8 here. Quote the quiet-machine gains; log uptime load at the start
+  and end of every A/B.
+Not measured: the compiled throughput on top of the new defaults (the combined tests do run
+compile); anything on MPS.

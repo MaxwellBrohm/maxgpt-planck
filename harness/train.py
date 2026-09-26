@@ -32,6 +32,7 @@ from config import PlanckConfig        # noqa: E402
 from count_params import count_module   # noqa: E402
 from data import build_loader          # noqa: E402
 from device import amp_factory, env_info, pick_device, resolve_precision  # noqa: E402
+from docattn import resolve_doc_attn, set_doc_attn  # noqa: E402
 from model import build_model          # noqa: E402
 from optim import make_optimizer       # noqa: E402
 from selftest import run_selftests     # noqa: E402
@@ -98,6 +99,9 @@ def main(argv=None) -> int:
     model = build_model(mcfg, "cpu").to(device)
     n_params = count_module(model)["total"]
     dmode = cfg["data"].get("mode", "pack")
+    # packed-row attention kernel (docattn.py); auto = varlen on cuda+bf16, else mask
+    doc_attn = resolve_doc_attn(tc.get("doc_attn", "auto"), device, precision)
+    set_doc_attn(model, doc_attn, device)
     if tc.get("selftest", True):
         st = run_selftests(model, device, amp, packed=(dmode == "pack"))
         print(f"[train] leak self-test passed {st}", flush=True)
@@ -121,7 +125,8 @@ def main(argv=None) -> int:
     tr = Trainer(model=model, optimizer=opt, loader=loader, sched=sched, device=device, amp=amp,
                  cfg=cfg, out_dir=out_dir, grad_accum=accum, grad_clip=float(tc.get("grad_clip", 1.0)),
                  log_every=int(tc.get("log_every", 10)), ckpt_every=int(tc.get("ckpt_every", 500)),
-                 keep_last=int(tc.get("keep_last", 2)), stable_points=stable_pts, meta=meta)
+                 keep_last=int(tc.get("keep_last", 2)), stable_points=stable_pts, meta=meta,
+                 lazy_metrics=bool(tc.get("lazy_metrics", False)))
 
     if (cfg.get("eval") or {}).get("rc12"):   # off unless eval.rc12.every > 0 (rc12_eval.py)
         from rc12_eval import make_hook
@@ -149,6 +154,12 @@ def main(argv=None) -> int:
              "n_params": n_params, "step": tr.step, "schedule": sched.to_dict(),
              "batch_tokens": batch_tokens, "precision": precision, "resumed_from": resumed_from,
              "env": env_info(device)}
+    if model.doc_attn != "mask":            # the speed switches, recorded when not the reference
+        start["doc_attn"] = model.doc_attn
+    if opt.batched:
+        start["optim_batched"] = True
+    if tr.lazy_metrics:
+        start["lazy_metrics"] = True
     runio.append_jsonl(runs_jsonl, start)
     print(f"[train] {name}: {n_params:,} params, {device}/{precision}, steps {tr.step}->"
           f"{sched.total_steps} ({sched.mode}), {batch_tokens:,} tokens/step", flush=True)

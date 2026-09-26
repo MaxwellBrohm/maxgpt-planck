@@ -47,6 +47,8 @@ optim:
   scalar_lr: 3.0e-3
   weight_decay: 0.1
   cautious_wd: true
+  batched: auto                          # auto (on for cuda, off for cpu/mps) | true | false:
+                                         # optim_batched, same update, far fewer kernel launches
 
 schedule:
   mode: full                             # full | trunk | branch
@@ -66,3 +68,6 @@ train:
   ckpt_every: 20
   keep_last: 2
   selftest: true                         # causal and document leak test at startup
+  # lazy_metrics: false                  # true: loss/gnorm read on log steps only (no per-step sync)
+  doc_attn: auto                         # packed rows: auto (varlen on cuda+bf16, else mask) | mask
+                                         # (SDPA + dense mask, the reference) | varlen (flash, cuda bf16)

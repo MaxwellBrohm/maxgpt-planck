@@ -44,18 +44,26 @@ class Muon(torch.optim.Optimizer):
     """From Ultra. Groups with use_muon=False run AdamW (embeddings, 1D params)."""
 
     def __init__(self, params, lr=3e-4, weight_decay=0.1, momentum=0.95, nesterov=True, ns_steps=5,
-                 normalize=True, cautious=True, beta2=0.95, betas=(0.9, 0.95), eps=1e-8, ns_dtype=None):
+                 normalize=True, cautious=True, beta2=0.95, betas=(0.9, 0.95), eps=1e-8, ns_dtype=None,
+                 batched=False):
         defaults = dict(lr=lr, weight_decay=weight_decay, momentum=momentum, nesterov=nesterov,
                         ns_steps=ns_steps, normalize=normalize, cautious=cautious, beta2=beta2,
                         betas=betas, eps=eps, use_muon=True)
         super().__init__(params, defaults)
         self.ns_dtype = ns_dtype
+        # Planck: batched=True runs optim_batched (same math, far fewer kernel launches). An
+        # attribute, not a group key, so state_dicts and checkpoints are the same either way.
+        self.batched = bool(batched)
 
     @torch.no_grad()
     def step(self, closure=None):
         loss = closure() if closure is not None else None
+        if self.batched:
+            from optim_batched import adamw_group_batched, muon_group_batched
         for group in self.param_groups:
-            if group["use_muon"]:
+            if self.batched:
+                (muon_group_batched if group["use_muon"] else adamw_group_batched)(self, group)
+            elif group["use_muon"]:
                 self._muon_group(group)
             else:
                 self._adamw_group(group)
@@ -132,11 +140,24 @@ def split_params(model) -> dict[str, list[tuple[str, torch.nn.Parameter]]]:
     return out
 
 
+def resolve_batched(value, device_type: str) -> bool:
+    """optim key batched: true | false | auto (the default since 2026-09-26). auto = on for
+    cuda, where it won its A/B on the 5070 (+11-32% tok/s) and passed parity; off on cpu and
+    mps (never measured there, so they keep the per-matrix reference)."""
+    if value is None or value == "auto":
+        return device_type == "cuda"
+    if isinstance(value, bool):
+        return value
+    raise ValueError(f"optim.batched must be true, false or auto, got {value!r}")
+
+
 def make_optimizer(model, ocfg: dict, device_type: str = "cpu") -> Muon:
     """ocfg keys (defaults): kind 'normuon' | 'muon' | 'adamw'; lr 3e-3; embed_lr (=lr);
     scalar_lr (=lr); weight_decay 0.1; embed_wd (=weight_decay); cautious_wd True;
-    momentum 0.95; betas [0.9, 0.95]; eps 1e-8. kind 'adamw' runs every group as AdamW
-    (the comparison arm)."""
+    momentum 0.95; betas [0.9, 0.95]; eps 1e-8; batched auto. kind 'adamw' runs every group
+    as AdamW (the comparison arm). batched True: optim_batched's foreach/stacked steps, the
+    same update to float rounding (test_optim_batched.py) with far fewer kernel launches;
+    auto (the default, see resolve_batched) = True on cuda, False on cpu/mps."""
     kind = ocfg.get("kind", "normuon")
     assert kind in ("normuon", "muon", "adamw"), kind
     lr = float(ocfg.get("lr", 3e-3))
@@ -158,7 +179,7 @@ def make_optimizer(model, ocfg: dict, device_type: str = "cpu") -> Muon:
     return Muon(groups, lr=lr, weight_decay=wd, momentum=float(ocfg.get("momentum", 0.95)),
                 normalize=(kind == "normuon"), cautious=bool(ocfg.get("cautious_wd", True)),
                 betas=tuple(ocfg.get("betas", (0.9, 0.95))), eps=float(ocfg.get("eps", 1e-8)),
-                ns_dtype=ns_dtype)
+                ns_dtype=ns_dtype, batched=resolve_batched(ocfg.get("batched", "auto"), device_type))
 
 
 def set_lr(optimizer, factor: float) -> None:

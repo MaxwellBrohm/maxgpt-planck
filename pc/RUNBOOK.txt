@@ -109,6 +109,33 @@ STEP 8  Verify CUDA, then measure                                               
   modes: causal (flash path, bucket rows) and docmask (packed rows with the document mask).
   Results: ~/planck/runs/bench_micro.jsonl, one line per measurement, with versions. These
   replace PLAN.md's throughput estimates (re-plan rule, Phase 4).
+  Speed switches (2026-09-26; harness/notes.txt "SPEED INTEGRATE 2" has the numbers). bench_micro
+  and train.py share the defaults, and each row records what ran (batched_optim, doc_attn,
+  lazy_loss):
+    optim.batched   auto (default) = optim_batched on cuda, per-matrix reference on cpu/mps;
+                    bench --batched-optim auto|on|off (bare flag = on). Measured: clip + step
+                    kernels 4,785 -> 261 at 5M; alone +12 to +32 percent tok/s.
+    train.doc_attn  auto (default) = flash varlen for packed rows on cuda+bf16, else the mask
+                    path; bench --doc-attn auto|mask|varlen. Measured: docmask alone +34 to +41
+                    percent, 0.7 to 1.1 GiB less reserved at 5M-20M; 30M docmask fits at B8 (was B4 x 2).
+    train.lazy_metrics  false (default, opt-in); bench --lazy-loss. Measured: +0.4 to +1.7
+                    percent on top of the two defaults; NaN is caught at the next log step/save.
+  Both defaults together vs HEAD (5 interleaved repeats, medians, all fit ok, quiet host):
+  causal +16 to +34 percent; docmask at the bench default --docs-per-row 8 +52 to +85 percent.
+  At --docs-per-row 1.0, the closest bench mix to the E2 starter data (about 2.5 docs/row):
+  docmask +57 (5M) and +65 (20M) percent, and docmask runs at causal speed, not faster.
+  Hours from bench tok/s are LOWER bounds (full rows, no pads; train.py counts non-pad tokens
+  only, so divide by the measured fill). 25B tokens at 5M docmask: 42.8 -> 27.2 h at the E2 mix
+  (25.9 h at 8 docs/row); 30B at 30M docmask 177.3 -> 116.7 h at 8 docs/row (not measured at 1.0).
+  A/Bs run while a corpus job loads the CPU overstate the gain (HEAD's step is launch bound): quote
+  quiet-machine numbers, and log uptime load at the start and end of each A/B.
+  The pre-2026-09-26 reference step: --batched-optim off --doc-attn mask (config: optim.batched
+  false, train.doc_attn mask). torch.compile is bench-only (--compile), not a train.py option.
+  Tests on the PC GPU: harness/test_speed_combined.py, test_optim_batched_cuda.py,
+  test_s3_docattn.py, test_docattn_curve.py (all run inside the normal harness suite when
+  CUDA is present; the PC's full harness run, 450 tests, took 3.6 min). A lean copy for that
+  suite needs harness/ pc/ rc12/ PLUS experiments/E004_general_updating/code (rc12 imports
+  text_e004) and pipeline/ (the from_pipeline fixtures); without them pytest stops at collection.
 
 STEP 9  Runner settings                                                         [CLAUDE]
   ~/planck/runner.env (plain settings only, never secrets). Example:

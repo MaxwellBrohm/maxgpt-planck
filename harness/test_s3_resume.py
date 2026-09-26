@@ -4,7 +4,9 @@ Tolerance: none. Weights, every optimizer state tensor, the loader state, and th
 loss of every step 21..40 must be identical (torch.equal / ==). CPU is deterministic for
 these ops; on MPS or CUDA this must be re-checked (kernels may not be).
 Cases: pack mode fp32; bucket mode with a looped, shared, K=V arm; pack mode under bf16
-autocast with prelude + looped core + coda and grad_accum 3.
+autocast with prelude + looped core + coda and grad_accum 3; the speed switches (optim
+batched + lazy_metrics, log_every 5). The same on CUDA with the cuda defaults (varlen doc
+attention + batched) and lazy_metrics, deterministic: test_speed_combined.py.
 """
 from __future__ import annotations
 
@@ -27,6 +29,8 @@ CASES = {
                       "model": {**LOOPED, "n_layers": 2, "n_loops": 2, "qk_share": 2, "kv_tie": True}},
     "pack_bf16_prelude_coda": {"model": {**LOOPED, "n_loops": 3, "n_prelude": 1, "n_coda": 1},
                                "train": {"precision": "bf16", "grad_accum": 3}},
+    "pack_batched_lazy": {"optim": {"lr": 3e-3, "batched": True},
+                          "train": {"lazy_metrics": True, "log_every": 5}},
 }
 
 

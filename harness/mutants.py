@@ -33,6 +33,23 @@ mut("mask_ignored_by_attention", "mask", "blocks.py",
     "attention takes the causal flag instead of the document mask")
 mut("mask_trainer_drops_doc", "mask", "trainer.py", 'self._to(b["doc"]),', "None,",
     "the trainer forgets to pass doc ids")
+# ---------------- doc_attn varlen (docattn.py; killed by test_s3_docattn.py on CPU) ------
+mut("docattn_docs_span_rows", "docattn", "docattn.py",
+    "start = torch.ones_like(doc, dtype=torch.bool)",
+    "start = torch.zeros_like(doc, dtype=torch.bool); start[0, 0] = True",
+    "a row start no longer starts a document: documents run across rows")
+mut("docattn_last_doc_dropped", "docattn", "docattn.py",
+    "return F.pad(s, (0, 1), value=doc.numel())", "return s",
+    "cu_seqlens lacks the final offset: the last document has no end")
+mut("docattn_flatten_wrong_layout", "docattn", "docattn.py",
+    "x.transpose(1, 2).reshape(B * T, x.size(1), hd)", "x.reshape(B * T, x.size(1), hd)",
+    "heads and time mixed up when rows are flattened for the kernel")
+mut("docattn_unflatten_wrong_layout", "docattn", "docattn.py",
+    "return o.view(B, T, H, hd).transpose(1, 2)", "return o.view(B, H, T, hd)",
+    "kernel output reshaped with the wrong axis order")
+mut("docattn_flag_ignored", "docattn", "model.py",
+    'if doc is not None and self.doc_attn == "varlen":', "if False:",
+    "doc_attn varlen silently runs the mask path")
 # ---------------- causality ----------------
 mut("causal_flag_off", "causal", "blocks.py",
     "out = F.scaled_dot_product_attention(q, k_, v_, is_causal=True)",
