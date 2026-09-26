@@ -1,0 +1,565 @@
+E006: three objects. A device control, a position-balance arm and a general-chat replay arm (E005 + one change each)
+PC (RTX 5070 12 GB, WSL Ubuntu, CUDA), one GPU job at a time under ~/planck/locks/gpu.lock. No model is loaded on the
+Mac for E006. E001-E005 are read-only: their code is copied or imported, never edited; their records and weights are
+read, never written.
+
+PRE-REGISTRATION WRITTEN 2026-09-25 23:58, REVISED 2026-09-26 after an independent critique and again after an
+independent validation (CHANGES AFTER VALIDATION), before any scored E006 run. Run before the first revision, no
+model anywhere: pure-Python generators and checkers on the Mac importing E005's code read-only, a tokenizer (not a
+model) through the `tokenizers` library for the stream checks, read-only looks at the PC's files, and the replay
+pool built on the PC from its raw OASST2 file (no model, no tokenizer). Since then, on the PC only: the step-0
+checks with the HF tokenizer and dry runs on the GPU (seed 0 or cut sets, tagged dry, outputs deleted). No model
+was loaded on the Mac. What they measured is logged in LOG AT WRITING.
+
+CHANGES AFTER CRITIQUE (the critique's MUST items 1-9 are all adopted; SHOULD items as marked)
+  M1  H5L, a gold-last mirror of H5, is scored for every model; RESTORED / PARTLY RESTORED carry a pre-registered
+      suffix read on H5L ("recency traded" or "no loss where the gold is last"); the U families are split by
+      gold-last and BIG H5 by the rule NL; the controls are stated not to discriminate (NL .94 on both).
+  M2  G is ADDITIVE, not a replacement (option b): C's 6,400 update examples in C's micro-batches with C's loss
+      scaling, plus one replay micro-batch per step. Q-chat, knowledge and cost all read G vs C.
+  M3  Replay drops added: a turn equal to a chat-probe turn or containing one of 3+ words; any eval, AL, BIG or H5L
+      surname. Counts logged (4 and 4 threads).
+  M4  The chat rule reads TF and TF2 (TF2: the second sentence too when the first has 3 words or fewer).
+  M5  LOOP ignores lines in code fences, code or brace lines and lines under 3 alphabetic words; LOOP and CHECKS
+      are CI-based non-inferiority margins (+0.10 and -3).
+  M6  The WHY sentence is corrected; P is gated on GL2 AND on the 2-object gold-last rate GLX2 (<= E004's, per seed);
+      the knobs are Q_SPLIT 1.0, F_YFIRST 0.30 (was 0.55 / 0.30, which failed GLX2).
+  M7  RESTORED needs P - L4's CI high > 0 (not a point comparison), and RESTORED vs PARTLY is read only when the
+      training-device shift |C - e005w| on BIG H5 LIK is under 0.03; otherwise the label is GAIN.
+  M8  The knowledge CI resamples items x seeds, as Q-H5 does.
+  M9  The rule's operating characteristics are stated (OPERATING CHARACTERISTICS).
+  SHOULD adopted: 2 (WORSE label in Q-H5, LOWER mark in the cost table), 3 (SDPA math kernel only, bitwise dry-run
+  check, TF32 twins C1t and C2t, the chance count of Q-device intervals), 4 (P's side effects measured), 5 (BIG H5
+  reweighted to D4004's introduction mix, reported), 6 (recency index), 7 (a blinded 20-turn sample per arm is
+  read before the Q-chat label), 8 (loose exposure as a sensitivity check), 9 (held-out axes and OASST caveat),
+  11 (open questions named; the pass rule's H5 and control cells on BIG as a companion reading).
+  SHOULD declined: 1 (seeds 6-10: the brief fixes 5 seeds and the GPU is shared; the operating characteristics
+  are stated instead, and any later extension is a new pre-registration, not a conditional step of this one);
+  5's stratified rebuild of BIG (BIG stays E004's generator unchanged so it samples D4004's distribution).
+  SHOULD 10 (D8 scope of the update templates) is Max's decision; OPEN FOR MAX below.
+
+CHANGES AFTER VALIDATION (2026-09-26, before any scored run; LOG AT WRITING 13 and 14)
+  V1  Replay: a thread whose tokenized input does not decode back to its template text is skipped at stream time
+      ("lossy_text"). SmolLM2's vocabulary has no token for U+0004, U+0006, U+0013, U+0014, U+0016 and U+001D (of
+      U+0000-U+024F; the same under HF and the shim), and the tokenizer drops them silently. One pool thread
+      (oasst2:df7b676, U+0006 in its first user turn) was used on s1, s3, s4 and s5 with an input 2 characters
+      short of its 4,150-character template text. The label check also requires now that the whole input decodes
+      to the template text of the used turns. The pool file, its sha256 and the exposure lists are unchanged; the
+      seeds' replay orders are unchanged except that the skipped thread's place goes to the next usable thread.
+      Mutants R10 and R11.
+  V2  Q-H5: when e004w is incomplete (L4 - C not read) the flag is "L4 NOT READ", not "NO DROP TO RESTORE ON CUDA"
+      (the code raised the second then, which the notes did not define). Mutant Q15.
+  V3  Tokenizer facts measured with the HF tokenizer on the PC replace the shim's where they differ (ARMS G, STREAM
+      ACCEPTANCE, KNOWN RISK 10).
+  V4  GPU memory is read from guard.json (peak_gpu_mem_mib) and run.json (peak_cuda_gb) (PC QUEUE).
+
+WHY
+E005 (E005_alias_eot/AUDIT.md) read PARTIAL-X (H5) on a 2-item margin: alias DATA GAP 5/5, stopping learned,
+knowledge -7.5 points (as E004). H5 fell to .656 LIK (E004 .756). Wrong picks moved to another object's later
+statement, usually the dialogue's last one (64 of 110 wrong picks vs 33 of 78 in E004). By the order in which the
+asked object is introduced: .88/.51/.47 (first/second/third) vs E004 .88/.64/.69. Both controls slipped the same
+way (2 seeds fail a control at GEN). In general chat over half of first sentences are training answer templates
+(untouched model .01). The audit's candidate cause for H5, untested: in 2-object training examples whose asked
+object is introduced second, its latest statement is the dialogue's last value statement .656-.671 of the time in
+E005 vs .544-.567 in E004. Measured at writing (drawn, 6,404 per seed, s1-5): the E004 block keeps E004's rate
+(.551-.564); the ALIAS block is at .734-.789 and the IND block at 1.000 (asked Y). The E005 excess is not only
+conditional on introduction order: over ALL 2-object examples the asked object's latest is last .2665 of the time
+in E005 vs .2189 in E004 (critique 6). P targets both numbers.
+From E006 on, model work runs on the PC (CUDA); E005 trained on the Mac (MPS). The device change is measured first.
+
+QUESTIONS
+  Q-device  Does E005's recipe rerun on CUDA reproduce E005 (Mac)? Every family is reported; stated, not ruled.
+  Q-H5      Does balancing the position of the asked object's latest statement in training restore H5?
+  Q-chat    Does adding human-written general chat to training protect general chat (template answers, loops,
+            probe checks) and closed-book knowledge, and what does it cost on H1-H7 and the controls?
+
+DEFINITIONS (code/position_e006.py)
+  GL     for a training example: 1 if the dialogue's last value statement is about the asked object (an
+         incidental last counts 0), else 0. On 2-object examples: GL2 = mean GL where the asked object is
+         introduced second (first-mention order); GL1 = introduced first; Delta = GL2 - GL1; GLX2 = mean GL over
+         every 2-object example.
+  R4, DELTA4, X4  E004's GL2, Delta and GLX2 pooled over the first 6,404 KEPT examples of train_e004.stream(s),
+         s = 1-5 (E004's encoder, 768 tokens): R4 .5581, GL1 .0375, DELTA4 .5206, X4 .2181 (n = 18,214 two-object
+         examples), the same under the shim (Mac) and the HF tokenizer (PC, validate_e006; queue step 0 re-checks).
+  pooled mean over 5 seeds x items of a family.
+
+ARMS (SmolLM2-135M-Instruct, seeds 1-5 each, all on the PC. Every hyperparameter is E005's: 400 optimizer steps,
+AdamW lr 1.5e-4, wd 0, 20 warmup steps then cosine to 0, clip 1.0, fp32 weights and optimizer, answer-only loss as a
+token mean per micro-batch (e004_core.answer_loss), micro-batch 4 x accumulation 4, gradient checkpointing, max
+length 768 with redraw, probe every 50 steps, torch.manual_seed(seed), E005's loss self-check batches.)
+
+C  CONTROL. E005's recipe exactly: e005_train.train (unedited) on train_e005.stream(seed) through
+   e005_sets.example_stream. e006_train.patch_stream wraps that call with a read-only digest tap (sha256 of the
+   ids and labels the loop consumed, into run.json); nothing else differs except the device and the software
+   around the run, plus one process change: weights are saved and hashed before scoring.
+
+P  POSITION. E005's recipe with one change, in the planners of the ALIAS and IND blocks only (code/train_e006p.py).
+   Every new decision is drawn from a third generator R_pos = Random(1000 * s + 47). R_mix (block and render per
+   drawn example), the E004 block (train_e004.stream(s), unchanged) and every PLAN draw of R_new =
+   Random(1000 * s + 45) are C's. After the first changed example the render consumes R_new differently, so later
+   ALIAS/IND examples are fresh draws from the same distributions as C's, not C's examples. Loop: e005_train.train
+   with the stream source swapped (patch_stream).
+   (a) ALIAS, cases LATEST and EARLIER, placements adjacent and filler: where E005 puts B's whole chain before A's
+       original (its 1/2 branch) and B has k_B >= 1, with probability Q_SPLIT = 1.0 the chain is split: B's
+       original stays first, B's corrections move after A's latest statement (LATEST: after the alias correction;
+       EARLIER: after A's last correction), in order. The first moved correction follows A's statement, so E004's
+       far rule decides it at render time (full or head 3:2, gap 0-2 fillers). k_B = 0, the other_obj placement,
+       the OTHER case, the B-after branch and every other draw are unchanged.
+   (b) IND: with probability F_YFIRST = 0.30 per IND example (whoever is asked) Y's original moves to the front.
+       X's chain follows unchanged (X's original after 0-2 fillers by E004's gap rule, X's last correction indirect
+       and directly after X's previous statement), then Y's corrections in order, the first after the 0-2 fillers
+       E005 drew before Y's original. If that first moved correction was planned indirect it would read as X's, so
+       it becomes full or head (E004's far weights, drawn from R_pos). The ask (X 3/4, Y 1/4) is unchanged.
+   A changed example carries "p_change" (split / yfirst); with Q_SPLIT = F_YFIRST = 0 the stream equals
+   train_e005.stream exactly (tested on 20,000 draws per seed).
+   Why Q_SPLIT 1.0 and F_YFIRST 0.30: GLX2 moves with Q only (IND's GLX2 is its ask-Y share, .25, whatever F is),
+   and only Q = 1.0 puts every seed's kept GLX2 at or below X4 (Q .9 failed on s3 and s5 at .2195 and .2198).
+   F = 0.30 is the smallest of the tried values (.30/.40/.50) that keeps IND's GL2 below R4 on every seed.
+   Not balanced, stated: IND's own GLX2 stays at its ask-Y share (P kept .234-.285, above X4), because changing the
+   ask ratio would be a second change; the gate reads the whole stream's GLX2, and per block GL2.
+   Measured at writing, KEPT streams (the gate reads these; shim tokenizer):
+     GL2 .4329/.4352/.4537/.4467/.4453 (C .655-.670; R4 .5581); GLX2 .2065/.2055/.2169/.2100/.2090 (C .261-.269;
+     X4 .2181); ALIAS GL2 .166-.214 (C .739-.781); IND GL2 .413-.506 (C 1.000); Delta .348-.370 (DELTA4 .5206).
+     Every gate passes on every seed; the thinnest margin is s3's GLX2 (.2169 vs .2181).
+   Drawn, pooled s1-5 (tested to 4 decimals by test_train_e006p): GL2 .4369, GL1 .0832, GLX2 .2080
+     (C .6658 / .0690 / .2665; E004 .5586 / .0384 / .2189).
+   Side effects, measured at writing (drawn, 6,404 per seed, s1-5; critique SHOULD 4):
+     changed examples: ALIAS .187, IND .298; 2-object asked-second share .331 -> .353; IND: indirect share of
+     corrections .714 -> .664, "another object's indirect statement after the asked latest" .575 -> .473;
+     ALIAS: indirect share .298 -> .264, "another object's indirect after the asked latest" .154 -> .193 (H5's
+     worst structure, after_ind; read H5 by after_ind with this in view); characters per example +0.9% (ALIAS) and
+     +1.0% (IND), fillers +0.10 and +0.09 per example; a split chain's first moved correction is always named; in
+     Y-first the non-first original's marker probability moves to X's original. GL2 lands .12 BELOW E004's, so a
+     result is about this re-balance, not about matching E004 exactly.
+
+G  GENERAL-CHAT REPLAY. E005's recipe with one change: one replay micro-batch is ADDED to every optimizer step
+   (code/e006_train.py g_train). Every step is [u, u, u, u, r]: C's four update micro-batches of 4 kept examples,
+   in C's order and each scaled by 1/4 exactly as in C, then one micro-batch of 4 replay threads, also scaled 1/4;
+   then clip 1.0 and one AdamW step. So G trains on exactly C's 6,400 update examples (after C's 4-example check
+   batch), byte for byte, plus 1,600 replay threads; replay is 1/5 of the micro-batches and of the pre-clip loss
+   weight. Block shares inside the update part are C's own; as shares of all trained examples each E005 block is
+   scaled by 0.8 (E004 block .56, ALIAS .16, IND .08, replay .20).
+   Why additive (critique M2): a replacement design trains on 25% fewer update examples, so a lower template share,
+   fewer loops or a smaller knowledge loss could come from the smaller update dose alone. Additive G changes one
+   thing: replay is present. What cannot be separated from it, and is stated: clipping is active on every step
+   (E005's logged norms, every 10th step of 5 seeds: 1.75-12.96, never under the clip), so replay also takes a
+   share of the clipped norm; the loop logs the update part's gradient norm before the replay backward and the
+   clipped total, per step.
+   Why 1 in 5, in whole micro-batches: the loss is a token mean per micro-batch; an update micro-batch has about 30
+   labelled tokens (E005's self-check batches: 27-32) and a replay micro-batch about 1,260 (pool median 305 per
+   thread). A replay thread inside an update micro-batch would take over 90% of that micro-batch's gradient and the
+   update share would depend on thread lengths. A whole micro-batch gives replay a fixed 1/5 of the loss weight.
+   One per step is the smallest dose that keeps every step identical in composition; E005's chat damage is large
+   (first sentence a template .50-.59), and a null at a smaller dose would not separate "replay does not help" from
+   "too little replay".
+   Replay data (D8: human-written, Apache-2.0; no model-written and no Claude-written text; code/replay_e006.py):
+     pool   the OASST2 threads of ~/planck/data/tok_sample_v0c/train/oasst2.jsonl (3,338; sha256 6d9ec530...).
+            corpus/readers_chat.py built them from 2023-11-05_oasst2_all.trees.jsonl.gz (sha256 2cf3d24f...): OOD-H
+            reserve trees dropped first, English, ready_for_export, deleted / synthetic / model-written /
+            review-failed / spam messages dropped, hygiene.aiism per message, the best-ranked path, trailing user
+            turns cut. The tokenizer's held-out side (1,094 threads) is not used, so no Planck held-out set is
+            trained on. The OASST authors state that their filters cannot remove all ChatGPT-written text; the
+            AI-ism filter is the project's accepted mitigation (CORPUS.md).
+     drop   first matching reason: reserve (oodh.in_oodh_reserve; 0), heldout (on the tokenizer's held-out side; 0),
+            reserve_leak (a user turn, oodh.prompt_key, >= oodh.LEAK_MIN_CHARS, equal to a user turn of any
+            reserved tree of the raw file; 3), aiism (0), eval_8gram (a word 8-gram, text_e004.words, shared with any
+            item text of draws 4004/4104/4204, BIG, H5L, AL, or a chat-probe user turn or system prompt; 0),
+            probe_turn (a turn equal to a chat-probe user turn, or containing one of 3 or more words; 4),
+            eval_surname (any of the 16 eval and 20 AL surnames as a whole word, any case; 4). Kept 3,327; pool
+            sha256 94d0f651c58f49781c628d30c13e36c9a396a9116363da8e05f09cbbec93da39. replay_ref/ holds the tree
+            ids with their reasons, the build counts and the exposure lists; the queue rebuilds the pool on the PC
+            and it must hash to this. len(oodh.leaked_reserve_trees(raw)) = 54 (logged; those are reserve trees).
+            At stream time (tokenizer): a thread whose first exchange does not fit 768 tokens, whose spans do not
+            tokenize jointly, which holds a special-token string, or whose tokenized input does not decode back to
+            its template text (lossy_text, V1) is skipped (counted).
+     render SmolLM2's chat template over the thread's turns (user first, ending on an assistant turn), no system
+            message (the template inserts its default one, as E005's chat render and the eval do); the "\n" after the
+            final <|im_end|> is not in the input (as E005's chat render). A thread over 768 tokens is cut after the
+            longest prefix of whole exchanges that fits. Labels: the content tokens of every assistant turn plus its
+            <|im_end|>; -100 elsewhere (system prompt, user turns, role headers, the "\n" after <|im_end|>). Spans
+            come from joint tokenization of turn prefixes.
+     order  per seed the pool (sorted by id) is shuffled with Random(1000 * s + 48); replay micro-batches take the
+            usable threads in that order, none twice within a seed. The loss self-check adds a replay batch (the
+            first 4 usable threads of a separate iterator; the training iterator does not move); the dry run's
+            wrong-loss mutants must differ from the HF loss on it too.
+     Measured with the HF tokenizer on the PC (what training uses; LOG AT WRITING 14): 3,201 of 3,327 threads are
+     usable (125 first exchanges over 768, 1 lossy_text), 345 are cut; the first 1,604 usable threads of seeds 1-5
+     skip 66/57/62/62/69 (lossy_text 1 of them on s1, s3, s4, s5) and cut 177/174/166/177/162; 0 label problems,
+     whole-input check included, on every used thread. The shim differs on OASST text (KNOWN RISK 10): 3,202
+     usable, 124 too long, 338 cut.
+
+WHAT STAYS IDENTICAL (each checked before any scored run; a failure stops the queue)
+  1 Code. E005's code/ is copied byte for byte into E006's code/ (98 files; copies/copied_from_e005_sha256.txt;
+    identity_e006 checks copy = list = E005 source). C runs e005_train.train unedited. Equivalence: 5-step dry runs
+    (seed 0) of e005_ft_test.py (started through numerics_e006.py, which applies the NUMERICS settings and then runs
+    the script unchanged with runpy) and of e006_ft_test.py --arm C give bitwise-equal step losses, loss self-check
+    values and probe scores (compare_dry_e006). If two runs of the same entry point are not bitwise equal on this
+    GPU, the check becomes: the two entry points differ by no more than two runs of one entry point do.
+  2 C's streams. Per seed, the first 6,404 kept examples (ids and labels) hash the same through e006_sets and
+    e005_sets, and the stream stats equal E005's run.json train_stats exactly (n, rejected 102/112/101/107/102, mean
+    and max length, every drawn and kept share). Checked at writing with the shim tokenizer: equal on all 5 seeds.
+  3 P's streams. The block and render sequence and every E004-block example equal C's by drawn index; before the
+    first changed example every ALIAS/IND example is C's; at every ALIAS/IND example P's planner, run from C's R_new
+    state, consumes R_new exactly as E005's and returns E005's plan or E005's plan transformed exactly as (a)/(b)
+    (the counterfactual pairing of test_train_e006p). Reported: the share of P's kept examples that are C's.
+  4 G's update part. G's update source is train_e005.stream; the training loop's update digest (check batch plus
+    6,400 trained examples) must equal C's same-seed digest (both in run.json; the analyzer prints the comparison).
+  5 Model and software. HF snapshot 12fd25f77366fa6b3b4b768ec3050bf629380bac with config, generation config,
+    tokenizer, tokenizer config, special tokens map, vocab, merges and model.safetensors (sha256 5af571cb..., E005's).
+    torch 2.13.0 (the cu130 build), transformers 5.15.1, tokenizers 0.22.2, safetensors 0.8.0 (E005's versions).
+    The venv is ~/planck/venv-hf; if it exists with other versions, E006 makes ~/planck/venv-e006 with these pins
+    (E006_PY) instead of changing a shared venv. sanity_nll of the snapshot equals E005's 1.9598 within 1e-3 (a
+    trained or base run refuses otherwise). Versions, CUDA, driver and GPU name go into every run.json.
+  6 Eval. Draws 4004/4104/4204 built from E006's copy equal E004's and E005's item by item, 1,120 of 1,120 each
+    (eval_identity_e006; passed at writing). AL items sha256 e99b40d6...; BIG + H5L file sha256 566ef467...
+  7 Graders and rules: gen_grade.py, lik.py, rules_e004.py, rules_e005.py, evidence_e005.py as copied. Chat probe:
+    run_chat.py and battery.py as copied, greedy, the same 53 conversations and caps.
+
+EVAL DRAWS AND SCORED MODELS
+  D4004  E004's eval draw, 64 per family (9 pass families + ID), LIK and GEN, plain and chat. The pass rule and the
+         alias reading read it (plain), unchanged.
+  BIG    items_e004.build(6006, f, 192) for f = H5, C_noupd, C_twoslot (576 items; E004's generator unchanged).
+         Written once to big/big_items.jsonl with H5L (768 items; sha256
+         566ef4676b1997317e91cdbb0baf6162bd5531ece5def44a105669caa625166e).
+         0 item-check problems, gates G1/G2 pass, 0 prompts shared with 4004/4104/4204, AL or H5L, prompt-list
+         sha256 prefix 6ad25186 (the draft's trial). H5 introduction order 76/77/39 (D4004 27/20/17).
+  H5L    the gold-last mirror (code/items_big_e006.py): E004's H5 planner with the after-condition inverted (the
+         asked object's latest statement IS the dialogue's last), seed 6106, stratified by the asked object's
+         introduction order, 64 items each (never corrected only in the third stratum, the one order it allows).
+         0 item-check problems; IDEAL 1.00; O2 "last mention" 1.00 by construction (reported, not gated).
+  Unchanged from E005: probe 4204 (every 50 steps), continuity (8 sets), knowledge (kbig441, khard40,
+  K_closedbook60), AL (64 items, plain and chat), chat probe (53 conversations, 149 assistant turns).
+  Why Q-H5 reads BIG and not D4004: (1) the paired P - C interval is narrower (half-width about .054 vs .085 at
+  n = 64, OPERATING CHARACTERISTICS); (2) the hypothesis came from post hoc analysis of D4004's H5 items, so the
+  confirmatory test uses items that did not suggest it; (3) same generator and vocabulary.
+  Models scored on CUDA: the untouched model (tag base); C1-C5, P1-P5, G1-G5 (every set and the chat probe);
+  without training, E005's saved s1-s5 weights (e005w1-5: every set and the chat probe) and E004's s1-s5 (e004w1-5:
+  D4004, BIG, H5L, AL); the TF32 twins C1t, C2t (D4004, BIG, H5L). Reference weights hash to E005's al/out records
+  (E005 f846ac3d 4ef6230a aa5f99f1 1d330be9 131c8113; E004 91a3aab0 aee5a7fa efd68a20 8ad34021 1bb9f377; checked
+  at writing on the Mac copies).
+
+PRE-REGISTERED RULES AND READINGS (code/rules_e006.py; analyzer analyze_e006*.py, passrule_e006.py)
+Common. LIK right = the gold's summed log-prob strictly above every other in-context candidate (metrics_ft.right on
+the raw scores); GEN right = strict (gen_grade.py, clauses 1-7), plain render unless named. Paired bootstrap for an
+arm difference X - Y on one family: 10,000 resamples with numpy.random.default_rng(6006); each resample draws k seed
+numbers with replacement from the k seeds both have and n items with replacement from the family's n, and averages
+right_X(s, i) - right_Y(s, i) over the drawn (s, i) pairs; X and Y are paired by seed number and item. 95% CI = the
+2.5th and 97.5th percentiles. References (e004w, e005w, E005's Mac records) pair the same way by seed number. A
+missing or incomplete seed of an arm makes every pooled reading that uses that arm NOT READ (no imputation).
+
+Q-device (stated, not ruled). C minus E005 (Mac records), pooled, with the CI, for every family of D4004 (10
+families x LIK/GEN x plain/chat), AL LIK (4 cells x 2 renders), the continuity sets new/extra/old/uprobe/cross and
+knowledge kbig and khard (plain LIK; K_closedbook60 sits inside "old"), and the chat-probe TF, TF2, LOOP and CHECKS;
+the count of intervals clear of 0 is printed with the number expected by chance (5%; about 3 of 59). On BIG, which
+E005 never scored: C minus e005w (training device). Scoring device: e005w (CUDA) vs E005's records of the same
+weights (LIK decision flips, max |score difference|, identical GEN replies). Also the untouched model on CUDA vs
+E004's untouched records (flips by prompt hash) and its transcript hash (E004's ffa5ee69...; E006's file adds two
+fields per record). Noise floor: the TF32 twins C1t, C2t minus C1, C2 on BIG. Written as sentences, no label.
+
+Q-H5 (P vs C). H5 on BIG, plain, pooled over seeds, LIK and GEN separately: d = P - C with its CI; L4 = e004w.
+dev = C - e005w, pooled BIG H5 LIK (the training-device shift). First matching label wins:
+  GAIN (RESTORED VS PARTLY NOT READ)  on both LIK and GEN: d >= +0.06 and CI low > 0, and |dev| >= 0.03 or dev
+                   is not read (L4 is Mac-trained, so it is not a same-device reference then)
+  RESTORED         on both: d >= +0.06, CI low > 0, and the CI high of P - L4 > 0 (P not credibly below L4)
+  PARTLY RESTORED  on both: d >= +0.06 and CI low > 0 (the CI high of P - L4 is at or below 0 on LIK or GEN, or
+                   L4 is not read)
+  WORSE            on both: CI high < 0
+  NOT THE CAUSE    on both: CI high < +0.06 (the data exclude a gain of 6 points)
+  INCONCLUSIVE     anything else, including LIK and GEN disagreeing
+  Flag: "NO DROP TO RESTORE ON CUDA" if L4 - C (pooled BIG H5 LIK) is under 0.05; "L4 NOT READ" instead if e004w
+  is incomplete (no drop is measured then; V2).
+  Suffix of GAIN / RESTORED / PARTLY RESTORED, read on H5L (P - C, paired): "recency traded (LIK/GEN)" if on LIK
+  or GEN d <= -0.05 and CI high < 0; else "no loss where the gold is last".
+  Meaning, fixed now: RESTORED = the position statistic accounts for E005's H5 drop; PARTLY RESTORED = for part of
+  it; NOT THE CAUSE = it does not, and the other candidates (the 70% E004 block, the IND block, the chat render)
+  remain untested; "recency traded" = P's gain came with a loss where the gold IS the last statement, i.e. a weaker
+  recency prior rather than better tracking. No label says whether three objects is a capacity limit at 135M.
+  Why H5L: on H5, C_noupd and C_twoslot the gold is never the dialogue's last statement, so weakening the recency
+  prior alone raises all three; the rule NL ("the latest statement of any object other than the last statement's
+  object", from metadata) scores .50 on D4004 H5 and .94 on both controls. The controls cannot discriminate.
+  Reported next to it, not ruled: per-seed P_s - C_s (how many of 5 > 0); D4004 H5 pooled for P, C, e004w, e005w
+  and E004's stored .756 / E005's .656; H5 by introduction order and by after_ind, both draws; BIG H5 reweighted to
+  D4004's introduction mix (27/20/17) and split by NL right / wrong; wrong-pick classes and the share that are the
+  dialogue's last statement; the recency index (rank of the last statement's value among the LIK candidates and
+  its log-prob margin over the gold, on items whose gold is not last) on BIG H5, C_noupd, C_twoslot and H5L; D4004's
+  U families split by gold-last. Controls (secondary, CIs, no label): P - C on BIG C_noupd and C_twoslot with their
+  wrong-pick classes (E005: C_noupd 43 of 43 wrong picks another object's later statement; C_twoslot 29 of 48).
+  Mechanism expectation, written now: if position is the cause, P's gain sits in second- and third-introduced items,
+  the "dialogue's last statement" wrong picks fall, and H5L does not fall.
+
+OPERATING CHARACTERISTICS of Q-H5 on one measure (critique 9; re-run at writing: the critique's se.py, se2.py and
+power.py on E004/E005's D4004 records). E005 - E004 on D4004 H5 LIK: -.100, CI -.184 to -.016 (half-width .084).
+Variance components of the paired difference: seed .0013, item .0255, residual .158; at n = 192 the seed term is
+46% of the variance of the pooled difference (SE .023; n = 64: .034), so more items alone cannot halve the CI.
+Simulated labels (normal approximation, 400 replications, Monte Carlo error about +-.025), n = 192, 5 seeds:
+  true P - C  +.10: RESTORED or PARTLY .95;  +.06: .47 (else INCONCLUSIVE);  +.03: INCONCLUSIVE .75;
+  0: NOT THE CAUSE .62, INCONCLUSIVE .37. CI half-width .054 (10 seeds: .043; NOT THE CAUSE at 0: .83).
+Requiring LIK and GEN both lowers each rate. INCONCLUSIVE is a likely outcome for a true effect of 3-6 points.
+
+Q-chat (G vs C). Chat probe, per assistant turn (149 per model; code/chatmeasures_e006.py, the E005 audit's Q9
+definitions reproduced exactly at writing):
+  TF      the first sentence (reply.strip() split once at the first "\n" or at the first whitespace after . ! ?)
+          matches a training answer template: any "ans" or "ans_upd" entry of pools_train.POOLS, {v} = one
+          alphanumeric word, {o} = [A-Za-z][A-Za-z'\- ]{0,40} (lazy), case-insensitive, not preceded by a letter.
+          Untouched model .01, E005 .58/.57/.50/.59/.54.
+  TF2     TF, or the first sentence has 3 words or fewer and the second sentence matches (an opener such as "Sure!"
+          cannot hide a template; 741 of 5,161 human OASST assistant turns open with 3 words or fewer).
+  LOOP    some line occurs 3 or more times, counting only lines outside ``` fences that have 3+ alphabetic words and
+          are not code or brace lines. Untouched .013 (2 turns, both genuine repeated-line loops); human OASST
+          assistant turns .008 (E005's old rule: .049, mostly "```" and "}"); E005 .62/.17/.40/.11/.37.
+  CAP     the turn hit its token cap;  EOS  the turn stopped at end of turn.
+  CHECKS  the probe's graded checks passed, of 73 per model (None counts as not passed).
+  CIs: two-way bootstrap over seeds (5) and conversations (53), paired by seed and conversation; TF, TF2 and LOOP
+  are the drawn turns' mean, CHECKS the mean over drawn seeds of checks passed summed over drawn conversations.
+  (a) pooled TF_G <= 0.5 x TF_C and TF2_G <= 0.5 x TF2_C, and the CIs of TF_G - TF_C and TF2_G - TF2_C lie below 0
+  (b) CI high of LOOP_G - LOOP_C < +0.10   (c) CI low of CHECKS_G - CHECKS_C > -3
+  (d) G meets E005's stopping yardstick (chat strict GEN within 0.10 of plain on every pass family, 3 of 5 seeds)
+  First matching label: PROTECTS (a-d); PARTLY PROTECTS (a, and at least one of b-d fails, named); SMALL EFFECT (a's
+  CIs hold, a's ratios do not); WORSE (the CI of TF or TF2 lies above 0); NO EFFECT (anything else).
+  Before the Q-chat label is written up, the blinded sample the analyzer writes (20 random turns per arm, C and G,
+  shuffled, logs/readings/<stamp>__blind.json) is read and described, and only then the key is opened.
+  Also printed: TF, TF2, WHOLE, LOOP (and the old rule), CAP, EOS, CHECKS, same-first-sentence, "latest plan" and
+  stopped-turn length for base, C, G and e005w; "near untouched" if TF_G <= 0.10.
+  Knowledge (its own label). K = G - C on kbig441's UNEXPOSED items, paired by seed and item, bootstrap over items x
+  seeds (critique 8). Exposed (strict): one turn of a pool thread holds the gold and every content word of the
+  question (text_e004.content_words; whole words, a trailing 's or s allowed): 16 items, fixed and hashed in
+  replay_ref/exposed_kbig.json before any run (computed over the whole pool, a superset of any seed's threads).
+  REDUCES THE COST if K >= +0.03 and CI low > 0; SMALL REDUCTION if CI low > 0; INCREASES THE COST if CI high < 0;
+  else NO EFFECT. Also reported: all 441; the loose exposure (gold plus a capitalised content word of the question:
+  89 items); khard40, K_closedbook60 and each seed's change vs base with the exact McNemar p (as E005).
+  Cost (G and P each vs C): per family of D4004 (pass families + ID), BIG and H5L, LIK and GEN, plain (the marks) and
+  chat (reported): COST where d <= -0.05 and CI high < 0; LOWER where CI high < 0 otherwise.
+
+PER-ARM READINGS (C, P, G, and e005w / e004w rescored on CUDA)
+  Pass rule, E004 (c) as E005 used it: rules_e005.reading on D4004 plain (9 families, LIK >= 0.8 and GEN >= 0.8,
+  3 of 5 planned seeds, an incomplete seed fails; PASS, PARTIAL-G, PARTIAL-X, FAIL). Next to it: the "any single
+  seed" variant of "a LIK failure on H1, H2 or a control is never partial" when it differs; leave-one-seed-out
+  labels (4 planned seeds); the fewest item flips (in up to 3 cells) that change the label. Checked at writing on
+  E005's records: PARTIAL-X (H5), kept only without s1 or s4, 2 flips on s5 C_twoslot (the audit's numbers).
+  Alias reading and stopping yardstick: E005's. Companion (reported): the pass rule's H5 and control cells on BIG.
+  Stated now for G: replay text holds digits (in about 2 of 3 threads), sport and value words, small talk, creative
+  requests and question frames, so H6's and H7's held-out axes, H4/H7 fillers and H1/H2 frames are not held out in
+  G; a G pass there is not read as transfer.
+
+EXTRA REPORTS (descriptive; no rule reads them)
+  1 Every family, both draws, both renders, LIK and GEN: P - C and G - C (the cost tables), C - E005, C - e005w.
+  2 Wrong-pick classes per family (gold, tie, A_prev, A_earlier, other_after, other_before, not_in_context, none).
+  3 Each arm's kept-stream position statistics (validate_e006: GL1, GL2, Delta, GLX2; whole stream and per block).
+  4 Chat probe per category (capped share, checks), TF strict and whole-turn, same first sentence as the previous
+    turn, "latest plan", mean new tokens of stopped turns.
+  5 Knowledge per category and seed; continuity as E005.
+  6 Probe trajectory and lock-in step per arm; the update digests; G's replay use (threads, drops, cut threads,
+    labelled tokens), update and replay loss per step, the update part's gradient norm and the clipped total.
+
+STREAM ACCEPTANCE AND PURITY (validate_e006.py on each seed's KEPT streams, SmolLM2 tokenizer, on the PC in queue
+step 0; one row per arm x seed; any failure stops the queue)
+  E004  R4, DELTA4, X4 recomputed (they must equal the values in DEFINITIONS).
+  C     identity 2; E005's gates on the kept stream (every O and X rule <= .70, O1 and O2 <= .50, IDEAL 1.00,
+        drawn-vs-kept share shift <= 2 points, purity_e005 violations 0 on every kept example); 0 word 5-grams shared
+        with eval text (draws 4004/4104/4204, BIG, H5L, AL) over EVERY kept example (the audit's coverage fix).
+  P     the same gates and 5-gram check; checks_e006p.all_problems_p empty on every kept example (E005's per-example
+        table with the P structure rule); identity 3; position gates per seed: whole-stream GL2, ALIAS GL2 and IND
+        GL2 <= R4, Delta <= DELTA4, GLX2 <= X4. If a gate fails, Q_SPLIT and F_YFIRST may move by at most 0.10 each,
+        before any model run, logged as a deviation.
+  G     identity 4 (source); the pool's drop counts (reserve, heldout, aiism must be 0); per seed at least 1,604
+        usable threads, distinct, and on each the labelled spans decode exactly to the assistant turns' text +
+        <|im_end|> with nothing else labelled, and the whole input decodes exactly to the template text of the
+        used turns (V1).
+  At writing (Mac, shim tokenizer): ALL PASS. C: max rule .622-.632, O1 .200-.211, O2 .396-.408, 0 purity
+  violations, 0 eval 5-grams, stats = E005's run.json on all 5 seeds. P: max rule .623-.632, O1 .198-.209, O2
+  .357-.367, 0 purity violations, 0 eval 5-grams, 0 per-example failures, gates pass, 403-425 changed kept examples
+  per seed. G: pool counts as above; 1,604 usable threads per seed, 0 label problems. Re-run on the PC with the HF
+  tokenizer after V1 (LOG AT WRITING 14): ALL PASS with the same C and P numbers, C's digests = e005_sets' and the
+  stats = E005's run.json on all 5 seeds, and G's replay rows as under ARMS G (label problems 0, whole input
+  included).
+
+SEEDS AND NUMERICS (code/numerics_e006.py)
+  Seeds 1-5 in every arm (C_s, P_s and G_s share E004 seed s's block). Dry runs use seed 0, tagged dry*, never
+  analyzed. Every CUDA job: fp32, torch.set_float32_matmul_precision("highest") and allow_tf32 off (matmul, cuDNN),
+  cudnn.benchmark off, cudnn.deterministic on, torch.use_deterministic_algorithms(True, warn_only=True),
+  CUBLAS_WORKSPACE_CONFIG=:4096:8, attention = the library default (SDPA, as E005) with ONLY the math kernel enabled
+  (flash, memory-efficient and cuDNN SDPA off: deterministic backward), HF_HUB_OFFLINE=1, HF_HOME=~/planck/hf. The
+  twins C1t, C2t differ only in TF32 on. All of it is written into run.json.
+
+PC QUEUE (code/queue_e006.sh; started detached by a wrapper whose first line is exec > ~/planck/logs/e006_queue.out;
+working copy ~/planck/dev/e006, made by code/sync_e006.sh with pcsync.sh; E005's and E004's weights synced
+separately to ~/planck/dev/e006_refs_e005 and _e004, the layout sync_e006.sh --refs makes; on 2026-09-26 they were
+copied as plain tars and extracted by a detached job instead, since pcsync.sh's 120 s extraction limit is short
+for 2.5 GB, and every model.safetensors was checked against the Mac's sha256; LOG AT WRITING 14)
+  Outputs live in ~/planck/e006_run (out/ logs/ transcripts/ weights/ replay/), linked into E006's folder, so a
+  re-sync cannot delete a result; the main session copies them back (weights and the pool text excepted).
+  Every GPU job: flock -w 7200 ~/planck/locks/gpu.lock python guard_e006_pc.py --name <job> --ceiling <s> -- <cmd>.
+  The guard refuses a name whose logs exist (never overwritten); waits up to 7,200 s while another E005/E006 model
+  process runs or the GPU is over 75 C or has under 6,000 MiB free (a refusal leaves no job log, and the queue
+  retries up to 12 times); then samples every 5 s with pc/wsl/gpuguard.py's Guard (temp, gpu_mem, host_mem, smi)
+  plus the wall ceiling, and writes logs/<job>.log (home directory written as ~), .guard.log and .guard.json
+  (command, times, exit, killed, verdict, peak temperature and GPU memory, weights_sha256 from the job's run.json).
+  GPU memory is read from guard.json (peak_gpu_mem_mib) and run.json (peak_cuda_gb); the step lines' mps_alloc and
+  driver fields come from E005's copied code and read 0 on CUDA (V4).
+  Ceilings (fixed now): train + score 14,400 s; base and reference scoring 9,000 s; chat probe 3,600 s; dry runs
+  1,800 s; the one-conversation chat dry run 900 s.
+  Order:
+  0 No GPU: code sha256 list (logs/code_sha256_at_start_<run>.txt); the replay pool build (if absent);
+    identity_e006; eval_identity_e006; items_big_e006 --check; validate_e006; test_train_e006p; test_replay_e006;
+    test_rules_e006; test_analyze_e006; mutation_e006; test_queue_e006.sh. Any failure stops.
+  1 Dry runs (5 steps padded to 768; self-check on the first / plain / chat batches, plus replay for G; wrong-loss
+    mutants; 2 items per set): dryC5 (e005_ft_test.py via numerics_e006.py), dryC6a and dryC6b (e006_ft_test --arm
+    C), dryP, dryG, drychat (one conversation); then compare_dry_e006. A failure stops.
+  2 base: every set, then its chat probe.
+  3 For s = 1..5: e005w_s (every set), its chat probe, e004w_s (D4004, BIG, H5L, AL).
+  4 For s = 1..5, for arm C, P, G: train + save + hash + score every set (one process), then its chat probe; an
+    analysis after every arm job (an interim reading).
+  5 The TF32 twins C1t, C2t (D4004, BIG, H5L). 6 Final analysis, the readings line, "QUEUE E006 DONE".
+  Stop rules: a check, dry-run or dry-comparison failure, or a temp/gpu_mem/host_mem/smi verdict stops the queue.
+  A failed scored job (non-zero exit or a ceiling kill) gives a GAP line and the queue goes on (E004's rule). On a
+  restart, a job whose guard.json shows exit 0 is skipped; one that failed is not rerun by the queue. A scored job
+  is rerun only by hand after a kill or crash, never because of its results, as <tag>_r2, keeping the failed
+  attempt's files, logged as a deviation.
+  Readings: analyze_e006 writes logs/readings/<YYYYmmdd-HHMMSS>__<trigger>.txt and .json, opened exclusively, plus
+  the blinded sample and its key, and appends one line to logs/readings/index.txt; logs/tables.txt may be rewritten
+  and is never the record of a reading. The final reading is the file whose trigger is "final".
+  Records: every LIK, GEN and AL record carries weights_sha256, tag and arm; every chat-probe record carries
+  weights_sha256 and tag (model.safetensors as saved, hashed before scoring; the snapshot's for base; the synced
+  file's for references). No output file is ever overwritten (exclusive creation).
+  Rough time, a guess to be replaced by the dry runs': 15-25 min per training job and 10-20 min of scoring per
+  model (BIG and H5L add 768 items, LIK and GEN, in each render), 3-5 min per chat probe: about 14-18 h of GPU time
+  for 28 scored models and 21 chat probes, more while other work holds gpu.lock.
+
+CODE (experiments/E006_three_objects/code/; 35 new files, 4,384 lines, each under 250; no E001-E005 file edited)
+  copies            E005's 98 code files byte for byte (copies/copied_from_e005_sha256.txt, and the AL items).
+  train_e006p.py    P's stream (stream_p, plan_alias_p, plan_ind_p, y_first); checks_e006p.py P's per-example table.
+  position_e006.py  GL1, GL2, Delta, GLX2 per stream, block and case; the position gates.
+  replay_e006.py    the replay pool build and drops, the kbig exposure lists (run on the PC; replay_ref/ here).
+  e006_sets.py      per-arm kept streams through E005's encoder; encode_replay, label checks, replay order/stream.
+  items_big_e006.py BIG and H5L: build, checks, write-once file and its sha256.
+  e006_train.py     patch_stream (C and P through e005_train.train with a digest tap), g_train (arm G).
+  e006_ft_test.py + e006_score.py  the entry point: arms, --weights, numerics, save-then-hash, write-once records.
+  chat_e006.py      the chat probe on CUDA (run_chat.py unchanged via runpy), hashed records.
+  numerics_e006.py  the NUMERICS settings, the version pins, the runpy runner for e005_ft_test.py.
+  chatmeasures_e006.py  TF, TF2, WHOLE, LOOP (new and old), CAP, EOS, CHECKS and the rest of EXTRA REPORT 4.
+  rules_e006.py     the bootstraps and the Q-H5, Q-chat, knowledge and cost rules.
+  analyze_e006.py, analyze_e006_b.py (records -> matrices, item facts, wrong picks, recency), analyze_e006_c.py
+                    (Q-H5, cost, BIG companion), analyze_e006_d.py (Q-chat, knowledge, Q-device), passrule_e006.py
+                    (the per-arm readings).
+  identity_e006.py, eval_identity_e006.py, validate_e006.py + validate_e006_b.py, compare_dry_e006.py  checks.
+  guard_e006_pc.py, queue_e006.sh, start_queue_e006.sh (the detached wrapper), sync_e006.sh (Mac side),
+                    tokshim_e006.py (tokenizer loader: HF, or a tokenizers + jinja2 shim for the Mac checks).
+  Tests: test_train_e006p.py, test_replay_e006.py, test_rules_e006.py, test_analyze_e006.py, test_queue_e006.sh (with
+  fake_py_e006.py), mutation_e006.py. Results at writing are in LOG AT WRITING.
+
+KNOWN RISKS
+  1 Device. MPS -> CUDA changes numerics (kernels, reduction order, attention). C measures it; Q-H5 and Q-chat
+    compare arms on one device. E004/E005 levels on CUDA come from rescoring their Mac-trained weights.
+  2 CUDA may not be bitwise reproducible even with these settings (warn_only); the dry runs report it and the
+    identity check then falls back to "no more than two runs of one entry point differ".
+  3 P changes more than GL2 and GLX2 (side effects under ARMS P); GL2 lands .12 below E004's.
+  4 One candidate cause is tested. NOT THE CAUSE leaves the 70% E004 block, the IND block and the chat render open.
+  5 G's replay takes a share of a gradient norm that is clipped on every step, so "replay present" includes a
+    smaller effective step for the update part; the logged update-part norm shows how much.
+  6 G's replay holds values, digits, sport words, small talk, creative requests and question frames, and facts
+    kbig asks about (hence the unexposed subset; exposure by string matching undercounts paraphrases, so the loose
+    list is reported too). Threads are cut at exchange boundaries to fit 768 tokens.
+  7 The chat probe is small (53 conversations, 149 turns, written in E001) and greedy.
+  8 BIG and H5L use E004's generator and vocabulary: more samples of the same held-out distribution, not a new one.
+  9 The GPU is shared: jobs can wait for gpu.lock; at 2026-09-26 00:20 another process held 9.7 of 12.2 GB, which
+    the guard's 6,000 MiB start rule would not have allowed; at 04:57 about ten other jobs were queued on gpu.lock
+    (flock does not serve waiters in order), so a queue job can time out on the lock and retry. The WSL VM has 15
+    GB of RAM. A reboot or a Windows
+    update mid-queue kills the running job (GAP line).
+  10 Tokenizer. transformers 5.15.1 loads SmolLM2's tokenizer with a ByteLevel pre-tokenizer only; the snapshot's
+    tokenizer.json has Digits (individual) + ByteLevel. E004's and E005's saved tokenizer.json files have the same
+    ByteLevel-only form, so E006 tokenizes as E004 and E005 did, and all arms share it; whether it differs from
+    SmolLM2's pretraining tokenization is a question for every SmolLM2 experiment, not for this comparison. The Mac
+    checks used a shim (tokenizers 0.22.2 + jinja2 on the snapshot's tokenizer.json, so with Digits). On the E004
+    and E005 templates it equals HF: C's and P's first 6,404 kept (ids, labels) hash the same under both on all 5
+    seeds (LOG AT WRITING 14). On OASST text it does not: the whole-template ids differ on 846 of 3,327
+    threads (whitespace next to digits, e.g. a blank line before "1."). So every replay count in these notes is the
+    HF one, and the queue's step 0 re-runs every check with HF.
+  11 Q-H5's operating characteristics: a true 3-6 point effect most likely reads INCONCLUSIVE.
+
+OPEN FOR MAX (not decided by the pre-registration)
+  D8 scope (critique SHOULD 10): PLAN.md v2 says D8 covers "every string that reaches training text" and that
+  templates come "never from Claude". E006's update streams reuse E004/E005's templates (E005's alias templates were
+  set in its own pre-registration), as every SmolLM2 diagnostic fine-tune has. Whether these diagnostic fine-tunes
+  fall inside D8 is Max's call; E006 does not change its templates either way (that would be a second change).
+
+DEVIATIONS (what counts, fixed now)
+  Any change after this entry to: an arm's data or constants (Q_SPLIT, F_YFIRST, R_pos, the replay dose, schedule or
+  pool rules), seeds, hyperparameters, numerics settings, software pins, eval draws or items, graders, rules,
+  thresholds, bootstrap settings, analyzer definitions, ceilings, the set or order of scored jobs; a rerun of a
+  scored job; a killed job; any edit to an E001-E005 file; any model loaded on the Mac; any guard or queue edit
+  after logs/code_sha256_at_start_<run>.txt. Each is logged below with time and reason, before the reading it
+  touches is read where possible. A rule changed after any scored E006 output exists is labelled post hoc and does
+  not replace the pre-registered reading.
+
+LOG AT WRITING (2026-09-25 and 2026-09-26; no model loaded on the Mac, on the PC only the dry runs in 13 and 14;
+scratch scripts in the session scratchpad)
+  1 Draft (2026-09-25): position statistic on drawn streams (E004 GL2 .544-.567, pooled .559; E005 whole GL2
+    .656-.671, the audit's three seeds reproduce; E004 block .551-.564, ALIAS .734-.789, IND 1.000); the BIG trial
+    build (prompt-list prefix 6ad25186); a P simulation; PC read-only: snapshot revision 12fd25f7..., venv-hf absent,
+    OASST2 raw file sha256 2cf3d24f..., starter_v0c oasst2 4,432 threads (3,338 train, 1,094 held out).
+  2 Critique re-runs (2026-09-26): se.py, se2.py and power.py reproduce the numbers in OPERATING CHARACTERISTICS;
+    evalpos.py: rule NL .50 on H5 (D4004 and BIG), .94 on both controls, BIG H5 by introduction order .29/.55/.82.
+  3 Knob grid (drawn, then kept with the shim): Q .55 / F .30 fails GLX2 on every seed (.233 pooled); Q .8 / F .3
+    fails 3 seeds; Q .9 / F .3 fails s3 and s5 (kept .2195, .2198); Q 1.0 / F .30 and .40 pass every gate on every
+    seed. Chosen: Q 1.0, F .30 (numbers under ARMS P).
+  4 Byte copies: 98 E005 code files and the AL items, sha256 list written; identity_e006 (Mac, venv with the pinned
+    versions, importlib.metadata only): ALL PASS, including the 10 reference weights' hashes and the Mac snapshot.
+    eval_identity_e006: 1,120 of 1,120 against E004 and against E005.
+  5 BIG + H5L written once: big/big_items.jsonl, 768 items, sha256 566ef467...; --check equal.
+  6 Replay pool built on the PC (python3, stdlib + corpus/, 45 s): counts under ARMS G; replay_ref/ copied back.
+    Encoding on the Mac with the shim: 3,203 usable, 124 too long, 338 cut, 0 label problems.
+  7 validate_e006 (Mac, shim, 5 seeds, all three arms): ALL PASS (numbers under STREAM ACCEPTANCE).
+  8 Chat measures on E005's and E004's transcripts reproduce the audit's Q9 table (TF, CHECKS, CAP, EOS, same-first,
+    template shares); LOOP (new rule) on 5,161 human OASST assistant turns: 42 (.008), old rule 252 (.049); TF on
+    their first sentences: 6.
+  9 P side effects (drawn): under ARMS P.
+  10 Tests on the Mac: test_train_e006p (full: Q = F = 0 equals E005 on 20,000 draws x 5 seeds; the pairing on
+    6,404 draws x 5 seeds: 1,196 splits = 1,196 eligible, 956 y-first of 3,208 IND (.298), 17 examples before the
+    first change all equal to C's; 0 of 32,500 P examples fail the per-example table; the drawn numbers match; the
+    position gates pass a stream at the limits, fail one 1e-6 above each, and fail E005's own stream): ALL PASS.
+    test_replay_e006 (shim; includes, per seed 1-5, G's check batch plus 5 steps of update micro-batches equal to
+    C's first 84 kept examples in order, and its replay micro-batches in the seed's order): ALL PASS.
+    test_rules_e006: ALL PASS. test_analyze_e006 (E005 through the new code gives PARTIAL-X, the LOO pattern, 2
+    flips on s5 C_twoslot, DATA GAP 5/5, stopping 5/5, TF .58/.57/.50/.59/.54 and .01, checks 30/33/33/32/29 and
+    21, capped 87/25/62/18/59 and 68; Q-device 59 of 59 intervals exactly 0 when C = E005; synthetic Q-H5 RESTORED
+    then NOT THE CAUSE with the flag; Q-chat PARTLY PROTECTS failing (c) and (d); a second reading with the same
+    name refused): ALL PASS. test_queue_e006.sh (9 scenarios, fake interpreter and lock): ALL PASS.
+  11 mutation_e006 (Mac, shim): baselines pass; 45 mutants, 45 killed, 0 survived, 0 crashed: 12 in the P generator,
+    2 in the position statistics and gates, 4 in replay encoding and order, 2 in G's step schedule (replacement
+    instead of addition; replay first), 5 in the pool drop and exposure rules, 2 in the H5L generator, 14 in the
+    rules, 4 in the queue. A first run found 1 surviving and 4 crashing mutants (one a mistyped mutant); the tests
+    were strengthened (gate boundaries, drops treated as failures, a robust pooled()) before this count.
+  12 At the first revision (01:26) not yet run: any model, any dry run, anything on the PC GPU, the PC checks with
+    the HF tokenizer (venv-hf did not exist, and the PC's snapshot held only merges.txt and model.safetensors at
+    00:20). Since done: 13 and 14.
+  13 Independent validation (2026-09-26 01:29-04:35; its own scripts, reported by the validator, not re-run here
+    except as 14 says). venv-hf built (torch 2.13.0+cu130, transformers 5.15.1, tokenizers 0.22.2, safetensors
+    0.8.0, accelerate 1.15.0) and the snapshot completed (12fd25f7; model.safetensors 5af571cb). PC, HF tokenizer:
+    the pool rebuilt to 94d0f651; identity_e006 --no-refs, eval_identity, items_big --check, validate_e006, every
+    test and mutation_e006 (45 of 45 killed): ALL PASS. C's kept (ids, labels) equal E005's original code's, and
+    the stats E005's run.json, on s1-5; R4, GL1, DELTA4, X4 and P's gates as under DEFINITIONS and ARMS P. Its own
+    re-implementation of ARMS P agreed on every drawn example. Dry runs on the GPU (outputs deleted): arm C s1, 10
+    steps, sets cut to 16 items, weights saved and hashed (sanity_nll 1.9598; step 0 and 1 losses equal E005's MPS
+    values; loss self-check within 2.2e-6 of E005's; peak 5,669 MiB); the queue's step-1 set (dryC5, dryC6a,
+    dryC6b, dryP, dryG, drychat) exit 0, compare_dry ALL PASS (dryC6a = dryC6b bitwise, dryC5 vs dryC6a max
+    difference 0.0 over 29 numbers), 1.66-1.68 s per step for C and P and 2.06 for G, dryG peak 6,329 MiB. Its
+    findings: V1-V4, and E004's and E005's weights were not yet on the PC.
+  14 Fix pass (2026-09-26 04:35-05:02; no model on the Mac). Code: V1 (e006_sets encode_prefix and
+    check_replay_labels; test_replay_e006 adds a U+0006 thread and an input that lost a character; mutants R10,
+    R11) and V2 (rules_e006.q_h5; test_rules_e006 adds the unread-L4 case; mutant Q15). Mac, shim: identity_e006
+    --no-replay (10 reference hashes), eval_identity, items_big --check, test_train_e006p, test_replay, test_rules,
+    test_analyze, test_queue: ALL PASS; mutation_e006: 48 mutants, 48 killed (P generator 12, position 2, replay
+    encoding 6, G schedule 2, pool drops and exposure 5, H5L 2, rules 15, queue 4). PC, HF tokenizer, in an
+    isolated copy of the synced working copy (same code digest as the Mac): pool rebuilt to 94d0f651;
+    identity_e006 --no-refs, eval_identity, items_big --check, validate_e006, the five tests and mutation_e006 (48
+    of 48 killed): ALL PASS. Tokenizer checks on the PC: the pre-tokenizers, the lossy characters and the shim vs
+    HF comparisons (KNOWN RISK 10, V1); whole-pool counts (ARMS G). Reference weights: E005's and E004's weights/
+    copied as plain tars (2.5 GB each) and extracted on the PC to ~/planck/dev/e006_refs_e005 and _e004; every
+    model.safetensors matched the Mac's sha256, and identity_e006 with refs and replay: ALL PASS on the PC.
+    Not run in this pass: a GPU dry run after V1. The queue's step-1 set plus a one-conversation chat probe on
+    E005's s1 weights directory (the path of every e005w and arm chat probe) was started detached at 04:52 in the
+    isolated copy under gpu.lock and was still waiting at 05:30 (about ten other jobs queued). The queue's step 1
+    runs the same set before any scored job, and a failure stops the queue.
+
+POST-RUN LOG (kills, reruns, guard or queue edits, hand-run analyses; written as they happen)
