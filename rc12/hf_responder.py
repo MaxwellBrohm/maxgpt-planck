@@ -1,9 +1,12 @@
 """RC-12 Hugging Face causal-LM responder for runner.py (SPEC s2).
 
-UNTESTED. HF_TESTED = False: no model has ever been loaded through this file (it was written while the Mac's GPU
-ran another experiment, and baselines generate on the 5070). runner.py refuses to use it without
---hf-untested-ok. Before the first real run: greedy on 20 conversations per family, compare with a vLLM run
-(SPEC s2 parity), read the stop reasons and a few transcripts by eye, then set HF_TESTED = True in a logged step.
+HF_TESTED = True since the logged step notes STEP 9b (2026-09-26): greedy on 20 conversations per family through
+parity_hf_vllm.py (Qwen2.5, Qwen3, Qwen3.5, LFM2.5, LFM2, Falcon-H1, SmolLM2, Gemma 3; 240 turns each), every prompt
+equal to vLLM's, stop reasons and transcripts read by eye. KNOWN DEFECT: gemma-3-270m-it under transformers 5.17's
+default (sdpa) attention ends the reply at once (p of <end_of_turn> about 1) on 6 long-prompt parity turns where
+eager attention and vLLM agree on a real reply; never run Gemma 3 through this file as it stands (engines.json
+names vLLM). Doge-160M-Instruct does not load here (notes STEP 9b). runner.py still asks for --hf-untested-ok (its
+gate never read this flag).
 
 Importing this module imports nothing heavy; torch and transformers load in HFResponder.__init__ only.
 Decoding: greedy (seed None) or sampling with T = 0.6, top-p 1.0, top-k OFF, repetition penalty 1.0, max 256 new
@@ -19,7 +22,7 @@ import hashlib
 
 import render as RD
 
-HF_TESTED = False
+HF_TESTED = True
 DECODE = dict(temperature=0.6, top_p=1.0, top_k=0, repetition_penalty=1.0, max_new_tokens=RD.MAX_NEW_TOKENS)
 EOT_TOKENS = ["<|im_end|>", "<|eot_id|>", "<|end|>", "<end_of_turn>", "<|endoftext|>", "<|end_of_text|>"]
 

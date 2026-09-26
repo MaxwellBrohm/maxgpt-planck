@@ -78,7 +78,8 @@ MUTANTS = [
     ("fakes_family", "            return prev\n", '            return t["ideal"]\n', "L_REPEAT does not loop"),
     ("fakes_family", "for _, rule, arg in reversed(active):", "for _, rule, arg in active:",
      "P_OBEYALL lets the newest rule win (correct on 3 of 4 override pairs)"),
-    ("hf_responder", "\nHF_TESTED = False\n", "\nHF_TESTED = True\n", "HF path claims to be tested"),
+    ("hf_responder", "\nHF_TESTED = True\n", "\nHF_TESTED = False\n",
+     "HF path loses its STEP 9b tested mark"),
     # step 5 audit: the audit cheaters and the OWN counterfactual diagnostic
     ("fakes_audit", "v = AR.rule_picks(self.rec, q).get(ALIAS.get(self.rule, self.rule))",
      'v = p.get("gold") or AR.rule_picks(self.rec, q).get(ALIAS.get(self.rule, self.rule))',

@@ -1,0 +1,1411 @@
+{
+ "rows": {
+  "RECALL": 48,
+  "CORR": 64,
+  "BIND": 60,
+  "TWOHOP": 48,
+  "COMPOSE": 16,
+  "OWN": 32,
+  "TOPIC": 48,
+  "ROLE": 48,
+  "LOOKUP": 48
+ },
+ "renders": [
+  "template",
+  "plain"
+ ],
+ "models": {
+  "Qwen/Qwen2.5-0.5B-Instruct": {
+   "measured": true,
+   "model_type": "qwen2",
+   "renders": {
+    "template": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 32,
+      "n_matched": 38,
+      "chance": 0.35964912280701755
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 64,
+      "n_matched": 64,
+      "chance": 0.18169642857142856
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 40,
+      "n_matched": 40,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 48,
+      "n_matched": 48,
+      "chance": 0.3333333333333333
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 2,
+      "n_matched": 26,
+      "chance": 0.3647435897435897
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 13,
+      "n_matched": 35,
+      "chance": 0.4380952380952381
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 7,
+      "n_matched": 35,
+      "chance": 0.44523809523809527
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 16,
+      "n_matched": 46,
+      "chance": 0.22210144927536232
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 11,
+      "n_matched": 11,
+      "chance": 0.5
+     }
+    },
+    "plain": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 32,
+      "n_matched": 38,
+      "chance": 0.35964912280701755
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 64,
+      "n_matched": 64,
+      "chance": 0.18169642857142856
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 40,
+      "n_matched": 40,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 48,
+      "n_matched": 48,
+      "chance": 0.3333333333333333
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 2,
+      "n_matched": 26,
+      "chance": 0.3647435897435897
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 13,
+      "n_matched": 35,
+      "chance": 0.4380952380952381
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 7,
+      "n_matched": 35,
+      "chance": 0.44523809523809527
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 16,
+      "n_matched": 46,
+      "chance": 0.22210144927536232
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 11,
+      "n_matched": 11,
+      "chance": 0.5
+     }
+    }
+   },
+   "renders_agree": true
+  },
+  "Qwen/Qwen3-0.6B": {
+   "measured": true,
+   "model_type": "qwen3",
+   "renders": {
+    "template": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 32,
+      "n_matched": 38,
+      "chance": 0.35964912280701755
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 64,
+      "n_matched": 64,
+      "chance": 0.18169642857142856
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 40,
+      "n_matched": 40,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 48,
+      "n_matched": 48,
+      "chance": 0.3333333333333333
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 2,
+      "n_matched": 26,
+      "chance": 0.3647435897435897
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 13,
+      "n_matched": 35,
+      "chance": 0.4380952380952381
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 7,
+      "n_matched": 35,
+      "chance": 0.44523809523809527
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 16,
+      "n_matched": 46,
+      "chance": 0.22210144927536232
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 11,
+      "n_matched": 11,
+      "chance": 0.5
+     }
+    },
+    "plain": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 32,
+      "n_matched": 38,
+      "chance": 0.35964912280701755
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 64,
+      "n_matched": 64,
+      "chance": 0.18169642857142856
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 40,
+      "n_matched": 40,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 48,
+      "n_matched": 48,
+      "chance": 0.3333333333333333
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 2,
+      "n_matched": 26,
+      "chance": 0.3647435897435897
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 13,
+      "n_matched": 35,
+      "chance": 0.4380952380952381
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 7,
+      "n_matched": 35,
+      "chance": 0.44523809523809527
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 16,
+      "n_matched": 46,
+      "chance": 0.22210144927536232
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 11,
+      "n_matched": 11,
+      "chance": 0.5
+     }
+    }
+   },
+   "renders_agree": true,
+   "vs_comparator": {
+    "RECALL": {
+     "n_common": 38,
+     "n_equal_both": 32
+    },
+    "CORR": {
+     "n_common": 64,
+     "n_equal_both": 64
+    },
+    "BIND": {
+     "n_common": 40,
+     "n_equal_both": 40
+    },
+    "TWOHOP": {
+     "n_common": 48,
+     "n_equal_both": 48
+    },
+    "OWN": {
+     "n_common": 26,
+     "n_equal_both": 2
+    },
+    "TOPIC": {
+     "n_common": 35,
+     "n_equal_both": 13
+    },
+    "ROLE": {
+     "n_common": 35,
+     "n_equal_both": 7
+    },
+    "LOOKUP": {
+     "n_common": 46,
+     "n_equal_both": 16
+    },
+    "COMPOSE": {
+     "n_common": 11,
+     "n_equal_both": 11
+    }
+   }
+  },
+  "Qwen/Qwen3.5-0.8B": {
+   "measured": false,
+   "error": "OSError: We couldn't connect to 'https://huggingface.co' to load the files, and couldn't find them in the cached files.\nCheck your internet connection or see how to run "
+  },
+  "LiquidAI/LFM2.5-230M": {
+   "measured": true,
+   "model_type": "lfm2",
+   "renders": {
+    "template": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 32,
+      "n_matched": 41,
+      "chance": 0.36991869918699183
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 48,
+      "n_matched": 61,
+      "chance": 0.18805620608899298
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 34,
+      "n_matched": 34,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 40,
+      "n_matched": 47,
+      "chance": 0.3581560283687943
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 5,
+      "n_matched": 24,
+      "chance": 0.3055555555555555
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 8,
+      "n_matched": 31,
+      "chance": 0.45698924731182794
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 7,
+      "n_matched": 33,
+      "chance": 0.4292929292929293
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 11,
+      "n_matched": 46,
+      "chance": 0.18998447204968943
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 11,
+      "n_matched": 11,
+      "chance": 0.5
+     }
+    },
+    "plain": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 32,
+      "n_matched": 41,
+      "chance": 0.36991869918699183
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 48,
+      "n_matched": 61,
+      "chance": 0.18805620608899298
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 34,
+      "n_matched": 34,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 40,
+      "n_matched": 47,
+      "chance": 0.3581560283687943
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 5,
+      "n_matched": 24,
+      "chance": 0.3055555555555555
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 8,
+      "n_matched": 31,
+      "chance": 0.45698924731182794
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 7,
+      "n_matched": 33,
+      "chance": 0.4292929292929293
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 11,
+      "n_matched": 46,
+      "chance": 0.18998447204968943
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 11,
+      "n_matched": 11,
+      "chance": 0.5
+     }
+    }
+   },
+   "renders_agree": true,
+   "vs_comparator": {
+    "RECALL": {
+     "n_common": 33,
+     "n_equal_both": 25
+    },
+    "CORR": {
+     "n_common": 61,
+     "n_equal_both": 48
+    },
+    "BIND": {
+     "n_common": 30,
+     "n_equal_both": 30
+    },
+    "TWOHOP": {
+     "n_common": 47,
+     "n_equal_both": 40
+    },
+    "OWN": {
+     "n_common": 17,
+     "n_equal_both": 1
+    },
+    "TOPIC": {
+     "n_common": 30,
+     "n_equal_both": 8
+    },
+    "ROLE": {
+     "n_common": 30,
+     "n_equal_both": 3
+    },
+    "LOOKUP": {
+     "n_common": 39,
+     "n_equal_both": 9
+    },
+    "COMPOSE": {
+     "n_common": 11,
+     "n_equal_both": 11
+    }
+   }
+  },
+  "LiquidAI/LFM2.5-350M": {
+   "measured": true,
+   "model_type": "lfm2",
+   "renders": {
+    "template": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 32,
+      "n_matched": 41,
+      "chance": 0.36991869918699183
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 48,
+      "n_matched": 61,
+      "chance": 0.18805620608899298
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 34,
+      "n_matched": 34,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 40,
+      "n_matched": 47,
+      "chance": 0.3581560283687943
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 5,
+      "n_matched": 24,
+      "chance": 0.3055555555555555
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 8,
+      "n_matched": 31,
+      "chance": 0.45698924731182794
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 7,
+      "n_matched": 33,
+      "chance": 0.4292929292929293
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 11,
+      "n_matched": 46,
+      "chance": 0.18998447204968943
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 11,
+      "n_matched": 11,
+      "chance": 0.5
+     }
+    },
+    "plain": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 32,
+      "n_matched": 41,
+      "chance": 0.36991869918699183
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 48,
+      "n_matched": 61,
+      "chance": 0.18805620608899298
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 34,
+      "n_matched": 34,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 40,
+      "n_matched": 47,
+      "chance": 0.3581560283687943
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 5,
+      "n_matched": 24,
+      "chance": 0.3055555555555555
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 8,
+      "n_matched": 31,
+      "chance": 0.45698924731182794
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 7,
+      "n_matched": 33,
+      "chance": 0.4292929292929293
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 11,
+      "n_matched": 46,
+      "chance": 0.18998447204968943
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 11,
+      "n_matched": 11,
+      "chance": 0.5
+     }
+    }
+   },
+   "renders_agree": true,
+   "vs_comparator": {
+    "RECALL": {
+     "n_common": 33,
+     "n_equal_both": 25
+    },
+    "CORR": {
+     "n_common": 61,
+     "n_equal_both": 48
+    },
+    "BIND": {
+     "n_common": 30,
+     "n_equal_both": 30
+    },
+    "TWOHOP": {
+     "n_common": 47,
+     "n_equal_both": 40
+    },
+    "OWN": {
+     "n_common": 17,
+     "n_equal_both": 1
+    },
+    "TOPIC": {
+     "n_common": 30,
+     "n_equal_both": 8
+    },
+    "ROLE": {
+     "n_common": 30,
+     "n_equal_both": 3
+    },
+    "LOOKUP": {
+     "n_common": 39,
+     "n_equal_both": 9
+    },
+    "COMPOSE": {
+     "n_common": 11,
+     "n_equal_both": 11
+    }
+   }
+  },
+  "LiquidAI/LFM2-700M": {
+   "measured": false,
+   "error": "OSError: We couldn't connect to 'https://huggingface.co' to load the files, and couldn't find them in the cached files.\nCheck your internet connection or see how to run "
+  },
+  "LiquidAI/LFM2-1.2B": {
+   "measured": false,
+   "error": "OSError: We couldn't connect to 'https://huggingface.co' to load the files, and couldn't find them in the cached files.\nCheck your internet connection or see how to run "
+  },
+  "LiquidAI/LFM2-2.6B": {
+   "measured": true,
+   "model_type": "lfm2",
+   "renders": {
+    "template": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 32,
+      "n_matched": 41,
+      "chance": 0.36991869918699183
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 48,
+      "n_matched": 61,
+      "chance": 0.18805620608899298
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 34,
+      "n_matched": 34,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 40,
+      "n_matched": 47,
+      "chance": 0.3581560283687943
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 5,
+      "n_matched": 24,
+      "chance": 0.3055555555555555
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 8,
+      "n_matched": 31,
+      "chance": 0.45698924731182794
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 7,
+      "n_matched": 33,
+      "chance": 0.4292929292929293
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 11,
+      "n_matched": 46,
+      "chance": 0.18998447204968943
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 11,
+      "n_matched": 11,
+      "chance": 0.5
+     }
+    },
+    "plain": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 32,
+      "n_matched": 41,
+      "chance": 0.36991869918699183
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 48,
+      "n_matched": 61,
+      "chance": 0.18805620608899298
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 34,
+      "n_matched": 34,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 40,
+      "n_matched": 47,
+      "chance": 0.3581560283687943
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 5,
+      "n_matched": 24,
+      "chance": 0.3055555555555555
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 8,
+      "n_matched": 31,
+      "chance": 0.45698924731182794
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 7,
+      "n_matched": 33,
+      "chance": 0.4292929292929293
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 11,
+      "n_matched": 46,
+      "chance": 0.18998447204968943
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 11,
+      "n_matched": 11,
+      "chance": 0.5
+     }
+    }
+   },
+   "renders_agree": true,
+   "vs_comparator": {
+    "RECALL": {
+     "n_common": 33,
+     "n_equal_both": 25
+    },
+    "CORR": {
+     "n_common": 61,
+     "n_equal_both": 48
+    },
+    "BIND": {
+     "n_common": 30,
+     "n_equal_both": 30
+    },
+    "TWOHOP": {
+     "n_common": 47,
+     "n_equal_both": 40
+    },
+    "OWN": {
+     "n_common": 17,
+     "n_equal_both": 1
+    },
+    "TOPIC": {
+     "n_common": 30,
+     "n_equal_both": 8
+    },
+    "ROLE": {
+     "n_common": 30,
+     "n_equal_both": 3
+    },
+    "LOOKUP": {
+     "n_common": 39,
+     "n_equal_both": 9
+    },
+    "COMPOSE": {
+     "n_common": 11,
+     "n_equal_both": 11
+    }
+   }
+  },
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct": {
+   "measured": true,
+   "model_type": "falcon_h1",
+   "renders": {
+    "template": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 23,
+      "n_matched": 33,
+      "chance": 0.3838383838383838
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 42,
+      "n_matched": 60,
+      "chance": 0.22742063492063494
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 28,
+      "n_matched": 28,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 36,
+      "n_matched": 40,
+      "chance": 0.35
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 2,
+      "n_matched": 25,
+      "chance": 0.32266666666666666
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 26,
+      "n_matched": 41,
+      "chance": 0.39430894308943093
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 10,
+      "n_matched": 39,
+      "chance": 0.4166666666666667
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 0,
+      "n_matched": 44,
+      "chance": 0.27959956709956707
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 6,
+      "n_matched": 6,
+      "chance": 0.5
+     }
+    },
+    "plain": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 23,
+      "n_matched": 33,
+      "chance": 0.3838383838383838
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 42,
+      "n_matched": 60,
+      "chance": 0.22742063492063494
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 28,
+      "n_matched": 28,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 36,
+      "n_matched": 40,
+      "chance": 0.35
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 2,
+      "n_matched": 25,
+      "chance": 0.32266666666666666
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 26,
+      "n_matched": 41,
+      "chance": 0.39430894308943093
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 10,
+      "n_matched": 39,
+      "chance": 0.4166666666666667
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 0,
+      "n_matched": 44,
+      "chance": 0.27959956709956707
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 6,
+      "n_matched": 6,
+      "chance": 0.5
+     }
+    }
+   },
+   "renders_agree": true,
+   "vs_comparator": {
+    "RECALL": {
+     "n_common": 26,
+     "n_equal_both": 19
+    },
+    "CORR": {
+     "n_common": 60,
+     "n_equal_both": 42
+    },
+    "BIND": {
+     "n_common": 20,
+     "n_equal_both": 20
+    },
+    "TWOHOP": {
+     "n_common": 40,
+     "n_equal_both": 36
+    },
+    "OWN": {
+     "n_common": 16,
+     "n_equal_both": 0
+    },
+    "TOPIC": {
+     "n_common": 26,
+     "n_equal_both": 7
+    },
+    "ROLE": {
+     "n_common": 23,
+     "n_equal_both": 3
+    },
+    "LOOKUP": {
+     "n_common": 40,
+     "n_equal_both": 0
+    },
+    "COMPOSE": {
+     "n_common": 6,
+     "n_equal_both": 6
+    }
+   }
+  },
+  "HuggingFaceTB/SmolLM2-135M-Instruct": {
+   "measured": true,
+   "model_type": "llama",
+   "renders": {
+    "template": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 23,
+      "n_matched": 40,
+      "chance": 0.4041666666666667
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 44,
+      "n_matched": 64,
+      "chance": 0.2216889880952381
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 28,
+      "n_matched": 28,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 37,
+      "n_matched": 44,
+      "chance": 0.3598484848484848
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 1,
+      "n_matched": 28,
+      "chance": 0.3613095238095238
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 10,
+      "n_matched": 34,
+      "chance": 0.45098039215686275
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 11,
+      "n_matched": 35,
+      "chance": 0.40714285714285714
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 1,
+      "n_matched": 45,
+      "chance": 0.2726719576719577
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 8,
+      "n_matched": 8,
+      "chance": 0.5
+     }
+    },
+    "plain": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 23,
+      "n_matched": 40,
+      "chance": 0.4041666666666667
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 44,
+      "n_matched": 64,
+      "chance": 0.2216889880952381
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 28,
+      "n_matched": 28,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 37,
+      "n_matched": 44,
+      "chance": 0.3598484848484848
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 1,
+      "n_matched": 28,
+      "chance": 0.3613095238095238
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 10,
+      "n_matched": 34,
+      "chance": 0.45098039215686275
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 11,
+      "n_matched": 35,
+      "chance": 0.40714285714285714
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 1,
+      "n_matched": 45,
+      "chance": 0.2726719576719577
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 8,
+      "n_matched": 8,
+      "chance": 0.5
+     }
+    }
+   },
+   "renders_agree": true,
+   "vs_comparator": {
+    "RECALL": {
+     "n_common": 34,
+     "n_equal_both": 22
+    },
+    "CORR": {
+     "n_common": 64,
+     "n_equal_both": 44
+    },
+    "BIND": {
+     "n_common": 24,
+     "n_equal_both": 24
+    },
+    "TWOHOP": {
+     "n_common": 44,
+     "n_equal_both": 37
+    },
+    "OWN": {
+     "n_common": 19,
+     "n_equal_both": 1
+    },
+    "TOPIC": {
+     "n_common": 30,
+     "n_equal_both": 8
+    },
+    "ROLE": {
+     "n_common": 25,
+     "n_equal_both": 4
+    },
+    "LOOKUP": {
+     "n_common": 41,
+     "n_equal_both": 0
+    },
+    "COMPOSE": {
+     "n_common": 7,
+     "n_equal_both": 7
+    }
+   }
+  },
+  "HuggingFaceTB/SmolLM2-360M-Instruct": {
+   "measured": true,
+   "model_type": "llama",
+   "renders": {
+    "template": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 23,
+      "n_matched": 40,
+      "chance": 0.4041666666666667
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 44,
+      "n_matched": 64,
+      "chance": 0.2216889880952381
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 28,
+      "n_matched": 28,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 37,
+      "n_matched": 44,
+      "chance": 0.3598484848484848
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 1,
+      "n_matched": 28,
+      "chance": 0.3613095238095238
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 10,
+      "n_matched": 34,
+      "chance": 0.45098039215686275
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 11,
+      "n_matched": 35,
+      "chance": 0.40714285714285714
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 1,
+      "n_matched": 45,
+      "chance": 0.2726719576719577
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 8,
+      "n_matched": 8,
+      "chance": 0.5
+     }
+    },
+    "plain": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 23,
+      "n_matched": 40,
+      "chance": 0.4041666666666667
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 44,
+      "n_matched": 64,
+      "chance": 0.2216889880952381
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 28,
+      "n_matched": 28,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 37,
+      "n_matched": 44,
+      "chance": 0.3598484848484848
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 1,
+      "n_matched": 28,
+      "chance": 0.3613095238095238
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 10,
+      "n_matched": 34,
+      "chance": 0.45098039215686275
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 11,
+      "n_matched": 35,
+      "chance": 0.40714285714285714
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 1,
+      "n_matched": 45,
+      "chance": 0.2726719576719577
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 8,
+      "n_matched": 8,
+      "chance": 0.5
+     }
+    }
+   },
+   "renders_agree": true,
+   "vs_comparator": {
+    "RECALL": {
+     "n_common": 34,
+     "n_equal_both": 22
+    },
+    "CORR": {
+     "n_common": 64,
+     "n_equal_both": 44
+    },
+    "BIND": {
+     "n_common": 24,
+     "n_equal_both": 24
+    },
+    "TWOHOP": {
+     "n_common": 44,
+     "n_equal_both": 37
+    },
+    "OWN": {
+     "n_common": 19,
+     "n_equal_both": 1
+    },
+    "TOPIC": {
+     "n_common": 30,
+     "n_equal_both": 8
+    },
+    "ROLE": {
+     "n_common": 25,
+     "n_equal_both": 4
+    },
+    "LOOKUP": {
+     "n_common": 41,
+     "n_equal_both": 0
+    },
+    "COMPOSE": {
+     "n_common": 7,
+     "n_equal_both": 7
+    }
+   }
+  },
+  "unsloth/gemma-3-270m-it": {
+   "measured": true,
+   "model_type": "gemma3_text",
+   "renders": {
+    "template": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 38,
+      "n_matched": 45,
+      "chance": 0.3592592592592592
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 64,
+      "n_matched": 64,
+      "chance": 0.18169642857142856
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 46,
+      "n_matched": 46,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 48,
+      "n_matched": 48,
+      "chance": 0.3333333333333333
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 2,
+      "n_matched": 26,
+      "chance": 0.33589743589743587
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 26,
+      "n_matched": 39,
+      "chance": 0.3888888888888889
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 18,
+      "n_matched": 44,
+      "chance": 0.3806818181818182
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 18,
+      "n_matched": 44,
+      "chance": 0.19897186147186147
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 16,
+      "n_matched": 16,
+      "chance": 0.5
+     }
+    },
+    "plain": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 38,
+      "n_matched": 45,
+      "chance": 0.3592592592592592
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 64,
+      "n_matched": 64,
+      "chance": 0.18169642857142856
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 46,
+      "n_matched": 46,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 48,
+      "n_matched": 48,
+      "chance": 0.3333333333333333
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 2,
+      "n_matched": 26,
+      "chance": 0.33589743589743587
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 26,
+      "n_matched": 39,
+      "chance": 0.3888888888888889
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 18,
+      "n_matched": 44,
+      "chance": 0.3806818181818182
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 18,
+      "n_matched": 44,
+      "chance": 0.19897186147186147
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 16,
+      "n_matched": 16,
+      "chance": 0.5
+     }
+    }
+   },
+   "renders_agree": true,
+   "vs_comparator": {
+    "RECALL": {
+     "n_common": 36,
+     "n_equal_both": 31
+    },
+    "CORR": {
+     "n_common": 64,
+     "n_equal_both": 64
+    },
+    "BIND": {
+     "n_common": 38,
+     "n_equal_both": 38
+    },
+    "TWOHOP": {
+     "n_common": 48,
+     "n_equal_both": 48
+    },
+    "OWN": {
+     "n_common": 23,
+     "n_equal_both": 0
+    },
+    "TOPIC": {
+     "n_common": 30,
+     "n_equal_both": 13
+    },
+    "ROLE": {
+     "n_common": 24,
+     "n_equal_both": 5
+    },
+    "LOOKUP": {
+     "n_common": 41,
+     "n_equal_both": 16
+    },
+    "COMPOSE": {
+     "n_common": 11,
+     "n_equal_both": 11
+    }
+   }
+  },
+  "SmallDoge/Doge-160M-Instruct": {
+   "measured": false,
+   "error": "OSError: We couldn't connect to 'https://huggingface.co' to load the files, and couldn't find them in the cached files.\nCheck your internet connection or see how to run "
+  }
+ },
+ "legend": "per key n_matched/n_equal/n; vs comparator n_common/n_equal_both (template)"
+}

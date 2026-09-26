@@ -4,8 +4,11 @@ the PERSIST base-rate drop rule and the sensitivity row. Pure Python.
 bootstrap_diff(rows_a, rows_b, n)  D = R(a) - R(b). Each resample: units resampled within each family (stratified,
     the SAME draw for both models: paired), training seeds resampled per model, sampling seeds resampled inside
     each drawn training seed (nested); percentile 95% CI. Level R holds when the CI's lower bound is >= -3 points
-    (level_r); the OOD-H wording rule of PLAN s1 is not implemented here (it needs the OOD split). The OWN slot
-    holds the OD1 b gated units (score.py), so both models need their --own-cf OWN rows; without them it refuses.
+    (level_r). The OWN slot holds the OD1 b gated units (score.py), so both models need their --own-cf OWN rows;
+    without them it refuses.
+OW = oodh_wording.py, the OOD-H wording rule of s1: OW.paired_diff (OOD-H paired difference, paired bootstrap over
+    threads and seeds), OW.decide (D worse than -5 points: "non-inferior on RC-12's format" with the OOD-H result
+    beside it, the unqualified wording refused; provisional until OOD-H Part 2 is scored), OW.refusals.
 headroom(panel)  panel {model: score.summarize(...)} (template render, mean of 3 seeds, core panel only). A family
     or Level A key fails if EVERY model is <= 0.05 (floor) or EVERY model is >= 0.95 (ceiling). A composite family
     is judged on the score that enters R (summary families: OWN = OWN_GATED, OD1 b).
@@ -17,6 +20,7 @@ import random
 
 import grade_fmt_dyn as FD
 import grade_text as T
+import oodh_wording as OW  # noqa: F401  (the s1 OOD-H wording rule, used as ST.OW)
 import score as S
 
 HEADROOM_KEYS = S.COMPOSITE + [k for k in S.LEVEL_A if k not in S.COMPOSITE]

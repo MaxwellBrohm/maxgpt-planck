@@ -12,7 +12,9 @@ refuses unknown fields, and a stub LLM whose completion is a deterministic funct
   ctx        min(native, 32768), or --max-model-len
   lockstep   runner.run with and without --lockstep give identical rows (template seeds greedy + 1, plain with a
              role-tag word, --own-cf on OWN); one generate call per turn position
-  refuse     runner refuses vllm: without --vllm-untested-ok; a template-less model refuses the template render
+  refuse     with VLLM_TESTED patched False the runner refuses vllm: without --vllm-untested-ok, patched True it
+             builds it (stub class); VLLM_TESTED is True (notes STEP 9b); a template-less model refuses the template
+             render
 Run: python3 -B test_vllm_responder.py   (exit 1 on any failure)"""
 import argparse
 import hashlib
@@ -209,20 +211,32 @@ def c_refuse():
     fails = []
     ns = argparse.Namespace(vllm_untested_ok=False, render="template", dtype="bfloat16", gpu_mem=0.85,
                             max_model_len=None, batch_invariant=False)
-    try:
-        R.make_responder("vllm:none", ns)
-        fails.append("refuse: runner built a vllm responder without --vllm-untested-ok")
-    except SystemExit:
-        pass
-    except Exception as e:  # noqa: BLE001
-        fails.append(f"refuse: no refusal, runner tried to build it ({type(e).__name__})")
+    tested, cls = VR.VLLM_TESTED, VR.VLLMResponder
+    try:                                  # the gate while untested: patched False (notes STEP 9b set it True)
+        VR.VLLM_TESTED = False
+        try:
+            R.make_responder("vllm:none", ns)
+            fails.append("refuse: runner built a vllm responder without --vllm-untested-ok")
+        except SystemExit:
+            pass
+        except Exception as e:  # noqa: BLE001
+            fails.append(f"refuse: no refusal, runner tried to build it ({type(e).__name__})")
+        VR.VLLM_TESTED = True             # tested: the runner builds it without the flag (stub class, no model)
+        VR.VLLMResponder = lambda *a, **k: "built"
+        try:
+            if R.make_responder("vllm:none", ns) != ("built", "none"):
+                fails.append("refuse: tested vllm responder not built")
+        except SystemExit as e:
+            fails.append(f"refuse: runner refused a tested vllm responder ({e})")
+    finally:
+        VR.VLLM_TESTED, VR.VLLMResponder = tested, cls
     try:
         make(template=None)
         fails.append("refuse: a template-less model accepted the template render")
     except ValueError:
         pass
-    if VR.VLLM_TESTED:
-        fails.append("refuse: VLLM_TESTED is True but no parity check has passed")
+    if VR.VLLM_TESTED is not True:
+        fails.append("refuse: VLLM_TESTED is not True although notes STEP 9b set it after a passing parity")
     return fails
 
 

@@ -1,0 +1,33 @@
+{
+ "decided": "2026-09-26, rc12/notes.txt STEP 9b (Claude, under Max's standing permission; reversible before the lock)",
+ "rule": "draft s4: vLLM wherever the architecture is supported, batched HF (hfb) for Doge and anything vLLM rejects; the engine per model is named after the greedy HF-vs-vLLM parity check (parity_hf_vllm.py, 20 conversations, --pick spread, 240 turns) of its family; a family member takes its family's verdict. IDENTICAL or NEAR_TIE: vLLM. DIFFERS: the differing turns were read; the engine that is wrong is the one not used. dtype: bfloat16 (every checkpoint's own torch_dtype) for every model, so the panel shares one precision; the fp32 parity runs are the evidence that a bf16 difference is precision, not the engine.",
+ "models": {
+  "Qwen/Qwen2.5-0.5B-Instruct": {"engine": "vllm", "dtype": "bfloat16", "family": "Qwen2.5", "parity": "bf16 DIFFERS, fp32 NEAR_TIE",
+   "reason": "bf16: 109/240 turns identical, 1 turn over 0.5 nats (corr-001 t5, first difference at token 63, margin 1.0, vLLM's token HF's 2nd choice: 'Battery Management System' vs 'Battery Management App'). fp32: NEAR_TIE, 229/240 identical, largest margin 0.007. The two engines compute the same function; the bf16 split is precision drift, which HF bf16 has as much as vLLM bf16."},
+  "Qwen/Qwen3-0.6B": {"engine": "vllm", "dtype": "bfloat16", "family": "Qwen3", "parity": "bf16 DIFFERS",
+   "reason": "115/240 identical, 1 turn over 0.5 nats (topic-002 t3, token 0, margin 0.625, 4 candidate tokens within 0.625 nats under HF: 'Your costume is complete...' vs 'The costume for the school play is complete...'), both fluent; every other difference <= 0.5. Read as bf16 drift at a flat choice. fp32 parity not run: vLLM fp32 at max_model_len 32768 needs 7.0 GiB KV, 6.85 GiB free (notes STEP 9b)."},
+  "Qwen/Qwen3.5-0.8B": {"engine": "vllm", "dtype": "bfloat16", "family": "Qwen3.5", "parity": "bf16 NEAR_TIE",
+   "reason": "65/240 identical, largest first-difference margin 0.375. fp32 cannot run on vLLM 0.30 (its gated-delta-net kernel takes fp16 / bf16 only)."},
+  "LiquidAI/LFM2.5-230M": {"engine": "vllm", "dtype": "bfloat16", "family": "LFM2.5", "parity": "bf16 NEAR_TIE, fp32 NEAR_TIE",
+   "reason": "bf16 113/240 identical, largest margin 0.25; fp32 224/240, largest 0.008."},
+  "LiquidAI/LFM2.5-350M": {"engine": "vllm", "dtype": "bfloat16", "family": "LFM2.5", "parity": "family verdict (LFM2.5-230M)",
+   "reason": "same family as LFM2.5-230M (NEAR_TIE bf16 and fp32); LFM2-700M of the older LFM2 line is NEAR_TIE too."},
+  "LiquidAI/LFM2-700M": {"engine": "vllm", "dtype": "bfloat16", "family": "LFM2", "parity": "bf16 NEAR_TIE, fp32 NEAR_TIE",
+   "reason": "bf16 72/240 identical, largest margin 0.25; fp32 220/240, largest 0.008."},
+  "LiquidAI/LFM2-1.2B": {"engine": "vllm", "dtype": "bfloat16", "family": "LFM2", "parity": "family verdict (LFM2-700M)",
+   "reason": "same family as LFM2-700M (NEAR_TIE bf16 and fp32)."},
+  "LiquidAI/LFM2-2.6B": {"engine": "vllm", "dtype": "bfloat16", "family": "LFM2", "parity": "family verdict (LFM2-700M)",
+   "reason": "same family as LFM2-700M (NEAR_TIE bf16 and fp32); fp32 weights (about 10.4 GB) would not fit the 12 GB card with a KV cache anyway."},
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct": {"engine": "vllm", "dtype": "bfloat16", "family": "Falcon-H1", "parity": "bf16 NEAR_TIE, fp32 NEAR_TIE",
+   "reason": "bf16 41/240 identical (the most differing turns of the panel), every first difference at margin <= 0.41; fp32 198/240, largest 0.10."},
+  "HuggingFaceTB/SmolLM2-135M-Instruct": {"engine": "vllm", "dtype": "bfloat16", "family": "SmolLM2", "parity": "bf16 NEAR_TIE, fp32 NEAR_TIE",
+   "reason": "bf16 118/240 identical, largest margin 0.25; fp32 228/240, largest 0.007."},
+  "HuggingFaceTB/SmolLM2-360M-Instruct": {"engine": "vllm", "dtype": "bfloat16", "family": "SmolLM2", "parity": "family verdict (SmolLM2-135M-Instruct)",
+   "reason": "same family as SmolLM2-135M-Instruct (NEAR_TIE bf16 and fp32)."},
+  "unsloth/gemma-3-270m-it": {"engine": "vllm", "dtype": "bfloat16", "family": "Gemma3", "parity": "bf16 DIFFERS (HF sdpa at fault)",
+   "reason": "bf16 119/240 identical, 7 turns over 0.5 nats; on 6 of them HF (transformers 5.17, default sdpa attention) gives p(<end_of_turn>) about 1 at token 0 (margins 15.6 to 23.2 nats, empty reply) where vLLM writes a real reply. HF with eager attention agrees with vLLM on those 6 prompts (vLLM's token eager's top-1 on 5, 2nd on 1, bf16 and fp32 alike), so the divergence is HF sdpa's, not vLLM's. Parity rerun with HF eager (parity_hf_eager): DIFFERS by 3 turns at 0.75 to 1.25 nats, vLLM's token HF's 2nd or 3rd choice, both texts fluent: bf16 drift as for Qwen2.5. vLLM fp32 does not start (Triton shared memory 116992 > 101376 bytes)."}
+ },
+ "not_run": {
+  "SmallDoge/Doge-160M-Instruct": "no engine loads it (notes STEP 9b): vLLM 0.30 maps it to transformers' built-in Doge class and transformers 5.17's built-in class has other shapes than the checkpoint (self_attn.A and dt_proj: 6 heads in the checkpoint, 3 in the class); the checkpoint's own modeling_doge.py (trust_remote_code) fails on transformers 5.17 (ImportError OutputRecorder, then _tied_weights_keys as a list). The queue writes NOENGINE for it and a restart runs it once an engine is named here."
+ }
+}

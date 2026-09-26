@@ -1,4 +1,4 @@
-RC-12 mutation_e2e.py part 5/8: 11 of 88 mutants, fresh process each, 72 s. No model.
+RC-12 mutation_e2e.py part 5/8: 11 of 88 mutants, fresh process each, 153 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #04 runner: truncated probes not failed  <- trunc: ctx 556: only 0 truncated probes
@@ -6,7 +6,7 @@ KILLED    #12 render: role cut case-sensitive  <- render: cut_plain('A\nAssistan
 KILLED    #20 score: flat mean instead of nested seed means  <- scoring: nested seed means
 KILLED    #28 score: Level A keys double-count cell units  <- scoring: unit counts {'BIND': 30, 'BIND:owner': 12, 'BIND:perspective': 10, 'BIND:third-party': 8, 'CORR': 64, 'CORR:C_noupd': 32, 'CORR:C_twoslot': 3
 KILLED    #36 fakes: ECHO answers right  <- G2 ECHO: 394 value-graded units above 0 (e.g. ['rc12-dev-recall-001', 'rc12-dev-recall-002', 'rc12-dev-recall-003'])
-KILLED    #44 hf_responder: HF path claims to be tested  <- hf: hf_responder import is not light or claims to be tested
+KILLED    #44 hf_responder: HF path loses its STEP 9b tested mark  <- hf: hf_responder import is not light or lost the tested mark of notes STEP 9b
 KILLED    #52 score: OD1 b: gated OWN from only the runs that have cf rows  <- owngate: cf rows for 1 of 2 training seeds: gated OWN not missing ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0})
 KILLED    #60 score_stats: OD1 b: cf replies counted in PERSIST base rates  <- stats: cf rows in PERSIST base rates
 KILLED    #68 score: OD1 b: misaligned join (cf rows zipped to the own ids in reverse order)  <- owngate: random units: OWN_GATED:list 0.296875, per-unit AND 0.3125

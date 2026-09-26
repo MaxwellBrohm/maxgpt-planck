@@ -211,4 +211,4 @@ BASELINE fixture misses 0, conversation-test misses 0
   killed  SOURCE grade_voice: "|you|your|you're|yours|you've)" -> ')'  (94 fixtures, 0 conv; e.g. voice_you_after_i_ok/VAL)
   killed  SOURCE grade_voice: 'and not T.SECOND_P.search(text[s0:s1])' -> ''  (94 fixtures, 0 conv; e.g. voice_far_mixed_ok/VAL)
   killed  SOURCE graders: 'if mode not in ("given", "own"):' -> 'if True:'  (2 fixtures, 0 conv; e.g. given_my_name_ok/VAL)
-MUTANTS killed 209/209, survived 0, crashed 0; 75s
+MUTANTS killed 209/209, survived 0, crashed 0; 192s

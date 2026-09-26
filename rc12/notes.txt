@@ -1208,3 +1208,310 @@ WHEN THE PC IS BACK, before engines.json: read the parity verdicts; decide the g
   prints the Qwen3.5 / Doge / LFM2-700M / LFM2-1.2B prompts and generation configs, asks vLLM 0.30's own ModelConfig
   for its stop ids (no weights), and runs Qwen2.5-0.5B on 24 records (2 per family) to ~/planck/runs/rc12_verify
   (never rc12_dev), template and plain, greedy, 1, 2, then verify --rerun 5.
+
+STEP 11, LIKELIHOOD ROWS (2026-09-26 afternoon; prereg draft s4, P-004): built and tested with stubs, no model run
+  Diagnostic only, never in a composite or a claim. Unchanged: runner.py (md5 3db64f256d684edbc742de9962ccb4c3 before
+  and after), render.py, the graders, the dev records, the fakes and the scored protocol. All files below are new.
+  pools_lik_prefix.py  the forced answer prefix pool, separate from every generator pool: 8 neutral lead-ins ("It
+                       is", "It's", "That would be", "That's", "The answer is", "That is", "It would be", "The answer
+                       would be"); lead_for(rid, turn) from its own stream "RC12:likprefix:<rid>:<turn>:4747" (seed
+                       4747, not the dev seed 1212). Dev use per lead-in: 35 to 60 of the 412 rows.
+  lik_rows.py          the row builder: golden history (user turns and IDEAL replies of turns 1..P-1), the probe
+                       turn, the lead-in, gold, candidates. 412 dev rows.
+  lik_score.py         scoring with any logprob(prefix_ids, continuation_ids) and tokenizer (optional many() for one
+                       batch per row), the renders, the rule, the per-family summary.
+  lik_stubs.py         stub tokenizers (word, chunk, merge, canonical, eos) and stub scorers IDEAL, LENGTH, RECENCY.
+  lik_adapters.py      HF and Planck scorer adapters, lazy imports (importing loads no torch), LIK_MODEL_TESTED False.
+  lik_run.py           CLI: --responder stub:NAME | hf:<id> | planck:<ckpt>, --render template | plain | both; writes
+                       excluded.json and per render rows.jsonl and summary.json. runner.py is not used.
+  test_lik.py, test_lik_adapters.py, mutation_lik.py (logs/test_lik.txt, test_lik_adapters.txt, mutation_lik.txt).
+RULES DECIDED (Claude, 2026-09-26, under Max's standing permission; reversible before the lock)
+  (1) Closed candidate set: a VAL probe whose gold is one of >= 2 candidates, and the OWN pick probe (DYN, gold_fn
+      pick), whose gold on golden history is its ideal_gold (the option the IDEAL Q reply picked; test_lik re-parses
+      it with G-DYN's parser) with the probe's 5 candidates. Rows: RECALL 48, CORR 64, BIND 60, TWOHOP 48, COMPOSE 16
+      (TWOHOP:COMPOSE, diagnostic and apart, as in score.py), OWN 32, TOPIC 48, ROLE 48, LOOKUP 48 = 412. Excluded,
+      counted in excluded.json: K 64 (knowledge; L4), T0 96 and the RECALL abstain X 12 (one candidate: T0 probes
+      carry only the gold), ROLE X 48 (G-ROLEX, an open question with no answer slot), RECALL abstain P 12, LOOKUP X
+      48, OWN list 16, PERSIST 216, LOOP 480 (no gold). So family T0 has no likelihood row; the Tier 0 margin is
+      over the closed-set families.
+  (2) Prefix: a lead-in from the new pool, not the probe's own prefix field (that is the IDEAL frame, and None on
+      BIND, TOPIC, LOOKUP and OWN). Plain: render.plain(history) + " " + lead-in, with the tokenizer's special tokens
+      (as hf_responder encodes plain); template: the chat template with the generation prompt, then the lead-in, no
+      added special tokens; Planck template: its role-token ids ending with <|assistant|>, then the encoded lead-in.
+      Each candidate is the continuation " " + value.
+  (3) Rule and ids: E004 metrics_ft.right / margin (right iff the gold's summed log-prob is strictly above every
+      other candidate's; ties and non-finite scores are wrong; margin = gold minus the best other, nats) and E004
+      lik.cand_ids (joint, else split; a trailing eos on both dropped) with its canonical mode for tokenizers that
+      merge across spaces.
+  (4) Unequal token counts, per tokenizer and per row: an unequal row is scored with the same rule but reported
+      apart (n_unequal, acc_unequal) and never enters acc_equal, the BIND pair rate or the Tier 0 margin, because a
+      summed log-prob drops with every extra token, so the length alone can decide it. A comparison of two models
+      uses the rows equal under both tokenizers (rows.jsonl carries equal per row).
+  (5) Tier 0 margin summary per family: mean and 10th percentile (nearest rank, the ceil(0.1 n)-th smallest) of the
+      equal rows' margins. No number pooled across families.
+  (6) A row longer than the model's context is not scored (over_ctx) and is counted; the history is never cut.
+  (7) hf: and planck: need --untested-ok; planck: also needs --prereg-pushed (prereg s0: no Planck model is scored
+      on any RC-12 split, dev included, before the push).
+MEASURED (stubs on the dev rows; properties of the rows and the stub tokenizers, not of any model)
+  word tokenizer (one token per word): 0 unequal rows. chunk tokenizer (4-character pieces): 245 of 412 unequal;
+  LENGTH (-1 per token) is right on 38 of them and on 0 equal rows (ties), Tier 0 mean and p10 0.00 in every family.
+  merge tokenizer (3-character pieces across word boundaries): 326 unequal, 273 rows on the split path, IDEAL right
+  on every row. RECENCY (the candidate mentioned last in the golden history), word tokenizer, plain and template
+  alike: RECALL 0.333, CORR 0.031, BIND 0.50 (pairs 0.00 of 30), TWOHOP 0.333, OWN 0.00, TOPIC 0.292, ROLE 0.167,
+  LOOKUP 0.125, COMPOSE 0.50.
+TESTS test_lik.py (python3, no torch): 0 failures. It rebuilds every expected prompt from the dev records itself, so
+  the IDEAL oracle raises on any other history, render or lead-in; it runs IDEAL under 5 tokenizers x 2 renders,
+  LENGTH per unequal row, RECENCY against its own last-mention computation (right, margin, BIND pairs), the rule,
+  p10, BOS per render, ctx, the many() path, the HF and Planck tokenizer wrappers on fakes, and the CLI (stub run,
+  both refusals, no torch imported). test_lik_adapters.py (a Python with torch 2.13.0; a fixed random bigram table
+  on synthetic ids, no language model, no RC-12 row): 0 failures. mutation_lik.py: 31 of 31 killed (2026-09-26
+  14:09 to 14:13 EDT, 282 s), baselines clean; 3 of them (adapter arithmetic) run under the torch Python. The first
+  run had 1 malformed mutant (its text also matched the docstring); fixed and re-run.
+NOT DONE: no model has been scored (LIK_MODEL_TESTED False); the HF batch and the Planck path have never run on a
+  real model; prereg s0 still lists the likelihood rows as not built (outside this step's edit scope).
+
+STEP 11, OOD-H WORDING RULE (2026-09-26 afternoon; prereg draft s1, s9, s14, s16; oodh/DESIGN.txt s7): built and
+tested on synthetic per-thread scores, no model run
+  New: oodh_wording.py, test_oodh_wording.py, mutation_oodh_wording.py (logs/test_oodh_wording.txt,
+  mutation_oodh_wording.txt). score_stats.py imports it as OW (one import line and its docstring; no code line of
+  score_stats changed, so every mutants_e2e target on it still matches once). Unchanged: graders, dev records,
+  fakes, runner, the scored protocol, oodh/.
+  Input      each model's OOD-H transcript rows (runner rows through oodh/play.FixedHistory, family OODH, unit = the
+             thread's mean probe result, strict); score.select keeps the sampling seeds (greedy only if none).
+  D          Planck minus comparator, points; M = 100 x mean over threads, then sampling seeds, then training seeds.
+  CI         paired bootstrap, 10,000 resamples: threads with replacement (the SAME draw for both models), training
+             seeds per model, sampling seeds inside each drawn training seed; percentile 95%. Each resample takes
+             nested means (bootstrap_diff pools the drawn runs; the two agree when every training seed has the same
+             number of sampling seeds). 150 threads, 15 vs 3 runs, 10,000 resamples: 1.9 s.
+  Refused    (ValueError; CLI exit 2): no rows, a non-OODH row, an --own-cf row, a unit not a number in [0, 1]
+             (None, NaN, bool), a thread twice in a run, two renders in one model or different renders across the
+             models, any thread set that differs between two runs (either model), or from --data (item file ids).
+RULES DECIDED (Claude, 2026-09-26, under Max's standing permission; reversible before the lock)
+  (1) "Worse than -5 points" = D < -5 after rounding D to 6 decimals; exactly -5 is not worse. The rounding only
+      removes float noise: 10 of 20 threads vs 11 of 20 gives D = -5.000000000000007, which would otherwise count
+      as worse. A real nonzero difference is about 0.004 points or more.
+  (2) Qualified text = the s1 Level R sentence with "non-inferior to Qwen2.5-0.5B-Instruct on RC-12," replaced by
+      "... on RC-12's format,"; the OOD-H sentence (already in the s1 wording) stays; the unqualified phrase is
+      refused. Unqualified: the s1 sentence as written (the qualified one is allowed too). Where the words go is my
+      reading of s1; the appositive "a pre-registered, sealed 12-turn conversation test" then follows "RC-12's
+      format". For Max's review.
+  (3) Provisional until Part 2 is scored (--part2-complete): the note "Provisional until OOD-H is complete: Part 2
+      (the raters' scripts, collected in January) is not scored." is appended. s1 and DESIGN s7 ("added under the
+      same rule") do not say whether Part 2 pools with Part 1; the code pools whatever threads it is given.
+  (4) D is shown to 2 decimals, more when 2 would show a number on the other side of the bar (-5.005 stays -5.005).
+  (5) refusals(text, dec): "non-inferior" in a sentence without "RC-12's format" while qualified; the OOD-H
+      sentence with these numbers missing; the provisional note missing while provisional.
+  It words Level R only if Level R holds (s9: CI lo >= -3, T0 >= 0.90, >= 3 training seeds); it never decides that.
+TESTS test_oodh_wording.py: 0 failures. Boundary with float noise on both sides of -5 (both unqualified), -5.005
+  qualified, D = -4, -6, -8, -12, -16, 0, +16; provisional on and off; LEVEL_R equals the s1 quote read from the
+  prereg; fill; refusals incl. a paraphrase; a paired shift of exactly 10 points gives lo = hi = 10; the percentile
+  CI within 15% of the normal CI on 150 threads (n 4000); nested means over unequal seed counts; greedy beside
+  sampled rows; sign; every refusal above with its message; CLI (qualified, --part2-complete, exit 2 on a missing
+  thread); ST.OW. mutation_oodh_wording.py: 29 of 29 killed, baseline clean (25 s under load); both re-run at
+  15:21 after the test learned to delete its CLI temp dir (64 left behind by earlier runs, removed): 0 failures,
+  29 of 29 killed (24 s).
+CHECK ORDER (2026-09-26 14:24 to 15:20 EDT, load average 17 to 250 from other jobs; no model loaded here):
+  First pass: build_dev, test_gens, audit_rules, audit_graders, validate_e2e, validate_machinery, mutation_gens and
+  mutation_audit 1/2, 2/2 passed; mutation_graders and mutation_e2e 1/8 to 4/8 hit the 115 s timeout (exit 124,
+  no result, no orphan process left); stopped and re-run in the background with timeout 900. During that re-run
+  another session changed hf_responder.py, vllm_responder.py, test_vllm_responder.py, validate_machinery.py and
+  mutants_e2e.py (14:41 to 14:43; HF_TESTED True, mutant #44). So the order was finished on that tree:
+  mutation_graders   exit 0 (196 s), baseline 0 fixture / 0 conversation-test misses, 209 / 209 killed, 0 crashed
+                     (imports none of the changed files)
+  mutation_e2e       --part 1/8 .. 8/8, exit 0 each (226 to 269 s), 11 x 8 = 88 / 88 killed, 0 survived /
+                     crashed / malformed, baseline failures none in every part (all started after 14:43:28)
+  then re-run after it (15:18 to 15:20): build_dev exit 0 (27 s, dev sha256 3e543f8d...689a0 byte-identical to a
+  copy taken before), test_gens exit 0 (0 failures over 640), audit_rules exit 0 (GATE PASS), audit_graders exit 0
+  (0 wrong verdicts over 34378), validate_e2e exit 0 (G1-G3 PASS, G4 PASS), validate_machinery exit 0 (11 groups).
+  From the first pass (neither imports a changed file): mutation_gens exit 0 (29 s, 33 / 33 killed),
+  mutation_audit 1/2 exit 0 (110 s, 7 / 7), 2/2 exit 0 (97 s, 6 / 6). rc12 hashes equal before and after the
+  final re-run.
+NOT DONE: no model's OOD-H rows exist; Part 2 is not built; prereg s9 still says the OOD-H wording rule is not
+  implemented and s0 says "no OOD-H" (outside this step's edit scope).
+
+STEP 9b (2026-09-26 afternoon, branch B): parity read for every family, engines.json, HF_TESTED / VLLM_TESTED set,
+dev-baseline queue started. No model loaded on the Mac; nothing committed.
+PARITY (parity_hf_vllm.py: greedy, template render, 20 conversations --pick spread = 240 turns; vLLM 0.30.0,
+  transformers 5.17.0, torch 2.13.0+cu132; PC: ~/planck/runs/rc12_dev/<model>/parity*/). The bf16 and fp32 runs below
+  were made by the morning's parity chains (~/planck/logs/rc12_parity_chain*.log, 01:07 to 13:11 EDT; their report
+  never reached these notes); this step read them and ran the gemma checks and the Qwen3 fp32 run.
+  ident = turns with equal ids, stop and text; over = differing turns whose first difference is above 0.5 nats
+  (HF's log p(HF token) - log p(vLLM token) at the first differing token); max = largest such margin.
+  model (family)                 run          verdict   ident    convs  over  max     stop disagreements
+  Qwen2.5-0.5B-Instruct          bf16         DIFFERS   109/240   1/20   1    1.000   19
+  Qwen2.5-0.5B-Instruct          fp32         NEAR_TIE  229/240  10/20   0    0.007    2
+  Qwen3-0.6B                     bf16         DIFFERS   115/240   0/20   1    0.625    4
+  Qwen3-0.6B                     fp32         launched 14:59 (max_model_len 16384); got the GPU lock after 15:22:50,
+                                              RUNNING when this was written (~/planck/logs/rc12b_q3fp32.log)
+  Qwen3.5-0.8B                   bf16         NEAR_TIE   65/240   0/20   0    0.375   18
+  LFM2.5-230M                    bf16         NEAR_TIE  113/240   1/20   0    0.250   17
+  LFM2.5-230M                    fp32         NEAR_TIE  224/240   8/20   0    0.008    0
+  LFM2-700M                      bf16         NEAR_TIE   72/240   0/20   0    0.250    9
+  LFM2-700M                      fp32         NEAR_TIE  220/240   6/20   0    0.008    1
+  Falcon-H1-Tiny-90M-Instruct    bf16         NEAR_TIE   41/240   0/20   0    0.406    4
+  Falcon-H1-Tiny-90M-Instruct    fp32         NEAR_TIE  198/240   2/20   0    0.101    1
+  SmolLM2-135M-Instruct          bf16         NEAR_TIE  118/240   0/20   0    0.250   11
+  SmolLM2-135M-Instruct          fp32         NEAR_TIE  228/240  12/20   0    0.007    3
+  gemma-3-270m-it                bf16         DIFFERS   119/240   0/20   7   23.188    7
+  gemma-3-270m-it                bf16, HF eager attention (this step)   DIFFERS   115/240   3 over (0.75 to 1.25)   5
+  Every run: 0 prompt mismatches (HF and vLLM prompt ids equal on all 240 turns), no FAIL_STOP.
+  Could not run: fp32 of Qwen3.5 (vLLM's gated-delta-net kernel takes fp16 / bf16 only) and of gemma (Triton out of
+  shared memory, 116992 > 101376 bytes); Doge (below). HF transcripts read by eye (3 per family, plus every text over
+  0.5 nats): fluent, no role or special-token text, no <think> tags (Qwen3 and Qwen3.5 run with thinking off, HF and
+  vLLM alike); stop reasons are the tokenizer eos (Qwen / SmolLM2 / LFM2 <|im_end|>, gemma <end_of_turn>) or cap, and
+  Falcon-H1's end-of-turn ids; empty replies: none except gemma (HF 8, vLLM 2; below).
+THE THREE bf16 DIFFERS, READ TURN BY TURN
+  Qwen2.5: the one turn over 0.5 (corr-001 t5) splits at token 63 of a list answer ("Battery Management System" vs
+    "... App"), margin 1.0, vLLM's token HF's 2nd choice. fp32 is NEAR_TIE with a largest margin of 0.007: the two
+    engines compute the same function and the bf16 split is precision drift, which HF bf16 has as much as vLLM bf16.
+  Qwen3-0.6B: the one turn over 0.5 (topic-002 t3) splits at token 0 ("Your costume is complete..." vs "The costume
+    for the school play is complete..."), margin 0.625, vLLM's token HF's 4th of four within 0.625 nats: a flat
+    choice in bf16. The fp32 run meant to confirm it was still running when this was written;
+    if it is not NEAR_TIE, revisit Qwen3's engine before the queue reaches it (11th of 13 models).
+  gemma-3-270m-it: a real divergence, and HF's. On 6 of the 7 turns over 0.5 (prompts of 513 to 1153 tokens; the
+    sliding window is 512) HF gives p(<end_of_turn>) of about 1 at token 0 (margins 15.6 to 23.2 nats) and replies
+    empty, where vLLM writes a fitting reply ("I am sorry, I do not have the ability to access your calendar."). A
+    forward on those 6 prompts (~/planck/logs/rc12b_diag.log): HF sdpa bf16 and sdpa fp32 both put about 1 on
+    <end_of_turn>; HF eager bf16 and eager fp32 both put vLLM's token first on 5 and second on 1 (0.06 to 0.12
+    nats behind), with <end_of_turn> at -7 to -20. The parity rerun with HF on eager attention (parity_hf_eager/;
+    a scratch wrapper that calls parity_hf_vllm's hf and report stages after
+    model.set_attn_implementation("eager"), not in the repo):
+    the 6 empty replies are gone, 3 turns over 0.5 remain (0.75 to 1.25 nats, vLLM's token HF's 2nd or 3rd choice,
+    both texts fluent): bf16 drift as for Qwen2.5. So vLLM is the faithful engine for Gemma 3 and HF's default sdpa
+    path is not (transformers 5.17); hf_responder.py records it as a known defect.
+DOGE (SmallDoge/Doge-160M-Instruct): NOT RUN, no engine loads it. vLLM 0.30 resolves it to the transformers backend,
+  whose built-in Doge class (transformers 5.17) has self_attn.A and dt_proj over 3 key-value heads where the
+  checkpoint has 6 attention heads ("Attempted to load weight (torch.Size([6])) into parameter (torch.Size([3]))");
+  HF (hf and hfb alike: HFResponder has no trust_remote_code) fails the same way ("Reinit due to size mismatch").
+  The checkpoint's own modeling_doge.py (trust_remote_code, the hub's latest revision e69e586, saved with
+  transformers 4.55.0) fails on 5.17 at import (OutputRecorder moved to transformers.utils.output_capturing) and,
+  with that alias patched in, at post_init (_tied_weights_keys is a list, 5.x wants a mapping)
+  (~/planck/logs/rc12b_doge.log). Patching the remote code further would leave a Doge no second engine can check.
+  Proposed fix: a separate venv with transformers 4.55 (the checkpoint's version) plus trust_remote_code for Doge in
+  hf_responder, then parity_hf_vllm.py --engine hfb (batched vs serial HF). Doge is in the core panel, so the
+  headroom panel lacks it until then.
+ENGINES (rc12/engines.json; decided by Claude under Max's standing permission, reversible before the lock)
+  Rule (draft s4, s16): vLLM wherever the architecture loads and the family's parity passes; a DIFFERS verdict is read
+  turn by turn and the engine found wrong is not used; every family member takes its family's verdict. Result: all
+  12 loadable models on vLLM, dtype bfloat16 (each checkpoint's own torch_dtype, read from all 13 config.json files):
+  Qwen2.5-0.5B-Instruct, Qwen3-0.6B, Qwen3.5-0.8B, LFM2.5-230M / 350M, LFM2-700M / 1.2B / 2.6B (one lfm2
+  architecture), Falcon-H1-Tiny-90M-Instruct, SmolLM2-135M / 360M-Instruct, gemma-3-270m-it. Doge is left out
+  ("not_run" in the file; the queue writes NOENGINE for it and a restart runs it once it is listed).
+  Why bf16 everywhere and not fp32 where only fp32 passed (Qwen2.5): one precision for the whole panel (LFM2-2.6B's
+  fp32 weights, about 10.4 GB, would not fit the 12 GB card with a KV cache; Qwen3.5 and gemma cannot run fp32 on
+  vLLM), the fp32 runs already show the engines agree, and bf16 drift at 0.6 temperature is small beside sampling
+  noise. The alternative stays one line away: {"engine": "vllm", "dtype": "float32"} for Qwen2.5 (dev_batch honors
+  it; its fp32 parity passed).
+FLAGS (this is the logged step both docstrings ask for)
+  vllm_responder.VLLM_TESTED = True (parity passed on 6 families at the mechanical rule, the 3 DIFFERS read above).
+  hf_responder.HF_TESTED = True (greedy on 20 conversations for 8 families, compared with vLLM, stops and transcripts
+    read), with the gemma sdpa defect and the Doge load failure written into its docstring. runner.py's HF gate reads
+    only --hf-untested-ok and never read HF_TESTED (unchanged; the queue passes the flag for hf / hfb anyway).
+  Tests that asserted the old values: test_vllm_responder c_refuse now patches VLLM_TESTED False to test the refusal,
+    patches it True with a stub class to test that the runner builds it, and asserts the module value True;
+    validate_machinery c_hf asserts HF_TESTED True; mutants_e2e #44 is now True -> False ("HF path loses its STEP 9b
+    tested mark"). Watched failing (scratch copies): VLLM_TESTED back to False -> test_vllm_responder exit 1; runner
+    gate without VLLM_TESTED -> exit 1.
+  Gates (Mac, no model, load 65 to 185 from other jobs): test_vllm_responder 0; validate_machinery 0 (11 groups);
+    test_dev_batch 0; test_queue 0 (with rc12/engines.json present); mutation_step9 1/3 .. 3/3: 47 / 47 killed;
+    mutation_e2e 1/8 .. 8/8: 88 / 88 killed, baseline failures none in every part, #44 killed by the new c_hf line.
+QUEUE (queue_dev_baselines.sh, unchanged)
+  Code: ~/planck/dev/rc12_q9 = git HEAD's rc12 (identical to 19114c5) plus this step's files (engines.json,
+  hf_responder.py, vllm_responder.py and the three test files); other steps' uncommitted rc12 work (score_stats.py,
+  lik_*, oodh_wording*) was NOT synced. Launched detached 2026-09-26 14:47:35 EDT (queue pid on the PC in its log).
+  First process (Qwen2.5-0.5B-Instruct template greedy + greedy_owncf): waited for the GPU lock (another step's jobs)
+  until about 14:53:50, 250 s under the lock (load about 30 s, dev run 205.9 s, own-cf twin 15.2 s), exit 0.
+  dev: 640 conversations, 7328 replies, stops eos 4612 / cap 2716, R_ungated 2.56, loop rate 0.469. owncf: 48
+    conversations, 576 replies, eos 381 / cap 195. meta.json: engine vllm, dtype bfloat16, parity DIFFERS, engine
+    decision vllm, gate not skipped, vLLM stop ids [151643, 151645] = HF's list, no stop ids added from
+    generation_config.json, vLLM sampling defaults {}. The process log: FlashInfer sampler disabled, 0 lines with nvcc.
+  verify_dev_runs.py (no model) on both runs: VERIFY PASS (0 failures); C5's turn-3 prompt is Qwen's own template
+    with its default system block ("You are Qwen, created by Alibaba Cloud. ...", the draft's "model's default
+    system behavior"), <|im_start|> / <|im_end|> turns, the model's own earlier replies fed back.
+  Transcripts read (dev: recall-001, own-001, loop-001; owncf: own-001, own-005, own-010), 12 turns each: template
+    right (above), thinking not applicable to Qwen2.5 (0 <think> tags in 7904 replies), stops: every reply ends at
+    <|im_end|> (eos) or the 256-token cap, 0 replies with special-token or role text, 0 empty. What the model does:
+    long list answers hit the cap; it often answers statements and later turns with "I'm sorry, but I can't assist
+    with that." (own-001 on 7 of 12 turns, loop-001 on 6), gets recall-001's probe wrong ("Your bike is black": the
+    niece's), and once names itself ("I'm Qwen, not a band"). Model behavior, not harness.
+  Progress (from the Mac, repo root): <scratchpad>/pcwsl.sh rc12/queue_progress.sh 90. Status lines:
+  ~/planck/runs/rc12_dev/queue_status.txt; stop between processes: touch ~/planck/logs/rc12_dev_queue.STOP.
+  Second process (template seed 1): waited for the lock 14:58:01 to 15:18:24 (other steps' GPU jobs, E006's queue
+  among the waiters), 266 s under it, exit 0, 640 + 48 conversations. Then the Qwen3 fp32 parity took the lock.
+  ETA: two measured processes (250 s, 266 s under the lock) times the 96 processes the 12 listed models need
+  (Doge's 8 are NOENGINE) is about 7 h; the larger models (LFM2-2.6B, LFM2-1.2B, Qwen3.5-0.8B) will be slower, so
+  about 7 to 10 h of GPU time, plus whatever the shared lock costs (20 min for the second process). So: done
+  late tonight at the earliest (about 23:00 EDT if the GPU were free from 15:30), more likely during Sep 27. A
+  process that waits 3 x 7200 s for the lock is recorded as failed and the rest of that model and render is
+  skipped (SKIP; a restart retries it).
+OPEN
+  Doge (above). The gemma <eos> question of STEP 9 VERIFY stands (generation_config eos [1, 106]; vllm_responder
+  raises on a foreign stop id, so a gemma <eos> would stop that gemma render loudly, SKIP in the status file).
+  prereg draft s0 and s16 still say HF_TESTED False and no vLLM responder (outside this step's files).
+
+STEP 11 FIX ROUND (2026-09-26, 16:00 to 17:20 EDT): a reviewer's 8 findings against STEP 11 (likelihood rows and
+the OOD-H wording rule). Each was confirmed on the real tree first (the reviewer's scratch scripts, pointed at rc12/),
+then fixed, tested and mutation-tested. No model loaded: the token-count measurement loads tokenizers and config.json
+only. Nothing committed. score_stats.py, the graders, dev records, fakes and the scored protocol are unchanged.
+FINDINGS
+  F1 major, CONFIRMED. realtok.py on the real tree gave the reviewer's numbers (Qwen2.5 template: OWN 2/32 all-equal
+    rows, TOPIC 13/48, ROLE 7/48, LOOKUP 16/48; SmolLM2 OWN 1/32, LOOKUP 1/48; equal sets Qwen 233, SmolLM2 163,
+    both 147); "rows equal under both" existed only as prose. FIXED (lik_score.py): each row is scored on the gold
+    against its FOILS, the candidates with the gold's token count under that tokenizer (>= 1; else "unmatched",
+    counted, not scored). rows.jsonl carries foils, chance = 1 / (1 + foils), right_m, margin_m; summary per family:
+    n_matched, n_unmatched, acc_matched, chance_matched beside acc_equal (all candidates one count) and acc_unequal.
+    Tier 0 and the BIND pair rate use the matched rows. lik_compare.py (new) compares two models' rows.jsonl on the
+    foils BOTH tokenizers give the gold's count (refuses rows of different builds or renders). lik_tokcheck.py (new)
+    measures the panel's own tokenizers (AutoTokenizer + AutoConfig from the local cache, HF_HUB_OFFLINE; 88 s),
+    logs/lik_tokcheck.json. Matched / all-equal rows of 412, template (plain identical for every model):
+      Qwen2.5-0.5B, Qwen3-0.6B            343 / 233   (OWN 26, ROLE 35, TOPIC 35, LOOKUP 46, RECALL 38, BIND 40)
+      LFM2.5-230M, LFM2.5-350M, LFM2-2.6B 328 / 196   vs Qwen2.5 common-foil rows 298, equal under both 175
+      SmolLM2-135M, SmolLM2-360M          326 / 163   vs Qwen2.5 288 / 147
+      Falcon-H1-Tiny-90M                  316 / 173   vs Qwen2.5 257 / 133
+      gemma-3-270m-it                     372 / 276   vs Qwen2.5 315 / 226
+      NOT MEASURED (not in the Mac's cache, PC offline): Qwen3.5-0.8B, LFM2-700M, LFM2-1.2B, Doge-160M.
+  F2 major, CONFIRMED. bindlead.py: 22 of 30 pairs had twins with different lead-ins; the lead-dependent position
+    cheater's best partition scored BIND pairs 0.367 of 30. FIXED: lik_rows.lead_key draws from the pair_id for
+    twins. After: the twins share a lead-in and differ in exactly 2 messages; bindlead.py's best of all 256
+    partitions is 0.0. Other rows keep their draws.
+  F3 major, CONFIRMED (no attention argument in lik_adapters.py). FIXED: HFLik.load reads model_type from the config
+    first; attn_for gives eager for gemma3* and refuses any other request for Gemma 3; other models keep the library
+    default (their parity ran on it). scorer.info (model_type, dtype, attn requested and as loaded, device) goes into
+    summary.json "engine". Tested with fake transformers / torch modules only: no Gemma forward was run.
+  F4 major, CONFIRMED. oodh_adv.py: Planck sampled vs a greedy-only comparator accepted (D -49.333), a SmolLM2
+    comparator accepted with the Qwen text, plain vs plain accepted. FIXED (oodh_wording.py): refused when one
+    model's rows hold two responders, when the comparator's responder is not Qwen/Qwen2.5-0.5B-Instruct (the bare id
+    the runner writes, or kind:id), when the Planck rows are the comparator's, or when one model's selected rows are
+    greedy and the other's sampled. A plain-render or greedy pair is computed but labeled ci["diagnostic"]; decide()
+    refuses it and the CLI prints decision null. --part2-complete needs --data, and decide() needs part2_threads > 0
+    (scored ids outside the Part 1 file, default sealed/oodh/oodh_part1.jsonl). After: oodh_adv (a), (b) refused.
+  F5 minor, CONFIRMED (refusals() returned [] for the three texts). FIXED: while qualified, every match of
+    non[\s\-‐-―]?inferior (any case) must start the exact QUALIFIED phrase. Tests: the reviewer's three
+    texts plus "NON INFERIOR", a U+2011 hyphen and "non-inferiority".
+  F6 minor, CONFIRMED (nonfinite.py: tier0 n 24, mean 3.0, p10 3.0 with the gold -inf on 24 of 48 rows). FIXED: a
+    matched row with a non-finite score enters the Tier 0 list as -inf, n_nonfinite is counted, and lik_run's console
+    line prints nonfinite and ties. After: tier0 n 48, mean -inf, p10 -inf.
+  F7 minor, CONFIRMED (bf16ties.py: exact gold ties per 2000 rows fp32 0 vs bf16 16, 14, 15). FIXED: lik_run --dtype
+    and HFLik.load default float32 (E004's), --planck-precision fp32; n_ties per family.
+  F8 minor, CONFIRMED (leak.py: most-mentioned right on OWN 32/32, TOPIC 4/48, else 0). The counterfactual-twin
+    option is REJECTED with evidence: own_cf.swap on the IDEAL Q reply of all 32 OWN rows (0 unswapped) leaves the
+    most-mentioned heuristic right on 32/32 twins (the swap exchanges the names, so the new gold is the one named
+    twice). FIXED by stating it: summary OWN "note" (a copying diagnostic, not own-commitment memory), stub
+    Mentions, a test that pins the property, prereg s4.
+FILES  changed: lik_score.py, lik_rows.py, pools_lik_prefix.py, lik_adapters.py, lik_run.py, lik_stubs.py,
+  oodh_wording.py, test_lik.py (lead key; matched checks; its wrapper test moved to test_lik_more), test_oodh_wording.py
+  (responders stamped; CLI Part 2 cases), mutation_lik.py (5 targets rewritten to the new text, 20 added: 51),
+  mutation_oodh_wording.py (runs both OOD-H tests; 15 added: 44). New: lik_compare.py, lik_tokcheck.py,
+  test_lik_more.py, test_oodh_pairing.py, logs/lik_tokcheck.json. prereg draft s1, s4, s16 status lines.
+CHECK ORDER (16:28 to 17:15 EDT, load average 12 to 59 from other jobs; hashes of rc12/*.py, engines.json and the
+  prereg equal before and after)
+  build_dev 0 (9 s; dev byte-identical, sha256 3e543f8d...), test_gens 0 (0 failures over 640), audit_rules 0
+  (GATE PASS), audit_graders 0 (0 wrong verdicts over 34378), validate_e2e 0 (G1-G3, G4 PASS), validate_machinery 0
+  (11 groups), test_lik 0, test_lik_more 0, test_lik_adapters 0 (torch 2.13 Python), test_oodh_wording 0,
+  test_oodh_pairing 0; mutation_graders 209/209 (baselines 0), mutation_gens 33/33, mutation_audit 7/7 + 6/6,
+  mutation_e2e 8 x 11 = 88/88 (baseline failures none in every part), mutation_oodh_wording 44/44 (baseline 0),
+  mutation_lik 51/51 (3 baselines 0; 672 s under load).
+NOT DONE: no model scored; 4 panel tokenizers unmeasured; Gemma 3 eager never run through lik_adapters; lik_tokcheck
+  has no test of its own (lik_score and lik_compare, which it calls, are tested); prereg s9 still says the OOD-H
+  wording rule is not implemented and s0 is stale (outside this round's edit scope). Part 2's item format does not
+  exist yet, so "Part 2 thread" means only "an id outside the Part 1 file".

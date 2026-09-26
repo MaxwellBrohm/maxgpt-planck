@@ -11,7 +11,8 @@ Each check returns a list of failure strings; main() writes logs/e2e_machinery.t
   scoring    T0 / K / COMPOSE excluded from R; BIND unit = pair; nested seed means; Level A comparator and
              claimability; K gap
   stats      headroom floor / ceiling, paired bootstrap and Level R, PERSIST base rates, sensitivity row
-  hf         hf_responder imports without torch; runner refuses it without --hf-untested-ok
+  hf         hf_responder imports without torch and keeps HF_TESTED True (notes STEP 9b); runner refuses it
+             without --hf-untested-ok
   owncf      the OWN counterfactual-history diagnostic (step 5 audit, own_cf.py); padded, blank-bulleted and
              U+2028 lists are swapped too (LISTPAD, LISTBLANK, LISTLS: the list rule is G-DYN's)
   owngate    OD1 (b): OWN counts in R only if right in the own-history AND the --own-cf run (score.py GATE); NEXT
@@ -218,8 +219,8 @@ def c_stats(recs):
 def c_hf(recs):
     out = []
     import hf_responder as H
-    check(H.HF_TESTED is False and "torch" not in sys.modules and "transformers" not in sys.modules,
-          "hf_responder import is not light or claims to be tested", out)
+    check(H.HF_TESTED is True and "torch" not in sys.modules and "transformers" not in sys.modules,
+          "hf_responder import is not light or lost the tested mark of notes STEP 9b", out)
     try:
         RN.make_responder("hf:none", argparse.Namespace(hf_untested_ok=False, render="template", dtype="bfloat16",
                                                         device="cpu"))

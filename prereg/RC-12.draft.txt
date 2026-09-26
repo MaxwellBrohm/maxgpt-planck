@@ -75,6 +75,17 @@ becomes training text). The two share the label D8 by accident.
     If OOD-H's paired point estimate is worse than -5 points, the claim is worded "non-inferior on RC-12's format",
     with the OOD-H result beside it, and the unqualified wording is not used. Level R statements made in December are
     provisional until OOD-H is complete in January.
+    Status (2026-09-26; rc12/oodh_wording.py, imported by score_stats; rc12/notes.txt STEP 11, OOD-H WORDING RULE):
+    the rule is code, tested on synthetic per-thread scores only, never applied to a model. Decided by Claude under
+    Max's standing permission (reversible before the lock): "worse than -5" is D < -5 after rounding D to 1e-6
+    points (exactly -5 is not worse); the qualified text replaces "non-inferior to Qwen2.5-0.5B-Instruct on RC-12,"
+    with "... on RC-12's format," and keeps the OOD-H sentence; a provisional note is added until Part 2 is scored.
+    Fix round (2026-09-26, notes STEP 11 FIX ROUND): the paired difference is refused when the comparator rows are not
+    Qwen2.5-0.5B-Instruct's, when the Planck rows are, when one model's rows hold two responders, or when one model is
+    greedy and the other sampled; a plain-render or greedy pair is only a labeled diagnostic, from which no claim
+    text is worded (s9: template render, T 0.6); "OOD-H complete" needs Part 2 threads in the scored set (ids
+    outside the Part 1 file); while qualified, any "non-inferior" (any case, hyphen, dash, space or none) that is not
+    the exact qualified phrase is refused.
   Level A: "Planck-{N}M passes a strict multi-turn bar that no model at or below 0.6B passed in our tests. On sealed
     RC-12, pooled over {k} seeds, it: applies corrections made 4 or more turns earlier (pass rate at least 0.80, with
     the two-slot and no-update control items also at least 0.80); keeps same-type facts and speakers apart in both
@@ -168,10 +179,34 @@ becomes training text). The two share the label D8 by accident.
     MaxGPT-3 and anything vLLM rejects. Conversations advance in lockstep batches (turn t of every conversation in one
     batch). A greedy HF-vs-vLLM parity check on 20 conversations per model family runs before any scored run. The
     locked file names one engine per model (OPEN, s16).
-  Likelihood rows (diagnostic, P-004; NOT BUILT): every probe with a closed candidate set also gets a row on GOLDEN
-    history (IDEAL replies) with a forced answer prefix from a separate prefix pool; right iff the gold's summed
-    log-prob is strictly above every other candidate's (E004 lik.py rule; equal candidate token counts checked per
-    tokenizer). Tier 0 margins are the per-checkpoint guard. Never in a composite or a claim.
+  Likelihood rows (diagnostic, P-004; BUILT 2026-09-26, rc12/notes.txt STEP 11, no model scored): every probe with a
+    closed candidate set also gets a row on GOLDEN history (IDEAL replies) with a forced answer prefix from a
+    separate prefix pool; right iff the gold's summed log-prob is strictly above every other candidate's (E004 lik.py
+    rule; equal candidate token counts checked per tokenizer). Tier 0 margins are the per-checkpoint guard. Never in
+    a composite or a claim.
+    Status (decided 2026-09-26 by Claude under Max's standing permission, reversible before the lock; rc12/
+    lik_rows.py, lik_score.py, pools_lik_prefix.py, lik_run.py): closed set = VAL probes whose gold is one of >= 2 candidates plus
+    the OWN pick (gold = the option the IDEAL Q reply picked): 412 dev rows (T0, K, abstain, ROLE X, OWN list,
+    PERSIST and LOOP have none; counts in excluded.json). Lead-ins: 8 neutral ones ("It is", "That would be", ...),
+    seed 4747; BIND twins share their pair's lead-in (the twins then differ only in the order of the two value
+    statements). Token counts (fix round, notes STEP 11 FIX ROUND): each row is scored on the gold against its foils,
+    the candidates with the gold's token count under that model's tokenizer (>= 1, else the row is "unmatched",
+    counted, not scored); accuracy is acc_matched with its per-row chance 1 / (1 + foils) beside it; rows whose
+    candidates all share one count (acc_equal) and the length-confounded rest (acc_unequal) are reported apart. Tier
+    0 margin per family: mean and nearest-rank 10th percentile of the matched rows' margins (gold minus the best
+    foil, nats); a row with a non-finite score enters as -inf and is counted (n_nonfinite), exact ties are counted
+    (n_ties). Two models are compared on the foils both tokenizers share (rc12/lik_compare.py). Scored in float32
+    (E004's default; Planck fp32); Gemma 3 with eager attention (engines.json: HF's sdpa path is wrong on long
+    prompts), recorded in summary.json. OWN rows are a copying diagnostic only: the gold is the one candidate named
+    twice on golden history, and a most-mentioned heuristic is right on all 32 (a swapped-pick twin keeps that cue).
+    Measured with the panel's own tokenizers (rc12/lik_tokcheck.py, tokenizer and config.json only, no weights;
+    logs/lik_tokcheck.json), matched / all-equal rows of 412, template (plain gives the same counts): Qwen2.5-0.5B
+    and Qwen3-0.6B 343 / 233 (OWN 26 of 32, ROLE 35 of 48, TOPIC 35, LOOKUP 46); LFM2.5-230M, LFM2.5-350M and
+    LFM2-2.6B 328 / 196; SmolLM2-135M and 360M 326 / 163; Falcon-H1-Tiny-90M 316 / 173; gemma-3-270m-it 372 / 276.
+    Rows with a foil common to the model and Qwen2.5-0.5B: 257 (Falcon-H1) to 315 (gemma). Not measured (tokenizer
+    not in the Mac's cache, PC offline): Qwen3.5-0.8B, LFM2-700M, LFM2-1.2B, Doge-160M. Tested with stub tokenizers
+    and scorers only (test_lik, test_lik_more; 51 of 51 mutants killed); the HF and Planck adapters have never run on a
+    model.
 
 5. FAMILIES AND DEV COUNTS
   Dev seed 1212, one stream per family: Random("RC12:dev:<family>:1212"). Byte-identical across processes (tested).
@@ -625,7 +660,14 @@ becomes training text). The two share the label D8 by accident.
   Planck's tokenizer does not exist and Phase 1 fixes it around Oct 18, after the lock window. So the lock fixes the
     RULE, not a hash: each checkpoint is scored with the tokenizer and ChatTemplate it was trained with, both recorded
     by hash in its run config and published with every scored run. The s3 token budget is then measured, not proxied.
-  Likelihood rows (s4) to build. OOD-H Part 1 to build; the OOD-H wording rule to implement in score_stats.
+  Likelihood rows (s4): BUILT 2026-09-26 (rc12/notes.txt STEP 11, stubs only; fix round the same day: matched
+    foils, BIND lead-ins per pair, fp32, Gemma 3 eager, the Tier 0 guard's non-finite and tie counts, lik_compare,
+    token counts measured with 9 of the 13 panel tokenizers); the first model run and the 4 missing tokenizers
+    (Qwen3.5-0.8B, LFM2-700M, LFM2-1.2B, Doge-160M) are open.
+  OOD-H Part 1: BUILT 2026-09-26 (s14; not locked). The OOD-H wording rule (s1): BUILT 2026-09-26
+    (rc12/oodh_wording.py, imported by score_stats as OW; rc12/notes.txt STEP 11, OOD-H WORDING RULE; synthetic
+    per-thread scores only; fix round the same day: comparator, decoding, render and Part 2 checks, the refusal
+    matcher; s1 status). Open: its first use needs both models' OOD-H runs, and OOD-H Part 2 (January).
   The sealed split (s13) and every hash of S5 and S9.
   DONE 2026-09-25: Max ruled OD1-OD8 (s17) and the code for the picks is written (OD1 option b: an AND over the two
     OWN runs in score.py and score_stats.py, mutants_e2e #50-#60; OD6 (iii): grade_loop plus fixtures, 7 grader

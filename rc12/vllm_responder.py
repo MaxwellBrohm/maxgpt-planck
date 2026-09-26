@@ -1,9 +1,12 @@
 """RC-12 vLLM responder (draft s4 engines; notes STEP 9): the same interface as hf_responder.HFResponder (start,
 count, reply) plus reply_batch for lockstep.py, backed by vLLM offline (LLM.generate with token-id prompts).
 
-UNTESTED ON A REAL MODEL. VLLM_TESTED = False: runner.py refuses it without --vllm-untested-ok. It is set True only
-in a logged step after parity_hf_vllm.py has passed on a real model. Tests without a model: test_vllm_responder.py
-(a stub LLM, a stub SamplingParams and a toy tokenizer).
+VLLM_TESTED = True since the logged step notes STEP 9b (2026-09-26): parity_hf_vllm.py passed (NEAR_TIE, greedy, 20
+conversations) on Qwen3.5-0.8B, LFM2.5-230M, LFM2-700M, Falcon-H1-Tiny-90M-Instruct and SmolLM2-135M-Instruct in
+bf16, and on Qwen2.5-0.5B-Instruct in fp32; the three bf16 DIFFERS verdicts (Qwen2.5, Qwen3-0.6B, gemma-3-270m-it)
+were read turn by turn there. While it was False, runner.py refused vllm: without --vllm-untested-ok (the refusal
+is still tested with the flag patched False). Tests without a model: test_vllm_responder.py (a stub LLM, a stub
+SamplingParams and a toy tokenizer).
 Importing this module imports nothing heavy; transformers and vllm load in VLLMResponder.__init__ only.
 
 Prompts: the HF path's own code. prompt / encode / count ARE HFResponder's functions (the template render via
@@ -34,7 +37,7 @@ import os
 
 import hf_responder as HR
 
-VLLM_TESTED = False
+VLLM_TESTED = True
 TOP_K_OFF = -1
 GPU_MEM = 0.85
 MAX_LEN_CAP = 32768

@@ -1,4 +1,4 @@
-RC-12 mutation_step9.py part 2/3: 16 of 47 mutants, fresh process each, 32 s. No model.
+RC-12 mutation_step9.py part 2/3: 16 of 47 mutants, fresh process each, 87 s. No model.
 baseline: ran, failures: none
 KILLED    #01 lockstep [lock vllm]: every conversation gets the first conversation's seed  <- SAMPLER plain seeds=[None, 1, 2] ctx=None own_cf=False: 1920 vs 1920 rows, first differing row 640
 KILLED    #04 lockstep [lock]: PerConv starts every conversation greedy  <- SAMPLER plain seeds=[None, 1, 2] ctx=None own_cf=False: 1920 vs 1920 rows, first differing row 640
