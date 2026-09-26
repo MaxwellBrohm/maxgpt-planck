@@ -1515,3 +1515,114 @@ NOT DONE: no model scored; 4 panel tokenizers unmeasured; Gemma 3 eager never ru
   has no test of its own (lik_score and lik_compare, which it calls, are tested); prereg s9 still says the OOD-H
   wording rule is not implemented and s0 is stale (outside this round's edit scope). Part 2's item format does not
   exist yet, so "Part 2 thread" means only "an id outside the Part 1 file".
+
+STEP 9c (2026-09-26 evening, branch doge): an engine for SmallDoge/Doge-160M-Instruct. Its own venv, the checkpoint's
+own code, EAGER attention (a causality defect under sdpa, found here), batched HF with 32 rows; per-model python and
+HF options in engines.json; Doge queued as a follow-up to the running queue. No model loaded on the Mac; nothing
+committed; the running queue (rc12_q9) untouched.
+VENV (PC) ~/planck/venv-doge, built by a detached restartable job (17:24 to 17:25 EDT, 46 wheels from the pip
+  cache, 5 downloaded): Python 3.14.4 (the only Python on the PC), torch 2.13.0+cu130 (CUDA 13.0, the cu130 index, as
+  ~/planck/venv), transformers 4.55.0 (config.json transformers_version), tokenizers 0.21.4, huggingface_hub 0.36.2,
+  safetensors 0.8.0, jinja2 3.1.6; 4.9 GB. The remote code imports only torch and transformers. pip freeze:
+  ~/planck/logs/rc12_doge_venv.freeze.txt.
+CPU LOAD (PC, CUDA_VISIBLE_DEVICES empty, torch.cuda.is_available() False; ~/planck/logs/rc12_doge_cpu.log): rc12's
+  HFResponder(trust_remote_code=True) builds transformers_modules...e69e586...modeling_doge.DogeForCausalLM in 1.8 s,
+  152.7M parameters, no load warnings; ctx 2048 (max_position_embeddings); stop ids [1 <|end_of_text|> (eos),
+  6 <|eot_id|>], pad 2; generation_config.json holds only bos / eos / pad ids. Template (Llama-3 layout): BOS, a
+  default system block "Cutting Knowledge Date: December 2024 / Today Date: December 2024", turns
+  "<|start_header_id|>role<|end_header_id|>\n...<|end_of_text|>\n\n", generation prompt the assistant header;
+  decode(ids) == the template string (one BOS). Replies: fluent and weak (e.g. "The capital of France is Paris" with
+  invented details; on some prompts it repeats the question).
+THE SDPA DEFECT (CPU, fp32; ~/planck/logs/rc12_doge_cpu3.log). Loaded with the default attention (sdpa):
+  changing only tokens 30+ of a 52-token paragraph moved the logits at positions 0-29 by up to 22.3 (causal: 0);
+  paragraph NLL 1.105 nats/token (eager 1.701); greedy with vs without KV cache differed on 3 of 3 chat prompts; a
+  prompt alone vs the same prompt left-padded in a 2-row batch differed on 3 of 3. Eager: 0.0, cache == no cache and
+  alone == padded on 3 of 3, and sdpa's padded replies read as eager's (first 70 characters, 3 of 3). Cause (read
+  in the remote code and in transformers 4.55): DogeAttention always passes its dynamic mask (the dt bias) as
+  attn_mask; create_causal_mask returns None under sdpa when the batch has no padding (allow_is_causal_skip), and
+  sdpa_attention_forward sets is_causal only when attn_mask is None, so an unpadded prefill attends to later tokens.
+  A padded batch gets the full 4-D mask and is causal. HF serial (no padding) would have been the leaky one; hfb
+  only on chunks without padding. So Doge loads with attn_implementation="eager", named in engines.json.
+GPU MEMORY (PC, under gpu.lock, 18:43 to 18:46; ~/planck/logs/rc12_doge_mem.log): hfb, eager, bf16, one chunk at a
+  1708-token prompt (history fitted near ctx - 256), sampled, 256 new tokens: 64 rows peak 17.94 GiB (above the
+  12 GB card: the WSL driver spilled to shared memory, no OOM) in 130.8 s; 32 rows 9.13 GiB, 16.5 s; 16 rows
+  4.73 GiB, 10.3 s. So max_batch 32 for Doge (engines.json); hf_batched.MAX_BATCH stays 64 for everything else.
+CODE (rc12; all options default to the old behavior, so the 12 vLLM models run exactly as before)
+  hf_responder.py   HFResponder(..., trust_remote_code=False, attn_implementation=None): trust goes to both
+                    from_pretrained calls, attn_implementation to the model's only when given (None = the library
+                    default, as before); self.attn = the attention as loaded. Docstring: Doge, the sdpa defect.
+  hf_batched.py     HFBatched passes both through; the MAX_BATCH comment.
+  runner.py         make_responder reads args.trust_remote_code / attn_implementation / max_batch (hfb) if present.
+  dev_batch.py      hf_options(): engines.json "trust_remote_code" (only a real true counts), "attn_implementation",
+                    "max_batch"; refused on vllm (trust / attn) and outside hfb or not a positive int (max_batch);
+                    meta.json records the three and sys.executable; engine_audit records trust_remote_code and attn.
+  queue_dev_baselines.sh  python_of(): engines.json "python" for the model (~ expanded), else $PY; each process runs
+                    under it; a python that is not executable writes NOPYTHON status lines and takes no lock.
+  parity_hf_vllm.py --trust-remote-code (hfb only) and --attn-implementation, passed to both HF stages and forwarded
+                    by stage all.
+  verify_dev_runs.py  --rerun rebuilds the engine with the run's meta.json trust / attn / max_batch.
+  engines.json      Doge moved from not_run to models: hfb, bfloat16, python ~/planck/venv-doge/bin/python,
+                    trust_remote_code true, attn_implementation eager, max_batch 32, with the evidence above.
+  test_hf_trust.py  NEW. Stub transformers and torch modules (sys.modules), no library loads: the options travel
+                    engines.json -> dev_batch -> make_responder -> HFBatched / HFResponder -> from_pretrained (the
+                    tokenizer gets trust only, the model both; absent: trust False and NO attn argument); meta and
+                    engine_audit; the refusals; parity's stages and stage-all forwarding; verify --rerun.
+  test_queue.py     c_python: a model with a "python" (~/venv-x/bin/python, HOME pointed at the test dir) runs its
+                    dev_batch under that wrapper (exactly one call, logged by the wrapper), the others under Q_PY,
+                    a missing python gives NOPYTHON lines and no lock call.
+  test_parity.py    its StubHF takes the two new keyword arguments. mutation_verify.py: one target retyped to the
+                    new meta line ("decode not recorded").
+GATES (Mac, no model) test_hf_trust 0, test_queue 0, test_dev_batch 0, test_verify_dev_runs 0, test_parity 0,
+  test_vllm_responder 0, test_lockstep 0, validate_machinery 0 (11 groups). Mutation: STEP 9c's own 38 mutants
+  (scratch script, each in a fresh copy of rc12, baselines 0): 38 / 38 killed, 0 malformed (trust, attn and
+  max_batch through every hop, the refusals, meta, audit, parity, verify --rerun, and the queue's python choice, ~
+  expansion, NOPYTHON check and $PY fallback). mutation_queue 30 / 30, mutation_step9 47 / 47, mutation_verify
+  17 / 17 (baselines clean).
+GPU SMOKE (PC, under gpu.lock 18:39 to 18:43, code ~/planck/dev/rc12_dg, root ~/planck/runs/rc12_doge_smoke, never
+  rc12_dev because a --limit run is marked DONE): dev_batch --responder hfb:SmallDoge/Doge-160M-Instruct --render
+  template --seeds greedy --limit 5 through engines.json, run by venv-doge's python: exit 0. greedy: 5 conversations
+  (t0-001..005), 60 replies, cap 37 / eos 23, 86.0 s, batches of 5; own-cf twin: 5 OWN conversations, 60 replies,
+  eos 52 / cap 8, 59.7 s. meta.json: engine hfb, dtype bfloat16, trust_remote_code true, attn_implementation
+  eager, executable ~/planck/venv-doge/bin/python, versions transformers 4.55.0 / torch 2.13.0+cu130, audit attn
+  eager, stops [1, 6], ctx 2048, hf_generation_config only bos / eos / pad. 0 empty replies, 0 with special-token
+  text. Read: t0-001 and t0-002 (6 turns each) and own-001: fluent, loops and repeats its own earlier sentences, often
+  echoes the user; recalls "ukulele" when asked. Model behavior, not harness.
+  verify_dev_runs on the smoke: C1 and C4 as above; C2 FAIL as expected for --limit (0 OWN among the first 5 dev
+  records vs 5 twins, STEP 9 VERIFY (5)); C5 crashed (StopIteration: no non-T0 row in a 5-record run), a
+  verify_dev_runs limit on limited runs, not fixed here.
+  The same job's parity at --n 5 failed in its own scorer (BIND pair bind-01 had 1 twin in the run: --pick spread
+  at n 5 splits a pair), so the parity was rerun at the panel's n 20 (below).
+PARITY (PC, under gpu.lock 19:19 to 19:36, 1010 s; ~/planck/runs/rc12_dev/Doge-160M-Instruct/parity/, the panel's
+  protocol: greedy, template, 20 conversations --pick spread, 240 turns; parity_hf_vllm.py --engine hfb
+  --trust-remote-code --attn-implementation eager, venv-doge): batched HF (one batch of 20 per turn) vs serial HF on
+  the same histories. VERDICT NEAR_TIE: 161 / 240 turns identical, 0 / 20 conversations, 0 prompt mismatches, 79
+  differing turns whose first differences all sit at margins <= 0.25 nats (largest 0.25, 0.25, then 0.125), 21 stop
+  disagreements (all on turns whose text differs; no FAIL_STOP). Read: the two 0.25 turns (t0-001 t3 at token 189,
+  role-001 t12 at token 65), first 160 characters, identical there. The batched engine is the serial one within
+  bf16 drift, as for the vLLM families. engines.json "parity": "bf16 NEAR_TIE (batched HF vs serial HF, both eager)".
+QUEUE (Doge after the others, the running queue left alone)
+  The running queue (launched 14:47 from the kit copy of queue_dev_baselines.sh, code ~/planck/dev/rc12_q9, engines
+  rc12_q9/engines.json) was not touched: not its script, code dir or engines.json. It writes NOENGINE for Doge's 16
+  runs and will end with its DONE marker (12 of 208 runs done at 17:38).
+  ~/planck/dev/rc12_dg = a copy of rc12_q9 (identical, no runs/) with this step's files laid over it (md5s checked
+  against the Mac). Follow-up job (scratchpad dg_follow.sh, planck-kit copy, log ~/planck/logs/rc12_doge_follow.log),
+  started 19:08:42 EDT (pid 351047, its flock waiter 351054): it waits on locks/rc12_dev_queue.lock until the
+  running queue exits; if its DONE marker exists and no STOP file, it keeps that marker as
+  rc12_dev_queue.DONE.pass1 and runs Q_CODE=~/planck/dev/rc12_dg bash
+  ~/planck/dev/rc12_dg/queue_dev_baselines.sh: same name, log, lock, status file and root; every finished run is
+  skipped, so it runs Doge's 8 processes (template then plain; greedy, 1, 2, 3) and retries anything pass 1 SKIPped.
+  Without a DONE marker (pass 1 died) or with a STOP file it does nothing and says so. Tested on the Mac with a shim
+  flock (restart / STOP / no DONE).
+  Manual restart (if the follow-up is gone, e.g. WSL restarted), once no queue runs: start detached (pcdetach.sh) a
+  script whose one command is  Q_CODE=$HOME/planck/dev/rc12_dg bash $HOME/planck/dev/rc12_dg/queue_dev_baselines.sh
+  Doge time, estimated from the probe and the smoke (not measured on a full run): 20 chunks x 12 turns per dev run
+  at about 10 to 16.5 s each plus 24 twin calls, about 45 to 75 min per process, 6 to 10 h of GPU for the 8.
+OPEN
+  Doge's first queue run (template greedy) has not run; it comes after pass 1, which was at 12 of 208 runs at 17:38.
+  After it: verify_dev_runs --model SmallDoge/Doge-160M-Instruct --render template with venv-doge's python, then
+  --rerun 5 under gpu.lock (R1 / R2 for the hfb path).
+  hf_responder's EOT list is unchanged (Doge's <|eot_id|> and eos were already covered).
+  lik_adapters.HFLik.load (STEP 11, outside this branch) passes neither trust_remote_code nor eager for Doge: its
+  likelihood rows would need both and venv-doge, or they hit the load failure or the sdpa defect.
+  The follow-up runs from its planck-kit copy (dg_follow.sh; bash reads it as it goes): do not overwrite that file
+  while it waits. Its log: ~/planck/logs/rc12_doge_follow.log.

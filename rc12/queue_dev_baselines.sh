@@ -9,6 +9,8 @@
 # stale .partial). One status line per run is appended to <root>/queue_status.txt (queue_status.py). After a failed
 # process the rest of that model and render is skipped (a restart retries it). DONE marker at the end.
 # Stop between processes: touch ~/planck/logs/rc12_dev_queue.STOP (the running process finishes first).
+# Python per model: engines.json's "python" for the model (~ expanded; Doge runs in ~/planck/venv-doge with
+# transformers 4.55, notes STEP 9c), else $PY; a model whose python is not executable gets NOPYTHON lines.
 # The Mac test (test_queue.py, fakes only) overrides Q_CODE Q_ROOT Q_LOGS Q_LOCKS Q_PY Q_ENGINES Q_MODELS Q_RENDERS
 # Q_SEEDS Q_LIMIT Q_TIMEOUT Q_LOCK_WAIT.
 CODE=${Q_CODE:-$HOME/planck/dev/rc12_q9}
@@ -42,6 +44,13 @@ engine_of() {
   "$PY" -c 'import json, sys; print(json.load(open(sys.argv[1]))["models"].get(sys.argv[2], {}).get("engine", ""))' \
     "$ENGINES" "$1" 2>/dev/null
 }
+python_of() {  # the model's python: engines.json "python" (~ expanded), else $PY
+  local p
+  p=$("$PY" -c 'import json, os, sys
+print(os.path.expanduser(json.load(open(sys.argv[1]))["models"].get(sys.argv[2], {}).get("python", "")))' \
+    "$ENGINES" "$1" 2>/dev/null)
+  echo "${p:-$PY}"
+}
 status() {  # status <model> <render> <seed> <engine> <exit> <t0> <t1> <runs> [note]: one line per run in <runs>
   "$PY" -B queue_status.py --root "$ROOT" --model "$1" --render "$2" --seed "$3" --engine "$4" --exit "$5" \
     --t0 "$6" --t1 "$7" --runs "$8" --note "${9:-}" >> "$STATUS" || echo "$(ts) queue: status failed: $1 $2 $3"
@@ -60,15 +69,19 @@ for m in $MODELS; do
       fi
       eng=$(engine_of "$m")
       if [ -z "$eng" ]; then status "$m" "$r" "$seed" - NOENGINE "$now" "$now" "$runs" not_in_engines.json; continue; fi
+      mpy=$(python_of "$m"); pnote=""; [ "$mpy" != "$PY" ] && pnote=", $mpy"
+      if [ ! -x "$mpy" ]; then
+        status "$m" "$r" "$seed" "$eng" NOPYTHON "$now" "$now" "$runs" "no_python_$mpy"; continue
+      fi
       extra=""; case $eng in hf|hfb) extra=--hf-untested-ok;; esac
       [ -n "$Q_LIMIT" ] && extra="$extra --limit $Q_LIMIT"
       log=$LOGS/rc12_dev/${s}_${r}_${seed}.log; lk=$LOGS/rc12_dev/.${s}_${r}_${seed}.lockstart
       for try in 1 2 3; do
         if [ -e "$LOGS/$NAME.STOP" ]; then echo "$(ts) queue: STOP file, exiting"; exit 0; fi
-        echo "$(ts) queue: $s $r $seed ($eng) waiting for the GPU lock (try $try)"
+        echo "$(ts) queue: $s $r $seed ($eng$pnote) waiting for the GPU lock (try $try)"
         t0=$(date +%s); rm -f "$lk"
         flock -E 75 -w "$LOCK_WAIT" "$LOCKS/gpu.lock" bash -c 'date +%s > "$0"; exec timeout -k 120 "$@" 8>&-' \
-          "$lk" "$TMO" "$PY" -B dev_batch.py --responder "$eng:$m" --render "$r" --seeds "$seed" --root "$ROOT" \
+          "$lk" "$TMO" "$mpy" -B dev_batch.py --responder "$eng:$m" --render "$r" --seeds "$seed" --root "$ROOT" \
           --engines "$ENGINES" $extra >> "$log" 2>&1
         rc=$?
         [ $rc -ne 75 ] && break

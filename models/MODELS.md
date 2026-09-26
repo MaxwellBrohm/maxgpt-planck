@@ -46,13 +46,16 @@ neither imports torch or loads weights. Tests: `python3 models/tests/test_regist
 - **The archive is the D: drive** (about 466 GB free), as `/mnt/d/planck-archive` from WSL. Layout: the
   registry id is the path, e.g. `/mnt/d/planck-archive/E005/135m/s1/model.safetensors`. Each id directory
   holds the entry's registered files under their own names (not the whole run directory).
-- **Archive status (2026-09-26, 14:50)**: 15 models, 5.65 GB, every file re-hashed there by
-  `verify --where pc` and listed in its entry: the 5 E2 smoke checkpoints, and E004/E005 135m s1-s5 (copied
-  on the PC from their hash-verified `~/planck/dev/e006_refs_*` copies). Not yet copied: 23 Mac-only
-  models (E002 5, E003 18; 4.53 GB). The Mac was on a phone hotspot, where Mac to PC ran at about
-  0.35 MB/s (about 3.6 hours and 4.5 GB of cellular data), so that upload waits for the home network; it
-  is restartable per file, and each file is hash-checked on the PC before its location is added. E006
-  has no saved weights yet.
+- **Archive status (2026-09-26, 17:37)**: all 38 saved models, 185 files, 10.18 GB (10,181,981,296
+  bytes), every file re-hashed there by `verify --where pc` (0 missing or mismatched) and listed in its
+  entry: E002 5 and E003 18 (uploaded from the Mac 17:20-17:31 on the home network at about 7 MB/s, each
+  file hash-checked on the PC before its location was added), E004/E005 135m s1-s5 (copied on the PC from
+  their hash-verified `~/planck/dev/e006_refs_*` copies) and the 5 E2 smoke checkpoints. Those 5 are now
+  archive-only: a second smoke run into `~/planck/runs/smoke` (17:07-17:11) overwrote their run-area files
+  with different ones, so that location was removed from their entries; the 17:07 run is not registered.
+  E006 has no saved weights yet (17:21: `weights/` empty, its queue still rescoring the E004/E005
+  reference weights before any training job), and its dry runs saved none (`weights_sha256` "unsaved" or
+  null in their guard records).
 - `~/planck/dev/...` is a working area that has been cleaned by another process once; a copy there
   (for example E006's reference copies of E004/E005) is listed but is never the only copy.
 - **Off-site backup (option, needs Max)**: a private Hugging Face model repo per experiment, pushed with

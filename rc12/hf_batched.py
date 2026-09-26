@@ -17,7 +17,8 @@ Importing this module imports nothing heavy; torch and transformers load in HFRe
 trace: set to a list to record every reply in parity_hf_vllm.py's format (finish / stop_reason None)."""
 import hf_responder as HR
 
-MAX_BATCH = 64
+MAX_BATCH = 64   # engines.json "max_batch" overrides it per model (Doge: 32; 64 rows of 1708-token prompts
+                 # under eager attention peaked at 17.9 GiB on the 12 GB card, notes STEP 9c)
 
 
 def split_reply(out, stop_ids, eot, cap=HR.DECODE["max_new_tokens"]):
@@ -70,8 +71,9 @@ class RowSampler:
 
 
 class HFBatched(HR.HFResponder):
-    def __init__(self, model_id, render="template", dtype="bfloat16", device="cuda", max_batch=MAX_BATCH):
-        super().__init__(model_id, render, dtype, device)
+    def __init__(self, model_id, render="template", dtype="bfloat16", device="cuda", max_batch=MAX_BATCH,
+                 trust_remote_code=False, attn_implementation=None):
+        super().__init__(model_id, render, dtype, device, trust_remote_code, attn_implementation)
         self.max_batch, self.batches, self.trace = max_batch, [], None
         self.rec = None
 

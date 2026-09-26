@@ -12,6 +12,11 @@ engines.json may also name a dtype per model ({"engine": "vllm", "dtype": "float
 records the run config (verifier 2026-09-26): dtype, max_model_len, batch_invariant, decode (hf_responder.DECODE) and
 audit (engine_audit: the stop list, thinking flag, ctx, the sampling kwargs, and for vLLM the stop ids it adds from
 generation_config.json).
+engines.json may also set, for an hf / hfb model only, "trust_remote_code": true (the checkpoint's own modeling code)
+and "attn_implementation" (e.g. "eager"), for hfb only "max_batch" (rows per generate call, default
+hf_batched.MAX_BATCH), and for any model a "python" (the venv the queue runs it with). Doge uses all four (notes
+STEP 9c). meta.json records them (max_batch None = the default) and sys.executable; its audit records the attention
+the model loaded with.
 hf: responders need --hf-untested-ok (runner.py rule) and go through lockstep.Serial (no batching); hfb: (hf_batched.py,
 batched, same flag) is gated on its parity.json like vllm: (parity_hf_vllm.py --engine hfb).
 Run on the PC under the GPU lock (pc_jobs.py writes the job):
@@ -55,11 +60,21 @@ def chosen_dtype(model_id, path=ENGINES):
     return json.load(open(path))["models"].get(model_id, {}).get("dtype")
 
 
+def hf_options(model_id, path=ENGINES):
+    """engines.json's HF options for model_id: trust_remote_code (True only where the checkpoint's own code must run;
+    a non-boolean value counts as False), attn_implementation (None = the library default), max_batch (None = the
+    default)."""
+    e = json.load(open(path))["models"].get(model_id, {}) if os.path.exists(path) else {}
+    return dict(trust_remote_code=e.get("trust_remote_code", False) is True,
+                attn_implementation=e.get("attn_implementation"), max_batch=e.get("max_batch"))
+
+
 def engine_audit(eng):
     """the engine's run config for meta.json: VLLMResponder.audit(), else the HF fields (stop list, thinking, ctx)."""
     if hasattr(eng, "audit"):
         return eng.audit()
-    out = {k: getattr(eng, k, None) for k in ("stop_ids", "eos", "eot", "qwen3", "ctx", "has_template")}
+    out = {k: getattr(eng, k, None) for k in ("stop_ids", "eos", "eot", "qwen3", "ctx", "has_template",
+                                              "trust_remote_code", "attn")}
     gc = getattr(getattr(eng, "model", None), "generation_config", None)
     try:                                               # what generate's explicit kwargs override
         if gc is not None:
@@ -137,6 +152,11 @@ def main():
     verdict = parity_verdict(root, model_id) if gated else None
     chosen = chosen_engine(model_id, args.engines)
     dtype = chosen_dtype(model_id, args.engines) or args.dtype   # engines.json's dtype wins (verifier 2026-09-26)
+    hfo = hf_options(model_id, args.engines)
+    if (hfo["trust_remote_code"] or hfo["attn_implementation"] is not None) and kind not in ("hf", "hfb"):
+        sys.exit(f"engines.json sets HF load options for {model_id}: hf / hfb only, not {kind}")
+    if hfo["max_batch"] is not None and (kind != "hfb" or type(hfo["max_batch"]) is not int or hfo["max_batch"] < 1):
+        sys.exit(f"engines.json max_batch {hfo['max_batch']!r} for {model_id}: a positive int, hfb only (not {kind})")
     if chosen is not None and chosen != kind and not args.no_parity_gate:
         sys.exit(f"engine gate: engines.json names {chosen} for {model_id}, not {kind}")
     if gated and verdict not in PASSING and chosen != kind and not args.no_parity_gate:
@@ -147,7 +167,8 @@ def main():
         return 0
     ns = argparse.Namespace(render=args.render, dtype=dtype, device=args.device, gpu_mem=args.gpu_mem,
                             max_model_len=args.max_model_len, batch_invariant=args.batch_invariant, lockstep=True,
-                            hf_untested_ok=args.hf_untested_ok, vllm_untested_ok=kind == "vllm")
+                            hf_untested_ok=args.hf_untested_ok, vllm_untested_ok=kind == "vllm",
+                            **hfo)
     eng, name = R.make_responder(args.responder, ns)
     ctx = getattr(eng, "ctx", None)
     recs, own = R.load(args.data, None, args.limit), R.load(args.data, ["OWN"], args.limit)
@@ -155,7 +176,7 @@ def main():
                  parity_gate_skipped=args.no_parity_gate and verdict not in PASSING and chosen != kind,
                  limit=args.limit, train_seed=args.train_seed, gpu_mem=args.gpu_mem, data=os.path.basename(args.data),
                  dtype=dtype, max_model_len=args.max_model_len, batch_invariant=args.batch_invariant,
-                 decode=HR.DECODE, audit=engine_audit(eng))
+                 decode=HR.DECODE, audit=engine_audit(eng), executable=sys.executable, **hfo)
     for seed, own_cf, final in todo:
         run_one(eng, name, own if own_cf else recs, args.render, seed, own_cf, final, ctx, extra)
     return 0

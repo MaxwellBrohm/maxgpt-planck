@@ -17,7 +17,7 @@ ENV = dict(os.environ, PYTHONPATH=os.pathsep.join(p for p in (E004, os.environ.g
 MUTANTS = [
     (D, "dtype = chosen_dtype(model_id, args.engines) or args.dtype", "dtype = args.dtype",
      "engines.json's dtype ignored"),
-    (D, "decode=HR.DECODE, audit=engine_audit(eng))", "audit=engine_audit(eng))", "decode not recorded"),
+    (D, "decode=HR.DECODE, audit=engine_audit(eng),", "audit=engine_audit(eng),", "decode not recorded"),
     (V, 'say("FAIL", f"C2 {name}: no finished _owncf twin (R would be None)")', "pass", "missing twin passes"),
     (V, 'if m.get("decode") != HR.DECODE:', "if False:", "decode not checked"),
     (V, 'if t["stop"] not in OK_STOPS[render] or t["reply"] != t["reply"].strip():', "if False:",

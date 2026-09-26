@@ -1,0 +1,582 @@
+{
+ "what": "Per-source statistics of core v0 after the second near-dedup pass on the final text (corpus/neardedup_post.py, data/core_v0_pd on the PC), with token estimates recomputed (corpus/neardedup_post_tok.py). Docs and bytes are exact counts, tokens are estimates (est.).",
+ "input": {
+  "core_v0_manifest_sha256": "268c1fe6c16e31da3290f8c9650786dcefc35bf57bc63c7d56177601ec7bcb79",
+  "core_v0_manifest_updated": "2026-09-26T10:09:37"
+ },
+ "output": {
+  "manifest_sha256_note": "sha256 of each output shard and keys file is in data/core_v0_pd/MANIFEST.json on the PC",
+  "updated": "2026-09-26T18:16:48",
+  "shards": 870
+ },
+ "params": {
+  "verify": 0.7,
+  "chain_floor": 0.0,
+  "level": 10
+ },
+ "nd_params": {
+  "ngram": 5,
+  "bands": 14,
+  "rows": 9,
+  "nperm": 126,
+  "verify": 0.7,
+  "seed": 20260926,
+  "hash": "multiply-shift 64->32 on splitmix64 5-gram ids"
+ },
+ "code_sha256": {
+  "neardedup.py": "2744c1d8794272bb05fdcb0a1b09e7aef566af5e931accd64f1fb109f0e8f9b9",
+  "neardedup_keep.py": "eee351bff52bf87c08feae7caf37a2644fad722a93dc5c19cee7884f6affc500",
+  "neardedup_lsh.py": "f66c5b2fd4a7dd5c3bab85d97bb4073575ff80a9279d403b42e1ba92da26ecdb",
+  "neardedup_post.py": "ed79686162ce5c40f6e9e8aa25d56e297cf9b9da29602647c73ec0089c3fb54c",
+  "neardedup_post_io.py": "930dd97d088d6c9ef5960bd33d1445c70d89440bedbfe07a352652ef3f41f067"
+ },
+ "method": {
+  "tokens": "tokenizer v0 8k (tok_v0_8k.json, sha256 078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5), encode(text, add_special_tokens=False), no EOS; ratio estimate over a fresh uniform sample of the post-dedup docs (2,000 per source, 400 for loc and gutenberg, all of pdr), numpy seed 20260926; ci95 = 300 bootstrap resamples; dropped_tokens_est_8k = dropped bytes / the new bytes per token; tokens_est_8k_at_v0_ratio = new text bytes / the core v0 bytes per token of final_stats.json (isolates the dedup change from resampling noise)",
+  "input_check": "docs_in and text_bytes_in of every source equal final_stats.json (core v0) exactly: True"
+ },
+ "totals": {
+  "docs_v0": 9307490,
+  "docs": 8881393,
+  "dropped_docs": 426097,
+  "text_bytes_v0": 119856592046,
+  "text_bytes": 119318118743,
+  "dropped_bytes": 538473303,
+  "zst_bytes": 38305895737,
+  "tokens_est_8k_v0": 35934989683,
+  "tokens_est_8k": 35425655654,
+  "tokens_est_8k_sum_of_ci95": [
+   34900161181,
+   35965343306
+  ],
+  "dropped_tokens_est_8k": 167449236,
+  "tokens_est_8k_at_v0_ratio": 35764107679
+ },
+ "neardedup_post": {
+  "verify": 0.7,
+  "chain_floor": 0.0,
+  "docs": 9307490,
+  "dropped": 426097,
+  "clusters": 284183,
+  "docs_in_clusters": 710280,
+  "edges": {
+   "candidate_edges": 2910696,
+   "verified": 449573,
+   "rejected": 130075,
+   "merges": 426097,
+   "rounds": 1,
+   "released": 0,
+   "unsettled": 0
+  },
+  "cluster_size_hist": {
+   "2": 230978,
+   "3-5": 48014,
+   "6-11": 2424,
+   "12-23": 867,
+   "24-47": 1877,
+   "48-95": 17,
+   "96-191": 3,
+   "192-383": 2,
+   "384-767": 1
+  },
+  "audit_summary": {
+   "n": 200,
+   "under_0.7": 3,
+   "under_0.5": 0,
+   "median": 0.857
+  },
+  "seconds": 47.7
+ },
+ "sources": {
+  "oasst2": {
+   "tier": 1,
+   "docs_v0": 4432,
+   "docs": 4432,
+   "dropped_docs": 0,
+   "dropped_docs_share": 0.0,
+   "text_bytes_v0": 8687488,
+   "text_bytes": 8687488,
+   "dropped_bytes": 0,
+   "dropped_bytes_share": 0.0,
+   "zst_bytes": 3427256,
+   "dropped_by_lead_source": {},
+   "tokens_est_8k_v0": 2327743,
+   "tokens_est_8k_at_v0_ratio": 2327712,
+   "sample_docs": 2000,
+   "bytes_per_token_8k": 3.7216,
+   "bytes_per_token_8k_ci95": [
+    3.687,
+    3.7633
+   ],
+   "tokens_est_8k": 2334366,
+   "tokens_est_8k_ci95": [
+    2308447,
+    2356270
+   ],
+   "dropped_tokens_est_8k": 0
+  },
+  "dolly": {
+   "tier": 1,
+   "docs_v0": 10785,
+   "docs": 10785,
+   "dropped_docs": 0,
+   "dropped_docs_share": 0.0,
+   "text_bytes_v0": 10479961,
+   "text_bytes": 10479961,
+   "dropped_bytes": 0,
+   "dropped_bytes_share": 0.0,
+   "zst_bytes": 4286848,
+   "dropped_by_lead_source": {},
+   "tokens_est_8k_v0": 2896290,
+   "tokens_est_8k_at_v0_ratio": 2896297,
+   "sample_docs": 2000,
+   "bytes_per_token_8k": 3.609,
+   "bytes_per_token_8k_ci95": [
+    3.57,
+    3.6416
+   ],
+   "tokens_est_8k": 2903819,
+   "tokens_est_8k_ci95": [
+    2877860,
+    2935547
+   ],
+   "dropped_tokens_est_8k": 0
+  },
+  "stackexchange": {
+   "tier": 1,
+   "docs_v0": 1080107,
+   "docs": 1080107,
+   "dropped_docs": 0,
+   "dropped_docs_share": 0.0,
+   "text_bytes_v0": 4772266107,
+   "text_bytes": 4772266107,
+   "dropped_bytes": 0,
+   "dropped_bytes_share": 0.0,
+   "zst_bytes": 1931208846,
+   "dropped_by_lead_source": {},
+   "tokens_est_8k_v0": 1302790806,
+   "tokens_est_8k_at_v0_ratio": 1302794384,
+   "sample_docs": 2000,
+   "bytes_per_token_8k": 3.6253,
+   "bytes_per_token_8k_ci95": [
+    3.5842,
+    3.6653
+   ],
+   "tokens_est_8k": 1316360908,
+   "tokens_est_8k_ci95": [
+    1302006473,
+    1331458066
+   ],
+   "dropped_tokens_est_8k": 0
+  },
+  "irc": {
+   "tier": 1,
+   "docs_v0": 192016,
+   "docs": 192016,
+   "dropped_docs": 0,
+   "dropped_docs_share": 0.0,
+   "text_bytes_v0": 4371530136,
+   "text_bytes": 4371530136,
+   "dropped_bytes": 0,
+   "dropped_bytes_share": 0.0,
+   "zst_bytes": 1397112846,
+   "dropped_by_lead_source": {},
+   "tokens_est_8k_v0": 1638495784,
+   "tokens_est_8k_at_v0_ratio": 1638504549,
+   "sample_docs": 2000,
+   "bytes_per_token_8k": 2.6657,
+   "bytes_per_token_8k_ci95": [
+    2.6514,
+    2.6792
+   ],
+   "tokens_est_8k": 1639918091,
+   "tokens_est_8k_ci95": [
+    1631665464,
+    1648767803
+   ],
+   "dropped_tokens_est_8k": 0
+  },
+  "wikimedia": {
+   "tier": 1,
+   "docs_v0": 83610,
+   "docs": 83592,
+   "dropped_docs": 18,
+   "dropped_docs_share": 0.00022,
+   "text_bytes_v0": 314825178,
+   "text_bytes": 314787245,
+   "dropped_bytes": 37933,
+   "dropped_bytes_share": 0.00012,
+   "zst_bytes": 101806280,
+   "dropped_by_lead_source": {
+    "wikimedia": 18
+   },
+   "tokens_est_8k_v0": 88688144,
+   "tokens_est_8k_at_v0_ratio": 88677459,
+   "sample_docs": 2000,
+   "bytes_per_token_8k": 3.5008,
+   "bytes_per_token_8k_ci95": [
+    3.3865,
+    3.6064
+   ],
+   "tokens_est_8k": 89919550,
+   "tokens_est_8k_ci95": [
+    87286178,
+    92953517
+   ],
+   "dropped_tokens_est_8k": 10836
+  },
+  "news": {
+   "tier": 1,
+   "docs_v0": 118883,
+   "docs": 118882,
+   "dropped_docs": 1,
+   "dropped_docs_share": 1e-05,
+   "text_bytes_v0": 314050603,
+   "text_bytes": 314045246,
+   "dropped_bytes": 5357,
+   "dropped_bytes_share": 2e-05,
+   "zst_bytes": 106684834,
+   "dropped_by_lead_source": {
+    "news": 1
+   },
+   "tokens_est_8k_v0": 95734458,
+   "tokens_est_8k_at_v0_ratio": 95733827,
+   "sample_docs": 2000,
+   "bytes_per_token_8k": 3.2228,
+   "bytes_per_token_8k_ci95": [
+    3.1634,
+    3.285
+   ],
+   "tokens_est_8k": 97443890,
+   "tokens_est_8k_ci95": [
+    95598516,
+    99273453
+   ],
+   "dropped_tokens_est_8k": 1662
+  },
+  "pressbooks": {
+   "tier": 1,
+   "docs_v0": 14926,
+   "docs": 14925,
+   "dropped_docs": 1,
+   "dropped_docs_share": 7e-05,
+   "text_bytes_v0": 157679729,
+   "text_bytes": 157672850,
+   "dropped_bytes": 6879,
+   "dropped_bytes_share": 4e-05,
+   "zst_bytes": 45719577,
+   "dropped_by_lead_source": {
+    "wikimedia": 1
+   },
+   "tokens_est_8k_v0": 42746652,
+   "tokens_est_8k_at_v0_ratio": 42744829,
+   "sample_docs": 2000,
+   "bytes_per_token_8k": 3.6422,
+   "bytes_per_token_8k_ci95": [
+    3.5876,
+    3.6892
+   ],
+   "tokens_est_8k": 43290173,
+   "tokens_est_8k_ci95": [
+    42738829,
+    43949785
+   ],
+   "dropped_tokens_est_8k": 1889
+  },
+  "oercommons": {
+   "tier": 1,
+   "docs_v0": 4416,
+   "docs": 4416,
+   "dropped_docs": 0,
+   "dropped_docs_share": 0.0,
+   "text_bytes_v0": 41900894,
+   "text_bytes": 41900894,
+   "dropped_bytes": 0,
+   "dropped_bytes_share": 0.0,
+   "zst_bytes": 11812274,
+   "dropped_by_lead_source": {},
+   "tokens_est_8k_v0": 11180726,
+   "tokens_est_8k_at_v0_ratio": 11180727,
+   "sample_docs": 2000,
+   "bytes_per_token_8k": 3.7135,
+   "bytes_per_token_8k_ci95": [
+    3.6665,
+    3.7561
+   ],
+   "tokens_est_8k": 11283395,
+   "tokens_est_8k_ci95": [
+    11155476,
+    11428104
+   ],
+   "dropped_tokens_est_8k": 0
+  },
+  "foodista": {
+   "tier": 1,
+   "docs_v0": 67780,
+   "docs": 67780,
+   "dropped_docs": 0,
+   "dropped_docs_share": 0.0,
+   "text_bytes_v0": 87274639,
+   "text_bytes": 87274639,
+   "dropped_bytes": 0,
+   "dropped_bytes_share": 0.0,
+   "zst_bytes": 30293997,
+   "dropped_by_lead_source": {},
+   "tokens_est_8k_v0": 29120570,
+   "tokens_est_8k_at_v0_ratio": 29120667,
+   "sample_docs": 2000,
+   "bytes_per_token_8k": 2.9775,
+   "bytes_per_token_8k_ci95": [
+    2.9543,
+    2.9968
+   ],
+   "tokens_est_8k": 29311088,
+   "tokens_est_8k_ci95": [
+    29123066,
+    29541291
+   ],
+   "dropped_tokens_est_8k": 0
+  },
+  "pdr": {
+   "tier": 1,
+   "docs_v0": 1278,
+   "docs": 1278,
+   "dropped_docs": 0,
+   "dropped_docs_share": 0.0,
+   "text_bytes_v0": 6242496,
+   "text_bytes": 6242496,
+   "dropped_bytes": 0,
+   "dropped_bytes_share": 0.0,
+   "zst_bytes": 2212266,
+   "dropped_by_lead_source": {},
+   "tokens_est_8k_v0": 1708900,
+   "tokens_est_8k_at_v0_ratio": 1708915,
+   "sample_docs": 1278,
+   "bytes_per_token_8k": 3.6529,
+   "bytes_per_token_8k_ci95": [
+    3.6384,
+    3.6657
+   ],
+   "tokens_est_8k": 1708900,
+   "tokens_est_8k_ci95": [
+    1702928,
+    1715748
+   ],
+   "dropped_tokens_est_8k": 0
+  },
+  "gutenberg": {
+   "tier": 2,
+   "docs_v0": 56660,
+   "docs": 56660,
+   "dropped_docs": 0,
+   "dropped_docs_share": 0.0,
+   "text_bytes_v0": 20700650773,
+   "text_bytes": 20700650773,
+   "dropped_bytes": 0,
+   "dropped_bytes_share": 0.0,
+   "zst_bytes": 6711244261,
+   "dropped_by_lead_source": {},
+   "tokens_est_8k_v0": 6272706286,
+   "tokens_est_8k_at_v0_ratio": 6272734394,
+   "sample_docs": 400,
+   "bytes_per_token_8k": 3.3005,
+   "bytes_per_token_8k_ci95": [
+    3.264,
+    3.3317
+   ],
+   "tokens_est_8k": 6271928179,
+   "tokens_est_8k_ci95": [
+    6213202538,
+    6342026426
+   ],
+   "dropped_tokens_est_8k": 0
+  },
+  "youtube": {
+   "tier": 3,
+   "docs_v0": 753966,
+   "docs": 753964,
+   "dropped_docs": 2,
+   "dropped_docs_share": 0.0,
+   "text_bytes_v0": 14983570634,
+   "text_bytes": 14983556099,
+   "dropped_bytes": 14535,
+   "dropped_bytes_share": 0.0,
+   "zst_bytes": 4584265332,
+   "dropped_by_lead_source": {
+    "youtube": 2
+   },
+   "tokens_est_8k_v0": 3717793112,
+   "tokens_est_8k_at_v0_ratio": 3717819488,
+   "sample_docs": 2000,
+   "bytes_per_token_8k": 4.0142,
+   "bytes_per_token_8k_ci95": [
+    3.9797,
+    4.0489
+   ],
+   "tokens_est_8k": 3732662228,
+   "tokens_est_8k_ci95": [
+    3700654625,
+    3764991547
+   ],
+   "dropped_tokens_est_8k": 3621
+  },
+  "loc": {
+   "tier": 4,
+   "docs_v0": 120495,
+   "docs": 120495,
+   "dropped_docs": 0,
+   "dropped_docs_share": 0.0,
+   "text_bytes_v0": 37350887690,
+   "text_bytes": 37350887690,
+   "dropped_bytes": 0,
+   "dropped_bytes_share": 0.0,
+   "zst_bytes": 11673404456,
+   "dropped_by_lead_source": {},
+   "tokens_est_8k_v0": 11078576793,
+   "tokens_est_8k_at_v0_ratio": 11078418416,
+   "sample_docs": 400,
+   "bytes_per_token_8k": 3.4173,
+   "bytes_per_token_8k_ci95": [
+    3.3558,
+    3.4908
+   ],
+   "tokens_est_8k": 10929895483,
+   "tokens_est_8k_ci95": [
+    10699774099,
+    11130138350
+   ],
+   "dropped_tokens_est_8k": 0
+  },
+  "cccc": {
+   "tier": 5,
+   "docs_v0": 6798136,
+   "docs": 6372061,
+   "dropped_docs": 426075,
+   "dropped_docs_share": 0.06268,
+   "text_bytes_v0": 36736545718,
+   "text_bytes": 36198137119,
+   "dropped_bytes": 538408599,
+   "dropped_bytes_share": 0.01466,
+   "zst_bytes": 11702416664,
+   "dropped_by_lead_source": {
+    "cccc": 399963,
+    "foodista": 171,
+    "gutenberg": 2,
+    "loc": 4,
+    "news": 25190,
+    "oasst2": 1,
+    "pressbooks": 1,
+    "wikimedia": 717,
+    "youtube": 26
+   },
+   "tokens_est_8k_v0": 11650223419,
+   "tokens_est_8k_at_v0_ratio": 11479446015,
+   "sample_docs": 2000,
+   "bytes_per_token_8k": 3.2157,
+   "bytes_per_token_8k_ci95": [
+    3.1576,
+    3.267
+   ],
+   "tokens_est_8k": 11256695584,
+   "tokens_est_8k_ci95": [
+    11080066682,
+    11463807399
+   ],
+   "dropped_tokens_est_8k": 167431228
+  }
+ },
+ "verification": {
+  "sha_ok": 870,
+  "keys_sha_ok": 870,
+  "counts_ok": 870,
+  "v0_sha_ok": 870,
+  "shards": 870,
+  "key_mismatch": 0,
+  "v0_manifest_sha_ok": true,
+  "docs": 8881393,
+  "what": "read-only pass after the run: output shard and keys sha256 vs core_v0_pd MANIFEST, lines == docs == keys == info rows, sha1 of every kept text vs its key, every core v0 shard and MANIFEST.json still at their recorded sha256"
+ },
+ "residual_check": {
+  "what": "the branch D review's same-URL sample (rv_mh2 sample A: final CCCC docs whose URL key hashes to 0 mod 330; its own MinHash, exact word 5-gram Jaccard of candidates), rerun unchanged on core_v0_pd",
+  "core_v0": {
+   "docs": 20462,
+   "share_docs_with_partner_ge_0.9": 0.045,
+   "share_docs_with_partner_ge_0.8": 0.0682,
+   "share_docs_with_partner_ge_0.7": 0.0879
+  },
+  "core_v0_pd": {
+   "docs": 18918,
+   "share_docs_with_partner_ge_0.9": 0.0,
+   "share_docs_with_partner_ge_0.8": 0.0015,
+   "share_docs_with_partner_ge_0.7": 0.0118
+  },
+  "hosts_ge_0.8_core_v0_top": {
+   "bizsugar.com": [
+    427,
+    455
+   ],
+   "destructoid.com": [
+    334,
+    650
+   ],
+   "mdpi.com": [
+    88,
+    940
+   ],
+   "quotationsbook.com": [
+    88,
+    265
+   ]
+  },
+  "hosts_ge_0.8_core_v0_pd": {
+   "hindawi.com": [
+    6,
+    1324
+   ],
+   "mdpi.com": [
+    4,
+    871
+   ],
+   "wagingnonviolence.org": [
+    2,
+    18
+   ],
+   "richmondsunlight.com": [
+    2,
+    72
+   ],
+   "wikitravel.org": [
+    2,
+    243
+   ],
+   "wikieducator.org": [
+    2,
+    8
+   ],
+   "mariowiki.com": [
+    2,
+    119
+   ],
+   "generasia.com": [
+    2,
+    39
+   ],
+   "offshoreleaks.icij.org": [
+    2,
+    82
+   ],
+   "spring96.org": [
+    2,
+    49
+   ],
+   "infogalactic.com": [
+    2,
+    366
+   ]
+  },
+  "drop_lead_pairs_read": {
+   "n": 24,
+   "exact_jaccard_min": 0.703,
+   "same_url": 15
+  }
+ }
+}

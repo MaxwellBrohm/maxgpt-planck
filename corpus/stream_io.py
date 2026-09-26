@@ -56,7 +56,9 @@ class Frame:
 
     def __init__(self, codec, level):
         if codec == "gz":
-            c = zlib.compressobj(level, zlib.DEFLATED, 31)
+            # zlib levels stop at 9; a zstd level (e.g. neardedup_post's 10) falls back here on a Python
+            # without zstd (the Mac's 3.12), so clamp instead of raising "Invalid initialization option".
+            c = zlib.compressobj(min(level, 9), zlib.DEFLATED, 31)
             self._end = lambda: c.flush(zlib.Z_FINISH)
         elif _zstd is not None:
             c = _zstd.ZstdCompressor(level=level)

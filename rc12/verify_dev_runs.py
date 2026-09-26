@@ -161,7 +161,9 @@ def rerun(args, runs, recs):
     ns = argparse.Namespace(render=args.render, dtype=m.get("dtype") or "bfloat16", device="cuda",
                             gpu_mem=m.get("gpu_mem", 0.85), max_model_len=m.get("max_model_len"),
                             batch_invariant=bool(m.get("batch_invariant")), lockstep=True, hf_untested_ok=True,
-                            vllm_untested_ok=True)
+                            vllm_untested_ok=True, trust_remote_code=m.get("trust_remote_code") is True,
+                            attn_implementation=m.get("attn_implementation"),   # the run's HF options (STEP 9c)
+                            max_batch=m.get("max_batch"))
     spec = f"{m['engine']}:{args.model}"
     eng, name = R.make_responder(spec, ns)
     ctx = getattr(eng, "ctx", None)

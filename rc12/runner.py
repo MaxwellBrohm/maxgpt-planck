@@ -165,10 +165,15 @@ def make_responder(spec, args):
         if not args.hf_untested_ok:
             sys.exit("hf responder is UNTESTED (no model was ever loaded through it); rerun with --hf-untested-ok")
         import hf_responder as H
+        trust = bool(getattr(args, "trust_remote_code", False))   # engines.json, via dev_batch (Doge; notes STEP 9c)
+        attn = getattr(args, "attn_implementation", None)
         if kind == "hfb":
             import hf_batched as HB
-            return HB.HFBatched(name, render=args.render, dtype=args.dtype, device=args.device), name
-        return H.HFResponder(name, render=args.render, dtype=args.dtype, device=args.device), name
+            mb = getattr(args, "max_batch", None) or HB.MAX_BATCH
+            return HB.HFBatched(name, render=args.render, dtype=args.dtype, device=args.device, max_batch=mb,
+                                trust_remote_code=trust, attn_implementation=attn), name
+        return H.HFResponder(name, render=args.render, dtype=args.dtype, device=args.device,
+                             trust_remote_code=trust, attn_implementation=attn), name
     if kind == "planck":
         import planck_responder as PR
         r = PR.from_checkpoint(name, args.planck_config, args.planck_tokenizer, args.planck_device,

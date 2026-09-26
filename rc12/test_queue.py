@@ -3,7 +3,9 @@ A shim flock (the Mac has none) logs every call, can refuse the first N gpu.lock
 command. Checks: plan order (model, render template then plain, seed, dev before owncf), one lock call per process,
 one status line per run with the right counts, seeds and renders reaching the runs, the own-cf twin, NOENGINE, a
 failing process skipping the rest of its render, lock-timeout retries, a restart adding nothing for finished runs and
-leaving them byte-identical, a half-finished seed running only its missing run, the STOP file, the DONE marker.
+leaving them byte-identical, a half-finished seed running only its missing run, the STOP file, the DONE marker, and
+engines.json's per-model "python" (notes STEP 9c): a model with one runs under it (~ expanded), the others under
+Q_PY, and a model whose python is not executable gets NOPYTHON lines and no lock call.
   python3 -B test_queue.py        (exit 0 = pass)"""
 import hashlib
 import json
@@ -100,6 +102,31 @@ def status_unit():
           and "0/4 done" in got[2], f"status unit: progress {got}")
 
 
+def c_python():
+    b = tempfile.mkdtemp(prefix="rc12_queue_py_")
+    setup(b)
+    os.makedirs(f"{b}/venv-x/bin")
+    wrap = f"{b}/venv-x/bin/python"
+    open(wrap, "w").write(f'#!/bin/bash\necho "$*" >> "{b}/wrap.log"\nexec "{sys.executable}" "$@"\n')
+    os.chmod(wrap, 0o755)
+    eng = json.load(open(f"{b}/engines.json"))
+    eng["models"]["IDEAL"]["python"] = "~/venv-x/bin/python"
+    eng["models"]["SAMPLER"]["python"] = f"{b}/missing/bin/python"
+    json.dump(eng, open(f"{b}/engines.json", "w"))
+    check(queue(b, "IDEAL CAPPER SAMPLER", seeds="greedy", renders="template", HOME=b) == 0, "python: queue exit")
+    lc = lock_calls(b)
+    pys = {c[c.index("--responder") + 1]: c[c.index("dev_batch.py") - 2] for c in lc}
+    check(pys == {"fake:IDEAL": wrap, "fake:CAPPER": sys.executable}, f"python: per model {pys}")
+    wl = open(f"{b}/wrap.log").read().splitlines() if os.path.exists(f"{b}/wrap.log") else []
+    check(len(wl) == 1 and "--responder fake:IDEAL" in wl[0], f"python: wrapper ran {wl}")
+    st = {x["key"]: x for x in status(b)}
+    check([st[f"{m} template greedy fake {r}"]["exit"] for m in ("IDEAL", "CAPPER") for r in ("dev", "owncf")]
+          == ["0"] * 4, f"python: runs {list(st)}")
+    miss = [st.get(f"SAMPLER template greedy fake {r}", {}) for r in ("dev", "owncf")]
+    check(all(x.get("exit") == "NOPYTHON" and x.get("done") == "0" and "missing" in x.get("note", "") for x in miss),
+          f"python: NOPYTHON {miss}")
+
+
 def replies_of(d):
     return [t["reply"] for line in open(f"{d}/transcripts.jsonl") for t in json.loads(line)["turns"]]
 
@@ -190,6 +217,7 @@ def main():
     check([x["key"] for x in status(b)] == want and not lock_calls(b), "default plan: order or content")
     check(open(f"{b}/logs/rc12_dev_queue.DONE").readline().strip() == "complete 0 of 208 runs", "default plan: DONE")
     status_unit()
+    c_python()
     for f in fails:
         print("FAIL", f)
     print("test_queue:", "PASS" if not fails else f"{len(fails)} FAILURES")

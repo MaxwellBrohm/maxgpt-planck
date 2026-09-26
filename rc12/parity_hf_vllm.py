@@ -66,12 +66,18 @@ def pick(recs, n, how="first"):
     return out
 
 
+def hf_kw(args):
+    """HF load options for both HF stages (Doge: trust_remote_code, eager attention; notes STEP 9c)."""
+    return dict(trust_remote_code=getattr(args, "trust_remote_code", False),
+                attn_implementation=getattr(args, "attn_implementation", None))
+
+
 def stage_vllm(args):
     engine = getattr(args, "engine", "vllm")
     if engine == "hfb":                          # Doge and anything vLLM rejects: batched HF vs serial HF
         import hf_batched as HB
         import transformers as vllm              # its version goes in the meta's "vllm" field
-        v = HB.HFBatched(args.model, "template", args.dtype, args.device)
+        v = HB.HFBatched(args.model, "template", args.dtype, args.device, **hf_kw(args))
         v.thinking_rule_differs = False
     else:
         import vllm
@@ -102,7 +108,7 @@ def hf_margin(h, prompt, prefix, a, b):
 def stage_hf(args):
     import hf_responder as HR
     import transformers
-    h = HR.HFResponder(args.model, "template", args.dtype, args.device)
+    h = HR.HFResponder(args.model, "template", args.dtype, args.device, **hf_kw(args))
     seen, dec = {}, h.tok.decode
 
     def capture(ids, **kw):
@@ -218,7 +224,13 @@ def main():
     ap.add_argument("--table", nargs="+", default=None)
     ap.add_argument("--engine", choices=sorted(ENGINES), default="vllm",
                     help="what stage vllm plays with: vllm, or hfb (hf_batched.HFBatched, for a model vLLM rejects)")
+    ap.add_argument("--trust-remote-code", action="store_true",
+                    help="HF loads the checkpoint's own modeling code (Doge-160M, hfb only; notes STEP 9c)")
+    ap.add_argument("--attn-implementation", choices=["eager", "sdpa"], default=None,
+                    help="HF stages' attention (default: the library's); Doge needs eager (notes STEP 9c)")
     args = ap.parse_args()
+    if args.trust_remote_code and args.engine != "hfb":
+        sys.exit("--trust-remote-code: hfb only (vLLM's stage does not take it)")
     if args.table:
         return table(args.table)
     os.makedirs(args.out, exist_ok=True)
@@ -226,6 +238,8 @@ def main():
         base = [sys.executable, "-B", os.path.abspath(__file__), "--model", args.model, "--out", args.out, "--n",
                 str(args.n), "--pick", args.pick, "--data", args.data, "--dtype", args.dtype, "--device", args.device, "--gpu-mem",
                 str(args.gpu_mem), "--engine", args.engine] + (["--max-model-len", str(args.max_model_len)] if args.max_model_len else [])
+        base += ["--trust-remote-code"] if args.trust_remote_code else []
+        base += ["--attn-implementation", args.attn_implementation] if args.attn_implementation else []
         for st in ("vllm", "hf"):
             cmd = base + ["--stage", st]
             print(f"stage {st}", flush=True)

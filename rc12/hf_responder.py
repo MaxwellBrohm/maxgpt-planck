@@ -5,8 +5,12 @@ parity_hf_vllm.py (Qwen2.5, Qwen3, Qwen3.5, LFM2.5, LFM2, Falcon-H1, SmolLM2, Ge
 equal to vLLM's, stop reasons and transcripts read by eye. KNOWN DEFECT: gemma-3-270m-it under transformers 5.17's
 default (sdpa) attention ends the reply at once (p of <end_of_turn> about 1) on 6 long-prompt parity turns where
 eager attention and vLLM agree on a real reply; never run Gemma 3 through this file as it stands (engines.json
-names vLLM). Doge-160M-Instruct does not load here (notes STEP 9b). runner.py still asks for --hf-untested-ok (its
-gate never read this flag).
+names vLLM). Doge-160M-Instruct does not load under transformers 5.17 (notes STEP 9b); it runs through hf_batched.py
+with trust_remote_code=True (its own modeling_doge.py) in ~/planck/venv-doge (transformers 4.55.0) and with EAGER
+attention: under sdpa its dynamic mask turns SDPA's causal flag off whenever a batch has no padding, so a prompt
+token sees later tokens (notes STEP 9c). engines.json names all three per model; trust_remote_code is False and
+attn_implementation the library default unless a caller passes them. runner.py still asks for --hf-untested-ok
+(its gate never read this flag).
 
 Importing this module imports nothing heavy; torch and transformers load in HFResponder.__init__ only.
 Decoding: greedy (seed None) or sampling with T = 0.6, top-p 1.0, top-k OFF, repetition penalty 1.0, max 256 new
@@ -32,12 +36,17 @@ def conv_seed(seed, rid, turn):
 
 
 class HFResponder:
-    def __init__(self, model_id, render="template", dtype="bfloat16", device="cuda"):
+    def __init__(self, model_id, render="template", dtype="bfloat16", device="cuda", trust_remote_code=False,
+                 attn_implementation=None):
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
         self.torch, self.device, self.render = torch, device, render
-        self.tok = AutoTokenizer.from_pretrained(model_id)
-        self.model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=getattr(torch, dtype))
+        self.trust_remote_code = bool(trust_remote_code)
+        attn = {} if attn_implementation is None else {"attn_implementation": attn_implementation}
+        self.tok = AutoTokenizer.from_pretrained(model_id, trust_remote_code=self.trust_remote_code)
+        self.model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=getattr(torch, dtype),
+                                                          trust_remote_code=self.trust_remote_code, **attn)
+        self.attn = getattr(self.model.config, "_attn_implementation", None)       # as loaded
         self.model.to(device).eval()
         self.has_template = bool(getattr(self.tok, "chat_template", None))
         if render == "template" and not self.has_template:
