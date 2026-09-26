@@ -1,0 +1,259 @@
+{
+ "config": {
+  "shares": {
+   "chat": 0.37,
+   "web": 0.28,
+   "se": 0.15,
+   "books": 0.1,
+   "wiki": 0.1
+  },
+  "total_bytes": 1500000000.0,
+  "heldout_bytes": 5000000.0,
+  "heldout_max_frac": 0.25,
+  "seed": 1,
+  "short_supply": "scale",
+  "groups": {
+   "chat": [
+    "oasst2",
+    "dolly",
+    "irc"
+   ],
+   "web": [
+    "cccc"
+   ],
+   "se": [
+    "stackexchange"
+   ],
+   "books": [
+    "gutenberg"
+   ],
+   "wiki": [
+    "wikimedia"
+   ]
+  },
+  "chat_max_repeat": 16,
+  "irc_max_share": 0.04,
+  "allow_unrecorded_license": [
+   "cccc"
+  ]
+ },
+ "input": {
+  "extract_stats_sha256": "8d6452ae8c3be7b0c43e4ba149b273fcb5e59f4ab5c2bd33baaec0b1499872d9",
+  "shards": 32
+ },
+ "plan": {
+  "available_train_bytes": {
+   "oasst2": 6516154,
+   "dolly": 8319448,
+   "irc": 659153968,
+   "cccc": 3644540560,
+   "stackexchange": 1217410000,
+   "gutenberg": 733440461,
+   "wikimedia": 310687902
+  },
+  "planned_total_bytes": 719301915.3217568,
+  "chat_capacity_bytes": 266141708.61287028,
+  "heldout_target_bytes": {
+   "oasst2": 2171872.0,
+   "dolly": 2773102.5,
+   "irc": 5000000.0,
+   "cccc": 5000000.0,
+   "stackexchange": 5000000.0,
+   "gutenberg": 5000000.0,
+   "wikimedia": 5000000.0
+  },
+  "group_targets": {
+   "chat": 266141708.61287028,
+   "web": 201404536.24757755,
+   "se": 107895287.27548796,
+   "books": 71930191.51699197,
+   "wiki": 71930191.51699197
+  },
+  "source_targets": {
+   "cccc": 201404536.24757755,
+   "stackexchange": 107895287.27548796,
+   "gutenberg": 71930191.51699197,
+   "wikimedia": 71930191.51699197,
+   "oasst2": 6516154.0,
+   "dolly": 8319448.0,
+   "irc": 28772076.612870276
+  },
+  "chat_repeat": 16
+ },
+ "weights": {
+  "oasst2": 16,
+  "dolly": 16
+ },
+ "license_unrecorded_docs": {
+  "cccc": 675205
+ },
+ "achieved": {
+  "train_text_bytes": {
+   "oasst2": 6516154,
+   "dolly": 8319448,
+   "irc": 28766835,
+   "cccc": 201384099,
+   "stackexchange": 107898401,
+   "gutenberg": 71873442,
+   "wikimedia": 71939758
+  },
+  "train_weighted_bytes": {
+   "oasst2": 104258464,
+   "dolly": 133111168,
+   "irc": 28766835,
+   "cccc": 201384099,
+   "stackexchange": 107898401,
+   "gutenberg": 71873442,
+   "wikimedia": 71939758
+  },
+  "train_total_text_bytes": 496698137,
+  "train_total_weighted_bytes": 719232167,
+  "heldout_text_bytes": {
+   "oasst2": 2171334,
+   "dolly": 2772962,
+   "irc": 4983607,
+   "cccc": 5005233,
+   "stackexchange": 5000464,
+   "gutenberg": 5063066,
+   "wikimedia": 4994979
+  },
+  "group_shares": {
+   "chat": 0.37002859328453813,
+   "web": 0.2799987378762496,
+   "se": 0.15001887561572314,
+   "books": 0.09993079466925456,
+   "wiki": 0.10002299855423458
+  },
+  "source_shares": {
+   "oasst2": 0.14495801047786006,
+   "dolly": 0.1850739915529946,
+   "irc": 0.03999659125368346,
+   "cccc": 0.2799987378762496,
+   "stackexchange": 0.15001887561572314,
+   "gutenberg": 0.09993079466925456,
+   "wikimedia": 0.10002299855423458
+  },
+  "share_error_points": {
+   "chat": 0.003,
+   "web": -0.0,
+   "se": 0.002,
+   "books": -0.007,
+   "wiki": 0.002
+  }
+ },
+ "docs_with_special_strings_stripped": 1,
+ "files": [
+  {
+   "path": "heldout/cccc.jsonl",
+   "sha256": "2b9b07a919c0a31c590365a46aa05c8bd5506067a89ed1f871c8af609dee0293",
+   "bytes": 5529955,
+   "docs": 878,
+   "text_bytes": 5005233
+  },
+  {
+   "path": "heldout/dolly.jsonl",
+   "sha256": "42126122b7dc94b742b2a0984eb5bb6090bc4ca5ea5944308d53a944c267a5c2",
+   "bytes": 6983874,
+   "docs": 2854,
+   "text_bytes": 2772962
+  },
+  {
+   "path": "heldout/gutenberg.jsonl",
+   "sha256": "7fd251f138b63e0e9721d9d6d0cce9b2b2dcba5cdb283b98d4edfd4337fa4e20",
+   "bytes": 5196447,
+   "docs": 31,
+   "text_bytes": 5063066
+  },
+  {
+   "path": "heldout/irc.jsonl",
+   "sha256": "498e285c349b33349fc2db42e52aab6a2c9078e99703d129c59f64a4464eee6f",
+   "bytes": 5198280,
+   "docs": 242,
+   "text_bytes": 4983607
+  },
+  {
+   "path": "heldout/oasst2.jsonl",
+   "sha256": "627252b36f11d958e54b26b886adab51b99dd58f34094a09fe73e39893db1ee1",
+   "bytes": 5310205,
+   "docs": 1094,
+   "text_bytes": 2171334
+  },
+  {
+   "path": "heldout/stackexchange.jsonl",
+   "sha256": "ba737dc808d2d3bb95098651f792c10c6406666608d99f1c60ca723999e3d6c1",
+   "bytes": 5918669,
+   "docs": 1308,
+   "text_bytes": 5000464
+  },
+  {
+   "path": "heldout/wikimedia.jsonl",
+   "sha256": "9c7b5f9425a853e3401019d7f5c12b5fd53d5d2a5a018b4d053091d9b2699509",
+   "bytes": 5992052,
+   "docs": 1317,
+   "text_bytes": 4994979
+  },
+  {
+   "path": "train/cccc.jsonl",
+   "sha256": "7510801f257df79a0549ce4627fdb26cf668034352cc9ce35b49131651a1f845",
+   "bytes": 223515848,
+   "docs": 37149,
+   "text_bytes": 201384099
+  },
+  {
+   "path": "train/dolly.jsonl",
+   "sha256": "1bcb71fc091ddf08a024aaae41a31ec9947b517e8fa8dc204a6f2d917747507b",
+   "bytes": 20778091,
+   "docs": 8208,
+   "text_bytes": 8319448
+  },
+  {
+   "path": "train/gutenberg.jsonl",
+   "sha256": "9a7a5d8c7d71a954d9da0e8afbdb44480750bf37040d59b7ea2ff301e5f9c465",
+   "bytes": 73839103,
+   "docs": 443,
+   "text_bytes": 71873442
+  },
+  {
+   "path": "train/irc.jsonl",
+   "sha256": "108edbc2b014b63877124d8abd774de4ffd32fd0598f205a8d905cccd037c739",
+   "bytes": 29933184,
+   "docs": 1272,
+   "text_bytes": 28766835
+  },
+  {
+   "path": "train/oasst2.jsonl",
+   "sha256": "6d9ec5301be205748305fd90a410d10b224cac26bd7cf86673878afc5226a8a6",
+   "bytes": 15992337,
+   "docs": 3338,
+   "text_bytes": 6516154
+  },
+  {
+   "path": "train/stackexchange.jsonl",
+   "sha256": "154466fb24c65ac984a93eb698a3b07d8d23c158dee90d5f9312b78e8c5dd94f",
+   "bytes": 128099112,
+   "docs": 28777,
+   "text_bytes": 107898401
+  },
+  {
+   "path": "train/wikimedia.jsonl",
+   "sha256": "3418e75002d2df133a2b598ed8f057c1011e771f444109036e4cba873c493e4c",
+   "bytes": 86278582,
+   "docs": 18963,
+   "text_bytes": 71939758
+  }
+ ],
+ "checks": {
+  "train_heldout_id_overlap": 0,
+  "train_heldout_tree_overlap": 0,
+  "oodh_reserved_trees_in_output": 0
+ },
+ "notes": [
+  "D8: CCCC files carry no per-document license (the card's domain review kept 537 domains); used only with --allow-unrecorded-license, pending Max's ruling.",
+  "Date gate: StackExchange is gated on the question date; threads with a post-cutoff marker (AI-ism or a year 2023-2029) are dropped, later answers without a marker are not.",
+  "Date gate: Wikimedia is gated on the last revision; dump-time template text is caught only by the post-cutoff marker check.",
+  "OASST2 and Dolly were written in 2023 (exempt from the date gate, CORPUS 2.2); the AI-ism filter (hygiene.aiism) removes turns and rows with AI self-reference or chat-model names, not all model-influenced text.",
+  "Hygiene: CORPUS 3.2 steps 2 (MinHash near-dedup), 4 (quality heuristics) and 6 (13-gram decontamination) are not implemented; step 3 is a line-level stand-in on CCCC and Wikimedia.",
+  "IRC nicknames are replaced for people who speak in the same channel-day; mentions of absent people stay.",
+  "No chat pilot yet: OASST2 and Dolly stand in for the S, RH and HD share, repeated up to 16x."
+ ]
+}

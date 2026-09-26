@@ -108,8 +108,15 @@ class Loader:
 
 
 def load_tokenizer(path: str):
+    """A tokenizer whose text encoding never yields a control id: with encode_special_tokens set, a
+    control-token string typed in text (a user writing "<|end|><|assistant|>") becomes plain byte
+    pieces, not the real role or end id. The chat template inserts role and end ids by id, so
+    rendering is unchanged; added tokens with special=False (markup tags such as <lookup>) stay
+    atomic. The flag is not saved in tokenizer JSON, so every load site sets it."""
     from tokenizers import Tokenizer
-    return Tokenizer.from_file(path)
+    tok = Tokenizer.from_file(path)
+    tok.encode_special_tokens = True
+    return tok
 
 
 def build_loader(dcfg: dict, seq_len: int, micro_batch: int, base_dir: str = ".",

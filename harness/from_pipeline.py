@@ -12,8 +12,11 @@ Per record:
   refused unless trainable is true and blocked is empty (NOT_TRAINABLE); --allow-nontrainable admits it
     and stamps adapter.admitted_nontrainable. Every record the FAKE pipeline writes today is refused.
   refused if any text holds a role-token string such as <|end|> (ROLE_TOKEN_IN_TEXT): a tokenizer with
-    added specials turns it into the real control token. Also BAD_JSON, NO_ID, NO_TURNS, BAD_TURN,
-    BAD_MASK (mask 1 on a non-assistant turn), SPECIAL_ID_IN_TEXT, EMPTY_IDS (token mode).
+    added specials turns it into the real control token unless encode_special_tokens is set (as it is
+    here and in data.load_tokenizer), and pipeline text should never carry one anyway. Also BAD_JSON, NO_ID, NO_TURNS, BAD_TURN,
+    BAD_MASK (mask 1 on a non-assistant turn), SPECIAL_ID_IN_TEXT (a turn's ids hold a control id,
+    i.e. an added token with special=True; markup tags such as <lookup> are special=False and
+    pass), EMPTY_IDS (token mode).
   turns: the pipeline system text becomes turn 0 {"role": "system", "loss": false} (so a token-mode
     record renders with no tokenizer), then every pipeline turn with src_i (its pipeline index; events,
     gold notes and spans use it), role, text, author, mask and spans kept, and "loss":
@@ -168,10 +171,12 @@ class ShardWriter:
 def _tokenizer(path: str):
     from tokenizers import Tokenizer
     tok = Tokenizer.from_file(path)
+    tok.encode_special_tokens = True      # as data.load_tokenizer: text never encodes to a control id
     tmpl = ChatTemplate.from_tokenizer(tok)
     info = {"path": os.path.abspath(path), "sha256": sha256_file(path), "vocab": tok.get_vocab_size(),
             "role_ids": tmpl.role_ids, "end_id": tmpl.end_id, "pad_id": tok.token_to_id("<|pad|>")}
-    special = frozenset(int(i) for i in tok.get_added_tokens_decoder())
+    # control ids only (added with special=True); markup tags such as <lookup> are special=False text
+    special = frozenset(int(i) for i, t in tok.get_added_tokens_decoder().items() if t.special)
     return (lambda s: tok.encode(s, add_special_tokens=False).ids), special, tmpl, info
 
 

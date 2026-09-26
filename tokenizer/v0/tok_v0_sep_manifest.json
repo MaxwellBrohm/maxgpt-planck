@@ -1,0 +1,65 @@
+{
+ "family": "tok_v0",
+ "prefix": "tok_v0_sep",
+ "tokenizers_version": "0.23.2",
+ "specials": [
+  "<|pad|>",
+  "<|endoftext|>",
+  "<|system|>",
+  "<|user|>",
+  "<|assistant|>",
+  "<|end|>",
+  "<|tool|>",
+  "<note>",
+  "</note>",
+  "<think>",
+  "</think>",
+  "<lookup>",
+  "</lookup>",
+  "<result>",
+  "</result>"
+ ],
+ "control_tokens": [
+  "<|pad|>",
+  "<|endoftext|>",
+  "<|system|>",
+  "<|user|>",
+  "<|assistant|>",
+  "<|end|>",
+  "<|tool|>"
+ ],
+ "tag_tokens": [
+  "<note>",
+  "</note>",
+  "<think>",
+  "</think>",
+  "<lookup>",
+  "</lookup>",
+  "<result>",
+  "</result>"
+ ],
+ "pretokenize_regex": "['’](?i:s|t|re|ve|m|ll|d)(?![\\p{L}\\p{M}])| ?[\\p{L}\\p{M}]+|\\p{N}| ?[^\\s\\p{L}\\p{M}\\p{N}]|\\s*[\\r\\n]+|\\s+(?!\\S)|\\s+",
+ "normalizer": null,
+ "args": {
+  "cmd": "separate",
+  "sample": "tok_sample_v0c",
+  "out": "v0c",
+  "weight": null,
+  "min_frequency": 2,
+  "progress": false,
+  "size": 8192,
+  "prefix": "tok_v0_sep"
+ },
+ "weights": {
+  "oasst2": 16,
+  "dolly": 16
+ },
+ "train_seconds": 23.8,
+ "sample_manifest_sha256": "d0fa0838a6aa4ee8a6c62d6ffe496f812e8335d90266d34689c97cd9e13cfa63",
+ "files": {
+  "tok_v0_sep_8k.json": {
+   "size": 8192,
+   "sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5"
+  }
+ }
+}

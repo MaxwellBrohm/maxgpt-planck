@@ -1,0 +1,82 @@
+{
+ "family": "tok_v0",
+ "prefix": "tok_v0",
+ "tokenizers_version": "0.23.2",
+ "specials": [
+  "<|pad|>",
+  "<|endoftext|>",
+  "<|system|>",
+  "<|user|>",
+  "<|assistant|>",
+  "<|end|>",
+  "<|tool|>",
+  "<note>",
+  "</note>",
+  "<think>",
+  "</think>",
+  "<lookup>",
+  "</lookup>",
+  "<result>",
+  "</result>"
+ ],
+ "control_tokens": [
+  "<|pad|>",
+  "<|endoftext|>",
+  "<|system|>",
+  "<|user|>",
+  "<|assistant|>",
+  "<|end|>",
+  "<|tool|>"
+ ],
+ "tag_tokens": [
+  "<note>",
+  "</note>",
+  "<think>",
+  "</think>",
+  "<lookup>",
+  "</lookup>",
+  "<result>",
+  "</result>"
+ ],
+ "pretokenize_regex": "['’](?i:s|t|re|ve|m|ll|d)(?![\\p{L}\\p{M}])| ?[\\p{L}\\p{M}]+|\\p{N}| ?[^\\s\\p{L}\\p{M}\\p{N}]|\\s*[\\r\\n]+|\\s+(?!\\S)|\\s+",
+ "normalizer": null,
+ "args": {
+  "cmd": "nested",
+  "sample": "tok_sample_v0c",
+  "out": "v0c",
+  "weight": null,
+  "min_frequency": 2,
+  "progress": false,
+  "top": 32768,
+  "sizes": "2048,4096,8192,16384",
+  "prefix": "tok_v0"
+ },
+ "weights": {
+  "oasst2": 16,
+  "dolly": 16
+ },
+ "train_seconds": 40.9,
+ "sample_manifest_sha256": "d0fa0838a6aa4ee8a6c62d6ffe496f812e8335d90266d34689c97cd9e13cfa63",
+ "files": {
+  "tok_v0_2k.json": {
+   "size": 2048,
+   "sha256": "3ac7a4d3fd5613d1c40f14233a27ca9ee8b48a2dbccb6ce3c22c6787a183bf99"
+  },
+  "tok_v0_4k.json": {
+   "size": 4096,
+   "sha256": "37b7ec2f194d67ae5491fddbfa2a6f52a5b871bee6f0f8aff4688486fa613fdd"
+  },
+  "tok_v0_8k.json": {
+   "size": 8192,
+   "sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5"
+  },
+  "tok_v0_16k.json": {
+   "size": 16384,
+   "sha256": "3bcba844190e5449458886990053c73897dfa8aceb72766f03d352ffc97fefd8"
+  },
+  "tok_v0_32k.json": {
+   "size": 32768,
+   "sha256": "d37da81fabff1acda9319ec43f2f2feb0d10500104332d3d2685b287e8edd8dc"
+  }
+ }
+}

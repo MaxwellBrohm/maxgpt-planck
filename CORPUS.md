@@ -1160,3 +1160,33 @@ This design was drafted before Max made models of 30M and under the main target.
 | 60M, 150M | as the Titans allow | | 1+ | Titans |
 
 The totals land at roughly 1,600-2,100 hours depending on the 3M and 30M choices, so the final split follows the measured rates and P-186's measured gain per doubling: whichever size gains most per GPU-hour gets the extension time. Rates are the section 5.3 estimates (plus or minus 2x), so every number here moves once bench_micro runs on the PC.
+
+## Addendum, 2026-09-25 night: tokenizer v0 and the starter corpus
+
+**Built.** `corpus/` (extractor, hygiene, IRC speaker mapping, boilerplate removal, OOD-H reserve, tokenizer
+sample) and `tokenizer/` (nested byte-level BPE, 2k to 32k, health checks, P-097/P-098/P-101). Tokenizer v0 was
+trained on a 719 MB sample of the 3.9 GB starter download; files and results are in `tokenizer/v0/`. It is
+provisional: v1 freezes on a larger sample.
+
+**Results.** P-098 holds exactly: the 8k cut from the 32k model is byte-identical to a separately trained 8k,
+so one nested tokenizer serves the whole curve. P-101 fails its 5% bar (best 4.4% with real added tokens), so no
+superword tokens. At 8k, OASST2 held-out text is 3.71 bytes per token.
+
+**Ruling on CCCC (Claude, 2026-09-25, under Max's standing permission; reversible).** Section 3.1 assumed a
+per-document license. The release has none: 0 of 15,000 sampled documents across all 10 snapshots carry a
+license field. Common Pile selected CCCC pages by detecting a CC license on each page and reviewing the top
+1,000 domains by hand (537 kept). CCCC is admitted with the provenance basis "dataset-level: Common Pile
+page-level CC detection and domain review; per-document license not recorded", and `make_tok_sample.py` refuses
+it unless `--allow-unrecorded-license cccc` is passed, so every use is explicit and recorded in the manifest.
+The model card will say this. If Max rules otherwise, CCCC leaves the mix and the P bucket's web share moves to
+Gutenberg, LoC books and Wikimedia.
+
+**Open before any model trains on this corpus (the tokenizer does not depend on them):**
+- StackExchange is dated by the question only; later answers can be newer than the date gate. The fix is the
+  official Stack Exchange dump with per-post dates (the AI-ism and year filter drops the obvious cases).
+- Near-dedup is not built. Boilerplate removal (lines on 10+ distinct pages) also removes some real page content
+  repeated across URLs; near-dedup should run first, as section 3.2 orders.
+- OOD-H Part 1 must skip the 11 reserved OASST2 trees whose user turns appear verbatim elsewhere
+  (`corpus/oodh.leaked_reserve_trees()`), and the reserve holds only 376 English ready threads with 2+ user
+  turns (14 with 3+). If Part 1 needs 150 longer threads, the reserve rule changes before tokenizer v1.
+- Dolly and OASST2 are dated 2023 and exempt from the date gate (section 2.2); both now pass the AI-ism filter.
