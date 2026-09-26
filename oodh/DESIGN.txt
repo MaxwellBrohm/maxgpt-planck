@@ -1,9 +1,11 @@
 OOD-H PART 1: DESIGN (public; no item content. Threads, probes and golds live only in sealed/oodh/, gitignored.)
 Written 2026-09-26. Serves prereg/RC-12.draft.txt s1 (the OOD-H wording rule), s3, s6, s8, s14 and s19 item 7.
-Status: selection built and run (oodh/select.py); three probe batches written; build, play and gate built and run
-  (oodh/build.py, play.py, gate.py, hashes.py, leaks.py; s10). The primary rule gives 107 usable threads, not 150,
-  and the gate FAILS on the 107 (s10). Adversarial review, item fixes and a held-out scan on the PC: s11 (L2 and
-  VAL now pass; G2 and G4 still fail). Nothing is locked.
+Status: BUILT to 150 threads (2026-09-26, s13) and REVIEWED (s14). The best-path rule gave 107 usable threads
+  (s10); the F1 fallback (deepest usable path per reserved tree, DESIGN s12) added 43 more from
+  candidates_deepest.jsonl (batch 4), for 150. The gate PASSES on every gating check (ids, struct, G1, L2, G8, ABS,
+  VAL, G7); G2 and G4 are reported, not gating (s12). Adversarial reviews and item fixes: s11 (batches 1-3), s14
+  (batch 4: 1 thread swapped under KL2, 35 probes fixed). Held-out PC scans: s11, s13, s14. Nothing is locked; the
+  file is a LOCK CANDIDATE (oodh/HASHES.txt; the hashes in s13 are superseded by s14).
 
 1. SOURCE, RESERVE AND LEAKS
   Source: OASST2 2023-11-05_oasst2_all.trees.jsonl.gz (70,642 trees).
@@ -244,3 +246,139 @@ Status: selection built and run (oodh/select.py); three probe batches written; b
     boilerplate, common openers) do occur in training text, so the 13-gram decontamination still matters.
   Still short: 107 threads, not 150, and G2 and G4 fail. Nothing is locked; the prereg's s14 is not edited
     (oodh/PREREG_PARAGRAPH.txt holds the status paragraph).
+
+12. DECISIONS (2026-09-26, after s11)
+  DECIDED 2026-09-26 by Claude under Max's standing permission (reversible before the lock). The same decisions
+    are in prereg/RC-12.draft.txt s14.
+  Graders: the s11 grader finding is fixed in rc12 before any dev baseline is scored (rc12/grade_voice.py, draft s6
+    v4 and D23, rc12/notes.txt STEP 10). With holder "user", "You told me it was X", "You asked me about the X",
+    "You said X", "According to you, X" pass; "I said X", "I told you it was X", "I mentioned X", "I asked you
+    about the X", "I did X" fail. With holder "assistant" (a fact the user gave the assistant) "I said X" fails.
+    On this 107-thread file (counts only, items untouched): "You told me it was <gold>." and "You asked me about
+    the <gold>." pass 225 of 225 user-held VAL probes (0 before); "I said <gold>." passes 0 of 225 (225 before).
+    The gate rerun on a scratch copy of the report: G1 pass, USERVOICE and ROLECAP pass 4 VAL probes each (28
+    before): 2 user-held where no person word stands within 8 words before the gold, and 2 assistant-held whose
+    nearest person word before the gold is a first-person binding (1) or a plain "you" (1), both allowed for a fact
+    the user gave the assistant ("My name is X" is right there).
+  Count: Part 1 reaches 150 threads with F1 (the deepest usable path per reserved tree), with no reserve change. F3
+    is rejected: it would put new OOD-H trees into tokenizer v0 and the E2/E3 shards. This replaces s9's
+    recommendation of F1 and F3 together.
+  Gates: OOD-H keeps the RC-12 graders, and G2 and G4 (s6, s10) are NOT applied to OOD-H. Natural threads usually
+    hold one value of the asked kind, so type-guessing cheaters pass structurally; OOD-H is a paired Planck versus
+    comparator check, where that helps both sides. Reported beside the OOD-H score: the full cheater table, and the
+    score on the subset of probes where the user gave 2+ values of the asked kind.
+  Grader fix round (2026-09-26, after a verifier's adversarial battery; rc12/notes.txt STEP 10 fix round, draft s6
+    v4 and D23). On this 107-thread file (counts only): "You'd told me it was <gold>.", "You told me that the one in
+    question was <gold>.", "You wanted me to use <gold>.", "You'd like me to use <gold>.", "You want me to use
+    <gold>.", "You needed me to use <gold>.", "Let me check: it's <gold>." now pass 225 of 225 user-held VAL probes
+    (0 of 225 each before); "I'd told you it was <gold>." and "It's <gold>, like I told you." now fail 225 of 225
+    (passed all before). On the 5 assistant-held probes, "You chose <gold> for me." and "You picked <gold> for me."
+    pass 5 of 5 (0 before); "I'll call you <gold>.", "I told you to call me <gold>." fail 5 of 5 (passed before).
+    IDEAL and TERSE still pass every VAL probe. Gate rerun on a scratch symlink (the repo's oodh/HASHES.txt and
+    sealed gate_report.json untouched): G1 pass; G2 and G4 still fail as in s11 (not applied to OOD-H, above);
+    USERVOICE and ROLECAP family 0.011 each (0.016 after STEP 10); the USERVOICE swap that changes the reply now
+    passes 3 VAL probes (4 after STEP 10): 1 user-held with no person word before the gold, 2 assistant-held.
+  Known limit (not fixed, draft D23): the right value bound to the wrong holder passes ("Your grandmother's bike is
+    X" for the user's bike).
+
+13. PART 1 BUILT (F1, 2026-09-26; counts and hashes in oodh/HASHES.txt, items only in sealed/oodh/)
+  Reached 150 threads: the 107 best-path threads (s10, kept unchanged) plus 43 F1 threads (the deepest usable path
+    per reserved tree, DESIGN s12), written to sealed/oodh/batch_4.jsonl. No reserve change; F3 not used.
+  Batch 4 pool and read: the deepest-path KL1 passes within the token budget whose tree is not one of the 107 (106
+    threads), read in build.py's PICK_SALT order. A thread whose message ids equal a primary candidate already read
+    under KL2 carries that verdict (17 such, all earlier KL2 drops, not re-read). Reading stopped at the 43rd usable
+    thread (150 reached); 39 pool threads after it were left unread. KL2 on the newly-read: 43 usable, 7 dropped
+    (code b: 3 - a display-manager config, `ln -s`, an Ansible playbook; encyclopedic a: 2 - My Little Pony trivia,
+    a sky-colour trivia + complaint; unsafe c: 2 - a mass-SSH credential-stuffing attack tool in C, and a SHA1-of-a-
+    slur request beside piracy SEO). Batch 4 is 128 probes (H-FACT 50, H-ASK 45, H-ABS 33; 42 threads with 3 probes,
+    1 with 2), 5 holder "assistant" (a persona, name or reply-style the user gave the assistant).
+  Whole set (build.py, run 2026-09-26): 150 threads, 417 probes (H-FACT 228, H-ASK 96, H-CORR 1, H-ABS 92; 135
+    threads with 2 user turns, 15 with 3; 117 threads with 3 probes, 33 with 2). Mixed path rule (107 best, 43
+    deepest), each record's meta.path_rule set accordingly.
+  Gate (gate.py, run 2026-09-26): PASS on every gating check - ids, struct, G1 (IDEAL and TERSE and every accepted
+    form score 1.00, history unchanged, no probe-turn loop or role-leak), L2, G8, ABS, VAL, G7. G2 and G4 are
+    reported, not gating (s12): 130 G2 findings and 46 G4 threads, all structural (type matchers 0.73-0.76 family;
+    SHOTGUN 0.63; USERVOICE and ROLECAP 0.01 with the fixed graders; ECHO/DEFLECT/ABSTAIN/LATEST_USER 0.00-0.05).
+    The 2+-value subset (VAL probes whose user turns hold 2+ same-type values): 31 of 325 VAL probes; on it the top
+    cheater passes are OVERLAP_A 21, MARKER_OBJ 20, WORDING 20 (reported, per s12). The reserve/leak-list id check
+    passes: none of the 150 trees is in the 54-tree leaked_reserve_trees list (select.py already dropped leaks).
+  Held-out scan on the PC for the 43 new trees (detached; counts only in the log, hits stay in the PC's sealed/oodh/
+    b4_scan/; same method as s11): the 43 tree ids, their 192 message ids, and 81 plain 50-char user-turn snippets
+    (15 user turns have no 40-char plain run) against every text artifact under data/ except raw/ (extracted, tok
+    samples v0/v0b/v0c, shards with their .ids lists, evalsets, core_v0_smoke, core_v0_work, nd_accept_sig,
+    se_probe_out; .zst decompressed): 0 hits of any tree id, message id or snippet. Positive controls (20 non-
+    reserved trees from the v0 extract and the evalset) are found by the same scan in the extracts, tok samples,
+    shard .ids lists and evalsets. Token binaries (.bin, .npy, .u64) cannot be searched and were skipped. The 43-tree
+    id-list sha256 in the scan matched the batch built here.
+  Hashes (oodh/HASHES.txt): oodh_part1.jsonl sha256 1a7a2641f913e1a2bf4f55524b6f2fa123cb18ba53838ab2166b0e08552c819a;
+    sorted tree-id list (newline-joined, no trailing newline) sha256
+    b705e6cbcadf8c5eb4bfc14ad1d6cd072dfd63d3d0551a60f2aa6643d5f3dbb0. Marked LOCK CANDIDATE (150 threads, gating
+    checks pass). Nothing is committed or locked here; the prereg's s14 gets the BUILT paragraph.
+  SUPERSEDED by s14 (the batch 4 review): the counts, the gate numbers and both hashes above are the pre-review ones.
+
+14. ADVERSARIAL REVIEW OF BATCH 4 (2026-09-26, after s13; no model loaded; item text only in sealed/)
+  Read: all 43 F1 threads, every turn and all 128 probes. Each probe was graded against 3 hand-written natural
+    correct replies with the fixed graders (a scratch harness puts each reply in place of the IDEAL reply at its probe
+    turn, graders.grade_probe unchanged). gate.py rerun and both hashes recomputed before any change: they matched s13.
+    Before the fixes 357 of the 384 replies passed: 16 failures were item problems (fixed below), 9 grader limits
+    (below, not fixed here), 2 looser paraphrases than the accepted lists cover (left).
+  KL2: 1 thread dropped under (b), a probability puzzle (win chances in percent, then a variant with more doors). It
+    was kept at authoring as "borderline (probability), but personal framing"; KL2 (b) has no personal-framing
+    exception. Replaced by the next thread of the batch 4 reading order (the first one marked "not read"), read under
+    KL2 at review: usable (a writing task with user-set details), 3 probes (H-FACT, H-ASK, H-ABS).
+    So batch 4 read 51 threads: 43 usable, 8 dropped (3 code, 2 encyclopedic, 2 unsafe, 1 math); 38 left unread (17
+    more carried earlier KL2 drops). The other 42 fit s3: 10 of the 43 usable are marked borderline (expert or
+    explainer topics, a charged stance, a glossary), each with user-set request details or a personal frame, so they
+    stay, as s11 kept its borderlines.
+  Confirmed item problems, fixed by sealed/oodh/review_patch_b4_2026-09-26.py (edits in review_b4_items_2026_09_26.py;
+    patches FROM the untouched copies in sealed/oodh/pre_review/, asserting each old value; a rerun gives the same
+    file; four of its assertions were each broken once on a scratch copy and fired):
+    guessable  8 probes in 6 threads were answerable without the thread: the probe's question, or an earlier probe
+               question of the block, carried a cue that world knowledge or a stock idiom completes to the gold. 9
+               questions reworded (2 of them the earlier cueing question), 1 probe replaced by another request of the
+               same user turn (and 1 later question reworded so it does not restate the new gold, L2). 1 more question
+               needed world knowledge to pick among the user's own values: reworded to the user's own order.
+    wording    1 question read as "when did I ask" rather than "which value did I ask about".
+    ABS        4 abstain probes were answerable or ill-formed (the user had given a vague amount; a vague length the
+               old IDEAL denied; the user's request itself answered the question; 1 question ill-formed and answerable
+               from world knowledge): each replaced by an unanswerable question with a fresh pool.
+    alt        1 gold held an "or", so the natural "All X or Y." failed the grader's alternative rule: the probe is
+               replaced by one on a detail the user added in their own turn.
+    candidates 14 VAL probes lacked same-type values of their own thread (s6: candidates are every same-type value in
+               the thread), 11 of them values in a user turn; added to candidates and pool. Before: batch 4 carried 8
+               user-turn and 9 assistant-turn non-gold candidates, batches 1-3 carry 33 and 114.
+    accepted   6 probes got natural wordings of the user's value (a reversed pair, contractions of the user's own
+               negation, "versus" forms, ordinary synonyms); 1 accepted form removed (the assistant's suggested word,
+               also a later probe's gold, on a probe that asks for the user's original word; s11's precedent).
+  Field diff, old file to new (same 149 trees): 25 records, 35 probes (question 19, candidates 16, pool 20, object
+    words 13, ideal 9, accepted 9, prefix 6, gold 2); 2 user turns change kind D to L (they hold a new candidate); ids
+    after the dropped tree shift by one (tree-id order). Rebuilding from the pre_review copies gives s13's file sha256
+    1a7a2641... byte for byte.
+  After the fixes the same 384 replies (those for changed probes rewritten to the new questions) pass 377: 5 ABS cue
+    gaps and the 2 looser paraphrases. A per-probe cheater check (echo and bare abstain on VAL, a pool guess on ABS)
+    passes 0 of 223.
+  Held-out scan of the replacement tree on the PC (detached; counts only in the log, hits in the PC's
+    sealed/oodh/b4rev_scan/; same method as s11 and s13): its tree id, 4 message ids and 2 plain 50-char user
+    snippets (every user turn had one) against every text artifact under data/ except raw/: 0 hits. The positive
+    controls (non-reserved trees from the v0 extract and the evalset) were found in every class. Token binaries
+    skipped. The one-tree id-list sha256 matched the thread built here. In the reserve, not in the 54-tree leak list.
+  Gate (gate.py, run 2026-09-26 on the reviewed file): PASS on every gating check. Reported, not gating: G2 129
+    findings, G4 45 threads; type matchers 0.71-0.75 family, SHOTGUN 0.59, USERVOICE and ROLECAP 0.01, ECHO,
+    DEFLECT, ABSTAIN 0.00; the 2+-value subset is now 43 of 325 VAL probes (31 before; the added user-turn
+    candidates), top cheater passes there OVERLAP_A 31, MARKER_OBJ 30, WORDING 28.
+  Whole set: 150 threads, 417 probes (H-FACT 227, H-ASK 97, H-CORR 1, H-ABS 92; 135 threads with 2 user turns, 15
+    with 3; 117 with 3 probes, 33 with 2). Batch 4: H-FACT 49, H-ASK 46, H-ABS 33.
+  Hashes (oodh/HASHES.txt): oodh_part1.jsonl sha256 f6163981e6af04bfef130e7416ef13d00bf81cad8228c639eb9c3c45a8315270;
+    sorted tree-id list sha256 4c3f60e3c1c79121982326ca430f9e26b37f4f2037ab17c501903dd179a69eb7. LOCK CANDIDATE.
+  Grader findings for the rc12 workflow (counts only; not fixed here):
+    if       "You asked if <gold>." fails every H-ASK probe (97 of 97): grade_text.in_condition reads the "if" of a
+             reported question as a condition. "You asked whether <gold>." passes 97 of 97. For a yes-no request
+             "You asked if it's X" is the natural answer.
+    ABS cue  "You never gave me that.", "You didn't specify.", "You never specified that." and "You didn't provide
+             that." fail every OOD-H ABS probe (92 of 92) and every RC-12 dev ABS probe (60 of 60): ABS_CUE and
+             ABS_MORE have no give (past), specify or provide forms. Seen in the reads too: "You didn't name ...",
+             "You didn't rate it ...", "You haven't ordered anything yet." fail.
+    neg      a contraction of the user's own negation ("isn't <value>" for a user's "is not <value>") fails
+             unless listed; handled here per item through accepted forms.
+  Note: build_b4.py (the batch 4 authoring script, scratch) would rewrite batch_4.jsonl from the pre-review item
+    files; the review patch is the record of every later change, as for batches 1-3.

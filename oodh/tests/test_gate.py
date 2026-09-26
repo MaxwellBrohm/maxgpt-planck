@@ -198,10 +198,13 @@ def gate_end_to_end():
     _, _, recs = fixture_recs()
     res = GT.gate(recs, set())
     c = res["checks"]
-    assert not any(c[k] for k in ("ids", "struct", "G1", "L2", "G8", "ABS", "VAL", "G7")), c
-    g2 = " | ".join(c["G2"])
-    assert "G2 SHOTGUN: passes" in g2 and "G2 LATEST_USER: passes" in g2 and not res["ok"], g2
+    assert set(c) == set(GT.GATING) and "G2" not in c and "G4" not in c, c
+    assert not any(c.values()) and res["ok"], c            # G2/G4 no longer gate: gating checks clean -> PASS
+    g2 = " | ".join(res["reported"]["G2"])                 # G2 is reported, not gating
+    assert "G2 SHOTGUN: passes" in g2 and "G2 LATEST_USER: passes" in g2, g2
     assert "ECHO" not in g2 and "ABSTAIN" not in g2 and "USERVOICE" not in g2, g2
+    mv = res["multi_value"]                                # the 2+-value subset is reported
+    assert mv["n_probes"] <= mv["n_val"] and "SHOTGUN" in mv["cheater_pass"], mv
 
 
 @test

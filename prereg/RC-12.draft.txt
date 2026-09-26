@@ -222,7 +222,8 @@ becomes training text). The two share the label D8 by accident.
   sharded vs full, F7 persona, F8 social basics.
   Deferred LOOKUP conditions (not dev v1): shuffled table, no table, BM25-retrieved table (P-082).
 
-6. GRADERS (pure Python, no model; rc12/graders.py, grade_text.py, grade_cues.py, grade_fmt_dyn.py, grade_role.py)
+6. GRADERS (pure Python, no model; rc12/graders.py, grade_text.py, grade_cues.py, grade_voice.py, grade_fmt_dyn.py,
+  grade_role.py)
   G-VAL, strict value grader (closed candidate set). Right only if ALL hold:
     v1 non-empty, not degenerate (s7), stop reason is not the 256-token cap;
     v2 the gold is ASSERTED: some whole-word, case-insensitive mention (E004 value matching: grey/gray, number words)
@@ -239,7 +240,23 @@ becomes training text). The two share the label D8 by accident.
        D11);
     v4 assistant voice: the gold's sentence does not bind a user fact to the first person ("My cat is Biscuit",
        "I'm Marcus"; "my" within 3 words before an object or holder word). For assistant-held probes (OWN, "What
-       did I call you?") the reverse is checked ("You picked X", "Your name is X");
+       did I call you?") the reverse is checked ("You picked X", "Your name is X"). Report frames (D23,
+       rc12/grade_voice.py): the nearest person marker before the gold may be a report. The user's words reported
+       back ("You told me it was X", "You asked me about X", "You said X", "According to you, X") do not bind a
+       user-held fact; the model's own report ("I said X", "I told you X", "I mentioned X", "I asked you about X",
+       "I did X") binds it and fails (the model speaks as the user). A fact the user gave the assistant fails "I
+       said X" too; the assistant's own earlier answer (OWN pick) fails "You said X", "You told me X", "You asked
+       me about X", "According to you, X" (a misattribution) and passes "I said X". World-held facts (K) keep
+       the E001 rule unchanged. Fix round (same day, verifier findings): a frame counts when it ENDS within the 8
+       words before the gold ("You told me that the one in question was X"); frames allow "'d / had", up to 2
+       words inside, never a pronoun ("You'd already told me X" passes, "You know I said X" fails); any other
+       "you ... me" ("You wanted me to remember X", "You asked me to pick one, and X was my choice") and "let me"
+       bind nothing; with no marker before the gold, the first frame after it counts ("It's X, like I told you"
+       fails); a quote opened by the user's reported words (You said, "Mine is X.") is the user's voice. The
+       reverse check is per mode: an OWN pick fails when it is given to someone else ("You'd gone with X", "Your
+       pick was X", "Your team picked X", "X, which you chose"); a fact the user gave the assistant fails "Your
+       name's X", "I'll call you X", "You go by X", "I said you'd be X", "I told you to call me X", and passes
+       "You chose the name X for me" (the OWN rule no longer applies to it; G-ROLEX r6 uses the same check);
     v5 no role leak (no role tag at a line start, no fake user turn) and not an echo: >= 80% of the reply's word
        4-grams copied from the probe question, OR the reply contains the whole question (4+ words) word for word
        (D8).
@@ -551,7 +568,32 @@ becomes training text). The two share the label D8 by accident.
 14. OOD-H (PLAN Phase 0; the Level R wording rule depends on it)
   Part 1, fixed at the lock: 150 held-out, knowledge-light English multi-turn OASST2 threads; their IDs hashed into
   this file; removed by thread ID from every training corpus, the tokenizer's included; graded probe turns appended
-  (Claude-written, a gold set), asking about what the human user said; the same graders as RC-12. NOT BUILT.
+  (Claude-written, a gold set), asking about what the human user said; the same graders as RC-12. BUILT 2026-09-26
+  (Part 1 BUILT paragraph below); not committed, not locked.
+  DECIDED 2026-09-26 by Claude under Max's standing permission (reversible before the lock): (a) the two grader
+  bugs the OOD-H review found (oodh/DESIGN.txt s11: "You told me it was X" failed every user-held value probe, and
+  "I said X" passed them) are fixed in the RC-12 graders before any dev baseline is scored (s6 v4, D23; generation
+  is unaffected, transcripts are graded later); (b) Part 1 reaches 150 threads with fallback F1 (the deepest usable
+  path per reserved tree), with no reserve change: F3 is rejected because it would put new OOD-H trees into
+  tokenizer v0 and the E2/E3 shards; (c) Part 1 keeps the RC-12 graders, but the item gates G2 and G4 are not
+  applied to it: a natural thread usually holds one value of the asked kind, so a type-guessing cheater passes
+  structurally, and OOD-H is a paired Planck-versus-comparator check, where that helps both sides. Reported beside
+  the OOD-H score: the full cheater table, and the score on the subset of probes where the user gave 2+ values of
+  the asked kind.
+  Part 1 BUILT (2026-09-26, F1; oodh/DESIGN.txt s13, reviewed in s14; hashes in oodh/HASHES.txt; not committed,
+  not locked). 150 threads: the 107 best-path threads plus 43 F1 threads (deepest usable path per reserved tree,
+  sealed/oodh/batch_4.jsonl); the batch-4 pool was read in order until the 43rd usable thread, 8 dropped under KL2
+  (3 code, 2 encyclopedic, 2 unsafe, and 1 math thread the adversarial review dropped and replaced with the next
+  thread in the reading order). The review also fixed 35 batch-4 probes (guessable-without-the-thread questions,
+  answerable or ill-formed abstain probes, missing same-type candidates, accepted wordings). 417 probes (H-FACT 227,
+  H-ASK 97, H-CORR 1, H-ABS 92). The gate passes every gating check (ids, struct, G1, L2, G8, ABS, VAL, G7); G2 and
+  G4 are reported, not gating, per (c) above (type matchers 0.71-0.75, USERVOICE/ROLECAP 0.01 with the fixed
+  graders; the 2+-value subset is 43 of 325 VAL probes). Held-out PC scans of every F1 tree in the set (42 at the
+  build, the replacement at the review; tree ids, message ids, 50-char user snippets, against every text artifact
+  under data/ except raw/, with positive controls that hit) found 0 contamination. oodh_part1.jsonl sha256
+  f6163981e6af04bfef130e7416ef13d00bf81cad8228c639eb9c3c45a8315270; sorted tree-id list sha256
+  4c3f60e3c1c79121982326ca430f9e26b37f4f2037ab17c501903dd179a69eb7. Marked LOCK CANDIDATE; the lock (s15) fixes
+  these hashes only after Max's review.
   Part 2, collected in January: 50-60 short scripts written by the human-test raters before they see any model
   output (6-12 user turns, 2+ personal facts, one correction, a later question; the rater marks the golds). Only the
   protocol is pre-registered (those scripts cannot have leaked into training).
@@ -794,6 +836,15 @@ becomes training text). The two share the label D8 by accident.
   D20 TWOHOP: the echoing hop-2 statement is the gold's in 1/3 (SPEC: a lure's).
   D21 HEDGE and ABS_CUE extended (grade_cues.py), near_hedge, the G-FMT stuffing rule.
   D22 New gates: audit_rules (G10), audit_graders (G11), mutation_audit.
+  D23 v4_voice reads report frames (grade_voice.py, 2026-09-26, before any dev baseline was scored; s6 v4): "You
+      told me X" and "You asked me about X" no longer fail a user-held fact, "I said X" / "I told you X" / "I
+      mentioned X" now fail it, and an OWN pick fails "You said X". G11 and the grader fixtures carry both forms.
+      Fix round (2026-09-26, a verifier's adversarial battery, still before any dev baseline): frames ending inside
+      the window, "'d / had" and gap words, "you ... me" requests, frames after the gold, user quotes, and the
+      reverse check split by mode (s6 v4); G-ROLEX r6 uses it too. Known limit, not fixed: the right value bound
+      to the wrong holder passes ("Your grandmother's bike is X" for the user's bike, "You have the X one" for an
+      uncle's); it is not a person-voice error, and a simple holder rule for third-party probes fails natural
+      right answers ("As you know, it's X", 28 of 28 BIND third-party probes in a scratch trial).
   From this draft: the sealed banks are written after the pipeline generator exists, not before (s13 S2).
   From the rulings (s17, 2026-09-25): the loop equality clause is charged only on replies to asking turns, with
   identical statement-turn replies reported as ack-repeats (OD6 iii; SPEC: every reply); OWN is gated by the --own-cf

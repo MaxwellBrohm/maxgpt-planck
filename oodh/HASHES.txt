@@ -1,14 +1,14 @@
 OOD-H Part 1 hashes (public: hashes and counts only; the items are sealed). Written by oodh/build.py.
-status SHORT: 107 usable threads, target 150; NOT the lock set
-sealed/oodh/oodh_part1.jsonl sha256 86ec858fef43fd10b45358eb6f90f7f9467567abc687676b372a3dcb28e4c5ad
-sorted tree ids (newline-joined, no trailing newline) sha256 265d6185b6b1d3bf4c9a76c615505ffca9ec4354758a7ff315dc6fad167bd5e5
-threads 107; probes 289: H-FACT 178, H-ASK 51, H-CORR 1, H-ABS 59
-probes per thread: 2: 32, 3: 75
-cells (probe-kind mix): H-ABS+H-ASK 3, H-ABS+H-ASK+H-FACT 22, H-ABS+H-FACT 34, H-ASK 3, H-ASK+H-FACT 20, H-CORR+H-FACT 1, H-FACT 24
-thread user turns: 2: 102, 3: 5
-inputs (sha256, first 16 hex): candidates.jsonl f1d0f4f9714e87f3, batch_1.jsonl a08bb3fd2fc8bccc, batch_2.jsonl b1e9f676e6a809b6, batch_3.jsonl 54a05407e5c5942c, batch_1_asks.json f32f17b631008e17
-GATE (oodh/gate.py) on oodh_part1.jsonl sha256 86ec858fef43fd10b45358eb6f90f7f9467567abc687676b372a3dcb28e4c5ad: FAIL
-  107 threads; leak list of 54 tree ids
+status COMPLETE: 150 threads chosen by the rule in oodh/build.py
+sealed/oodh/oodh_part1.jsonl sha256 f6163981e6af04bfef130e7416ef13d00bf81cad8228c639eb9c3c45a8315270
+sorted tree ids (newline-joined, no trailing newline) sha256 4c3f60e3c1c79121982326ca430f9e26b37f4f2037ab17c501903dd179a69eb7
+threads 150; probes 417: H-FACT 227, H-ASK 97, H-CORR 1, H-ABS 92
+probes per thread: 2: 33, 3: 117
+cells (probe-kind mix): H-ABS+H-ASK 12, H-ABS+H-ASK+H-FACT 37, H-ABS+H-FACT 43, H-ASK 3, H-ASK+H-FACT 29, H-CORR+H-FACT 1, H-FACT 25
+thread user turns: 2: 135, 3: 15
+inputs (sha256, first 16 hex): candidates.jsonl f1d0f4f9714e87f3, candidates_deepest.jsonl 1b4533e435273ab1, batch_1.jsonl a08bb3fd2fc8bccc, batch_2.jsonl b1e9f676e6a809b6, batch_3.jsonl 54a05407e5c5942c, batch_4.jsonl 0c94e8569c898551, batch_1_asks.json f32f17b631008e17
+GATE (oodh/gate.py) on oodh_part1.jsonl sha256 f6163981e6af04bfef130e7416ef13d00bf81cad8228c639eb9c3c45a8315270: PASS (gating checks)
+  150 threads; leak list of 54 tree ids
   ids    pass
   struct pass
   G1     pass
@@ -17,7 +17,10 @@ GATE (oodh/gate.py) on oodh_part1.jsonl sha256 86ec858fef43fd10b45358eb6f90f7f94
   ABS    pass
   VAL    pass
   G7     pass
-  G2     FAIL 114
-  G4     FAIL 38
-  G4 histogram (threads passed by k of the 11 generic cheaters): 0:61, 1:3, 2:2, 3:3, 4:3, 5:13, 6:22
-  cheater family scores: FIRST 0.76, LAST 0.74, WORDING 0.76, OVERLAP_A 0.77, OVERLAP_B 0.75, MARKER 0.75, ECHO 0.00, DEFLECT 0.00, SHOTGUN 0.62, USERVOICE 0.10, ABSTAIN 0.00, ROLECAP 0.10, ANTI_OVERLAP 0.74, ANTI_WORDING 0.74, LONGEST 0.74, SHORTEST 0.75, LEASTFREQ 0.76, MOSTFREQ 0.75, POS2 0.04, PENULT 0.04, ANTEPENULT 0.00, PENULT_MARKER 0.00, PREV_FRESH 0.74, EXL_OVERLAP 0.76, EXL_WORDING 0.75, EXL_MARKER 0.76, LATEST_USER_SWAP 0.06, LATEST_USER 0.03, ORDER_ABS 0.42, MYONLY 0.62, MARKER_OBJ 0.76
+  reported, NOT gating for OOD-H (DESIGN s12):
+    G2    129 findings (structural, see s12)
+    G4    45 findings (structural, see s12)
+    2+-value VAL probes: 43 of 325 VAL; top cheater passes there: OVERLAP_A 31, MARKER_OBJ 30, WORDING 28, EXL_OVERLAP 26, OVERLAP_B 26, EXL_MARKER 25
+  G4 histogram (threads passed by k of the 11 generic cheaters): 0:94, 1:3, 2:3, 3:5, 4:5, 5:15, 6:25
+  cheater family scores: FIRST 0.74, LAST 0.72, WORDING 0.74, OVERLAP_A 0.75, OVERLAP_B 0.74, MARKER 0.74, ECHO 0.00, DEFLECT 0.00, SHOTGUN 0.59, USERVOICE 0.01, ABSTAIN 0.00, ROLECAP 0.01, ANTI_OVERLAP 0.71, ANTI_WORDING 0.71, LONGEST 0.71, SHORTEST 0.72, LEASTFREQ 0.73, MOSTFREQ 0.72, POS2 0.04, PENULT 0.05, ANTEPENULT 0.00, PENULT_MARKER 0.00, PREV_FRESH 0.72, EXL_OVERLAP 0.74, EXL_WORDING 0.72, EXL_MARKER 0.74, LATEST_USER_SWAP 0.05, LATEST_USER 0.03, ORDER_ABS 0.40, MYONLY 0.60, MARKER_OBJ 0.75
+  verdict: LOCK CANDIDATE (150 threads; gating checks pass; G2/G4 reported per DESIGN s12, not gating)

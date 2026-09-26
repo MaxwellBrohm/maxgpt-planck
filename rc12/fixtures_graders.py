@@ -5,6 +5,7 @@ VAL/DYN-pick fixtures: vfix; ABS: afix; FMT: ffix; LOOP: lfix; ROLEX: rfix; DYN-
 Content fixtures that do not apply to a grader are listed in NOT_APPLICABLE with the reason."""
 import re
 
+import grade_voice as GV
 import graders as G
 import pools_vals as V
 
@@ -114,6 +115,54 @@ def vfix(rec, p, gold=None, ideal=None, avoid=()):
                      if p.get("object_words") else [])
         if who:
             out.append(fx(rec, p, "voice_myholder", f"As for my own {h}, you said it's {gold}.", False))
+    mode = GV.mode_of(p)                      # report frames (grade_voice.py, STEP 10 and its fix round)
+    if mode == "user":
+        out += [fx(rec, p, "voice_you_told_ok", f"You told me it was {gold}.", True),
+                fx(rec, p, "voice_you_asked_ok", f"You asked me about the {gold}.", True),
+                fx(rec, p, "voice_long_ok", f"You told me that the one in question was {gold}.", True),
+                fx(rec, p, "voice_request_ok", f"You wanted me to remember it's {gold}.", True),
+                fx(rec, p, "voice_let_me_ok", f"Let me check: it's {gold}.", True),
+                fx(rec, p, "voice_shared_ok", f"You shared with me that it's {gold}.", True),
+                fx(rec, p, "voice_quote_ok", f'You said, "Mine is {gold}."', True),
+                fx(rec, p, "voice_quote_my_ok", f'You told me, "My {obj} is {gold}."', True),
+                fx(rec, p, "voice_i_said", f"I said {gold}.", False),
+                fx(rec, p, "voice_i_told_you", f"I told you it was {gold}.", False),
+                fx(rec, p, "voice_i_mentioned", f"I mentioned {gold}.", False),
+                fx(rec, p, "voice_know_i_said", f"You know I said {gold}.", False),
+                fx(rec, p, "voice_id_said", f"I'd said it was {gold}.", False), fx(rec, p, "voice_i_did", f"I did {gold}.", False),
+                fx(rec, p, "voice_after_i_told", f"It's {gold}, like I told you.", False),
+                fx(rec, p, "voice_second_mention", f"You told me it was {gold}. I said {gold} too.", False),
+                fx(rec, p, "voice_you_after_i_ok", f"I checked: your answer is {gold}.", True),
+                fx(rec, p, "voice_far_mixed_ok", f"I'm happy you asked; the one we talked about earlier on was {gold}.", True)]
+    elif mode == "given":
+        out += [fx(rec, p, "given_you_told_ok", f"You told me {gold}.", True),
+                fx(rec, p, "given_my_name_ok", f"My name is {gold}.", True),
+                fx(rec, p, "given_chose_ok", f"You chose the name {gold} for me.", True),
+                fx(rec, p, "given_quote_ok", f'You said, "I\'ll call you {gold}."', True),
+                fx(rec, p, "given_i_said", f"I said {gold}.", False), fx(rec, p, "given_already", f"I already said {gold}.", False),
+                fx(rec, p, "given_told_call_me", f"I told you to call me {gold}.", False),
+                fx(rec, p, "given_gave_you", f"I gave you the name {gold}.", False),
+                fx(rec, p, "given_ill_call", f"I'll call you {gold}.", False), fx(rec, p, "given_names", f"Your name's {gold}.", False),
+                fx(rec, p, "given_go_by", f"You go by {gold}.", False), fx(rec, p, "given_youd_be", f"I said you'd be {gold}.", False),
+                fx(rec, p, "given_youre", f"You're {gold}.", False)]
+    elif mode == "own":                       # "you said X" gives the assistant's own pick to the user: own_you_said
+        out = [f for f in out if f["label"] != "voice_mixed_ok"]
+        out += [fx(rec, p, "own_i_said_ok", f"I said {gold}.", True), fx(rec, p, "own_after_ok", f"{Gd} was my pick.", True),
+                fx(rec, p, "own_request_ok", f"You asked me to pick one, and {gold} was my choice.", True),
+                fx(rec, p, "own_suggested_ok", f"Of the names you suggested, {gold} was my pick.", True),
+                fx(rec, p, "own_you_said", f"You said {gold}.", False),
+                fx(rec, p, "own_you_told", f"You told me {gold}.", False),
+                fx(rec, p, "own_according", f"According to you, it's {gold}.", False),
+                fx(rec, p, "own_youd_said", f"You'd said {gold}.", False),
+                fx(rec, p, "own_had_already", f"You had already said {gold}.", False),
+                fx(rec, p, "own_asked_about", f"You asked me about {gold}.", False),
+                fx(rec, p, "own_telling", f"You were telling me about {gold}.", False),
+                fx(rec, p, "own_youd_gone", f"You'd gone with {gold}.", False), fx(rec, p, "own_team", f"Your team picked {gold}.", False),
+                fx(rec, p, "own_wanted", f"You wanted {gold}.", False), fx(rec, p, "own_the_name", f"You picked the name {gold}.", False),
+                fx(rec, p, "own_your_pick", f"Your pick was {gold}.", False), fx(rec, p, "own_which_you", f"{Gd}, which you chose.", False),
+                fx(rec, p, "own_was_your", f"{Gd} was your pick.", False)]
+    else:
+        out.append(fx(rec, p, "world_i_said_ok", f"As I said, it's {gold}.", True))
     if p.get("pool") == "name":
         out.append(fx(rec, p, "vocative", f"Hi {gold}! How can I help you today?", False))
     if o:

@@ -24,7 +24,12 @@ G-VAL clauses (a reply is right only if none fails):
   v3_shotgun  every candidate (2+) is mentioned (not COMPOSE, whose answer compares the two holders)
   v4_voice    user voice: the gold bound to the first person (E001 captures) or "my" + an object/holder word
               (E004 clause 7); for assistant-held facts (OWN, "What did I call you?") the reverse: the value
-              given to the user ("You picked Quizzards", "Your name is Kestrel")
+              given to the user ("You picked Quizzards", "Your name is Kestrel"). Report frames (grade_voice.py,
+              STEP 10): "You told me X" / "You asked me to X" do not bind a user fact to the first person;
+              "I said X" / "I'd told you X" / "It's X, like I told you" do (the model speaks as the user), and so
+              fail a fact the user gave the assistant; "You said X" / "You told me X" fail the assistant's own
+              answer (OWN pick), a request ("You asked me to pick one, and X was my choice") does not. The
+              reversal is per mode (grade_voice.reversed_to). World-held facts (K) keep E001 captures unchanged.
   v5_echo     >= 80% of the reply's word 4-grams copied from the probe question
 G-ABS clauses: a1_degen, a2_cue (an abstain cue), a3_value (no value of the probe's pool mentioned at all),
   a4_voice (user voice: "my" + object word, or a first-person-bound sentence about the object with no "you").
@@ -36,6 +41,7 @@ import re
 
 import grade_loop as L
 import grade_text as T
+import grade_voice as GV
 import pools_vals as V
 
 STOP = {"the", "a", "an", "of", "by", "on", "in", "at", "to", "for", "and", "my", "your", "is", "it", "that", "this"}
@@ -104,10 +110,10 @@ def g_val(reply, stop, prior, rec, probe, gold=None):
         fails.append("v3_guess")
     if "shotgun" not in T.OFF and not probe.get("pool_values") and len(cands) >= 2 and all(T.mentioned(text, v) for v in cands):
         fails.append("v3_shotgun")
-    if probe.get("holder") == "assistant":
-        voice = any(T.assist_reversed(text, g) for g in gs)
-    else:
-        voice = any(T.captures(g, text) for g in gs) or T.my_object(text, obj_words(probe))
+    mode = GV.mode_of(probe)
+    voice = any(GV.voice_error(g, text, mode) for g in gs)
+    if mode not in ("given", "own"):
+        voice = voice or T.my_object(GV.unquote(text), obj_words(probe))
     if voice:
         fails.append("v4_voice")
     if T.echo(text, probe["question"]):

@@ -27,7 +27,7 @@ import mutants_graders as M
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PER_CELL = 2 if "--quick" in sys.argv else 4
-MODS = {"grade_text": T, "grade_loop": L, "graders": G, "grade_fmt_dyn": FD, "grade_role": R}
+MODS = {"grade_text": T, "grade_loop": L, "graders": G, "grade_fmt_dyn": FD, "grade_role": R, "grade_voice": G.GV}
 
 
 def load():

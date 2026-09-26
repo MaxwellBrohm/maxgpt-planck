@@ -39,7 +39,10 @@ import pools_vals as V  # noqa: E402
 import hashes as H  # noqa: E402
 
 SEALED = os.path.join(REPO, "sealed", "oodh")
-BATCHES = ["batch_1.jsonl", "batch_2.jsonl", "batch_3.jsonl"]
+BATCHES = ["batch_1.jsonl", "batch_2.jsonl", "batch_3.jsonl", "batch_4.jsonl"]
+# batch 4 is the F1 fallback (DESIGN s12): deepest usable path per reserved tree, so its cand_index indexes
+# candidates_deepest.jsonl, not candidates.jsonl. Every other batch indexes the best-path candidates.jsonl.
+CAND_FILE = {"batch_4.jsonl": "candidates_deepest.jsonl"}
 ASKS_FILES = {"batch_1.jsonl": "batch_1_asks.json"}   # hand asks labels (tree id -> per turn) where records have none
 TARGET = {"H-FACT": 0.40, "H-ASK": 0.40, "H-ABS": 0.20}
 PICK_SALT = "planck-oodh-pick-v1:"
@@ -78,10 +81,20 @@ def norm_probe(p, message_ids):
 
 
 def load_items(sealed=SEALED, batches=BATCHES, asks_files=ASKS_FILES):
-    """every usable thread of every batch, joined with its thread text from candidates.jsonl."""
-    cands = read_jsonl(os.path.join(sealed, "candidates.jsonl"))
+    """every usable thread of every batch, joined with its thread text from its candidates file (CAND_FILE)."""
+    cand_cache = {}
+
+    def cands_for(name):
+        f = CAND_FILE.get(name, "candidates.jsonl")
+        if f not in cand_cache:
+            cand_cache[f] = read_jsonl(os.path.join(sealed, f))
+        return cand_cache[f]
+
     items, seen = [], set()
     for name in batches:
+        if not os.path.exists(os.path.join(sealed, name)):
+            continue                          # a batch file need not exist (e.g. the synthetic fixture omits batch 4)
+        cands = cands_for(name)
         fn = os.path.join(sealed, asks_files.get(name, "-"))
         extra = json.load(open(fn)) if os.path.exists(fn) else {}
         for r in read_jsonl(os.path.join(sealed, name)):
@@ -218,7 +231,8 @@ def main():
     with open(out, "w", encoding="utf-8") as fh:
         for r in recs:
             fh.write(json.dumps(r, ensure_ascii=False) + "\n")
-    ins = [os.path.join(a.sealed, b) for b in ["candidates.jsonl"] + BATCHES + list(ASKS_FILES.values())]
+    ins = [os.path.join(a.sealed, b) for b in ["candidates.jsonl", "candidates_deepest.jsonl"]
+           + BATCHES + list(ASKS_FILES.values())]
     for line in H.write_hashes(recs, short, a.n, out, a.hashes, [f for f in ins if os.path.exists(f)]):
         print(line)
     return 0

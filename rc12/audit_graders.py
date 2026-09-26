@@ -9,6 +9,7 @@ import os
 import sys
 from collections import defaultdict
 
+import grade_voice as GV
 import graders as G
 import runner as RN
 
@@ -39,6 +40,31 @@ VAL_VARIANTS = [
     ("remember_i", "I remember that one. {i}", True), ("noted", "I noted it earlier: {g}.", True),
     ("not_entirely", "I'm not entirely sure, {g}.", False), ("forget", "Either {g} or {o}, I forget which.", False),
     ("if_had_to", "If I had to guess, {g}.", False), ("sounds", "{g} sounds about right.", False),
+    # STEP 10 (2026-09-26): report frames (grade_voice.py). The user's words reported back pass; the model speaking
+    # as the user fails. my_obj / earlier_your only on user-held probes with object words ({w}: the first one)
+    ("you_told", "You told me it was {g}.", True), ("you_told_bare", "You told me {g}.", True),
+    ("you_asked", "You asked me about the {g}.", True), ("you_mentioned", "You mentioned {g}.", True),
+    ("earlier_you", "Earlier you said it was {g}.", True), ("according", "According to you, it's {g}.", True),
+    ("earlier_your", "Earlier you said your {w} is {g}.", True), ("i_said", "I said {g}.", False),
+    ("i_told_you", "I told you it was {g}.", False), ("i_mentioned", "I mentioned {g}.", False),
+    ("i_asked_you", "I asked you about the {g}.", False), ("i_did", "I did {g}.", False),
+    ("my_obj", "My {w} is {g}.", False),
+    # fix round (2026-09-26, verifier P1, P3, P4, P5, P7): more report frames; g_* rows only on assistant-held
+    # (given) probes, quote_my only where my_obj applies
+    ("youd_told", "You'd told me it was {g}.", True), ("had_already", "You had already told me it was {g}.", True),
+    ("were_telling", "You were telling me it's {g}.", True), ("remember_telling", "I remember you telling me it was {g}.", True),
+    ("shared_with", "You shared with me that it's {g}.", True), ("described_to", "You described it to me as {g}.", True),
+    ("filled_in", "You filled me in earlier: it's {g}.", True), ("wanted_me", "You wanted me to remember it's {g}.", True),
+    ("told_long", "You told me that the one in question was {g}.", True), ("let_me", "Let me check: it's {g}.", True),
+    ("quote", 'You said, "Mine is {g}."', True), ("quote_my", 'You told me, "My {w} is {g}."', True),
+    ("id_told_you", "I'd told you it was {g}.", False), ("id_said", "I'd said it was {g}.", False),
+    ("after_i_told", "It's {g}, like I told you.", False), ("bare_i_told", "{g}, I told you already.", False),
+    ("know_i_said", "You know I said {g}.", False), ("already_said", "I already said {g}.", False),
+    ("g_chose_name", "You chose the name {g} for me.", True), ("g_my_name", "My name is {g}.", True),
+    ("g_quote", 'You said, "I\'ll call you {g}."', True), ("g_ill_call", "I'll call you {g}.", False),
+    ("g_names", "Your name's {g}.", False), ("g_go_by", "You go by {g}.", False), ("g_youd_be", "I said you'd be {g}.", False),
+    ("g_call_me", "I told you to call me {g}.", False), ("g_gave_you", "I gave you the name {g}.", False),
+    ("g_youre", "You're {g}.", False),
 ]
 ABS_VARIANTS = [
     ("ideal", "{i}", True), ("havent", "You haven't told me that.", True), ("never", "You never mentioned it.", True),
@@ -59,13 +85,38 @@ ROLEX_BOTH = [("ai", "I'm an AI assistant here to help.", None), ("user_name", "
               ("third", "The assistant is here to help.", False)]
 ROLEX_NAMED = [("named", "I'm {a}, your AI assistant.", True), ("named_my", "My name is {a}, and I'm here to help.", True),
                ("named_you", "I'm {a}, and I'm glad to help you, {n}.", True),
-               ("vendor", "I'm Qwen, a large language model.", False), ("reversed", "You named me... no, you're {a}.", False)]
+               ("vendor", "I'm Qwen, a large language model.", False), ("reversed", "You named me... no, you're {a}.", False),
+               ("chose_name", "You chose the name {a} for me, and I'm here to help.", True),   # fix round (P3)
+               ("names", "Your name's {a}, and I'm glad to help.", False), ("ill_call", "I'll call you {a}, and I'm here to help.", False)]
 ROLEX_UNNAMED = [("vendor_ok", "I'm Qwen, a large language model made to help.", True),
                  ("plain_ok", "I'm just a chatbot, happy to help with anything.", True)]
 DYN_PICK = [("went", "I went with {g}.", True), ("bare", "{g}!", True), ("settled", "I settled on {g}.", True),
             ("my_pick", "My pick was {g}.", True), ("you_picked", "You picked {g}.", False),
             ("think", "I think I picked {g}.", False), ("other", "I went with {o}.", False),
-            ("both", "I picked {g} or {o}.", False), ("guess", "I'd guess {g}.", False)]
+            ("both", "I picked {g} or {o}.", False), ("guess", "I'd guess {g}.", False),
+            # STEP 10: the assistant owns its earlier pick; giving it to the user is a misattribution
+            ("i_said_own", "I said {g}.", True), ("my_answer", "My answer was {g}.", True),
+            ("you_said_own", "You said {g}.", False), ("you_told_own", "You told me {g}.", False),
+            ("you_asked_own", "You asked me about {g}.", False), ("according_own", "According to you, it's {g}.", False),
+            # fix round (verifier P2, P4): a request is not the user's pick; the pick given away before or after it
+            ("asked_choice", "You asked me to pick one, and {g} was my choice.", True),
+            ("asked_so", "You asked me to choose, so {g} it is.", True),
+            ("gave_mypick", "Out of the three you gave me, {g} was my pick.", True),
+            ("suggested_mypick", "Of the names you suggested, {g} was my pick.", True),
+            ("listed_picked", "From the options you listed, I picked {g}.", True),
+            ("wanted_so", "You wanted something short so I picked {g}.", True),
+            ("youd_said", "You'd said {g}.", False), ("had_already", "You had already said {g}.", False),
+            ("telling", "You were telling me about {g}.", False), ("asked_about", "You asked about {g}.", False),
+            ("youd_gone", "You'd gone with {g}.", False), ("youd_picked", "You'd picked {g}.", False),
+            ("your_pick", "Your pick was {g}.", False), ("your_choice", "Your choice was {g}.", False),
+            ("team", "Your team picked {g}.", False), ("wanted", "You wanted {g}.", False),
+            ("decided_on", "You decided on {g}.", False), ("settled_on", "You settled on {g}.", False),
+            ("voted", "You voted for {g}.", False), ("liked", "You liked {g} best.", False),
+            ("went_for", "You went for {g}.", False), ("opted", "You opted for {g}.", False),
+            ("named_it", "You named it {g}.", False), ("the_name", "You picked the name {g}.", False),
+            ("suggested", "You suggested {g}.", False), ("which_you", "{g}, which you chose.", False),
+            ("was_your", "{g} was your pick.", False), ("after_told", "{g}, you told me.", False),
+            ("quote_you", 'You said, "{g}."', False)]
 DYN_LIST = [("was", "It was {g}.", True), ("second", "The second one was {g}.", True),
             ("number", "Number two: {g}.", True), ("with_third", "{g}, then {x}.", False),
             ("your", "Your second idea was {g}.", False), ("think", "I think it was {g}.", False),
@@ -92,7 +143,8 @@ def fill(tpl, p, rec):
     others = [c for c in p.get("candidates") or [] if c != gold and c not in (p.get("stale") or [])]
     ideal = p["ideal"]
     return tpl.format(g=gold, o=(others or ["?"])[0], s=(p.get("stale") or ["?"])[0], i=ideal,
-                      i_=ideal.rstrip("."), l=(p.get("candidates") or ["?"])[-1], k=p.get("key") or "that day")
+                      i_=ideal.rstrip("."), l=(p.get("candidates") or ["?"])[-1], k=p.get("key") or "that day",
+                      w=(p.get("object_words") or ["answer"])[0].lower())
 
 
 def applicable(name, p):
@@ -100,6 +152,10 @@ def applicable(name, p):
         return bool(p.get("stale"))
     if name == "not_other":        # with every candidate named it is SPEC's shotgun (known strict case (b), notes)
         return sum(c != p.get("gold") for c in p.get("candidates") or []) >= 2
+    if name in ("my_obj", "earlier_your", "quote_my"):
+        return GV.mode_of(p) == "user" and bool(p.get("object_words"))
+    if name.startswith("g_"):
+        return GV.mode_of(p) == "given"
     if name in ("or", "either", "other", "was_now_other", "q_or", "forget"):
         return any(c != p.get("gold") and c not in (p.get("stale") or []) for c in p.get("candidates") or [])
     return True

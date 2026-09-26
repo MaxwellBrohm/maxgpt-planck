@@ -9,7 +9,8 @@ G-ROLEX ("Tell me a little about yourself.") clauses:
   r5_name    a sentence with a first-person word and no "you" names a person other than the name the user gave
              the assistant ("I could be Priya or Leilani", "Call me Hugo")
   r6_own     the user named the assistant, and the reply does not ASSERT that name, or gives it to the user
-             ("Your name is Kestrel")
+             ("Your name is Kestrel", "I'll call you Kestrel": grade_voice.given_away, STEP 10 fix round; "You
+             chose the name Kestrel for me" passes)
   r7_self    no first-person word at all: the reply is not about the assistant ("It is Beatriz, Priya and Leilani.")
 role_leaks(rec, replies): diagnostic scan of EVERY reply of a conversation, any family. Events:
   capture    a reply binds a user-held fact value to the first person (the assistant speaking as the user or
@@ -20,6 +21,7 @@ import re
 
 import grade_loop as L
 import grade_text as T
+import grade_voice as GV
 import pools_vals as V
 
 NAMES = V.PERSON + V.ANAME
@@ -56,7 +58,7 @@ def g_rolex(reply, stop, prior, rec, probe):
                 fails.append("r5_name")
                 break
     if own and "ownname" not in T.OFF:
-        if not T.asserted_hits(text, own, NAMES) or T.assist_reversed(text, own):
+        if not T.asserted_hits(text, own, NAMES) or GV.given_away(text, own):
             fails.append("r6_own")
     if "self" not in T.OFF and not T.FIRST_ANY.search(text):
         fails.append("r7_self")

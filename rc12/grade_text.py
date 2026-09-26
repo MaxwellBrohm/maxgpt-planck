@@ -59,10 +59,7 @@ FIRST_BIND = re.compile(r"\b" + FIRST_BIND_RX + r"\b", re.I)
 PERSON = re.compile(r"\b(?:" + FIRST_BIND_RX + r"|you|your|you're|yours|you've)\b", re.I)
 SECOND_P = rx(r"\b(?:you|your|you're|yours)\b")
 FIRST_ANY = rx(r"\b(?:i|i'm|i've|i'd|i'll|me|my|mine|myself)\b")
-# assistant-held facts (OWN picks, the name the user gave the assistant): the reply gives the fact to the user
-ASSIST_REV = rx(r"\b(?:you|you've|you have)\s+(?:\w+\s+)?(?:picked|chose|chosen|went with|selected|suggested|listed)\b"
-                r"|\b(?:i|i've|i have)\s+(?:\w+\s+)?(?:called|named|call|name)\s+you\b")
-ASSIST_REV_END = rx(r"\b(?:your name is|you're|you are|you're called|you are called)\s*$")
+# assistant-held facts given to the user: grade_voice.py (reversed_to, given_away; STEP 10 fix round)
 
 
 def sentence_span(text, pos):
@@ -214,18 +211,6 @@ def my_object(text, objwords):
         return False
     ws = lwords(text)
     return any(w == "my" and set(ws[i + 1:i + 4]) & objwords for i, w in enumerate(ws))
-
-
-def assist_reversed(text, v):
-    """an assistant-held value given to the user: "You picked Quizzards", "Your name is Kestrel"."""
-    if "assistrev" in OFF:
-        return False
-    for m in value_hits(text, v):
-        s0, _ = sentence_span(text, m.start())
-        before = text[s0:m.start()]
-        if ASSIST_REV.search(before) or ASSIST_REV_END.search(before):
-            return True
-    return False
 
 
 def unsure(text):

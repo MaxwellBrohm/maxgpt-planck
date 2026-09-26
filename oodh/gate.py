@@ -1,5 +1,9 @@
-"""OOD-H Part 1 gate (oodh/DESIGN.txt s6; prereg draft s2 L2 and s8 G1, G2, G4, G5, G7, G8). No model. Exit 0 when
-every check passes, 1 otherwise. Each check below lists its failures by record id and probe turn (never item text).
+"""OOD-H Part 1 gate (oodh/DESIGN.txt s6, s12; prereg draft s2 L2 and s8 G1, G7, G8). No model. Exit 0 when every
+GATING check passes, 1 otherwise. G2 and G4 are computed but NOT gating for OOD-H (DESIGN s12: on natural threads a
+probe usually asks for the one value of its kind the user gave, so type-guessing cheaters pass structurally; OOD-H is
+a paired Planck-vs-comparator check where that helps both sides). They are reported beside the result, with the full
+cheater table and the score on the subset of probes where the user gave 2+ values of the asked kind (multi_value).
+Each check below lists its failures by record id and probe turn (never item text).
   ids     every tree id is in the OOD-H reserve (corpus/oodh.in_oodh_reserve), not in the leak list, unique, and is the
           thread's first message id. Leak list: --leaked (default sealed/oodh/leaked_reserve_trees.txt), written on the
           PC by oodh/leaks.py (corpus/oodh.leaked_reserve_trees over every OASST2 tree and Dolly instruction).
@@ -16,11 +20,12 @@ every check passes, 1 otherwise. Each check below lists its failures by record i
           question holds no abstain cue (grade_text.ABS_CUE, D12); >= 8 pool values; no gold.
   VAL     the gold is a candidate, and >= 8 pool values occur nowhere in the thread (any case).
   G7      every question <= 20 words; proxy tokens (thread messages, questions, 50 words per probe reply) <= 1,800.
-  G2      rc12's 12 generic and 14 audit value cheaters and play.LATEST_USER_SWAP: family OODH <= 0.40 and every cell
-          (probe-kind mix) <= 0.50; ORDER_ABS: cells holding H-ABS <= 0.50. ZERO: ECHO, DEFLECT, SHOTGUN, USERVOICE,
-          ABSTAIN, ROLECAP, LATEST_USER pass no VAL probe, and all but ABSTAIN and DEFLECT (which answer an abstain
-          probe right by design) pass no ABS probe. NEVER_ABS: every other cheater fails every ABS probe.
-  G4      per thread, at most 3 of the 11 generic cheaters (OVERLAP_A and _B as one) score 1.00.
+  G2      (reported, not gating) rc12's 12 generic and 14 audit value cheaters and play.LATEST_USER_SWAP: family OODH
+          <= 0.40 and every cell (probe-kind mix) <= 0.50; ORDER_ABS: cells holding H-ABS <= 0.50. ZERO/NEVER_ABS as
+          in rc12. On OOD-H the type matchers pass structurally (s12), so this is recorded, not enforced.
+  G4      (reported, not gating) per thread, at most 3 of the 11 generic cheaters (OVERLAP_A and _B as one) score 1.00.
+  multi_value (reported) the VAL probes whose thread user turns hold 2+ same-type values (candidates or pool values):
+          on that subset the type matchers cannot pass structurally, so each cheater's pass count there is reported.
 Reported only: MYONLY, MARKER_OBJ, per probe kind rates, the G4 histogram. Not run: 13-gram decontamination, G11.
 Writes sealed/oodh/gate_report.json and a GATE section (counts only) at the end of oodh/HASHES.txt.
 Run: python3 -B oodh/gate.py [--data FILE] [--leaked FILE]"""
@@ -52,6 +57,7 @@ from oodh import in_oodh_reserve  # noqa: E402  (corpus/oodh.py, the ONE reserve
 
 SEALED = B.SEALED
 BAR = dict(family=0.40, cell=0.50, item=3)
+GATING = ("ids", "struct", "G1", "L2", "G8", "ABS", "VAL", "G7")   # G2 and G4 are reported, not gating (DESIGN s12)
 ZERO = ["ECHO", "DEFLECT", "SHOTGUN", "USERVOICE", "ABSTAIN", "ROLECAP", "LATEST_USER"]
 ABS_OK = {"ABSTAIN", "DEFLECT", "ORDER_ABS"}
 BARRED = F.GENERIC + FA.VALUE_RULES + ["LATEST_USER_SWAP"]
@@ -158,26 +164,60 @@ def cheater_checks(recs, sc):
     return bad, dict(sorted(hist.items()))
 
 
+def multi_value_probes(recs):
+    """VAL probes whose THREAD USER turns hold 2+ same-type values (a candidate or pool value each). On these the
+    type matchers cannot pass just by knowing the answer's kind. Returns a set of (record id, probe turn)."""
+    mv = set()
+    for r in recs:
+        n = r["meta"]["n_thread_user_turns"]
+        users = [t["text"] for t in r["turns"] if t["i"] <= n]
+        for p in r["probes"]:
+            if p["grader"] != "VAL":
+                continue
+            vals = set(p["candidates"]) | set(p["pool_values"])
+            if sum(1 for v in vals if any(has(u, v) for u in users)) >= 2:
+                mv.add((r["id"], p["turn"]))
+    return mv
+
+
 def gate(recs, leaked):
     stat = static_checks(recs, leaked)
     rows = {n: P.play(recs, n) for n in REFERENCE}
     sc = {n: P.scores(P.play(recs, n), recs) for n in CHEATERS}
     g1 = reference_checks(recs, rows)
     g24, hist = cheater_checks(recs, sc)
-    found = dict(stat, G1=g1, G2=[b for b in g24 if b.startswith("G2")], G4=[b for b in g24 if b.startswith("G4")])
-    checks = {k: found.get(k, []) for k in ("ids", "struct", "G1", "L2", "G8", "ABS", "VAL", "G7", "G2", "G4")}
+    found = dict(stat, G1=g1)
+    checks = {k: found.get(k, []) for k in GATING}
+    reported = dict(G2=[b for b in g24 if b.startswith("G2")], G4=[b for b in g24 if b.startswith("G4")])
     table = {n: dict(family=round(s["family"], 3), kinds={k: round(v, 3) for k, v in sorted(s["kinds"].items())},
                      max_cell=max(s["cells"].values())) for n, s in sc.items()}
-    return dict(checks=checks, table=table, g4_hist=hist, ok=not any(checks.values()))
+    mv = multi_value_probes(recs)
+    n_val = sum(1 for r in recs for p in r["probes"] if p["grader"] == "VAL")
+    mv_pass = {n: sum(1 for x in sc[n]["probes"] if (x["id"], x["turn"]) in mv and x["ok"]) for n in CHEATERS}
+    multi_value = dict(n_probes=len(mv), n_val=n_val, cheater_pass=dict(sorted(mv_pass.items())))
+    return dict(checks=checks, reported=reported, table=table, g4_hist=hist, multi_value=multi_value,
+                ok=not any(checks.values()))
 
 
 def report_lines(res, file_sha, n_recs, n_leaked):
-    lines = [f"{H.GATE_HEAD} on oodh_part1.jsonl sha256 {file_sha}: {'PASS' if res['ok'] else 'FAIL'}",
+    lines = [f"{H.GATE_HEAD} on oodh_part1.jsonl sha256 {file_sha}: {'PASS' if res['ok'] else 'FAIL'} (gating checks)",
              f"  {n_recs} threads; leak list of {n_leaked} tree ids"]
     lines += [f"  {k:6s} {'pass' if not v else f'FAIL {len(v)}'}" for k, v in res["checks"].items()]
+    rep = res["reported"]
+    lines.append("  reported, NOT gating for OOD-H (DESIGN s12):")
+    for k in ("G2", "G4"):
+        lines.append(f"    {k:5s} {'clean' if not rep[k] else f'{len(rep[k])} findings (structural, see s12)'}")
+    mv = res["multi_value"]
+    top = sorted(((n, c) for n, c in mv["cheater_pass"].items() if c), key=lambda x: -x[1])[:6]
+    lines.append(f"    2+-value VAL probes: {mv['n_probes']} of {mv['n_val']} VAL; top cheater passes there: "
+                 + (", ".join(f"{n} {c}" for n, c in top) if top else "none"))
     lines.append("  G4 histogram (threads passed by k of the 11 generic cheaters): "
                  + ", ".join(f"{k}:{v}" for k, v in res["g4_hist"].items()))
     lines.append("  cheater family scores: " + ", ".join(f"{n} {t['family']:.2f}" for n, t in res["table"].items()))
+    verdict = ("LOCK CANDIDATE (150 threads; gating checks pass; G2/G4 reported per DESIGN s12, not gating)"
+               if res["ok"] and n_recs >= 150 else
+               "not a lock candidate" + ("" if res["ok"] else " (a gating check failed)"))
+    lines.append(f"  verdict: {verdict}")
     return lines
 
 

@@ -826,3 +826,266 @@ CHECK ORDER (round 2): 2026-09-25 23:56 to 2026-09-26 00:10 EDT, each step alone
                      killed, 0 survived / crashed / malformed, baseline failures none in every part
   Not run: harness/test_rc12_eval.py, test_rc12_hook.py (need torch). harness/rc12_eval.py grades through
   graders.grade_conv, so its probe results now carry eq_only too; not re-run here.
+
+STEP 9 (2026-09-26 early): vLLM responder, lockstep runner, HF-vs-vLLM parity tool, PC job scripts (no model run)
+BUILT
+  runner.py        play() now drives play_steps(), the same loop as a generator (yields (history, turn), is sent
+                   (raw, stop), returns the transcript); run_one() = play() + make_row(); run(..., lockstep=False)
+                   hands the conversations to lockstep.rows when set. make_responder: vllm:<id> (refused without
+                   --vllm-untested-ok while vllm_responder.VLLM_TESTED is False) and, under --lockstep, a fake comes
+                   wrapped in lockstep.PerConv. Flags --lockstep, --vllm-untested-ok, --gpu-mem (0.85),
+                   --max-model-len, --batch-invariant. Every mutants_e2e runner text is still found exactly once.
+  lockstep.py      play_all(convs, engine, render, ctx, own_cf): one play_steps generator per (record, seed); each
+                   round collects the pending turn of every live conversation and makes ONE engine.reply_batch call
+                   (turn t of every conversation in one batch; a shorter conversation leaves early); the own-cf
+                   rewrite runs inside each generator before its next turn is requested. rows() builds runner.run's
+                   rows in runner.run's order. Engine protocol: count(messages, render), reply_batch([(k, rec, seed,
+                   history, turn)]) -> [(raw, stop)]. PerConv(factory, render): one fresh responder per conversation
+                   (fakes keep per-conversation state in start). Serial(responder, render): HFResponder /
+                   PlanckResponder, start + reply per request, NOT batched. engine() refuses a bare fake.
+  vllm_responder.py  VLLMResponder(model_id, render, dtype, gpu_memory_utilization, max_model_len, batch_invariant,
+                   trust_remote_code): start / count / reply like HFResponder plus reply_batch. prompt / encode /
+                   count ARE HFResponder's functions; ids go to vLLM as prompt_token_ids. SamplingParams per request:
+                   greedy temperature 0; sampling T 0.6, seed hf_responder.conv_seed(seed, id, turn); top-p 1.0,
+                   top-k -1, repetition 1.0, max_tokens 256, stop_token_ids = HF's [eos] + end-of-turn ids,
+                   skip_special_tokens. LLM(..., generation_config="vllm", seed=0, max_model_len = min(native,
+                   32768) unless given). stop_of(): finish length -> cap; finish stop -> the stop token (vLLM
+                   stop_reason, eos when None) is eot if an end-of-turn id else eos; the stop token is appended when
+                   vLLM leaves it out (HF's convention), text = the same tokenizer's decode(skip_special_tokens=True);
+                   other finish reasons, string or foreign stop reasons raise. enable_thinking=False for model_type
+                   qwen3* (HF's rule) OR a template that mentions enable_thinking (thinking_rule_differs flags the
+                   second case: HF would render differently and parity reports FAIL_PROMPT). trace list for parity.
+                   Imports nothing heavy at module import (checked in a subprocess).
+  parity_hf_vllm.py  --model M --out DIR [--n 20] [--pick first|spread] [--stage all|vllm|hf|report] [--table
+                   DIR ...]. Stage vllm plays the conversations greedy on vLLM's own history through the real
+                   lockstep runner and traces every reply; stage hf (a separate process) has HFResponder reply to
+                   EXACTLY those histories, so each turn compares on the same prompt: prompt ids equal?, reply ids,
+                   stop, and where the ids differ the first differing token j and HF's margin log p(HF token) - log
+                   p(vLLM token) at j (one HF forward on prompt + common prefix). Report: parity.txt (per turn, both
+                   texts where they differ) and parity.json. Verdict (proposal, mechanical): FAIL_PROMPT (any prompt
+                   differs), FAIL_STOP (equal ids, other stop or text), IDENTICAL, NEAR_TIE (every first difference at
+                   margin <= 0.5 nats), DIFFERS. The first 20 dev records are all T0 (dev order); --pick spread takes
+                   20 round-robin over the 12 families.
+  dev_batch.py     one model x one render per process, engine loaded once: every seed on dev plus each seed's
+                   --own-cf twin on the OWN records, in lockstep, to <root>/<model>/<render>/<seed>[_owncf]/
+                   (transcripts, scores, meta.json, DONE); written to <dir>.partial and renamed when complete; a
+                   finished run is skipped, never overwritten; a dir without DONE is refused; a stale .partial is
+                   redone. vllm: runs only when <root>/<model>/parity/parity.json says IDENTICAL or NEAR_TIE (or
+                   --no-parity-gate, recorded in meta.json).
+  pc_jobs.py       prints the WSL job script: probe (API checks, no model, no lock), parity <id>, dev <spec>
+                   --render R. Logs to ~/planck/logs/<job>.log, runs from ~/planck/dev/<code> (default rc12_s9),
+                   holds flock -w 7200 ~/planck/locks/gpu.lock only around its own python call, touches <job>.DONE.
+  Tests (no model): test_lockstep.py, test_vllm_responder.py (toy tokenizer, stub SamplingParams that refuses
+                   unknown fields, stub LLM), test_parity.py, test_dev_batch.py; mutation_step9.py (39 mutants of the
+                   STEP 9 code, fresh process each, --part i/n).
+DECISIONS
+  Lockstep reuses runner's loop instead of copying it, so every runner mutant (mutants_e2e) hits both paths. The
+  vLLM responder borrows HF's prompt code and decodes with HF's tokenizer, so a parity difference is the engine's,
+  not a render's. Parity compares per turn on identical (vLLM-history) prompts rather than two own-history runs,
+  which diverge after the first difference. The runner gate for vllm mirrors HF's (VLLM_TESTED False until a
+  logged step after a passing parity); dev_batch's per-model parity gate stands in for it there. The plain render
+  gets no vLLM stop strings: the role cut stays the runner's, as on the HF path (raw keeps the text past it).
+RESULTS
+  2026-09-26 00:27 to 01:00 EDT on the Mac, no model, load average 5 to 75 (other jobs):
+  refactor           the pre-STEP-9 runner.py (copy) and the new one give identical rows on 178 configurations
+                     (every fake: template on one record per cell + all OWN, --own-cf on OWN, seeds greedy + 1;
+                     FORGETFUL / HISTCHECK ctx 556 plain and template); scratch script, not in the repo
+  test_lockstep      exit 0 (46 s): rows identical for all 58 fakes (plain, 640 records), template sample, --own-cf
+                     on OWN, SAMPLER seeds greedy,1,2 in one pass, ctx 556 truncation, batch shape, Serial, CLI
+                     transcripts.jsonl + scores.jsonl byte-identical with and without --lockstep; logs/test_lockstep.txt
+  test_vllm_responder exit 0; test_parity exit 0; test_dev_batch exit 0
+  mutation_step9     --part 1/3 .. 3/3 exit 0 (32, 31, 27 s): 39 / 39 killed, 0 survived / crashed / malformed,
+                     baseline clean. First round found 1 survivor (a stale .partial's files kept) and 1 crash:
+                     test_dev_batch now checks the finished dir holds none of the stale files and turns exceptions
+                     into failure lines
+  validate_e2e       exit 0 (14 s), G1-G3 PASS, G4 PASS; logs/e2e_fakes.txt byte-identical to HEAD; all 82
+                     runs/fakes/*.jsonl byte-identical to the files written before the runner change
+  validate_machinery exit 0 (15 s), ALL 11 CHECK GROUPS PASS; logs/e2e_machinery.txt byte-identical to HEAD
+  mutation_e2e       --part 1/8 .. 8/8 exit 0 each, 11 x 8 = 88 / 88 killed, baseline failures none in every part;
+                     80 to 124 s per part at load 20 to 75, so the eight ran one after another as one background job
+                     (a first foreground part 1/8 hit my 115 s timeout and wrote nothing). Logs differ from HEAD only
+                     in the timing line.
+  Seen in passing: fake PARROT raises IndexError (fakes_family.py:215) when the history is truncated (ctx 556), with
+  the old runner too; no gate runs PARROT truncated.
+PC STATE (read only, no model loaded)
+  vLLM 0.30.0, transformers 5.17.0, torch 2.13.0+cu132 in ~/planck/venv-vllm. pc_jobs probe: SamplingParams accepts
+  sampling_kwargs greedy and sampled (greedy normalizes top_k to 0), EngineArgs has generation_config, seed,
+  max_model_len, gpu_memory_utilization, dtype, trust_remote_code; transformers 5.17 still maps from_pretrained
+  torch_dtype (HFResponder's kwarg) to dtype with a deprecation warning.
+  BLOCKER: every model snapshot in HF_HOME=~/planck/hf holds only model.safetensors plus merges.txt and / or
+  chat_template.jinja (gemma also tokenizer.model; Doge its .py files). config.json, tokenizer.json,
+  tokenizer_config.json, generation_config.json and vocab.json are missing for all 13 models; the download log
+  prints "Ignoring --include since filenames have been explicitly set" once per model. No model can load, so no
+  parity check or dev run was attempted. Fix: re-run the download with the json / tokenizer files included (not
+  done here: another job's cache).
+  Downloaded templates: Qwen3.5-0.8B's mentions enable_thinking; LFM2 / LFM2.5, Falcon-H1-Tiny, gemma-3-270m and
+  Doge's do not; Doge ends turns with <|end_of_text|> (in hf_responder.EOT_TOKENS). Qwen2.5, Qwen3-0.6B and SmolLM2
+  keep their templates in tokenizer_config.json (missing), unchecked.
+NOT DONE / OPEN
+  No model has run through vllm_responder or through the lockstep path on a GPU; VLLM_TESTED and HF_TESTED stay
+  False. Batched HF generation (per-reply seeds in one batch) is not built: Doge and anything vLLM rejects run one
+  sequence at a time under lockstep.Serial (throughput unmeasured). HFResponder passes no trust_remote_code while
+  the Doge snapshot ships modeling_doge.py (whether transformers 5.17 has Doge built in is unchecked: its
+  config.json is missing). vLLM batch composition can move numerics; --batch-invariant exists, cost unmeasured.
+  Order once the snapshots are complete: pc_jobs probe, parity Qwen2.5-0.5B-Instruct, read parity.txt, then dev.
+
+STEP 10 (2026-09-26 morning): v4_voice report frames (the OOD-H review's grader finding), before any dev baseline
+DECIDED 2026-09-26 by Claude under Max's standing permission (reversible before the lock): fix both voice bugs in
+  the graders now, before any dev baseline is scored (generation is unaffected; transcripts are graded later).
+  The OOD-H decisions of the same review (F1 to 150, no reserve change, no G2 / G4 on OOD-H) are in prereg draft
+  s14 and oodh/DESIGN.txt s12.
+REPRODUCED (scratch script, fixed reply templates at the probe turn, IDEAL / OASST2 history elsewhere; counts only)
+  bug 1, holder "user": "You told me it was <gold>." passed 0 of 60 RECALL, 0 of 22 BIND user-held, 0 of 28 BIND
+    third-party and 0 of 225 OOD-H user-held VAL probes (the review's 183 predates its relabel of 42); "You asked
+    me about the <gold>." the same 0s. Cause: grade_text.captures takes the "me" of "you told me" as the nearest
+    person marker, and "me" binds the first person.
+  bug 2: "I said <gold>.", "I told you it was <gold>.", "I mentioned <gold>.", "I asked you about the <gold>.",
+    "I did <gold>." passed 60 of 60 RECALL and 225 of 225 OOD-H user-held (said, told, mentioned, did are in
+    grade_text.NEUTRAL_I, so "I said" is no person marker, and "you" in "I told you" is the nearest one); on
+    holder "assistant" every form passed (BIND "What did I call you?" 10 of 10, OOD-H 5 of 5), and the OWN picks
+    passed "You said <gold>." 32 of 32.
+BUILT
+  grade_voice.py   (new; grade_text.py stays at 250 lines) voice_error(v, text, mode): the nearest marker may be a
+                   report frame, matched first: you_rep ("you told / asked / gave me", "you said / mentioned (to
+                   me)", "you told", "you asked", "according to you") or i_rep ("I said / mentioned / told / asked /
+                   did", "I told / asked / reminded / gave / showed you"). mode_of(probe): user (holder user, a named
+                   other, a table): fails on a first-person binding or an i_rep; a you_rep does not bind; no marker
+                   in reach: captures' sentence rule. given (holder assistant, no gold_fn: a fact the user gave the
+                   assistant): fails on an i_rep. own (holder assistant with gold_fn: OWN picks): fails on a you_rep.
+                   world (K): grade_text.captures unchanged.
+  graders.py       g_val v4_voice: voice_error for every mode; user / world add my_object, given / own add
+                   assist_reversed (as before). grade_text.captures is unchanged, so G-ROLEX r4 and the role-leak scan
+                   are unchanged. Every other clause unchanged.
+  fixtures_graders.py  vfix per mode: user voice_you_told_ok, voice_you_asked_ok (pass), voice_i_said,
+                   voice_i_told_you, voice_i_mentioned (fail); given given_you_told_ok (pass), given_i_said (fail);
+                   own own_i_said_ok, own_after_ok (pass), own_you_said, own_you_told, own_according (fail); world
+                   world_i_said_ok (pass). voice_mixed_ok ("From what I've heard, you said it's X") is no longer
+                   built for OWN picks: it gives the assistant's pick to the user (own_you_said covers it).
+  audit_graders.py G11 battery: VAL you_told, you_told_bare, you_asked, you_mentioned, earlier_you, according,
+                   earlier_your (pass); i_said, i_told_you, i_mentioned, i_asked_you, i_did, my_obj (fail);
+                   my_obj / earlier_your only on user-held probes with object words. DYN pick i_said_own,
+                   my_answer (pass); you_said_own, you_told_own, you_asked_own, according_own (fail).
+  mutants_graders.py  12 SOURCE mutants, each reverting one piece (the you_rep group, the i_rep group, the "me"
+                   inside you_rep, "I told you", "according to you", i_rep binding for user facts, the given and own
+                   rules, the own / given split, the world split, the no-marker rule limited to user facts, the
+                   given / own reverse check); mutation_graders.MODS has grade_voice.
+RESULTS (Mac, no model, load 5 to 21)
+  step                exit  time  result
+  build_dev           0     6 s   dev sha256 3e543f8d5638e6ab... unchanged (same as HEAD)
+  test_gens           0     13 s  0 failures over 640 records
+  audit_rules         0     0 s   GATE PASS; logs/audit_rules.txt byte-identical to the copy taken before the change
+  audit_graders       0     4 s   0 wrong verdicts over 26248 graded variants (was 0 over 21012). With the
+                                  pre-STEP-10 v4_voice patched back in (scratch run, log to scratch): 3234 wrong,
+                                  exit 1: i_said, i_told_you, i_mentioned, i_asked_you, i_did 392 of 392;
+                                  you_told, you_told_bare, you_asked 382 of 392 (all but BIND "What did I call
+                                  you?"); the four DYN own forms 32 of 32. The other new variants were already
+                                  right under the old rule
+  validate_e2e        0     12 s  G1-G3 PASS, G4 PASS; logs/e2e_fakes.txt byte-identical to before
+  validate_machinery  0     13 s  ALL 11 CHECK GROUPS PASS; log identical except the timing line
+  mutation_graders    0     58 s  fixtures 7199 (was 6701; must-pass 1678, must-fail 5521), baseline 0 misses,
+                                  IDEAL on all 640 records 0; MUTANTS killed 177/177 (was 165/165), 0 survived,
+                                  0 crashed; each of the 12 new mutants killed by the fixture it names
+  mutation_gens       0     16 s  ALL MUTANTS KILLED; log identical
+  mutation_audit 1/2  0     56 s  killed 7 of 7;  2/2: 0, 46 s, killed 6 of 6
+  mutation_e2e 1..8   0 each 75 to 98 s each (one background job, load up to 21): 11 x 8 = 88 / 88 killed,
+                                  baseline failures none; logs differ from before only in the timing line
+  ALL PASS
+  Dev impact (runs/fakes as validate_e2e wrote them, every probe regraded with the old and the new v4_voice): 0 of
+    57,564 probe verdicts change, no unit score changes; IDEAL and IDEAL_ALT stay 1.00 on every family and no
+    cheater moves. Positive control: with v4_voice switched off the same script reports changes (USERVOICE,
+    ROLECAP).
+  OOD-H (107-thread SHORT file, counts only; oodh/gate.py run on a symlink with its report and HASHES copy in
+    scratch, the repo's oodh/HASHES.txt and sealed gate_report.json untouched): G1 pass; "You told me it was
+    <gold>." and "You asked me about the <gold>." pass 225 of 225 user-held VAL probes (0 before); "I said
+    <gold>." 0 of 225 (225 before); USERVOICE and ROLECAP pass 4 VAL probes each (28 before; family 0.10 to 0.02).
+    oodh/HASHES.txt still shows the pre-fix gate until the OOD-H workflow reruns it.
+LEFT AS IS
+  "My answer is <gold>." still fails a user-held fact (a first-person marker; unchanged). "I told you to call me X"
+    passes a fact the user gave the assistant: its nearest marker is "me", which that mode allows ("Call me X" is
+    the assistant's own name). The nearest-marker rule reads no further than the last person word.
+
+STEP 10 FIX ROUND (2026-09-26, late morning): a verifier's adversarial battery against STEP 10, still before any
+dev baseline is scored. Same standing permission; nothing committed, no model loaded.
+CONFIRMED on the real tree (the verifier's 189 templates: 70 user, 65 OWN pick, 54 "What did I call you?"; on 15
+  user, 5 OWN pick and 10 BIND assistant-held probes): 555 wrong verdicts of 1915, 55 templates, the verifier's log
+  line for line; the git-HEAD graders give 890 of 1915, 80 templates. Per finding:
+  P1 confirmed, FIXED: "You'd told me", "You had / 'd already told me", "You were telling me", "I remember you
+    telling me", "You shared with me", "You described it to me as", "You filled me in", "You wanted me to
+    remember", "you'd let me know", and a frame cut by the 8-word window ("You told me that the bike in question
+    was X") failed 15 of 15 each.
+  P2 confirmed (STEP 10 made it; HEAD passed them), FIXED: "You asked me to pick one, and X was my choice", "You
+    asked me to choose, so X it is", "Out of the three you gave me, X was my pick" failed 5 of 5. Two older forms
+    failed under HEAD too and are fixed with it: "Of the names you suggested, I picked X", "From the options you
+    listed, I picked X".
+  P3 confirmed, FIXED: "You chose the name X for me", "You picked X as my name", "You went with X for my name"
+    failed 10 of 10 through the OWN reversal. G-ROLEX r6 had the same rule: those three forms were right on 0 of
+    24 named ROLE X probes, and "Your name's X" / "I'll call you X" passed 24 of 24.
+  P4 confirmed, FIXED: user "I'd told you / said / mentioned", "It's X, like I told you", "X, I told you
+    already"; OWN "Your pick / choice was X", "X was your pick", "X, which you chose", "You'd picked / said / gone
+    with X", "You wanted / decided on / settled on / voted for / liked X", "Your team / coworker picked X"; given
+    "I'll / 'd call(ed) you X", "I decided / wanted to call you X", "I'm calling you X", "I said you'd be X", "I
+    told you to call me X", "Your name's X", "Your nickname is X", "You go by X" all passed.
+  P5 confirmed, FIXED: named pieces had no failing test; now every piece has a mutant killed by a fixture.
+  P6 confirmed, NOT FIXED: the right value bound to the wrong holder passes ("Your grandmother's bike is X" 108 of
+    108 user probes; BIND "Your <other> has the X one" 22 of 22 user and 28 of 28 third-party; "You have the X
+    one" on a third-party probe 28 of 28). Not a person-voice error (SPEC v4), and a naive rule (third-party
+    probe: fail when the nearest marker is "you" not followed by the holder's word) fixed "You have the X one"
+    but failed "As you know, it's X", "I can tell you it's X", "Thank you for asking, it's X" on 28 of 28 each
+    (scratch trial). Recorded as a known limit in draft D23 and oodh/DESIGN.txt s12.
+  P7 split: the quote form confirmed, FIXED (You said, "My bike is X." failed 15 of 15, 13 of 15 through
+    my_object after the voice fix, so my_object now skips such quotes). The if-clause form REJECTED: "You asked if
+    you could call me X" fails v2_gold's if-clause rule, which is right for a reported question ("You asked if it
+    was X" asserts nothing: 0 of 15, as intended), and "You asked to call me X" passes 10 of 10.
+BUILT
+  grade_voice.py   frames count when they END within the 8 words before the gold (scanned over the sentence);
+                   YOU_REP / I_REP take "'d / had / have" and up to 2 gap words, never a pronoun ("You know I
+                   said X" stays an i_rep); you_rep narrowed to the user's words (told / telling / reminded me,
+                   asked (me) about / if / for, said / mentioned / wrote / shared / described (to / with me),
+                   according to you); new "neutral" kind: any other "you ... me" (1 to 3 words) and "let me";
+                   I_REP adds "told you to <word> me". frame_after: with no marker before the gold, the first frame
+                   after it. quoted / unquote: a quote a you_rep opens is the user's voice (my_object reads the
+                   reply without it). reversed_to per mode, end-anchored: OWN_REV (you / you'd / your <word> +
+                   picked, chose, went with / for, opted for, selected, suggested, named, decided on, settled on,
+                   wanted, voted for, liked; "your pick / choice was"), OWN_AFTER ("which you chose", "was your
+                   pick"), GIVEN_REV (call / named you, your name's / nickname is, you go by, you'd be, you're
+                   (called)); given_away for G-ROLEX r6. "assistrev" in grade_text.OFF still switches reversal off.
+  graders.py       g_val: voice_error holds the reversal; user / world add my_object on unquote(text).
+  grade_role.py    r6_own uses grade_voice.given_away instead of grade_text.assist_reversed.
+  grade_text.py    ASSIST_REV, ASSIST_REV_END and assist_reversed removed (no caller left); 250 to 235 lines.
+  fixtures_graders.py  +13 user, +11 given, +13 own fixtures (each kills at least one mutant below).
+  audit_graders.py G11 battery: +28 VAL rows (g_* only on assistant-held probes), +29 DYN pick rows, +3 ROLE X.
+  mutants_graders.py  the STEP 10 block rewritten to the new source: 46 entries (12 before), plus the G-ROLEX r6
+                   mutant retargeted to given_away; the 2 grade_text ASSIST_REV mutants dropped with the code
+                   (177 - 2 + 34 = 209 mutants in all).
+RESULTS (Mac, no model, load about 6; logs under logs/, scratch copies of every step's output)
+  step                exit  time  result
+  build_dev           0     7 s   dev sha256 3e543f8d5638e6ab... unchanged
+  test_gens           0     13 s  0 failures over 640 records; log identical
+  audit_rules         0     0 s   GATE PASS; log identical
+  audit_graders       0     4 s   0 wrong verdicts over 34378 graded variants (26248 after STEP 10)
+  validate_e2e        0     11 s  G1-G3 PASS, G4 PASS; logs/e2e_fakes.txt byte-identical
+  validate_machinery  0     13 s  ALL 11 CHECK GROUPS PASS; log identical
+  mutation_graders    0     75 s  fixtures 8495 (7199 after STEP 10; must-pass 2444, must-fail 6051), baseline 0
+                                  misses, IDEAL on all 640 records 0; MUTANTS killed 209/209, 0 survived, 0 crashed
+  mutation_gens       0     15 s  ALL MUTANTS KILLED; log identical
+  mutation_audit 1/2  0     55 s  killed 7 of 7;  2/2: 0, 44 s, killed 6 of 6
+  mutation_e2e 1..8   0 each 70 to 82 s: 88 / 88 killed, baseline failures none; logs identical but the timing line
+  ALL PASS
+  The G11 battery run under each of the 47 voice mutants (scratch script, repo code): 42 flip 10 to 4202 verdicts;
+    the 5 it misses are killed by fixtures only (the world split, the no-marker rule's user limit, first mention
+    only, the single you / your markers, the no-"you" guard of the no-marker rule).
+  Adversarial batteries (scratch): the verifier's 189 templates now 40 wrong of 1915 (226 of 10180 on all 108
+    user, 32 OWN and 10 given probes), 3 templates left: P6's two and P7's if-clause. A second battery of 55
+    templates for the new rules' risks ("You know I said X", "You and I both have an X one", "Let me check: it's
+    X", "You wanted something short so I picked X", "I call you friend and you call me X", ...): 0 wrong of 3124.
+  Dev impact: every fake transcript in runs/fakes (26240, 57564 probes) regraded with the HEAD, STEP 10 and
+    fix-round graders: 0 verdict changes and no unit change between any two. Positive control: v4_voice off
+    changes 1148 verdicts.
+  OOD-H (counts only; oodh/DESIGN.txt s12): IDEAL and TERSE pass all 230 VAL probes; the new right forms pass 225 of
+    225 user-held and 5 of 5 assistant-held, the new wrong forms fail all. Gate on a scratch symlink: G1 pass,
+    USERVOICE and ROLECAP family 0.011 (0.016 after STEP 10); the repo's oodh/HASHES.txt is untouched.
+  Real outputs (8777 distinct small-model replies under experiments/): the rarer P1 forms occur 0 times; "let me
+    check / see / think / recall" 0 times.
+LEFT AS IS
+  P6 (above). "It's X, and I did write it down" fails a user fact (the "I did" frame after the gold). The quote
+    rule reads only double quotes.
