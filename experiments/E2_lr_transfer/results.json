@@ -1,0 +1,98 @@
+{
+ "stage_A": {
+  "decided": "2026-09-27 16:35 EDT",
+  "rule": "e2pick.py stage A (notes RULES), run on the PC over ~/planck/runs/E2",
+  "pick": 0.003,
+  "argmin": 0.003,
+  "at_edge": null,
+  "extend_with": [],
+  "guard_moved": false,
+  "gap_next_to_argmin": false,
+  "final_bpb": {
+   "note": "final checkpoint, split all; chat = F(CHAT), prose = F(PROSE)",
+   "0.00075": {
+    "b62M": {
+     "chat": 1.3211,
+     "prose": 1.5247
+    },
+    "b125M": {
+     "chat": 1.2219,
+     "prose": 1.4444
+    },
+    "b250M": {
+     "chat": 1.162,
+     "prose": 1.3936
+    }
+   },
+   "0.0015": {
+    "b62M": {
+     "chat": 1.2718,
+     "prose": 1.4895
+    },
+    "b125M": {
+     "chat": 1.197,
+     "prose": 1.4269
+    },
+    "b250M": {
+     "chat": 1.1487,
+     "prose": 1.382
+    }
+   },
+   "0.003": {
+    "b62M": {
+     "chat": 1.2644,
+     "prose": 1.4835
+    },
+    "b125M": {
+     "chat": 1.1948,
+     "prose": 1.426
+    },
+    "b250M": {
+     "chat": 1.1479,
+     "prose": 1.383
+    }
+   },
+   "0.006": {
+    "b62M": {
+     "chat": 1.2675,
+     "prose": 1.4858
+    },
+    "b125M": {
+     "chat": 1.1985,
+     "prose": 1.4287
+    },
+    "b250M": {
+     "chat": 1.1511,
+     "prose": 1.3858
+    }
+   },
+   "0.012": {
+    "b62M": {
+     "chat": 1.2515,
+     "prose": 1.4795
+    },
+    "b125M": {
+     "chat": 1.2014,
+     "prose": 1.4293
+    },
+    "b250M": {
+     "chat": 1.1556,
+     "prose": 1.3929
+    }
+   }
+  }
+ },
+ "stage_B": {
+  "queued": "2026-09-27",
+  "eta_a": 0.003,
+  "r_axis_new": [
+   0.5,
+   2,
+   4,
+   8
+  ],
+  "r1_reused": "stage A's 5m_e3_r1 runs",
+  "plan": "plans/stageB.txt sha256 44f37dee72644d7cc9d761e23dc004e220ce8ad7c02bb08a4895b5a96271da43",
+  "configs": "16 configs 5m_e3_r{0.5,2,4,8}_{trunk,b62M,b125M,b250M}.yaml, sha256 listed in notes STAGE B QUEUED"
+ }
+}

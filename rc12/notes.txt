@@ -1673,3 +1673,14 @@ OPEN
   Doge's first full run: verify_dev_runs --model SmallDoge/Doge-160M-Instruct --render template with venv-doge's
   python, then --rerun 5 under gpu.lock (STEP 9c OPEN). No rc12_dev_queue.DONE.pass1 will exist (pass 1 never
   finished); dg_follow.sh stays in planck-kit unused.
+
+STEP 9e (2026-09-27 14:15 EDT): queue ORDER change only, Doge-160M last. Doge's first full hfb run (template
+greedy, max_batch 32, eager) has held gpu.lock since about 11:53 and was still running at 14:14 (100% GPU, 11.8 GB
+used, allocator OOM retries at 12:28 and 13:14 for 1.6 and 2.3 GB blocks as the lockstep context grows), against
+STEP 9c's 45-75 min estimate (never measured on a full run). The queue's 3 h per-process timeout (TMO 10800) may
+end it. Done: rc12_dev_queue.STOP touched (the running process finishes or times out first), then the same queue
+code (rc12_dg) restarts with Q_MODELS = the 12 vLLM models in panel order, then Doge (PC script
+planck-kit/rc12_reorder.sh, log ~/planck/logs/rc12_reorder.log). Nothing about how any run is played or scored
+changes. Open: Doge's cost. If the greedy run times out or takes near 3 h, its seven other runs need a smaller
+max_batch (memory, not correctness: batched vs serial was NEAR_TIE at 32) or a longer timeout, decided from this
+run's measured time before Doge starts again; a max_batch change is recorded as a deviation for all Doge runs.

@@ -658,3 +658,13 @@ POST-RUN LOG (kills, reruns, guard or queue edits, hand-run analyses; written as
     their chat probes skipped as done; compare_dry ALL PASS; "GAP: e005w1" as expected; the analyses rewrote
     readings up to after_G1 (10:40:33). From 10:40:33 C2 waits on gpu.lock (flock -w 7200; the queue retries up to 12
     times) behind other GPU work; still waiting at 11:06, not yet started.
+
+  2026-09-27 11:30  OPEN item closed: e005w1_r2 serves as e005w1 (decided by Claude under Max's delegation, before
+    the final reading, and not from any result). Rule: the notes say a killed scored job is rerun by hand as
+    <tag>_r2, so the complete rerun is the record. Check (PC, read-only, JSON records with tag, weights_sha256 and
+    time fields removed): the killed attempt's 19 complete output files are record-for-record identical to
+    e005w1_r2's (al, big, cross, e004, extra, h5l, new chat and plain; gen_e004 plain; kbig, khard, old, uprobe
+    plain); its gen_e004 chat has 286 of 640 records and all 286 equal e005w1_r2's first 286. So every interim
+    reading so far is unchanged by the choice except where it read e005w1's gen_e004 chat (286 rows, not 640).
+    At the final analysis the analyzer reads e005w1_r2's files for tag e005w1 (a mapping in analyze_e006, added
+    after the queue ends so the running queue's code hash does not change).

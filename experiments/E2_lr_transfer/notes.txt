@@ -317,3 +317,31 @@ FIXED LOG (2026-09-26, before any E2 run; the FIXING step at commit 93ea41c. Che
     was still null in that copy; everything else in engine.yaml was as fixed here.
   7 Starter-corpus exception: accepted by whoever commits this log (calibration checkpoints only; never released,
     never an init for a recipe run, never on the curve).
+
+STAGE A RESULT (2026-09-27 16:35 EDT). Stage A finished 16:27:17 ("MARK E2 STAGE A DONE"). Queue history: the
+06:03 power cut on 09-27 hit while the queue waited for the lock before the e12 trunk (nothing cut mid-run); it was
+relaunched at 10:21 on 7e7c802; at 14:14 it stopped after a 2 h gpu.lock wait before 5m_e12_r1_b250M (the GPU is
+shared) and was relaunched at 14:23 on ba55916 (only pc/ and notes files differ from 7e7c802; none is read by the
+E2 queue or the harness); finished runs were skipped both times. No deviation, no GAP, no divergence.
+e2pick.py stage A: pick eta_A = 3e-3 (argmin, not at an edge, no extension, PROSE guard not moved). F(CHAT) at
+250M: 0.75e-3 1.1620, 1.5e-3 1.1487, 3e-3 1.1479, 6e-3 1.1511, 12e-3 1.1556 (full table in results.json). The
+bowl is flat near the pick (1.5e-3 is 0.0008 behind); E3 measures whether seed noise resolves steps of that size.
+At 62M the argmin is 12e-3 (1.2515), at 125M 3e-3: shorter runs prefer a higher LR (Q3 reads this properly).
+STAGE B QUEUED: eta 3e-3, r in {0.5, 2, 4, 8} (r 1 reuses stage A's 5m_e3_r1), plans/stageB.txt sha256
+44f37dee72644d7cc9d761e23dc004e220ce8ad7c02bb08a4895b5a96271da43, plans/CURRENT = stageB. Configs (e2plan.py arm):
+    256eeb4092a26c668193c068b272d12ca4375be4f1fb20e4907e0dd00ad8aab3 5m_e3_r0.5_b125M.yaml
+    471e3e8d211c747997b66a92ef0aee96d541e904e333c6e8a690d96ae7fcd36e 5m_e3_r0.5_b250M.yaml
+    4f6acd1471313832f33a1fe961623b663e8644f473491c85ec7951b4a75021c3 5m_e3_r0.5_b62M.yaml
+    e6235c8bd9dc3f334d32fe9b46e429182b5847954f52064da7e1d5e091f8ab88 5m_e3_r0.5_trunk.yaml
+    18ee0da6d4d7e168a7978ffee07b9a82b4b3038284fff56b83467e82734fb641 5m_e3_r2_b125M.yaml
+    4bb8d5762c27dca57b4d1591d0ea47e7f88d2c43b7d65a60076eafa9e591a79e 5m_e3_r2_b250M.yaml
+    831a15eff44b963f0740877100f34180d43babfaf42f6e268cb2233637323912 5m_e3_r2_b62M.yaml
+    1fcf36bc11a043b5393df1506fbdab268c9c326c53ff3cc19dd2bf38aad35d5a 5m_e3_r2_trunk.yaml
+    b5633e3197e785e431913183a256094e4f62371c06b61e4f7a5fc08efe925ab3 5m_e3_r4_b125M.yaml
+    e4bfab9972e89e5c4825498477eb47860fa02244ae9a9324381d137e856b5f43 5m_e3_r4_b250M.yaml
+    08278c4731e34d982ea76d8ee426421dd52eddce624e4ff42368b416d3e8ac45 5m_e3_r4_b62M.yaml
+    6a40fcd6840622479815ada6015122199a85905493c8acb2855437512a86642b 5m_e3_r4_trunk.yaml
+    e0ed0a7fb495f2073d00fd112455b98398ce104a5ed7f232f1be29893979b314 5m_e3_r8_b125M.yaml
+    ef54be1b9c081ffa3493ab6f595fe409c358b1ade56d01bbf8d9a64f57273a8f 5m_e3_r8_b250M.yaml
+    2e37a16b4f9e35439367d0a624715d676eff350317dc6a3f8636551adfe73870 5m_e3_r8_b62M.yaml
+    a77428f07b2bb30f58b06d4daf40f108078031eed9dd1cfe8b695f76fb50a1a6 5m_e3_r8_trunk.yaml
