@@ -64,7 +64,7 @@ class PlanckLM(nn.Module):
 
     def forward(self, idx: torch.Tensor, targets: torch.Tensor | None = None,
                 doc: torch.Tensor | None = None, pos: torch.Tensor | None = None,
-                reduction: str = "mean", return_hidden: bool = False):
+                reduction: str = "mean", return_hidden: bool = False, ce_chunk: int = 0):
         """idx, targets: (B, T) int64. targets uses -100 for positions without loss
         (assistant-only masking is applied by the data side).
         Planck (packing): doc (B, T) gives each token a document id; attention is then causal
@@ -73,7 +73,9 @@ class PlanckLM(nn.Module):
         reduction "mean" (default) or "sum" (the trainer divides by the supervised-token
         count of the whole step, so micro-batches of different fill weigh correctly).
         Returns (logits, loss); return_hidden (S006, train.mtp): (logits, loss, z), z the final
-        hidden state after the final norm, which the trainer's t+2 aux head (mtp.py) reads."""
+        hidden state after the final norm, which the trainer's t+2 aux head (mtp.py) reads.
+        ce_chunk > 0 (train.ce_chunk_rows, default 0 = off): with targets, lm_head and the loss run
+        ce_chunk rows at a time (chunked_ce.py, imported only then) and logits come back as None."""
         B, T = idx.shape
         assert T <= self.cfg.seq_len, f"T={T} exceeds seq_len {self.cfg.seq_len}"
         if self.cfg.forget_gate and self.doc_attn != "mask":   # S005: never run varlen without the bias
@@ -112,18 +114,30 @@ class PlanckLM(nn.Module):
             if i == 0 and self.cfg.value_residual:
                 v1 = v_loc
         z = self.norm(x)
+        if ce_chunk and targets is not None:        # train.ce_chunk_rows: no full logits
+            return self._chunked_out(z, targets, ce_chunk, reduction, return_hidden)
         logits = self.lm_head(z)
         loss = None
         if targets is not None:
             flat = logits.view(-1, logits.size(-1)).float()
             tgt = targets.reshape(-1)
-            if (tgt != -100).any():
+            # The guard is a data-dependent branch (a host sync, and a graph break under
+            # torch.compile). With reduction "sum" it is not needed: the sum over zero
+            # supervised tokens is exactly 0 with zero gradients (test_compile.py), so the
+            # compiled path skips it. Eager (is_compiling() False) runs the reference unchanged.
+            if (reduction == "sum" and torch.compiler.is_compiling()) or (tgt != -100).any():
                 loss = F.cross_entropy(flat, tgt, ignore_index=-100, reduction=reduction)
             else:
                 loss = flat.sum() * 0.0
         if return_hidden:
             return logits, loss, z
         return logits, loss
+
+    def _chunked_out(self, z, targets, chunk: int, reduction: str, return_hidden: bool):
+        """train.ce_chunk_rows: the loss without the full logits (chunked_ce.py)."""
+        from chunked_ce import chunked_lm_loss      # only a run that sets ce_chunk_rows imports it
+        loss = chunked_lm_loss(z, self.lm_head.weight, targets, int(chunk), reduction)
+        return (None, loss, z) if return_hidden else (None, loss)
 
 
 def positions_from_doc(doc: torch.Tensor) -> torch.Tensor:
@@ -164,6 +178,46 @@ def document_causal_mask(doc: torch.Tensor) -> torch.Tensor:
     causal = torch.ones(T, T, dtype=torch.bool, device=doc.device).tril()
     same = run[:, :, None] == run[:, None, :]
     return (same & causal)[:, None]
+
+
+# train.compile: the modes with a parity run and an A/B on the old tree (notes.txt SPEED V3). The
+# CUDA-graph modes (reduce-overhead, max-autotune) are refused: never tested with grad accumulation.
+COMPILE_MODES = ("default", "max-autotune-no-cudagraphs")
+
+
+def compile_mode(value) -> str | None:
+    """Config value of train.compile -> None (eager, the default) or a torch.compile mode.
+    false / null / "off" / "none" / "eager" = eager; true = "default"."""
+    if value is None or value is False or str(value).lower() in ("off", "none", "false", "eager"):
+        return None
+    if value is True:
+        return "default"
+    if value not in COMPILE_MODES:
+        raise ValueError(f"train.compile must be false or one of {COMPILE_MODES}, got {value!r}")
+    return value
+
+
+def ce_chunk_rows(value) -> int:
+    """Config value of train.ce_chunk_rows -> 0 (off, the default: the reference loss path) or the
+    rows per lm_head + loss chunk (chunked_ce.py)."""
+    if value is None or value is False:
+        return 0
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ValueError(f"train.ce_chunk_rows must be an integer >= 0, got {value!r}")
+    return value
+
+
+def compile_forward(model: nn.Module, mode: str | None, backend: str = "inductor",
+                    dynamic: bool | None = None):
+    """The callable the trainer runs forward through: the model itself when mode is None,
+    else torch.compile(model). The compiled wrapper shares the model's parameters, so the
+    optimizer, grad clipping, state_dict (no _orig_mod. prefix) and checkpoints stay on the
+    plain module. backend "aot_eager" (no code generation) is for CPU tests."""
+    if mode is None:
+        return model
+    if backend == "inductor":
+        return torch.compile(model, mode=mode, dynamic=dynamic)
+    return torch.compile(model, backend=backend, dynamic=dynamic)
 
 
 def build_model(cfg: PlanckConfig, device: str = "cpu") -> PlanckLM:

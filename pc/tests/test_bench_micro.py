@@ -199,3 +199,83 @@ def test_tokens_per_step_is_rows_times_seq_len_times_accum(tmp_path):
         err = r["tok_per_s"] * 5e-5 + r["step_s"] * 0.05 + 1e-4
         assert r["step_s"] > 0 and abs(r["tok_per_s"] * r["step_s"] - per_step) <= err
         assert r["docs_per_row"] == (2.5 if r["mode"] == "docmask" else None)
+
+
+def test_arms_interleave_and_compiled_rows_are_one_graph(tmp_path):
+    """--arms eager,default --repeats 2: ABBA order, one row per run, the compiled arm goes
+    through harness model.compile_forward as one graph on causal rows and on docmask rows off
+    cuda (the mask path; aot_eager here: no C++ toolchain)."""
+    out = tmp_path / "ab.jsonl"
+    assert bench_micro.main(TINY + ["--targets", "3e5", "--batches", "2", "--arms", "eager,default",
+                                    "--repeats", "2", "--compile-backend", "aot_eager",
+                                    "--out", str(out)]) == 0
+    rs = rows(out)
+    assert [(r["mode"], r["arm"], r["repeat"]) for r in rs] == [
+        (m, arm, rep) for m in ("causal", "docmask")
+        for rep, arm in ((0, "eager"), (0, "default"), (1, "default"), (1, "eager"))]
+    for r in rs:
+        assert r["status"] == "ok" and r["compile"] == (r["arm"] != "eager")
+        assert r["ce_chunk"] == 0 and r["capture_dynamic"] is False and r["doc_attn"] == "mask"
+        if r["compile"]:
+            assert (r["dynamo_graphs"], r["graph_breaks"]) == (1, 0)
+        else:
+            assert "dynamo_graphs" not in r
+    same = {(r["mode"], r["arm"]): r["loss_first"] for r in rs if r["repeat"] == 0}
+    for m in ("causal", "docmask"):     # aot_eager on CPU: the same step-0 loss as eager
+        assert abs(same[(m, "eager")] - same[(m, "default")]) < 1e-4
+    with pytest.raises(ValueError):
+        bench_micro.main(TINY + ["--arms", "eager,fast", "--out", str(tmp_path / "x.jsonl")])
+
+
+def test_ce_chunk_flag_reaches_the_model_and_keeps_the_loss(tmp_path, monkeypatch):
+    """--ce-chunk passes ce_chunk to the forward (the reference call is unchanged without it),
+    the row records it, and on CPU fp32 the losses match the reference path's."""
+    seen = []
+    real = bench_micro.build_model
+
+    def spy(cfg, device):
+        m = real(cfg, device)
+        orig = m.forward
+
+        def fwd(*a, **k):
+            seen.append(k.get("ce_chunk"))
+            return orig(*a, **k)
+        m.forward = fwd
+        return m
+    monkeypatch.setattr(bench_micro, "build_model", spy)
+    out = tmp_path / "c.jsonl"
+    for c in ("0", "40"):
+        assert bench_micro.main(TINY + ["--targets", "3e5", "--batches", "2", "--modes", "docmask",
+                                        "--ce-chunk", c, "--out", str(out)]) == 0
+    r0, r1 = rows(out)
+    assert (r0["ce_chunk"], r1["ce_chunk"]) == (0, 40)
+    assert None in seen and 40 in seen and set(seen) == {None, 40}
+    assert abs(r1["loss_first"] - r0["loss_first"]) < 1e-4
+    assert abs(r1["loss_last"] - r0["loss_last"]) < 1e-3
+
+
+def test_capture_dynamic_flag_is_recorded_and_reset(tmp_path):
+    out = tmp_path / "k.jsonl"
+    try:
+        assert bench_micro.main(TINY + ["--targets", "3e5", "--batches", "2", "--modes", "docmask",
+                                        "--dynamo-capture-dynamic", "--out", str(out)]) == 0
+        assert not torch._dynamo.config.capture_dynamic_output_shape_ops
+    finally:
+        torch._dynamo.config.capture_dynamic_output_shape_ops = False
+    assert [r["capture_dynamic"] for r in rows(out)] == [True]
+
+
+def test_ce_arms_interleave_with_plain_arms(tmp_path):
+    """--arms eager,eager+ce --ce-chunk 40: only the +ce arm chunks (rows say so), ABBA order,
+    the same step-0 loss on CPU fp32; +ce needs --ce-chunk, and +anything else is refused."""
+    out = tmp_path / "ce.jsonl"
+    assert bench_micro.main(TINY + ["--targets", "3e5", "--batches", "2", "--modes", "docmask",
+                                    "--arms", "eager,eager+ce", "--repeats", "2", "--ce-chunk", "40",
+                                    "--out", str(out)]) == 0
+    rs = rows(out)
+    assert [(r["arm"], r["ce_chunk"], r["compile"]) for r in rs] == [
+        ("eager", 0, False), ("eager+ce", 40, False), ("eager+ce", 40, False), ("eager", 0, False)]
+    assert abs(rs[0]["loss_first"] - rs[1]["loss_first"]) < 1e-4
+    for bad in (["--arms", "eager+ce"], ["--arms", "eager+fast", "--ce-chunk", "8"]):
+        with pytest.raises(ValueError):
+            bench_micro.main(TINY + bad + ["--out", str(tmp_path / "x.jsonl")])

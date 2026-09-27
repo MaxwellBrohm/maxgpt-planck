@@ -2,8 +2,8 @@
 
 Defaults since 2026-09-26 (optim.resolve_batched, docattn.resolve_doc_attn): on cuda with bf16
 the optimizer is optim_batched and packed rows use doc_attn varlen; cpu and mps keep the
-reference (never measured there). train.lazy_metrics stays opt-in. torch.compile is not a
-train.py option (pc/bench_micro.py --compile only), so the compiled checks drive Trainer.
+reference (never measured there). train.lazy_metrics stays opt-in. The compiled checks drive
+Trainer with forward=torch.compile(m) (train.compile, opt-in since SPEED V3: test_compile*.py).
 CPU: the auto rule; a default cpu run equals an explicit reference run bit for bit.
 CUDA (skipped without it; deterministic algorithms, CUBLAS_WORKSPACE_CONFIG=:4096:8):
   resume   train.py defaults + lazy_metrics (pack with chats, bf16, accum 2, log_every 5), each
@@ -158,7 +158,7 @@ def trainer(base, tmp, batches, impl="varlen", batched=True, lazy=True, compiled
         grads.append(torch.cat([p.grad.float().flatten() for p in m.parameters()]))
         step()
     opt.step = spy
-    tr = Trainer(model=torch.compile(m) if compiled else m, optimizer=opt,
+    tr = Trainer(model=m, forward=torch.compile(m) if compiled else None, optimizer=opt,
                  loader=ListLoader(batches if accum > 1 else [one_batch(batches)]),
                  sched=S.full(1000, warmup_steps=1), device="cuda", amp=amp, cfg={}, out_dir=str(tmp),
                  grad_accum=accum, grad_clip=1e9, log_every=1, ckpt_every=0, keep_last=1,

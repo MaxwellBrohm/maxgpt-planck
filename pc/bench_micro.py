@@ -2,7 +2,10 @@
 
   python pc/bench_micro.py                                   # 5M 10M 20M 30M on CUDA
   python pc/bench_micro.py --targets 3e6,5e6 --batches 8,16,32,64 --modes causal,docmask
-  python pc/bench_micro.py --compile                         # also time torch.compile
+  python pc/bench_micro.py --compile                         # torch.compile (mode default) only
+  python pc/bench_micro.py --arms eager,default --repeats 5  # interleaved A/B, same process
+  python pc/bench_micro.py --ce-chunk 2048                   # chunked lm_head + loss (no logits)
+  python pc/bench_micro.py --arms eager,default,eager+ce,default+ce --ce-chunk 2048 --repeats 5
   python pc/bench_micro.py --loops 2                         # a looped arm (any budget.py flag)
   python pc/bench_micro.py --batched-optim off --doc-attn mask   # the pre-2026-09-26 reference step
   python pc/bench_micro.py --lazy-loss --phase-times         # no per-step loss sync; time the update
@@ -51,6 +54,18 @@ lazy_metrics). Rows record the resolved batched_optim and doc_attn. --phase-time
 opt_ms_median (CUDA events around clip + opt.step + zero_grad: GPU time from the end of
 backward to the end of the update, idle gaps included) and opt_cpu_ms_median (host time to
 issue that phase) over the timed steps.
+Arms (train.compile): "eager" or a torch.compile mode (default, max-autotune-no-cudagraphs:
+model.COMPILE_MODES), compiled through harness model.compile_forward exactly as train.py does.
+--arms a,b --repeats N runs every cell N times per arm, interleaved (ABBA order), and prints the
+median tok/s per arm over mem_fit "ok" rows. Each compiled cell starts from torch._dynamo.reset()
+(so first_step_s holds its compile, warm on-disk caches included) and records dynamo_graphs and
+graph_breaks. On docmask rows with doc_attn varlen, cu_seqlens' nonzero() breaks the graph
+(harness notes SPEED V3); --dynamo-capture-dynamic sets Dynamo's capture_dynamic_output_shape_ops
+for the whole bench process (a bench-only experiment, not a train.py option; recorded per row).
+--ce-chunk N (train.ce_chunk_rows): lm_head + the loss N rows at a time without the full logits
+(harness/chunked_ce.py); 0 = the reference loss path. An arm ending in "+ce" (eager+ce,
+default+ce) chunks with N and the others do not, so chunked and plain interleave in one process;
+with no "+ce" arm, N > 0 chunks every arm. Rows record the ce_chunk each run used.
 """
 from __future__ import annotations
 
@@ -71,7 +86,7 @@ import torch  # noqa: E402
 import budget  # noqa: E402
 from device import amp_factory, env_info, resolve_precision, sync  # noqa: E402
 from docattn import CHOICES, resolve_doc_attn, set_doc_attn  # noqa: E402
-from model import build_model  # noqa: E402
+from model import build_model, compile_forward, compile_mode  # noqa: E402
 from optim import make_optimizer, resolve_batched  # noqa: E402
 
 
@@ -168,19 +183,35 @@ def mem_report(before: tuple[int, int], min_free_gib: float) -> dict:
             "total_gib": round(total / G, 2), "mem_fit": fit}
 
 
-def bench_one(cfg, mode: str, B: int, a, device: str, precision: str) -> dict:
+def parse_arm(arm: str, a) -> tuple[str | None, int]:
+    """"<eager | a compile mode>[+ce]" -> (torch.compile mode or None, ce_chunk rows or 0)."""
+    spec, _, suffix = arm.partition("+")
+    if suffix not in ("", "ce"):
+        raise ValueError(f"arm {arm!r}: the only suffix is +ce")
+    if suffix and a.ce_chunk < 1:
+        raise ValueError(f"arm {arm!r} needs --ce-chunk N > 0")
+    return compile_mode(spec), a.ce_chunk if (suffix or not a.any_ce) else 0
+
+
+def bench_one(cfg, mode: str, B: int, a, device: str, precision: str, arm: str = "eager") -> dict:
+    cmode, ce_chunk = parse_arm(arm, a)
+    if cmode:
+        torch._dynamo.reset()
+        torch._dynamo.utils.counters.clear()
     before = mem_before() if device == "cuda" else None
     torch.manual_seed(0)
     g = torch.Generator().manual_seed(1)
     model = build_model(cfg, "cpu").to(device)
     set_doc_attn(model, a.doc_attn, device)
     opt = make_optimizer(model, {"kind": a.optim, "batched": a.batched_optim}, device_type=device)
-    fwd = torch.compile(model) if a.compile else model
+    fwd = compile_forward(model, cmode, a.compile_backend)
+    kw = {"ce_chunk": ce_chunk} if ce_chunk else {}
+    rec_ce = {"ce_chunk": ce_chunk}
     amp = amp_factory(precision, device)
     batches = [make_batch(B, cfg.seq_len, cfg.vocab_size, mode, a.docs_per_row, g, device)
                for _ in range(min(a.accum, 4))]
     # parameters() yields a tied or shared tensor once, so this is the TOTAL the curve counts
-    rec = {"status": "ok", "n_params_built": sum(p.numel() for p in model.parameters())}
+    rec = {"status": "ok", "n_params_built": sum(p.numel() for p in model.parameters()), **rec_ce}
     phases = None                                   # a PhaseTimer during the timed steps
 
     def step(i: int):
@@ -188,7 +219,7 @@ def bench_one(cfg, mode: str, B: int, a, device: str, precision: str) -> dict:
         for j in range(a.accum):
             idx, tgt, doc = batches[(i * a.accum + j) % len(batches)]
             with (amp() if amp else nullcontext()):
-                _, ls = fwd(idx, tgt, doc, reduction="sum")
+                _, ls = fwd(idx, tgt, doc, reduction="sum", **kw)
             (ls / idx.numel() / a.accum).backward()
             if a.lazy_loss:                          # a device tensor, read after the loop
                 loss_sum = loss_sum + ls.detach() / idx.numel()
@@ -233,11 +264,17 @@ def bench_one(cfg, mode: str, B: int, a, device: str, precision: str) -> dict:
             rec["status"] = "nonfinite"
         if device == "cuda":
             rec.update(mem_report(before, a.min_free_gib))
+        if cmode:
+            c = torch._dynamo.utils.counters
+            rec.update(dynamo_graphs=int(c["stats"]["unique_graphs"]),
+                       graph_breaks=int(sum(c["graph_break"].values())))
     except (RuntimeError, torch.OutOfMemoryError) as e:
         rec = {"status": "oom" if is_oom(e) else "error", "error": str(e).splitlines()[0][:300],
-               "n_params_built": rec["n_params_built"]}
+               "n_params_built": rec["n_params_built"], **rec_ce}
     finally:
         del model, opt, fwd, batches
+        if cmode:
+            torch._dynamo.reset()      # drop the compiled graphs before the next cell
         if device == "cuda":
             torch.cuda.empty_cache()
     return rec
@@ -270,7 +307,15 @@ def main(argv=None) -> int:
     ap.add_argument("--warmup", type=int, default=5)
     ap.add_argument("--docs-per-row", type=float, default=8.0)
     ap.add_argument("--optim", default="normuon", choices=["normuon", "muon", "adamw"])
-    ap.add_argument("--compile", action="store_true")
+    ap.add_argument("--compile", action="store_true", help="shorthand for --arms default")
+    ap.add_argument("--arms", default=None,
+                    help="comma list of eager and torch.compile modes (default: eager)")
+    ap.add_argument("--repeats", type=int, default=1, help="runs per arm per cell, interleaved")
+    ap.add_argument("--compile-backend", default="inductor", help="aot_eager: CPU tests only")
+    ap.add_argument("--dynamo-capture-dynamic", action="store_true",
+                    help="Dynamo capture_dynamic_output_shape_ops (bench-only experiment)")
+    ap.add_argument("--ce-chunk", type=int, default=0,
+                    help="rows per lm_head + loss chunk (harness/chunked_ce.py); 0 = reference path")
     ap.add_argument("--batched-optim", nargs="?", const="on", default="auto",
                     choices=["auto", "on", "off"],
                     help="optim key batched (optim_batched.py): auto (default) = on for cuda")
@@ -286,10 +331,16 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default=os.path.join(HERE, "bench_results.jsonl"))
     budget.add_constraint_args(ap)
     a = ap.parse_args(argv)
-    if a.steps < 1 or a.accum < 1 or a.warmup < 0:
-        raise SystemExit("--steps and --accum must be >= 1, --warmup >= 0")
+    if a.steps < 1 or a.accum < 1 or a.warmup < 0 or a.repeats < 1 or a.ce_chunk < 0:
+        raise SystemExit("--steps, --accum and --repeats must be >= 1, --warmup and --ce-chunk >= 0")
+    arms = (a.arms or ("default" if a.compile else "eager")).split(",")
+    a.any_ce = any(arm.endswith("+ce") for arm in arms)
+    for arm in arms:
+        parse_arm(arm, a)   # ValueError on an unknown mode or suffix
     if a.device == "cuda" and not torch.cuda.is_available():
         raise SystemExit("CUDA is not available (this benchmark is meant for the PC)")
+    if a.dynamo_capture_dynamic:              # reset at the end of main
+        torch._dynamo.config.capture_dynamic_output_shape_ops = True
     precision = resolve_precision(a.precision, a.device)
     # the harness defaults (auto) resolved here, so every row records what actually ran
     a.batched_optim = resolve_batched({"on": True, "off": False}.get(a.batched_optim, "auto"),
@@ -302,35 +353,60 @@ def main(argv=None) -> int:
     k = budget.constraints_from_args(a)
     run_id = time.strftime("%Y%m%d-%H%M%S")
     print(f"bench_micro {run_id}: {env.get('gpu', a.device)} torch {env['torch']} "
-          f"precision {precision} T={a.seq_len} accum={a.accum} compile={a.compile} "
-          f"batched_optim={a.batched_optim} lazy_loss={a.lazy_loss} doc_attn={a.doc_attn}")
-    print(f"{'target':>7} {'d':>4} {'L':>3} {'params':>9} {'mode':>8} {'B':>4} {'tok/s':>10} "
-          f"{'step s':>8} {'h/1B':>7} {'peakGiB':>7} {'resGiB':>6} {'freeGiB':>7} fit   status")
+          f"precision {precision} T={a.seq_len} accum={a.accum} arms={','.join(arms)} x{a.repeats} "
+          f"batched_optim={a.batched_optim} lazy_loss={a.lazy_loss} doc_attn={a.doc_attn} "
+          f"ce_chunk={a.ce_chunk}" + (" capture_dynamic" if a.dynamo_capture_dynamic else ""))
+    print(f"{'target':>7} {'d':>4} {'L':>3} {'params':>9} {'mode':>8} {'B':>4} {'arm':>10} "
+          f"{'tok/s':>10} {'step s':>8} {'h/1B':>7} {'peakGiB':>7} {'resGiB':>6} {'freeGiB':>7} "
+          f"fit   {'1st s':>6} status")
+    medians: list[str] = []
     for target in [float(t) for t in a.targets.split(",")]:
         sol = budget.solve(target, k)
         cfg = sol.cfg.replace(seq_len=a.seq_len)
         for mode in a.modes.split(","):
             assert mode in ("causal", "docmask"), mode
+            oomed: set[str] = set()      # an arm that ran out of memory skips larger batches
             for B in [int(b) for b in a.batches.split(",")]:
-                r = bench_one(cfg, mode, B, a, a.device, precision)
-                row = {"run_id": run_id, "target": target, "n_params": sol.total,
-                       "shape": sol.row(), "mode": mode, "micro_batch": B,
-                       "seq_len": a.seq_len, "accum": a.accum, "compile": a.compile,
-                       "batched_optim": a.batched_optim, "lazy_loss": a.lazy_loss,
-                       "doc_attn": a.doc_attn,
-                       "docs_per_row": a.docs_per_row if mode == "docmask" else None,
-                       "optim": a.optim, "precision": precision, "device": a.device, **r,
-                       "gpu_after": gpu_state() if a.device == "cuda" else None, "env": env}
-                with open(a.out, "a") as f:
-                    f.write(json.dumps(row) + "\n")
-                print(f"{target / 1e6:>6.1f}M {cfg.d_model:>4} {cfg.n_layers:>3} "
-                      f"{sol.total:>9,} {mode:>8} {B:>4} {r.get('tok_per_s', 0):>10,.0f} "
-                      f"{r.get('step_s', 0):>8.3f} {r.get('h_per_1B', 0):>7.2f} "
-                      f"{r.get('peak_mem_gib', 0):>7.2f} {r.get('peak_reserved_gib', 0):>6.2f} "
-                      f"{r.get('free_gib', 0):>7.2f} {r.get('mem_fit', '-'):<5} {r['status']}",
-                      flush=True)
-                if r["status"] == "oom":
+                speeds: dict[str, list[float]] = {arm: [] for arm in arms}
+                for rep in range(a.repeats):
+                    for arm in (arms if rep % 2 == 0 else arms[::-1]):
+                        if arm in oomed:
+                            continue
+                        r = bench_one(cfg, mode, B, a, a.device, precision, arm)
+                        row = {"run_id": run_id, "target": target, "n_params": sol.total,
+                               "shape": sol.row(), "mode": mode, "micro_batch": B,
+                               "seq_len": a.seq_len, "accum": a.accum,
+                               "compile": parse_arm(arm, a)[0] is not None, "arm": arm, "repeat": rep,
+                               "capture_dynamic": a.dynamo_capture_dynamic,
+                               "batched_optim": a.batched_optim, "lazy_loss": a.lazy_loss,
+                               "doc_attn": a.doc_attn,
+                               "docs_per_row": a.docs_per_row if mode == "docmask" else None,
+                               "optim": a.optim, "precision": precision, "device": a.device, **r,
+                               "gpu_after": gpu_state() if a.device == "cuda" else None, "env": env}
+                        with open(a.out, "a") as f:
+                            f.write(json.dumps(row) + "\n")
+                        print(f"{target / 1e6:>6.1f}M {cfg.d_model:>4} {cfg.n_layers:>3} "
+                              f"{sol.total:>9,} {mode:>8} {B:>4} {arm[:10]:>10} "
+                              f"{r.get('tok_per_s', 0):>10,.0f} "
+                              f"{r.get('step_s', 0):>8.3f} {r.get('h_per_1B', 0):>7.2f} "
+                              f"{r.get('peak_mem_gib', 0):>7.2f} {r.get('peak_reserved_gib', 0):>6.2f} "
+                              f"{r.get('free_gib', 0):>7.2f} {r.get('mem_fit', '-'):<5} "
+                              f"{r.get('first_step_s', 0):>6.1f} {r['status']}", flush=True)
+                        if r["status"] == "oom":
+                            oomed.add(arm)
+                        elif r["status"] == "ok" and r.get("mem_fit", "ok") == "ok":
+                            speeds[arm].append(r["tok_per_s"])
+                if a.repeats > 1 or len(arms) > 1:
+                    medians.append(f"{target / 1e6:>6.1f}M {mode:>8} B{B:<3} " + "  ".join(
+                        f"{arm}: {sorted(v)[len(v) // 2]:,.0f} (n={len(v)})" if v else f"{arm}: -"
+                        for arm, v in speeds.items()))
+                if len(oomed) == len(arms):
                     break
+    if medians:
+        print("median tok/s over mem_fit ok rows (upper median):")
+        print("\n".join(medians))
+    if a.dynamo_capture_dynamic:
+        torch._dynamo.config.capture_dynamic_output_shape_ops = False
     print(f"results appended to {a.out}")
     return 0
 

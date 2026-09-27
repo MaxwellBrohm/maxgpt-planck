@@ -224,3 +224,5 @@ mut("fg_in_normuon", "forget", "optim.py", 'elif ".forget_" in name:', "elif Fal
 import mutants_mtp  # noqa: E402,F401
 # ---------------- S007 smeared keys: mutants_smear.py (same split; it appends to M) ----------------
 import mutants_smear  # noqa: E402,F401
+# ---------------- SPEED V3 train.compile + train.ce_chunk_rows: mutants_speed3.py (same split) ----------------
+import mutants_speed3  # noqa: E402,F401

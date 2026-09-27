@@ -85,14 +85,26 @@ MUTANTS = [
     ("hb", "throttle_not_shown", "wsl/heartbeat.py",
      'thr = ",".join(g.get("throttle_reasons") or []) or "none"', 'thr = "none"',
      "tests/test_heartbeat.py"),
-    ("bench", "docmask_without_docs", "bench_micro.py",
-     'if mode == "docmask" else None', "if False else None", "tests/test_bench_micro.py"),
-    ("bench", "oom_not_skipping", "bench_micro.py",
-     'if r["status"] == "oom":\n                    break', 'if r["status"] == "oom":\n                    pass',
+    ("bench", "docmask_without_docs", "bench_micro.py",   # SPEED V3: the old target also hit the row
+     'per_row, g) if mode == "docmask" else None', "per_row, g) if False else None",
+     "tests/test_bench_micro.py"),
+    ("bench", "oom_not_skipping", "bench_micro.py", "oomed.add(arm)", "pass",   # SPEED V3: per-arm skip
      "tests/test_bench_micro.py"),
     ("bench", "wrong_shape", "bench_micro.py", "cfg = sol.cfg.replace(seq_len=a.seq_len)",
      "cfg = sol.cfg.replace(seq_len=a.seq_len, n_layers=sol.cfg.n_layers + 1)",
      "tests/test_bench_micro.py"),
+    # SPEED V3 (--arms, --repeats, --ce-chunk, --dynamo-capture-dynamic)
+    ("bench", "arm_not_compiled", "bench_micro.py", "fwd = compile_forward(model, cmode, a.compile_backend)",
+     "fwd = model", "tests/test_bench_micro.py::test_arms_interleave_and_compiled_rows_are_one_graph"),
+    ("bench", "no_abba_order", "bench_micro.py", "for arm in (arms if rep % 2 == 0 else arms[::-1]):",
+     "for arm in arms:", "tests/test_bench_micro.py::test_arms_interleave_and_compiled_rows_are_one_graph"),
+    ("bench", "ce_chunk_dropped", "bench_micro.py", 'kw = {"ce_chunk": ce_chunk} if ce_chunk else {}',
+     "kw = {}", "tests/test_bench_micro.py::test_ce_chunk_flag_reaches_the_model_and_keeps_the_loss"),
+    ("bench", "capture_flag_left_on", "bench_micro.py",
+     "torch._dynamo.config.capture_dynamic_output_shape_ops = False", "pass",
+     "tests/test_bench_micro.py::test_capture_dynamic_flag_is_recorded_and_reset"),
+    ("bench", "ce_arm_suffix_ignored", "bench_micro.py", "a.ce_chunk if (suffix or not a.any_ce) else 0",
+     "a.ce_chunk if not a.any_ce else 0", "tests/test_bench_micro.py::test_ce_arms_interleave_with_plain_arms"),
 ] + [("boot", n, "wsl/" + f, old, new, t if t.startswith("tests/") else "tests/test_boot_resume.py::" + t)
       for n, f, old, new, t in [
     # boot.d (RUNBOOK "RESUME AFTER A REBOOT"): each claim of test_boot_resume.py, broken on purpose

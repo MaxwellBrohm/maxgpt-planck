@@ -490,3 +490,84 @@ integ/base range. Raw rows: PC ~/planck/dev/integ_out/ab_{base,integ,integ_lazy}
   and end of every A/B.
 Not measured: the compiled throughput on top of the new defaults (the combined tests do run
 compile); anything on MPS.
+
+SPEED V3 (2026-09-27, branch speed/v3): the two candidates that SPEED INTEGRATE 2 left out, ported onto
+7e7c802 (optim.batched auto, train.doc_attn auto) as two independent switches. Both are OFF by default; the
+default path is unchanged (proved below). Nothing here ran on a GPU; every number is CPU (Mac) or copied
+from the old-tree candidates, marked so.
+  train.compile   false (default, eager) | default | max-autotune-no-cudagraphs (true = default; the CUDA-graph
+                  modes reduce-overhead and max-autotune are refused). train.compile_backend (inductor;
+                  aot_eager in the CPU tests), train.compile_dynamic. Only the trainer's forward + loss run
+                  compiled (model.compile_forward, Trainer forward=); the self-test, eval hooks, optimizer,
+                  clipping and state_dict use the plain module, so checkpoints keep their keys and a run may
+                  switch compile on or off across a resume. Trainer refuses a compiled wrapper as model=. When
+                  compiling with reduction "sum" model.forward skips the (tgt != -100).any() guard (a sync and a
+                  graph break; the sum over zero targets is exactly 0 with zero grads); eager and "mean" keep it.
+                  Start record: compile (and compile_backend when not inductor).
+  train.ce_chunk_rows  0 (default) | N: lm_head + cross-entropy N rows at a time, no full logits
+                  (chunked_ce.py, imported only when N > 0; the memory candidate's code unchanged). The S006
+                  aux head still builds its own full logits. On eager CUDA the per-chunk core runs through
+                  torch.compile (chunked_ce.FUSE_CUDA) even with train.compile off. Start record: ce_chunk_rows.
+  Not ported: memfit.py (train.cuda_mem_cap_gib, train.auto_micro_on_oom) from the memory candidate: two
+  more switches that were not asked for. Its end-to-end ce_chunk_rows check lives in test_speed3.py now.
+Old-tree evidence (candidates, before the 2026-09-26 defaults; copied, not re-run): compile default +59
+percent median tok/s at the same batch and about half the reserved memory; compile_parity 200 steps at 5M
+and 20M passed for default (max-autotune-no-cudagraphs failed one 20M check: not validated).
+Conflicts and how they were resolved:
+  model.forward: now ends in z = norm(x) with return_hidden (S006) and the screen flags before it; the
+    chunked branch returns right after z, (None, loss[, z]), before lm_head; the reference loss code is
+    untouched apart from the compiled-guard condition.
+  trainer.py: self.model(...) -> self.fwd(...); ce_chunk rides in the same kwargs as return_hidden; the aux
+    head, clipping, optimizer and payload keep self.model.
+  train.py: compile and ce_chunk resolve after the loader and before make_optimizer, which is always built
+    on the plain model; their start-record fields sit with doc_attn / optim_batched / lazy_metrics.
+  test_speed_combined.py passed torch.compile(m) as Trainer(model=); now forward= (the new guard).
+  pc/bench_micro.py: the compile candidate's --arms / --repeats (ABBA, one process, medians over fit-ok rows)
+    merged with the current rows (batched_optim, lazy_loss, doc_attn, docs_per_row, --phase-times); OOM now
+    skips larger batches per arm. --ce-chunk N; an arm "X+ce" chunks and plain arms do not, so chunked and
+    plain interleave (with no +ce arm, N > 0 chunks every arm). --dynamo-capture-dynamic (bench only).
+  pc/tests/mutation_check.py: bench mutant oom_not_skipping retargeted to the per-arm skip;
+    docmask_without_docs retargeted (its string already matched twice on main, so it was INVALID there).
+  compile_parity.py: arms may carry +ce; the reference arms are exactly eager and eager:det. On cuda it now
+    measures on top of the 2026-09-26 defaults (train.py's own).
+Compile + varlen (open question; CPU with the flash kernel swapped for a traceable stand-in,
+test_compile_varlen.py): with Dynamo's default config the varlen forward is 4 graphs and 3 breaks, every
+break at cu_seqlens' nonzero() (a data-dependent size); none in attention. Over 14 batches of varying
+document counts the graph count went 4 -> 6 after the first change, then stayed (no cache-limit fallback to
+eager). With capture_dynamic_output_shape_ops on: 1 graph, no recompiles. Not set in train.py: the real
+varlen kernel under an unbacked size is untested; bench --dynamo-capture-dynamic is there to measure it.
+Compile + chunked CE: one graph under fullgraph (aot_eager), loss and grads equal eager to fp32 rounding.
+Default path, proved on the Mac: default_parity.py (main 7e7c802 vs this tree, CPU fp32, pack with chats,
+accum 2, 24 steps): every log record, the final checkpoint (model, optimizer, loader, rng) and the start
+record identical, and no module imported that main did not. test_speed3.py: no keys == keys set off, bit
+for bit; a fresh default process calls no torch.compile, compiles no graph, never imports chunked_ce, and
+the trainer runs the plain model.
+Tests (new): test_compile.py (modes, the all-ignored batch in one graph, compiled == eager over 11 arms incl.
+the screen flags, leak probes, the trainer's accum-3 step against one eager forward / n_sup, Trainer refuses a
+wrapper), test_compile_varlen.py, test_compile_train.py (off by default; compiled resume 20 + 20 == 40 in pack
+and bucket with plain keys and eager's optimizer groups; compile on then off), test_compile_parity.py,
+test_chunked_ce.py (fp32 == reference over 8 arms x 2 reductions x 4 chunk sizes, no-grad, all-ignored,
+-100 targets, bf16 envelope, trainer accum, one-token leak), test_speed3.py (default path, ce_chunk_rows values,
+resume on then off for chunk and chunk + compile, compiled chunked forward one graph, S006 head with chunk,
+compile and both). CUDA only (skipped on the Mac): test_compile_cuda.py, test_chunked_ce_cuda.py (the
+candidates'), test_speed3_cuda.py (step-1 loss and grads of varlen, + compile, + chunk, + both within 1.5x the
+bf16 reference's distance to fp32; graph breaks of the compiled varlen forward only at cu_seqlens, graph count
+stable; both switches 20 + 20 == 40 bitwise, then switched off after 20). pc/tests/test_bench_micro.py: arms
+ABBA and one graph, --ce-chunk, +ce arms, the capture flag reset.
+Results (Mac CPU, load average 149 at the start and 294 at the end: other sessions; times are not
+meaningful): harness 800 passed, 44 skipped (all 44 "needs CUDA"; the new files hold 134 CPU and 14 CUDA
+tests, so main's share is 666 and 30 by subtraction, not re-run); pc/tests 65 passed (4 new).
+Mutation checks (scratch copies; mutation_check.py with its per-run timeout raised in the copy for the load):
+  speed3 group (mutants_speed3.py) 16 of 16 killed: compile on by default, ce_chunk_rows on by default,
+  model.forward chunking by default, chunked CE counting -100 targets in the loss, giving them a gradient,
+  dividing "mean" by every row, Trainer dropping ce_chunk, the start record hiding it, the chunked path
+  losing z, checkpoints saved from the wrapper, the optimizer built on the wrapper, Trainer taking a wrapper,
+  Trainer ignoring forward=, the guard kept when compiled, the guard dropped for "mean", CUDA-graph modes
+  accepted. Existing groups re-run on this tree: mask 7/7, resume 3/3, loss 6/6, schedule 5/5, mtp 16/16,
+  docattn 5/5. pc bench group 8/8 (5 new: arm not compiled, no ABBA order, --ce-chunk dropped, +ce suffix
+  ignored, capture flag left on; and the 3 old ones retargeted or unchanged). default_parity.py itself: a
+  momentum 0.95 -> 0.951 drift and a top-level import of chunked_ce each gave FAIL.
+Not done here: anything on CUDA (the 5070 was busy with E2 and a queue of lock waiters; no GPU was used).
+Open, for the Prove stage: compile's gain on top of batched + varlen, whether inductor traces the real varlen
+kernel with the breaks above only, chunked CE's worth once compile fuses the loss, and whether either lets
+20M/30M run a larger micro batch. Commands: the report of this stage (not repeated here).

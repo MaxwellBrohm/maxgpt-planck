@@ -33,7 +33,7 @@ from count_params import count_module   # noqa: E402
 from data import build_loader          # noqa: E402
 from device import amp_factory, env_info, pick_device, resolve_precision  # noqa: E402
 from docattn import resolve_doc_attn, set_doc_attn  # noqa: E402
-from model import build_model          # noqa: E402
+from model import build_model, ce_chunk_rows, compile_forward, compile_mode  # noqa: E402
 from mtp import MTPHead, mtp_settings   # noqa: E402
 from optim import make_optimizer       # noqa: E402
 from selftest import run_selftests     # noqa: E402
@@ -115,6 +115,11 @@ def main(argv=None) -> int:
     batch_tokens = per_micro * accum
     total_steps = int(tc["total_steps"]) if "total_steps" in tc else \
         S.steps_for_tokens(float(tc["total_tokens"]), batch_tokens)
+    # train.compile (default off = eager; model.compile_mode): torch.compile the training forward only.
+    # The self-test above, eval hooks, the optimizer, clipping and checkpoints use the plain module.
+    cmode = compile_mode(tc.get("compile", False))
+    fwd = compile_forward(model, cmode, tc.get("compile_backend", "inductor"), tc.get("compile_dynamic"))
+    ce_chunk = ce_chunk_rows(tc.get("ce_chunk_rows", 0))   # default 0 = the reference loss path
     opt = make_optimizer(model, oc, device, extra=head)
 
     init_ck = None
@@ -131,7 +136,8 @@ def main(argv=None) -> int:
                  cfg=cfg, out_dir=out_dir, grad_accum=accum, grad_clip=float(tc.get("grad_clip", 1.0)),
                  log_every=int(tc.get("log_every", 10)), ckpt_every=int(tc.get("ckpt_every", 500)),
                  keep_last=int(tc.get("keep_last", 2)), stable_points=stable_pts, meta=meta,
-                 lazy_metrics=bool(tc.get("lazy_metrics", False)), mtp=head, mtp_weight=mtp_weight)
+                 lazy_metrics=bool(tc.get("lazy_metrics", False)), mtp=head, mtp_weight=mtp_weight,
+                 forward=fwd, ce_chunk=ce_chunk)
 
     if (cfg.get("eval") or {}).get("rc12"):   # off unless eval.rc12.every > 0 (rc12_eval.py)
         from rc12_eval import make_hook
@@ -165,11 +171,19 @@ def main(argv=None) -> int:
         start["optim_batched"] = True
     if tr.lazy_metrics:
         start["lazy_metrics"] = True
+    if cmode:                               # SPEED V3 switches, both opt-in
+        start["compile"] = cmode
+        if tc.get("compile_backend", "inductor") != "inductor":
+            start["compile_backend"] = tc["compile_backend"]
+    if ce_chunk:
+        start["ce_chunk_rows"] = ce_chunk
     if head is not None:                    # S006: deployed total (n_params) and training-only, apart
         start["mtp"] = {"heads": mtp, "weight": mtp_weight, "training_only_params": meta["mtp_params"]}
     runio.append_jsonl(runs_jsonl, start)
     print(f"[train] {name}: {n_params:,} params, {device}/{precision}, steps {tr.step}->"
-          f"{sched.total_steps} ({sched.mode}), {batch_tokens:,} tokens/step", flush=True)
+          f"{sched.total_steps} ({sched.mode}), {batch_tokens:,} tokens/step"
+          + (f", compile {cmode}" if cmode else "") + (f", ce_chunk_rows {ce_chunk}" if ce_chunk else ""),
+          flush=True)
     t0 = time.time()
     try:
         last_rec = tr.run(a.max_steps)

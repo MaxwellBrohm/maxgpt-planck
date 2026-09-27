@@ -18,6 +18,12 @@ losses + w_t * sum of aux losses) / n_sup, n_sup the step's NEXT-TOKEN supervise
 mtp_weight * the schedule factor of the step. "loss" stays the next-token loss alone; log records
 add mtp_loss (aux CE per aux target), mtp_w (w_t) and mtp_n (aux targets). The grad norm and its clip
 cover the head too; checkpoints hold its state under "mtp". Off (mtp=None): the pre-flag step.
+
+forward (train.compile; model.compile_forward): what train_step calls, a torch.compile wrapper of
+model when set. Everything else (parameters, clipping, the optimizer, state_dict, eval hooks) uses
+the plain module, so checkpoints are the same with and without compile. ce_chunk (train.ce_chunk_rows;
+chunked_ce.py): > 0 runs lm_head + the loss that many rows at a time. Both off (None, 0) by default:
+train_step then calls the model exactly as before.
 """
 from __future__ import annotations
 
@@ -38,8 +44,12 @@ class Trainer:
     def __init__(self, *, model, optimizer, loader, sched, device, amp, cfg: dict, out_dir: str,
                  grad_accum: int, grad_clip: float, log_every: int, ckpt_every: int,
                  keep_last: int, stable_points: set[int], meta: dict, hooks=None,
-                 lazy_metrics: bool = False, mtp=None, mtp_weight: float = 1.0):
+                 lazy_metrics: bool = False, mtp=None, mtp_weight: float = 1.0, forward=None,
+                 ce_chunk: int = 0):
+        if hasattr(model, "_orig_mod"):      # the plain module owns params and checkpoints
+            raise ValueError("Trainer needs the plain model; pass a compiled wrapper as forward=")
         self.model, self.opt, self.loader, self.sched = model, optimizer, loader, sched
+        self.fwd = model if forward is None else forward
         self.device, self.amp, self.cfg, self.out_dir = device, amp, cfg, out_dir
         self.grad_accum, self.grad_clip = grad_accum, grad_clip
         self.log_every, self.ckpt_every, self.keep_last = log_every, ckpt_every, keep_last
@@ -56,6 +66,8 @@ class Trainer:
         self._checked_at = 0
         self.mtp, self.mtp_weight = mtp, float(mtp_weight)   # S006: the aux head (mtp.MTPHead) or None
         self._hid = {} if mtp is None else {"return_hidden": True}
+        if ce_chunk:                         # train.ce_chunk_rows (default 0 = off)
+            self._hid["ce_chunk"] = int(ce_chunk)
 
     # ------------------------------------------------------------------ #
     def _to(self, t):
@@ -75,8 +87,8 @@ class Trainer:
             n_real += int((b["idx"] != self.loader.pad).sum())   # pad_id is reserved
             ctx = self.amp() if self.amp else nullcontext()
             with ctx:
-                out = self.model(self._to(b["idx"]), self._to(b["tgt"]), self._to(b["doc"]),
-                                 self._to(b["pos"]), reduction="sum", **self._hid)
+                out = self.fwd(self._to(b["idx"]), self._to(b["tgt"]), self._to(b["doc"]),
+                               self._to(b["pos"]), reduction="sum", **self._hid)
                 ls = obj = out[1]
                 if aux is not None:
                     obj = ls + aux["w"] * self._mtp_sum(out[2], b, aux)
