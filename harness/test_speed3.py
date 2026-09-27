@@ -59,7 +59,8 @@ def test_ce_chunk_rows_values():
 
 
 PROBE = """
-import json, sys, torch
+import json, os, sys, torch
+torch.set_num_threads(int(os.environ["PLANCK_PROBE_THREADS"]))   # the test process's count (below)
 def refuse(*a, **k):
     raise AssertionError("torch.compile called on the default path")
 torch.compile = refuse
@@ -88,8 +89,11 @@ def test_default_run_is_the_reference_and_builds_nothing_new(tmp_path, data):
     a = write_run(str(tmp_path / "a"), data, train=tc)
     b = write_run(str(tmp_path / "b"), data, train={**tc, "compile": False, "ce_chunk_rows": 0})
     out = tmp_path / "probe.json"
+    # same CPU thread count as run b below (testutil sets 4 here, a fresh process takes the core
+    # count): on the PC (x86) 4 vs 16 threads rounds the weights differently with identical logs
+    env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PLANCK_PROBE_THREADS": str(torch.get_num_threads())}
     p = subprocess.run([sys.executable, "-c", PROBE, str(out), a], cwd=HERE, capture_output=True,
-                       text=True, timeout=600, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
+                       text=True, timeout=600, env=env)
     assert p.returncode == 0, p.stderr[-3000:]
     assert json.load(open(out)) == {"rc": 0, "plain": [True], "chunked_ce": False, "graphs": 0}
     assert train.main([b]) == 0
