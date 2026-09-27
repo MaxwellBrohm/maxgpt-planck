@@ -1626,3 +1626,50 @@ OPEN
   likelihood rows would need both and venv-doge, or they hit the load failure or the sdpa defect.
   The follow-up runs from its planck-kit copy (dg_follow.sh; bash reads it as it goes): do not overwrite that file
   while it waits. Its log: ~/planck/logs/rc12_doge_follow.log.
+
+STEP 9d (2026-09-27, 10:18 to 10:52 EDT, branch rc12): the dev-baseline queue restarted after the 06:03 power loss.
+No model loaded on the Mac; nothing committed; no code changed.
+WHAT THE CRASH LEFT (read on the PC at 10:20, up 4:16)
+  Pass 1 (rc12_q9, launched 2026-09-26 14:47) and the Doge follow-up (dg_follow.sh, pid 351047) were gone; only the
+  boot task's runner_start.sh / queue_runner.py ran. No rc12_dev_queue.DONE, no STOP file. Last queue lines:
+  SmolLM2-135M plain 1 exit 0 at 05:34:39, then "SmolLM2-135M-Instruct plain 2 (vllm) waiting for the GPU lock
+  (try 1)"; that process log is 0 bytes and no .lockstart file remained: plain 2 never got the lock, so no run was
+  killed mid-way. queue_status.txt: 44 lines, all exit 0 done=1 (Qwen2.5-0.5B 16 runs, Falcon-H1-Tiny-90M 16,
+  SmolLM2-135M 12). Run dirs: no *.partial under ~/planck/runs/rc12_dev, every seed dir holds DONE, no zero-length
+  file besides the DONE marks. Nothing was removed. verify_dev_runs (rc12_dg code, venv-vllm, CPU) on SmolLM2-135M
+  plain (greedy and 1, the last runs before the crash): VERIFY PASS (0 failures).
+RESTART (STEP 9c's "Manual restart", written for exactly this case: the follow-up gone with WSL)
+  Checked first: rc12_dg differs from rc12_q9 only in STEP 9c's files (dev_batch, engines.json, hf_batched,
+  hf_responder, mutation_verify, parity_hf_vllm, queue_dev_baselines.sh, runner, test_parity, test_queue,
+  verify_dev_runs, and the new test_hf_trust); rc12_dg/engines.json holds pass 1's 12 entries unchanged plus Doge
+  (hfb, venv-doge, trust_remote_code, eager, max_batch 32); its queue_dev_baselines.sh, dev_batch.py and
+  verify_dev_runs.py have the Mac rc12's md5s. dg_follow.sh was neither re-armed nor edited: with no pass-1 DONE
+  marker it would only log "not restarting". Doge is folded into the restart: the rc12_dg queue runs it in its panel
+  place (4th model, right after SmolLM2-135M), not after the others; then the 9 remaining vLLM models.
+  Started detached 10:21:48 EDT: planck-kit/rc12_restart0927.sh (log ~/planck/logs/rc12_restart0927.log; it touches
+  rc12_restart0927.DONE when the queue exits), whose one command is
+    Q_CODE=$HOME/planck/dev/rc12_dg bash $HOME/planck/dev/rc12_dg/queue_dev_baselines.sh
+  Queue log: "start, code ~/planck/dev/rc12_dg, root ~/planck/runs/rc12_dev, pid 5302".
+FIRST RUN AFTER THE RESTART (SmolLM2-135M-Instruct plain seed 2)
+  Waited for gpu.lock 10:21:48 to 10:45:32 (another project's GPU job, then E2's 5m_e12 trunk), 236 s under it,
+  exit 0 at 10:49:28. dev: 640 conversations, 7328 replies, stops cap 2425 / eos 1728 / role 3175, 197.2 s,
+  R_ungated 1.229, loop rate 0.520. owncf: 48 conversations, 576 replies, cap 126 / eos 211 / role 239, 15.5 s.
+  meta.json: engine vllm, bfloat16, vllm 0.30.0 / transformers 5.17.0 / torch 2.13.0+cu132. Process log: 55 lines,
+  0 with traceback or error, 0 with nvcc. queue_status.txt: 46 lines.
+  verify_dev_runs --model HuggingFaceTB/SmolLM2-135M-Instruct --render plain (greedy, 1, 2 and their twins): VERIFY
+  PASS (0 failures); C3 turn-1 replies identical 1 vs 2: 9 / 640, 2 vs greedy: 15 / 640.
+  The queue then went on to plain 3 (waiting for the lock at 10:49:28).
+ETA
+  Left: 81 processes (162 runs): SmolLM2-135M plain 3; Doge's 8 (hfb, 45 to 75 min each by STEP 9c's estimate, not
+  measured on a full run: 6 to 10 h); 9 vLLM models x 8 = 72. Pass 1's 22 processes took 222 to 437 s under the
+  lock (mean 307 s); at 5 to 8 min each for the larger models the 72 take 6 to 10 h. GPU time left: about 12 to
+  20 h, so done between about 23:00 Sep 27 and 07:00 Sep 28 on a free GPU. Pass 1 ran at 41.7 min of wall time per
+  process (14.6 h for 22) because the lock is shared (E006, E2, another project); at that share, Sep 29 to 30.
+  Power: the PC lost power at about 06:03 on Sep 26 and Sep 27, and the queue does not come back by itself (only the
+  PlanckRunner boot task does). If it happens again: the same one-command restart, after a look for leftovers
+  (dev_batch deletes and redoes a stale .partial itself; a final dir without DONE stops dev_batch with "exists without
+  DONE" and the queue then SKIPs the rest of that model and render, so remove only such a dir).
+OPEN
+  Doge's first full run: verify_dev_runs --model SmallDoge/Doge-160M-Instruct --render template with venv-doge's
+  python, then --rerun 5 under gpu.lock (STEP 9c OPEN). No rc12_dev_queue.DONE.pass1 will exist (pass 1 never
+  finished); dg_follow.sh stays in planck-kit unused.

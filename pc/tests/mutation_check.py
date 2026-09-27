@@ -3,7 +3,7 @@ copy of pc/, and the named tests must go red. A mutant that survives means that 
 proves nothing.
 
   <python> pc/tests/mutation_check.py --list
-  <python> pc/tests/mutation_check.py --group guard     # guard | runner | start | hb | bench
+  <python> pc/tests/mutation_check.py --group guard     # guard | runner | start | hb | bench | boot
 Killed = pytest exit 1 (a real failure). Exit 2+ (collection or usage error) is INVALID,
 never counted as killed. A timeout (hang) is reported separately.
 """
@@ -93,7 +93,48 @@ MUTANTS = [
     ("bench", "wrong_shape", "bench_micro.py", "cfg = sol.cfg.replace(seq_len=a.seq_len)",
      "cfg = sol.cfg.replace(seq_len=a.seq_len, n_layers=sol.cfg.n_layers + 1)",
      "tests/test_bench_micro.py"),
-]
+] + [("boot", n, "wsl/" + f, old, new, "tests/test_boot_resume.py::" + t) for n, f, old, new, t in [
+    # boot.d (RUNBOOK "RESUME AFTER A REBOOT"): each claim of test_boot_resume.py, broken on purpose
+    ("e2_ignores_its_end_lines", "boot.d/10_e2.sh", "ENDS=' (plan finished", "ENDS=' (NEVER",
+     "test_e2_run_that_ended_itself_is_left_alone"),
+    ("first_start_not_last", "boot.d/bootlib.sh", '"$2" "$1" 2>/dev/null | tail -1', '"$2" "$1" 2>/dev/null | head -1',
+     "test_e2_only_the_last_start_counts"),
+    ("e006_running_not_checked", "boot.d/20_e006.sh", 'if running "$ANY"; then', "if false; then",
+     "test_a_running_queue_is_never_started_twice"),
+    ("rc12_running_not_checked", "boot.d/30_rc12.sh", 'if running "$ANY"; then', "if false; then",
+     "test_a_running_queue_is_never_started_twice"),
+    ("global_stop_ignored", "boot.d/bootlib.sh", '"$P/STOP" "$P/PAUSE" ', "",
+     "test_stop_files_hold_every_queue"),
+    ("queue_stop_ignored", "boot.d/bootlib.sh", '"$BOOTD/$NAME.STOP" ', "", "test_stop_files_hold_every_queue"),
+    ("dry_run_starts", "boot.d/bootlib.sh", 'would start: $*"; return 0; fi', 'would start: $*"; fi',
+     "test_cut_off_queue_resumes_and_dry_run_starts_nothing"),
+    ("e006_note_in_dry_run", "boot.d/20_e006.sh", "if [ $DRY = 0 ]; then", "if true; then",
+     "test_cut_off_queue_resumes_and_dry_run_starts_nothing"),
+    ("e006_cut_job_ignored", "boot.d/20_e006.sh", '[ -e "$n.guard.json" ] || cut=', "true || cut=",
+     "test_e006_job_cut_mid_run_is_left_for_a_person"),
+    ("e006_wrapper_exit_ignored", "boot.d/20_e006.sh", 'if [ -n "$wend" ]; then', "if false; then",
+     "test_e006_wrapper_exit_after_last_start_is_left_alone"),
+    ("rc12_done_ignored", "boot.d/30_rc12.sh", 'if [ -e "$DONE" ]; then', "if false; then",
+     "test_rc12_finished_or_stopped_is_left_alone"),
+    ("rc12_own_stop_ignored", "boot.d/30_rc12.sh", 'blocked "$P/logs/rc12_dev_queue.STOP"', "blocked",
+     "test_rc12_own_stop_file_holds_it"),
+    ("rc12_wrong_code", "boot.d/30_rc12.sh", 'env Q_CODE="$CODE" bash', "env bash",
+     "test_cut_off_queue_resumes_and_dry_run_starts_nothing"),
+    ("e2_no_fallback", "boot.d/10_e2.sh", 'trying the fallback"\nfallback', 'trying the fallback"\ntrue',
+     "test_e2_falls_back_when_launch_e2_never_reaches_the_queue"),
+    ("e2_fallback_after_queue_ran", "boot.d/10_e2.sh", "grep -q '^code .* plan '; then", "false; then",
+     "test_e2_no_fallback_when_the_queue_started_and_exited"),
+    ("twice_per_boot", "boot.d/boot_resume.sh", 'if [ -n "$bid" ] && [', "if false && [",
+     "test_dispatcher_resumes_once_per_boot"),
+    ("blind_gpu_resumes", "boot.d/boot_resume.sh", "[ $MODE = dry ] || exit 1", "true",
+     "test_dispatcher_resumes_nothing_while_the_gpu_is_blind"),
+    ("runs_non_executable", "boot.d/boot_resume.sh", 'if [ ! -x "$s" ]; then', "if false; then",
+     "test_dispatcher_dry_run_asks_every_script_and_starts_nothing"),
+    ("start_never_resumes", "runner_start.sh", 'if [ -f "$BOOT_RESUME" ]; then', "if false; then",
+     "test_runner_start_launches_boot_resume_only_when_installed"),
+    ("start_resumes_uninstalled", "runner_start.sh", 'if [ -f "$BOOT_RESUME" ]; then', "if true; then",
+     "test_runner_start_launches_boot_resume_only_when_installed"),
+]]
 
 
 def run_one(m, python: str) -> tuple[str, float]:

@@ -610,3 +610,51 @@ POST-RUN LOG (kills, reruns, guard or queue edits, hand-run analyses; written as
     e004w1 (the queue's next job after chat_e005w1): exit 0, not killed, card peak 8,046 MiB, weights_sha256
     91a3aab0... (E004 s1's). The queue then wrote reading 20260926-163454__after_refs_s1 and at 16:35 was waiting on
     gpu.lock for its next job (e005w2).
+  2026-09-27 10:20-10:40  C2 cut by a PC power loss at about 06:03; rerun under its own tag. DEVIATION (a killed job,
+    its rerun, and a rerun as C2 rather than C2_r2). No model was loaded on the Mac.
+    What stopped. The PC lost power at about 06:03 (the Mac, on the same house power, ran on battery 06:02:56-06:03:00
+    by pmset; the main session read Windows Kernel-Power 41 at boot; WSL up since 06:03:34). C2 (seed 2, arm C: train
+    + save + hash + score, one process) was running: guard samples 05:34:44-06:02:46 (last: el 1,687 s, 7,140 MiB,
+    50 C, no verdict); weights saved 05:44:14; C2.log's last line "generated h5l/chat: 192 in 27s"; GEN al/plain
+    opened (0 bytes). Never written: the rest of GEN, run.json (so no in-job weights_sha256) and C2.guard.json. The
+    queue's restart rule (skip on a guard.json with exit 0, GAP on any other) does not cover a job with no guard.json:
+    it starts C2 again, the guard refuses a name whose logs exist, and the queue stops after 12 refusals. No reading
+    used any C2 output (the last is 20260927-052531__after_G1). The GPU sat idle until the restart below.
+    Rerun. By hand at 10:22:52 on the PC, with no E006 process running: every file of the attempt (logs/C2.log,
+    C2.guard.log, 27 out files, the 6 files of weights/..__C2; 34 in all) hashed into
+    ~/planck/e006_run/crashed/C2_20260927-0603/MANIFEST_sha256.txt (sha256, bytes, lines, mtime; the manifest's own
+    sha256 c66924e8...), then moved (not deleted) into that folder, outside out/ logs/ weights/; every moved file was
+    rechecked against its recorded sha256 (all match) and nothing named C2 is left in the queue's paths. The queue
+    reruns C2 as the same command under its own name, so the analyzer (tags C1-C5) and chat_C2 read the rerun. The
+    documented form (C2_r2, the attempt's files left in place) would leave the queue refusing C2 and the analyzer
+    reading C2's partial files (the OPEN item e005w1_r2 already hit). The attempt's files are kept. Set__render,
+    lines, first 12 hex of sha256:
+    C2.guard.log 5f3b9f4dbf88; C2.log dab08486d80f; al__chat 64 4ce253e6c0ba; al__plain 64 f5cc4442267f
+    big__chat 576 51319aceb0d3; big__plain 576 ecb1c92557a3; cross__chat 384 522fa34e0bd7
+    cross__plain 384 ed63631f2e20; e004__chat 640 74df5384b814; e004__plain 640 d5583257c3b6
+    extra__chat 192 18d88b5ccd12; extra__plain 192 d30fa9404f31; gen_al__plain 0 e3b0c44298fc
+    gen_big__chat 576 061f16b7404e; gen_big__plain 576 6a22ac3202f5; gen_cont__plain 416 2c583a07b63c
+    gen_e004__chat 640 affea5301126; gen_e004__plain 640 6c5c4419533d; gen_h5l__chat 192 132ecfdeff94
+    gen_h5l__plain 192 305460a84a9c; h5l__chat 192 ddb4480bb3e9; h5l__plain 192 c86b04089a61
+    kbig__plain 441 225d30870b84; khard__plain 80 3ba0e260bc2d; new__chat 1728 49a524e03066
+    new__plain 1728 3bf49ecb7261; old__plain 1116 0a249e1780b3; uprobe__plain 576 f5eb8fc3c653
+    chat_template.jinja 872be49dbb63; config.json 0252916543d0; generation_config.json 2c44ce4e4765
+    model.safetensors 641b454dc62056da92b0bc7d8d185261f9c47cff25f01e16ecfd4c269284e4f9 (538,090,408 bytes; hashed
+    after the power loss, so a rerun weights_sha256 equal to it says the save survived and training reproduced; an
+    unequal one does not say which); tokenizer.json bf346d64f6f0; tokenizer_config.json 9b6f7008bcd6
+    The other jobs not finished cleanly. The 2026-09-26 06:03 power loss killed no GPU job (queue.txt 06:09:18: the
+    queue died waiting for gpu.lock after its checks; restarted 06:09:19 as run 20260926-060919). e005w1 (guard.json
+    exit -15, killed gpu_mem, 2026-09-26 12:04:57, before the allocator cap; partial: GEN e004/chat 286 of 640) was
+    rerun after the cap as e005w1_r2 (exit 0, not killed, 7,972 MiB) and logged in the entry above; nothing new is
+    done for it, its OPEN item stands, and the queue writes "GAP: e005w1" at every restart by its rule. Every other
+    guard.json in logs/ shows exit 0, not killed.
+    Sync. The working copy's code/*.py and *.sh already equal the Mac's (digest f3065d54f48b436a both) and
+    code_sha256_at_start_20260926-145559.txt. sync_e006.sh changes, besides notes.txt, corpus/stream_io.py and adds
+    corpus/neardedup_post*.py (3 files; commit 7e7c802, RC-12); no E004-E006 code imports them (replay_e006 imports
+    corpus/oodh and hygiene only, unchanged). After the sync every working-copy file's sha256 equals the Mac's.
+    Restart (10:25:07, run 20260927-102507; queue.txt has a hand line about the power loss at 10:25:06, as on
+    2026-09-26). code_sha256_at_start_20260927-102507.txt is byte-identical to _20260926-145559's. Step 0 on the PC:
+    ALL PASS (10:25-10:38, mutation_e006 and test_queue_e006 included); dry runs, base, the references, C1, P1, G1 and
+    their chat probes skipped as done; compare_dry ALL PASS; "GAP: e005w1" as expected; the analyses rewrote
+    readings up to after_G1 (10:40:33). From 10:40:33 C2 waits on gpu.lock (flock -w 7200; the queue retries up to 12
+    times) behind other GPU work; still waiting at 11:06, not yet started.

@@ -20,6 +20,16 @@ fi
 RUNNER="$PLANCK_HOME/repo/pc/wsl/queue_runner.py"
 
 echo "$(date "+%Y-%m-%dT%H:%M:%S%z") runner_start: boot (pid $$, uptime $(cut -d" " -f1 /proc/uptime 2>/dev/null || echo "?") s)" >> "$LOG"
+# Boot resume (RUNBOOK "RESUME AFTER A REBOOT"): restart the queues a reboot cut off, once per WSL boot, after a
+# 2-minute wait for the GPU driver. Detached, so the runner starts at once; nothing happens without ~/planck/boot.d.
+BOOT_RESUME="$PLANCK_HOME/boot.d/boot_resume.sh"
+if [ -f "$BOOT_RESUME" ]; then
+    if command -v setsid > /dev/null; then
+        setsid bash "$BOOT_RESUME" >> "$PLANCK_HOME/logs/boot_resume.log" 2>&1 < /dev/null &
+    else
+        bash "$BOOT_RESUME" >> "$PLANCK_HOME/logs/boot_resume.log" 2>&1 < /dev/null &
+    fi
+fi
 while true; do
     # shellcheck disable=SC2086  # RUNNER_ARGS is a word list on purpose
     python3 "$RUNNER" --home "$PLANCK_HOME" ${RUNNER_ARGS:-} >> "$LOG" 2>&1

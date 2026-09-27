@@ -185,6 +185,47 @@ STEP 11  Start the runner at boot                                        [CLAUDE
   The task has no time limit (the Windows default of 72 h would kill the runner), restarts
   every minute on failure, and keeps wsl.exe in the foreground (that keeps WSL alive).
 
+RESUME AFTER A REBOOT (boot.d, added 2026-09-27)                                [CLAUDE]
+  Why: the PC lost power at about 06:03 on Sep 26 and again on Sep 27 (notes.txt "POWER CUTS").
+  The runner came back with the boot task; the detached queues (E2, E006, RC-12) did not, and
+  the GPU sat idle until a session restarted them by hand.
+  What: runner_start.sh starts ~/planck/boot.d/boot_resume.sh detached whenever the task
+  starts (only if that file exists). Once per WSL boot it waits 2 min for the GPU driver, then
+  up to 10 min more until nvidia-smi reads a temperature (else it resumes nothing), then runs
+  each executable ~/planck/boot.d/NN_<name>.sh in name order. Each script restarts ONE queue
+  through that queue's own restart path, and only when all hold:
+    no stop file applies (below);  nothing of that queue runs (pgrep on its scripts and jobs);
+    the queue's own log shows its last run was CUT OFF: no line after the last start that
+    ends a run. A queue that finished, or stopped by its own rules, is left for a person.
+  The queues (source: pc/wsl/boot.d/; E003 runs on the Mac and is not here):
+    10_e2.sh    E2: the planck-kit copy of launch_e2.sh (newest bundle, plans/CURRENT). If it
+                never reaches the queue (no bundle, no cmd.exe interop in the boot session),
+                queue_e2.sh from the interrupted run's ~/planck/qcode/<commit12> and plan.
+    20_e006.sh  E006: ~/planck/dev/e006/.../code/start_queue_e006.sh, after appending one
+                "boot resume:" line to logs/queue.txt. NOT resumed when a job was cut mid-run
+                (NAME.guard.log without NAME.guard.json): the guard refuses a job whose logs
+                exist, so the queue would stop there; E006's rule is a hand rerun as <tag>_r2.
+    30_rc12.sh  RC-12 dev baselines: Q_CODE=~/planck/dev/rc12_dg bash .../queue_dev_baselines.sh
+                (STEP 9c "Manual restart"). Edit CODE in the script when the queue moves.
+  Stop files: touch ~/planck/boot.d/STOP        nothing resumes
+              touch ~/planck/boot.d/<name>.STOP that queue does not (names: e2, e006, rc12)
+              ~/planck/STOP, ~/planck/PAUSE     also block every resume (STEP 5's update window)
+              ~/planck/logs/rc12_dev_queue.STOP (RC-12's own) blocks RC-12
+  To retire a queue: delete its NN_ script from ~/planck/boot.d (or chmod -x it).
+  Log: ~/planck/logs/boot_resume.log, one line per decision with its reason.
+  Look without starting anything:  bash ~/planck/boot.d/boot_resume.sh --dry-run
+  Resume by hand (e.g. after rm ~/planck/PAUSE): boot_resume.sh --now, started DETACHED:
+    pcdetach.sh a two-line script: exec >> ~/planck/logs/boot_resume.log 2>&1
+                                   bash ~/planck/boot.d/boot_resume.sh --now
+    (a plain SSH call would take the restarted queues down with its session).
+  Install or update (from the Mac):  pcsync.sh pc/wsl/boot.d bootd, then in WSL
+    cp -p ~/planck/dev/bootd/*.sh ~/planck/boot.d/  (NN_*.sh and boot_resume.sh executable).
+  The hook itself is in runner_start.sh, which the task runs from ~/planck/repo: it is live
+  only after that clone has it (commit, pc/mac/send_kit.sh, git -C ~/planck/repo pull ...).
+  A new queue: NN_<name>.sh on the pattern of the three (source bootlib.sh; blocked, running,
+  read the log, launch), with tests in pc/tests/test_boot_resume.py and mutants in
+  pc/tests/mutation_check.py (group boot).
+
 ---------------------------------------------------------------------------------------
 Daily use (all inside WSL, as U)
   queue a job     python3 ~/planck/repo/pc/wsl/add_job.py <job.json> [--as 040_name.json]
@@ -196,6 +237,7 @@ Daily use (all inside WSL, as U)
   hold the queue  touch ~/planck/PAUSE      (the running job continues; nothing new starts)
   stop now        touch ~/planck/STOP       (running job checkpoints, goes back to pending)
   resume          rm -f ~/planck/PAUSE ~/planck/STOP
+                  (detached experiment queues: boot_resume.sh --now, RESUME AFTER A REBOOT)
   a failed job    the reason is in status/jobs.jsonl; fix, then move it from queue/failed/
                   back to queue/pending/ (reset "attempts" in the file if it hit the limit)
 
@@ -221,5 +263,7 @@ Files in this kit
   wsl/jobq.py                job files, prereg check        wsl/heartbeat.py      status line
   wsl/sysinfo.py             disk and memory                wsl/add_job.py        queue a job
   wsl/jobs/*.json            example jobs                   mac/send_kit.sh       Mac to PC copy
-  tests/                     Mac tests (pytest) and mutation_check.py
+  wsl/boot.d/boot_resume.sh  boot-time dispatcher           wsl/boot.d/bootlib.sh shared checks
+  wsl/boot.d/NN_<name>.sh    one queue each (e2, e006, rc12); installed in ~/planck/boot.d
+  tests/                    Mac tests (pytest) and mutation_check.py
   notes.txt                  what was tested and what was not

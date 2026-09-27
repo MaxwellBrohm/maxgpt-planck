@@ -59,3 +59,48 @@ Design choices worth knowing
 Next
   PC session: RUNBOOK steps 1-11 in order. First measurements: verify_cuda.py, then the
   bench_micro jobs (020, 025), which replace PLAN.md's throughput estimates.
+
+BOOT RESUME (2026-09-27; RUNBOOK "RESUME AFTER A REBOOT")
+  Built: runner_start.sh starts ~/planck/boot.d/boot_resume.sh once per WSL boot; boot.d scripts for E2, E006 and
+  RC-12 resume a queue only when its own log shows the last run was cut off, nothing of it runs and no stop file
+  applies. Installed on the PC in ~/planck/boot.d (md5s equal to pc/wsl/boot.d). NOT live at boot until the PC's
+  ~/planck/repo has the new runner_start.sh (it was at 2d9c65e on 2026-09-27; pc/wsl had no other change since).
+  Mac: pc/tests/test_boot_resume.py, 40 tests (fake queues under tmp_path, pgrep scoped to the test's processes);
+  full pc/tests 101 passed. mutation_check.py --group boot: 20 / 20 killed (each read: the named test failed on
+  the broken claim, e.g. first_start_not_last -> "ended by itself" on a log whose last start was cut off).
+  PC, 2026-09-27 10:39 to 10:41 EDT, nothing real started:
+    simulation (/tmp/bootsim): the real E2, E006 and RC-12 logs cut back to their 06:03 state, fake queues for
+    every launch target, pgrep scoped to /tmp/bootsim (so the running queues look gone, as after a reboot).
+    --dry-run: all three "cut off" (E2 last start line 1, E006 run 20260926-145559, RC-12 last line 05:34:39
+    waiting for the lock), 0 started. Boot mode: all three fakes started, each in its own session (setsid:
+    sid = pid), the E006 note appended to the copy of queue.txt. Boot mode again: "already ran in this WSL
+    boot". --now while the fakes ran: 3 x "running: nothing to do".
+    live (real home, real pgrep, all three queues running since 10:21 to 10:25): --dry-run, each script in real
+    mode, and --now: 9 x "running ... nothing to do"; E006 queue.txt 127 lines before and after; 4 queue
+    processes before and after.
+  Not tested: a real reboot. Open questions for the first one: whether cmd.exe interop works in the S4U boot
+  session (launch_e2.sh needs it for the Windows user name; 10_e2.sh falls back to the interrupted checkout if
+  not), and that the 2 min wait covers the GPU driver (the script waits up to 10 more minutes for nvidia-smi).
+
+POWER CUTS AT 06:03 (read 2026-09-27, Windows event logs over SSH, WSL journal, the Mac's pmset log; nothing changed)
+  PC: Kernel-Power 41 at boot on Sep 26 (OS start 06:04:05) and Sep 27 (06:03:18), BugcheckCode 0, PowerButton-
+  Timestamp 0, SleepInProgress 0; no 1074 / 6006 / 109 before either (not a planned or update restart, not a
+  bugcheck). The 6008 "previous shutdown" times (05:44:03, 05:24:15) are stale stamps: the PC was working later.
+  WSL journal: last entries of the cut boots 2026-09-26 06:02:58 and 2026-09-27 06:02:49; on Sep 26 a job wrote
+  ~/planck/logs/mem4.log at 06:03:29.8. The repeating "UtilAcceptVsock ... abnormally long accept" lines run at a
+  flat ~2,880 per hour all night: background noise, not a warning.
+  Mac (same house power): on battery 2026-09-26 06:03:40 to 06:03:44 and 2026-09-27 06:02:56 to 06:03:00. The PC's
+  OS started 21 s and 18 s after the Mac's AC came back, both days: a POST after power returned.
+  Nothing scheduled explains it: no wake timers; no Windows Update install or restart near 06:00 (update restarts
+  were Sep 9 and Sep 15 at about 01:30); tasks near 06:00 are small Windows maintenance (CEIP Consolidator ran
+  06:00:01 on Sep 27; RegisterDevicePeriodic24 has a 06:00 trigger); WSL timers and cron.daily fall at 06:19 to
+  06:25, after the cut. ASUS software present (Armoury Crate, ROG Live, AsusFanControl; tasks \ASUS\AcPower-
+  Notification and P508PowerAgent_sdk start at boot); no timed power-off is visible, and no software on the PC
+  could take the Mac off AC. Board ROG STRIX Z790-E GAMING WIFI, BIOS 3107; Windows sees no battery or UPS.
+  Conclusion: a short outage (about 4 s) of the power both machines share, at about 06:03 two mornings running.
+  The PC coming back on its own means the board powers on when AC returns. Fixes are physical (Max): a UPS on
+  the PC (a small one rides through seconds), or find what switches at 06:00 on that circuit (a timer or smart
+  plug, a thermostat or HVAC schedule, another appliance). Not every Mac AC drop is an outage: 2026-09-26 03:15:35
+  (4 s) and 2026-09-22 04:46:44 (1 s) did not reboot the PC.
+  Seen in passing, not changed: Windows Update active hours read 8 to 1 (RUNBOOK STEP 5 says 06:00 to 23:00) and
+  the UX\Settings key shows no pause expiry.
