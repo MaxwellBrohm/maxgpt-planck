@@ -16,7 +16,7 @@ class Ctx:
     def __init__(self, skel, turn_texts, built=None, wordlist=None):
         self.skel = skel
         self.by_i = {t["i"]: t for t in skel["turns"]}
-        self.text = dict(turn_texts)
+        self.text = {i: straight(s) for i, s in turn_texts.items()}
         self.built = built
         self.wordlist = wordlist
         self.lower_user = skel["user"]["style"] == "lowercase"
@@ -25,6 +25,7 @@ class Ctx:
         self.uname = R.user_name(skel)
         self.events = {e["id"]: e for e in skel["events"]}
         self.first = first_scheduled(skel)
+        self.values = event_values(skel)
 
     def turns(self, role=None, mode=None):
         """(spec, text) for every parsed turn, filtered by role and mode."""
@@ -39,9 +40,21 @@ class Ctx:
         if s is None:
             return False
         rx = golds.value_re(v)
-        if self.lower_user and self.by_i[i]["role"] == "user":
+        user = self.by_i[i]["role"] == "user"
+        if self.lower_user and user:
             rx = value_re_i(v)
-        return bool(rx.search(s))
+        if rx.search(s):
+            return True
+        return user and self.det_swap(i, v, s)
+
+    def det_swap(self, i, v, s):
+        """a user turn may say "my X" for a required "the X" and back (REQ_SPAN audit, 2026-09-27), but only for a
+        referring expression of that turn that is not itself a value: "your X" and slot values stay exact."""
+        m = re.match(r"(the|my) (.+)$", v)
+        if not m or v not in self.by_i[i]["must_include"] or v in self.values:
+            return False
+        alt = ("my " if m.group(1) == "the" else "the ") + m.group(2)
+        return bool(value_re_i(alt).search(s))
 
     def answer_turn(self, e):
         return e["turns"].get("answer")
@@ -60,20 +73,47 @@ def ngrams(ws, n):
     return [tuple(ws[i:i + n]) for i in range(len(ws) - n + 1)]
 
 
+QUOTES = str.maketrans({"\u2018": "'", "\u2019": "'", "\u201a": "'", "\u201b": "'", "\u2032": "'", "\u02bc": "'",
+                        "\u201c": '"', "\u201d": '"', "\u201e": '"', "\u201f": '"', "\u2033": '"'})
+
+
+def straight(s):
+    """curly quotes and apostrophes to straight ones, one character for one (so offsets hold). The checks read the
+    straight form: the lexicons are written with "'" and Ministral writes U+2019 in almost every output (audit)."""
+    return s.translate(QUOTES) if s else s
+
+
+STEM_SUFFIXES = ("iness", "ingly", "edly", "ness", "ment", "ied", "ily", "ing", "ly", "ed", "er", "y", "e")
+
+
 def stem(w):
-    """crude suffix stripper for the OFFTOPIC overlap: chews/chewing -> chew, worried/worry -> worry."""
+    """suffix stripper for the OFFTOPIC overlap, applied the same way to both sides: the plural first (holidays ->
+    holiday, worries -> worry, boxes -> box), then one suffix with a stem of 3+ letters left, then a doubled final
+    consonant undoubled. noisy/noise -> nois, saving/save -> sav, worried/worry -> worr, running/runs -> run."""
     w = w.strip("'")
     if w.endswith("'s"):
         w = w[:-2]
-    for suf, rep, min_len in (("ies", "y", 5), ("ied", "y", 5), ("ing", "", 6), ("ed", "", 5), ("es", "", 5),
-                              ("s", "", 4)):
-        if len(w) >= min_len and w.endswith(suf) and not w.endswith("ss"):
-            return w[: -len(suf)] + rep
+    if len(w) > 4 and w.endswith("ies"):
+        w = w[:-3] + "y"
+    elif len(w) > 4 and w.endswith("es") and w[:-2].endswith(("s", "x", "z", "ch", "sh")):
+        w = w[:-2]
+    elif len(w) >= 4 and w.endswith("s") and not w.endswith("ss"):
+        w = w[:-1]
+    for suf in STEM_SUFFIXES:
+        if len(w) - len(suf) >= 3 and w.endswith(suf):
+            w = w[:-len(suf)]
+            break
+    if len(w) >= 4 and w[-1] == w[-2] and w[-1] not in "lsz":
+        w = w[:-1]
     return w
 
 
+GENERIC_STEMS = {stem(w) for w in L.GENERIC}
+
+
 def content(s):
-    return {stem(w) for w in words(s) if w not in L.STOPWORDS and len(w) > 2}
+    """stemmed content words for the OFFTOPIC overlap: no stopwords, no topic-neutral words (lexicons.GENERIC)."""
+    return {stem(w) for w in words(s) if w not in L.STOPWORDS and len(w) > 2} - GENERIC_STEMS
 
 
 def sentences(s):

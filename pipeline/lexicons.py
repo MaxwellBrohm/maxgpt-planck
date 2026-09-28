@@ -16,6 +16,12 @@ who whom whose when where why how all any some each every both few more most oth
 go going gone make made let lets like one ok okay oh hi hey hello sure thanks thank please really much many way
 thing things something anything nothing lot bit maybe yeah yep""".split())
 
+# topic-neutral conversational words that OFFTOPIC ignores on both sides (2026-09-27): a reply swapped in from a
+# chat on another topic passed on "help", "sound", "start" or "new" alone
+GENERIC = set("""help sound think feel try keep start new good great nice morning day time idea love enjoy fun happy
+glad hope want need use look know see tell say ask talk chat question tip little big small easy hard sure lot best
+way""".split())
+
 FUNCTION_WORDS = set("""the a an and or but to of in on at for with is are was were be it i you my your we they
 that this what how do does did not can so if have has had me our their there here just""".split())
 
@@ -36,10 +42,14 @@ HEDGE_RE = _alt([r"you haven't (?:told|mentioned|said|shared)", r"you have not (
                  r"you didn't (?:tell|mention|say|share)", r"you did not (?:tell|mention|say)",
                  r"you never (?:told|mentioned|said)", r"i don't know", r"i do not know", r"not sure",
                  r"hasn't come up", r"has not come up", r"didn't come up", r"no idea", r"haven't heard",
-                 r"i don't think you've", r"don't think you (?:told|mentioned|said)", r"not something you've"])
+                 r"i don't think you've", r"don't think you (?:told|mentioned|said)", r"not something you've",
+                 # audit 2026-09-27: the guidance's own wording and its close forms were read as no hedge
+                 r"(?:was|wasn't|was not|has not been|hasn't been|haven't been) mentioned",
+                 r"(?:we|you) (?:did not|didn't|have not|haven't) (?:mention|talk about|discuss)(?:ed)?",
+                 r"no record"])
 OFFER_RE = _alt([r"tell me", r"let me know", r"what is it", r"what's (?:it|its|their|his|her|the)",
                  r"want to share", r"like to share", r"i can (?:note|remember|keep)", r"i'll (?:note|remember|keep)",
-                 r"share it", r"fill me in"])
+                 r"share it", r"fill me in", r"(?:let me|i will|i'll|i can) (?:make a )?note", r"note (?:it|that) down"])
 
 # ---- lookup (LOOKUP_EMPTY, LOOKUP_UNNEEDED) -----------------------------------------------------------------------
 NOT_FOUND_RE = _alt([r"couldn't find", r"could not find", r"can't find", r"cannot find", r"not found",
@@ -52,7 +62,11 @@ TAG_RE = re.compile(r"<\s*/?\s*(?:lookup|result)\s*>", re.I)
 
 # ---- role swap denial (S6 role_swap) ------------------------------------------------------------------------------
 DENY_RE = _alt([r"don't have", r"do not have", r"haven't got", r"of my own", r"i'm an assistant",
-                r"i am an assistant", r"not something i have", r"i don't really have", r"no .{1,20} for me"])
+                r"i am an assistant", r"not something i have", r"i don't really have", r"no .{1,20} for me",
+                # audit 2026-09-27: denials the list missed (after quote normalization)
+                r"(?:i'm|i am) just an assistant", r"an assistant (?:doesn't|does not)",
+                r"i (?:don't|do not) (?:eat|own|collect)",
+                r"i have no (?:favou?rite \w+|hobb(?:y|ies)|job|pets?|family|home|name)"])
 
 # ---- first-person self claims outside the card (SELF_CLAIM), by must_not category ----------------------------------
 SELF_CLAIM = {

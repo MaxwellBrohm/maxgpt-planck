@@ -5,6 +5,7 @@ import re
 import lexicons as L
 import parse
 import pools as P
+import topic_words as TW
 from banks_keys import KEYS
 from check_base import content, sentences, mentioned, value_re_i
 
@@ -37,6 +38,7 @@ def chk_perspective(ctx):
             if rx.search(s):
                 out.append(("PERSPECTIVE", t["i"], rx.search(s).group(0)))
                 break
+    out += _user_perspective(ctx)
     for e in ctx.skel["events"]:
         i = e["turns"].get("answer")
         if e["kind"] == "S6" and e["params"]["variant"] == "role_swap" and i in ctx.text:
@@ -48,6 +50,28 @@ def chk_perspective(ctx):
             if not L.DENY_RE.search(ctx.text[i]):
                 out.append(("ANSWER_WRONG", i, f"{e['id']} no denial"))
     return out
+
+
+def own_nouns(skel):
+    """what the user owns and names with a noun: slot nouns of user slots, the user's persons, list names."""
+    ns = {s["noun"] for s in skel["slots"].values() if s["owner"] != "assistant" and s.get("noun")}
+    ns |= {p["relation"] for p in skel["persons"].values()}
+    ns |= {e["params"]["list_name"] for e in skel["events"] if e["params"].get("list_name")}
+    return sorted(ns, key=len, reverse=True)
+
+
+def _user_perspective(ctx):
+    """PERSPECTIVE on a guided user turn: the user calls one of their own things "your X" (the guidance's second
+    person copied into the line: "what is last on your shopping list?"). The role-swap question asks about the
+    assistant's own thing on purpose and is exempt."""
+    swap_q = {e["turns"].get("query") for e in ctx.skel["events"]
+              if e["kind"] == "S6" and e["params"].get("variant") == "role_swap"}
+    ns = own_nouns(ctx.skel)
+    if not ns:
+        return []
+    rx = re.compile(r"(?<![A-Za-z])your (?:" + "|".join(re.escape(n) for n in ns) + r")(?![A-Za-z])", re.I)
+    return [("PERSPECTIVE", t["i"], rx.search(s).group(0)) for t, s in ctx.turns(role="user", mode="guided")
+            if t["i"] not in swap_q and rx.search(s)]
 
 
 def chk_self_claim(ctx):
@@ -83,27 +107,35 @@ def chk_persist(ctx):
     return out
 
 
+def topic_set(text):
+    """stemmed content words of a topic text plus its topic word set (topic_words, FAKE until the bank pass)."""
+    return content(text) | content(" ".join(TW.related(text)))
+
+
 def chk_offtopic(ctx):
+    """OFFTOPIC: a guided topic turn shares no stemmed content word with what it should be about. A user topic turn
+    may pick up its topic or the assistant's last reply; an assistant filler reply may pick up any topic of the chat
+    or the user's last line (audit 2026-09-27: synonyms and replies to the previous turn were read as off topic)."""
     out, topics = [], ctx.skel["topic_text"]
-    all_topic = set().union(*(content(x) for x in topics.values()))
-    prev_user = None
+    all_topic = set().union(*(topic_set(x) for x in topics.values()))
+    prev_user = prev_assist = None
     for t in ctx.skel["turns"]:
         s = ctx.text.get(t["i"])
+        it = t["intent"] or ""
+        want = None
+        if s is not None and t["mode"] == "guided":
+            if t["role"] == "user" and it.startswith("topic:"):
+                want = topic_set(topics[it.split(":")[1]]) | content(prev_assist or "")
+            elif t["role"] == "user" and it == "open the chat about the topic":
+                want = topic_set(topics[ctx.skel["topic_path"][0]])
+            elif t["role"] == "assistant" and it.split(";")[0] in FILLER_ASSIST:
+                want = all_topic | content(prev_user or "")
+        if want is not None and not content(s) & want:
+            out.append(("OFFTOPIC", t["i"], it[:30]))
         if t["role"] == "user":
             prev_user = s
-        if s is None or t["mode"] != "guided":
-            continue
-        it = t["intent"] or ""
-        if t["role"] == "user" and it.startswith("topic:"):
-            want = content(topics[it.split(":")[1]])
-        elif t["role"] == "user" and it == "open the chat about the topic":
-            want = content(topics[ctx.skel["topic_path"][0]])
-        elif t["role"] == "assistant" and it.split(";")[0] in FILLER_ASSIST:
-            want = all_topic | content(prev_user or "")
-        else:
-            continue
-        if not content(s) & want:
-            out.append(("OFFTOPIC", t["i"], it[:30]))
+        elif t["role"] == "assistant" and not t.get("lookup_call"):
+            prev_assist = s
     return out
 
 

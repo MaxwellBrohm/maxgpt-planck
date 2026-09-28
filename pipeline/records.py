@@ -7,6 +7,7 @@ accepted: ids, pass R0, system text, turns [{role, text, mask, author, spans}], 
   Apache-2.0 (D8, LICENSE), and RC-12 decontamination has not run (DECON_PENDING).
 reject: skel_id, attempt, primary code, all codes, the first failing line, hits, teacher, finish reason, the raw
   teacher text (for measuring checker false rejects in the pilot)."""
+import re
 import time
 
 import golds
@@ -21,12 +22,14 @@ def est_tokens(turns):
     return round(sum(len(t["text"].split()) for t in turns) * TOKENS_PER_WORD)
 
 
-def spans(text, slots):
+def spans(text, slots, fold=False):
+    """slot value spans; fold=True matches without case (a lowercase-style user's turns write values in lowercase)."""
     out = []
     for sid, s in slots.items():
         if not s.get("value"):
             continue
-        for m in golds.value_re(s["value"]).finditer(text):
+        rx = golds.value_re(s["value"])
+        for m in (re.compile(rx.pattern, re.I) if fold else rx).finditer(text):
             out.append({"start": m.start(), "end": m.end(), "slot_id": sid, "type": s["type"]})
     return sorted(out, key=lambda x: (x["start"], x["end"]))
 
@@ -59,11 +62,13 @@ def teacher_meta(client, call, built, seed):
 def accepted(skel, built, res, call, attempt, teacher, turns, dedup_keys=None):
     """turns = checker.record_turns(skel, res) (exact lines stored as the bank line itself)."""
     by_i = {t["i"]: t for t in skel["turns"]}
+    lower = skel["user"].get("style") == "lowercase"
     out_turns = []
     for i, t in enumerate(turns):
         st = by_i[i]
         out_turns.append({"role": t["role"], "text": t["text"], "mask": t["mask"],
-                          "author": author(st, teacher["model"]), "spans": spans(t["text"], skel["slots"])})
+                          "author": author(st, teacher["model"]),
+                          "spans": spans(t["text"], skel["slots"], fold=st["role"] == "user" and lower)})
     notes = {str(t["i"]): t["gold_note"] for t in skel["turns"] if t.get("gold_note")}
     reasons = blocked(skel, built, teacher)
     return {

@@ -1,10 +1,13 @@
 """Turn a placed Ctx into the skeleton JSON of SPEC section 2: opening, closing and filler turns, leak windows as
 must_exclude, S4 rule constraints, S7 abstain candidates, global turn indices (lookup call and tool turns
 inserted), word bounds per register and style, required words, gold notes, provenance and the gate hash."""
+import re
+
 import banks as B
 import golds
 import heldout
 import pools as P
+import topic_words as TW
 from events_base import Fail, bank_options
 
 REGISTERS = {"RS": {"user": (3, 20), "assistant": (3, 25)}, "RM": {"user": (3, 25), "assistant": (3, 30)},
@@ -12,6 +15,12 @@ REGISTERS = {"RS": {"user": (3, 20), "assistant": (3, 25)}, "RM": {"user": (3, 2
 TOKENS_PER_WORD = 1.3
 HARD_CAP_TOKENS = 1800
 MUST_NOT = ["plans", "family", "body", "past", "preferences", "places"]
+# assistant turns that talk about a topic: the only turns that get a required word (audit 2026-09-27: on ack, list,
+# name, rule and abstain turns the FAKE words were missed 25-37% of the time or forced into invented self claims)
+TOPIC_TURNS = ("greet back and engage with the topic", "reply on the topic", "respond helpfully on the first topic",
+               "respond on the second topic", "say goodbye briefly")
+REQ_MIN_W = 10    # no required word under a tighter cap (an 8-word rule: Qwen already overshot it in the audit)
+TERSE_TOPIC_EXTRA = 6
 
 
 def _words(s):
@@ -21,17 +30,21 @@ def _words(s):
 def fill_frame(ctx, info):
     """opening, closing and fillers on the free user turns, split across the topic path in order."""
     rng = ctx.rng
+    ctx.topic_text = info["topic_text"]
     if 0 in ctx.free:
         topic_text = info["topic_text"][info["topic_path"][0]]
         bank = "open.topic" if rng.random() < 0.7 else "open.greet"
+        # openings and closings are bank lines (2026-09-27): guided ones came back as the guidance itself ("open the
+        # chat about ...", "say goodbye") or one-word goodbyes; a bare greeting gets a greeting back, not a topic
         ctx.user(0, "opening", "opening", bank_options(bank), {"t": topic_text}, "open the chat about the topic",
-                 [], exact=None)
+                 [], exact=True)
         ctx.uturn[0]["events"] = []
-        ctx.aturn[0] = {"intent": "greet back and engage with the topic", "must_include": [], "must_exclude": [],
-                        "mask": 0, "events": [], "lookup": None}
+        ctx.aturn[0] = {"intent": "greet back and engage with the topic" if bank == "open.topic" else
+                        "greet the user back", "must_include": [], "must_exclude": [], "mask": 0, "events": [],
+                        "lookup": None}
     last = ctx.T - 1
     if info["closing"] == "goodbye" and last in ctx.free:
-        ctx.user(last, "closing", "closing", bank_options("close.goodbye"), {}, "say goodbye", [])
+        ctx.user(last, "closing", "closing", bank_options("close.goodbye"), {}, "say goodbye", [], exact=True)
         ctx.uturn[last]["events"] = []
         ctx.aturn[last] = {"intent": "say goodbye briefly", "must_include": [], "must_exclude": [], "mask": 0,
                            "events": [], "lookup": None}
@@ -69,13 +82,19 @@ def apply_windows(ctx):
 def build_turns(ctx, reg, style):
     ulo, uhi = REGISTERS[reg]["user"]
     alo, ahi = REGISTERS[reg]["assistant"]
+    reg_uhi = uhi
     if style == "terse":
         uhi = min(uhi, 10)
     turns, index = [], {}
     for k in range(ctx.T):
         u = ctx.uturn[k]
+        hi = uhi
+        if style == "terse" and u["mode"] == "guided" and (u["intent"] or "").startswith("topic:"):
+            # a terse user still names the topic (OFFTOPIC wants it): room for the topic phrase plus a few words
+            n = len(ctx.topic_text[u["intent"].split(":")[1]].split())
+            hi = min(reg_uhi, max(uhi, n + TERSE_TOPIC_EXTRA))
         t = dict(i=len(turns), role="user", mode=u["mode"], text=u["text"], bank_ref=u["bank_ref"],
-                 intent=None if u["mode"] == "exact" else u["intent"], min_w=ulo, max_w=uhi,
+                 intent=None if u["mode"] == "exact" else u["intent"], min_w=ulo, max_w=hi,
                  must_include=u["must_include"], must_exclude=sorted(set(u["must_exclude"])), events=u["events"],
                  mask=0, gold_note=None, role_in_event=u["role"])
         if u["text"]:
@@ -140,17 +159,7 @@ def finish(skel, ctx):
             if e["params"]["key"] == "user_name" and any(x["key"] == "nickname" for x in skel["slots"].values()):
                 raise Fail("abstain on the name after a call-me rule")
             t["must_exclude"] = sorted(set(t["must_exclude"]) | set(e["gold"]["candidates"]))
-    rng = ctx.rng
-    rw = {}
-    for part in ("noun", "verb", "adj"):
-        cands = [w for w in P.pool("req_" + part).values if w not in ctx.used]
-        rw[part] = rng.choice(cands)
-    fill = [t["i"] for t in skel["turns"] if t["role"] == "assistant" and not t["events"] and t["mode"] == "guided"]
-    other = [t["i"] for t in skel["turns"] if t["role"] == "assistant" and t["mode"] == "guided" and t["i"] not in fill]
-    hint = rng.sample(fill, min(3, len(fill)))
-    hint += rng.sample(other, min(3 - len(hint), len(other)))
-    rw["turn_hint"] = sorted(hint)
-    skel["required_words"] = rw
+    skel["required_words"] = required_words(skel, ctx)
     for i, note in golds.notes(skel).items():
         by_i[i]["gold_note"] = note
     est = sum(t["max_w"] for t in skel["turns"]) * TOKENS_PER_WORD
@@ -161,6 +170,47 @@ def finish(skel, ctx):
     vtypes = {s["type"] for s in skel["slots"].values()} | {"topic", "relation", "plan", "object", "pet_kind",
                                                             "req_noun", "req_verb", "req_adj", "entity_kind"}
     skel["provenance"] = {"banks": [B.bank_ref()], "pools": P.provenance_refs(vt for vt in vtypes if vt in P.POOLS),
-                          "personas": "FAKE", "fake": True}
+                          "personas": "FAKE", "topic_words": TW.PROVENANCE, "fake": True}
     skel["heldout_gate"] = heldout.gate_hash()
     skel["rc12"] = heldout.RC12_STATUS
+
+
+def _turn_topic(skel, t):
+    """the topic an assistant turn talks about: the topic of the user turn before it, else the first topic."""
+    prev = next((u for u in reversed(skel["turns"][:t["i"]]) if u["role"] == "user"), None)
+    it = (prev or {}).get("intent") or ""
+    tid = it.split(":")[1] if it.startswith("topic:") else skel["topic_path"][0]
+    return skel["topic_text"][tid]
+
+
+def _taken(skel, ctx):
+    """words a required word must not be: every value, noun and list name of the chat, every word of every slot pool
+    (a pool word used early would read as a value: VALUE_EARLY, DIST_LEAK), and the topic texts' own words."""
+    ws = set(ctx.used) | {w for s in skel["slots"].values() for w in re.findall(r"[a-z']+", (s.get("noun") or "").lower())}
+    for e in skel["events"]:
+        ws |= set(re.findall(r"[a-z']+", " ".join(str(v) for v in e["params"].values()).lower()))
+    for vt, pool in P.POOLS.items():
+        if not vt.startswith("req_") and vt != "topic":
+            ws |= {w for v in pool.values for w in v.lower().split()}
+    ws |= {w for x in skel["topic_text"].values() for w in x.lower().split()}
+    return ws
+
+
+def required_words(skel, ctx):
+    """noun, verb, adj for up to three topic turns (TOPIC_TURNS, cap REQ_MIN_W+), in turn order, each word drawn
+    from the topic word set (topic_words, FAKE) of the topic its turn talks about; the old FAKE word pools are the
+    fallback when a set has nothing left. Fewer topic turns place fewer words: turn_hint lists the placed ones and
+    check_text.chk_req_word requires only those."""
+    rng = ctx.rng
+    ok = [t for t in skel["turns"] if t["role"] == "assistant" and t["mode"] == "guided"
+          and (t["intent"] or "").split(";")[0] in TOPIC_TURNS and t["max_w"] >= REQ_MIN_W]
+    hint = sorted(rng.sample(ok, min(3, len(ok))), key=lambda t: t["i"])
+    taken, rw = _taken(skel, ctx), {}
+    for n, part in enumerate(("noun", "verb", "adj")):
+        topic = _turn_topic(skel, hint[n]) if n < len(hint) else skel["topic_text"][skel["topic_path"][0]]
+        cands = [w for w in TW.words(topic, part) if w not in taken and w not in rw.values()
+                 and w not in TW.NOT_REQUIRED]
+        cands = cands or [w for w in P.pool("req_" + part).values if w not in ctx.used and w not in rw.values()]
+        rw[part] = rng.choice(cands)
+    rw["turn_hint"] = [t["i"] for t in hint]
+    return rw

@@ -13,24 +13,33 @@ KEY_PHRASE = {"user_name": "your name", "home_city": "the city you live in", "jo
               "plan_city": "which city your {o} is in", "plan_time": "what time your {o} starts",
               "item_colour": "the colour of the {o} you bought", "person_name": "your {o}'s name",
               "person_city": "where your {o} lives", "person_job": "what your {o} does for work"}
-LIST_Q = {"first": "ask what is first on your {L}", "last": "ask what is last on your {L}",
-          "ordinal": "ask what is {arg} on your {L}", "count": "ask how many things are on your {L} now",
-          "contains": "ask whether {arg} is still on your {L}",
-          "other": "say {arg} is done and ask what the other one on your {L} was"}
-LIST_OP = {"add": "add {v} to your {L}", "remove": "take {v} off your {L}", "move_first": "move {v} to the top of your {L}",
-           "move_last": "move {v} to the end of your {L}"}
+# list guidance says "the {L}", never "your {L}": the teachers copy the guidance's second person into the user line
+# ("what is last on your shopping list?", 2026-09-27 audit), which check_behav now rejects as PERSPECTIVE
+LIST_Q = {"first": "ask what comes first on the {L}", "last": "ask what comes last on the {L}",
+          "ordinal": "ask what is {arg} on the {L}", "count": "ask how many things the {L} has now",
+          "contains": "ask whether {arg} is still on the {L}",
+          "other": "say {arg} is done and ask what the other one on the {L} was"}
+LIST_OP = {"add": "add {v} to the {L}", "remove": "take {v} off the {L}", "move_first": "move {v} to the top of the {L}",
+           "move_last": "move {v} to the end of the {L}"}
 RULE = {"max_words": "request a rule: replies of at most {word} words",
         "one_sentence": "request a rule: one sentence per reply",
-        "end_question": "request a rule: a question mark at the end of each reply",
+        "end_question": "request a rule: every reply finishes by asking something",
         "call_user": "request a rule: the assistant calls you {name}",
         "avoid_word": "request a rule: no {word} in replies",
         "start_name": "give your name, {name}, and request a rule: each reply opens with that name"}
 SOCIAL = {"greeting": "say hello", "how_are_you": "ask how the assistant is doing", "thanks": "thank the assistant",
           "goodbye": "say goodbye", "who_are_you": "ask who you are talking to"}
-ASSIST = {"answer with the value first": "answer, starting the reply with the answer itself",
-          "answer with the value after a short lead in": "answer, with a few words before the answer",
-          "answer from the list": "answer from the list as it is now",
+ONLY_ANSWER = "; no other value"
+ASSIST = {"answer with the value first": "answer, starting the reply with the answer itself" + ONLY_ANSWER,
+          "answer with the value after a short lead in": "answer, with a few words before the answer" + ONLY_ANSWER,
+          "answer from the list": "answer from the list as it is now" + ONLY_ANSWER,
+          "answer from what the user said, without a lookup": "answer from what the user said, without a lookup"
+                                                              + ONLY_ANSWER,
+          "answer with the looked up value": "answer with the looked up value" + ONLY_ANSWER,
           "greet back and engage with the topic": "greet the user back and pick up the topic",
+          "greet the user back": "greet the user back briefly; the user has not named a topic yet",
+          "acknowledge the change": "acknowledge the change in one short sentence",
+          "acknowledge the list": "acknowledge the list in one short sentence",
           "reply on the topic": "reply to what the user just said", "react briefly": "react briefly",
           "respond helpfully on the first topic": "reply helpfully to what the user just said",
           "respond on the second topic": "reply to what the user just said"}
@@ -57,6 +66,21 @@ def _op_slot(skel, e, t):
 
 def _topic_text(skel, tid):
     return skel["topic_text"].get(tid, "the topic")
+
+
+def _op(skel, e, t):
+    """the op this turn states, if any."""
+    for op in (e["params"].get("ops", []) if e else []):
+        if e["turns"].get(op["turn"]) == t["i"]:
+            return op
+    return None
+
+
+def _ask_back(slot):
+    """first-person, unambiguous ask-back (audit: "ask the assistant your favourite colour" came back as a question
+    about the assistant's own favourite colour)."""
+    ph = phrase(slot)
+    return "ask the assistant to remind you " + (ph if ph.split()[0] in ("which", "what", "where") else "of " + ph)
 
 
 def user_guidance(skel, t):
@@ -93,7 +117,9 @@ def user_guidance(skel, t):
     if it.startswith("state ") and slot:
         return f"tell the assistant {phrase(slot)}"
     if it.startswith("correct ") and slot:
-        return f"correct what you said before about {phrase(slot)}"
+        op = _op(skel, e, t)
+        new = f": it is {op['value']} now" if op and op.get("value") else ""
+        return f"correct what you said before about {phrase(slot)}{new}"
     if it == "ask for a recap":
         return "ask the assistant to sum up what you have told it"
     if it.startswith("ask for the ") and it.endswith(" name"):
@@ -106,7 +132,7 @@ def user_guidance(skel, t):
         return "ask about " + p.get("ref_expr", "it") + " as if you had said it before"
     if it.startswith("ask for "):
         q = p.get("queried") or p.get("slot")
-        return f"ask the assistant {phrase(skel['slots'][q])}, without saying the answer" if q else it
+        return f"{_ask_back(skel['slots'][q])}, without saying the answer" if q else it
     if it == "go back to the first topic":
         return "steer the chat back to the first topic"
     if it == "ask about the entity":
@@ -122,6 +148,14 @@ def assistant_guidance(skel, t):
     it = t["intent"]
     base, _, tail = it.partition("; ")
     text = ASSIST.get(base, base)
+    if base == "answer with the value first" and any(r["verifier"] == "start_name" for r in t.get("rules", [])):
+        text = "answer, with the answer right after the name the reply starts with" + ONLY_ANSWER
+    elif base == "acknowledge briefly":
+        text = "acknowledge in one short sentence" + ("" if t["must_include"] else ", not repeating the value")
+    elif base == "pick the first topic back up and name it" and t["must_include"]:
+        text = f"go back to what was said before the detour and name {t['must_include'][0]} in the reply"
+    elif base.startswith("recap, but state"):
+        text = base + ", and name no other value"
     if tail:
         text += "; " + tail
     return text

@@ -26,6 +26,23 @@ def plan(skel):
     return [(ROLE_LETTER[t["role"]] + str(t["i"] + 1), t["i"], t["role"]) for t in skel["turns"]]
 
 
+def exact_text(skel, t):
+    """the form of an exact line the teacher is shown and the record stores: the bank line itself, lowercased on the
+    user turns of a lowercase-style user (D1, 2026-09-27: lowercase is a user style, so the user's copied lines
+    follow it; the assistant and tool lines never change). A structured-output literal must use this form."""
+    if t["role"] == "user" and skel["user"].get("style") == "lowercase":
+        return t["text"].lower()
+    return t["text"]
+
+
+def exact_ok(skel, t, s):
+    """EXACT_MISMATCH test: s equals exact_text after normalize; case is folded on a lowercase-style user's own
+    lines only (D1: the case there is the user's style, not the skill; assistant and tool lines stay case-exact)."""
+    a, b = normalize(s), normalize(exact_text(skel, t))
+    fold = t["role"] == "user" and skel["user"].get("style") == "lowercase"
+    return a.lower() == b.lower() if fold else a == b
+
+
 def normalize(s):
     """NFKC, straight quotes, collapsed whitespace: the EXACT_MISMATCH comparison form."""
     s = unicodedata.normalize("NFKC", s)

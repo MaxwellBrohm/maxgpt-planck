@@ -93,7 +93,7 @@ tools/gemma_chat.py, experiments/E004_general_updating/code (read-only). No mode
   topics, intents     teacher-written everyday topics (several thousand) and per-topic filler intents
   personas            Nemotron-Personas-USA, CC-BY-4.0, gpt-oss-120b (Q2 yes): prompt seeds only; PERSONA_LEAK
                       rejects any 8-gram shared between persona text and a render
-  required words      noun/verb/adj from the controlled word list (computed from our allowed corpora; FAKE until then)
+  required words      noun/verb/adj from the controlled word list, fitted to the topic of the turn they go on (13)
   lookup KB           program-built fictional entities (nonce names), attribute labels from a teacher-written list
   bank lines          teacher-written user event lines with {slot} holes, ref expressions, markers, openings,
                       closings, rule phrasings, return lines, RH wrappers; each line used at most 50 times per 100k
@@ -116,10 +116,11 @@ tools/gemma_chat.py, experiments/E004_general_updating/code (read-only). No mode
     e) script: one line per turn: "U3 [exact]: <text>" (copy exactly), or "A3 [4-18 words; must include: X;
        must not include: Y]: <intent>"; tool turns are given complete and must be copied;
     f) output format: exactly the planned labels in order, one per line, "U1: ...", "A1: ...", ..., then "END".
+  Since 2026-09-27: rules block and worked example after the script, no user name on the card, D1 (section 13).
   Parse: strip; drop one leading empty thought block if present; each non-empty line must match
   ^(U|A|T)(\d+): (.+)$ in the planned order, then "END". Anything else is a FORMAT_* reject (no repair in v0).
   Exact lines: the parsed text must equal the bank line after NFKC, quote and whitespace normalization; the
-  stored text is the bank line itself.
+  stored text is the bank line itself (lowercased for a lowercase-style user's lines: D1, section 13).
 
 6. CHECKER (every check runs; all failing codes are logged; the first in this order is the primary reason)
   FORMAT_LINES count or labels wrong      FORMAT_EXTRA text outside labeled lines      FORMAT_WRAP unlabeled line
@@ -130,23 +131,24 @@ tools/gemma_chat.py, experiments/E004_general_updating/code (read-only). No mode
   REQ_WORD a required word never used     VOCAB_OOL out-of-list rate > 2% (slots exempt; report-only while FAKE)
   PLANT_MISSING value not in plant turn   DIST_LEAK value between plant and query      QUERY_RESTATES query has value
   QUERY_NOREF query lacks its ref expr    ANSWER_WRONG gold absent                     ANSWER_STALE stale value present
-  ANSWER_SHOTGUN >= 2 candidates          PERSPECTIVE "my X" for a user fact, or user fact claimed by assistant
+  ANSWER_SHOTGUN >= 2 candidates          PERSPECTIVE "my X" for a user fact, or user fact claimed (13)
   SELF_CLAIM first-person self-facts outside the card ("I went", "my weekend", "I love", "I live", "my family")
-  PERSIST_FAIL rule verifier fails        OFFTOPIC reply shares no content word with its turn's intent or topic
+  PERSIST_FAIL rule verifier fails        OFFTOPIC reply shares no stemmed content word with its topic (13)
   ABSTAIN_MISSING no hedge, or a candidate given on an abstain item
-  DEFLECT deflection pattern ("I don't have access", "as an AI I can't know", "I can't remember") on a given item
+  DEFLECT deflection pattern ("I don't have access", "I can't remember") or a hedge on a given item (13)
   AI_ISM ("as an AI", "language model", "great question", "feel free to", "I'm here to help", "Certainly!")
   TOPIC_RETURN S5 gold fails              IDENTITY S8 name mismatch or other name       LIST_STATE S2 gold fails
   LOOKUP_FORMAT / LOOKUP_UNNEEDED / LOOKUP_MISSING / LOOKUP_COPY / LOOKUP_EMPTY (S9 golds)
   REPEAT_4GRAM a 4-gram 3+ times in a turn   CONSEC_REP coverage >= 0.25   SELF_COPY >= 50% of the previous
   assistant turn's 4-grams                   ECHO_USER assistant copies >= 60% of the user turn's 4-grams
   NON_ENGLISH                            SAFETY blocklist hit                       PERSONA_LEAK (section 4)
-  PROMPT_ECHO any 6-gram of the instruction or card block (slots and bank lines excluded) in a turn: this stops
-    Claude-written prompt wording from leaking into training text
+  PROMPT_ECHO any 6-gram of the instruction or card block (slots and bank lines excluded) in a turn, or a user
+    line that is its own guidance (13): this stops Claude-written prompt wording from leaking into training text
   HELDOUT_VOCAB / HELDOUT_ECHO / HELDOUT_STRUCT (section 9)   NGRAM_CAP / SENT_CAP / OPENING_CAP (section 7)
   FAKE_PROVENANCE (admit only)            DUP_EXACT / DUP_NEAR (admit only)          DECON_PENDING (admit only)
   Matching: lowercase, NFKC, word-bounded value regex with optional plural (E004 text_e004.value_re style); number
-  words only. Candidates = every same-type value in the conversation plus stale values.
+  words only. Candidates = every same-type value in the conversation plus stale values. Every check reads the turn
+  text with curly quotes and apostrophes made straight (13). Case: see D1 in section 13.
   Every code has a clean fixture that must pass and a planted fixture that must fire it (Max's mutation rule);
   shotgun, echo-of-question, stale value, wrong owner, leaked role and empty reply are planted for every answer check.
   A 1-2% sample goes to a second-model naturalness read (report only, not a gate).
@@ -228,3 +230,20 @@ tools/gemma_chat.py, experiments/E004_general_updating/code (read-only). No mode
   Fake: every bank, every pool except closed programmatic lists, the word list, the teacher (canned outputs from a
   local stub), the paraphraser. Open: final event shares (pilot), p_exact, RC-12 exports, the user-turn loss switch,
   whether RH passages with a lone digit or an honorific are dropped (default: dropped, logged).
+
+13. PILOT FIXES 2026-09-27 (dry-pilot reject audit; decided by Claude under Max's delegation, reversible; notes.txt)
+  Prompt: after the script, a rules block (no dashes, number words, the assistant in sentence case, script lines
+    describe the move, the user says "my") and a worked example on its own FAKE items; the card hides the user name.
+  D1 lowercase is a user style: that user's exact lines are shown and stored lowercased (parse.exact_text, also the
+    structured-output literal); EXACT_MISMATCH and value matches fold case on that user's turns only.
+  D2 loosened, each with a clean and a planted fixture (fixtures_pilot.py): OFFTOPIC (plural-first stemmer, topic
+    word sets in topic_words.py, the last assistant reply counts for a user topic turn, topic-neutral words ignored,
+    no check on "greet the user back"); REQ_WORD (adverbs, -ves; placed words only); hedge, offer and denial lists;
+    "my X" for a required non-value "the X" in a user line; the pronoun "one" in a count answer.
+  Tightened: curly quotes straightened before every check; PROMPT_ECHO on a copied guidance line; PERSPECTIVE on a
+    user's "your X"; DEFLECT on a hedged given answer. Never loosened: DASH, MARKDOWN, DIGIT, AI_ISM, SELF_CLAIM,
+    answer golds, PROMPT_ECHO, held-out gates.
+  Skeleton skel-v0.2 (same RNG streams): bank openings and goodbye closings; "greet the user back" after a bare
+    greeting; terse topic turns allow max(10, topic words + 6) within the register; required words (0-3) only on
+    topic turns with a cap of 10+ words, drawn from the turn's topic set. Guidance: first-person ask-backs, "the list",
+    corrections name the new value, answers name no other value. Decoding and sampling (D3, D4): pipeline/teachers/.

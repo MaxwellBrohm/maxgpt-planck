@@ -12,7 +12,11 @@ loads a model. Only the driver's --allow-real-teacher flag sets allow_real; the 
 
 Transient failures (connection refused or reset, timeout, HTTP 408/429/5xx, a body that is not JSON) are retried
 up to http_tries times with exponential backoff; any other HTTP status fails at once. A request that never
-succeeds raises TeacherError, which the driver records as a TEACHER_ERROR reject for that attempt."""
+succeeds raises TeacherError, which the driver records as a TEACHER_ERROR reject for that attempt.
+
+Decoding controls (the driver's --structured, --ban-dashes, --preset; 2026-09-27) exist only on a served teacher
+(teachers/serve_client.ServeClient, drive.py --serve). This client refuses any of them in configure_decode, so a run
+can never record a control its server did not apply."""
 import hashlib
 import http.client
 import json
@@ -29,6 +33,8 @@ LOOPBACK = {"127.0.0.1", "localhost", "::1"}
 STUB_PATH = "/planck-stub"
 TRANSIENT_STATUS = {408, 429, 500, 502, 503, 504}
 LICENSES = {"gemma-4": "Apache-2.0", "ministral-3": "Apache-2.0"}   # model id substring -> license (D8)
+STRUCTURED = ("off", "labels", "labels_exact")                      # = teachers/decode.STRUCTURED
+DECODE_OFF = {"structured": "off", "ban": None, "preset": None}
 
 
 class RefuseRealTeacher(RuntimeError):
@@ -39,6 +45,22 @@ class TeacherError(RuntimeError):
     def __init__(self, detail, requests):
         super().__init__(detail)
         self.detail, self.requests = detail, requests
+
+
+class DecodeConfigError(ValueError):
+    pass
+
+
+def decode_config(cfg):
+    """{structured, ban, preset} checked and normalized; unknown values raise DecodeConfigError."""
+    c = {**DECODE_OFF, **{k: v for k, v in (cfg or {}).items() if k in DECODE_OFF}}
+    if c["structured"] not in STRUCTURED:
+        raise DecodeConfigError(f"--structured {c['structured']!r}: one of {STRUCTURED}")
+    if c["ban"] not in (None, "dash"):
+        raise DecodeConfigError(f"ban {c['ban']!r}: only 'dash'")
+    if c["preset"] is not None and (not isinstance(c["preset"], str) or not c["preset"]):
+        raise DecodeConfigError(f"preset {c['preset']!r}")
+    return c
 
 
 def render_seed(skel_id, attempt):
@@ -67,6 +89,16 @@ class TeacherClient:
         self.license = license or license_of(model)
         self.is_stub = False
         self._checked = False
+
+    supports_decode = False
+
+    def configure_decode(self, cfg):
+        c = decode_config(cfg)
+        if c != DECODE_OFF:
+            raise DecodeConfigError("--structured, --ban-dashes and --preset need a served teacher (drive.py --serve)")
+
+    def decode_meta(self, call):
+        return None
 
     # --- safety --------------------------------------------------------------------------------------------------
     def check_endpoint(self):

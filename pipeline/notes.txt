@@ -349,3 +349,496 @@ Tailscale ping from 08:43, so nothing was re-run on the GPU and the PC's ~/planc
   Leaks: no teacher output, dry run dir or distinctive output line in the repo tree or in commits since 09-25
   (sealed/ not read); pipeline/teachers holds code and hf_pins.json only; the drive records carry trainable false,
   blocked FAKE_PROVENANCE and DECON_PENDING.
+
+TEACHER CAPACITY RUNS (2026-09-26, 19:44 to 21:55; PC RTX 5070, vLLM 0.30.0 offline API; DRY: prompts are the 700-row
+FAKE render file of 01:06 on the PC, status dry, variant instr.fake.N; outputs stay on the PC; nothing is training data)
+  Earlier attempt (uncommitted files), read and checked:
+    kept as is: serve_client.py, drive.py (test_drive passes; driver builds its client via TC.TeacherClient, so the
+      patch takes), drive_report.py (on a fake-engine driver run its totals equal the driver's: 17 attempts, 8 accepted,
+      9 rejected; 63 codes = 59 checker + 4 driver), count_planck.py (PC, tokenizer v0 md5 94005755...: counts equal
+      direct encoding on a sample, a wrong md5 is refused).
+    FIXED serve_http.py: one enqueue call per batch meant a single request vLLM refused (or a prompt over
+      max_model_len) raised in the engine thread and failed the server for every caller; now each request is
+      prepared and enqueued alone and fails alone as render_error (new test in test_drive.py; mutant killed).
+    REWRITTEN thinking_control.py: the old bar (a marker in 2 of 3 ON outputs) could not pass for Qwen, whose ON
+      prompt pre-fills '<think>' so only a closing tag can show (the 05:06 failure), and nothing tested an opening
+      tag. Now Qwen also gets on_open (the ON render minus the prefill), each teacher has one scored probe, and
+      control() runs inside the caller's hold.
+  serve.py: load() refuses unless gpu.lock is held by the process or an ancestor (new gpulock.py, /proc/locks; so
+    nothing loads on the Mac); loaded() context manager; prepare(): a prompt with no room under max_model_len is a
+    per-request render_error (vLLM fails the whole batch on it); seeds/max_tokens length and output-count checks;
+    log_facts() (KV tokens, KV/model/graph GiB incl. a negative KV figure, both backend log forms, fp8 lines).
+  New: capacity.py + capmeter.py (one-hold runner), stub_vllm.py, test_serve_stub.py (stub load/generate/unload;
+    gpulock on fake and on the real /proc/locks under flock(1)), test_capacity.py (stub end to end). Tests: Mac 37
+    run, 31 pass, 6 skip (tokenizer, GPU, Linux layers); PC 21 run, 20 pass, 1 skip (GPU smoke, not run). Mutants:
+    29 run over the session, 28 killed (2 only after tests were added), 1 equivalent (gpulock's '->' check is
+    redundant with its FLOCK-field check).
+  Holds of gpu.lock (flock -w 7200; auto then fp8 in one hold per teacher): Ministral 20:40:19-20:43:32, Qwen
+    21:26:15-21:33:21, Gemma 21:43:56-21:50:06 (waits 31, 43, 10 min behind E006 and RC-12 dev jobs). Device memory
+    back after each unload: 485 / 347 / 390 MiB.
+  MEASURED (util 0.88, max_model_len 2048; 200 forced output tokens per prompt; disjoint prompts, mean 730 to 830
+  tokens per batch (about 460 at batch 1);
+  out tok/s = output tokens per wall second incl. prefill; KV limit = whole sequences of mean prompt + 200 tokens
+  that vLLM's KV line holds; run = peak running requests from vLLM's own metrics)
+    teacher    load  weights  KV GiB  KV tokens  x@2048  limit  out tok/s at batch 1 / 8 / limit / 32 / 64     run
+    ministral  46 s  5.99     2.83    21,808     10.65   22     80.3 / 394.0 / 584.2 / 472.3 / 517.1           30
+    qwen 9B    40 s  7.55     2.23    28,262     13.80   29     67.4 / 339.3 / 341.1 / 422.8 / 443.3           28
+    gemma 12B  43 s  8.28     1.60     4,958      2.42    5     52.4 / 148.4 (8) / 180.0 (5) / 178.3 / 170.1    7
+    Device peak MiB while loaded: 11,864 / 11,880 / 11,554 (Ministral and Qwen are over gpuguard's 11,600: a teacher
+    run under the queue runner's guard would be stopped). Backends: FLASH_ATTN (FA2), FLASH_ATTN, TRITON_ATTN.
+    Past the limit vLLM preempts (KV usage 99%+): Ministral drops from 584 at 22 to 472 at 32, Gemma from 180 at 5 to
+    148 at 8. Qwen's 28,262 tokens equals the 07:27 serve_http load but not the 04:26 bench (8,396); cause not found.
+  THINKING OFF, 10 prompts each (5 that invite reasoning, 5 FAKE renders), raw decode with skip_special_tokens false:
+    zero thought markers or ids, and no special-token string of any kind in the 30 raw outputs; none opens with
+    plain reasoning text. Wire: Gemma ids start [2, 105] with one id 2 and equal '<bos>' + tools/gemma_chat
+    build_prompt in text and ids on all 10; Ministral '<s>[INST]..[/INST]', no [SYSTEM_PROMPT]; Qwen ends in the
+    empty think block. Positive controls pass: Gemma ON opens with id 100 (<|channel>) 3/3; Qwen on_open starts with
+    id 248068 (<think>) 3/3 and its prefilled ON closes '</think>' 2/3 within 1,900 tokens; OFF 0/3 for both. So the
+    detector is now shown to catch an opening tag. Ministral has no thinking mode, so no control.
+  FP8 KV (--kv-cache-dtype fp8, default scales), tried in each hold:
+    ministral  fails: fp8 drops FA2, vLLM picks FLASHINFER, whose prefill JIT needs nvcc (absent in this WSL). The
+               TRITON_ATTN retry was added after this hold, so it was not tried here.
+    qwen 9B    default fails the same way; retried on TRITON_ATTN: loads, but vLLM profiles 2.1 GiB peak activation
+               (0.53 auto), so KV is 0.66 GiB and 10,496 tokens (0.37x auto), limit 10, 238.9 / 341.4 out tok/s at
+               10 / 64 against 443.3 at 64 auto. Greedy vs auto 1/8 identical, but auto against itself is only 3/8.
+    gemma 12B  fails on its default TRITON_ATTN: 'Available KV cache memory: -2.11 GiB', no room for any block.
+    So on this box fp8 KV adds capacity for no teacher. Greedy self-agreement (two identical greedy batches of 8 in
+    one process): Ministral 4/8, Qwen 3/8, Gemma 8/8, so only Gemma is run-to-run deterministic here.
+  Results (PC): runs/teachers/dry/cap_0926/<teacher>.{auto,fp8}.dry.json; logs tcap_<teacher>_{auto,fp8}.log and
+  tcap_run.log; code copy dev/tcap_pipeline; hold script teach/tcap_hold.sh. Nothing committed or pushed.
+
+TEACHER YIELD DRY RUNS (2026-09-26, 22:15 to 23:56; PC RTX 5070, vLLM 0.30.0 offline API; DRY: the same 200 FAKE shard
+skeletons (shard 'teachdry') for all three; renders stay on the PC under runs/teachers/dry/<teacher>/yld_0926/; records
+trainable false, blocked FAKE_PROVENANCE + DECON_PENDING; nothing is training data; no model loaded on the Mac)
+  Wiring: drive.py --serve (earlier attempt, kept) runs pipeline/driver.py unchanged through serve_client ->
+    serve_http -> serve.py; without --serve it is driver.main as before (the fake stub stays the default). Per attempt:
+    iter_shard -> render_prompt.build -> teacher (serve.render wire, thinking off) -> parse -> checker -> dedup ->
+    records; one retry with a new render seed (SPEC 1).
+  Changed this session (pipeline/teachers only):
+    serve_client.py: ServerGone. A dead or stopping server (a socket error other than a timeout, or serve_http's 503)
+      became a TEACHER_ERROR reject for every remaining attempt, and those count as finished, so a resume never
+      redid them. Now the run stops and the same command resumes; drive.py first writes a yield snapshot (stopped
+      'server gone'). The end-to-end test failed first on BrokenPipe, then on EINVAL (macOS), hence "every socket
+      error but a timeout".
+    drive_report.py: wall time and completion tokens summed over driver sessions (yield.jsonl restarts its session
+      clock on a resume, which inflated tokens per hour after one).
+    gpulock.py: fdinfo fallback. At 22:29 /proc/locks on the PC did not list a live gpu.lock holder (RC-12's flock)
+      whose /proc/<pid>/fdinfo showed the lock. check() now also accepts an ancestor's fdinfo lock line (granted locks
+      only, never a waiter's). Our three holds were listed in /proc/locks, so the fallback was not exercised.
+    New test_drive_gone.py (9 tests); 2 new gpulock tests in test_serve_stub.py. Mac: 48 run, 42 pass, 6 skip. PC:
+      test_drive + test_drive_gone 15 pass, test_serve_stub 14 pass. Mutants: 17 run, 15 killed, 2 equivalent
+      (drive_report max-over-snapshots vs the last snapshot; gpulock also parsing non-lock fdinfo lines).
+  Holds (flock -w 7200 gpu.lock, timeout 2340; serve_http + driver inside, SIGTERM unload before release): Ministral
+    22:34:37-22:38:23, Qwen 23:10:57-23:16:29, Gemma 23:39:59-23:55:24 (waits 19, 33, 23 min behind E006 and RC-12).
+    Device memory after unload 526 / 348 / 473 MiB. Concurrency = the capacity entry's best batch: 22 / 64 / 5.
+  RESULTS (attempts include the retry; tok/h = accepted tokens in tokenizer v0 8k (md5 94005755...), turn text only,
+  over the driver's wall time at that concurrency, the tail of the run included)
+    teacher    conc  attempts  acc  yield/att  /skel  1st att  wall s  out tok/s  Planck tok/h all / teacher-written
+    ministral   22     399      0    0.0%      0.0%    0.0%     155    801.9      0 / 0
+    qwen 9B     64     399      5    1.3%      2.5%    0.0%     259    541.9      25,542 / 18,768
+    gemma 12B    5     390     11    2.8%      5.5%    4.5%     851    151.7      11,787 / 7,572
+    Wilson 95% per attempt: ministral 0-1.0%, qwen 0.5-2.9%, gemma 1.6-5.0%, so Qwen and Gemma are not separated.
+    Qwen's 5 accepts all came on the retry (0/200 first); its reject mix is the same on both attempts.
+    Gemma repeats the 07:23 run on the same shard (concurrency 16: 13/389, first attempt 10/200, 13,227 tok/h).
+    Mean prompt / output tokens 796/312, 805/353, 795/332; max_tokens clamped to fit 2048 on 146 / 146 / 142
+    requests, all ended on a stop. out tok/s is above the capacity bench (584 / 443 / 180) because outputs are
+    longer than its forced 200. Thinking: 0 thought markers or ids in the 1,185 served outputs.
+  Primary rejects: ministral DASH 245, FORMAT_LINES 142, MARKDOWN 5, 7 others once each; qwen FORMAT_LINES 200,
+    REQ_SPAN 47, FORBID_SPAN 35, OFFTOPIC 31, REQ_WORD 27, LEN_USER 19, VALUE_EARLY 7, 15 others 1-5; gemma OFFTOPIC
+    138, REQ_SPAN 129, LEN_USER 23, LEN_ASSIST 21, REQ_WORD 20, FORBID_SPAN 10, HELDOUT_ECHO 8, FORMAT_LINES 7, 11
+    others 1-5. SKEL_INFEASIBLE 1 for each (one skeleton, no teacher call).
+  Attempts hit: ministral DASH 368, OFFTOPIC 311, FORMAT_LINES 142, REQ_WORD 133, REQ_SPAN 123; qwen OFFTOPIC 302,
+    FORMAT_LINES 200, REQ_SPAN 148, REQ_WORD 141, FORBID_SPAN 120; gemma OFFTOPIC 307, REQ_SPAN 133, HELDOUT_ECHO 63,
+    REQ_WORD 49, AI_ISM 45, PROMPT_ECHO 43. Failing on one code alone: ministral DASH 7; qwen OFFTOPIC 22; gemma
+    OFFTOPIC 83, HELDOUT_ECHO 8, PROMPT_ECHO 5.
+  CPU re-checks of the same texts (runs/.../counterfactual.dry.json): dashes to commas passes 7/399 Ministral
+    attempts, 0 for the others; cutting after END passes none. REQ_SPAN hits that are case-only misses on assistant
+    turns of lowercase user-style chats: ministral 33, qwen 87, gemma 68 (the teachers lowercase the assistant too);
+    ANSWER_WRONG and LOOKUP_COPY fire on the same case, so none of those attempts fails on REQ_SPAN alone.
+    10 Gemma attempts failing on OFFTOPIC alone, read: 3 on-topic paraphrases the word overlap misses (synonyms), 1
+    unclear, 6 genuinely off (mostly a required word forced into a simile).
+  Diversity of accepted chats, teacher-written turns: qwen (5 chats, 952 words) distinct-1/2/3 0.386 / 0.811 / 0.941,
+    gzip 0.444; gemma (11 chats, 1,304 words) 0.288 / 0.670 / 0.855, gzip 0.392; gemma first 5 (533 words) 0.362 /
+    0.753 / 0.903, gzip 0.442. Word counts differ (Gemma chats 253 Planck tokens, Qwen 368), so this ranks nothing.
+  Naturalness, Claude's read of accepted chats (1-5; texts stay on the PC): qwen all 5 it has: 3 3 2 1 2 (mean 2.2);
+    gemma 10: 3 3 2 2 3 1 3 3 3 2 (mean 2.5); ministral none. Common faults: FAKE required words forced into similes
+    and sign-offs, flat acknowledgements, the user's lowercase style applied to the assistant. Checker misses in
+    accepted chats: a Gemma user line that is the script guidance copied verbatim (PROMPT_ECHO did not fire); a
+    Qwen answer that says it does not know a value and then states it.
+  WHAT THE REAL PILOT MUST CHANGE
+    1. Fix checker and prompt conflicts before yields are compared: OFFTOPIC's word overlap rejects paraphrases (a
+       synonym-tolerant topic check or teacher-written topic word sets); scope the lowercase style to the user in
+       the prompt, or case-fold REQ_SPAN, ANSWER_WRONG and LOOKUP_COPY in lowercase chats (Max's call); read the raw
+       rejects for false rejects (driver entry, item 6). The two checker misses above need their own fixtures.
+    2. The FAKE required-word bank causes the least natural lines and feeds OFFTOPIC: real words must fit the turn's
+       topic, or stay off short acknowledgement turns.
+    3. Format: FORMAT_LINES is Qwen's first reject (skipped or renamed labels, no END). vLLM structured output (a
+       regex of the planned labels ending in END) would make those impossible; not tried here.
+    4. Ministral is not a candidate on this evidence: 0/399, with dash, format and topic failures together (dashes
+       alone recover 7/399). Drop it, or ban dash tokens at sampling and re-test.
+    5. 200 skeletons cannot separate teachers at 1-3% yield; at 3%, 1,000 skeletons give about 30 accepts each.
+    6. Yield is the lever, not batch: at these rates 20M accepted tokens is about 1,700 h (Gemma) or 780 h (Qwen) of
+       5070 time (est.). Gemma's 4,955-token KV holds about 4 real sequences (mean 1,127 tokens), so its batch stays
+       small; Qwen and Ministral run 3.6x and 5.3x its output rate.
+  Files (PC): runs/teachers/dry/<teacher>/yld_0926/: report, report_k5, planck, counterfactual, serve_stats_*
+    (.dry.json), accepted_texts, accepted_examples, rejected_examples (.dry.jsonl; 10 each where they exist: 0 and
+    5 accepted for Ministral and Qwen), run/ (driver shards), DRY.txt; logs tyld_*.log; teach/yld: pipeline copy,
+    symlinks to dev/tyld_tools, dev/tyld_tokv0 and repo/experiments (E004 read-only), yld_all.sh + yld_hold.sh.
+    Nothing committed or pushed.
+
+TEACHER PREP ADVERSARIAL CHECK (2026-09-27, 00:23 to 10:40; resumed after a session limit; DRY: FAKE renders only,
+outputs on the PC under runs/teachers/dry/ver_0927/; no model loaded on the Mac; nothing committed or pushed)
+  Licenses: HF API and model card at each pinned revision (sha equal to the pin) say apache-2.0 for all six repos
+    (3 official, 3 quant); ai.google.dev gemma_4_license serves the Apache License 2.0 text; both Qwen LICENSE files are
+    Apache 2.0. serve.TEACHERS and serve_client.OK_LICENSES agree.
+  Thinking off: 0 thought, channel, think or special-token strings (regex) and 0 meta-reasoning openings in all saved
+    outputs (1,185 yield outputs, 26 capacity outputs per teacher); serve_http thought_hits 0 for all three. The same
+    regex fires on 3/3 Gemma thinking-ON heads and 3/3 Qwen open-tag heads (2 of those 3 close the block at once).
+    Read by eye: 20 seeded outputs per teacher (15 to 20 rejects plus up to 5 accepted), full text: no thought content.
+  Re-measure (gpu.lock, one hold each, 01:58, 03:08, 04:01; same engine settings and prompt slices as cap_0926):
+    out tok/s now vs capacity, batch 1 / 8 / KV limit / fresh batch 8: ministral 88.0/80.3, 417.1/394.0,
+    639.0/584.2 (22), 423.8; qwen 75.7/67.4, 369.4/339.3, 460.1/341.1 (29), 373.9; gemma 55.3/52.4, 157.1/148.4,
+    187.6/180.0 (5), 155.5. All within +4 to +12% except Qwen at its KV limit (+35%): at 29 only 28 run at once,
+    so one request trails; capacity's 341.1 is below its own 32 and 64 figures and is not a stable number.
+    Peak device MiB 11,830 / 11,723 / 11,599 (guard 11,600: Gemma is 1 MiB under it). Unload 462 / 280 / 485 MiB.
+  Yield table: recomputed from the driver's saved records (accepted/, rejects/, skeletons/, yield.jsonl): attempts,
+    accepts, per-attempt, per-skeleton and first-attempt yield, Wilson intervals, primary / hit / only counts, wall
+    time, out tok/s and Planck tok/h (tokenizer v0 md5 94005755...) all equal the DRY table and report.dry.json.
+    Re-running the checker on every saved reject gives the same primary and codes (398 / 393 / 378); every accepted
+    chat still passes. One driver session each. The 07:23 Gemma drive run: 13 accepted of 389, 10 on attempt 0.
+  Data: no dry marker in any file under ~/planck/data changed since 09-25 20:00 outside core_v0* (json/jsonl/txt/log
+    grepped) and none in core_v0* json/jsonl/txt under 5 MB; no dry-named file under data; all yield records
+    trainable false. The 09-26 bench outputs sit in runs/teachers/ (not runs/teachers/dry/), dry-marked. Repo: no
+    dry file, no teacher text, no run path other than names in notes; no commit since 09-25 carries teacher text.
+  Tests: Mac 49 run, 43 pass, 6 skip; PC 49 run, 48 pass, 1 skip (GPU smoke). Mutants on scratch copies: 14, 13
+    killed (lock refusal, ServerGone, thought ids, no-room prompt, control pass bar, license, dry marker, session sum,
+    Gemma bos, second bos, Qwen enable_thinking, Qwen must_end, Ministral system message); the survivor is the
+    equivalent "->" filter in gpulock.holders (the FLOCK field test already drops waiter lines).
+  Fixed (docs only): count_planck.py said --elapsed-s is drive_report elapsed_s (last session; would inflate tok/h
+    after a resume); it is elapsed_s_all_sessions, as yld_all.sh passes. serve.py docstring names the fdinfo fallback;
+    comments mark Ministral's and Qwen's sampling as not their cards' settings, and Qwen's 32-sequence server cap.
+  Open, not fixed: (1) sampling differs from the cards for Ministral (0.8 vs below 0.1) and Qwen (0.8 / 0.95, no
+    top_k 20 or presence 1.5); only Gemma ran at its card's setting, so the yield ranking and "drop Ministral" are
+    confounded by sampling (Max's call). (2) Qwen "concurrency 64" was at most 32 running (28 seen). (3) Ministral's
+    fp8 run predates the Triton retry. (4) mistral_common warns that Tokenized.text, which serve.render reads for
+    Ministral, goes away in 1.13 (a loud failure before any GPU use, not a silent one). (5) PLAN's "token for token
+    against the LM Studio path" for Gemma was not done: renders were checked against the HF template and
+    tools/gemma_chat.py text only. (6) The PC showed 1,062 MiB used at 10:18 with no job; capacity figures assume
+    about 500 MiB, so Gemma's KV room and the guard margin shrink when the desktop holds more.
+
+TEACHER DECODING CONTROLS, D4 PRESETS AND A REPAIR FLAG (2026-09-27, 17:25 to 18:20; code only: pipeline/teachers/,
+driver.py, teacher_client.py; DRY; no model loaded anywhere, no gpu.lock hold, nothing committed or pushed)
+  Decisions recorded here (each decided by Claude under Max's delegation, reversible):
+    D1 Lowercase is a USER style only. The prompt says the assistant writes normal sentence case whatever the user
+       does. A checker rule may fold case only where the skill it protects does not depend on case (a user turn in
+       lowercase style; a slot value compared as a value); exact-copy and lookup-copy checks stay case-exact on
+       assistant turns unless the diagnosis shows the gold itself is case-ambiguous. (Prompt and checker: the
+       parallel session's work, not this entry's.)
+    D2 A rule is loosened only when the reject audit shows it rejects outputs that meet the rule's own stated
+       purpose; every loosening gets a clean fixture that now passes and a planted fixture that still fires. DASH,
+       MARKDOWN, DIGIT, AI_ISM, SELF_CLAIM, answer golds, PROMPT_ECHO and the held-out gates are never loosened; they
+       are fixed by prompt or decoding. (Checker: the parallel session.)
+    D3 Decoding controls are allowed and preferred for pure-form rules: structured output that makes the planned
+       label lines plus END the only legal form, and dash tokens banned at sampling. They may change the form only,
+       which is checked on read outputs (the 09-27 probe did that for Qwen and Gemma; the code paths below have not
+       yet generated on the GPU).
+    D4 Each teacher runs at its model card's setting AND at the shared 0.8 / 0.95 where they differ (Ministral,
+       Qwen); Gemma runs at its card setting only. Diversity (distinct-2/3, gzip) is reported beside yield
+       (drive_report) so a low-temperature setting cannot win on yield alone.
+  Flags (driver.py, passed through by drive.py --serve; all off by default; every record carries "run_flags" and
+  "attempt_kind", every teacher call's record the server's own "decode" account; <out>/decode.json pins them and a
+  resume with other flags is refused before run.json counts a session):
+    --structured labels|labels_exact  driver.constraint(sk) sends [[label, literal or null]] in parse.plan order;
+        serve_http builds decode.label_regex with the teacher's line separator ("\n", Ministral "\n+") and
+        serve.py passes StructuredOutputsParams(regex=...) (the load passes StructuredOutputsConfig(backend=
+        "xgrammar"), the call the probe ran). labels_exact makes exact and tool lines literal (the bank or program
+        line the checker compares against); only "labels" was probed on the GPU.
+    --ban-dashes  serve_http --dash-ban computes decode.dash_ban_ids over the tokenizer's byte table (the probe's
+        rule: a dash char, "--" or " - " in the token, or a token ending " -"), caches it in ~/planck/teach/cache
+        under sha256 of the tokenizer files + vocab size, and each request gets logit_bias -100 on those ids (cap
+        1024). The real tokenizers give 185 / 149 / 140 ids (Qwen / Gemma / Ministral), equal to the probe's sets.
+    --preset card|shared|yld0926  serve.TEACHERS presets; a preset REPLACES the default sampling. Card lines are
+        quoted in serve.py. Qwen card 0.7 / 0.8 / top_k 20 / min_p 0 / presence 1.5 / repetition 1.0; Gemma card
+        1.0 / 0.95 / 64 with min_p 0 (the card names no min_p, so SPEC 5's 0.05, used in every Gemma run so far,
+        is not the card's: yld0926 keeps it); Ministral card temperature 0.05 (the card says "below 0.1", gives no
+        value; 0.05 is what the probe ran), top_p off. shared = 0.8 / 0.95 = the 09-26 yield runs. Gemma has no
+        shared preset (refused).
+    --repair  off by default; SPEC 1 allows repair only as a pilot flag and SPEC 5 "no repair in v0" holds without
+        it. This is NOT the audit's single-turn re-render: the whole chat is rendered again, and the retry prompt
+        ends with a note naming what failed (driver.repair_note; the note also goes into the tail block, so
+        PROMPT_ECHO covers its wording). Near miss (driver.near_miss): every gating code is FORMAT_*, or the only
+        gating failure is one REQ_SPAN or FORBID_SPAN hit. Kind "repair" is counted apart (yield.jsonl
+        by_attempt_kind, drive_report by_attempt_kind); a resume rebuilds pending repairs from the rejects.
+        Audit support, read on the 09-26 records: blind retries repeat the same primary code (117/199, 91/194,
+        135/188), which argues for naming the failure; but under this near-miss rule only 3 of 588 attempt-0
+        rejects qualify today (Qwen 1 form, 1 span; Gemma 1 span; Ministral 0) and none of those 3 passed on the
+        blind retry. So the flag does nearly nothing until structured output and the D1/D2 fixes remove the other
+        codes; the audit's own near-miss count (1 or 2 failing turns: after all fixes Min 69 / Qwen 83 one-turn
+        attempts) is a wider rule, not built.
+  Also: gpu_memory_utilization default 0.86 (serve.ENGINE; serve.load and serve_http --gpu-util refuse more; the
+  probe still saw 11,725 MiB with Ministral at 0.86, over the 11,600 guard). mistral_common: render decodes the ids
+  with SpecialTokenPolicy.KEEP instead of reading Tokenized.text (removed in 1.13), and serve.tokenizer refuses a
+  version outside >=1.11.7,<1.13 (installed 1.12.0; nothing installed or changed in the venv). serve_client refuses
+  a server that lacks a requested control and turns a row whose "decode" disagrees into a TeacherError.
+  Tests (new: test_decode.py, test_decode_e2e.py, test_repair.py, test_decode_pc.py; fixtures fake_engine.py and
+  stub_vllm additions). The e2e fake engine keeps serve.py's real render / prepare / _params, so the tests read the
+  regex, logit_bias and preset values the engine would get per skeleton. Mac: 87 run, 73 pass, 14 skip (the 6 old
+  skips plus 8 PC-only); driver tests (tests/test_driver*.py) 20 pass. PC, CPU only, venv-teach: 87 run, 86 pass,
+  1 skip (the GPU smoke); there xgrammar compiles each teacher's labels_exact regex for 30 FAKE skeletons, accepts
+  the canonical render (Ministral's blank-line form too), refuses form breaks and an altered literal; vLLM's own
+  SamplingParams takes regex, bias and preset; render never reads Tokenized.text and equals it on 30 prompts.
+  Mutation (scratch copies only): Mac 48 mutants, 44 killed (2 only after a vacuous escape test and a merge-versus-
+  replace preset test were fixed), 4 equivalent (cache file name without the hash: the in-file hash check still
+  recomputes; either one of the two repair-flag guards alone, both removed together is killed; last-reject choice
+  on resume, records are written in attempt order). PC 7 mutants on the PC-only tests, 6 killed (one after the
+  Ministral separator test stopped reading its expectation from the code), 1 equivalent (".+" for "[^\n]+":
+  xgrammar's "." does not match a newline).
+  NOT done / open: (1) nothing generated through these paths on the GPU: serve_http with --dash-ban and a
+  structured request is tested only against the fake engine (the probe ran the same vLLM calls via
+  LLM.generate, not serve_http's enqueue loop). (2) Ministral with "\n+" and the unrun Gemma probe conditions still
+  need a hold each. (3) labels_exact literals and the repair note are not measured on any teacher. (4) No markdown
+  or AI_ISM token ban (the audit's other D3 items). (5) At about 17:50 the GPU lock had five waiters, so no smoke run
+  was queued from here.
+
+TEACHER PILOT FIXES, CHECKER AND PROMPT SIDE (2026-09-27; CPU only. DRY: every yield below re-checks the saved
+dry-pilot outputs (yld_0926, FAKE banks) on scratch copies. No model loaded, no GPU hold, nothing committed or pushed.
+pipeline/teachers/ and driver.py belong to the parallel decode session and were not touched.)
+  DECISIONS, each decided by Claude under Max's delegation, reversible:
+    D1 Lowercase is a user style only. The card and the rules block say the assistant writes normal sentence case.
+       A lowercase-style user's exact lines are shown and stored lowercased (parse.exact_text). EXACT_MISMATCH folds
+       case on that user's own lines only (parse.exact_ok); value matches already folded there. Assistant, tool and
+       lookup lines stay case-exact (planted: a lowercased tool line still fires EXACT_MISMATCH).
+    D2 A rule is loosened only where the audit shows false rejects of its own purpose, each with a clean fixture that
+       now passes and a planted one that still fires (fixtures_pilot.py, run by mutation_checker). Not loosened:
+       DASH, MARKDOWN, DIGIT, AI_ISM, SELF_CLAIM, answer golds, PROMPT_ECHO, held-out gates. Four checks tightened.
+    D3 Decoding controls for pure-form rules (labels + END, dash-token ban) live on the serve side (parallel session).
+       This side supplies parse.exact_text as the exact-line literal (open item 1).
+    D4 Sampling (card settings, plus 0.8 / 0.95 where they differ; diversity beside yield): serve side, nothing here.
+  LOOSENED (audit evidence; clean fixture / planted fixture)
+    OFFTOPIC (sample: CHECKER_FALSE 14/25, PROMPT_CONFLICT 5): stemmer takes the plural first, then one suffix
+      (noisy/noise, saving/save, shaded/shade, holidays/holiday); topic word sets (topic_words.py) join the topic
+      text; a user topic turn may pick up the assistant's last reply; "greet the user back" is not checked.
+      Clean: a topic-set word, a stem match, a user reply to the assistant's word. Planted: a reply built from other
+      topics' words.
+    REQ_WORD (CHECKER_FALSE 5/25): adverbs (smoothly, gently) and f/fe plurals (shelves); only placed words count.
+      Clean: "shelves ... smoothly" for shelf/smooth; two placed words, third absent. Planted: both words absent.
+    ABSTAIN_MISSING (CHECKER_FALSE 3/4): hedges "was not mentioned", "we did not mention", "no record"; offer "let me
+      note". Clean: "That was not mentioned yet, let me note it." Planted: the existing guess and no-hedge defects.
+    role-swap denial: "just an assistant", "an assistant doesn't", "I don't eat/own/collect", "I have no favourite X,
+      hobby, job ...". After quote normalization 8/40 Ministral and 11/40 Qwen role-swap answers still read as no
+      denial; most were denials. Clean: "I'm just an assistant, so none here." Planted: the no-denial defect.
+    REQ_SPAN (CHECKER_FALSE 1): a user line may say "my X" for a required non-value "the X" and back. Planted:
+      "your X" still fires; values never swap (unit test).
+    LIST_STATE count: "one" after which/that/the/next... is a pronoun (3 count answers fired on "which one").
+      Clean: "... Which one comes next?" Planted: "... Or maybe one."
+  TIGHTENED (planted fires now, the old checker let it through; dry-run attempts hit, Ministral/Qwen/Gemma)
+    quotes: curly quotes straightened before every check (Ministral U+2019 in 397/398 outputs; audit: 51 false hits
+      removed, 35 missed ones exposed). Planted: a curly "I'm here to help" fires AI_ISM; clean: a curly denial
+      passes.
+    PROMPT_ECHO: a guided user line equal to its own guidance (6/18/19; one accepted Gemma chat).
+    PERSPECTIVE: "your X" in a guided user line for the user's own noun, person or list; the role-swap question is
+      exempt (27/66/44; three accepted chats). The guidance's "your {list}" was the source; it now says "the {list}".
+    DEFLECT: a hedge in a given answer ("I do not know ..., but ..."; 2/3/1; one accepted Qwen chat).
+    OFFTOPIC: topic-neutral words (lexicons.GENERIC: help, sound, start, new, morning ...) count on neither side.
+      Planted: an off-topic reply plus a neutral word the user used. Two accepted Gemma greet-backs matched on
+      "morning" alone; both are forced-word similes.
+    Of the 16 chats the dry run accepted, 7 fail now: PERSPECTIVE 3, OFFTOPIC 2, PROMPT_ECHO 1, DEFLECT 1.
+  OFFTOPIC CHOICE: WordNet is not on this Mac (no nltk, no data); fetching it would be a download plus a non-stdlib
+    checker dependency, not done without Max. Chosen: topic word sets in the topic bank's shape (the teacher writes
+    them in the bank pass; FAKE Claude stand-ins until then), the stemmer, the neighbouring turn, the neutral list.
+    Why: the audit's C4 class (stems + per-topic lexicon + previous turn) was the largest single class for Qwen and
+    Gemma. Measured on every filler line of every parsed dry output (old -> new): flagged share of the teacher's own
+    line, and caught share of a line swapped in from a chat with disjoint topics:
+      assistant filler  Ministral 0.63 -> 0.40 / 0.92 -> 0.86; Qwen 0.56 -> 0.36 / 0.90 -> 0.89;
+                        Gemma 0.51 -> 0.34 / 0.91 -> 0.85
+      user topic        Ministral 0.38 -> 0.24 / 0.96 -> 0.92; Qwen 0.20 -> 0.07 / 0.97 -> 0.91;
+                        Gemma 0.26 -> 0.15 / 0.97 -> 0.92
+    Without the neutral list the catch fell to 0.80 (assistant). Read 30 lines still flagged (before the plural fix):
+    about 20 on-topic paraphrases the sets miss, 9 forced FAKE-word lines, 1 content-free. It stays lexical: the
+    bank pass should ask for 40+ words per topic, and the flag rates must be re-measured on the real bank.
+  SKELETON (gen_version skel-v0.2; RNG_VERSION keeps skel-v0.1 draws)
+    Openings and goodbye closings are bank lines (guided ones came back as "open the chat about ...", "say goodbye" or
+    one-word goodbyes). A bare greeting gets "greet the user back" (audit PROMPT_CONFLICT 5). A terse user's topic
+    turns allow min(register cap, max(10, topic words + 6)) (LEN_USER conflict). Required words: noun, verb, adj
+    only on topic turns (greet-back with topic, fillers, goodbye) with a cap of 10+ words, drawn from that turn's
+    topic word set (NOT_REQUIRED drops body-claim words such as tired); REQ_WORD sample FAKE_BANK 20/25, SELF_CLAIM
+    FAKE_BANK 6/8. Words placed per chat, 1,000 RM skeletons: 0: 6.4%, 1: 20.4%, 2: 21.5%, 3: 51.7%.
+  PROMPT (instr.fake.p2.*): after the script, a rules block (no dashes, numbers as words, the assistant in sentence
+    case and never "your X is Y", lines describe the move, the user says my) and a two-line worked example on its own
+    FAKE items; the card no longer prints the user's name (VALUE_EARLY 8/8 true). Guidance: first-person ask-backs
+    ("ask the assistant to remind you of your X"), list lines say "the list", corrections name the new value, answers
+    add "no other value", acknowledgements ask for one short sentence (not repeating the value when it is excluded),
+    the S5 return names its origin value, the end-question rule avoids the E004 5-gram "at the end of each", and
+    start_name answers drop "starting with the answer". Mean prompt 465 -> 593 words (+28%); test_capacity's 140
+    stub renders still leave 200 tokens under 2,048 (a longer draft did not, and was cut).
+  TESTS (Mac, scratch copy, then the repo):
+    pipeline/tests 83 run, 83 pass (62 before + 21 in test_pilot_fixes.py). mutation_checker full: 1,704/1,704 cases,
+    149/149 checker mutants killed (21 new, one per change). Pilot fixtures (72 cases) on the old checker: every
+    loosening's clean case fails there except the sentence-case copy of a lowercase user's exact line (old code took
+    it; it guards the new fold), every planted violation fires there too, and the tightening plants do not fire
+    there (guidance copy 1/3, via the old 6-gram rule). test_pilot_fixes on 32 scratch mutants (one per prompt,
+    guidance, skeleton, record and unit change): 32 killed. tests/driver_fixtures now expects parse.exact_text for
+    exact lines. Repo after the final sync: pipeline/tests 83 run, 83 pass; pipeline/teachers (the parallel
+    session's tests) 87 run, 73 pass, 14 skipped. The first sync (18:24) broke 4 driver tests and 3 teachers tests
+    (exact-line case in the fake render, prompt length in test_capacity); the second sync (18:39) fixed both.
+  EXPECTED YIELD on the saved outputs (per attempt / per skeleton; base = the dry run: 0.0 / 1.3 / 2.8%):
+                            Ministral       Qwen            Gemma
+    new checker             0.0 / 0.0       1.8 / 3.5       6.1 / 9.0
+    + simulable skeleton    0.0 / 0.0       3.8 / 7.5      11.0 / 16.5
+    + prompt/decode proxies 9.0 / 16.5      7.8 / 14.0     16.9 / 24.0
+    + user "my" proxy       9.5 / 17.0      9.0 / 16.5     19.7 / 28.0   (expected)
+    + audit upper bounds   11.0 / 19.0     12.0 / 21.0     25.4 / 34.5
+    and no OFFTOPIC        29.8 / 47.0     26.3 / 39.0     56.7 / 67.0   (bracket)
+    Proxies (the audit's): relabel plus exact literals, dash/markdown/AI-ism removal, D1 re-case, "my X" in ask-for
+    lines, early vocatives dropped. Not simulable: topic-fitted words, the rules block and example, first-person
+    guidance. Largest remaining: OFFTOPIC, REQ_SPAN (absent values), FORBID_SPAN (Qwen stale values), FORMAT_LINES
+    with a different line count. PLAN Phase 1 assumes about 60%: only the no-OFFTOPIC bracket for Gemma gets there.
+  OPEN
+    1. driver.constraint uses the skeleton text as the exact-line literal; D1 wants parse.exact_text (lowercase-style
+       users). The checker folds case on those lines, so both pass; the prompt and the literal differ in case until
+       it switches. fake_teacher renders the bank line to match the literal for now.
+    2. The longer prompt costs KV and max_tokens room (Gemma's small KV most); the serve side should re-check the
+       2,048 max_model_len clamp count.
+    3. Fewer required words per chat (2.19 mean, was 3): vocabulary coverage falls; revisit with the real word list.
+    4. Openings are all bank lines now: opening diversity rests on the bank (OPENING_CAP, SPEC 7).
+  Files: topic_words.py, fixtures_pilot.py, tests/test_pilot_fixes.py (new); assemble, check_base, check_behav,
+    check_events, check_text, checker, checker_mutants, fake_teacher, lexicons, mutation_checker, parse, records,
+    render_intents, render_prompt, skeleton, tests/driver_fixtures, SPEC (section 13).
+
+DRY PILOT 2, PRE-REGISTRATION (2026-09-27 19:11, written before any generation. DRY: FAKE banks; renders stay on the
+PC under runs/teachers/dry/<teacher>/dp2_0927/<arm>/, marked dry, trainable false; nothing is training data; nothing
+under data/ or sealed/; no model on the Mac; nothing committed or pushed)
+  What it measures: form and checker yield of the three teachers after the 09-27 fixes (checker, prompt, skel-v0.2,
+    D3 decoding, D4 presets), beside a same-day control of the old setup. It is NOT the teacher pick: required words,
+    topic word sets, slot pools and openings are FAKE, and PLAN Phase 1 picks the teacher after the real bank pass.
+    OFFTOPIC and REQ_WORD depend on the bank most, so their rates here say little about the real ones.
+  Skeletons: 600 FAKE, register RM, skel-v0.2, one file (sha256 409345dc...), rebuilt on the PC with the same hash:
+    the 200 of shard 'teachdry' (yld_0926's; seeds teachdry:1-200 equal its manifest; same RNG draws, so the same
+    events, slots and personas, but skel-v0.2 openings, closings and required words) plus 400 from the new fixed shard
+    seed 'dp2new0927' (no overlap). teachdry:178 is SKEL_INFEASIBLE (as in yld_0926): no call, a failed skeleton.
+  Arms, 2 attempts per skeleton (first plus one more, as yld_0926):
+    FIX (new code: the repo pipeline synced 19:10, code hash ada4858c; --structured labels_exact --ban-dashes --repair
+      and one D4 preset), all 600: ministral card (T 0.05), ministral shared (0.8 / 0.95), qwen card (0.7 / 0.8,
+      top_k 20, presence 1.5), qwen shared, gemma card (1.0 / 0.95 / 64, min_p 0). labels_exact literals are the bank
+      lines as driver.constraint builds them (for a lowercase-style user the literal is the sentence-case bank line;
+      the checker folds case there, open item 1 of the fixes entry, unchanged).
+    CONTROL (old code: the exact yld_0926 pipeline copy, code hash da640008: old prompt, skel-v0.1, old checker, no
+      decoding controls, 09-26 sampling qwen 0.8 / 0.95, gemma min_p 0.05): qwen and gemma, the 200 teachdry only.
+      One change in the scratch copy: gpu_memory_utilization 0.86 (was 0.88; hard rule).
+    Concurrency, equal for every arm of a teacher: ministral 16, qwen 32 (its server cap), gemma 4 (prompts about 28%
+      longer and util 0.86 leave less KV than yld_0926's 22 / 64 / 5).
+    Order: qwen (card, shared, control), ministral (card, shared), gemma (card, control). gpu.lock holds under 40
+      min, chunked by time; a stopped arm resumes where it stopped (driver_state).
+    Smoke gate fixed now: in each teacher's first FIX hold, 8 skeletons of seed 'dp2smoke0927' (card, own dir, not
+      counted). If TEACHER_ERROR exceeds 10% of them, or any call's server record lacks labels_exact, the ban or the
+      preset, everything stops (ABORT) and the switch to --structured labels is decided and recorded before rerun.
+  Metrics per arm (drive_report and count_planck as in yld_0926, plus a scratch script for intervals and subsets):
+    yield per attempt, per skeleton and on the first attempt, with Wilson 95% intervals; on all, the 200 and the 400;
+    reject codes (primary, hit, only); yield per attempt kind (first, retry, repair; repair counted apart);
+    accepted Planck tokens per hour (tokenizer v0 8k, md5 94005755..., turn text, summed driver wall time);
+    distinct-1/2/3 and gzip compression ratio of teacher-written turns, over all accepts and over the first 30 by
+      conv_id (equal n; arms with 30 accepts only);
+    D3 form check: finish reasons, the share of calls with structured output, ban and preset (server records), and
+      a read of outputs for damage the controls could cause (split words, cut or padded lines, garbled literals);
+    naturalness: Claude reads 10 accepted chats per arm (seeded), 1-5 with one line each.
+  Comparisons, and what each can and cannot show:
+    C1 qwen FIX shared vs qwen CONTROL, the 200: the bundled fixes at equal sampling. Not which fix did it, and the
+       checker changed too, so it is not a pure generation effect.
+    C2 gemma FIX card vs gemma CONTROL, the 200: the bundled fixes plus min_p 0.05 -> 0.
+    C3 card vs shared (ministral, qwen; 600): sampling at fixed fixes, yield beside diversity, so a low temperature
+       cannot win on yield alone.
+    C4 the 200 vs the 400 inside each FIX arm: the audit and the fixes were built by reading the 200's 09-26 outputs;
+       a clear drop on the 400 means the fixes fit those outputs rather than the task.
+    C5 CONTROL vs yld_0926 (same code and skeletons; util, concurrency and day differ): a drift check only.
+    C6 across teachers at card (600): form and checker yield under FAKE banks; the order may change with the real
+       bank; tokens per hour depend on the concurrency chosen above; 10 reads per arm are a rough naturalness signal.
+  No decision is taken on these numbers (no teacher pick, no drop); they feed the bank pass and the next fix round.
+
+DRY PILOT 2, RESULTS (2026-09-27 19:43 to 09-28 00:25; PC RTX 5070, vLLM 0.30.0; DRY: FAKE banks, renders under
+runs/teachers/dry/<teacher>/dp2_0927/ on the PC, all 851 accepted records (5 of them smoke) trainable false (FAKE_PROVENANCE,
+DECON_PENDING); nothing under data/ or sealed/; no model on the Mac; nothing committed or pushed; no example texts)
+  Ran as pre-registered above: code hashes ada4858c (FIX) and da640008 (CONTROL), skeleton file 409345dc, 2 attempts,
+    concurrency 16 / 32 / 4. Smoke gates passed for all three (0 TEACHER_ERROR; every call's server record showed
+    labels_exact, the dash ban and the preset). One procedural change, no arm changed: after the Qwen FIX hold the
+    master was restarted (20:13) to run several segments per hold, to need fewer lock acquisitions.
+  Holds (gpu.lock): 19:43-20:11 qwen FIX; 21:20-21:46 qwen CONTROL + ministral FIX; 22:38-23:12 gemma FIX; 00:09-00:23
+    gemma CONTROL (all under 40 min; waits 31, 67, 52, 58 min). Unload 540 / 343 / 410 / 425 / 480 MiB. Highest reading
+    at a driver end 11,593 MiB (ministral card, util 0.86; guard 11,600). Thought hits 0. Every arm ran in one session.
+  RESULTS (Wilson 95%; per attempt / per skeleton over 600 or 200 / first attempt; Planck tok/h = accepted tokens in
+  tokenizer v0 8k over the arm's driver wall time, all turns / teacher-written turns)
+    arm              attempts acc  per attempt        per skeleton       first attempt     tok/h all / teacher
+    qwen card          1081   189  17.5 (15.3-19.9)   31.5 (27.9-35.3)   19.7 (16.7-23.0)  213,157 / 149,692
+    qwen shared        1098   172  15.7 (13.6-17.9)   28.7 (25.2-32.4)   16.8 (14.1-20.0)  191,428 / 133,461
+    qwen CONTROL        399     3   0.8 (0.3-2.2)      1.5 (0.5-4.3)      0.0 (0.0-1.9)     13,582 / 9,399
+    ministral card     1142    85   7.4 (6.1-9.1)     14.2 (11.6-17.2)    9.5 (7.4-12.1)    98,782 / 64,123
+    ministral shared   1134   124  10.9 (9.2-12.9)    20.7 (17.6-24.1)   10.8 (8.6-13.6)   183,538 / 116,637
+    gemma card         1021   261  25.6 (23.0-28.3)   43.5 (39.6-47.5)   29.7 (26.2-33.4)  106,501 / 71,149
+    gemma CONTROL       389    12   3.1 (1.8-5.3)      6.0 (3.5-10.2)     5.0 (2.7-9.0)     14,309 / 9,280
+    Per attempt on the 200 / the 400: qwen card 16.9 / 17.8, shared 15.8 / 15.6; ministral card 4.9 / 8.7, shared
+    9.7 / 11.6; gemma card 22.4 / 27.2. Wall s: 805, 790, 244, 643, 535, 1,941, 798. Out tok/s 441 / 445 / 692 / 695
+    / 161 (FIX). max_tokens was clamped to fit 2,048 on about half of all requests (534 / 1,035 gemma); in the FIX
+    arms only Ministral ended on length (293; 285 of them repeat END five or more times).
+  Attempt kinds, FIX arms pooled: repair 44 of 119 (37%) against blind retry 268 of 2,357 (11%); repairs are chosen
+    near misses, so this is not a clean effect. Per arm repair / retry: qwen card 12/34, 59/447; qwen shared 9/35,
+    62/463; ministral card 6/16, 22/526; shared 4/15, 55/519; gemma 13/19, 70/402.
+  Primary rejects (top): qwen card REQ_SPAN 216, OFFTOPIC 130, FORBID_SPAN 128, LEN_USER 83, REQ_WORD 44, VALUE_EARLY
+    43; qwen shared REQ_SPAN 224, FORBID_SPAN 163, OFFTOPIC 110, LEN_USER 78; ministral card LEN_ASSIST 279,
+    FORMAT_LINES 204, OFFTOPIC 134, REQ_SPAN 126, REQ_WORD 85; ministral shared LEN_ASSIST 264, REQ_SPAN 166, OFFTOPIC
+    104, REQ_WORD 102, FORMAT_LINES 89; gemma card OFFTOPIC 261, REQ_SPAN 114, AI_ISM 59, PROMPT_ECHO 58, HELDOUT_ECHO
+    55, LEN_ASSIST 49; CONTROL qwen FORMAT_LINES 200, OFFTOPIC 43, REQ_SPAN 42; CONTROL gemma OFFTOPIC 132, REQ_SPAN
+    130.
+    Failing on one code alone: gemma OFFTOPIC 142, HELDOUT_ECHO 55, PROMPT_ECHO 46, AI_ISM 38; qwen card OFFTOPIC 74,
+    FORBID_SPAN 35, REQ_SPAN 29, PROMPT_ECHO 28; ministral card OFFTOPIC 84, LEN_ASSIST 50.
+  D3 form check: DASH 0 hits in all 5,476 FIX attempts (ministral had it in 368 of 399 on 09-26); FORMAT_LINES 0 for
+    Qwen and Gemma; MARKDOWN 19 in ministral shared (no markdown ban is built). Ministral: the regex lets the last
+    line run on, and it repeats END inside that line until max_tokens (204 card, 89 shared); 10 ACCEPTED Ministral
+    chats (3 card, 7 shared) carry END inside a turn, which the checker passes. Hyphenated words are rare in every
+    arm (0 to 0.9% of accepted lines, CONTROL 0 to 0.6%); no split words or odd spacing seen in the reads.
+    One content effect: labels_exact forces a lowercase-style user's exact lines in sentence case (driver.constraint
+    uses the bank line, open item 1), and the teachers then drop the style on their own user lines. Teacher-written
+    user lines in lowercase chats that are all lowercase, before any exact user line / after one: qwen card 13/14 /
+    22/920, shared 12/13 / 45/1009; ministral 14/14 / 166/1137 and 11/12 / 146/1069; gemma 12/12 / 473/780; CONTROL
+    qwen (no literal) 28/28 / 187/375. So the literal is not form only; the assistant starts in capitals in 2,261 of
+    2,262 accepted assistant turns of those chats (D1 met).
+  C1 qwen shared vs CONTROL on the 200: 15.8 (12.5-19.9) vs 0.8 (0.3-2.2). The CONTROL outputs re-checked with the new
+    checker pass 7 of 399 (1.8%), so the checker change is worth about a point here; the rest is generation side,
+    mainly FORMAT_LINES 200 -> 0. C2 gemma: 22.4 (18.3-27.1) vs 3.1 (1.8-5.3); CONTROL re-checked 26 of 389 (6.7%).
+  C3 card vs shared: Qwen card is ahead on yield (overlapping intervals), tok/h and diversity; Ministral shared is
+    ahead of card on yield (separated intervals), tok/h (1.9x) and diversity, and card's T 0.05 drives the END loop and
+    the one or two word replies that fail LEN_ASSIST (558 of 761 card LEN_ASSIST hits are too short). The low
+    temperature did not win on yield.
+  C4 no arm drops on the new 400: they run from 0.2 points below to 4.8 above the audited 200. The 200 have a
+    little more per chat (3.10 vs 2.95 events, 21.0 vs 20.1 turns, 30.5% vs 26.8% lowercase users). No sign that the
+    fixes fit the audited outputs only.
+  C5 CONTROL vs yld_0926: qwen 3/399 vs 5/399, gemma 12/389 vs 11/390: no drift beyond noise.
+  C6 card, FAKE banks: yield gemma > qwen > ministral (intervals separated); tok/h qwen 213k > gemma 107k > ministral
+    99k (qwen shared 191k, ministral shared 184k). At these rates 20M accepted tokens is about 94 h (qwen card) or
+    188 h (gemma) of 5070 time (est., FAKE banks), against 780 / 1,700 h on 09-26.
+  Diversity, teacher-written turns of the first 30 accepted by conv_id (distinct-1 / 2 / 3, gzip ratio): qwen card
+    0.238 / 0.690 / 0.882, 0.376; qwen shared 0.224 / 0.638 / 0.839, 0.363; ministral card 0.250 / 0.640 / 0.834, 0.377;
+    ministral shared 0.258 / 0.686 / 0.872, 0.393; gemma card 0.197 / 0.540 / 0.739, 0.331. Gemma is the least varied
+    (its acknowledgements repeat one frame).
+  Naturalness, Claude's read of 10 seeded accepted chats per arm (1-5; CONTROL qwen has 3): qwen card 2.8, shared
+    2.8, CONTROL 2.0; ministral card 3.2, shared 2.6; gemma card 2.5, CONTROL 1.8. FIX arms have far fewer forced
+    similes than the CONTROLs (skel-v0.2 words); what is left: flat or repeated acknowledgement frames (Gemma), odd
+    sign-offs from forced words, garbled guided user lines, third-person talk about the user, wrong list order in an
+    acknowledgement, the user called by a place value, and the END leak above. 10 reads per arm is a rough signal.
+  WHAT STILL BLOCKS 60% (upper bounds: share of attempts that pass if a code set is ignored, text unchanged)
+    set ignored               qwen card  qwen shared  ministral card  ministral shared  gemma card
+    none                        17.5        15.7          7.4              10.9            25.6
+    OFFTOPIC + REQ_WORD         25.7        23.0         19.2              21.5            42.4
+    + LEN_USER, LEN_ASSIST      27.8        24.8         30.6              32.9            46.0
+    + REQ_SPAN, FORBID_SPAN     35.8        32.1         37.3              40.7            50.8
+    Even with the FAKE-bank codes, lengths and spans all ignored, no arm reaches 60% per attempt. The rest is a tail of
+    gates that are never loosened: HELDOUT_ECHO (gemma 177 hits: the your-X-is-Y frame in 108 despite the rules block, and
+    an E004 5-gram on user topic turns whose FAKE intent form is fake_data "ask for a simple tip about", 41 gemma, 39
+    qwen), PROMPT_ECHO (guidance copied into user lines: gemma 36, qwen card 50), AI_ISM (gemma 134 hits, mostly
+    one phrase; no phrase ban is built), PERSIST_FAIL (qwen card end-question rule 143), ABSTAIN_MISSING (qwen card
+    no offer 84, ministral shared no hedge 95), VALUE_EARLY, PERSPECTIVE.
+  Next fixes this points to (none made here): AI_ISM phrase ban at decoding; rewording that FAKE intent form and the
+    guidance that gets copied; a length-bounded last line with no END inside in decode.label_regex, plus a checker
+    rule for END inside a turn; parse.exact_text as the structured literal; real topic word sets (bank pass) before
+    OFFTOPIC is judged again; a D2 audit of LEN_ASSIST minimums on brief intents (Ministral).
+  Files (PC): runs/teachers/dry/<teacher>/dp2_0927/<arm>/: run/, report.dry.json, planck.dry.json, accepted_texts,
+    accepted_examples, rejected_examples (.dry.jsonl); runs/teachers/dry/dp2_summary_0927, dp2_recheck_0927,
+    dp2_headroom_0927 (.dry.json/.txt); logs dp2_*.log; teach/dp2 (frozen code copies, skeleton files, scripts).

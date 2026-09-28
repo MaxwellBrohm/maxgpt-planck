@@ -16,6 +16,7 @@ import check_behav
 import check_events
 import check_text
 import checker
+import lexicons
 import parse
 
 MODULES = [checker, check_text, check_events, check_behav, check_base, parse]
@@ -49,9 +50,9 @@ SRC = [  # (name, module, old, new)
     ("identity_any_name", check_behav, "if not ctx.has_sys or m.group(1) != ctx.card:", "if False:"),
     ("identity_card_wrong", check_behav, "if not ctx.has_sys or m.group(1) != ctx.card:", "if True:"),
     ("swap_no_deny_ok", check_behav, "if not L.DENY_RE.search(ctx.text[i]):", "if False:"),
-    ("case_insensitive_values", check_base, "rx = golds.value_re(v)\n        if self.lower_user",
-     "rx = re.compile(golds.value_re(v).pattern, re.I)\n        if self.lower_user"),
-    ("lowercase_user_strict", check_base, 'if self.lower_user and self.by_i[i]["role"] == "user":', "if False:"),
+    ("case_insensitive_values", check_base, "rx = golds.value_re(v)\n        user =",
+     "rx = re.compile(golds.value_re(v).pattern, re.I)\n        user ="),
+    ("lowercase_user_strict", check_base, "if self.lower_user and user:", "if False:"),
     ("parse_no_end_ok", parse, "if not ended:", "if False:"),
     ("parse_order_ok", parse, "if seen != order:", "if False:"),
     ("parse_no_unquote", parse, 'drift.append("quoted")\n        return t[1:-1].strip()', 'return t'),
@@ -59,6 +60,38 @@ SRC = [  # (name, module, old, new)
      'codes.append(("FORMAT_EXTRA", line.strip()[:40])) if not started else None'),
     ("parse_thought_ok", parse, 'codes.append(("THOUGHT_TAG", "non-empty thought block"))', "pass"),
     ("parse_no_merge", parse, "if not m or nxt is None or m.group(1) + m.group(2) != nxt:", "if True:"),
+    # 2026-09-27 pilot fixes (fixtures_pilot.py): each reverts or overshoots one change
+    ("quote_norm_off", check_base, "self.text = {i: straight(s) for i, s in turn_texts.items()}",
+     "self.text = dict(turn_texts)"),
+    ("det_swap_off", check_base, "return user and self.det_swap(i, v, s)", "return False"),
+    ("det_swap_your_ok", check_base, "return bool(value_re_i(alt).search(s))",
+     'return bool(value_re_i(alt).search(s) or value_re_i("your " + m.group(2)).search(s))'),
+    ("stem_no_y", check_base, '"er", "y", "e")', '"er", "e")'),
+    ("hedge_mentioned_dropped", lexicons, 'r"(?:was|wasn\'t|was not|has not been|hasn\'t been|haven\'t been) mentioned",',
+     ""),
+    ("offer_note_dropped", lexicons, 'r"(?:let me|i will|i\'ll|i can) (?:make a )?note", ', ""),
+    ("deny_just_assistant_dropped", lexicons, 'r"(?:i\'m|i am) just an assistant", ', ""),
+    ("exact_fold_all_roles", parse, 'fold = t["role"] == "user" and skel["user"]', 'fold = skel["user"]'),
+    ("exact_no_fold", parse, "return a.lower() == b.lower() if fold else a == b", "return a == b"),
+    ("ly_forms_dropped", check_text, 'stems.add(w[:-1] + "y" if w.endswith("le") else w + "ly")', "pass"),
+    ("ves_forms_dropped", check_text, 'stems.add(w[:-1 if w.endswith("f") else -2] + "ves")', "pass"),
+    ("placed_all_three", check_text, "R.req_word_turns(ctx.skel).values()   # placed words only",
+     '[ctx.skel["required_words"][k] for k in ("noun", "verb", "adj")]'),
+    ("guidance_copy_off", check_text, 'elif t["role"] == "user" and words(s) == words(R.guidance(ctx.skel, t)):',
+     "elif False:"),
+    ("offtopic_no_topic_words", check_behav, 'return content(text) | content(" ".join(TW.related(text)))',
+     "return content(text)"),
+    ("offtopic_generic_counts", check_base, "- GENERIC_STEMS\n", "\n"),
+    ("offtopic_no_prev_assist", check_behav, 'want = topic_set(topics[it.split(":")[1]]) | content(prev_assist or "")',
+     'want = topic_set(topics[it.split(":")[1]])'),
+    ("offtopic_no_prev_user", check_behav, 'want = all_topic | content(prev_user or "")', "want = all_topic"),
+    ("user_your_off", check_behav, "    out += _user_perspective(ctx)\n", ""),
+    ("hedge_given_off", check_events, "m = L.DEFLECT_RE.search(ctx.text[i]) or L.HEDGE_RE.search(ctx.text[i])",
+     "m = L.DEFLECT_RE.search(ctx.text[i])"),
+    ("pronoun_one_off", check_events,
+     'if "one" in others and len(ONE_RE.findall(s)) == len(PRONOUN_ONE.findall(s)):', "if False:"),
+    ("pronoun_one_any", check_events,
+     'if "one" in others and len(ONE_RE.findall(s)) == len(PRONOUN_ONE.findall(s)):', 'if "one" in others:'),
 ]
 
 

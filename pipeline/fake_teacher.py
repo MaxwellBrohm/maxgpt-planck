@@ -4,7 +4,7 @@ uses it as the clean baseline that every check must pass, then plants one defect
 index so consecutive assistant turns do not copy each other (SELF_COPY)."""
 import parse
 import render_prompt as R
-from check_base import content, sentences, stem, words
+from check_base import GENERIC_STEMS, content, sentences, stem, words
 from lexicons import STOPWORDS
 from fake_user import candidates as user_candidates, styled, cap, _event
 
@@ -30,6 +30,7 @@ FIXED = {"acknowledge the list": ["Okay, I have your list.", "Got the list, than
          "say it has no such thing of its own, without inventing one": ["I don't have one of my own, I'm an assistant.",
                                                                        "I don't have one, I'm an assistant."],
          "respond to the greeting briefly, no new topic": ["Hello, nice to hear from you."],
+         "greet the user back": ["Hi, good to hear from you.", "Hello, nice to hear from you."],
          "respond to the how are you briefly, no new topic": ["Doing fine, thanks for asking."],
          "respond to the thanks briefly, no new topic": ["You're welcome, glad it helped."],
          "respond to the goodbye briefly, no new topic": ["Bye, take care."],
@@ -40,7 +41,7 @@ REQ = {"noun": ["A {w} could help.", "A {w} helps."], "verb": ["You could {w} it
 
 def topic_words(text):
     """real content words of a topic text (not stems), longest first."""
-    ws = [w for w in words(text) if w not in STOPWORDS and len(w) > 2]
+    ws = [w for w in words(text) if w not in STOPWORDS and stem(w) not in GENERIC_STEMS and len(w) > 2]
     return sorted(dict.fromkeys(ws), key=len, reverse=True)
 
 
@@ -178,7 +179,7 @@ def render(skel):
     hint = dict(zip(skel["required_words"]["turn_hint"], pending))
     carry = []
     for t in skel["turns"]:
-        if t["mode"] == "exact":
+        if t["mode"] == "exact":   # the bank line; a lowercase-style user's copy may also be lowercased (D1 folds)
             texts[t["i"]] = t["text"]
         elif t["role"] == "user":
             texts[t["i"]] = user_line(skel, t)

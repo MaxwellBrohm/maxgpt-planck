@@ -61,9 +61,10 @@ def run(skel, raw, built=None, wordlist=None):
 
 
 def record_turns(skel, res):
-    """accepted conversation turns for the record: the stored text of an exact line is the bank line itself."""
+    """accepted conversation turns for the record: the stored text of an exact line is the bank line itself
+    (parse.exact_text: lowercased on a lowercase-style user's turns)."""
     out = []
     for t in skel["turns"]:
-        text = t["text"] if t["mode"] == "exact" else res["turns"][t["i"]]
+        text = parse.exact_text(skel, t) if t["mode"] == "exact" else res["turns"][t["i"]]
         out.append({"role": t["role"], "text": text, "mask": t["mask"]})
     return out

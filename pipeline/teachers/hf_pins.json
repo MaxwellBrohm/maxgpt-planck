@@ -6,7 +6,9 @@
     "gpu_memory_utilization": 0.88,
     "vllm_budget_mib": 10760,
     "assumed_non_kv_overhead_mib": 1200,
-    "why_0.88": "pc/wsl/gpuguard.py stops a job above 11,600 MiB used for 3 samples; vLLM preallocates util x total, and the Windows desktop also holds VRAM. Use 0.88, or give vLLM jobs a guard override."
+    "why_0.88": "pc/wsl/gpuguard.py stops a job above 11,600 MiB used for 3 samples; vLLM preallocates util x total, and the Windows desktop also holds VRAM. Use 0.88, or give vLLM jobs a guard override.",
+    "gpu_memory_utilization_now": 0.86,
+    "why_0.86": "2026-09-27: at 0.88 the served peaks reached 11,830 / 11,723 / 11,599 MiB against the 11,600 guard; serve.ENGINE defaults to 0.86 and serve.load refuses more. At 0.86 the decode probe still saw 11,725 MiB with Ministral loaded."
   },
   "teachers": {
     "gemma-4-12b": {

@@ -14,6 +14,7 @@ if PIPE not in sys.path:
 
 import checker  # noqa: E402
 import fake_teacher  # noqa: E402
+import parse  # noqa: E402
 import pools  # noqa: E402
 import render_prompt as R  # noqa: E402
 import shards  # noqa: E402
@@ -137,8 +138,8 @@ def verify(tc, out, plan, skels):
         tc.assertFalse(r["trainable"])
         tc.assertEqual(len(r["turns"]), len(sk["turns"]))
         for t, st in zip(r["turns"], sk["turns"]):
-            if st["mode"] == "exact":
-                tc.assertEqual(t["text"], st["text"])
+            if st["mode"] == "exact":   # the bank line, lowercased for a lowercase-style user (D1, 2026-09-27)
+                tc.assertEqual(t["text"], parse.exact_text(sk, st))
             for sp in t["spans"]:
                 value = r["slots"][sp["slot_id"]]["value"].lower()
                 tc.assertTrue(t["text"][sp["start"]:sp["end"]].lower().startswith(value), sp)

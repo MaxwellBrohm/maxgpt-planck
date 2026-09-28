@@ -8,6 +8,7 @@ import gate
 import heldout
 import lexicons as L
 import parse
+import render_prompt as R
 from check_base import words, ngrams, content
 
 REPEAT_MIN = 3        # a 4-gram this many times in one turn -> REPEAT_4GRAM
@@ -67,7 +68,7 @@ def chk_len(ctx):
 
 def chk_exact(ctx):
     return [("EXACT_MISMATCH", t["i"], s[:40]) for t, s in ctx.turns(mode="exact")
-            if parse.normalize(s) != parse.normalize(t["text"])]
+            if not parse.exact_ok(ctx.skel, t, s)]
 
 
 def chk_spans(ctx):
@@ -84,6 +85,10 @@ def word_forms_re(w):
         stems |= {w[:-1] + "ing", w[:-1] + "ed", w[:-1] + "er", w[:-1] + "est"}
     if w.endswith("y"):
         stems |= {w[:-1] + "ies", w[:-1] + "ied", w[:-1] + "ier", w[:-1] + "iest", w[:-1] + "ily"}
+    else:   # 2026-09-27 audit ("smoothly" read as missing "smooth"): adverbs, gentle -> gently; shelf -> shelves
+        stems.add(w[:-1] + "y" if w.endswith("le") else w + "ly")
+    if w.endswith("f") or w.endswith("fe"):
+        stems.add(w[:-1 if w.endswith("f") else -2] + "ves")
     if re.search(r"[^aeiou][aeiou][bdgmnprt]$", w):
         stems |= {w + w[-1] + "ing", w + w[-1] + "ed", w + w[-1] + "er", w + w[-1] + "est"}
     return re.compile(r"(?<![a-z])(?:" + "|".join(sorted(map(re.escape, stems), key=len, reverse=True)) + r")(?![a-z])",
@@ -91,9 +96,8 @@ def word_forms_re(w):
 
 
 def chk_req_word(ctx):
-    rw = ctx.skel["required_words"]
-    alltext = " ".join(s for _, s in ctx.turns())
-    return [("REQ_WORD", None, rw[k]) for k in ("noun", "verb", "adj") if not word_forms_re(rw[k]).search(alltext)]
+    alltext, placed = " ".join(s for _, s in ctx.turns()), R.req_word_turns(ctx.skel).values()   # placed words only
+    return [("REQ_WORD", None, w) for w in placed if not word_forms_re(w).search(alltext)]
 
 
 def chk_vocab(ctx):
@@ -203,6 +207,7 @@ def prompt_grams(ctx):
 
 
 def chk_prompt_echo(ctx):
+    """a PROMPT_N-gram of the prompt in a turn, or a guided user turn that is its own guidance ("say goodbye")."""
     if not ctx.built:
         return []
     g = prompt_grams(ctx)
@@ -211,6 +216,8 @@ def chk_prompt_echo(ctx):
         hit = g & set(ngrams(words(s), PROMPT_N))
         if hit:
             out.append(("PROMPT_ECHO", t["i"], " ".join(sorted(hit)[0])))
+        elif t["role"] == "user" and words(s) == words(R.guidance(ctx.skel, t)):
+            out.append(("PROMPT_ECHO", t["i"], "guidance copied"))
     return out
 
 

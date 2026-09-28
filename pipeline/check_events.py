@@ -11,6 +11,10 @@ CORR_OPS = {"set", "fix", "err", "twin", "add", "remove", "move_first", "move_la
 NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven",
                 "twelve"]
 YES_RE = re.compile(r"(?<![a-z])(?:yes|yep|yeah|still (?:on|there)|it is|it's (?:still )?(?:on|there))(?![a-z])", re.I)
+# "one" as a pronoun, not a count: "which one is next", "that one's done" (audit 2026-09-27: 3 count answers fired)
+PRONOUN_ONE = re.compile(r"(?<![a-z])(?:which|that|this|each|every|any|other|another|the|next|last|first|no)\s+one"
+                         r"(?![a-z])|(?<![a-z])one(?:'s|\s+of)(?![a-z])", re.I)
+ONE_RE = re.compile(r"(?<![a-z])one(?![a-z])", re.I)
 NO_RE = re.compile(r"(?<![a-z])(?:no|nope|not|isn't|is not|off|removed|gone|took .{1,30} off)(?![a-z])", re.I)
 
 
@@ -112,8 +116,9 @@ def chk_answers(ctx):
         named = mentioned(ctx, i, cands)
         if present + len(named) >= 2:
             out.append(("ANSWER_SHOTGUN", i, f"{e['id']} also {named}"))
-        if L.DEFLECT_RE.search(ctx.text[i]):
-            out.append(("DEFLECT", i, L.DEFLECT_RE.search(ctx.text[i]).group(0)))
+        m = L.DEFLECT_RE.search(ctx.text[i]) or L.HEDGE_RE.search(ctx.text[i])
+        if m:   # a hedge on a given item ("I do not know what ..., but ...") is a deflection too (2026-09-27)
+            out.append(("DEFLECT", i, m.group(0)))
     return out
 
 
@@ -133,6 +138,8 @@ def chk_list(ctx):
             continue
         if g["query"] == "count":
             others = mentioned(ctx, i, [w for w in NUMBER_WORDS if w != g["answer"]])
+            if "one" in others and len(ONE_RE.findall(s)) == len(PRONOUN_ONE.findall(s)):
+                others.remove("one")
             if not ctx.has(i, g["answer"]) or others:
                 out.append(("LIST_STATE", i, f"{e['id']} count {g['answer']} vs {others}"))
             continue

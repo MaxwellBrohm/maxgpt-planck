@@ -19,15 +19,29 @@ GEMMA_SAMPLING = {"temperature": 1.0, "top_p": 0.95, "top_k": 64, "min_p": 0.05}
 STOP = ["<turn|>", "<|turn>"]
 REQ_WORD_ORDER = ("noun", "verb", "adj")
 
+# The rules and a short worked example sit AFTER the script, the last thing the teacher reads before it writes
+# (dry pilot 2026-09-26: dashes in 368/399 Ministral outputs and Qwen label drift, with the rules only at the top).
+# The example uses its own FAKE items (a packing list), no slot pool value and no bank line, and shows "my" for "the"
+# in a user line, a lowercase user beside a sentence-case assistant, a number word, a comma, and END.
+RULES = ("Rules: no dashes (use a comma or a new sentence); no digits (numbers as words); the assistant writes "
+         "normal sentence case, never answers as your X is Y; a line not marked copy exactly says what happens: write "
+         "what the person would say, and the user calls their own things my, never your.")
+EXAMPLE = ("Example, another script, a user who writes in lowercase:\n"
+           "U1 [3-12 words]: ask what comes first on the packing list\n"
+           "A2 [3-12 words; must include: \"maps\"]: answer from the list\n"
+           "gives\n"
+           "U1: what comes first on my packing list?\n"
+           "A2: The maps come first, then two sweaters.\n"
+           "END")
 VARIANTS = [
-    ("instr.fake.0",
+    ("instr.fake.p2.0",
      "Write one chat between a user and an assistant. Follow the script below line by line.\n"
      "Style: plain everyday sentences. No emojis, no bold or other markdown, no lists, no dashes of any kind, no "
      "stage directions, no speaker names inside a line. Typos only if the user sketch says so.",
      "Output: one line per script line, starting with its label and a colon (like U1: ...), in the same order, "
      "then a last line with END. Write nothing else. Lines marked copy exactly must be copied character for "
      "character. Stay inside each word range and use every must include item exactly as written."),
-    ("instr.fake.1",
+    ("instr.fake.p2.1",
      "Your job is to write a short chat between a person and an assistant, one line for each script line below.\n"
      "Keep the language simple and natural. Do not use emojis, markdown, bullet points, dashes, actions in "
      "brackets, or names in front of lines. Only add typos if the user is described as making them.",
@@ -37,7 +51,8 @@ VARIANTS = [
 ]
 STYLE_TEXT = {"terse": "writes very short messages", "chatty": "writes friendly, fuller messages",
               "typos": "makes a few small typos, but never in the must include words",
-              "lowercase": "writes everything in lowercase, names included"}
+              "lowercase": "writes in lowercase, names included; this is the user's style only, the assistant "
+                           "writes normal sentence case"}
 AGE_TEXT = {"teen": "in their teens", "20s": "in their twenties", "30s": "in their thirties", "40s": "in their forties",
             "50s": "in their fifties", "60s": "in their sixties", "70s": "in their seventies"}
 FAKE_TRAITS = ["cheerful", "busy", "careful", "curious", "laid back", "practical", "shy", "patient", "restless",
@@ -82,8 +97,10 @@ def card_block(skel):
     lines.append("It never invents plans, family, a body, a past, favourite things or places of its own.")
     u = skel["user"]
     lines.append("The user:")
-    un = user_name(skel)
-    lines.append(f"Name: {un}, said only where the script says it." if un else "The user never gives a name.")
+    # the user's name is not printed (VALUE_EARLY audit 2026-09-27: teachers greeted the user by it before the line
+    # that gives it); the script line that plants it carries it as a must include or copy exactly text
+    lines.append("Nobody in the chat uses a name before the script line that gives it." if user_name(skel)
+                 else "The user never gives a name.")
     lines.append(f"The user {STYLE_TEXT[u['style']]}. Background for the voice only, never stated: "
                  f"{persona_text(skel)}.")
     return "\n".join(lines)
@@ -101,7 +118,7 @@ RULE_NOTE = {"max_words": "at most {max} words", "one_sentence": "exactly one se
 def script_line(skel, t, req_words):
     lab = parse.ROLE_LETTER[t["role"]] + str(t["i"] + 1)
     if t["mode"] == "exact":
-        return f"{lab} [copy exactly]: {t['text']}"
+        return f"{lab} [copy exactly]: {parse.exact_text(skel, t)}"
     no_name = not skel["assistant"].get("system_text")
     excl = [x for x in t["must_exclude"] if not (no_name and x == card_name(skel))]
     parts = [f"{t['min_w']}-{t['max_w']} words"]
@@ -132,7 +149,8 @@ def build(skel, variant=None):
     if variant is None:
         variant = random.Random(skel["skel_id"]).randrange(len(VARIANTS))
     vid, head, tail = VARIANTS[variant]
-    blocks = {"head": head, "card": card_block(skel), "script": script_block(skel), "tail": tail}
+    blocks = {"head": head, "card": card_block(skel), "script": script_block(skel),
+              "tail": RULES + "\n\n" + tail + "\n\n" + EXAMPLE}
     prompt = "\n\n".join([blocks["head"], blocks["card"], blocks["script"], blocks["tail"]])
     return {"prompt": prompt, "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(), "variant": vid,
             "blocks": blocks, "labels": parse.plan(skel), "persona": persona_text(skel),
