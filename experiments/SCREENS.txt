@@ -349,3 +349,17 @@ notes; PLAN; LEDGER; research/lanes/arch.md and compute.md; research/followup/lo
   its new parameters get, and S005's b drift is read from its half-life diagnostic). Partly applied: the P-020 toy
   runs before S005's g-check only if its code lands before stage 2 (no toy code exists in the repo: no .py file
   mentions MQRAR).
+
+AMENDMENT C1-a (2026-09-28, before any screen config, flag run or result exists; decided by Claude under Max's
+delegation, reversible). C1's "every engine flag written explicitly with E2's FIXED 1 values" now has one exception:
+BASE and every arm of every screen set train.compile: default (harness/notes.txt SPEED V3, PROVE and FOLLOW-UPS,
+main 6b9fb0f). Evidence: on the 5070 at 5M docmask B16, compiled training runs +107% to +121% faster than eager
+(against eager's best batch setting), and 200-step parity at 5M and 20M sits within eager's own run-to-run noise
+(pooled permutation p >= 0.36). Every other engine flag keeps E2's FIXED values (train.compile_dynamic unset,
+train.ce_chunk_rows 0). Why this is safe for the screens: each screen compares arms against its own BASE, and every
+arm gets the same setting. What is not yet shown: that each screen's new flag (S004 canon, S005 forget_gate on the
+mask path, S006 mtp_aux, S007 smear_key) compiles cleanly. So before a screen's arms start: (1) a compiled smoke of
+its flag arm (graph count and breaks logged, no recompile-limit message); (2) a 200-step parity of that arm,
+compiled vs eager, by compile_parity.py's rule. A screen whose flag fails either check runs ALL its arms eager, and
+the failure is logged in its notes.txt before any of its arms run. LR5 still comes from E2/E3 (eager); compile does
+not change the function trained, only its speed, within the parity result above.
