@@ -725,8 +725,11 @@ and E3 stay pinned to the current engine regardless).
     every size, 10M within noise), compile at its best is +75.5 to +106.8 percent (NUMBERS REVIEW below).
     The old tree's +59 percent is superseded: with the batched optimizer the forward is a larger share of
     the step. RECOMMEND: default for NEW
-    experiments (set train.compile: default in their configs). Flipping train.py's own default would move
-    every config that omits the key, so E2 and E3 configs must say compile: false first; not done here.
+    experiments (set train.compile: default in their configs). E2 and E3 already pin compile: false and
+    ce_chunk_rows: 0 (experiments/E2_lr_transfer/configs/engine.yaml; base5m.yaml extends it, base20m.yaml
+    extends base5m, E3's run configs extend those bases), so flipping train.py's own default would NOT move
+    them; it would move every config that omits the key: E006, the S-screens, the RC-12 baselines and
+    sample_tiny. (Corrected 2026-09-28, SPEED V3 FOLLOW-UPS (1): this line first said E2/E3 must be pinned.)
     Costs: 16 to 23 s compile per new shape cold, 1 to 2 s warm; 3 graph breaks at cu_seqlens (6 graphs
     over varying document counts, stable). max-autotune-no-cudagraphs: not measured here, stays unvalidated.
   train.ce_chunk_rows 2048: passes alone and combined (both parity sizes, CUDA tests). A/B mixed: alone
@@ -784,3 +787,8 @@ during compiles, 1.23 at end). Same rows per optimizer step, B x 1 vs B/2 x 2, e
   least partly this eager effect.
   Raw: PC ~/planck/dev/speed3_rev3/{retime,retime_b4,batchcheck}.jsonl (+ batchcheck.jsonl.rep), logs
   ~/planck/logs/speed3_rev3.log and speed3_rev3b.log.
+SPEED V3 FOLLOW-UPS (2026-09-28, on speed/v3 after rebasing onto main 505d564; Mac CPU only, no GPU, no model
+beyond the CPU unit tests). From the correctness review (r1) and the numbers review (r2) of the entries above.
+  (1) The PROVE Verdicts line on E2/E3 was wrong (r1 finding 1) and is corrected in place: engine.yaml already
+      pins compile: false and ce_chunk_rows: 0 for every E2 and E3 run config, so a flip of train.py's default
+      would move only the configs that omit the key (E006, the S-screens, the RC-12 baselines, sample_tiny).
