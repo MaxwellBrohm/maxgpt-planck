@@ -1,0 +1,21 @@
+# E3 Part 1 (e3plan.py): 5M pairs, then two replays of A1
+wait_mark E2 E2 5M DONE
+train e3_5m_A_s1
+train e3_5m_B_s1
+train e3_5m_A_s2
+train e3_5m_B_s2
+train e3_5m_A_s3
+train e3_5m_B_s3
+train e3_5m_A_s4
+train e3_5m_B_s4
+train e3_5m_A_s5
+train e3_5m_B_s5
+train e3_5m_A_s6
+train e3_5m_B_s6
+train e3_5m_A_s7
+train e3_5m_B_s7
+train e3_5m_A_s8
+train e3_5m_B_s8
+train e3_5m_A_s1_R2
+train e3_5m_A_s1_R3
+mark E3 PART 1 DONE

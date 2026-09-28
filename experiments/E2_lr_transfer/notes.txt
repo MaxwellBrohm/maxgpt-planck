@@ -359,3 +359,20 @@ STAGE_B (auto, e2chain.py, 2026-09-28 09:44 EDT): stage B decided r_B = 1.0; sta
     5a62920d85899122406b9f1b1f79299f74c8c3a4f8a6cd6105c41d841b847ab1 5m_e6_r1_trunk.yaml
 
 STAGE C RESULT (auto, e2chain.py, 2026-09-28 09:46 EDT): g pick 1.0, LRs {'pick': [0.003, 1.0], 'runner_up': [0.0015, 1.0]}, runner-up 0.5, 125M argmin 1.0. The 5M search is decided; E3 and the 20M grid are next (left for a Claude session: E3's arms read these picks).
+
+E2 5M DONE (2026-09-28 16:40 EDT, Claude). Stage C was decided by e2chain.py at 09:46 (stage B r_B = 1 made stage
+C's g grid the stage A runs: g 0.25..4 = eta 0.75..12e-3 at r 1, reused). Final 5M pick (eta_5, r_5) = (3e-3, 1),
+runner-up (1.5e-3, 1); 125M argmin also g 1. The stage C plan ended with mark "E2 STAGE C DONE", not "E2 5M DONE",
+so the "E2 5M DONE" mark (marks/E2_5M_DONE plus a MARK line in queue_e2.txt) is written by hand now, after the
+decision and before E3 starts. 20M GRID QUEUED: g in {0.5, 1, 2} around (3e-3, 1) = 20m_e1.5_r1, 20m_e3_r1, 20m_e6_r1,
+plans/grid20m.txt sha256 9897100d7bb3ebe89d1acbb7b55f3327bb290a237e01dc46ef690fb0d691625c (waits for "E3 PART 1 DONE", marks "E2 20M DONE"), plans/CURRENT = grid20m.
+Extensions at 20M (argmin at an edge) are left for a Claude session (e2pick q2). Configs:
+    ab09bb5f3a3bc5116e10ca85d967ebf2db2949805b29d1bd0789a1492538b399 20m_e1.5_r1_b250M.yaml
+    96695ddf07a2458875e922238592e0edf9faba5891180576808427b21c267f63 20m_e1.5_r1_b500M.yaml
+    dc62392bc4cce09a2c5074409660e688ae837b1188966522cb740776400737b1 20m_e1.5_r1_trunk.yaml
+    88c673575321f7898cf0962bbaf8089f194b30b2f1597ba0a46f76e05fa016a8 20m_e3_r1_b250M.yaml
+    f40a0232698b0e4c238cf9bed035688b0e98ddda124280a9c0c024a2eaa2ec40 20m_e3_r1_b500M.yaml
+    5687fbe2ff5b24444a15bdb6c5963c9f197a3675104637cad32b9b8e641e0ced 20m_e3_r1_trunk.yaml
+    398dd60384f4acdd9990c4862aaba041fbc1733a4cf0467bb8a7d09d877a3e64 20m_e6_r1_b250M.yaml
+    180102c169715e00d89fb1a3af33f567b858aa58369b6fcdbb281ca6948e1235 20m_e6_r1_b500M.yaml
+    43d290b08ee07328e2939c2c8fb3856ccc5fdc020ff593378253e1a8cc780ad2 20m_e6_r1_trunk.yaml

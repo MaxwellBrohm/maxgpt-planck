@@ -171,3 +171,7 @@ CHANGES AFTER CRITIQUE (2026-09-26; no run existed, nothing committed)
   8 What a data seed changes in this loader is recorded, so sigma_data is read as this loader's noise.
   9 Data are E2's pinned shares (E2 change 1); warmup_steps and ckpt_every written explicitly.
   10 The budget line and the yield order were added.
+
+PART 1 QUEUED (2026-09-28 16:40 EDT, Claude): e3plan.py --a5 0.003,1 --b5 0.0015,1 (E2's final 5M pick and runner-up,
+E2 results.json stage_C) wrote 18 configs and plans/part1.txt (A1 B1 ... A8 B8, then A1's replays R2 R3; waits for
+"E2 5M DONE"; marks "E3 PART 1 DONE"). Part 2 (20M) waits for E2's 20M picks; Part 3 needs the data_seed patch.
