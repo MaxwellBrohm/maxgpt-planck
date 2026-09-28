@@ -1,12 +1,15 @@
 """compile_parity.pooled: the exchangeability check behind the compile parity verdict (CPU,
-synthetic loss curves; the real curves come from the PC runs)."""
+synthetic loss curves; the real curves come from the PC runs). compile_parity.check_arms: a bad arm
+stops the invocation before any run."""
 from __future__ import annotations
 
 import itertools
 import random
 import statistics as st
 
-from compile_parity import dist, pooled
+import pytest
+
+from compile_parity import check_arms, dist, main, pooled
 
 
 def curves(seed: int = 0):
@@ -55,3 +58,17 @@ def test_pooled_is_calibrated_when_compiled_runs_are_eager_like():
 def test_pooled_needs_two_eager_runs():
     runs = [{"arm": "eager", "loss": [1.0] * 60}, {"arm": "default", "loss": [1.1] * 60}]
     assert pooled(runs) == {}
+
+
+def test_arms_are_checked_before_any_run(tmp_path):
+    """train.main refuses max-autotune-no-cudagraphs (notes.txt SPEED V3 FOLLOW-UPS (3)) only when that arm's
+    turn comes, so compile_parity checks every arm first: a bad one stops it before the CUDA check, the data
+    and the first run (on the Mac a ValueError, not the CUDA assert), and no JSON is written."""
+    check_arms(["eager:det", "eager", "default", "default:det", "eager+ce:det", "default+ce"])
+    for bad in ("max-autotune-no-cudagraphs", "reduce-overhead", "default:fast", "eager+chunk", "true"):
+        with pytest.raises(ValueError, match="compile_parity arm"):
+            check_arms(["eager:det", bad])
+    out = tmp_path / "p.json"
+    with pytest.raises(ValueError, match="compile_parity arm"):
+        main(["--arms", "eager:det,max-autotune-no-cudagraphs", "--out", str(out)])
+    assert not out.exists()

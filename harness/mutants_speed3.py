@@ -75,3 +75,9 @@ mut("s3_train_accepts_autotune", "speed3", "train.py", "if cmode is not None and
 mut("s3_train_refuses_default", "speed3", "train.py", 'TRAIN_COMPILE_MODES = ("default",)',
     "TRAIN_COMPILE_MODES = ()", "train.py refuses the validated mode too",
     tests=[CT + "test_train_refuses_the_unvalidated_compile_mode"])
+mut("s3_parity_arms_unchecked", "speed3", "compile_parity.py", "    check_arms(arms)  ", "    pass  ",
+    "compile_parity runs the arms before a refused one (lost GPU time, no JSON)",
+    tests=["test_compile_parity.py::test_arms_are_checked_before_any_run"])
+mut("s3_parity_accepts_autotune", "speed3", "compile_parity.py", "mode not in train.TRAIN_COMPILE_MODES)",
+    'mode not in ("default", "max-autotune-no-cudagraphs"))', "compile_parity accepts the arm train.py refuses",
+    tests=["test_compile_parity.py::test_arms_are_checked_before_any_run"])

@@ -504,6 +504,9 @@ from the old-tree candidates, marked so.
                   compiling with reduction "sum" model.forward skips the (tgt != -100).any() guard (a sync and a
                   graph break; the sum over zero targets is exactly 0 with zero grads); eager and "mean" keep it.
                   Start record: compile (and compile_backend when not inductor).
+                  (Since SPEED V3 FOLLOW-UPS (2), (3): train.py takes false | default only, max-autotune-
+                  no-cudagraphs is a bench arm; compile_dynamic false with varlen is refused; the start record
+                  also carries compile_dynamic; train.compile resolves and is checked before the self-test.)
   train.ce_chunk_rows  0 (default) | N: lm_head + cross-entropy N rows at a time, no full logits
                   (chunked_ce.py, imported only when N > 0; the memory candidate's code unchanged). The S006
                   aux head still builds its own full logits. On eager CUDA the per-chunk core runs through
@@ -728,8 +731,10 @@ and E3 stay pinned to the current engine regardless).
     experiments (set train.compile: default in their configs). E2 and E3 already pin compile: false and
     ce_chunk_rows: 0 (experiments/E2_lr_transfer/configs/engine.yaml; base5m.yaml extends it, base20m.yaml
     extends base5m, E3's run configs extend those bases), so flipping train.py's own default would NOT move
-    them; it would move every config that omits the key: E006, the S-screens, the RC-12 baselines and
-    sample_tiny. (Corrected 2026-09-28, SPEED V3 FOLLOW-UPS (1): this line first said E2/E3 must be pinned.)
+    them; it would move every harness train.py config that omits the key: sample_tiny today, the S-screens
+    and Track K once written. E003, E006 and the RC-12 baselines never read it (HF fine-tune loops and HF /
+    checkpoint evaluation, not train.py). (Corrected 2026-09-28, SPEED V3 FOLLOW-UPS (1): this line first
+    said E2/E3 must be pinned; the review of the follow-ups removed E006 and RC-12 from the list.)
     Costs: 16 to 23 s compile per new shape cold, 1 to 2 s warm; 3 graph breaks at cu_seqlens (6 graphs
     over varying document counts, stable). max-autotune-no-cudagraphs: not measured here, stays unvalidated.
   train.ce_chunk_rows 2048: passes alone and combined (both parity sizes, CUDA tests). A/B mixed: alone
@@ -791,7 +796,8 @@ SPEED V3 FOLLOW-UPS (2026-09-28, on speed/v3 after rebasing onto main 505d564; M
 beyond the CPU unit tests). From the correctness review (r1) and the numbers review (r2) of the entries above.
   (1) The PROVE Verdicts line on E2/E3 was wrong (r1 finding 1) and is corrected in place: engine.yaml already
       pins compile: false and ce_chunk_rows: 0 for every E2 and E3 run config, so a flip of train.py's default
-      would move only the configs that omit the key (E006, the S-screens, the RC-12 baselines, sample_tiny).
+      would move only the train.py configs that omit the key (sample_tiny; the S-screens and Track K once
+      written). E003, E006 and the RC-12 baselines do not run harness/train.py, so the key never reaches them.
   (2) train.compile_dynamic false is refused when doc_attn resolves to varlen (r1 finding 2: over 12 batches of
       varying document counts it recompiled up to Dynamo's recompile limit, after which the attention and loss
       frames ran eager, correct but without the speedup and without a message). train.check_compile runs right
@@ -833,3 +839,15 @@ DEFAULTS DECISION (2026-09-28, made by the orchestrator under Max's delegation; 
     YAML files, K4_allocation/configs/model_H4/H6/H7.yaml, hold a model: block alone, and code/gen.py emits
     data blocks only, so there is no run config to add the key to.
   Config files changed for this decision: none.
+SPEED V3 FOLLOW-UPS, REVIEW (2026-09-28, Mac CPU only). Checked: main's side of the two conflicted files
+(pc/tests/mutation_check.py, pc/RUNBOOK.txt) is intact; experiments/, rc12/, pipeline/ and pc/wsl/ are
+byte-identical to main; both refusals fire before the start record (varlen via the real set_doc_attn with
+only its CUDA check skipped); bench_micro still takes max-autotune-no-cudagraphs as an arm. Fixed:
+  - (1)'s list: E003, E006 and the RC-12 baselines never run harness/train.py (HF fine-tune loops, HF and
+    checkpoint evaluation), so a default flip moves only train.py configs that omit the key. Corrected in
+    place in the PROVE Verdicts and in (1); the SPEED V3 entry's train.compile lines now point at (2), (3).
+  - compile_parity.check_arms: every arm is checked before the CUDA check, the data and the first run.
+    Before, a max-autotune-no-cudagraphs arm (refused by train.main since (3)) failed only at its turn,
+    after the earlier arms had used the GPU, with no JSON written. Test:
+    test_compile_parity.py::test_arms_are_checked_before_any_run. Mutants (speed3): s3_parity_arms_unchecked,
+    s3_parity_accepts_autotune, both killed.

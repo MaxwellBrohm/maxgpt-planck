@@ -53,6 +53,18 @@ from testutil import read_jsonl, write_run  # noqa: E402
 REF = ("eager", "eager:det")
 
 
+def check_arms(arms: list[str]) -> None:
+    """Refuse a bad arm before any run. train.main refuses a mode outside train.TRAIN_COMPILE_MODES
+    only when that arm's turn comes, after the arms before it have used the GPU, and no JSON is written."""
+    for arm in arms:
+        spec, _, det = arm.partition(":")
+        mode, _, ce = spec.partition("+")
+        if det not in ("", "det") or ce not in ("", "ce") or \
+                (mode != "eager" and mode not in train.TRAIN_COMPILE_MODES):
+            raise ValueError(f"compile_parity arm {arm!r}: expected <eager | one of "
+                             f"{train.TRAIN_COMPILE_MODES}>[+ce][:det]")
+
+
 def run_arm(arm: str, i: int, a, model_cfg: dict, data_dir: str, work: str) -> dict:
     spec, _, det = arm.partition(":")
     mode, _, ce = spec.partition("+")
@@ -167,12 +179,13 @@ def main(argv=None) -> int:
     ap.add_argument("--ce-chunk", type=int, default=2048, help="rows per chunk for +ce arms")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
+    arms = a.arms.split(",")
+    check_arms(arms)                          # before CUDA, the data and the first run
     assert torch.cuda.is_available(), "compile_parity runs on CUDA"
     sol = budget.solve(a.target, budget.Constraints())
     model_cfg = sol.cfg.replace(seq_len=a.seq_len).to_dict()
     work = tempfile.mkdtemp(prefix="compile_parity_")
     make(os.path.join(work, "data"), vocab=model_cfg["vocab_size"], docs=20000, chats=15000)
-    arms = a.arms.split(",")
     runs = []
     for i, arm in enumerate(arms):
         r = run_arm(arm, i, a, model_cfg, os.path.join(work, "data"), work)
