@@ -812,3 +812,9 @@ beyond the CPU unit tests). From the correctness review (r1) and the numbers rev
       on the 2026-09-26 defaults", ce_chunk_rows "unmeasured") and pc/RUNBOOK.txt STEP 8 ("not yet measured on
       these defaults") now give the measured status. r1 listed no others; the remaining SPEED V3 comments were
       checked against PROVE and left as they are.
+  (5) Eager half-batch finding (r2, NUMBERS REVIEW above): at the same rows per optimizer step, eager runs 1 to
+      9 percent faster at half its largest-fit micro batch x 2 accumulation (5M +6.9, 10M +1.1 within noise, 20M
+      +5.4, 30M +8.8 percent); compile does not (-1.3 to -5.8 percent at half batch), so it keeps its largest
+      fit. NOT applied to any pinned experiment: E2, E3, E006, E003 and the RC-12 baselines keep their micro
+      batch and accumulation (changing them mid-experiment is a deviation, and the runs would not be
+      bit-identical). A new eager config may use B/2 x 2; B/4 x 4 was not measured.
