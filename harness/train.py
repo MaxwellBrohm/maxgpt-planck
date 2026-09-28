@@ -65,6 +65,17 @@ def build_schedule(sc: dict, total_steps: int, n_params: int, batch_tokens: int,
     raise ValueError(f"unknown schedule mode {mode!r}")
 
 
+def check_compile(cmode: str | None, dynamic, doc_attn: str) -> None:
+    """Refuse the train.compile settings no parity run validated (notes.txt SPEED V3 FOLLOW-UPS).
+    compile_dynamic false with doc_attn varlen: every new document count recompiles until Dynamo's
+    recompile limit, then the frames after the cu_seqlens break (attention, loss) run eager for
+    good. The loss stays correct and the speedup is lost without a message. Unset (null) is the
+    validated setting: the graph count settles at 6."""
+    if cmode is not None and dynamic is False and doc_attn == "varlen":
+        raise ValueError("train.compile_dynamic false with doc_attn varlen recompiles per document count and "
+                         "falls back to eager at Dynamo's recompile limit; leave compile_dynamic unset")
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("config")
@@ -105,6 +116,11 @@ def main(argv=None) -> int:
     # packed-row attention kernel (docattn.py); auto = varlen on cuda+bf16, else mask
     doc_attn = resolve_doc_attn(tc.get("doc_attn", "auto"), device, precision)
     set_doc_attn(model, doc_attn, device)
+    # train.compile (default off = eager; model.compile_mode): torch.compile the training forward only.
+    # The self-test below, eval hooks, the optimizer, clipping and checkpoints use the plain module.
+    cmode = compile_mode(tc.get("compile", False))
+    cdyn = tc.get("compile_dynamic")          # None = Dynamo's automatic dynamic shapes (validated)
+    check_compile(cmode, cdyn, model.doc_attn)
     if tc.get("selftest", True):
         st = run_selftests(model, device, amp, packed=(dmode == "pack"))
         print(f"[train] leak self-test passed {st}", flush=True)
@@ -115,10 +131,7 @@ def main(argv=None) -> int:
     batch_tokens = per_micro * accum
     total_steps = int(tc["total_steps"]) if "total_steps" in tc else \
         S.steps_for_tokens(float(tc["total_tokens"]), batch_tokens)
-    # train.compile (default off = eager; model.compile_mode): torch.compile the training forward only.
-    # The self-test above, eval hooks, the optimizer, clipping and checkpoints use the plain module.
-    cmode = compile_mode(tc.get("compile", False))
-    fwd = compile_forward(model, cmode, tc.get("compile_backend", "inductor"), tc.get("compile_dynamic"))
+    fwd = compile_forward(model, cmode, tc.get("compile_backend", "inductor"), cdyn)
     ce_chunk = ce_chunk_rows(tc.get("ce_chunk_rows", 0))   # default 0 = the reference loss path
     opt = make_optimizer(model, oc, device, extra=head)
 
@@ -173,6 +186,7 @@ def main(argv=None) -> int:
         start["lazy_metrics"] = True
     if cmode:                               # SPEED V3 switches, both opt-in
         start["compile"] = cmode
+        start["compile_dynamic"] = cdyn     # recorded even when unset (null = automatic)
         if tc.get("compile_backend", "inductor") != "inductor":
             start["compile_backend"] = tc["compile_backend"]
     if ce_chunk:

@@ -17,6 +17,7 @@ import train
 from config import PlanckConfig
 from make_fake_data import make
 from model import build_model
+from train import check_compile
 from test_s3_resume import state_equal
 from testutil import read_jsonl, write_run
 
@@ -55,7 +56,7 @@ def test_compile_is_off_by_default(tmp_path, data):
     assert train.main([run, "--max-steps", "3"]) == 0
     assert torch._dynamo.utils.counters["stats"]["unique_graphs"] == 0
     starts = [r for r in read_jsonl(tmp_path / "runs.jsonl") if r["event"] == "start"]
-    assert starts and all("compile" not in r and "compile_backend" not in r for r in starts)
+    assert starts and all(not {"compile", "compile_backend", "compile_dynamic"} & set(r) for r in starts)
 
 
 @pytest.mark.parametrize("mode", ["pack", "bucket"])
@@ -110,3 +111,29 @@ def test_compiled_checkpoint_resumes_eager_and_back(tmp_path, data):
     st = [r for r in read_jsonl(tmp_path / "runs.jsonl") if r["event"] == "start" and r["run"] == "mixed"]
     assert [r.get("compile") for r in st] == ["default", None]
     assert st[1]["resumed_from"] and st[1]["step"] == 20
+
+
+def test_compile_dynamic_is_recorded(tmp_path, data):
+    """A compiled run records train.compile_dynamic in its start record, null when the key is absent
+    (Dynamo's automatic dynamic shapes); false is allowed with the mask engine (CPU) and recorded."""
+    for name, extra in (("auto", {}), ("static", {"compile_dynamic": False})):
+        run = write_run(str(tmp_path / name), data, train={**COMPILED, **extra})
+        assert train.main([run, "--max-steps", "1"]) == 0
+        torch._dynamo.reset()
+    st = {r["run"]: r for r in read_jsonl(tmp_path / "runs.jsonl") if r["event"] == "start"}
+    assert "compile_dynamic" in st["auto"] and st["auto"]["compile_dynamic"] is None
+    assert st["static"]["compile_dynamic"] is False and st["static"]["compile"] == "default"
+
+
+def test_compile_dynamic_false_refused_with_varlen(tmp_path, data, monkeypatch):
+    """compile_dynamic false with doc_attn varlen recompiles per document count and falls back to eager
+    at Dynamo's limit (notes.txt SPEED V3 FOLLOW-UPS), so train.main refuses it before any work. varlen
+    needs CUDA, so the doc_attn resolution is stubbed: the refusal comes before any forward."""
+    monkeypatch.setattr(train, "resolve_doc_attn", lambda *a: "varlen")
+    monkeypatch.setattr(train, "set_doc_attn", lambda m, impl, device=None: setattr(m, "doc_attn", impl))
+    run = write_run(str(tmp_path / "run"), data, train={**COMPILED, "compile_dynamic": False, "selftest": False})
+    with pytest.raises(ValueError, match="compile_dynamic false with doc_attn varlen"):
+        train.main([run, "--max-steps", "1"])
+    for ok in ((None, False, "varlen"), ("default", None, "varlen"), ("default", True, "varlen"),
+               ("default", False, "mask")):
+        check_compile(*ok)                                   # eager, unset, true, or the mask engine

@@ -57,3 +57,15 @@ mut("s3_guard_dropped_for_mean", "speed3", "model.py",
     tests=[C + "test_all_ignored_batch_compiled_in_one_graph"])
 mut("s3_cuda_graph_modes_allowed", "speed3", "model.py", "if value not in COMPILE_MODES:", "if False:",
     "reduce-overhead / max-autotune (CUDA graphs, untested) accepted", tests=[C + "test_compile_mode_values"])
+# ---------------- follow-ups (notes.txt SPEED V3 FOLLOW-UPS) ----------------
+CT = "test_compile_train.py::"
+mut("s3_dynamic_false_varlen_accepted", "speed3", "train.py",
+    'if cmode is not None and dynamic is False and doc_attn == "varlen":', "if False:",
+    "compile_dynamic false with varlen accepted (recompile limit, silent eager fallback)",
+    tests=[CT + "test_compile_dynamic_false_refused_with_varlen"])
+mut("s3_dynamic_false_refused_everywhere", "speed3", "train.py",
+    'if cmode is not None and dynamic is False and doc_attn == "varlen":',
+    "if cmode is not None and dynamic is False:", "compile_dynamic false refused with the mask engine too",
+    tests=[CT + "test_compile_dynamic_is_recorded"])
+mut("s3_dynamic_not_recorded", "speed3", "train.py", 'start["compile_dynamic"] = cdyn', "pass",
+    "the start record hides compile_dynamic", tests=[CT + "test_compile_dynamic_is_recorded"])

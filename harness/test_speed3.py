@@ -98,7 +98,8 @@ def test_default_run_is_the_reference_and_builds_nothing_new(tmp_path, data):
     assert json.load(open(out)) == {"rc": 0, "plain": [True], "chunked_ce": False, "graphs": 0}
     assert train.main([b]) == 0
     runs = read_jsonl(tmp_path / "runs.jsonl")
-    assert len(runs) == 4 and not {"compile", "compile_backend", "ce_chunk_rows"} & {k for r in runs for k in r}
+    speed = {"compile", "compile_backend", "compile_dynamic", "ce_chunk_rows"}
+    assert len(runs) == 4 and not speed & {k for r in runs for k in r}
     la, lb = (read_jsonl(tmp_path / r / "out" / "log.jsonl") for r in "ab")
     drop = lambda r: {k: v for k, v in r.items() if k not in ("tok_per_s", "time")}  # noqa: E731
     assert [drop(r) for r in la] == [drop(r) for r in lb] and len(la) == 12
