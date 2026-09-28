@@ -818,3 +818,18 @@ beyond the CPU unit tests). From the correctness review (r1) and the numbers rev
       fit. NOT applied to any pinned experiment: E2, E3, E006, E003 and the RC-12 baselines keep their micro
       batch and accumulation (changing them mid-experiment is a deviation, and the runs would not be
       bit-identical). A new eager config may use B/2 x 2; B/4 x 4 was not measured.
+DEFAULTS DECISION (2026-09-28, made by the orchestrator under Max's delegation; recorded here):
+  train.py's own default stays train.compile false, so no config that omits the key changes. Configs of
+  experiments that have NOT started runs set train.compile: default explicitly: the screens S001-S007 and Track
+  K. If a screen compares arms, every arm of that screen (and its BASE) gets the same setting. NOT touched: E2,
+  E3 (engine.yaml pins compile: false), E006, E003, the RC-12 baselines and anything already running.
+  Applied (what exists to change, checked 2026-09-28 on speed/v3 = main 505d564 + the SPEED V3 commits):
+  - Screens: no screen config exists yet. experiments/S001..S008 hold only notes.txt, and no config generator
+    is in the repo. experiments/SCREENS.txt C1 (pre-registration prose, not edited here) says BASE writes
+    "every engine flag written explicitly with E2's FIXED 1 values", which is compile: false. So whoever
+    writes the screen BASE and arm configs must write train.compile: default in BASE and every arm of every
+    screen (S005's own mask-engine BASE included), logged against C1 before the first screen config.
+  - Track K: not on main and not in this tree (experiments/K is untracked in the main checkout). Its only
+    YAML files, K4_allocation/configs/model_H4/H6/H7.yaml, hold a model: block alone, and code/gen.py emits
+    data blocks only, so there is no run config to add the key to.
+  Config files changed for this decision: none.
