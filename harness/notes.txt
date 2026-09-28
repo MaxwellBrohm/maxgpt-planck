@@ -571,3 +571,158 @@ Not done here: anything on CUDA (the 5070 was busy with E2 and a queue of lock w
 Open, for the Prove stage: compile's gain on top of batched + varlen, whether inductor traces the real varlen
 kernel with the breaks above only, chunked CE's worth once compile fuses the loss, and whether either lets
 20M/30M run a larger micro batch. Commands: the report of this stage (not repeated here).
+
+SPEED V3 PROVE (2026-09-27 11:59 to 2026-09-28 03:27, the PC 5070): the two SPEED V3 switches measured on
+CUDA on top of the 2026-09-26 defaults (optim.batched, doc_attn varlen). Tree: speed/v3 at 2522edd, then
+25c616d (the test fix below); lean copy ~/planck/dev/speed3, whole-tree md5 equal to the commit (373 files).
+torch 2.13.0+cu130, bf16, NorMuon, T 2048. Only gpu.lock was held: 11 holds, each under 35 minutes, released
+between them; uptime and GPU memory logged at the start and end of every hold (all start loads 0.9 to 1.9;
+h4, the first 5M/10M A/B, ended at 13.6: see A/B). Inductor and Triton caches in ~/planck/dev/speed3_cache
+(cold measurement: a fresh cold_<time> dir). Every raw file: PC ~/planck/dev/speed3_out/, hold logs
+~/planck/logs/speed3_*.log, job scripts ~/planck/dev/speed3_jobs/ (scratch helpers, not in the repo).
+Tests.
+  harness suite on the PC (lean copy of 2522edd, pytest -s): 838 passed, 1 failed, 5 skipped in 455 s. The 5
+  skips are lean-copy artifacts (4 "git or commit 5c5a30a unavailable", 1 "data_prep/bpb.py is not beside the
+  harness"). The failure, test_speed3.py::test_default_run_is_the_reference_and_builds_nothing_new, was the
+  test's own: its probe subprocess ran at torch's default 16 CPU threads and the in-process run at testutil's
+  4, and on the PC (x86) the two runs' final weights differ in rounding while every log record is identical.
+  Alone on the PC: fails at PLANCK_TEST_THREADS=4, passes at 16. Fix (25c616d): the probe sets the test
+  process's thread count. Checked on the PC CPU: passes at 4, 16 and 1 threads; mutants on a scratch copy
+  all fail it (probe forced to 16 threads under a 4-thread test, compile on by default, ce_chunk_rows on by
+  default); test_speed3.py 11 passed on the PC and on the Mac. Re-run on the lean copy of 25c616d (h10, no
+  -s): 839 passed, 5 skipped (the same 5), 0 failed, 333 s.
+  default_parity.py --device cuda (main 7e7c802 vs this tree, varlen + batched, deterministic, 24 steps):
+  log, checkpoint, start record and module set identical, PASS.
+  pc/tests (CPU): 63 passed, 1 failed, 1 skipped; the failure is the known
+  test_runner_start.py::test_low_disk_during_a_job_checkpoints_and_requeues, which fails the same way on
+  main (speed3_base) on the PC; the skip is test_bench_micro.py's CPU-only case ("this machine has CUDA").
+  New CUDA tests, all passed: test_speed3_cuda.py (step-1 loss / grad rel err vs fp32: ref bf16 4.22e-05 /
+  1.79e-02, varlen 4.90e-05 / 1.77e-02, + compile 5.88e-05 / 1.62e-02, + chunk 4.90e-05 / 1.77e-02, + both
+  5.88e-05 / 1.61e-02; both switches 20 + 20 == 40 bitwise), test_compile_cuda.py, test_chunked_ce_cuda.py
+  (head peak 1828 MiB reference vs 156 MiB chunked), test_speed_combined.py.
+Compile + varlen, the open question, answered on CUDA with inductor. torch._dynamo.explain of the varlen
+forward: 4 graphs, 3 breaks, all "Dynamic shape operator" (the nonzero in docattn.cu_seqlens), none in
+attention, the flash varlen kernel or the chunked loss; the same with ce_chunk. Over 6 batches of varying
+document counts the unique graph count went [4, 6, 6, 6, 6, 6]. In real training (compile_parity's train.main
+runs, 200 steps of packed rows with varying documents, counted per arm): every compiled arm 6 unique graphs
+and 3 breaks, all at cu_seqlens, at 5M and 20M; no recompile-limit message in any log; eager+ce 1 graph (the
+fused chunk core). bench_micro rows agree: docmask compiled cells 4 graphs / 3 breaks, causal 1 / 0.
+Capture_dynamic_output_shape_ops (one graph) was NOT measured here: bench --dynamo-capture-dynamic stays an
+untested option. Leak probes through the compiled varlen forward: test_speed_combined's one-token bitwise
+probe (torch.compile of the varlen model, every position) passed; test_compile_cuda's probe and ratio checks
+through compile_forward passed (mask path); the chunked loss has no logits to probe, its one-token check is
+the CPU test_chunked_ce.py.
+Parity (compile_parity.main, unchanged, run by parity_keep.py, which also saves each run's start records and
+Dynamo counters): real train.main, 200 steps, micro 8 x accum 2, bf16, NorMuon, pack mode (varlen docmask),
+same seed and data. Per invocation 12 arms: eager:det x2, eager x3, default:det x2, default, eager+ce:det,
+eager+ce, default+ce:det, default+ce (ce_chunk_rows 2048). Every start record says doc_attn varlen,
+optim_batched true, bf16, and the arm's compile / ce_chunk_rows. Rule as before: each candidate arm vs each
+eager:det arm within 2x the eager-eager floor on mean |d loss| and on |d last-50 mean|; plus the pooled exact
+permutation test over both invocations (7 distinct eager curves, 3 per candidate, 120 relabelings).
+  worst ratio to the limit (mean|d| / last-50), over all candidate-vs-eager:det checks of that arm:
+  arm            5M a         5M b         20M a        20M b
+  default:det    0.17 / 0.12  0.09 / 0.06  0.22 / 0.03  0.60 / 0.12
+  default        0.31 / 0.32  0.33 / 0.32  0.27 / 0.13  0.62 / 0.27
+  eager+ce:det   0.19 / 0.08  0.10 / 0.04  0.17 / 0.03  0.46 / 0.12
+  eager+ce       0.19 / 0.04  0.23 / 0.22  0.25 / 0.20  0.61 / 0.26
+  default+ce:det 0.35 / 0.35  0.19 / 0.18  0.20 / 0.04  0.55 / 0.16
+  default+ce     0.32 / 0.28  0.13 / 0.11  0.16 / 0.06  0.59 / 0.20
+  floors (mean|d|, last-50): 5M a 0.0098, 0.0323; 5M b 0.0181, 0.0652; 20M a 0.0403, 0.0139; 20M b 0.0148,
+  0.0036. All four invocations: pass. eager:det and default:det bitwise equal within and across invocations;
+  eager+ce:det and default+ce:det bitwise equal across invocations.
+  pooled permutation p (mean|d| / last-50): 5M default 0.475 / 0.458, eager+ce 0.783 / 0.742, default+ce
+  0.658 / 0.642; 20M default 0.358 / 0.717, eager+ce 0.533 / 0.583, default+ce 0.367 / 0.742. No arm sits
+  further from eager than eager sits from itself (every p >= 0.36). PASS for all three candidates at both sizes.
+  Pooled logs: PC p5m_pool.log; the 20M pool was run on the Mac from the two JSONs (same code).
+  Real-trainer tok/s (median per step, one run each, sequential, NOT an A/B): 5M eager 283 to 286k, default
+  588 to 589k, eager+ce 328 to 330k, default+ce 582 to 611k; 20M eager 101k, default 211k, eager+ce 107k,
+  default+ce 216 to 218k.
+A/B, same batch (pc/bench_micro.py, --docs-per-row 1.0, accum 1, 20 timed steps + 5 warmup, arms eager (the
+defaults), default (+compile), eager+ce (+chunked, --ce-chunk 2048), default+ce (+both); 5 repeats in one
+process, the arm order reversed on odd repeats (ABBA), medians over fit-ok rows; paired = per-repeat ratio to
+eager, min..max; resGiB = median peak reserved per arm, eager/compile/chunked/both). Batch = the defaults'
+best fit from SPEED INTEGRATE 2. Raw: ab_same.jsonl (h4 5M/10M, h5 20M/30M) and ab_same_rerun.jsonl (h10: 5M
+and 10M again on a quiet machine; the 5M and 10M rows below are these).
+  cell        B    eager tok/s  +compile (paired)                 +chunked (paired)              +both (paired)                    resGiB
+   5M causal  B16    256,392     563,458 +119.8% (+116.0..+120.6)   290,820  +13.4% (+13.3..+14.4)   575,779 +124.6% (+123.5..+126.8)  8.30/4.29/3.98/3.04
+   5M docmask B16    254,415     556,994 +118.9% (+117.1..+120.5)   289,135  +13.6% (+13.0..+14.0)   585,588 +130.2% (+126.7..+130.2)  8.83/4.80/4.03/3.04
+  10M causal  B8     167,466     322,044  +92.3% (+90.6..+96.7)   180,386   +7.7% (+6.5..+9.4)   332,350  +98.5% (+93.8..+103.4)  5.62/3.19/3.55/2.59
+  10M docmask B8     167,942     329,947  +96.5% (+94.9..+98.7)   182,819   +8.9% (+8.2..+9.1)   338,912 +101.8% (+97.1..+102.3)  5.64/3.46/3.83/2.59
+  20M causal  B8      93,852     181,045  +92.9% (+92.6..+93.3)    98,281   +4.7% (+4.5..+4.8)   184,372  +96.4% (+96.0..+97.3)  7.88/4.43/5.85/3.89
+  20M docmask B8      95,104     185,828  +95.4% (+94.8..+95.6)    99,686   +4.8% (+4.6..+5.2)   190,776 +100.6% (+100.1..+101.1)  8.21/4.69/5.85/3.90
+  30M causal  B8      68,560     129,805  +89.3% (+89.3..+89.5)    70,727   +3.2% (+3.0..+3.2)   131,325  +91.5% (+91.0..+91.7)  9.53/5.46/7.63/5.01
+  30M docmask B8      69,511     132,588  +90.7% (+90.3..+91.3)    71,704   +3.2% (+3.0..+3.3)   135,406  +94.8% (+94.6..+95.1)  9.90/5.71/7.65/5.02
+  Every cell mem_fit ok, n 5 per arm. Loads: h5 (20M, 30M) 1.00 at start, 1.76 at end, per-arm spread 0.2 to
+  0.7 percent. h10 (the 5M and 10M rows) 1.05 at start, 1.02 at its end, spread up to 3.6 percent (the
+  compiled arms vary more at 5M and 10M). The first 5M/10M run (h4: 1.02 at start, 5.6 after 5M, 13.6 at the
+  end) gave +compile +121.0 / +117.7 percent (5M) and +93.2 / +91.9 (10M), within 5 points of these.
+  +both vs +compile, paired: 5M causal +2.2% (+1.9..+4.3); 5M docmask +5.1% (+3.8..+5.1); 10M causal +3.2%
+  (+1.7..+4.2); 10M docmask +2.7% (-0.8..+3.7); 20M causal +1.8% (+1.5..+2.3); 20M docmask +2.7% (+2.4..+2.9);
+  30M causal +1.2% (+0.9..+1.2); 30M docmask +2.1% (+2.0..+2.4).
+Largest fit-ok micro batch per arm (probe_fit.py: batches going up, an arm leaves at its first row that is not
+status ok + mem_fit ok; 1 warmup + 2 steps, memory only). reserved GiB at that batch; next batch's verdict:
+  cell         eager                  +compile               +chunked               +both
+   5M causal   B16  8.28 (B32 over 16.4)  B32  7.47 (B64 over 16.7)  B32  7.79 (B64 over 15.3)  B32  5.78 (B64 over 11.5)
+   5M docmask  B16  8.31 (B32 over 16.5)  B32  9.51 (B64 over 16.8)  B32  8.85 (B64 over 15.4)  B32  5.82 (B64 over 11.5)
+  10M causal   B8   5.64 (B16 over 10.9)  B16  5.86 (B32 over 11.5)  B16  6.63 (B32 over 12.9)  B32  9.02 (none larger)
+  10M docmask  B8   5.62 (B16 over 10.9)  B16  6.38 (B32 over 12.5)  B16  7.18 (B32 over 14.0)  B32  9.06 (none larger)
+  20M causal   B8   7.91 (B16 over 15.4)  B16  8.58 (B32 over 17.0)  B8   5.88 (B16 over 11.3)  B16  7.47 (B32 over 14.6)
+  20M docmask  B8   7.88 (B16 over 15.5)  B16  9.15 (B32 over 17.1)  B8   6.21 (B16 over 11.9)  B16  7.88 (B32 over 14.7)
+  30M causal   B8   9.49 (B16 over 18.7)  B8   5.46 (B16 edge 10.6)  B8   7.63 (B16 over 14.6)  B16  9.53 (B32 over 18.8)
+  30M docmask  B8   9.54 (B16 over 18.8)  B8   5.71 (B16 edge 10.6)  B8   8.00 (B16 over 14.6)  B16  9.54 (B32 over 18.8)
+  (10M +both: B32 was the largest probed. The first probe hold timed out at 1400 s inside 30M; 30M was
+  re-probed in its own hold, h2b. Raw: fit.jsonl.) So: compile alone lets 20M go from B8 to B16 (8.6 to 9.2
+  GiB) but not 30M (B16 "edge": 10.64 GiB reserved, 0.0 free); chunked CE alone moves neither (B16 over);
+  both together fit 30M at B16 (9.53 GiB, 0.93 free).
+Equal rows per optimizer step (er_run.py): each arm at its own largest fit-ok micro batch, accum up to R rows
+per step (R = the largest of those batches), 5 repeats, each configuration a fresh process, configuration order
+and arm order reversed on odd repeats, paired by repeat. Raw: er.jsonl (+ er.jsonl.rep: the repeat of each
+row). Loads 1.0 to 1.9 (h8, h9).
+  cell         R   eager            +compile                    +chunked                  +both
+   5M causal  32  B16x2   262,463  B32x1   579,302 +120.7% (+120.1..+121.4)  B32x1   248,711   -5.2% (-5.7..-4.8)  B32x1   600,094 +128.6% (+124.3..+129.1)
+   5M docmask 32  B16x2   262,542  B32x1   589,505 +124.5% (+124.0..+126.4)  B32x1   252,329   -3.9% (-4.1..-3.7)  B32x1   616,811 +134.9% (+133.9..+135.7)
+  10M causal  32  B8x4    174,567  B16x2   357,426 +104.8% (+104.4..+106.6)  B16x2   164,939   -5.5% (-6.2..-4.7)  B32x1   356,885 +104.4% (+104.0..+106.3)
+  10M docmask 32  B8x4    176,110  B16x2   360,915 +104.9% (+104.6..+105.8)  B16x2   166,192   -5.6% (-5.7..-5.3)  B32x1   366,783 +108.3% (+107.8..+108.7)
+  20M causal  16  B8x2     96,546  B16x1   188,870  +95.6% (+95.0..+96.6)  B8x2    101,355   +5.0% (+4.7..+5.1)  B16x1   191,922  +98.8% (+98.3..+99.6)
+  20M docmask 16  B8x2     97,046  B16x1   188,003  +93.7% (+93.3..+94.0)  B8x2    101,774   +4.9% (+4.6..+5.1)  B16x1   191,673  +97.5% (+97.3..+97.8)
+  30M causal  16  B8x2     71,195  B8x2    139,570  +96.0% (+95.7..+96.3)  B8x2     73,578   +3.3% (+3.3..+3.6)  B16x1   139,645  +96.1% (+96.0..+96.4)
+  30M docmask 16  B8x2     71,702  B8x2    141,030  +96.7% (+96.4..+97.1)  B8x2     74,068   +3.3% (+2.9..+3.5)  B16x1   139,577  +94.7% (+94.5..+94.9)
+  30M docmask eager: 2 of 5 repeats "edge" (0.43 GiB free at B8 x 2), so n 3. +both vs +compile at equal
+  rows, paired: 5M causal +3.6% (+1.7..+4.1); 5M docmask +4.6% (+4.1..+4.7); 10M causal -0.2% (-0.6..+0.2);
+  10M docmask +1.6% (+1.3..+2.0); 20M causal +1.6% (+1.4..+1.8); 20M docmask +2.0% (+1.9..+2.1); 30M causal
+  +0.1% (-0.1..+0.3); 30M docmask -1.0% (-1.1..-1.0).
+  Chunked CE alone at its larger micro batch is SLOWER than eager with accumulation at 5M and 10M (its step
+  time grows 2.2 to 2.3x for 2x rows in the probe: 5M B16 0.112 s, B32 0.263 s; 10M B8 0.091, B16 0.202;
+  the compiled arms grow 1.9 to 2.0x). Not investigated further.
+First-step (compile) time, bench_micro first_step_s, one warmup step (coldwarm_{cold,warm}.jsonl): cold = a
+fresh inductor + Triton cache dir, warm = a new process on that dir.
+  cell            eager  +compile cold/warm  +both cold/warm  +chunked cold/warm
+   5M causal  B16   0.59   17.74 / 1.37        20.64 / 5.22     0.89 / 0.17
+   5M docmask B16   0.17   16.06 / 1.21        17.88 / 4.81     0.17 / 0.16
+  20M causal  B8    0.60   20.34 / 1.95        21.08 / 6.77     0.25 / 0.24
+  20M docmask B8    0.24   21.62 / 1.90        22.68 / 7.00     0.25 / 0.24
+  (+chunked ran after the compiled arms in the same cold process, so its "cold" is not fully cold.) Inside
+  one process after dynamo.reset (A/B repeats 1 to 4, median): +compile 0.9 to 2.1 s, +both 4.5 to 8.9 s.
+  In train.main (parity runs): 5M default:det 43.7 s for 200 steps on a cold cache, 17.4 s warm.
+Hours (bench tok/s, full rows, so lower bounds; 1e9 tokens): at equal rows eager -> +compile: 5M 1.06 ->
+0.47 h, 10M 1.58 -> 0.77, 20M 2.86 -> 1.48, 30M 3.87 -> 1.97 (docmask). 25B tokens at 5M: 26.5 -> 11.8 h;
+30B at 30M: 116.2 -> 59.1 h.
+Verdicts (the rule: a switch defaults on only if it passes its tests alone and combined AND wins its A/B; E2
+and E3 stay pinned to the current engine regardless).
+  train.compile default: passes alone and combined (suite, CUDA tests, both parity sizes, bitwise leak probe
+    through the compiled varlen forward), and wins every A/B cell: +89 to +120 percent at the same batch,
+    +94 to +125 percent at equal rows, on a quiet machine. The old tree's +59 percent is superseded: with
+    the batched optimizer the forward is a larger share of the step. RECOMMEND: default for NEW
+    experiments (set train.compile: default in their configs). Flipping train.py's own default would move
+    every config that omits the key, so E2 and E3 configs must say compile: false first; not done here.
+    Costs: 16 to 23 s compile per new shape cold, 1 to 2 s warm; 3 graph breaks at cu_seqlens (6 graphs
+    over varying document counts, stable). max-autotune-no-cudagraphs: not measured here, stays unvalidated.
+  train.ce_chunk_rows 2048: passes alone and combined (both parity sizes, CUDA tests). A/B mixed: alone
+    +3.2 to +13.6 percent at the same batch, but -3.9 to -5.6 percent at 5M and 10M when used for its
+    purpose (a larger micro batch at equal rows) and +3.3 to +5.0 at 20M and 30M only because those
+    batches did not change. On top of compile: +1.2 to +5.1 percent at the same batch (paired ranges above
+    zero except 10M docmask, -0.8..+3.7) and -1.0 to +4.6 at equal rows. It is worth memory, not speed: it is
+    the only way 30M compiled fits B16, and that B16 runs no faster than B8 x 2 (+0.1 and -1.0 percent).
+    RECOMMEND: opt-in only (for memory headroom: a bigger vocab, a bigger model, or a longer row).
+  Both together: the fastest arm at the same batch everywhere (+91.5 to +130.2 percent), parity pass; the
+    gain over compile alone is the chunked-CE margin above. Opt-in (compile on, chunk as needed).
