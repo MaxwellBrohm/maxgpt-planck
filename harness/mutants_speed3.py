@@ -69,3 +69,9 @@ mut("s3_dynamic_false_refused_everywhere", "speed3", "train.py",
     tests=[CT + "test_compile_dynamic_is_recorded"])
 mut("s3_dynamic_not_recorded", "speed3", "train.py", 'start["compile_dynamic"] = cdyn', "pass",
     "the start record hides compile_dynamic", tests=[CT + "test_compile_dynamic_is_recorded"])
+mut("s3_train_accepts_autotune", "speed3", "train.py", "if cmode is not None and cmode not in TRAIN_COMPILE_MODES:",
+    "if False:", "train.py runs max-autotune-no-cudagraphs (failed a 20M parity check, a bench arm only)",
+    tests=[CT + "test_train_refuses_the_unvalidated_compile_mode"])
+mut("s3_train_refuses_default", "speed3", "train.py", 'TRAIN_COMPILE_MODES = ("default",)',
+    "TRAIN_COMPILE_MODES = ()", "train.py refuses the validated mode too",
+    tests=[CT + "test_train_refuses_the_unvalidated_compile_mode"])

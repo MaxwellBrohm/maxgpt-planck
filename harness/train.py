@@ -65,12 +65,22 @@ def build_schedule(sc: dict, total_steps: int, n_params: int, batch_tokens: int,
     raise ValueError(f"unknown schedule mode {mode!r}")
 
 
+# train.compile modes a training run may use: "default" passed parity on the old tree and on the
+# 2026-09-26 defaults (notes.txt SPEED V3 PROVE). max-autotune-no-cudagraphs failed one 20M parity check
+# on the old tree and was never re-proved: model.compile_mode accepts it for pc/bench_micro.py arms only.
+TRAIN_COMPILE_MODES = ("default",)
+
+
 def check_compile(cmode: str | None, dynamic, doc_attn: str) -> None:
     """Refuse the train.compile settings no parity run validated (notes.txt SPEED V3 FOLLOW-UPS).
+    A mode outside TRAIN_COMPILE_MODES (max-autotune-no-cudagraphs: a bench arm only).
     compile_dynamic false with doc_attn varlen: every new document count recompiles until Dynamo's
     recompile limit, then the frames after the cu_seqlens break (attention, loss) run eager for
     good. The loss stays correct and the speedup is lost without a message. Unset (null) is the
     validated setting: the graph count settles at 6."""
+    if cmode is not None and cmode not in TRAIN_COMPILE_MODES:
+        raise ValueError(f"train.compile {cmode!r} is not validated for training (a pc/bench_micro.py arm "
+                         f"only; notes.txt SPEED V3); use one of {TRAIN_COMPILE_MODES} or false")
     if cmode is not None and dynamic is False and doc_attn == "varlen":
         raise ValueError("train.compile_dynamic false with doc_attn varlen recompiles per document count and "
                          "falls back to eager at Dynamo's recompile limit; leave compile_dynamic unset")

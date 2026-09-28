@@ -3,7 +3,9 @@
 Off by default (no Dynamo graph, no start-record field); on: resume 20 + 20 == 40 bitwise in pack
 and bucket mode with the plain module's checkpoint keys and the eager run's optimizer groups;
 switched on then off across a resume: loads cleanly, lands within float tolerance of 40 eager
-steps, and each start record says what ran.
+steps, and each start record says what ran. Follow-ups (notes.txt SPEED V3 FOLLOW-UPS): the start
+record carries compile_dynamic; train.main refuses compile_dynamic false with varlen and the
+unvalidated mode max-autotune-no-cudagraphs.
 """
 from __future__ import annotations
 
@@ -137,3 +139,17 @@ def test_compile_dynamic_false_refused_with_varlen(tmp_path, data, monkeypatch):
     for ok in ((None, False, "varlen"), ("default", None, "varlen"), ("default", True, "varlen"),
                ("default", False, "mask")):
         check_compile(*ok)                                   # eager, unset, true, or the mask engine
+
+
+def test_train_refuses_the_unvalidated_compile_mode(tmp_path, data):
+    """max-autotune-no-cudagraphs failed one 20M parity check on the old tree and was never re-proved:
+    model.compile_mode accepts it (a pc/bench_micro.py arm), train.main refuses it before any work;
+    "default" (the validated mode) runs (test_compile_dynamic_is_recorded and the resume tests)."""
+    run = write_run(str(tmp_path / "run"), data,
+                    train={**COMPILED, "compile": "max-autotune-no-cudagraphs"})
+    with pytest.raises(ValueError, match="not validated for training"):
+        train.main([run, "--max-steps", "1"])
+    assert not os.path.exists(tmp_path / "runs.jsonl")                 # refused before the start record
+    check_compile("default", None, "varlen")
+    with pytest.raises(ValueError, match="bench_micro"):
+        check_compile("max-autotune-no-cudagraphs", None, "mask")

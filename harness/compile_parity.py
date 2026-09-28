@@ -8,7 +8,8 @@ on CUDA (the PC), with a measured noise floor.
 Each arm is one train.main run (the real trainer and loader, NorMuon, bf16 autocast, the
 startup self-test) of budget.py's shape for --target, same seed, same synthetic data
 (make_fake_data: counting documents and copy-task chats, vocab = the model's). An arm is
-"<eager | a torch.compile mode>[+ce][:det]"; "+ce" adds train.ce_chunk_rows = --ce-chunk
+"<eager | default>[+ce][:det]" (train.py refuses max-autotune-no-cudagraphs, a bench_micro arm
+only); "+ce" adds train.ce_chunk_rows = --ce-chunk
 (chunked_ce.py); ":det" runs it under torch.use_deterministic_algorithms(True).
 CUBLAS_WORKSPACE_CONFIG=:4096:8 for every arm. The reference arms are exactly "eager" and
 "eager:det"; every other arm is a candidate. train.py's own defaults apply otherwise (since

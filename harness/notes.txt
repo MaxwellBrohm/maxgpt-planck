@@ -801,3 +801,10 @@ beyond the CPU unit tests). From the correctness review (r1) and the numbers rev
       engine allowed and recorded), test_compile_dynamic_false_refused_with_varlen (varlen stubbed on CPU; the
       refusal comes before any forward). Mutants (speed3 group): s3_dynamic_false_varlen_accepted,
       s3_dynamic_false_refused_everywhere, s3_dynamic_not_recorded.
+  (3) train.py refuses train.compile max-autotune-no-cudagraphs (r1 finding 3: its only parity run, on the old
+      tree, failed one 20M check and gave p 0.042 at 5M; it was never re-proved). train.TRAIN_COMPILE_MODES =
+      ("default",); model.compile_mode still accepts the mode, so it stays a pc/bench_micro.py arm, and a
+      compile_parity arm with it now stops in train.main. Comments corrected: model.py (the COMPILE_MODES line
+      said every listed mode had a parity run and an A/B), bench_micro.py, compile_parity.py, sample_tiny.
+      Test: test_compile_train.py::test_train_refuses_the_unvalidated_compile_mode (refused before the start
+      record; default still accepted). Mutants: s3_train_accepts_autotune, s3_train_refuses_default.

@@ -56,6 +56,8 @@ backward to the end of the update, idle gaps included) and opt_cpu_ms_median (ho
 issue that phase) over the timed steps.
 Arms (train.compile): "eager" or a torch.compile mode (default, max-autotune-no-cudagraphs:
 model.COMPILE_MODES), compiled through harness model.compile_forward exactly as train.py does.
+train.py itself accepts only default (train.TRAIN_COMPILE_MODES); max-autotune-no-cudagraphs is a
+bench arm only (its old-tree parity failed one 20M check; harness notes SPEED V3 FOLLOW-UPS).
 --arms a,b --repeats N runs every cell N times per arm, interleaved (ABBA order), and prints the
 median tok/s per arm over mem_fit "ok" rows. Each compiled cell starts from torch._dynamo.reset()
 (so first_step_s holds its compile, warm on-disk caches included) and records dynamo_graphs and

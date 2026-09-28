@@ -75,7 +75,7 @@ train:
   # lazy_metrics: false                  # true: loss/gnorm read on log steps only (no per-step sync)
   doc_attn: auto                         # packed rows: auto (varlen on cuda+bf16, else mask) | mask
                                          # (SDPA + dense mask, the reference) | varlen (flash, cuda bf16)
-  # compile: false                       # false (eager, the reference) | default | max-autotune-no-cudagraphs:
+  # compile: false                       # false (eager, the reference) | default (the only validated mode):
   #                                      # torch.compile the training forward + loss (CUDA); checkpoints
   #                                      # unchanged, resume works either way (test_compile_train.py).
   #                                      # Opt-in, not measured on the 2026-09-26 defaults (notes SPEED V3)

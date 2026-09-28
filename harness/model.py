@@ -180,8 +180,11 @@ def document_causal_mask(doc: torch.Tensor) -> torch.Tensor:
     return (same & causal)[:, None]
 
 
-# train.compile: the modes with a parity run and an A/B on the old tree (notes.txt SPEED V3). The
-# CUDA-graph modes (reduce-overhead, max-autotune) are refused: never tested with grad accumulation.
+# torch.compile modes compile_mode accepts (pc/bench_micro.py arms). train.py accepts only "default"
+# (train.TRAIN_COMPILE_MODES: parity passed on the old tree and on the 2026-09-26 defaults); the old
+# tree's parity run of max-autotune-no-cudagraphs failed one 20M check, so it is a bench arm only
+# (notes.txt SPEED V3). The CUDA-graph modes (reduce-overhead, max-autotune) are refused: never tested
+# with grad accumulation.
 COMPILE_MODES = ("default", "max-autotune-no-cudagraphs")
 
 
