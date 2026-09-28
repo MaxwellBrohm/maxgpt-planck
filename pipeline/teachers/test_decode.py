@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 sys.path.insert(0, HERE)
 import decode  # noqa: E402
 import driver  # noqa: E402
+import fake_engine as FE  # noqa: E402
 import fake_teacher  # noqa: E402
 import serve  # noqa: E402
 import skeleton  # noqa: E402
@@ -34,7 +35,7 @@ class LabelRegex(unittest.TestCase):
         return re.fullmatch(decode.label_regex(driver.constraint(sk, mode)["lines"], sep), text) is not None
 
     def test_canonical_render_matches_both_modes(self):
-        self.assertTrue(all(self.full(sk, fake_teacher.raw(sk), m) for sk in SKELS for m in ("labels", "labels_exact")))
+        self.assertTrue(all(self.full(sk, FE.canon(sk), m) for sk in SKELS for m in ("labels", "labels_exact")))
 
     def test_form_breaks_do_not_match(self):
         for sk in SKELS[:10]:

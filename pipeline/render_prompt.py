@@ -23,9 +23,15 @@ REQ_WORD_ORDER = ("noun", "verb", "adj")
 # (dry pilot 2026-09-26: dashes in 368/399 Ministral outputs and Qwen label drift, with the rules only at the top).
 # The example uses its own FAKE items (a packing list), no slot pool value and no bank line, and shows "my" for "the"
 # in a user line, a lowercase user beside a sentence-case assistant, a number word, a comma, and END.
-RULES = ("Rules: no dashes (use a comma or a new sentence); no digits (numbers as words); the assistant writes "
-         "normal sentence case, never answers as your X is Y; a line not marked copy exactly says what happens: write "
-         "what the person would say, and the user calls their own things my, never your.")
+# 2026-09-28: the rules are sentences, not a semicolon list the teacher could mimic (dp2 after the dash ban: Ministral
+# wrote 21 to 34 semicolons per 1,000 assistant lines); a "no semicolons" rule was cut to keep the prompt length.
+# Every guided line has a 3-word floor (P-048 register): dp2 Ministral wrote 1,002 guided replies of one or two words
+# ("Got it.", "Hello there.", a bare value), so the floor is said once here as well as in each word range.
+# p3 (2026-09-28): the dash rule is said once, here (the head's second mention was cut for the prompt length the
+# 3-word rule and the rule notes added; the serve side also bans dash tokens at sampling)
+RULES = ("Rules: no dashes (use a comma or a new sentence). No digits (numbers as words). The assistant "
+         "writes normal sentence case, never answers as your X is Y. Lines not marked copy exactly say what happens: "
+         "write what the person would say, in three words or more. The user calls their own things my, never your.")
 EXAMPLE = ("Example, another script, a user who writes in lowercase:\n"
            "U1 [3-12 words]: ask what comes first on the packing list\n"
            "A2 [3-12 words; must include: \"maps\"]: answer from the list\n"
@@ -34,16 +40,16 @@ EXAMPLE = ("Example, another script, a user who writes in lowercase:\n"
            "A2: The maps come first, then two sweaters.\n"
            "END")
 VARIANTS = [
-    ("instr.fake.p2.0",
+    ("instr.fake.p3.0",
      "Write one chat between a user and an assistant. Follow the script below line by line.\n"
-     "Style: plain everyday sentences. No emojis, no bold or other markdown, no lists, no dashes of any kind, no "
-     "stage directions, no speaker names inside a line. Typos only if the user sketch says so.",
+     "Style: plain everyday sentences. No emojis, no bold or other markdown, no lists, no stage directions, no "
+     "speaker names inside a line. Typos only if the user sketch says so.",
      "Output: one line per script line, starting with its label and a colon (like U1: ...), in the same order, "
      "then a last line with END. Write nothing else. Lines marked copy exactly must be copied character for "
      "character. Stay inside each word range and use every must include item exactly as written."),
-    ("instr.fake.p2.1",
+    ("instr.fake.p3.1",
      "Your job is to write a short chat between a person and an assistant, one line for each script line below.\n"
-     "Keep the language simple and natural. Do not use emojis, markdown, bullet points, dashes, actions in "
+     "Keep the language simple and natural. Do not use emojis, markdown, bullet points, actions in "
      "brackets, or names in front of lines. Only add typos if the user is described as making them.",
      "Format: each line starts with the script label and a colon, in script order, and the final line is END. "
      "Nothing before or after. Copy the copy exactly lines without any change. Respect the word ranges and put in "
@@ -121,16 +127,21 @@ def script_line(skel, t, req_words):
         return f"{lab} [copy exactly]: {parse.exact_text(skel, t)}"
     no_name = not skel["assistant"].get("system_text")
     excl = [x for x in t["must_exclude"] if not (no_name and x == card_name(skel))]
+    # a lowercase-style user's line is shown in lowercase, its items too (2026-09-28: "use every must include item
+    # exactly as written" beside a capitalized value asked for a capital that USER_STYLE rejects; spans fold case there)
+    low = (lambda x: x.lower()) if t["role"] == "user" and skel["user"].get("style") == "lowercase" else (lambda x: x)
     parts = [f"{t['min_w']}-{t['max_w']} words"]
     if t["must_include"]:
-        parts.append("must include: " + _q(t["must_include"]))
+        parts.append("must include: " + _q([low(x) for x in t["must_include"]]))
     if excl:
-        parts.append("must not include: " + _q(excl))
-    for r in t.get("rules", []):
-        parts.append("rule: " + RULE_NOTE[r["verifier"]].format(**r["args"]))
+        parts.append("must not include: " + _q([low(x) for x in excl]))
     if t["i"] in req_words:
         parts.append(f'use the word "{req_words[t["i"]]}" (any form)')
-    return f"{lab} [{'; '.join(parts)}]: {guidance(skel, t)}"
+    # a rule the reply must keep is said after the move, the last thing before the line is written (2026-09-28: dp2
+    # PERSIST_FAIL, e.g. 143 Qwen card hits, most on the reply that accepts the rule, with the rule inside the bracket)
+    notes = [RULE_NOTE[r["verifier"]].format(**r["args"]) for r in t.get("rules", [])]
+    tail = " (rule: " + " and ".join(notes) + ")" if notes else ""
+    return f"{lab} [{'; '.join(parts)}]: {low(guidance(skel, t))}{tail}"
 
 
 def req_word_turns(skel):

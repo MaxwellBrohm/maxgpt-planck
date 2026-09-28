@@ -146,9 +146,9 @@ def exact_mismatch(skel, texts, built):
 
 
 def req_word(skel, texts, built):
-    from check_text import word_forms_re
+    from check_lines import word_forms_re
     out = dict(texts)
-    rx = word_forms_re(skel["required_words"]["noun"])
+    rx = word_forms_re(skel["required_words"]["noun"], "noun")
     for i, s in out.items():
         out[i] = rx.sub("item", s)
     return out if out != texts else None

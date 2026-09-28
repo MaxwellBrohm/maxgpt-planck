@@ -1,0 +1,247 @@
+PLANCK BANK PASS DESIGN v0 (2026-09-28). DESIGN ONLY: nothing below has run except the use-rate count in section 1.
+Replaces every FAKE bank, pool and word list (SPEC 1, 4, 12; PLAN Phase 1 "Skeleton generator v0" and D8) with
+teacher-written or human-source items stored with provenance. Read: banks, banks_keys, pools, fake_data, lexicons,
+topic_words, skeleton, assemble, render_intents, render_prompt, heldout, gate (.py), SPEC, notes.txt (round 1, dry
+pilot 2), teachers/hf_pins.json, oodh/DESIGN.txt, corpus/make_common_words.py, corpus/stats/core_v0/final_stats.json.
+
+0. RULES THE PASS KEEPS (round 1 D1-D4 stand; D2 binds every checker use of the new sets)
+- D8: every string that can reach training text is human-written open text or written by an Apache-2.0 teacher.
+  Claude writes only prompts, code and rubric. Bank prompts are zero-shot, with NO Claude-written example line:
+  RC-12's sealed templates are Claude-written, and examples would pull the banks toward that phrasing. When a class
+  needs an example, it is a human sentence mined from core v0 (non-reserve OASST2, YouTube transcripts), cited by doc
+  id. BANK_PROMPT_ECHO drops an item sharing a word 5-gram with its prompt or a 6-gram with a mined example.
+- Authorship is split evenly across the three pinned teachers (hf_pins.json: Gemma 4 12B, Ministral 3 8B,
+  Qwen3.5-9B, all Apache-2.0), so the teacher pick (section 7) is not decided by whose own lines the skeletons copy.
+- Nothing is read from sealed/. Held-out gates (2d) run on every item before it is kept, and again whenever the gate
+  hash changes (RC-12 or OOD-H exports landing). Everything stays trainable false until DECON_PENDING clears.
+- Store: PC ~/planck/runs/banks/<version>/ (never ~/planck/data). Frozen banks get a manifest in the repo (per-bank
+  sha256, counts, author shares, gate hash); whether item files go into the public repo is Max's call (section 8).
+
+1. FAKE ITEM CLASSES AND THEIR USE (measured today on the Mac CPU, no model: 1,000 RM skel-v0.2 skeletons of shard
+   'bankpass-rates' via skeleton.iter_shard; exact bank lines per 1,000 conversations. Rates come from the sampler,
+   not from bank content, so they carry over. Target lines = max(30, rate x 2.5): SPEC 4's cap of 50 uses per 100k
+   conversations needs rate x 2 lines, plus 25% for lines lost to later gates.)
+  class (code)                     rate per 1k (target)                                   source    training text
+  K  key lines (banks_keys.KEYS),  plant 72-188 per key, sum 1,767 (4,420); query 45-111,  teacher   yes, user
+     15 keys x plant/query/        sum 1,071 (2,680); corr 20-49, sum 496 (1,240); bait 1-12 and twin 3-9 per key,
+     bait/corr/twin                floor 30 each (900). Total about 9,240
+  M  correction markers            389 prefix uses over 10 FAKE markers (80: 60 + 20 fix)  teacher   yes
+  O  openings (open.topic/.greet)  637 (1,590) / 337 (840); plus 3 topic-specific a topic  teacher   yes
+  C  closings (close.goodbye)      325 (810)                                               teacher   yes
+  S  social, identity, recap,      social 14-15 each (40 each), identity.q 42 + 42 (210),  teacher   yes
+     return, swap.q                recap 72 (180), return 116 (290), swap.q 81 (200)
+  R  rule phrasings, overrides     6 rules 33-54 each (670 with override prefixes)         teacher   yes
+  L  list lines, LIST_NAMES        14 banks 2-63 each (1,810); list names 4 types x 10     teacher   yes
+  U  lookup lines, LOOKUP_PRED,    q.* 12-64, cf 8, ctx 48 (530); 60 entity kinds with     teacher   yes, and tool
+     ENTITY_KINDS, ATTR_TYPES      typed attribute labels; predicates per attribute                  turn keys
+  Y  system texts (system.*)       484 (1,210: about 900 plain, 300 lookup)                teacher   yes
+  P  pools (fake_data, pools._DEFS) slots per 1k: city 1,056, assistant name 1,000, name 919, relation nouns 728,
+     plan nouns 601, job 418, grocery 371, chore 355, object 180, hobby 148, pet 124, food 102. Human: first names
+     (SSA), surnames (Census), cities (GeoNames); teacher: the rest; computed: avoid words. Closed lists (weekday,
+     month, colour, time, number words, ordinals) stay PROGRAM.
+  T  topics (fake_data.TOPICS, 60) 1,824 topic slots; SPEC wants several thousand: 4,000  teacher   yes ({t})
+  W  topic word sets (topic_words) one per topic; required words and OFFTOPIC              teacher   words yes
+  I  filler intents (INTENT_FORMS) 1,433 topic turns + 298 digressions; 8 per topic       teacher   prompt only
+  V  controlled word list          WORD_NOUNS/VERBS/ADJS, VOCAB_OOL, nonce _ENGLISHISH      computed  words yes
+  N  key labels, note frame, FEMALE/MALE, pools.features article rule                     teacher + computed
+  Q  prompt side: instruction VARIANTS (SPEC 50-200), persona FAKE_TRAITS/INTERESTS, EXAMPLE items: paraphrases
+     teacher, personas Nemotron-Personas-USA (prompt only)
+  Z  SAFETY_TERMS (lexicons)       checker rubric: LDNOOBW English (CC-BY-4.0, confirm at download), no teacher
+  H  RH wrapper lines (SPEC 4, 10) not built yet; 500 lines once RH is                    teacher   yes
+  Total kept: about 17,800 lines, 3,900 teacher pool items, 4,000 topics with sets and intents, 20,000 words.
+
+2. COMMON MACHINERY (pipeline/bankpass/: store, plan, gen, templatize, gates, judge, wordlist; each under 250 lines)
+ a) Value-filled, then templatized: the teacher never sees a hole. A call gets concrete values from the real pools
+    (a pet kind and name, a relation and job, a topic text, a number word), a voice seed (one Nemotron persona line,
+    an age band, a length band from the register) and writes N lines, one per value set. The program replaces the
+    exact value strings with {v}/{av}/{old}/{o}/{t}/{items}/{L}/{A}/{N}/{X}/{W}/{n}, and a leading subject pronoun
+    with {p} (pronoun corrections only). A line whose value is not found exactly once is dropped (rate reported per
+    bank). Teachers write better with a real "Biscuit" than with "{v}".
+ b) Decoding (pipeline/teachers serve, D3): a structured regex per call (N lines then END, each line length-limited
+    with no END inside, each line holding its value literal), dash, digit and markdown tokens banned, AI_ISM phrases
+    as bad_words once that lever lands. Sampling: each teacher's D4 shared preset (0.8 / 0.95); card settings
+    (Ministral T 0.05) collapse list diversity. Verbalized sampling (SPEC 7) for openings, markers and topics: each
+    line ends with a likelihood word (common, uncommon, rare), parsed off; the uncommon and rare tail fills at least
+    half of each of those banks.
+ c) Item checks (CPU, the checker's code where it exists): DASH, DIGIT, MARKDOWN, EMOJI, AI_ISM, SAFETY, NON_ENGLISH,
+    ROLE_LABEL, USER_VOICE, THOUGHT_TAG, PERSPECTIVE (a user line saying "your X" of its own fact), register length,
+    hole integrity, BANK_PROMPT_ECHO; text stored with straight quotes (the round 1 curly-quote finding).
+ d) Held-out gates, every item. E004: heldout.vocab_hits (phrases, markers, alias surnames, honorifics, digits); pool
+    items and required words also heldout.pool_ok (head nouns); heldout.echo_hits (5-grams, normalized frames) on the
+    template with holes as type tags AND on 20 random fills, since 5-grams form across hole edges; per key, the
+    gate._query_echo frame test on every (query, plant) and (query, corr) pair: an echoing pair is stored as
+    incompatible for the sampler, and a line incompatible with over half its partners is dropped. RC-12: pending;
+    when heldout_ext lands, every bank re-gates on vocab.txt and the 13-gram hashes (short lines collide only inside
+    filled turns, so admit's turn check stays the real guard). OOD-H: mined examples and human lines never come from
+    reserved or leaked trees (import corpus/oodh in_oodh_reserve and leaked_reserve_trees, never re-implement);
+    rendered turns get the 13-gram decontamination at admit. Drop counts per gate and bank go in the manifest.
+ e) Judges: the two teachers that did not write an item read it on a FRESH fill (values unseen at writing). Speech
+    act: plant = a declarative statement, by the user, of a fact about their own thing (round 1 HIGH 1: no question
+    may plant); query and bait = ask without stating it; corr = replaces the old value with the new; twin = mentions
+    the value as NOT the user's fact. Extraction: "what is the user's <label> after this line?" must return the fill
+    for plant and corr, "not said" for query, bait and twin; rules and lists: the rule id and argument, or the list
+    state after the op. Kept only when both judges agree and match. Disagreements are logged by author pair (a
+    teacher that rejects the others' lines far more than its own is reported).
+ f) Dedup and diversity: exact dedup after NFKC, lowercase, straight quotes, normalized holes; near-dedup at word
+    3-gram Jaccard >= 0.6 (keep the better-judged); frame signature (function words and holes, content words as word
+    list POS tags) capped at 5% of a bank; author thirds per bank (surplus trimmed at random, seeded); lengths inside
+    the register bounds. Reported per bank: distinct-2, frame count, top frame share, author shares.
+ g) Use cap: the sampler enforces 50 uses per 100k per line (SPEC 4). A bank short of its target gets
+    p_exact(bank) = 0.7 x kept / target, so the rest become guided turns instead of repeated lines.
+ h) Provenance record (JSONL, one per item, kept and dropped): stable id (class.bank.n), text, holes, features,
+    status and drop code; author {kind teacher|human|computed|program, model, revision, quant, license}; call
+    {prompt_id, prompt_sha256, decode hash, seed, sampling, call_id, raw output sha256, time}; seeds {persona id, fill
+    values, topic id, mined doc ids}; judges [{model, act, extraction, verdict}]; gates {gate_hash, rc12, oodh,
+    hits}; dedup {cluster, rank}; human sources add {url, license, retrieval date, file sha256, row}. Skeleton
+    provenance becomes "<bank>@<sha>:<author mix>"; admit keeps FAKE_PROVENANCE for any FAKE ref and checks each
+    license against the D8 audit table.
+ i) Restartable: the plan is a seeded, deterministic list of call ids; gen appends one JSONL line per finished call
+    and a restart skips done ids (as driver_state does). A hold stops at 33 minutes and unloads; the next resumes.
+
+3. PER CLASS (prompt design = what each call gives and asks; final wording is written at build time and hashed)
+ K  Key lines. One call = one key, one role, one form (full, head, pronoun, ellipsis), 10 fresh value sets, a voice
+    seed, "one line each, something a person says to an assistant at any point in a chat". Plant, corr, twin:
+    declarative, no "?", value literal forced by the regex; query, bait: end in "?", the value banned at decoding.
+    Checks 2c-2f plus both judges. Count per key and role: section 1.
+ M  Markers: short ways a person starts a sentence when fixing what they just said (error-fix: fixing what the
+    assistant said); at most 4 words; E004 EVAL_MARKERS and MARKER_TERMS stems fail the vocab gate. 60 + 20,
+    verbalized tail. The use cap counts the whole corrected line, not the marker.
+ O  Openings: (1) greet plus topic, filled with a topic text, templatized to {t} when the text appears verbatim;
+    (2) topic-specific, 3 per topic keyed to the topic id (paraphrased ones from (1) land here); (3) bare greetings.
+    No opening may state a fact of any key type (key plant judge and pool values): "my sister ..." in an opening
+    would plant an unplanned fact. OPENING_CAP and the "do not start with" list apply at render time as before.
+ C,S  One speech act per call with voice seeds; goodbye lines close without a question; swap.q is filled with the
+    teacher-written key label (N).
+ R  Rules: filled ({N} a number word, {X} a name, {W} an avoid word, {n} the user name), each line a request that
+    holds from now on; the judge extracts rule id and argument. Override prefixes: 30 short lines.
+ L  List names: 10 teacher variants per list type (LIST_STATE and golds take the chosen name). Init lines hold 3-5
+    concrete items joined any natural way, templatized only when a program join form matches (join_items, or with
+    the Oxford comma); the extraction judge checks order and contents.
+ U  60 place or event kinds, each with 2+ attributes typed weekday, city, month or colour (typing 2 of 2 judges);
+    predicates ("opens on {v}") filled per attribute; q, cf, ctx lines filled with a nonce entity name. The tool
+    turn's "key: value" uses the attribute label.
+ Y  System texts, filled with an assistant name: plain ones give only the name and being an assistant, lookup ones
+    add looking things up with the tag. Judge: "does it give the assistant any trait beyond these?" must be no
+    (must_not: plans, family, body, past, preferences, places).
+ P  Teacher pools: one call per type, seeded with 3 word-list nouns and a persona, "list 20 ...": jobs 400; hobbies
+    300 (judge "a sport or competitive game?" drops it: E004 H6 keeps the sport type unseen); foods 400; groceries
+    400; chores 200; plan nouns 400 (judge: fits "my X is on Monday"); owned objects 400 (judge: bought, colour
+    nameable); pet kinds 40; pet names 800; assistant names 300 (not a word-list word, not in SSA's top 1,000);
+    relations 30 with gender and number (2 of 3 agree; replaces FEMALE/MALE). Article and plural come from core v0
+    counts ("a"/"an" before the word, bare vs "a X"), replacing the vowel rule. pool_ok on every value.
+    Human pools (downloads, section 8): SSA baby names (public domain; common and rare bands, minus E004
+    ALIAS_SURNAMES; 5,000), Census 2010 surnames (public domain, rare use; 2,000), GeoNames cities15000 (CC-BY-4.0,
+    ASCII names, 3,000 by population, minus held-out collisions). Avoid words: computed, the 80 most frequent RM-list
+    adverbs and adjectives (word list POS), minus function words.
+ T  Topics: a call gets 3 RM-list nouns (seeded) and a persona and asks for 10 everyday things to chat with an
+    assistant about, as short noun phrases (4-8 words). Seeds are corpus words, not Claude categories. Dedup at
+    content-family Jaccard >= 0.5; pool_ok and echo_hits on the text; a judge assigns a group from a closed list
+    (coverage-matrix metadata only). 4,000 (1,000 in stage P).
+ W  Topic word sets: all three teachers write, for every topic, 20 nouns, 10 verbs and 10 adjectives a person uses
+    when talking about it (the notes' "40+" ask; union about 60-80), stored per author and mapped to word list
+    families (section 4). req_words = families listed by 2+ teachers, in the RS or RM list with the same POS,
+    pool_ok, not computed-generic, not NOT_REQUIRED.
+ I  Filler intents: 8 per topic, written as the user's move ("ask whether ...", "say that ..."), rotating author.
+    Gate: echo5 on the intent alone and on intent plus topic text (the FAKE "ask for a simple tip about" form drew
+    E004 5-grams: 41 Gemma, 39 Qwen). The bank probe (section 6) drops intents that come back copied (guidance copy)
+    or with an E004 echo twice. Prompt only, but a copy would make them training text, so the copy check stays on.
+ N  Key labels: 5 candidates per key, 2-of-3 vote (swap.q, gold notes, checker). The gold note frame
+    "label: value (was old)" takes its "was" wording from 3 teacher variants by vote (PLAN: note phrasing is teacher).
+ Q  Instruction paraphrases: 100 of the base block (SPEC 50-200), each checked by a second teacher against a
+    checklist extracted from the base block (every rule present, none added); PROMPT_ECHO runs against the variant
+    used. Personas: Nemotron-Personas-USA (CC-BY-4.0), prompt only, PERSONA_LEAK unchanged. The worked example stays
+    Claude's (prompt side) but its items must be in no pool and no bank.
+ Z  SAFETY: LDNOOBW English plus corpus/hygiene's own lists; rubric only.   H  RH wrappers: deferred, 500 lines.
+
+4. CONTROLLED WORD LIST FROM CORE V0 (PC CPU; SPEC 4 "computed from our allowed corpora"; PLAN D8)
+  Input: the 870 final shards of ~/planck/data/core_v0, read-only (9.3M docs, 120 GB text; the manifest sha256 goes
+    in the header). OOD-H reserved trees are already out of core v0 (oodh DESIGN s1); the script re-asserts it with
+    in_oodh_reserve on OASST2 tree ids where the meta has them. Code: pipeline/bankpass/wordlist.py, modelled on
+    corpus/make_common_words.py (same shard reader and worker pool), holding ~/planck/locks/pc_heavy.lock per chunk
+    of shards at nice 15; output ~/planck/runs/banks/wordlist_v0/.
+  Counting per doc, after quote straightening and lowercase: words = ASCII letter runs with inner apostrophes; DF
+    and TF per source; left-context counts for a POS proxy (after the/a/an/my/your/this: noun; after
+    to/will/can/don't/should: verb; after very/so/too/quite/more/most, or between is/was and punctuation: adjective);
+    "a" vs "an" before the word; the share of mid-sentence capitalized uses (proper-noun filter).
+  Groups: speech (youtube, irc), chat and Q&A (oasst2, dolly, stackexchange), edited prose (news, wikimedia,
+    pressbooks, oercommons, pdr), books (gutenberg), web (cccc), how-to (foodista); loc (OCR newspapers) is counted
+    and reported but does not vote. Eligible: DF >= max(5, 5e-4 x docs) in >= 3 of the 6 groups (make_common_words
+    uses 2 of 4). Score: geometric mean over the 6 groups of the DF share; rank by score.
+  Families: inflections join a headword by rubric rules (-s/-es/-ies, -ed/-ing with e-drop and doubling, -er/-est)
+    only when both forms are eligible and the POS proxy agrees; irregular verb forms come from teacher labels and
+    must be eligible; a family lists its forms per POS. A -ly adverb joins an adjective's family only when 2 of 3
+    teachers label it "same meaning" (smooth/smoothly yes, short/shortly no).
+  POS: the proxy's argmax when 2+ of 3 teacher labels agree with it; otherwise "amb" (counts for VOCAB_OOL, never a
+    required word). Drops: proper-noun share > 0.5, vocab_hits or pool_ok false (logged), SAFETY hits, single letters
+    except a and i.
+  Lists: RS = top 2,000 families, RM = top 5,000, RL = top 20,000 (POS and required words only; VOCAB_OOL off). The
+    full eligible table replaces pools._ENGLISHISH for the nonce filter and confirms the PROGRAM lists.
+  Stability and cost: first two disjoint seeded 5% doc samples (they time the job and give the top-2,000 and
+    top-5,000 Jaccard between them); the full read runs only if either is under 0.95. Runtime not measured yet.
+  Output: wordlist_v0.tsv (headword, pos, forms, rank, per-group DF, article, flags), header with rule, parameters,
+    input manifest sha256 and code sha256. The repo gets it once Max OKs (derived counts, like
+    corpus/data/common_words_en.txt).
+
+5. HOW THE CHECKER USES THE REAL SETS (each change under D2 with a clean and a planted fixture; the round 1 qv
+   fixtures, scratchpad/qv/new/pipeline/fixtures_qv.py, become regression tests of the family matcher)
+  Family table, not a stemmer: a word counts as a headword only through the word list's forms table, so ready/
+    reading, busy/bus, care/car, cater/cat, letting/letter, plane/plan stop colliding; unlisted words match as
+    themselves only.
+  OFFTOPIC wanted set = families of the topic text + the topic's word set (union of the three authors), + for an
+    assistant turn the previous user turn. Generic families are COMPUTED, replacing Claude's GENERIC list: families
+    in >= 5% of all topic sets, plus the top 200 families of teacher-written assistant turns that occur across >= 50%
+    of topics in the bank probe and the pilot ("noted" is Gemma's 233-times frame). Dropping a generic family only
+    removes matches, so it can never raise yield. The prev_assist admission of a user topic turn (round 1 loophole)
+    goes if the probe shows the user-turn flag rate moves 2 points or less; otherwise it needs 2 families.
+    Re-measured before the pilot is judged (notes OPEN): own-line flagged share and swapped-line catch share per
+    teacher, the notes' method; bar: catch >= 0.90 on assistant and user turns.
+  REQ_WORD: words come from the turn topic's req_words; any form the family lists for its POS passes; -ves and -ly
+    only as listed (friend/friendly, cafe/caves, short/shortly all fail). Goodbye turns carry none (round 1 MEDIUM).
+  VOCAB_OOL: share of non-slot, non-hole words outside the register list's families, reported per register in the
+    pilot; making it gate is a decision (section 8).
+
+6. ORDER OF WORK AND GPU TIME
+  W0 Mac, no GPU: the round 1 checker fixes land first (qv red tests green). Then bankpass code, loaders that read
+     bank files with provenance (FAKE stays the test fallback), per-bank admit checks, fixtures, scratch mutants.
+  W1 PC CPU: word list (samples, then full if needed), article and plural features, mined human examples.
+  W2 PC, after Max's OK for downloads: SSA, Census, GeoNames, Nemotron-Personas-USA, LDNOOBW, then human pools.
+  W3 GPU, stage P: all line banks, pools and labels at full size (they decide pick fairness and are cheap), 1,000
+     topics with sets, intents and openings, instruction paraphrases. Holds, author then judge: Qwen 1 (author),
+     Ministral 1 (author, judge Qwen), Gemma 1-3 (author, judge Qwen and Ministral), Qwen 2 (judge Ministral and
+     Gemma), Ministral 2 (judge Gemma). The last holds carry a bank probe: 60 skeletons per teacher on the stage P
+     banks, dry, own dir, not pilot data.
+  W4 PC CPU: templatize, gates, dedup, judge votes, frame caps, p_exact per bank, manifest, freeze (bank hashes).
+  W5 Mac: generic families and the OFFTOPIC/REQ_WORD re-measure on the probe; fixtures; the prev_assist call.
+  W6 the first real pilot (section 7). W7 stage B after the pick: 3,000 more topics with sets, intents, openings.
+  Output tokens (est., from the section 1 targets): lines 3x overgenerated x 18 tok 0.96M; line judges 2 x 10 tok
+    on 1.5x kept 0.53M; pools and feature labels 0.15M; word labels (POS, forms, -ly) 3 x 8,000 words 0.24M;
+    stage P topics, sets (3 x 150 tok a topic), intents, openings 0.76M; paraphrases 0.04M; probe 0.12M.
+    Stage P about 2.8M, a third per teacher (0.93M); stage B about 2.3M (0.75M per teacher).
+  Time = tokens / dry pilot 2's measured output rate (notes: Qwen 441 tok/s at concurrency 32, Ministral 692 at 16,
+    Gemma 161 at 4); estimates, excluding model load and the lock waits (31-67 min on 09-27):
+    teacher     stage P      holds (<= 33 min)   stage B     holds
+    Qwen        35 min       2                   28 min      1
+    Ministral   22 min       2                   18 min      1
+    Gemma       96 min       3                   78 min      3
+  Bank prompts are shorter than render prompts, so Gemma may fit more than 4 sequences; its first hold measures it.
+  Lean option, not recommended: topic sets by Qwen and Ministral only saves Gemma about 50 min in stage P, but sets
+    from two teachers may favour their vocabulary in OFFTOPIC, which biases the pick.
+
+7. WHAT THE FIRST REAL PILOT (PLAN Phase 1 teacher pick) NEEDS FROM THE PASS
+  (1) Stage P frozen: every bank and pool hash in the pre-registration; a 1,000-skeleton dry build shows 0
+      FAKE_PROVENANCE refs; skel-v0.3 records the bank versions.
+  (2) The same 200 skeletons for all three teachers (PLAN), built on the real banks; each teacher authored about a
+      third of the exact lines they carry; yield reported by exact-line author (own-line advantage check).
+  (3) Real topic sets and the word list in place with the section 5 re-measure passed, so OFFTOPIC and REQ_WORD
+      rates mean something (dry pilot 2's could not); VOCAB_OOL reported per register.
+  (4) The E004 gate hash in every record; RC-12 still pending, so pilot records stay trainable false
+      (DECON_PENDING) under ~/planck/runs/teachers/pilot/, not data/.
+  (5) Per teacher on the real prompts: yield by code, accepted Planck tokens per hour at bulk concurrency,
+      diversity, the Claude rubric read of 30, Max's optional blind skim of 10. R1 stays out (paraphraser FAKE).
+
+8. NEEDS MAX BEFORE IT RUNS (this file decides none of these)
+  1. Downloads: SSA names, Census 2010 surnames, GeoNames cities15000, Nemotron-Personas-USA, LDNOOBW.
+  2. A NON-dry generation (bank items are training-text material), stored outside data/; committing item files to
+     the public repo is his call.
+  3. The D8 reading: banks co-authored and cross-judged by the three Apache-2.0 teachers; human examples from core v0
+     in prompts.   4. VOCAB_OOL gating after the pilot, and p_exact scaling for banks short of target (2g).

@@ -26,6 +26,9 @@ Decoding controls (2026-09-27, D3/D4; off unless a request asks): a request's sa
 D4 preset from TEACHERS, which replaces the default sampling), "regex" (structured output through xgrammar; load
 with structured_backend="xgrammar") and "ban_ids" (logit_bias -100 on each id: dash_ban(), cached per tokenizer
 hash). decode.py holds the regex builder and the ban rule. gpu_memory_utilization is 0.86 by default and never above.
+Round 2 (2026-09-28): "bad_words" (the AI-ism phrase ban, decode.PHRASES minus the chat's literals) goes to vLLM's
+own SamplingParams.bad_words; phrase_ban() runs vLLM's update_from_tokenizer on the full list once per server, so
+the sequence and token caps are checked before the first request and the token form of every phrase is recorded.
 Pins (repo, revision, license) live in hf_pins.json next to this file; TEACHERS below repeats what load() needs.
 Environment: ~/planck/venv-teach, an overlay of ~/planck/venv-vllm (vLLM 0.30.0, torch 2.13.0+cu132) through a .pth
 file, with its own transformers 5.16.0: vLLM 0.30.0's pixtral.py imports PixtralRotaryEmbedding, which transformers
@@ -259,12 +262,13 @@ def preset(name, p):
     return dict(cfg["presets"][p])
 
 
-EXTRAS = ("preset", "regex", "ban_ids")
+EXTRAS = ("preset", "regex", "ban_ids", "bad_words")
 
 
 def resolve(t, sampling):
     """per-request sampling -> (SamplingParams kwargs, extras). Extras: preset (the named preset REPLACES the
-    teacher's default sampling, so no default key leaks in), regex (structured output), ban_ids (logit_bias)."""
+    teacher's default sampling, so no default key leaks in), regex (structured output), ban_ids (logit_bias),
+    bad_words (vLLM's phrase ban)."""
     s = dict(sampling or {})
     ex = {k: s.pop(k) for k in EXTRAS if s.get(k) is not None}
     base = preset(t.name, ex["preset"]) if "preset" in ex else dict(t.cfg["sampling"])
@@ -276,7 +280,9 @@ def sampling_record(t, sampling):
     s, ex = resolve(t, sampling)
     return {"preset": ex.get("preset", DEFAULT_PRESET),
             "sampling": {k: v for k, v in s.items() if k not in ("max_tokens", "min_tokens", "seed", "stop")},
-            "regex_sha256": decode.sha(ex["regex"]) if "regex" in ex else None, "ban_n": len(ex.get("ban_ids", ()))}
+            "regex_sha256": decode.sha(ex["regex"]) if "regex" in ex else None, "ban_n": len(ex.get("ban_ids", ())),
+            "bad_words_n": len(ex.get("bad_words", ())),
+            "bad_words_sha256": decode.sha("\n".join(ex["bad_words"])) if "bad_words" in ex else None}
 
 
 def _params(t, sampling, n_prompt, seed):
@@ -287,6 +293,8 @@ def _params(t, sampling, n_prompt, seed):
         s["structured_outputs"] = StructuredOutputsParams(regex=ex["regex"])
     if "ban_ids" in ex:
         s["logit_bias"] = decode.logit_bias(ex["ban_ids"])
+    if ex.get("bad_words"):
+        s["bad_words"] = list(ex["bad_words"])
     s.setdefault("stop", t.cfg["stop"] or None)
     s["skip_special_tokens"] = False
     room = t.engine["max_model_len"] - n_prompt
@@ -377,6 +385,28 @@ def dash_ban(t, models=None, cache_dir=None):
         json.dump(c, f)
     os.replace(tmp, path)
     return {**c, "cached": False, "path": path}
+
+
+def phrase_ban(vtok, words=decode.PHRASES):
+    """the phrase ban as vLLM will apply it: SamplingParams(bad_words).update_from_tokenizer on vLLM's own
+    tokenizer (t.llm.get_tokenizer(), or vllm.tokenizers.registry.get_tokenizer on CPU). Raises when the token
+    sequences exceed vLLM's caps; returns the rule, the counts and the phrases whose space-prefixed form vLLM drops
+    (it keeps that form only when it has as many tokens as the bare one: those are not banned after a space)."""
+    from vllm import SamplingParams
+    sp = SamplingParams(bad_words=list(words))
+    sp.update_from_tokenizer(vtok)
+    seqs = sp.bad_words_token_ids or []
+    n_tok = sum(len(x) for x in seqs)
+    if len(seqs) > decode.BAD_WORDS_CAP or n_tok > decode.BAD_TOKENS_CAP:
+        raise ValueError(f"phrase ban: {len(seqs)} sequences / {n_tok} tokens over vLLM's caps")
+    no_space = []
+    for w in words:
+        a = vtok.encode(text=w.lstrip(), add_special_tokens=False)
+        b = vtok.encode(text=" " + w.lstrip(), add_special_tokens=False)
+        if not (b and a and b[0] != a[0] and len(a) == len(b)):
+            no_space.append(w)
+    return {"rule": decode.PHRASE_RULE, "n_phrases": len(words), "n_seqs": len(seqs), "n_tokens": n_tok,
+            "sha256": decode.sha("\n".join(words)), "no_space_form": no_space, "seqs": [list(x) for x in seqs]}
 
 
 def strip_end(text):

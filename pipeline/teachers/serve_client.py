@@ -17,7 +17,10 @@ Decoding controls (2026-09-27, the driver's --structured / --ban-dashes / --pres
 check_endpoint also refuses a server that does not offer what the run asks for (a structured-output backend, a
 loaded dash ban, the preset name); each body carries them (the constraint is the one driver.dispatch put in
 built["constraint"]); each row's "decode" (what serve_http applied) goes into the result record, and a row whose
-"decode" does not match the request is a TeacherError (fail closed: a record never claims a control it lacked)."""
+"decode" does not match the request is a TeacherError (fail closed: a record never claims a control it lacked).
+2026-09-28: --ban-phrases ("phrases": "ai_ism", with the chat's forced literals from built["literals"]; the server
+needs --phrase-ban), and decode_pins(): the label rule and phrase rule the server applies, which driver.pin_flags
+writes into decode.json so a resume against a server with other rules is refused."""
 import json
 import os
 import random
@@ -86,6 +89,10 @@ class ServeClient(TC.TeacherClient):
             raise TC.RefuseRealTeacher("the run asks for structured output; this server has no backend for it")
         if want["ban"] and not (info.get("dash_ban") or {}).get("n"):
             raise TC.RefuseRealTeacher("the run asks for the dash ban; this server has none (serve_http --dash-ban)")
+        if want["phrases"] and not (info.get("phrase_ban") or {}).get("n_seqs"):
+            raise TC.RefuseRealTeacher("the run asks for the phrase ban; this server has none (serve_http --phrase-ban)")
+        if want["structured"] != "off" and not info.get("label_rule"):
+            raise TC.RefuseRealTeacher("the server does not say which label rule its structured output uses")
         if want["preset"] and want["preset"] not in (info.get("presets") or ()):
             raise TC.RefuseRealTeacher(f"preset {want['preset']!r} is not offered: {info.get('presets')}")
         self.info, self.model, self.license = info, info["model"], info["license"]
@@ -98,6 +105,10 @@ class ServeClient(TC.TeacherClient):
             b["preset"] = want["preset"]
         if want["ban"]:
             b["ban"] = want["ban"]
+        if want["phrases"]:
+            if "literals" not in built:
+                raise ValueError("built carries no literals for the phrase ban (driver.dispatch sets them)")
+            b["phrases"], b["literals"] = want["phrases"], list(built["literals"])
         if want["structured"] != "off":
             c = built.get("constraint")
             if not c or c.get("mode") != want["structured"]:
@@ -110,11 +121,24 @@ class ServeClient(TC.TeacherClient):
         want, dec = self.decode, dec or {}
         if want["structured"] != "off" and (dec.get("structured") != want["structured"] or not dec.get("regex_sha256")):
             return f"structured {want['structured']} not applied"
+        if want["structured"] != "off" and dec.get("label_rule") != self.info.get("label_rule"):
+            return f"label rule {dec.get('label_rule')} is not the server's {self.info.get('label_rule')}"
+        if want["phrases"] and (dec.get("phrases") or {}).get("rule") != (self.info.get("phrase_ban") or {}).get("rule"):
+            return "phrase ban not applied"
         if want["ban"] and (dec.get("ban") or {}).get("n") != (self.info.get("dash_ban") or {}).get("n"):
             return "dash ban not applied"
         if want["preset"] and dec.get("preset") != want["preset"]:
             return f"preset {want['preset']} not applied (got {dec.get('preset')})"
         return None
+
+    def decode_pins(self):
+        """the server's rules for the controls this run uses (after check_endpoint); pinned in decode.json."""
+        i, pins = self.info or {}, {}
+        if self.decode["structured"] != "off":
+            pins["label_rule"] = i.get("label_rule")
+        if self.decode["phrases"]:
+            pins["phrase_rule"] = (i.get("phrase_ban") or {}).get("rule")
+        return pins
 
     def decode_meta(self, call):
         return (call or {}).get("decode")
@@ -162,4 +186,4 @@ def describe(client):
     i = client.info or {}
     return json.dumps({k: i.get(k) for k in ("teacher", "repo", "revision", "license", "quant", "wire", "sampling",
                                              "presets", "structured_backend", "line_sep", "dash_ban",
-                                             "gpu_memory_utilization")})
+                                             "label_rule", "phrase_ban", "gpu_memory_utilization")})

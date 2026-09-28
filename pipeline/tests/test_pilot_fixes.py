@@ -38,14 +38,14 @@ class TestPrompt(unittest.TestCase):
         sk = _first(lambda s: s["user"]["style"] == "lowercase")
         b = R.build(sk)
         self.assertIn("this is the user's style only, the assistant writes normal sentence case", b["blocks"]["card"])
-        self.assertIn("the assistant writes normal sentence case", b["blocks"]["tail"])
+        self.assertIn("The assistant writes normal sentence case", b["blocks"]["tail"])
 
     def test_rules_and_example_come_after_the_script(self):
         p = R.build(corpus(N)[3])["prompt"]
         script, rules = p.index("Script:"), p.index("Rules: no dashes (use a comma or a new sentence)")
         self.assertLess(script, rules)
         self.assertLess(rules, p.index("Example, another script"))
-        for rule in ("no digits (numbers as words)", "normal sentence case", "my, never your",
+        for rule in ("No digits (numbers as words)", "normal sentence case", "my, never your",
                      "never answers as your X is Y"):
             self.assertIn(rule, p[rules:])
 
@@ -85,7 +85,7 @@ class TestPrompt(unittest.TestCase):
         self.assertEqual(parse.exact_text(sk2, t), t["text"])
 
     def test_variant_ids_mark_the_new_prompt(self):
-        self.assertEqual([v[0] for v in R.VARIANTS], ["instr.fake.p2.0", "instr.fake.p2.1"])
+        self.assertEqual([v[0] for v in R.VARIANTS], ["instr.fake.p3.0", "instr.fake.p3.1"])   # p3: 2026-09-28
 
 
 class TestGuidance(unittest.TestCase):
@@ -118,7 +118,7 @@ class TestGuidance(unittest.TestCase):
             if base.startswith("answer"):
                 self.assertIn(RI.ONLY_ANSWER, g)
                 start = any(r["verifier"] == "start_name" for r in t.get("rules", []))
-                self.assertEqual("starting the reply with the answer itself" in g,
+                self.assertEqual("starting with the answer itself" in g,   # 09-28 wording (test_round2_fixes)
                                  base == "answer with the value first" and not start)
             if base == "pick the first topic back up and name it":
                 self.assertIn(t["must_include"][0], g)
@@ -176,15 +176,16 @@ class TestSkeletonFrame(unittest.TestCase):
                 self.assertTrue(all(not heldout.vocab_hits(w) for w in TW.words(topic, part)))
 
     def test_versions(self):
-        self.assertEqual((S.GEN_VERSION, S.RNG_VERSION), ("skel-v0.2", "skel-v0.1"))
-        self.assertEqual(corpus(N)[0]["gen_version"], "skel-v0.2")
+        self.assertEqual((S.GEN_VERSION, S.RNG_VERSION), ("skel-v0.3", "skel-v0.1"))   # v0.3: 2026-09-28
+        self.assertEqual(corpus(N)[0]["gen_version"], "skel-v0.3")
 
 
 class TestCheckerUnits(unittest.TestCase):
     def test_stem_pairs(self):
-        same = [("noisy", "noise"), ("saving", "save"), ("shaded", "shade"), ("worried", "worry"), ("worries", "worry"),
-                ("running", "runs"), ("stopped", "stop"), ("shaking", "shaky"), ("holidays", "holiday"),
-                ("parties", "party"), ("boxes", "box"), ("cookies", "cook")]
+        # 2026-09-28: Porter (test_round2_fixes) no longer merges noisy/noise, shaking/shaky or cookies/cook
+        same = [("saving", "save"), ("shaded", "shade"), ("worried", "worry"), ("worries", "worry"),
+                ("running", "runs"), ("stopped", "stop"), ("holidays", "holiday"), ("parties", "party"),
+                ("boxes", "box")]
         for a, b in same:
             self.assertEqual(stem(a), stem(b), (a, b))
         for a, b in [("noise", "nose"), ("bus", "bush"), ("glass", "gla"), ("class", "clas")]:

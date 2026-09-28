@@ -3,6 +3,7 @@ are scheduled, distance integrity, query form, answer correctness (wrong, stale,
 and topic return. Golds come from the skeleton (golds.derive recomputes them; test_skeleton checks they agree)."""
 import re
 
+import golds
 import lexicons as L
 from check_base import event_values, same_type, slot_type, mentioned, value_re_i
 
@@ -11,9 +12,12 @@ CORR_OPS = {"set", "fix", "err", "twin", "add", "remove", "move_first", "move_la
 NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven",
                 "twelve"]
 YES_RE = re.compile(r"(?<![a-z])(?:yes|yep|yeah|still (?:on|there)|it is|it's (?:still )?(?:on|there))(?![a-z])", re.I)
-# "one" as a pronoun, not a count: "which one is next", "that one's done" (audit 2026-09-27: 3 count answers fired)
-PRONOUN_ONE = re.compile(r"(?<![a-z])(?:which|that|this|each|every|any|other|another|the|next|last|first|no)\s+one"
-                         r"(?![a-z])|(?<![a-z])one(?:'s|\s+of)(?![a-z])", re.I)
+# "one" as a pronoun, not a count: "which one is next", "that one's done" (audit 2026-09-27: 3 count answers fired).
+# 09-28 (v1 review): "the one" and "one of" are counts as often as pronouns ("maybe just the one", "only one of them is
+# left" beside another count), so only determiners that cannot count make "one" a pronoun, and "the one" only when a
+# word follows it (dp2 recheck: "four stops including the one you just added")
+PRONOUN_ONE = re.compile(r"(?<![a-z])(?:which|that|this|each|every|any|other|another|next|last|first|no)\s+one"
+                         r"(?![a-z])|(?<![a-z])the\s+one(?=\s+[a-z])", re.I)
 ONE_RE = re.compile(r"(?<![a-z])one(?![a-z])", re.I)
 NO_RE = re.compile(r"(?<![a-z])(?:no|nope|not|isn't|is not|off|removed|gone|took .{1,30} off)(?![a-z])", re.I)
 
@@ -24,7 +28,34 @@ def slot_event(e):
         (k == "S9" and e["params"]["need_kind"] == "context")
 
 
+def asks(clause, first, q_end):
+    """a clause asks (or requests) rather than states: it opens with an auxiliary, a request frame or a wh-word, and
+    it is the first clause of its sentence or its sentence ends in "?"; a that-clause always states, and so does an
+    embedded statement or a pseudo-cleft (lexicons.EMBED_DECL_RE, PSEUDO_CLEFT_RE)."""
+    c = clause.strip()
+    if c.lower().startswith("that ") or L.EMBED_DECL_RE.search(c) or (not q_end and L.PSEUDO_CLEFT_RE.match(c)):
+        return False
+    return bool((L.AUX_START_RE.match(c) or L.WH_START_RE.match(c)) and (first or q_end))
+
+
+def stated(text, v, fold=False):
+    """v occurs in text in a clause that states it (lexicons.PLANT_CLAUSE_SPLIT, asks()): "my friend is Demklal, can
+    you remember?" and "I bought a hat that is purple" state it, "Can you tell me the name of my friend Demklal?" and
+    "What is your favourite colour brown?" do not (dry pilot 2 recheck, 2026-09-28: the relative "that is" case)."""
+    marked = (value_re_i(v) if fold else golds.value_re(v)).sub(" VALUEMARK ", text)   # "mac and cheese" stays whole
+    for sent in re.findall(r"[^.!?]+[.!?]*", marked):
+        q_end = sent.rstrip().endswith("?")
+        for n, c in enumerate(L.PLANT_CLAUSE_SPLIT.split(sent)):
+            if "VALUEMARK" in c and not asks(c, n == 0, q_end):
+                return True
+    return False
+
+
 def chk_ops(ctx):
+    """PLANT_MISSING / CORR_MISSING: a planted, corrected or listed value absent from its turn; PLANT_MISSING also when
+    a guided user turn gives a slot value only inside a question or request (2026-09-28, v1 review: "What is your
+    favourite colour brown?" planted nothing, yet the later answer's gold rested on it). PLANT_UNBOUND: the value
+    without the noun it belongs to."""
     out = []
     for e in ctx.skel["events"]:
         for op in e["params"].get("ops", []):
@@ -36,6 +67,9 @@ def chk_ops(ctx):
             out += [(code, i, f"{e['id']} {v}") for v in vals if code and v and not ctx.has(i, v)]
             s = ctx.skel["slots"].get(op.get("slot") or "")
             t = ctx.by_i[i]
+            if op["op"] == "plant" and s and t["mode"] == "guided" and t["role"] == "user" and ctx.has(i, s["value"]) \
+                    and not stated(ctx.text[i], s["value"], fold=ctx.lower_user):
+                out.append(("PLANT_MISSING", i, f"{e['id']} {s['value']} asked, not stated"))
             if op["op"] == "plant" and s and s.get("noun") and t["mode"] == "guided" and t["role"] == "user" \
                     and not value_re_i(s["noun"]).search(ctx.text[i]):
                 out.append(("PLANT_UNBOUND", i, f"{e['id']} {s['noun']}"))

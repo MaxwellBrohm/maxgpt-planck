@@ -7,6 +7,7 @@ from functools import lru_cache
 import golds
 import lexicons as L
 import render_prompt as R
+from stemmer import porter
 
 WORD_RE = re.compile(r"[a-z0-9']+")
 SENT_SPLIT = re.compile(r"(?<=[.!?])\s+(?=\S)")
@@ -83,37 +84,30 @@ def straight(s):
     return s.translate(QUOTES) if s else s
 
 
-STEM_SUFFIXES = ("iness", "ingly", "edly", "ness", "ment", "ied", "ily", "ing", "ly", "ed", "er", "y", "e")
+I_STRIP_MIN = 6
 
 
 def stem(w):
-    """suffix stripper for the OFFTOPIC overlap, applied the same way to both sides: the plural first (holidays ->
-    holiday, worries -> worry, boxes -> box), then one suffix with a stem of 3+ letters left, then a doubled final
-    consonant undoubled. noisy/noise -> nois, saving/save -> sav, worried/worry -> worr, running/runs -> run."""
+    """the OFFTOPIC stem, the same on both sides: the Porter stem (stemmer.py) of the word without a possessive 's.
+    2026-09-28 (v1 quality review): the round 1 suffix stripper merged ready/reading, busy/bus, care/car, cater/cat,
+    letting/letter and plane/plan; Porter keeps them apart (tests/test_round2.py pins both lists)."""
     w = w.strip("'")
     if w.endswith("'s"):
         w = w[:-2]
-    if len(w) > 4 and w.endswith("ies"):
-        w = w[:-3] + "y"
-    elif len(w) > 4 and w.endswith("es") and w[:-2].endswith(("s", "x", "z", "ch", "sh")):
-        w = w[:-2]
-    elif len(w) >= 4 and w.endswith("s") and not w.endswith("ss"):
-        w = w[:-1]
-    for suf in STEM_SUFFIXES:
-        if len(w) - len(suf) >= 3 and w.endswith(suf):
-            w = w[:-len(suf)]
-            break
-    if len(w) >= 4 and w[-1] == w[-2] and w[-1] not in "lsz":
-        w = w[:-1]
-    return w
+    s = porter(w)
+    # a -y word of a long stem meets its base (photography/photographer, squeaky/squeak, cloudy/cloud); short stems
+    # stay apart (readi/read, busi/bu, noisi/nois), which is where the round 1 collisions were
+    return s[:-1] if len(s) >= I_STRIP_MIN and s.endswith("i") else s
 
 
 GENERIC_STEMS = {stem(w) for w in L.GENERIC}
 
 
 def content(s):
-    """stemmed content words for the OFFTOPIC overlap: no stopwords, no topic-neutral words (lexicons.GENERIC)."""
-    return {stem(w) for w in words(s) if w not in L.STOPWORDS and len(w) > 2} - GENERIC_STEMS
+    """stemmed content words for the OFFTOPIC overlap: no stopwords, no topic-neutral words (lexicons.GENERIC as
+    stems, lexicons.GENERIC_FORMS as written: "noted" is an acknowledgement, not the noun "note")."""
+    return {stem(w) for w in words(s) if w not in L.STOPWORDS and w not in L.GENERIC_FORMS and len(w) > 2} \
+        - GENERIC_STEMS
 
 
 def sentences(s):

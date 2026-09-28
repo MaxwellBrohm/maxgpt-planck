@@ -180,7 +180,7 @@ def render(skel):
     carry = []
     for t in skel["turns"]:
         if t["mode"] == "exact":   # the bank line; a lowercase-style user's copy may also be lowercased (D1 folds)
-            texts[t["i"]] = t["text"]
+            texts[t["i"]] = t["text"]   # teachers/fake_engine.canon() gives the parse.exact_text form (09-28)
         elif t["role"] == "user":
             texts[t["i"]] = user_line(skel, t)
         else:

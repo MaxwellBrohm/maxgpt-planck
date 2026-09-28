@@ -77,21 +77,25 @@ def p_offtopic(skel, texts, built):
             if gw:   # a topic-neutral word shared with the user's line does not make a reply on topic
                 out.append(("offtopic_generic_fire", skel, _copy(texts, t["i"], bad[:-1] + f", {gw[0]}."), {"OFFTOPIC"}, {}))
         break
+    lower = skel["user"]["style"] == "lowercase"
     for u in filler_user(skel):
         a = [t for t in _fillers(skel, texts) if t["i"] == u["i"] + 1]
-        reply = "Shaky ones happen, press firmly."
+        # 2026-09-28: Porter stems (shaking/shakes -> shake); shaky/shaking no longer meet (tests/test_round2.py)
+        reply = "Shake them less, press firmly."
         if a and u["max_w"] >= 6 and u["min_w"] <= 6 and not content(reply) & all_topic:
-            base = _copy(texts, u["i"], f"{_topic_w(skel, u)} tips? The jars keep shaking.")
+            line = f"{_topic_w(skel, u)} tips? The jars keep shaking."
+            base = _copy(texts, u["i"], line.lower() if lower else line)
             out.append(("offtopic_stem_pass", skel, _copy(base, a[0]["i"], reply), "ok", {}))
             break
     fill = {t["i"] for t in _fillers(skel, texts)}
     for u in filler_user(skel):
         cw = topic_set(topics[u["intent"].split(":")[1]])
-        if u["i"] - 1 not in fill or u["max_w"] < 6 or stem("patience") in cw | {stem(w) for w in vw}:
+        if u["i"] - 1 not in fill or u["max_w"] < 8 or stem("patience") in cw | {stem(w) for w in vw}:
             continue
-        base = _copy(texts, u["i"] - 1, f"{_topic_w(skel)} takes some patience.")
-        out.append(("offtopic_prev_assist_pass", skel, _copy(base, u["i"], "Patience is hard for me, honestly."),
-                    "ok", {}))
+        # 2026-09-28: two shared content words with the assistant's reply (one echoed word no longer passes)
+        base = _copy(texts, u["i"] - 1, f"{_topic_w(skel)} takes some patience and practice.")
+        line = "Patience and practice are hard for me, honestly."
+        out.append(("offtopic_prev_assist_pass", skel, _copy(base, u["i"], line.lower() if lower else line), "ok", {}))
         break
     return out
 
@@ -108,9 +112,9 @@ def p_req_forms(skel, texts, built):
     sk = copy.deepcopy(skel)
     sk["required_words"].update(noun="shelf", adj="smooth")
     base = {i: s for i, s in texts.items()}
-    from check_text import word_forms_re
+    from check_lines import word_forms_re
     for k in ("noun", "adj"):
-        base = {i: word_forms_re(rw[k]).sub("thing", s) for i, s in base.items()}
+        base = {i: word_forms_re(rw[k], k).sub("thing", s) for i, s in base.items()}
     w = _topic_w(skel)
     out.append(("req_forms_pass", sk, _copy(base, f[0]["i"], f"With {w}, the shelves slide in smoothly."), "ok", {}))
     out.append(("req_forms_fire", sk, _copy(base, f[0]["i"], f"With {w}, the boards slide in easily."), {"REQ_WORD"}, {}))
@@ -122,11 +126,11 @@ def p_placed(skel, texts, built):
     rw = skel["required_words"]
     if len(rw["turn_hint"]) != 3:
         return []
-    from check_text import word_forms_re
+    from check_lines import word_forms_re
     sk = copy.deepcopy(skel)
     sk["required_words"]["turn_hint"] = rw["turn_hint"][:2]
-    no_adj = {i: word_forms_re(rw["adj"]).sub("fine", s) for i, s in texts.items()}
-    no_noun = {i: word_forms_re(rw["noun"]).sub("item", s) for i, s in texts.items()}
+    no_adj = {i: word_forms_re(rw["adj"], "adj").sub("fine", s) for i, s in texts.items()}
+    no_noun = {i: word_forms_re(rw["noun"], "noun").sub("item", s) for i, s in texts.items()}
     if no_adj == texts or no_noun == texts:
         return []
     return [("placed_two_pass", sk, no_adj, "ok", {}), ("placed_two_fire", sk, no_noun, {"REQ_WORD"}, {})]

@@ -7,30 +7,34 @@ Codes added beyond the SPEC list (see notes.txt): STAGE_DIR (bracketed stage dir
 (a correction, fix, twin or list-op value absent from its turn), VALUE_EARLY (a scheduled value said before the
 turn that schedules it), USER_VOICE / ASSIST_VOICE (third-person narration: "the user says ..."), OPEN_END (an
 "end with an open question" turn without a question mark), SOCIAL_TOPIC (an S8 social reply that brings in a slot
-value), SKEL_INFEASIBLE (render_prompt.feasible, before any teacher call)."""
+value), SKEL_INFEASIBLE (render_prompt.feasible, before any teacher call); 2026-09-28 (SPEC 14): END_IN_TURN (the END
+marker, a closing "End." or script talk inside a turn) and USER_STYLE (a lowercase-style user's own line in capitals)."""
 import check_behav
 import check_events
+import check_lines
+import check_lookup
 import check_text
 import parse
 import render_prompt
-from check_base import Ctx
+from check_base import Ctx, straight
 
-ORDER = ["SKEL_INFEASIBLE", "FORMAT_LINES", "FORMAT_EXTRA", "FORMAT_WRAP", "THOUGHT_TAG", "EMPTY_TURN", "ROLE_LABEL",
-         "MARKDOWN", "EMOJI", "DASH", "STAGE_DIR", "LEN_USER", "LEN_ASSIST", "DIGIT", "EXACT_MISMATCH", "REQ_SPAN",
-         "FORBID_SPAN", "REQ_WORD", "VOCAB_OOL", "PLANT_MISSING", "PLANT_UNBOUND", "CORR_MISSING", "VALUE_EARLY", "DIST_LEAK",
-         "QUERY_RESTATES", "QUERY_NOREF", "ANSWER_WRONG", "ANSWER_STALE", "ANSWER_SHOTGUN", "PERSPECTIVE",
-         "SELF_CLAIM", "USER_VOICE", "ASSIST_VOICE", "PERSIST_FAIL", "OPEN_END", "OFFTOPIC", "ABSTAIN_MISSING",
-         "DEFLECT", "AI_ISM", "TOPIC_RETURN", "IDENTITY", "SOCIAL_TOPIC", "LIST_STATE", "LOOKUP_FORMAT",
-         "LOOKUP_UNNEEDED", "LOOKUP_MISSING", "LOOKUP_COPY", "LOOKUP_EMPTY", "REPEAT_4GRAM", "CONSEC_REP",
-         "SELF_COPY", "ECHO_USER", "NON_ENGLISH", "SAFETY", "PERSONA_LEAK", "PROMPT_ECHO", "HELDOUT_VOCAB",
-         "HELDOUT_ECHO", "HELDOUT_STRUCT"]
+ORDER = ["SKEL_INFEASIBLE", "FORMAT_LINES", "FORMAT_EXTRA", "FORMAT_WRAP", "END_IN_TURN", "THOUGHT_TAG",
+         "EMPTY_TURN", "ROLE_LABEL", "MARKDOWN", "EMOJI", "DASH", "STAGE_DIR", "LEN_USER", "LEN_ASSIST", "DIGIT",
+         "EXACT_MISMATCH", "REQ_SPAN", "FORBID_SPAN", "REQ_WORD", "VOCAB_OOL", "PLANT_MISSING", "PLANT_UNBOUND",
+         "CORR_MISSING", "VALUE_EARLY", "DIST_LEAK", "QUERY_RESTATES", "QUERY_NOREF", "ANSWER_WRONG", "ANSWER_STALE",
+         "ANSWER_SHOTGUN", "PERSPECTIVE", "SELF_CLAIM", "USER_VOICE", "ASSIST_VOICE", "USER_STYLE", "PERSIST_FAIL",
+         "OPEN_END", "OFFTOPIC", "ABSTAIN_MISSING", "DEFLECT", "AI_ISM", "TOPIC_RETURN", "IDENTITY", "SOCIAL_TOPIC",
+         "LIST_STATE", "LOOKUP_FORMAT", "LOOKUP_UNNEEDED", "LOOKUP_MISSING", "LOOKUP_COPY", "LOOKUP_EMPTY",
+         "REPEAT_4GRAM", "CONSEC_REP", "SELF_COPY", "ECHO_USER", "NON_ENGLISH", "SAFETY", "PERSONA_LEAK",
+         "PROMPT_ECHO", "HELDOUT_VOCAB", "HELDOUT_ECHO", "HELDOUT_STRUCT"]
 REPORT_ONLY = {"VOCAB_OOL"}
 RANK = {c: n for n, c in enumerate(ORDER)}
 
 
 def registry():
     """every check function, in module order; mutation_checker replaces entries to build checker mutants."""
-    return list(check_text.CHECKS) + list(check_events.CHECKS) + list(check_behav.CHECKS)
+    return (list(check_text.CHECKS) + list(check_lines.CHECKS) + list(check_events.CHECKS) + list(check_behav.CHECKS)
+            + list(check_lookup.CHECKS))
 
 
 REGISTRY = registry()
@@ -62,9 +66,10 @@ def run(skel, raw, built=None, wordlist=None):
 
 def record_turns(skel, res):
     """accepted conversation turns for the record: the stored text of an exact line is the bank line itself
-    (parse.exact_text: lowercased on a lowercase-style user's turns)."""
+    (parse.exact_text: lowercased on a lowercase-style user's turns); a teacher line is stored as the checks read it,
+    curly quotes made straight (2026-09-28: Ministral's U+2019 was stored as written, mixed with straight ones)."""
     out = []
     for t in skel["turns"]:
-        text = parse.exact_text(skel, t) if t["mode"] == "exact" else res["turns"][t["i"]]
+        text = parse.exact_text(skel, t) if t["mode"] == "exact" else straight(res["turns"][t["i"]])
         out.append({"role": t["role"], "text": text, "mask": t["mask"]})
     return out

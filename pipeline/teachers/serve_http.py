@@ -3,7 +3,7 @@ skeleton renders; nothing it produces is training data).
 
     flock -w 7200 ~/planck/locks/gpu.lock timeout -k 60 2280 python serve_http.py --teacher gemma-4-12b --port 18763 \
         [--log THIS_PROCESS.log] [--stats OUT.dry.json] [--idle-s 240] [--first-request-s 900] [--sampling-json '{}'] \
-        [--dash-ban] [--cache-dir DIR] [--gpu-util 0.86] [--structured-backend xgrammar|none]
+        [--dash-ban] [--phrase-ban] [--cache-dir DIR] [--gpu-util 0.86] [--structured-backend xgrammar|none]
 
 Loads one teacher with serve.load, then listens on 127.0.0.1 only:
   GET  /planck-serve            identity + pins {"planck_serve": true, "status": "dry", teacher, repo, revision, ...}
@@ -11,6 +11,8 @@ Loads one teacher with serve.load, then listens on 127.0.0.1 only:
                                 optional (decoding controls, 2026-09-27): "preset" (a D4 preset name), "constraint"
                                 {"mode", "lines"} (structured output: decode.label_regex with this teacher's line
                                 separator), "ban": "dash" (needs --dash-ban); the row's "decode" says what was applied
+                                (2026-09-28) "phrases": "ai_ism" (needs --phrase-ban) with "literals" (the chat's forced
+                                lines): vLLM bad_words = decode.phrase_words(literals and constraint literals)
   POST /planck-serve/stop       unload, write --stats, exit
 One engine thread owns vLLM. It adds each request the moment it arrives (LLM.enqueue) and steps the engine itself
 (llm_engine.step), so requests join and leave the running batch continuously and the caller's concurrency is the
@@ -36,8 +38,8 @@ from bench import gpu_used_mib  # noqa: E402
 
 
 class Engine:
-    def __init__(self, t, sampling, ban=None, util=None):
-        self.t, self.sampling, self.ban, self.util = t, sampling, ban, util
+    def __init__(self, t, sampling, ban=None, util=None, phrases=None):
+        self.t, self.sampling, self.ban, self.util, self.phrases = t, sampling, ban, util, phrases
         self.q = queue.Queue()
         self.pending = {}
         self.halt = threading.Event()
@@ -45,7 +47,7 @@ class Engine:
         self.lock = threading.Lock()
         self.st = {"received": 0, "done": 0, "render_errors": 0, "prompt_tokens": 0, "out_tokens": 0, "finish": {},
                    "thought_hits": 0, "clamped": 0, "max_inflight": 0, "step_s": 0.0, "first_request_t": None,
-                   "last_done_t": None, "structured": 0, "banned": 0, "presets": {}}
+                   "last_done_t": None, "structured": 0, "banned": 0, "phrase_banned": 0, "presets": {}}
 
     def submit(self, prompt, seed, max_tokens, req=None):
         """req: the request's decoding controls, checked by the handler: preset, constraint + regex, ban."""
@@ -72,6 +74,10 @@ class Engine:
             if not self.ban:
                 raise ValueError("this server has no dash ban (start it with --dash-ban)")
             s["ban_ids"] = self.ban["ids"]
+        if r.get("phrases"):
+            if not self.phrases:
+                raise ValueError("this server has no phrase ban (start it with --phrase-ban)")
+            s["bad_words"] = decode.phrase_words(r.get("literals"))
         dec = serve.sampling_record(self.t, s)
         if not r.get("preset") and self.sampling:
             dec["preset"] = "custom"                      # --sampling-json over the default
@@ -79,7 +85,9 @@ class Engine:
         dec.update(structured=c["mode"] if c else None, line_sep=r.get("line_sep"),
                    n_literal=sum(x[1] is not None for x in c["lines"]) if c else 0,
                    ban={k: self.ban[k] for k in ("rule", "n", "ids_sha256", "tokenizer_sha256")} if r.get("ban")
-                   else None, gpu_memory_utilization=self.util)
+                   else None, gpu_memory_utilization=self.util, label_rule=r.get("label_rule"),
+                   phrases={"rule": self.phrases["rule"], "n": dec["bad_words_n"], "sha256": dec["bad_words_sha256"],
+                            "left_out": len(decode.PHRASES) - dec["bad_words_n"]} if r.get("phrases") else None)
         return s, dec
 
     def _add(self, jobs):
@@ -100,6 +108,7 @@ class Engine:
             j["n_prompt"], j["clamped"] = len(ids), clamped
             self.st["structured"] += bool(j["decode"]["structured"])
             self.st["banned"] += bool(j["decode"]["ban"])
+            self.st["phrase_banned"] += bool(j["decode"]["phrases"])
             self.st["presets"][j["decode"]["preset"]] = self.st["presets"].get(j["decode"]["preset"], 0) + 1
             self.pending[rid.rsplit("-", 1)[0] if "-" in rid else rid] = j
         self.st["max_inflight"] = max(self.st["max_inflight"], len(self.pending))
@@ -166,11 +175,20 @@ def decode_request(body, info):
             raise ValueError("this server was loaded without a structured-output backend")
         if not decode.constraint_ok(c):
             raise ValueError("constraint must be {mode: labels|labels_exact, lines: [[label, literal or null]]}")
-        req.update(constraint=c, line_sep=info["line_sep"], regex=decode.label_regex(c["lines"], info["line_sep"]))
+        req.update(constraint=c, line_sep=info["line_sep"], label_rule=decode.LABEL_RULE,
+                   regex=decode.label_regex(c["lines"], info["line_sep"]))
     if body.get("ban") is not None:
         if body["ban"] != "dash" or not info.get("dash_ban"):
             raise ValueError(f"ban {body['ban']!r} is not loaded on this server (start it with --dash-ban)")
         req["ban"] = "dash"
+    if body.get("phrases") is not None:
+        if body["phrases"] != "ai_ism" or not info.get("phrase_ban"):
+            raise ValueError(f"phrases {body['phrases']!r} is not loaded on this server (start it with --phrase-ban)")
+        lits = body.get("literals") or []
+        if not isinstance(lits, list) or not all(isinstance(x, str) for x in lits):
+            raise ValueError("literals must be a list of strings")
+        lits = lits + [x[1] for x in (c or {}).get("lines", ()) if x[1] is not None]
+        req.update(phrases="ai_ism", literals=lits)
     return req
 
 
@@ -228,7 +246,7 @@ def make_handler(eng, info, stop_evt):
     return H
 
 
-def server_info(t, sampling, ban, backend, util, kv=None):
+def server_info(t, sampling, ban, backend, util, kv=None, phrases=None):
     """GET /planck-serve: identity, pins, and the decoding controls this server offers."""
     cfg = t.cfg
     return {"planck_serve": True, "status": "dry", "teacher": t.name, "repo": cfg["repo"],
@@ -238,6 +256,8 @@ def server_info(t, sampling, ban, backend, util, kv=None):
             **(kv or {}), "load_s": t.load_s, "decode_controls": 1, "presets": serve.preset_names(t.name),
             "default_preset": "custom" if sampling else serve.DEFAULT_PRESET, "structured_backend": backend,
             "line_sep": cfg.get("line_sep", "\\n"), "gpu_memory_utilization": util,
+            "label_rule": decode.LABEL_RULE if backend else None,
+            "phrase_ban": {k: v for k, v in phrases.items() if k != "seqs"} if phrases else None,
             "dash_ban": {k: ban[k] for k in ("rule", "n", "ids_sha256", "tokenizer_sha256", "cached")} if ban else None}
 
 
@@ -253,6 +273,8 @@ def main(argv=None):
                     "requests that name no preset")
     ap.add_argument("--dash-ban", action="store_true", help="compute (or load from --cache-dir) the dash-token ban "
                     "before loading, so requests may ask for it")
+    ap.add_argument("--phrase-ban", action="store_true", help="offer the AI-ism phrase ban (vLLM bad_words); its "
+                    "token form is checked on the loaded engine's tokenizer before READY")
     ap.add_argument("--cache-dir", default=serve.BAN_CACHE)
     ap.add_argument("--gpu-util", type=float, default=serve.ENGINE["gpu_memory_utilization"])
     ap.add_argument("--structured-backend", default="xgrammar", choices=["xgrammar", "none"])
@@ -270,8 +292,14 @@ def main(argv=None):
     if a.log and os.path.exists(a.log):
         with open(a.log, encoding="utf-8", errors="replace") as f:
             kv = serve.kv_from_log(f.read())
-    info = server_info(t, sampling, ban, backend, a.gpu_util, kv={"kv_vllm_log": kv, "kv_frontend": serve.kv_info(t)})
-    eng = Engine(t, sampling, ban, a.gpu_util)
+    try:
+        phrases = serve.phrase_ban(t.llm.get_tokenizer()) if a.phrase_ban else None
+    except Exception:
+        serve.unload(t)                          # the GPU memory goes back before the lock is released
+        raise
+    info = server_info(t, sampling, ban, backend, a.gpu_util, kv={"kv_vllm_log": kv, "kv_frontend": serve.kv_info(t)},
+                       phrases=phrases)
+    eng = Engine(t, sampling, ban, a.gpu_util, phrases)
     th = threading.Thread(target=eng.run, daemon=True)
     th.start()
     srv = ThreadingHTTPServer(("127.0.0.1", a.port), make_handler(eng, info, stop_evt))
@@ -279,7 +307,7 @@ def main(argv=None):
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     ready = time.time()
     print(f"[serve_http] READY {a.teacher} port {a.port} load {t.load_s}s kv {kv} gpu {gpu_used_mib()} util "
-          f"{a.gpu_util} structured {backend} dash_ban {info['dash_ban']}", flush=True)
+          f"{a.gpu_util} structured {backend} dash_ban {info['dash_ban']} phrase_ban {phrases}", flush=True)
     reason, last_busy = None, ready
     while reason is None:
         stop_evt.wait(2.0)

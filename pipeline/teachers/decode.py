@@ -15,6 +15,16 @@ driver side and serve_http share one definition. DRY prep: nothing here is train
                             30 outputs with a dash to 0 of 30 at 1.00 to 1.03x throughput. Byte-fallback fragments of a
                             dash are NOT banned (their first bytes are shared with curly quotes); the checker's DASH
                             still rejects whatever gets through.
+  (2026-09-28, round 2) LABEL_RULE "labels-v2": every free line is noend(), so no line holds "END" and END is written
+                            once, on its own line, at the end. Dry pilot 2: Ministral's last line ran on with
+                            " END. END." until max_tokens (293 runs), and 10 accepted chats kept END inside a turn.
+                            "labels-v1" was LINE_ANY on every line (dp2 FIX arms). NO length cap: every capped form
+                            measured costs too much in xgrammar 0.2.8 (Qwen vocab, PC CPU): a flat "[^\\n]{1,300}"
+                            last line 1.6 s of compile per request (LINE_ANY 0.14 s), the no-END unit repeated
+                            {1,300} 0.61 s of mask per token, nested repeats did not finish compiling in 10 minutes.
+  phrase_words(literals)    the AI-ism phrase ban (PHRASE_RULE): vLLM bad_words, one surface form per string (vLLM adds
+                            the space-prefixed form when it has as many tokens); a phrase that occurs in a forced
+                            literal of the chat is left out, so the grammar and the ban never forbid the same token.
 Presets (D4) live in serve.TEACHERS next to the teacher they belong to."""
 import hashlib
 import re
@@ -24,6 +34,54 @@ SEPS = ("\\n", "\\n+")                       # regex text: one newline, or one o
 LABEL_OK = re.compile(r"^[UAT][1-9][0-9]*$")
 LINE_ANY = "[^\\n]+"
 META = set("\\.^$|?*+()[]{}")               # regex metacharacters; nothing else is escaped (xgrammar's parser)
+
+LABEL_RULE = "labels-v2"
+# A capital E is followed by neither E nor N-then-D/E, so "END" cannot occur; a line may end in "E" or "EN". Stricter
+# than "no END" only for capital "EE" and "ENE" (all-caps words). The exact no-END automaton, with E-runs as a loop,
+# cost xgrammar 57 to 59 ms of mask time per token on Qwen's vocab (PC CPU, 2026-09-28) against 0.002 ms for this
+# form and for LINE_ANY, so it is not used.
+_UNIT = "(?:[^E\\n]|E[^EN\\n]|EN[^DE\\n])"
+
+
+def noend():
+    """a non-empty line (no newline) that never contains "END": units of 1 to 3 chars, then an optional "E" or "EN"."""
+    return f"(?:{_UNIT}+(?:EN?)?|EN?)"
+
+# ---- AI-ism phrase ban (PHRASE_RULE): the checker's lexicons.AI_ISM_RE phrases in the forms the teachers write
+# (dp2 records: "happy to help" 113 Gemma, "I am here to help" 52 Qwen, Ministral's curly "I’m here to help") plus
+# the greeting family (v1 review: "Hello, how can I help you today?" 33 times in Gemma accepts). Capitalized and
+# lowercase starts; "is there anything else" covers AI_ISM's "is there anything else i can". vLLM bans a phrase after
+# a space only when " phrase" has as many tokens as "phrase"; Ministral's "happy to help" and "feel free to" split
+# their bare first word, so their dp2 contexts ("I'd be happy to help" 61, "I'm happy to help", "and feel free to")
+# are listed whole (teachers/test_decode_pc.py checks the dp2 sentences are covered on every teacher's tokenizer).
+PHRASE_RULE = "aiism-v2"
+PHRASES = ("as an AI", "As an AI", "language model", "Language model", "great question", "Great question",
+           "feel free to", "Feel free to", "and feel free to", "please feel free to", "Please feel free to",
+           "I'm here to help", "I’m here to help", "I am here to help", "certainly!", "Certainly!",
+           "happy to help", "Happy to help", "be happy to help", "am happy to help", "I'm happy to help",
+           "I’m happy to help", "I hope this helps", "as a virtual", "As a virtual", "I'm just an AI",
+           "I’m just an AI", "I am just an AI", "artificial intelligence", "Artificial intelligence", "large language",
+           "Large language", "how can I assist", "How can I assist", "is there anything else", "Is there anything else",
+           "how can I help", "How can I help")
+GREETING = ("how can i help", "is there anything else", "i'm here to help")   # the family added beyond AI_ISM
+BAD_WORDS_CAP = 128                          # vLLM 0.30 VLLM_MAX_NUM_BAD_WORDS: token sequences per request
+BAD_TOKENS_CAP = 1024                        # VLLM_MAX_BAD_WORDS_TOTAL_TOKENS (V2 runner)
+
+
+def _fold(s):
+    return " ".join(s.replace("’", "'").replace("‘", "'").lower().split())
+
+
+def covered(seqs, ids):
+    """True when one banned token sequence occurs in ids: then vLLM's kernel would have masked its last token."""
+    ids = list(ids)
+    return any(ids[k:k + len(q)] == list(q) for q in seqs for k in range(len(ids) - len(q) + 1))
+
+
+def phrase_words(literals=()):
+    """the bad_words of one request: PHRASES minus every phrase whose folded form occurs in a forced literal."""
+    lit = [_fold(x) for x in literals or () if x]
+    return [p for p in PHRASES if not any(_fold(p) in x for x in lit)]
 
 DASH_RULE = "dash-v1"
 DASH_CHARS = "\u2012\u2013\u2014\u2015\u2212"
@@ -37,10 +95,13 @@ def esc(text):
     return "".join("\\" + c if c in META else c for c in text)
 
 
-def label_regex(lines, sep="\\n"):
-    """[[label, literal or None], ...] -> the regex of the whole output: 'U1: <line>' + sep + ... + sep + 'END'."""
+def label_regex(lines, sep="\\n", rule=LABEL_RULE):
+    """[[label, literal or None], ...] -> the regex of the whole output: 'U1: <line>' + sep + ... + sep + 'END'.
+    labels-v2: free lines are noend(); labels-v1: LINE_ANY (kept for comparison)."""
     if sep not in SEPS:
         raise ValueError(f"line separator {sep!r} is not one of {SEPS}")
+    if rule not in ("labels-v1", "labels-v2"):
+        raise ValueError(f"unknown label rule {rule!r}")
     if not lines:
         raise ValueError("no planned lines")
     parts, seen = [], set()
@@ -49,8 +110,10 @@ def label_regex(lines, sep="\\n"):
         if not isinstance(lab, str) or not LABEL_OK.match(lab) or lab in seen:
             raise ValueError(f"bad or repeated label {lab!r}")
         seen.add(lab)
-        if lit is None:
+        if lit is None and rule == "labels-v1":
             parts.append(f"{lab}: {LINE_ANY}")
+        elif lit is None:
+            parts.append(f"{lab}: {noend()}")
         elif isinstance(lit, str) and lit.strip() and "\n" not in lit and "\r" not in lit:
             parts.append(f"{lab}: {esc(lit)}")
         else:

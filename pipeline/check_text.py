@@ -1,4 +1,4 @@
-"""Text-level checks (SPEC section 6): hygiene, length, exact lines, spans, required words, degeneracy, voice,
+"""Text-level checks (SPEC section 6): hygiene, length, exact lines, spans, degeneracy, voice,
 language, safety, persona and prompt echo, and the held-out gate on the rendered text. Thresholds are module
 constants so the checker mutants in mutation_checker.py can move them."""
 import re
@@ -8,7 +8,6 @@ import gate
 import heldout
 import lexicons as L
 import parse
-import render_prompt as R
 from check_base import words, ngrams, content
 
 REPEAT_MIN = 3        # a 4-gram this many times in one turn -> REPEAT_4GRAM
@@ -77,27 +76,6 @@ def chk_spans(ctx):
         out += [("REQ_SPAN", t["i"], x) for x in t["must_include"] if not ctx.has(t["i"], x)]
         out += [("FORBID_SPAN", t["i"], x) for x in t["must_exclude"] if ctx.has(t["i"], x)]
     return out
-
-
-def word_forms_re(w):
-    stems = {w, w + "s", w + "es", w + "d", w + "ed", w + "ing", w + "er", w + "est"}
-    if w.endswith("e"):
-        stems |= {w[:-1] + "ing", w[:-1] + "ed", w[:-1] + "er", w[:-1] + "est"}
-    if w.endswith("y"):
-        stems |= {w[:-1] + "ies", w[:-1] + "ied", w[:-1] + "ier", w[:-1] + "iest", w[:-1] + "ily"}
-    else:   # 2026-09-27 audit ("smoothly" read as missing "smooth"): adverbs, gentle -> gently; shelf -> shelves
-        stems.add(w[:-1] + "y" if w.endswith("le") else w + "ly")
-    if w.endswith("f") or w.endswith("fe"):
-        stems.add(w[:-1 if w.endswith("f") else -2] + "ves")
-    if re.search(r"[^aeiou][aeiou][bdgmnprt]$", w):
-        stems |= {w + w[-1] + "ing", w + w[-1] + "ed", w + w[-1] + "er", w + w[-1] + "est"}
-    return re.compile(r"(?<![a-z])(?:" + "|".join(sorted(map(re.escape, stems), key=len, reverse=True)) + r")(?![a-z])",
-                      re.I)
-
-
-def chk_req_word(ctx):
-    alltext, placed = " ".join(s for _, s in ctx.turns()), R.req_word_turns(ctx.skel).values()   # placed words only
-    return [("REQ_WORD", None, w) for w in placed if not word_forms_re(w).search(alltext)]
 
 
 def chk_vocab(ctx):
@@ -206,6 +184,13 @@ def prompt_grams(ctx):
     return grams
 
 
+def script_guidance(built, t):
+    """the guidance the teacher was shown for turn t: its script line after the bracket (2026-09-28: read from the
+    built prompt, not recomputed, so a re-check of old outputs compares against the wording those teachers saw)."""
+    lab = parse.ROLE_LETTER[t["role"]] + str(t["i"] + 1) + " ["
+    return next((ln.split("]: ", 1)[-1] for ln in built["blocks"]["script"].split("\n") if ln.startswith(lab)), "")
+
+
 def chk_prompt_echo(ctx):
     """a PROMPT_N-gram of the prompt in a turn, or a guided user turn that is its own guidance ("say goodbye")."""
     if not ctx.built:
@@ -216,7 +201,7 @@ def chk_prompt_echo(ctx):
         hit = g & set(ngrams(words(s), PROMPT_N))
         if hit:
             out.append(("PROMPT_ECHO", t["i"], " ".join(sorted(hit)[0])))
-        elif t["role"] == "user" and words(s) == words(R.guidance(ctx.skel, t)):
+        elif t["role"] == "user" and words(s) == words(script_guidance(ctx.built, t)):
             out.append(("PROMPT_ECHO", t["i"], "guidance copied"))
     return out
 
@@ -245,5 +230,5 @@ def chk_heldout(ctx):
     return out
 
 
-CHECKS = [chk_empty, chk_format_text, chk_len, chk_exact, chk_spans, chk_req_word, chk_vocab, chk_repeat, chk_copy,
-          chk_language, chk_voice, chk_persona, chk_prompt_echo, chk_heldout]
+CHECKS = [chk_empty, chk_format_text, chk_len, chk_exact, chk_spans, chk_vocab, chk_repeat, chk_copy, chk_language,
+          chk_voice, chk_persona, chk_prompt_echo, chk_heldout]   # REQ_WORD moved to check_lines (2026-09-28)

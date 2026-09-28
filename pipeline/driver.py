@@ -3,7 +3,7 @@
   python3 -B driver.py --out RUN_DIR --endpoint http://127.0.0.1:PORT --model M --n 1000 [--mode completions|chat]
       [--shard-seed S] [--register RM] [--skeletons FILE.jsonl] [--concurrency 8] [--max-attempts 2]
       [--allow-real-teacher] [--stop-after K] [--log-every 30]
-      [--structured off|labels|labels_exact] [--ban-dashes] [--preset NAME] [--repair]
+      [--structured off|labels|labels_exact] [--ban-dashes] [--ban-phrases] [--preset NAME] [--repair]
 
 Skeletons come from skeleton.iter_shard (or a fixed jsonl list), are written to the manifest, checked with
 render_prompt.feasible (SKEL_INFEASIBLE costs no teacher call), rendered by up to --concurrency requests in flight,
@@ -26,7 +26,17 @@ Flags added 2026-09-27 (all off by default; recorded as "run_flags" in every rec
                                     holds without it): when an attempt is a near miss (near_miss(): only FORMAT_*
                                     codes, or one REQ_SPAN / FORBID_SPAN hit and nothing else), the next attempt's
                                     prompt ends with a note naming what failed. Every record has "attempt_kind"
-                                    (first, retry, repair) and yield is also logged per kind ("by_attempt_kind")."""
+                                    (first, retry, repair) and yield is also logged per kind ("by_attempt_kind").
+Added 2026-09-28 (round 2):
+  --ban-phrases                     the AI-ism phrase ban at sampling (teachers/decode.PHRASES as vLLM bad_words; the
+                                    request carries the chat's forced literals, built["literals"], so a phrase in a
+                                    literal is not banned). Key "phrases" in run_flags; a decode.json written before
+                                    it counts as phrases off. Measured 2026-09-28 (notes.txt): the teachers route
+                                    around the ban ("happy to and help", "how can I" + Chinese "help", "Ihelp"),
+                                    and one such broken line passed the checker, so it is NOT for training runs.
+  labels_exact literals are parse.exact_text (the line the prompt shows and the record stores: lowercased for a
+  lowercase-style user, D1), no longer the bank line. decode.json also pins what the server says it applies for
+  the controls that are on (client.decode_pins(): label rule, phrase rule), so a resume cannot mix regex forms."""
 import argparse
 import collections
 import concurrent.futures as cf
@@ -53,9 +63,10 @@ import yieldlog  # noqa: E402
 
 DEFAULTS = {"n": 100, "shard_seed": "s0", "register": "RM", "skeletons": None, "concurrency": 8,
             "max_attempts": 2, "shard_size": 5000, "log_every": 30.0, "stop_after": None, "near_t": 0.7,
-            "fsync": True, "quiet": False, "structured": "off", "ban": None, "preset": None, "repair": False}
-FLAGS = ("structured", "ban", "preset", "repair")
-FLAGS_OFF = {"structured": "off", "ban": None, "preset": None, "repair": False}
+            "fsync": True, "quiet": False, "structured": "off", "ban": None, "phrases": None, "preset": None,
+            "repair": False}
+FLAGS = ("structured", "ban", "phrases", "preset", "repair")
+FLAGS_OFF = {"structured": "off", "ban": None, "phrases": None, "preset": None, "repair": False}
 KINDS = ("first", "retry", "repair")
 FORM_CODES = {"FORMAT_LINES", "FORMAT_EXTRA", "FORMAT_WRAP"}
 SPAN_CODES = {"REQ_SPAN", "FORBID_SPAN"}
@@ -63,13 +74,17 @@ REPAIR_HEAD = ("Note: an earlier try at this chat did not pass the automatic che
                "line from the first label to END, and fix this:")
 
 
+def literals(sk):
+    """{turn index: forced text} of the exact and tool lines: parse.exact_text, the form the prompt shows and the
+    record stores (a lowercase-style user's copied lines lowercased, D1; assistant and tool lines unchanged)."""
+    return {t["i"]: parse.exact_text(sk, t) for t in sk["turns"] if t["mode"] == "exact"}
+
+
 def constraint(sk, mode):
     """serve_http's structured-output plan for one skeleton: [[label, literal or None]] in parse.plan order; with
-    labels_exact an exact or tool line is its literal (the bank or program line the checker compares against)."""
-    by_i = {t["i"]: t for t in sk["turns"]}
-    lit = mode == "labels_exact"
-    return {"mode": mode, "lines": [[lab, by_i[i]["text"] if lit and by_i[i]["mode"] == "exact" else None]
-                                    for lab, i, _ in parse.plan(sk)]}
+    labels_exact an exact or tool line is its literal (literals(): the text the checker compares against)."""
+    lit = literals(sk) if mode == "labels_exact" else {}
+    return {"mode": mode, "lines": [[lab, lit.get(i)] for lab, i, _ in parse.plan(sk)]}
 
 
 def attempt_kind(rec):
@@ -130,15 +145,17 @@ def repair_built(built, note):
 
 
 def pin_flags(out, flags, fresh):
-    """<out>/decode.json: the run's flags; a resume with other flags is refused (so is one of an older run dir)."""
+    """<out>/decode.json: the run's flags (plus the server's rules for the controls that are on); a resume with
+    other flags is refused (so is one of an older run dir). A key the file lacks counts as off (FLAGS_OFF), so a
+    run dir written before a flag existed resumes with that flag off."""
     path = os.path.join(out, "decode.json")
     if os.path.exists(path):
         with open(path) as f:
             have = json.load(f)
-        if have != flags:
+        if {**FLAGS_OFF, **have} != {**FLAGS_OFF, **flags}:
             raise SystemExit(f"refusing to resume {out}: decoding flags differ, run {have} != now {flags}")
         return
-    if not fresh and flags != FLAGS_OFF:
+    if not fresh and {**FLAGS_OFF, **flags} != FLAGS_OFF:
         raise SystemExit(f"refusing to resume {out} (written before decode.json) with decoding flags {flags}")
     os.makedirs(out, exist_ok=True)
     with open(path + ".tmp", "w") as f:
@@ -167,7 +184,7 @@ class Driver:
         c = self.cfg
         self.client = client
         self.flags = {k: c[k] for k in FLAGS}
-        dec = {k: c[k] for k in ("structured", "ban", "preset")}
+        dec = {k: c[k] for k in ("structured", "ban", "phrases", "preset")}
         if hasattr(client, "configure_decode"):
             client.configure_decode(dec)     # a client that cannot apply a control refuses it here
         elif any(dec[k] != FLAGS_OFF[k] for k in dec):
@@ -178,7 +195,8 @@ class Driver:
         c["gate_hash"] = heldout.gate_hash()
         c["source"] = f"file:{os.path.basename(c['skeletons'])}" if c["skeletons"] else "iter_shard"
         c.setdefault("created", round(time.time()))
-        pin_flags(self.out, self.flags, not os.path.exists(os.path.join(self.out, "run.json")))
+        pins = client.decode_pins() if hasattr(client, "decode_pins") else {}
+        pin_flags(self.out, {**self.flags, **pins}, not os.path.exists(os.path.join(self.out, "run.json")))
         self.run_info = driver_state.pin(self.out, c)
         self.n = self.run_info["n"]
         self.tally = yieldlog.Tally()
@@ -302,6 +320,8 @@ class Driver:
         built["attempt_kind"] = kind
         if self.flags["structured"] != "off":
             built["constraint"] = constraint(sk, self.flags["structured"])
+        if self.flags["phrases"]:
+            built["literals"] = list(literals(sk).values())
         seed = TC.render_seed(sid, attempt)
         pre = R.feasible(sk)
         if pre:
@@ -392,6 +412,9 @@ def main(argv=None):
                     help="structured output of the planned label lines (drive.py --serve only)")
     ap.add_argument("--ban-dashes", dest="ban", action="store_const", const="dash", default=None,
                     help="ban dash tokens at sampling (drive.py --serve only)")
+    ap.add_argument("--ban-phrases", dest="phrases", action="store_const", const="ai_ism", default=None,
+                    help="ban the AI-ism phrases at sampling, vLLM bad_words (drive.py --serve only; probe use "
+                         "only: the teachers write broken substitutes, notes.txt 2026-09-28)")
     ap.add_argument("--preset", default=None, help="a D4 sampling preset of the served teacher: card, shared, ...")
     ap.add_argument("--repair", action="store_true", help="name what failed in the retry prompt after a near miss")
     for k, v in DEFAULTS.items():

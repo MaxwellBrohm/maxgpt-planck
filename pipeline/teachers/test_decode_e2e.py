@@ -31,7 +31,7 @@ FEASIBLE = [k for k in SKELS if not R.feasible(k)]
 
 
 def good(sk, prompt, sp):
-    return fake_teacher.raw(sk)
+    return FE.canon(sk)
 
 
 class Base(unittest.TestCase):
@@ -76,7 +76,8 @@ class FlagsReachTheEngine(Base):
             self.assertEqual((sp.temperature, sp.top_p, sp.top_k, sp.min_p), (1.0, 0.95, 64, 0.0))
         acc, rej = self.records()
         self.assertTrue(acc)
-        flags = {"structured": "labels_exact", "ban": "dash", "preset": "card", "repair": False}
+        flags = {"structured": "labels_exact", "ban": "dash", "phrases": None, "preset": "card", "repair": False}
+        self.assertEqual(s.t.llm.violations, [])
         for r in acc + rej:
             self.assertEqual((r["run_flags"], r["attempt_kind"]), (flags, "first" if r["attempt"] == 0 else "retry"))
         for r in acc + [r for r in rej if r["teacher"]]:
@@ -89,7 +90,7 @@ class FlagsReachTheEngine(Base):
             self.assertEqual(dec["ban"]["ids_sha256"], decode.ids_sha(FE.BANNED))
             self.assertEqual((dec["sampling"]["min_p"], dec["gpu_memory_utilization"]), (0.0, 0.86))
         with open(os.path.join(self.out, "decode.json")) as f:
-            self.assertEqual(json.load(f), flags)
+            self.assertEqual(json.load(f), {**flags, "label_rule": decode.LABEL_RULE})
         with open(os.path.join(self.out, "yield.jsonl")) as f:
             self.assertEqual(json.loads(f.readlines()[-1])["run_flags"], flags)
 

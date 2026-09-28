@@ -842,3 +842,214 @@ DECON_PENDING); nothing under data/ or sealed/; no model on the Mac; nothing com
   Files (PC): runs/teachers/dry/<teacher>/dp2_0927/<arm>/: run/, report.dry.json, planck.dry.json, accepted_texts,
     accepted_examples, rejected_examples (.dry.jsonl); runs/teachers/dry/dp2_summary_0927, dp2_recheck_0927,
     dp2_headroom_0927 (.dry.json/.txt); logs dp2_*.log; teach/dp2 (frozen code copies, skeleton files, scripts).
+
+TEACHER SERVE AND DRIVER, ROUND 2 (2026-09-28, 01:05 to 05:40; code: pipeline/teachers/, driver.py, teacher_client.py;
+DRY: FAKE skeletons, outputs on the PC under runs/teachers/dry/r2srv_0928/, marked dry, nothing is training data; no
+model on the Mac; nothing committed or pushed; checker, prompt, intents, assemble and skeleton are the parallel
+session's)
+  (1) Forced literals. driver.literals(sk) = parse.exact_text for every exact turn, the function render_prompt and
+    checker.record_turns already call (D1: a lowercase-style user's copied lines lowercased; assistant and tool lines
+    unchanged); driver.constraint (labels_exact) uses it. No new helper: the checker side's files (repo and its
+    scratch copy) still name parse.exact_text at 05:40. Closes open item 1 of the 09-27 fixes entry (dp2: after a
+    sentence-case literal only 22 of 920 Qwen card user lines stayed lowercase). teachers/fake_engine.canon renders
+    this form for the tests; fake_teacher (not this side's file) still writes the bank line, which labels_exact now
+    refuses for those users.
+  (2) labels-v2 (decode.LABEL_RULE). Every free line is decode.noend(): a capital E is followed by neither E nor N then
+    D or E, so no line can hold "END"; END is written once, alone, at the end (EOS is forced after it, as before).
+    Stricter than "no END" only on capital "EE" and "ENE" (all-caps words). xgrammar 0.2.8 on the PC CPU (other jobs
+    running), 30 FAKE skeletons, labels_exact, each teacher's separator, v1 / v2: compile ms per request qwen 147 /
+    458, gemma 169 / 510, ministral 89 / 253; mask ms per token 0.002 / 0.026, 0.002 / 0.014, 0.001 / 0.121;
+    canonical renders accepted 30 of 30 in both. The exact no-END automaton (E-runs as a loop) cost 57 to 59 ms of
+    mask per token on Qwen and is not used.
+    NO length cap on the last line (asked for, not built). Every capped form measured costs too much: on the CPU a
+    flat "[^\n]{1,300}" last line compiles in 1.6 s per request on Qwen ({1,150} 1.6 s, {1,60} 0.58 s), the noend
+    unit {1,300} costs 0.61 s of mask per token, nested repeats did not compile in 10 minutes; on the GPU (V2C below)
+    the flat cap hit vLLM's 5 s regex compile timeout for 16 of 64 Qwen and 16 of 32 Gemma requests (each failed).
+    Run-ons stay bounded by max_tokens and the checker's length rules; the dp2 run-on was END repeated (285 of 293
+    length cuts), which no line can hold now.
+  (3) Phrase ban (driver --ban-phrases, serve_http --phrase-ban; decode.PHRASE_RULE aiism-v2): decode.PHRASES (38
+    strings) go to vLLM's SamplingParams.bad_words: every plain lexicons.AI_ISM_RE phrase, the greeting family ("how
+    can I help", "is there anything else", "I'm here to help"), capitalized and lowercase starts, curly apostrophes,
+    and dp2 contexts. vLLM 0.30 bans a phrase after a space only when " phrase" has as many tokens as "phrase";
+    Ministral's tekken splits bare "happy" and "feel", so their dp2 contexts are listed whole ("I'd be happy to help",
+    61 of Ministral's dp2 hits, "I'm happy to help", "and feel free to"). serve_http runs vLLM's update_from_tokenizer
+    on the engine's tokenizer before READY: qwen 73 sequences / 262 tokens, gemma 75 / 275, ministral 70 / 256 (caps
+    128 / 1024). Not banned after a space: "certainly!" (all three), "artificial intelligence" (qwen, ministral),
+    Ministral's bare "happy to help" / "feel free to" outside the listed contexts. test_decode_pc checks 17 dp2
+    AI-ism sentences against the registered sequences on each tokenizer. A phrase inside one of the chat's forced
+    literals is left out of that request; the record's decode.phrases holds rule, n, left_out and sha256.
+  (4) Flags per record: run_flags holds structured, ban, phrases, preset, repair; attempt_kind and the server's decode
+    stay, plus label_rule and phrases. decode.json = the flags plus label_rule / phrase_rule for the controls that are
+    on; a key it lacks counts as off (a round 1 run dir resumes with phrases off); a dp2 (labels-v1) run dir cannot be
+    resumed under labels-v2; a row whose label or phrase rule is not the server's is a TEACHER_ERROR; drive_report
+    counts label rules and phrase-banned calls.
+  GPU PROBE (one gpu.lock hold per teacher, util 0.86; requests built by serve_http.decode_request, Engine.sampling_for
+  and serve.prepare; labels_exact, dash ban, each teacher's dp2 arm preset (qwen card, ministral shared, gemma card);
+  FAKE skeletons of seed r2srv-gpu0928, 64 / 64 / 32, same seeds in every condition, one LLM.generate per condition).
+    Holds: qwen 02:57:58-03:04:05, ministral 04:26:00-04:31:14, gemma 05:20:53-05:28:13 (lock waits 74, 82, 50 min).
+    Highest reading 11,426 / 11,536 / 11,433 MiB (guard 11,600); before load 421 / 448 / 412, after unload 422 / 448
+    / 413 MiB. Each hold then ran a smoke of the production path (serve_http --dash-ban --phrase-ban, drive.py --serve
+    with every flag, the 8 dp2 smoke skeletons): 15 / 15 / 14 requests, all with labels-v2, the dash ban, the phrase
+    ban and the preset in their records and the server's stats; 0 TEACHER_ERROR, 0 render errors.
+    cond                      out tok/s               accepted          chats with AI_ISM / greeting / END in a turn
+                          qwen   ministral gemma    qwen ministral gemma   qwen      ministral   gemma
+    V1  labels-v1          414.8  500.5    149.5     15    2       7     4/4/0     8/4/11      2/8/0
+    V2  labels-v2          417.4  489.0    153.2     10    5       7     4/3/0     8/3/0       2/7/0
+    V2P V2 + phrase ban    408.6  485.2    154.7     14    6       7     0/0/0     0/0/0       0/0/0
+    V2C V2, last line cap  351.0  441.6    123.3     13    7       5     2/0/0     8/4/8       0/5/0
+    V2b V2 again           421.3  485.6    152.4     13    6       9     5/2/0     7/3/0       3/7/0
+    (accepted is out of 64 / 64 / 32; FAKE bank, small n: the accept counts cannot rank conditions.) Length cuts:
+    ministral V1 7, V2 1, V2P 0, V2b 0; none elsewhere. Ministral V1 to V2: tokens 22,025 to 18,435 and batch wall
+    44.0 to 37.7 s, since the END run-ons are gone. Noise (V2 against V2b): qwen 0.9%, ministral 0.7%, gemma 0.5%.
+    Phrase ban cost against V2 / V2b: qwen -2.1% / -3.0%, ministral -0.8% / -0.1%, gemma +1.0% / +1.5%.
+    Multi-token check (REP / REPP): 20 prompts, each asking to repeat a line with one banned phrase (4 per phrase),
+    no regex. Without the ban every phrase came back in 4 of 4; with it: qwen 0 except "how can I helps" once; gemma
+    0 except "how can I" + a Hindi word for help once; ministral "how can I helps", "how can I Help", "Is there
+    anything Else", and "I'm here to help" 3 times after an opening quote (a quote glued to "I" is another token).
+    WHAT THE BAN DOES TO THE TEXT (read, and counted with the current checker): the teachers route around it.
+    Synonyms the checker does not flag ("I am happy to assist", "How can I be your helpful assistant", "I'm here to
+    chat"); Gemma wrote "how can I" + the Chinese word for help in 4 of 32 V2P chats (NON_ENGLISH fired on 5 V2P
+    chats, 1 in V2, 1 in V2b), "how can Ihelp", and "I would be happy to and help you", which the checker ACCEPTED
+    (1 of the 7 Gemma V2P accepts). So the flag stays off by default and is NOT for training runs: the fix is prompt
+    side (Gemma's greet-back default "Hello, how can I help you today?") plus checker coverage of the substitutes.
+    No-END side effect (Ministral, shared): in 5 of 64 V2 chats (1 V2P, 2 V2b) the last turn holds "End." or meta
+    text ("Wait, no, just the script and end.", "**Note: This ends the script ...**"), where V1 wrote "END. END."
+    (9). The current checker rejected all of them, but on other codes (ABSTAIN_MISSING or REQ_WORD alone in two):
+    the checker side's END-in-turn rule should also catch a turn-final "End." and script meta talk.
+  TESTS: Mac teachers 112 run, 95 pass, 17 skip (PC-only); PC (CPU, GPU hidden) teachers 112 run, 111 pass, 1 skip
+    (GPU smoke); Mac pipeline/tests 83 run, 83 pass. New: teachers/test_round2.py (13), test_round2_e2e.py (9);
+    test_decode_pc.py gains RealPhraseBan and the v2 xgrammar cases; test_decode and test_decode_e2e now use the
+    canonical literals, the phrases flag and the decode.json pins.
+  MUTANTS (scratch copies only): Mac 31, 30 killed; the survivor is PC-only (test_decode_pc skips on the Mac) and is
+    killed there. PC 6 of 6 killed (END inside a line, v2 as LINE_ANY, the bank line as literal, two dropped context
+    phrases, half the registered sequences). First-run survivors, fixed by new tests: the client not sending literals
+    (equal to the server's constraint literals under labels_exact; now tested without a constraint) and the fake
+    engine's regex check (now tested with Ministral's END run-on).
+  OPEN: (1) the last-line cap (above). (2) The phrase ban is a probe tool until the substitutes are handled.
+    (3) Rows for the checker side: a turn-final "End." and script meta talk; the ban's substitutes if the ban is
+    ever used. (4) vLLM's 5 s regex compile timeout applies to any heavier grammar: labels-v2 compiles in about 0.5 s
+    on this CPU and never timed out in the probe or the smokes.
+
+TEACHER PILOT FIXES, ROUND 2, CHECKER, PROMPT AND SKELETON SIDE (2026-09-28, 15:19 to 16:25; CPU only. DRY: the
+re-check reads the saved dry pilot 2 outputs (FAKE banks) on the PC, results under runs/teachers/dry/r3chk_0928/,
+dry-marked; no model loaded anywhere, no gpu.lock hold, nothing under data/ or sealed/, nothing committed or pushed.
+driver.py, teacher_client.py and pipeline/teachers/ are the serve session's and were not touched)
+  Start: the v1 quality review's failing fixtures (19 case types, 3 record cases), and a round 2 draft an earlier,
+    interrupted run of this task left in scratch (never synced). I read the draft line by line, kept what the data
+    held up and changed it where the full re-check read found false rejects (marked [changed] below). D1 to D4 stand.
+    D2: nothing is looser than round 1. Each place where the draft was too tight was relaxed only with a dp2 line
+    that met the rule's purpose, plus a clean fixture and a planted one.
+  FIXES (review item: rule; evidence)
+    HEDGE_RE: negative forms only ("wasn't / was never / hasn't been mentioned"); [changed] "no X was mentioned"
+      (dp2 "No friend was mentioned so far, ..." read as no hedge). DEFLECT no longer fires on "as was mentioned".
+    Denial then claim: SELF_CLAIM adds "I do love/like/enjoy", "I spend my ...", "my evenings/weekends", "like my
+      own", past acts (booked, bought, cooked, ...). [changed] The draft's bare "my own" fired on 14 dp2 lines, 10 of
+      them denials ("a place to call my own", "I don't have my own hobbies"); cut to "like my own", which now misses 2
+      claims ("my own garden", "my own mix-ups"). "I called you" is the call-me rule, not a past act (2 dp2 lines).
+    Counts: "one of" counts; "the one" counts at a clause end ("maybe just the one."), [changed] and is a pronoun
+      before a word (dp2 "four stops including the one you just added", 2 lines).
+    OFFTOPIC stems: Porter (stemmer.py, written from the paper plus the reference code's two step 2 changes; 30
+      reference outputs pinned) on both sides keeps ready/reading, busy/bus, care/car, cater/cat, letting/letter and
+      plane/plan apart; "noted"/"noting" are neutral as written. [changed] Porter alone rejected on-topic dp2 lines
+      (noise/noisy, leaks/leaky, sun/sunny, taste/tasty, month/monthly, speakers, drivers): stemmer.topic_forms adds,
+      on the TOPIC side only, comparatives, -ly adverbs, the base under a -y or -ly adjective and a verb's -er agent,
+      never a 3-letter base or agent (busy does not make bus, let does not make letter).
+    OFFTOPIC prev reply: a user topic turn takes the assistant's last line only when it shares 2 content stems with it
+      or, [changed], half of its own (dp2 "I could eat omelettes every day", "... the couple with their seating?");
+      the review's "Speaking of X, my meal is acting up again" shares 1 of 4 and fires.
+    REQ_WORD: -ly only for an adjective and never fairly, shortly, clearly, nearly ...; -ves only for lf/rf/eaf/ife.
+    HIGH 1, plants: PLANT_MISSING when a guided user plant gives the value only inside a question or request (clauses
+      split at , ; : conjunctions and before "that"); [changed] an embedded statement after know / remember / tell you
+      and a pseudo-cleft without "?" state ("did you know our team lunch is this Friday?", "Where I live is Porto.";
+      3 dp2 lines). PERSPECTIVE on "your <label>" in a turn about the user's own label fact ("What is your favourite
+      colour brown?"). QUERY_RESTATES when an abstain query states a value of the asked type.
+    HIGH 2, guidance leak: no "without saying the answer", "without saying it" or "as if you had said it"; the recall
+      query's answer joins its must not include list; the never-said query reads like any recall question. PROMPT_ECHO
+      fires on guidance clauses, old and new wording (lexicons.GUIDE_META_RE), on any withholding clause in a query
+      line, and on a user line equal to the guidance the teacher was shown (read from the built script).
+    MEDIUM: no required word on goodbye turns; USER_STYLE (a capital in a lowercase-style user's guided line), with
+      that user's items and guidance shown in lowercase (forced literals: the serve side's parse.exact_text);
+      END_IN_TURN (an END token, a closing "End." or "The end.", script talk: the serve entry's open item 3); records
+      store straight quotes.
+    LOW: AI_ISM on assistant turns adds the service family ("how can I help", "I'm here to assist/chat", "helpful
+      assistant", "help with anything else") and the phrase-ban substitutes the serve probe saw. Semicolons and
+      invented details: reported below, no rule.
+  PROMPT (ids instr.fake.p3.*; not yet run on any teacher): intent form 0 is "ask what usually helps with {t}" (the
+    E004 5-gram "can you give me a": 39 / 33 / 6 / 5 / 41 dp2 hits, qwen card / shared, ministral card / shared,
+    gemma); lead-in answers "leading in with what you were told" (the "your <o> is <v>" frame: 94 of Gemma's 113 frame
+    hits are on that intent); answer-first "going on"; abstains "say the user has not told you ... ask them to share
+    it"; greet-backs "maybe asking how they are" (Gemma's "how can I help"); the rule reply keeps the rule; list,
+    rule, lookup, recap and return guidance reworded so a natural line is not the guidance word for word ("Move
+    cheese to the top of the shopping list." failed the equality check); the rules block is sentences, no semicolons;
+    [new] rule notes follow the move ("(rule: end with a question mark)"; dp2 PERSIST_FAIL agree-and-follow on
+    end_question: 46 / 51 Qwen card / shared); [new] "in three words or more" in the rules block; the head's second
+    dash mention cut for length (stub-token prompt mean 1,491 round 1, 1,494 now; test_capacity passes).
+  SKELETON skel-v0.3 (RNG_VERSION skel-v0.1): no required word on goodbyes; a chat whose last rule is end_question
+    closes "open" (86 dp2 goodbye PERSIST_FAILs on end_question); recall answers in must_exclude; shard iteration
+    moved to skeleton_shard.py (skeleton.py was 278 lines, now 246).
+  FIXTURES, red before and green after, same texts on each checker
+    The review's 57 cases (19 types, built once on round 1): round 1 accepts 53, fires the named code on 1; now 56
+    rejected, the named code on 53, END_IN_TURN (the new code) on the 3 END cases; the one accept is a "busy" reply
+    in a chat whose other topic's FAKE set lists "busy" (a real topic word there). Record cases: curly quotes stored
+    straight, the lowercase break fires USER_STYLE, "as was mentioned" passes.
+    fixtures_r2.py, fixtures_r2b.py, fixtures_r2c.py (71 types, 207 cases): round 1 has 40 red, 37 of the 38 planted
+    types (the 38th, a negative hedge on a given answer, fired there too; the old 6-gram caught 1 of 3 withhold
+    copies) and 3 clean ones ("as was mentioned", a natural list line equal to the old guidance, a comparative); the
+    draft has 10 red (its over-tight clean cases); now 71 of 71 as expected.
+  TESTS (Mac): pipeline/tests 119 run, 119 pass (83 + 36 new); pipeline/teachers 112 run, 95 pass, 17 skip (PC
+    only). mutation_checker full: 2,059 of 2,059 cases, 209 of 209 checker mutants killed. I read the killing case of
+    each of the 62 round 2 mutants. The first full run had 6 survivors (clause split, prev minimum 3, four topic-form
+    limits): 4 fixtures were added, and the 2 agent-form limits moved to unit tests. Unit-test mutants on scratch
+    copies: 54 of 54 killed; I read the failing assert of each.
+  RE-CHECK of all 5,476 dp2 FIX attempts (PC CPU; each prompt is the round 1 render its teacher saw; same verdicts
+  from the synced repo code). Accepted, round 1 -> round 2 (round 2 without USER_STYLE), %:
+    arm              attempts  accepted          per attempt        per skeleton       first attempt    lost gained
+    qwen card          1081    189 -> 129 (174)  17.5 -> 11.9 (16.1) 31.5 -> 21.5 (29.0) 19.7 -> 12.3 (17.8)  63   3
+    qwen shared        1098    172 -> 121 (159)  15.7 -> 11.0 (14.5) 28.7 -> 20.2 (26.5) 16.8 -> 12.5 (15.7)  52   1
+    ministral card     1142     85 ->  64 (82)    7.4 ->  5.6 (7.2)  14.2 -> 10.5 (13.5)  9.5 ->  7.5 (9.2)   23   2
+    ministral shared   1134    124 ->  83 (111)  10.9 ->  7.3 (9.8)  20.7 -> 13.8 (18.5) 10.8 ->  7.8 (10.2)  41   0
+    gemma card         1021    261 -> 142 (178)  25.6 -> 13.9 (17.4) 43.5 -> 23.7 (29.7) 29.7 -> 16.2 (20.2) 119   0
+    Lost, by new code (chats; the only new code): qwen card USER_STYLE 49 (45), PROMPT_ECHO 7 (5), AI_ISM 6 (4),
+    PLANT_MISSING 3 (2), PERSPECTIVE 2 (1), SELF_CLAIM 1; qwen shared USER_STYLE 45 (38), AI_ISM 6 (3), PROMPT_ECHO 4
+    (2), PLANT_MISSING 3 (1), PERSPECTIVE 2 (1); ministral card USER_STYLE 18 (17), END_IN_TURN 3 (2), AI_ISM 3 (3);
+    ministral shared USER_STYLE 32 (27), END_IN_TURN 7 (5), AI_ISM 4 (2), SELF_CLAIM 2 (2), QUERY_RESTATES 1,
+    PERSPECTIVE 1; gemma AI_ISM 82 (71), USER_STYLE 47 (36), PROMPT_ECHO 2 (1). Of 298 lost, 163 fail on USER_STYLE
+    alone.
+    The review's bad accepts now rejected: all 90 with a service greeting (79 Gemma), all 12 with a withholding line,
+    all 10 with END in a turn, the 6 plants asked as questions, the garbled denial, "I called a repair person", the
+    abstain that contradicts the user. Still accepted (no rule): invented or wrong details, "I should correct you",
+    "remove this label from your mind", "enjoy your vocabulary", "I hope I do not slip" and "thank you for asking".
+    Good accepts it costs: I read every new non-USER_STYLE hit line in the 298 (148 lines). All are defects the review
+    named, except 1 borderline ("What is your favourite colour? Mine is blue.": the plant is there, the question to
+    the assistant is extra). USER_STYLE is on 191 lost chats. In 16 of them every capital sits inside a must include
+    item the old prompt said to copy "exactly as written" (a prompt conflict, now gone). A seeded read of 25
+    USER_STYLE lines found sentence case in a lowercase chat every time. dp2 forced sentence-case literals, so this
+    cost should fall with the serve side's lowercased ones. So about 17 of 298 could be called good.
+    Gained 6, all round 1 OFFTOPIC rejects, read on topic: restful/rest, staying/stay, tiredness/tired, fluffier,
+    decor/decorate (2).
+    New-rule hits over ALL attempts, read for false rejects: END_IN_TURN 465 (the END token in all 400 sampled),
+    AI_ISM 412, PROMPT_ECHO 170 (guidance clauses: 112 withholding, 26 "drop the earlier rule", 14 "request a rule",
+    18 other), PLANT_MISSING 72 (all read: questions, or "tell me X is Y"; the draft's 3 more were the [changed]
+    statements), PERSPECTIVE 38, OFFTOPIC 18 (32 under the draft; left: 10 lines with an accented "cafe" that
+    NON_ENGLISH rejects anyway, 3 replies that matched "lovely" only by chance in round 1, 2 content-free lines,
+    "welder" vs "welding" across lines, "friendly assistant" in a greet-back, "sewers" in a line with a dash),
+    SELF_CLAIM 8 (22 under the draft), QUERY_RESTATES 4, LIST_STATE 0 (2), ABSTAIN_MISSING 0 (1).
+  AUDITS on the dp2 FIX outputs (round 1 checker)
+    LEN_ASSIST floor (D2): too short hits Ministral card 558 / shared 444 ("I see.", "Got it." on "acknowledge
+    briefly" 165 / 114; "Hello there." on greet-backs 130 / 108; a bare value on answer-first 80 / 82; "You're
+    welcome." 32), Qwen 5 / 20, Gemma 63 (40 bare answers). The 3-word floor is the pre-registered P-048 register and
+    these replies are below it, so the rule does what it states: not loosened; prompt side as above.
+    Semicolons per 1,000 guided assistant lines after the dash ban: Ministral card 20.6 (accepted 9.0), shared 33.6
+    (24.7); Qwen 0.3 to 0.6; Gemma 0.0. Mid-line colons 1.3 or less everywhere. Left and reported (no checker rule);
+    the rules block has no semicolon list now.
+    HELDOUT_ECHO besides the fixed two: "i'll keep that in mind" (Ministral acknowledgements, 99 / 53 hits) and "i am
+    glad to hear" (Qwen, 20 / 30) are E004 5-grams. They are candidates for the serve side's sampling phrase ban, not
+    for the prompt (naming them there puts E004 text in the prompt).
+  OPEN: (1) none of the prompt or skeleton changes has generated on a GPU; the per-intent effects above are
+    expectations. (2) OFFTOPIC stays lexical and FAKE-set bound; judge it again on the bank pass's word sets.
+    (3) USER_STYLE cost needs a run with the lowercased forced literals. (4) Invented details have no check.
+  Files: new check_lines.py, check_lookup.py (moved out of check_behav), stemmer.py, skeleton_shard.py,
+    checker_mutants_r2.py, fixtures_r2.py, fixtures_r2b.py, fixtures_r2c.py, tests/test_round2_fixes.py,
+    tests/test_round2_units.py; changed assemble, check_base, check_behav, check_events, check_text, checker,
+    checker_mutants, defects_text, fake_data, fake_teacher (comment), fixtures_bound, fixtures_pilot, lexicons,
+    mutation_checker, render_intents, render_prompt, skeleton, tests/test_pilot_fixes, SPEC (sections 5, 6, 13, 14).

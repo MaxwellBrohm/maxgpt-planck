@@ -7,7 +7,7 @@ import copy
 
 import render_prompt as R
 from fake_teacher import topic_words
-from check_text import word_forms_re
+from check_lines import word_forms_re
 from defects_text import filler_assist, filler_user, _copy
 from defects_event import _slot_answer_events, _sub
 
@@ -18,7 +18,7 @@ WORDS = ("plenty of other small ordinary words keep coming along here until this
 
 def _free_of_req(skel, text):
     rw = skel["required_words"]
-    return not any(word_forms_re(rw[k]).search(text) for k in ("noun", "verb", "adj"))
+    return not any(word_forms_re(rw[k], k).search(text) for k in ("noun", "verb", "adj"))
 
 
 def _topic_w(skel, t=None):
@@ -167,7 +167,7 @@ def b_case(skel, texts, built):
 
 
 def b_plural(skel, texts, built):
-    rx = word_forms_re(skel["required_words"]["noun"])
+    rx = word_forms_re(skel["required_words"]["noun"], "noun")
     n = skel["required_words"]["noun"]
     new = {i: rx.sub(n + "s", s) for i, s in texts.items()}
     return [("req_plural_pass", skel, new, "ok", {})] if new != texts else []

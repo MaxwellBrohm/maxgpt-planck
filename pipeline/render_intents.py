@@ -19,25 +19,33 @@ LIST_Q = {"first": "ask what comes first on the {L}", "last": "ask what comes la
           "ordinal": "ask what is {arg} on the {L}", "count": "ask how many things the {L} has now",
           "contains": "ask whether {arg} is still on the {L}",
           "other": "say {arg} is done and ask what the other one on the {L} was"}
-LIST_OP = {"add": "add {v} to the {L}", "remove": "take {v} off the {L}", "move_first": "move {v} to the top of the {L}",
-           "move_last": "move {v} to the end of the {L}"}
-RULE = {"max_words": "request a rule: replies of at most {word} words",
-        "one_sentence": "request a rule: one sentence per reply",
-        "end_question": "request a rule: every reply finishes by asking something",
-        "call_user": "request a rule: the assistant calls you {name}",
-        "avoid_word": "request a rule: no {word} in replies",
-        "start_name": "give your name, {name}, and request a rule: each reply opens with that name"}
+# 2026-09-28: list, rule, lookup, recap and return guidance reworded so that a natural user line is not the guidance
+# word for word (dp2: "Move cheese to the top of the shopping list." equal to "move {v} to the top of the {L}", and
+# "Request a rule: every reply finishes by asking something." copied whole), while a copy still fires PROMPT_ECHO
+LIST_OP = {"add": "have {v} added to the {L}", "remove": "have {v} taken off the {L}",
+           "move_first": "have {v} put first on the {L}", "move_last": "have {v} put last on the {L}"}
+RULE_HEAD = "ask for a rule for later replies: "
+RULE = {"max_words": RULE_HEAD + "at most {word} words each", "one_sentence": RULE_HEAD + "a single sentence each",
+        "end_question": RULE_HEAD + "each one closes with a question", "call_user": RULE_HEAD + "it calls you {name}",
+        "avoid_word": RULE_HEAD + "the word {word} never comes up",
+        "start_name": "give your name, {name}, and " + RULE_HEAD + "each one opens with that name"}
 SOCIAL = {"greeting": "say hello", "how_are_you": "ask how the assistant is doing", "thanks": "thank the assistant",
           "goodbye": "say goodbye", "who_are_you": "ask who you are talking to"}
 ONLY_ANSWER = "; no other value"
-ASSIST = {"answer with the value first": "answer, starting the reply with the answer itself" + ONLY_ANSWER,
-          "answer with the value after a short lead in": "answer, with a few words before the answer" + ONLY_ANSWER,
+# 2026-09-28: answers go on after the value (dp2: bare "Durban." under the 3-word floor) and the lead in is what the
+# user said (dp2: "Your friend is Mateo.", an E004 sentence frame: 94 of Gemma's 113 frame hits on the lead-in intent);
+# abstains ask for the fact; the rule reply keeps the rule at once
+ASSIST = {"answer with the value first": "answer, starting with the answer itself and going on" + ONLY_ANSWER,
+          "answer with the value after a short lead in": "answer, leading in with what you were told" + ONLY_ANSWER,
+          "say it was not mentioned, give no guess, offer to note it": "say the user has not told you, give no guess, "
+                                                                       "ask them to share it",
+          "agree and follow the rule": "agree, and keep the rule in this reply",
           "answer from the list": "answer from the list as it is now" + ONLY_ANSWER,
           "answer from what the user said, without a lookup": "answer from what the user said, without a lookup"
                                                               + ONLY_ANSWER,
           "answer with the looked up value": "answer with the looked up value" + ONLY_ANSWER,
-          "greet back and engage with the topic": "greet the user back and pick up the topic",
-          "greet the user back": "greet the user back briefly; the user has not named a topic yet",
+          "greet back and engage with the topic": "greet the user back and remark on the topic",
+          "greet the user back": "greet the user back briefly, maybe asking how they are; no topic yet",
           "acknowledge the change": "acknowledge the change in one short sentence",
           "acknowledge the list": "acknowledge the list in one short sentence",
           "reply on the topic": "reply to what the user just said", "react briefly": "react briefly",
@@ -111,7 +119,7 @@ def user_guidance(skel, t):
         k = 0 if role == "rule" else 1
         seg = p["segments"][k]
         text = RULE[seg["verifier"]].format(**{**seg["args"], "word": seg["args"].get("word", "")})
-        return ("drop the earlier rule, then " + text) if k else text
+        return ("say the old rule no longer holds, then " + text) if k else text
     if it == "mention a look-alike value that changes nothing":
         return f"mention a near choice that changes nothing about {phrase(slot)}" if slot else "mention a near choice"
     if it.startswith("state ") and slot:
@@ -121,22 +129,26 @@ def user_guidance(skel, t):
         new = f": it is {op['value']} now" if op and op.get("value") else ""
         return f"correct what you said before about {phrase(slot)}{new}"
     if it == "ask for a recap":
-        return "ask the assistant to sum up what you have told it"
+        return "ask the assistant for a recap of the facts you gave"
     if it.startswith("ask for the ") and it.endswith(" name"):
         return "ask the assistant its name" if "self" in it else "ask whether the assistant knows your name"
     if it.startswith("ask the assistant for its own "):
         return "ask the assistant about its own " + it.rsplit("its own ", 1)[1]
+    # 2026-09-28: no "without saying the answer" / "without saying it" (v1 review: copied into 13 accepted user
+    # lines); the query line's must-not-include list now holds the answer (assemble.finish). The never-said query
+    # reads like any recall question, so only memory tells the two sides of S7 apart.
     if it == "ask if the assistant remembers":
-        return f"ask whether the assistant remembers {phrase(skel['slots'][p['slot']])}, without saying it"
+        return f"ask whether the assistant remembers {phrase(skel['slots'][p['slot']])}"
     if it.startswith("ask for ") and "never said" in it:
-        return "ask about " + p.get("ref_expr", "it") + " as if you had said it before"
+        return _ask_back({"key": p["key"], "noun": p.get("noun")}) if p.get("key") in KEY_PHRASE else \
+            "ask the assistant to remind you about " + p.get("ref_expr", "it")
     if it.startswith("ask for "):
         q = p.get("queried") or p.get("slot")
-        return f"{_ask_back(skel['slots'][q])}, without saying the answer" if q else it
+        return _ask_back(skel["slots"][q]) if q else it
     if it == "go back to the first topic":
-        return "steer the chat back to the first topic"
+        return "go back to what you talked about first"
     if it == "ask about the entity":
-        return f"ask the assistant to find out the {p['attribute']} of the {p['entity']}"
+        return f"ask the assistant to look up the {p['entity']} and report its {p['attribute']}"
     if it == "state a belief, ask to check":
         return f"say what you believe about the {p['attribute']} of the {p['entity']}, and ask the assistant to check"
     if it == "pass on a fact":
@@ -149,7 +161,7 @@ def assistant_guidance(skel, t):
     base, _, tail = it.partition("; ")
     text = ASSIST.get(base, base)
     if base == "answer with the value first" and any(r["verifier"] == "start_name" for r in t.get("rules", [])):
-        text = "answer, with the answer right after the name the reply starts with" + ONLY_ANSWER
+        text = "answer, with the answer right after the name the reply starts with, then a few words" + ONLY_ANSWER
     elif base == "acknowledge briefly":
         text = "acknowledge in one short sentence" + ("" if t["must_include"] else ", not repeating the value")
     elif base == "pick the first topic back up and name it" and t["must_include"]:

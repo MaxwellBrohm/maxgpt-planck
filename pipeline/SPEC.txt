@@ -116,7 +116,7 @@ tools/gemma_chat.py, experiments/E004_general_updating/code (read-only). No mode
     e) script: one line per turn: "U3 [exact]: <text>" (copy exactly), or "A3 [4-18 words; must include: X;
        must not include: Y]: <intent>"; tool turns are given complete and must be copied;
     f) output format: exactly the planned labels in order, one per line, "U1: ...", "A1: ...", ..., then "END".
-  Since 2026-09-27: rules block and worked example after the script, no user name on the card, D1 (section 13).
+  Since 2026-09-27: rules and example after the script, no user name on the card, D1 (13); lowercase display (14).
   Parse: strip; drop one leading empty thought block if present; each non-empty line must match
   ^(U|A|T)(\d+): (.+)$ in the planned order, then "END". Anything else is a FORMAT_* reject (no repair in v0).
   Exact lines: the parsed text must equal the bank line after NFKC, quote and whitespace normalization; the
@@ -124,26 +124,26 @@ tools/gemma_chat.py, experiments/E004_general_updating/code (read-only). No mode
 
 6. CHECKER (every check runs; all failing codes are logged; the first in this order is the primary reason)
   FORMAT_LINES count or labels wrong      FORMAT_EXTRA text outside labeled lines      FORMAT_WRAP unlabeled line
+  END_IN_TURN END or a closing "End." in a turn (14)   USER_STYLE capital in a lowercase user's own line (14)
   THOUGHT_TAG leftover channel/turn tags  EMPTY_TURN                                   ROLE_LABEL "User:" etc. in text
   MARKDOWN ** __ # ` bullets numbering    EMOJI any emoji/pictograph codepoint          DASH em/en dash, " - ", "--"
   LEN_USER / LEN_ASSIST outside min_w..max_w                                           DIGIT any digit character
   EXACT_MISMATCH exact line altered       REQ_SPAN missing must_include                 FORBID_SPAN must_exclude found
   REQ_WORD a required word never used     VOCAB_OOL out-of-list rate > 2% (slots exempt; report-only while FAKE)
-  PLANT_MISSING value not in plant turn   DIST_LEAK value between plant and query      QUERY_RESTATES query has value
+  PLANT_MISSING value not stated (14)    DIST_LEAK value between plant and query      QUERY_RESTATES query has it (14)
   QUERY_NOREF query lacks its ref expr    ANSWER_WRONG gold absent                     ANSWER_STALE stale value present
-  ANSWER_SHOTGUN >= 2 candidates          PERSPECTIVE "my X" for a user fact, or user fact claimed (13)
+  ANSWER_SHOTGUN >= 2 candidates          PERSPECTIVE "my X" for a user fact, or user fact claimed (13, 14)
   SELF_CLAIM first-person self-facts outside the card ("I went", "my weekend", "I love", "I live", "my family")
-  PERSIST_FAIL rule verifier fails        OFFTOPIC reply shares no stemmed content word with its topic (13)
-  ABSTAIN_MISSING no hedge, or a candidate given on an abstain item
-  DEFLECT deflection pattern ("I don't have access", "I can't remember") or a hedge on a given item (13)
-  AI_ISM ("as an AI", "language model", "great question", "feel free to", "I'm here to help", "Certainly!")
+  PERSIST_FAIL rule verifier fails        OFFTOPIC reply shares no stemmed content word with its topic (13, 14)
+  ABSTAIN_MISSING no hedge or offer, or a guess (13)  DEFLECT "I can't remember", or a hedge on a given item (13)
+  AI_ISM ("as an AI", "great question", "feel free to", "Certainly!"; assistant turns: "how can I help" etc., 14)
   TOPIC_RETURN S5 gold fails              IDENTITY S8 name mismatch or other name       LIST_STATE S2 gold fails
   LOOKUP_FORMAT / LOOKUP_UNNEEDED / LOOKUP_MISSING / LOOKUP_COPY / LOOKUP_EMPTY (S9 golds)
   REPEAT_4GRAM a 4-gram 3+ times in a turn   CONSEC_REP coverage >= 0.25   SELF_COPY >= 50% of the previous
   assistant turn's 4-grams                   ECHO_USER assistant copies >= 60% of the user turn's 4-grams
   NON_ENGLISH                            SAFETY blocklist hit                       PERSONA_LEAK (section 4)
-  PROMPT_ECHO any 6-gram of the instruction or card block (slots and bank lines excluded) in a turn, or a user
-    line that is its own guidance (13): this stops Claude-written prompt wording from leaking into training text
+  PROMPT_ECHO a 6-gram of the prompt's wording (slots, bank lines excluded), a user line equal to its guidance (13)
+    or a guidance instruction clause (14): keeps Claude-written prompt wording out of training text
   HELDOUT_VOCAB / HELDOUT_ECHO / HELDOUT_STRUCT (section 9)   NGRAM_CAP / SENT_CAP / OPENING_CAP (section 7)
   FAKE_PROVENANCE (admit only)            DUP_EXACT / DUP_NEAR (admit only)          DECON_PENDING (admit only)
   Matching: lowercase, NFKC, word-bounded value regex with optional plural (E004 text_e004.value_re style); number
@@ -231,19 +231,19 @@ tools/gemma_chat.py, experiments/E004_general_updating/code (read-only). No mode
   local stub), the paraphraser. Open: final event shares (pilot), p_exact, RC-12 exports, the user-turn loss switch,
   whether RH passages with a lone digit or an honorific are dropped (default: dropped, logged).
 
-13. PILOT FIXES 2026-09-27 (dry-pilot reject audit; decided by Claude under Max's delegation, reversible; notes.txt)
-  Prompt: after the script, a rules block (no dashes, number words, the assistant in sentence case, script lines
-    describe the move, the user says "my") and a worked example on its own FAKE items; the card hides the user name.
-  D1 lowercase is a user style: that user's exact lines are shown and stored lowercased (parse.exact_text, also the
-    structured-output literal); EXACT_MISMATCH and value matches fold case on that user's turns only.
-  D2 loosened, each with a clean and a planted fixture (fixtures_pilot.py): OFFTOPIC (plural-first stemmer, topic
-    word sets in topic_words.py, the last assistant reply counts for a user topic turn, topic-neutral words ignored,
-    no check on "greet the user back"); REQ_WORD (adverbs, -ves; placed words only); hedge, offer and denial lists;
-    "my X" for a required non-value "the X" in a user line; the pronoun "one" in a count answer.
-  Tightened: curly quotes straightened before every check; PROMPT_ECHO on a copied guidance line; PERSPECTIVE on a
-    user's "your X"; DEFLECT on a hedged given answer. Never loosened: DASH, MARKDOWN, DIGIT, AI_ISM, SELF_CLAIM,
-    answer golds, PROMPT_ECHO, held-out gates.
-  Skeleton skel-v0.2 (same RNG streams): bank openings and goodbye closings; "greet the user back" after a bare
-    greeting; terse topic turns allow max(10, topic words + 6) within the register; required words (0-3) only on
-    topic turns with a cap of 10+ words, drawn from the turn's topic set. Guidance: first-person ask-backs, "the list",
-    corrections name the new value, answers name no other value. Decoding and sampling (D3, D4): pipeline/teachers/.
+13. PILOT FIXES 2026-09-27 (reject audit; decided by Claude under Max's delegation, reversible; notes.txt)
+  Rules and a worked example after the script; no user name on the card; D1 lowercase is a user style (exact lines
+    shown, forced, stored lowercased via parse.exact_text, compared without case); D2 loosenings with clean and
+    planted fixtures (fixtures_pilot.py), never for DASH, MARKDOWN, DIGIT, AI_ISM, SELF_CLAIM, golds, PROMPT_ECHO.
+  skel-v0.2: bank openings and goodbyes, greet-back after a bare greeting, topic-fitted words on topic turns only.
+14. ROUND 2 FIXES 2026-09-28 (v1 quality review, dry pilot 2 re-check; fixtures_r2.py, fixtures_r2b.py; notes.txt)
+  Checker: negative hedges only (plus "no X was mentioned"); SELF_CLAIM adds "I do love", "I spend my", "like my own",
+    past acts (not "I called you"); "one of" and a clause-final "the one" count; Porter stems on the text, topic-side
+    forms (comparatives, -ly, -y bases, verb agents), "noted" neutral; a user turn takes the last reply's words when
+    it shares two or half of its own; -ly only for adjectives, -ves only for -ves nouns; END_IN_TURN; USER_STYLE;
+    plants stated (an embedded statement or pseudo-cleft states, a question does not); "your <label>" on a turn about
+    that fact; an abstain query stating a value; guidance clauses for PROMPT_ECHO; the service family on assistant
+    turns; straight quotes stored. Prompt: no "without saying the answer" (the answer joins the query's must not
+    include list); never-said queries read as recall questions; list, rule, lookup, recap and return guidance is not
+    a natural line; answers go on after the value or lead in with what was said; abstains ask; rule notes follow the
+    move; a 3-word rule; lowercase display. skel-v0.3: no required word on goodbyes; end_question rules close "open".

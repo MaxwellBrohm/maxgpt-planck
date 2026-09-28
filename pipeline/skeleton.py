@@ -17,7 +17,7 @@ import pools as P
 import fake_data as F
 from events_base import Ctx, Fail, pick_weighted
 
-GEN_VERSION = "skel-v0.2"   # 2026-09-27 frame and required-word changes (notes.txt); RNG_VERSION keeps the draws
+GEN_VERSION = "skel-v0.3"   # 09-27 frame and required words; 09-28 goodbyes, recall queries, closing (notes.txt)
 RNG_VERSION = "skel-v0.1"
 TURN_WEIGHTS = {4: 5, 5: 10, 6: 20, 7: 20, 8: 20, 9: 7.5, 10: 7.5, 11: 5, 12: 5}
 NEVENT_WEIGHTS = {2: 25, 3: 45, 4: 30}
@@ -218,6 +218,9 @@ def build(seed, register="RM", persona=None, topics=None, kind_draws=5, attempts
         shrink(krng, kinds, pres, fixed, info)
         if "goodbye" in fixed:
             info["closing"] = "goodbye"
+        elif info["closing"] == "goodbye" and [p["rules"][-1] for k, p in zip(kinds, pres) if k == "S4"] == \
+                ["end_question"]:   # 09-28: a goodbye that must end in a question (dp2 PERSIST_FAIL on 86 goodbyes)
+            info["closing"] = "open"
         if "S5" in kinds and len(info["topic_path"]) < 2:
             info["topic_path"] = info["all_topics"][:2]
         need = _need(pres, fixed, info)
@@ -239,40 +242,5 @@ def build(seed, register="RM", persona=None, topics=None, kind_draws=5, attempts
     raise RuntimeError(f"no skeleton for seed {seed}")
 
 
-def triple(sk):
-    """the (topic path, persona, kind set) triple that a shard never repeats."""
-    return tuple(sk["topic_path"]), sk["user"]["persona_seed"], tuple(sorted(e["kind"] for e in sk["events"]))
-
-
-def iter_shard(shard_seed, register="RM", start_j=0, seen=None):
-    """endless generator of (j, skeleton) in shard order; shard() takes the first n. Resumable: pass the j of the
-    last skeleton already produced and the triples seen so far, and the stream continues exactly where it stopped."""
-    rng = P.seeded("planck-shard", RNG_VERSION, shard_seed)
-    personas = [f"np{i:05d}" for i in range(N_PERSONAS)]
-    tops = topic_ids()
-    rng.shuffle(personas)
-    rng.shuffle(tops)
-    seen, j = set() if seen is None else set(seen), start_j
-    while True:
-        persona = personas[j % len(personas)]
-        three = [tops[(3 * j + m) % len(tops)] for m in range(3)]
-        j += 1
-        sk = build(f"{shard_seed}:{j}", register, persona=persona, topics=three)
-        tr = triple(sk)
-        if tr in seen:
-            continue
-        seen.add(tr)
-        yield j, sk
-
-
-def shard(shard_seed, n, register="RM"):
-    """n skeletons with personas and topics drawn without replacement (cycling when exhausted) and no repeated
-    (topic path, persona, kind set) triple."""
-    out = []
-    if n <= 0:
-        return out
-    for _, sk in iter_shard(shard_seed, register):
-        out.append(sk)
-        if len(out) >= n:
-            break
-    return out
+# shard iteration lives in skeleton_shard.py (moved 2026-09-28 to keep this file under 250 lines)
+from skeleton_shard import triple, iter_shard, shard  # noqa: E402,F401

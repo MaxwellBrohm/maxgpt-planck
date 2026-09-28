@@ -1,8 +1,10 @@
 """Decoding controls against the real libraries, CPU only (the PC; every class skips where its library or the
 teacher's tokenizer files are missing, so the Mac skips them all). No model is loaded.
   XgrammarRegex    each teacher's label regex (labels_exact, its own separator) compiles in xgrammar with the
-                   TokenizerInfo vLLM builds; the canonical FAKE render is accepted, form breaks and an altered
-                   literal are refused; Ministral's blank-line form is accepted.
+                   TokenizerInfo vLLM builds; the canonical FAKE render (literals as parse.exact_text) is accepted,
+                   form breaks and an altered literal are refused; Ministral's blank-line form is accepted; under
+                   labels-v2 (2026-09-28) END inside a line is refused and no line is capped.
+  RealPhraseBan    serve.phrase_ban on vLLM's own tokenizer: under vLLM's bad_words caps, every phrase registered.
   RealBan          serve.dash_ban from the real tokenizer (fresh cache dir): the probe's ban set when its file exists
                    (~/planck/runs/teachers/dry/probe_0927/ban_<teacher>.dry.json), under the 1024 cap, then cached.
   RealParams       serve._params builds vLLM's own SamplingParams with structured_outputs, logit_bias and a preset.
@@ -25,7 +27,8 @@ sys.path.insert(0, os.path.dirname(HERE))
 sys.path.insert(0, HERE)
 import decode  # noqa: E402
 import driver  # noqa: E402
-import fake_teacher  # noqa: E402
+import fake_engine as FE  # noqa: E402
+import parse  # noqa: E402
 import render_prompt as R  # noqa: E402
 import serve  # noqa: E402
 import skeleton  # noqa: E402
@@ -73,15 +76,20 @@ class XgrammarRegex(unittest.TestCase):
         n_lit = 0
         for sk in SKELS:
             ctx = comp.compile_regex(decode.label_regex(driver.constraint(sk, "labels_exact")["lines"], sep))
-            raw = fake_teacher.raw(sk)
+            raw = FE.canon(sk)
             lines = raw.split("\n")
             ex = next((t for t in sk["turns"] if t["mode"] == "exact"), None)
+            last = "\n".join(lines[:-2])
             cases = {raw: True, "\n".join(lines[:-1]): False, "\n".join(lines[:1] + lines[2:]): False,
                      raw + "\nThanks!": False, raw.replace(lines[0].split(":")[0] + ":", "User:", 1): False,
-                     raw.replace("\n", "\n\n"): blank_lines_ok}
+                     raw.replace("\n", "\n\n"): blank_lines_ok,
+                     f"{last}\n{lines[-2]} END. END.\nEND": False,                       # END inside the last line
+                     f"{last}\n{lines[-2]} ENDING\nEND": False,
+                     f"{last}\n{lines[-2].split(':')[0]}: {'Bye now. ' * 50}\nEND": True}             # no cap
             if ex:
                 lab = ("U" if ex["role"] == "user" else "T") + str(ex["i"] + 1)
-                cases[raw.replace(f"{lab}: {ex['text']}", f"{lab}: {ex['text']} too", 1)] = False
+                lit = parse.exact_text(sk, ex)
+                cases[raw.replace(f"{lab}: {lit}", f"{lab}: {lit} too", 1)] = False
                 n_lit += 1
             for text, want in cases.items():
                 m = xgr.GrammarMatcher(ctx)
@@ -131,6 +139,54 @@ class RealBan(unittest.TestCase):
     @unittest.skipUnless(have("mistral_common") and have_tok("ministral-3-8b"), "mistral_common + tekken")
     def test_ministral(self):
         self.assertEqual(self.check("ministral-3-8b")["n"], 140)
+
+
+def vllm_tok(name):
+    from vllm.tokenizers.registry import get_tokenizer
+    cfg = serve.TEACHERS[name]
+    if cfg.get("tokenizer_dir"):
+        return get_tokenizer(os.path.join(serve.MODELS, cfg["tokenizer_dir"]), tokenizer_mode="mistral")
+    return get_tokenizer(serve.model_path(cfg))
+
+
+# dp2 sentences with the AI-isms the teachers wrote (records of 2026-09-27), as they follow a label ("A2:")
+DP2_AI_ISMS = ["I'd be happy to help with that.", "I am happy to help.", "I'm happy to help.", "I’m happy to help.",
+               "We would be happy to help.", "Happy to help!", "I am here to help.", "I'm here to help.",
+               "I’m here to help.", "Hello, how can I help you today?", "How can I help?", "Is there anything else?",
+               "Is there anything else I can do?", "Have a good day, and feel free to ask.", "Feel free to ask.",
+               "Please feel free to ask.", "I hope this helps."]
+
+
+class RealPhraseBan(unittest.TestCase):
+    def check(self, name):
+        vt = vllm_tok(name)
+        pb = serve.phrase_ban(vt)
+        self.assertLessEqual(pb["n_seqs"], decode.BAD_WORDS_CAP)
+        self.assertLessEqual(pb["n_tokens"], decode.BAD_TOKENS_CAP)
+        self.assertGreaterEqual(pb["n_seqs"], len(decode.PHRASES))       # every phrase at least in its bare form
+        for sent in DP2_AI_ISMS:                                          # canonical tokens after "A2:"
+            self.assertTrue(decode.covered(pb["seqs"], vt.encode(text=" " + sent, add_special_tokens=False)), sent)
+        self.assertFalse(decode.covered(pb["seqs"], vt.encode(text=" I would be glad to see you then.",
+                                                               add_special_tokens=False)))
+        from vllm import SamplingParams
+        t = serve.tokenizer_only(name)
+        t.engine = {"max_model_len": 2048}
+        sp, _ = serve._params(t, {"max_tokens": 64, "bad_words": decode.phrase_words(["Happy to help!"])}, 100, 7)
+        self.assertIsInstance(sp, SamplingParams)
+        self.assertEqual(len(sp.bad_words), len(decode.PHRASES) - 2)     # "happy to help" in both cases
+        return pb
+
+    @unittest.skipUnless(have("vllm") and have_tok("qwen3.5-9b"), "vllm + Qwen tokenizer")
+    def test_qwen(self):
+        self.check("qwen3.5-9b")
+
+    @unittest.skipUnless(have("vllm") and have_tok("gemma-4-12b"), "vllm + Gemma tokenizer")
+    def test_gemma(self):
+        self.check("gemma-4-12b")
+
+    @unittest.skipUnless(have("vllm") and have("mistral_common") and have_tok("ministral-3-8b"), "vllm + tekken")
+    def test_ministral(self):
+        self.check("ministral-3-8b")
 
 
 @unittest.skipUnless(have("vllm") and have_tok("qwen3.5-9b"), "vllm + Qwen tokenizer")

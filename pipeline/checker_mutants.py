@@ -14,12 +14,16 @@ import types
 import check_base
 import check_behav
 import check_events
+import check_lines
+import check_lookup
 import check_text
 import checker
 import lexicons
 import parse
+import stemmer  # noqa: F401  (a mutant target)
+from checker_mutants_r2 import SRC_R2
 
-MODULES = [checker, check_text, check_events, check_behav, check_base, parse]
+MODULES = [checker, check_text, check_lines, check_lookup, check_events, check_behav, check_base, parse]
 
 # lower values are the nearest shares a turn of legal length can reach below the threshold (fixtures_bound pins them)
 CONSTS = [("REPEAT_MIN", 2, 4), ("CONSEC_MAX", 0.24, 0.26), ("SELF_COPY_MAX", 0.48, 0.51), ("ECHO_MAX", 0.59, 0.61),
@@ -28,7 +32,7 @@ CONSTS = [("REPEAT_MIN", 2, 4), ("CONSEC_MAX", 0.24, 0.26), ("SELF_COPY_MAX", 0.
 SRC = [  # (name, module, old, new)
     ("len_max_off_by_one", check_text, 'if not (t["min_w"] <= n <= hi):', 'if not (t["min_w"] <= n <= hi + 1):'),
     ("len_min_off_by_one", check_text, 'if not (t["min_w"] <= n <= hi):', 'if not (t["min_w"] - 1 <= n <= hi):'),
-    ("plural_forms_dropped", check_text, 'stems = {w, w + "s", w + "es",', 'stems = {w, w + "es",'),
+    ("plural_forms_dropped", check_lines, 'stems = {w, w + "s", w + "es",', 'stems = {w, w + "es",'),
     ("shotgun_needs_3", check_events, "if present + len(named) >= 2:", "if present + len(named) >= 3:"),
     ("stale_ignored", check_events, 'stale = [v for v in g.get("stale", []) if ctx.has(i, v)]', "stale = []"),
     ("early_off_by_one", check_events, 'if t["i"] < first and ctx.has(t["i"], v):',
@@ -66,24 +70,21 @@ SRC = [  # (name, module, old, new)
     ("det_swap_off", check_base, "return user and self.det_swap(i, v, s)", "return False"),
     ("det_swap_your_ok", check_base, "return bool(value_re_i(alt).search(s))",
      'return bool(value_re_i(alt).search(s) or value_re_i("your " + m.group(2)).search(s))'),
-    ("stem_no_y", check_base, '"er", "y", "e")', '"er", "e")'),
-    ("hedge_mentioned_dropped", lexicons, 'r"(?:was|wasn\'t|was not|has not been|hasn\'t been|haven\'t been) mentioned",',
-     ""),
+    ("hedge_mentioned_dropped", lexicons, 'r"(?:wasn\'t|was not|was never|(?:has|have)(?: not| never|n\'t) been|not been) '
+     'mentioned",', ""),
     ("offer_note_dropped", lexicons, 'r"(?:let me|i will|i\'ll|i can) (?:make a )?note", ', ""),
     ("deny_just_assistant_dropped", lexicons, 'r"(?:i\'m|i am) just an assistant", ', ""),
     ("exact_fold_all_roles", parse, 'fold = t["role"] == "user" and skel["user"]', 'fold = skel["user"]'),
     ("exact_no_fold", parse, "return a.lower() == b.lower() if fold else a == b", "return a == b"),
-    ("ly_forms_dropped", check_text, 'stems.add(w[:-1] + "y" if w.endswith("le") else w + "ly")', "pass"),
-    ("ves_forms_dropped", check_text, 'stems.add(w[:-1 if w.endswith("f") else -2] + "ves")', "pass"),
-    ("placed_all_three", check_text, "R.req_word_turns(ctx.skel).values()   # placed words only",
-     '[ctx.skel["required_words"][k] for k in ("noun", "verb", "adj")]'),
-    ("guidance_copy_off", check_text, 'elif t["role"] == "user" and words(s) == words(R.guidance(ctx.skel, t)):',
+    ("ly_forms_dropped", check_lines, "if ly not in LY_SHIFTED:\n            stems.add(ly)", "if False:\n            pass"),
+    ("ves_forms_dropped", check_lines, 'stems.add(w[:-1 if w.endswith("f") else -2] + "ves")', "pass"),
+    ("placed_all_three", check_lines, 'for p in R.REQ_WORD_ORDER[:len(rw["turn_hint"])]', "for p in R.REQ_WORD_ORDER"),
+    ("guidance_copy_off", check_text, 'elif t["role"] == "user" and words(s) == words(script_guidance(ctx.built, t)):',
      "elif False:"),
     ("offtopic_no_topic_words", check_behav, 'return content(text) | content(" ".join(TW.related(text)))',
      "return content(text)"),
-    ("offtopic_generic_counts", check_base, "- GENERIC_STEMS\n", "\n"),
-    ("offtopic_no_prev_assist", check_behav, 'want = topic_set(topics[it.split(":")[1]]) | content(prev_assist or "")',
-     'want = topic_set(topics[it.split(":")[1]])'),
+    ("offtopic_generic_counts", check_base, " \\\n        - GENERIC_STEMS", ""),
+    ("offtopic_no_prev_assist", check_behav, 'want = want | content(prev_assist or "")', "want = want"),
     ("offtopic_no_prev_user", check_behav, 'want = all_topic | content(prev_user or "")', "want = all_topic"),
     ("user_your_off", check_behav, "    out += _user_perspective(ctx)\n", ""),
     ("hedge_given_off", check_events, "m = L.DEFLECT_RE.search(ctx.text[i]) or L.HEDGE_RE.search(ctx.text[i])",
@@ -92,7 +93,9 @@ SRC = [  # (name, module, old, new)
      'if "one" in others and len(ONE_RE.findall(s)) == len(PRONOUN_ONE.findall(s)):', "if False:"),
     ("pronoun_one_any", check_events,
      'if "one" in others and len(ONE_RE.findall(s)) == len(PRONOUN_ONE.findall(s)):', 'if "one" in others:'),
+    # 2026-09-28 round 2: checker_mutants_r2.SRC_R2 (appended below)
 ]
+SRC += SRC_R2
 
 
 def _read(path):

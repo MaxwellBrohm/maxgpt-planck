@@ -27,6 +27,9 @@ import defects_text  # noqa: E402
 import fake_teacher  # noqa: E402
 import fixtures_bound  # noqa: E402
 import fixtures_pilot  # noqa: E402
+import fixtures_r2  # noqa: E402
+import fixtures_r2b  # noqa: E402
+import fixtures_r2c  # noqa: E402
 import fixtures_hand  # noqa: E402
 import parse  # noqa: E402
 import render_prompt as R  # noqa: E402
@@ -77,7 +80,8 @@ def build_cases(skels, per_defect, n_drift):
             n += 1
     seen = collections.Counter()
     for s, tx in renders:
-        for b in fixtures_bound.BUILDERS + fixtures_pilot.BUILDERS:
+        for b in (fixtures_bound.BUILDERS + fixtures_pilot.BUILDERS + fixtures_r2.BUILDERS
+                  + fixtures_r2b.BUILDERS + fixtures_r2c.BUILDERS):
             for name, sk, texts, expect, opts in b(s, tx, R.build(s)):
                 if seen[name] < per_defect:
                     seen[name] += 1

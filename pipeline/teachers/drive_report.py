@@ -12,7 +12,8 @@ Reads the driver's own records (skeletons/, accepted/, rejects/, yield.jsonl) an
   diversity of the accepted chats: stats.text_stats (distinct-1/2/3, gzip ratio; all turns, user, assistant), the
   same on teacher-written turns only, and, with --k, on the first k accepted chats so teachers compare at equal n;
   yield per attempt kind (first, retry, repair: a --repair attempt is counted apart), the run flags seen in the
-  records, and what the server applied (structured, dash ban, preset) over the teacher calls (2026-09-27).
+  records, and what the server applied (structured, dash ban, preset) over the teacher calls (2026-09-27; label
+  rule and phrase ban 2026-09-28).
 --export writes accepted_texts.dry.jsonl (turn text + author, for count_planck.py on the PC, where the tokenizers
 package lives) and --examples accepted plus --examples rejected records (seeded sample; rejects spread over the
 primary codes) as dry jsonl."""
@@ -113,6 +114,8 @@ def decode_applied(acc, rej):
     return {"run_flags": [json.loads(f) for f in flags], "calls_with_decode": len(decs),
             "structured": dict(collections.Counter(str(d.get("structured")) for d in decs)),
             "dash_ban": sum(1 for d in decs if d.get("ban")),
+            "label_rules": dict(collections.Counter(str(d.get("label_rule")) for d in decs if d.get("structured"))),
+            "phrase_ban": sum(1 for d in decs if d.get("phrases")),
             "presets": dict(collections.Counter(d.get("preset") for d in decs))}
 
 

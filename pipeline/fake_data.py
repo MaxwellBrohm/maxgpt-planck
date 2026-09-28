@@ -88,9 +88,12 @@ TOPICS = ["cooking dinner on a budget", "a new sleep routine", "learning to play
           "a visit from an old friend", "a garden full of weeds", "a trip to the mountains", "saving energy at home",
           "a kid learning to read", "planning meals for the week", "a tricky recipe", "a snowy morning"]
 
-INTENT_FORMS = ["ask for a simple tip about {t}", "share how {t} is going", "ask a follow up question about {t}",
+# 2026-09-28: form 0 was "ask for a simple tip about {t}" (the teachers wrote "Can you give me a simple tip about ...",
+# an E004 5-gram: HELDOUT_ECHO 41 Gemma and 39 Qwen attempts in dry pilot 2); form 5 named "the assistant", which
+# user_guidance turns into "you" ("ask what you would suggest next", copied as "what you would suggest next for")
+INTENT_FORMS = ["ask what usually helps with {t}", "share how {t} is going", "ask a follow up question about {t}",
                 "mention a small worry about {t}", "react briefly to the last reply about {t}",
-                "ask what the assistant would suggest next for {t}"]
+                "ask which step to try next with {t}"]
 
 WORD_NOUNS = """window garden letter river kitchen blanket basket ladder candle pencil mirror bridge harbor
 meadow orchard lantern puzzle recipe ticket shelf pocket bucket feather pillow station library forest

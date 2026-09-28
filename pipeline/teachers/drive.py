@@ -15,6 +15,7 @@ snapshot, instead of recording TEACHER_ERROR for every remaining attempt; the sa
 Decoding controls and repair (2026-09-27, driver.py flags, all off by default and recorded in every record):
     --structured labels|labels_exact   structured output of each skeleton's planned label lines plus END
     --ban-dashes                       the dash-token ban (serve_http must run with --dash-ban)
+    --ban-phrases                      the AI-ism phrase ban, vLLM bad_words (serve_http must run with --phrase-ban)
     --preset card|shared|yld0926       a D4 sampling preset (serve.TEACHERS; Gemma has no "shared")
     --repair                           after a near miss the retry prompt names what failed (attempt kind "repair")
 serve_http offers them (its GET /planck-serve lists presets, structured backend, line separator and dash ban); the

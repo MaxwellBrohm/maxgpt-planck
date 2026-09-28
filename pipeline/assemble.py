@@ -16,9 +16,13 @@ TOKENS_PER_WORD = 1.3
 HARD_CAP_TOKENS = 1800
 MUST_NOT = ["plans", "family", "body", "past", "preferences", "places"]
 # assistant turns that talk about a topic: the only turns that get a required word (audit 2026-09-27: on ack, list,
-# name, rule and abstain turns the FAKE words were missed 25-37% of the time or forced into invented self claims)
+# name, rule and abstain turns the FAKE words were missed 25-37% of the time or forced into invented self claims;
+# 09-28, v1 review: goodbyes too, 82 to 96% of accepted goodbye turns carried one and 38 of 75 read unnatural)
 TOPIC_TURNS = ("greet back and engage with the topic", "reply on the topic", "respond helpfully on the first topic",
-               "respond on the second topic", "say goodbye briefly")
+               "respond on the second topic")
+# a recall question whose answer its own script line must not say (2026-09-28: replaces the guidance suffix
+# "without saying the answer", which 13 accepted user lines copied before the assistant answered anyway)
+RECALL_QUERY = ("ask for ", "ask if the assistant remembers")
 REQ_MIN_W = 10    # no required word under a tighter cap (an 8-word rule: Qwen already overshot it in the audit)
 TERSE_TOPIC_EXTRA = 6
 
@@ -159,6 +163,12 @@ def finish(skel, ctx):
             if e["params"]["key"] == "user_name" and any(x["key"] == "nickname" for x in skel["slots"].values()):
                 raise Fail("abstain on the name after a call-me rule")
             t["must_exclude"] = sorted(set(t["must_exclude"]) | set(e["gold"]["candidates"]))
+    for e in skel["events"]:
+        q, a = e["turns"].get("query"), e["gold"].get("answer")
+        t = by_i.get(q)
+        if t and t["mode"] == "guided" and isinstance(a, str) and (t["intent"] or "").startswith(RECALL_QUERY) \
+                and "never said" not in t["intent"] and a not in t["must_include"]:
+            t["must_exclude"] = sorted(set(t["must_exclude"]) | {a})
     skel["required_words"] = required_words(skel, ctx)
     for i, note in golds.notes(skel).items():
         by_i[i]["gold_note"] = note
@@ -200,7 +210,7 @@ def required_words(skel, ctx):
     """noun, verb, adj for up to three topic turns (TOPIC_TURNS, cap REQ_MIN_W+), in turn order, each word drawn
     from the topic word set (topic_words, FAKE) of the topic its turn talks about; the old FAKE word pools are the
     fallback when a set has nothing left. Fewer topic turns place fewer words: turn_hint lists the placed ones and
-    check_text.chk_req_word requires only those."""
+    check_lines.chk_req_word requires only those."""
     rng = ctx.rng
     ok = [t for t in skel["turns"] if t["role"] == "assistant" and t["mode"] == "guided"
           and (t["intent"] or "").split(";")[0] in TOPIC_TURNS and t["max_w"] >= REQ_MIN_W]

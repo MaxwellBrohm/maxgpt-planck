@@ -14,7 +14,8 @@ Transient failures (connection refused or reset, timeout, HTTP 408/429/5xx, a bo
 up to http_tries times with exponential backoff; any other HTTP status fails at once. A request that never
 succeeds raises TeacherError, which the driver records as a TEACHER_ERROR reject for that attempt.
 
-Decoding controls (the driver's --structured, --ban-dashes, --preset; 2026-09-27) exist only on a served teacher
+Decoding controls (the driver's --structured, --ban-dashes, --preset; 2026-09-27; --ban-phrases 2026-09-28) exist
+only on a served teacher
 (teachers/serve_client.ServeClient, drive.py --serve). This client refuses any of them in configure_decode, so a run
 can never record a control its server did not apply."""
 import hashlib
@@ -34,7 +35,8 @@ STUB_PATH = "/planck-stub"
 TRANSIENT_STATUS = {408, 429, 500, 502, 503, 504}
 LICENSES = {"gemma-4": "Apache-2.0", "ministral-3": "Apache-2.0"}   # model id substring -> license (D8)
 STRUCTURED = ("off", "labels", "labels_exact")                      # = teachers/decode.STRUCTURED
-DECODE_OFF = {"structured": "off", "ban": None, "preset": None}
+DECODE_OFF = {"structured": "off", "ban": None, "phrases": None, "preset": None}
+PHRASE_BANS = (None, "ai_ism")                                      # = teachers/decode.PHRASES under PHRASE_RULE
 
 
 class RefuseRealTeacher(RuntimeError):
@@ -58,6 +60,8 @@ def decode_config(cfg):
         raise DecodeConfigError(f"--structured {c['structured']!r}: one of {STRUCTURED}")
     if c["ban"] not in (None, "dash"):
         raise DecodeConfigError(f"ban {c['ban']!r}: only 'dash'")
+    if c["phrases"] not in PHRASE_BANS:
+        raise DecodeConfigError(f"phrases {c['phrases']!r}: only 'ai_ism'")
     if c["preset"] is not None and (not isinstance(c["preset"], str) or not c["preset"]):
         raise DecodeConfigError(f"preset {c['preset']!r}")
     return c
@@ -95,7 +99,8 @@ class TeacherClient:
     def configure_decode(self, cfg):
         c = decode_config(cfg)
         if c != DECODE_OFF:
-            raise DecodeConfigError("--structured, --ban-dashes and --preset need a served teacher (drive.py --serve)")
+            raise DecodeConfigError("--structured, --ban-dashes, --ban-phrases and --preset need a served teacher "
+                                    "(drive.py --serve)")
 
     def decode_meta(self, call):
         return None
