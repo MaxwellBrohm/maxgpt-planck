@@ -345,3 +345,15 @@ STAGE B QUEUED: eta 3e-3, r in {0.5, 2, 4, 8} (r 1 reuses stage A's 5m_e3_r1), p
     ef54be1b9c081ffa3493ab6f595fe409c358b1ade56d01bbf8d9a64f57273a8f 5m_e3_r8_b250M.yaml
     2e37a16b4f9e35439367d0a624715d676eff350317dc6a3f8636551adfe73870 5m_e3_r8_b62M.yaml
     a77428f07b2bb30f58b06d4daf40f108078031eed9dd1cfe8b695f76fb50a1a6 5m_e3_r8_trunk.yaml
+
+STAGE_B (auto, e2chain.py, 2026-09-28 09:44 EDT): stage B decided r_B = 1.0; stage C queued
+  e2pick: pick 1.0, argmin 1.0, at_edge None, extend_with [], guard_moved False
+  QUEUED stageC: 5m_e1.5_r1 5m_e6_r1; mark 'E2 STAGE C DONE'; plans/stageC.txt sha256 63882a82bb2072ce29d0dec0a6245667d264bca4fc179bd0a4d93b87407b9400
+    280f9575e493bb699897f47f7f7127f67a6d8ad844f21812c986da90f6f169a0 5m_e1.5_r1_b125M.yaml
+    e7d74f3955148ec027d32bc9434bd6a2f6b65eb6eda111f7387146682fa1c3ee 5m_e1.5_r1_b250M.yaml
+    2b89bf63e6cd44016858348c95513b0fe4d19a41b9dbdcd08e47f11e3e593077 5m_e1.5_r1_b62M.yaml
+    bb332d955aeb969048f06b05909add5b89da3d5c42e4c863ca4e060f8b30a5e7 5m_e1.5_r1_trunk.yaml
+    d76ad556bbd48b0ec6fc063e2961cf375664f9064c4e709ca06dbbbf737b12cf 5m_e6_r1_b125M.yaml
+    cb334d0b79de59afe90884e69d3206a2cc184211a257603023595fe9b6491110 5m_e6_r1_b250M.yaml
+    7ab758adb35ca03e2809a953eff5d5e8da92ed10eec3a339c77f33e3e1d52001 5m_e6_r1_b62M.yaml
+    5a62920d85899122406b9f1b1f79299f74c8c3a4f8a6cd6105c41d841b847ab1 5m_e6_r1_trunk.yaml

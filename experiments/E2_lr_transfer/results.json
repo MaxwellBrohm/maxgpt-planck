@@ -83,16 +83,31 @@
   }
  },
  "stage_B": {
-  "queued": "2026-09-27",
-  "eta_a": 0.003,
-  "r_axis_new": [
+  "argmin": 1.0,
+  "at_edge": null,
+  "axis": [
    0.5,
-   2,
-   4,
-   8
+   1.0,
+   2.0,
+   4.0,
+   8.0
   ],
-  "r1_reused": "stage A's 5m_e3_r1 runs",
-  "plan": "plans/stageB.txt sha256 44f37dee72644d7cc9d761e23dc004e220ce8ad7c02bb08a4895b5a96271da43",
-  "configs": "16 configs 5m_e3_r{0.5,2,4,8}_{trunk,b62M,b125M,b250M}.yaml, sha256 listed in notes STAGE B QUEUED"
+  "decided": true,
+  "extend_with": [],
+  "extensions_used": 0,
+  "gap_next_to_argmin": false,
+  "guard_moved": false,
+  "pick": 1.0,
+  "ready": true,
+  "runs": {
+   "0.5": "5m_e3_r0.5_b250M",
+   "1": "5m_e3_r1_b250M",
+   "2": "5m_e3_r2_b250M",
+   "4": "5m_e3_r4_b250M",
+   "8": "5m_e3_r8_b250M"
+  },
+  "stage": "B",
+  "recorded_by": "e2chain.py",
+  "recorded": "2026-09-28 09:44 EDT"
  }
 }
