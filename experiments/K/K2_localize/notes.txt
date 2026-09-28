@@ -1,0 +1,314 @@
+K2: localization. Where do facts and in-context skill sit in a 5M model whose facts are known exactly?
+RTX 5070 (PC) only, one GPU job at a time; inference and mask fitting on K1's checkpoints, no model training. The Mac
+runs no model. World, metrics, rule KR and hours: ../SPEC.txt (SPEC n); models: ../K1_capacity/notes.txt.
+
+PRE-REGISTRATION WRITTEN 2026-09-27 01:20 (before any K code, data, config or run exists; no model run for this
+entry. Nothing of K is queued or committed.)
+
+WHY
+  Max asked whether we can find which parameters hold facts and which hold skills. Published localization runs on
+  pretrained web models of 117M and up (arch.md U2; localize.md 3.2 (a) lists fact recall and in-context skill
+  localized on one from-scratch LM with known facts as untested at 5M). K1's FH models give ground truth: every
+  fact is known, and skill items are generated. What the literature says to expect and to guard against:
+  - Pruning-style masks (HardConcrete, Slimming) localize memorized data best; activations and single-unit zero-out
+    do poorly, and single-unit effects do not predict joint dropout (Chang et al., https://arxiv.org/abs/2311.09060).
+  - Tracing strength does not predict where an edit works (Hase et al., https://arxiv.org/abs/2301.04213).
+  - Patching results depend on the corruption; symmetric token replacement and logit difference are recommended
+    (Zhang and Nanda, https://arxiv.org/abs/2309.16042).
+  - Self-repair hides unit importance and zero ablation is off-distribution (McGrath et al., the Hydra effect,
+    https://arxiv.org/html/2307.15771), so mean ablation is reported beside zero.
+  - Facts are not only in MLPs (Physics 3.3 Results 5-7, capacity.md); later-layer "memory heads" and "context
+    heads" arbitrate at 1B+ (https://arxiv.org/abs/2402.18154, Findings of ACL 2024), untested at 5M.
+  - At 26M, data-attribution signs flip across seeds (capacity.md, https://arxiv.org/abs/2608.24460): 3 seeds, unit-
+    set agreement reported, methods judged by what the ablation does.
+
+QUESTIONS
+  Q1 Is there a set of MLP units whose removal takes out at least half of fact recall while in-context skill drops no
+     more than 3 points (SEPARABLE), or does every such set take skill with it (ENTANGLED)?
+  Q2 (reported) Which heads and blocks carry facts, skill and the memory-vs-context choice? Do facts displace skill
+     units (FH vs F0 skill maps)? How stable are the unit sets across data splits and seeds?
+
+MODELS
+  K1 FH final checkpoints, seeds 201-203 (primary). K1 F0 final checkpoints, seeds 201-203 (the skill map with no
+  facts; fact probes on F0 are the floor). Weights sha256 in every record.
+
+UNITS
+  N1 MLP neurons: 8 x 488 = 3,904 SwiGLU hidden units (unit j of layer l: row j of W_gate and W_up, column j of
+     W_down).
+  N2 attention heads: 8 x 3 = 24 (the head's output zeroed before W_o), all 24 singly and all 276 pairs.
+  N3 sublayers: the 8 attention and 8 MLP sublayers (skipped: the residual stream passes unchanged).
+
+PROBE SPLITS (draw seed 7601; fresh items, disjoint from every SPEC 8 file)
+  SPLIT A and SPLIT B, each: 512 FB_high entities (half FB_low) x 6 attributes, BIO prompts in 2 orders; 512 skill
+  items in K-EVAL-ID proportions; 128 CONFLICT items. Masks and unit rankings are fitted on A only; every reading
+  is measured on B only, so selection and measurement never share an item or an entity.
+  Metrics on a split [K2-a]: F = F_LIK minus F0's F_LIK, where F_LIK = argmax over C_F (the FB value plus seeded V
+  distractors, |C_F| = round(mean |C|) of the split's skill questions) equals the FB value, so facts and skill are
+  read on the same candidate scale; S = LIK accuracy minus chance (SPEC 9); CE_C beside S. Greedy BIO_acc over the
+  vocabulary is reported beside F and decides nothing. Normalized CE, for masks: g = (CE - CE_unablated) /
+  (CE_floor - CE_unablated), facts on C_F, skill on C (CE_floor: F0 for facts, chance for skill).
+
+METHODS (per seed)
+  M1 Masks (primary; Chang et al.'s best family). A HardConcrete gate per N1 unit, trained with the weights frozen,
+     Adam on SPLIT A with an L0 penalty lam x relu(E[units dropped] - b) / b that holds the mask to a target budget
+     b (lam per budget unit [K2-f]: lam prices an overshoot as a share of the budget, so an overshoot of 10% of b
+     costs the same at every b and one unit over costs lam / b), then hardened to the top b by
+     gate score (lowest log alpha first). Defaults [K2-f]: 2,000 steps, lam 6, gate init log alpha 0.0 (P(closed)
+     0.17 at step 0), lr 0.05, Adam eps 1e-6 (K2-e: 1,000 steps, lam 1 per unit; build: 200-500 steps, init 1.0).
+     [K2-h] 2 restarts (gate noise seeds s and s + 7919), the kept one the hardened set with the better objective on
+     SPLIT A with its units ablated (a run can leave a saturated unit stuck open).
+     Four objectives:
+       KF  kill facts: maximize g_fact                        SF  selective facts: g_fact minus g_skill
+       KS  kill skill: maximize g_skill                       SS  selective skill: g_skill minus g_fact
+     Budgets b in {2, 5, 10, 20}% of N1 (78, 195, 390, 781 units). Fixed hyperparameters, set on seed 201's SPLIT
+     A before any B reading and then frozen for every seed (logged in FIXED); lam from the grid {4, 6, 10} [K2-f].
+     Fixture check of the pick [K2-f]: the planted-set sweep (code/tests/mask_sweep.py: 10 cases, both floor
+     conventions, 20 seeds never used to choose, 32-51) is rerun at the fixed steps, init, lam and restarts before
+     any B reading, and its table logged beside them. The pick is frozen only if that sweep finds every planted set;
+     otherwise the grid value nearest the pick that does is used, logged as a deviation. [K2-h] With 2 restarts lam
+     6 found 400 of 400 on seeds 160-179; single runs missed 6 of 2,080 (seeds 12-31, 60-139 and 160-179), 3 of
+     them MX-KF on the default floors (3 of 140 runs); lam 4 and 10: K2-h's grid. At those rates, with the 2 runs
+     independent, the 400-fit check misses by chance with probability about 1% (about 0.6 with one run per fit).
+  M2 Random sets: 5 draws per budget, matched per layer to SF's layer counts (seeded 7611 + draw).
+  M3 Single units: zero ablation of every N1 unit (and mean ablation, the unit's mean activation over K-DEV) on
+     SPLIT A, giving (dF, dS) per unit; every N2 head and head pair; every N3 sublayer. If the seed-201 run projects
+     the single-unit map over 0.4 GPU-h per seed, it is replaced by gradient x activation attribution with exact
+     ablation of the top 200 units only (a registered fallback, not a deviation).
+  M4 Causal tracing (descriptive; it chooses no units): on BIO prompts, corrupt the three name tokens by swapping in
+     another FB entity's name (symmetric replacement), restore one (layer, position) residual at a time, measure the
+     logit difference of the true value; on U items, swap the latest statement's value and trace the answer.
+  M5 Positive control: the 2 heads with the highest induction score (SCREENS C6's IND file, copy-2 minus copy-1
+     NLL) ablated together must lower S by 10 points or more on every seed; if not, the head-level readings carry
+     "copy circuit not found by the head probe".
+
+READINGS (per seed first, then the model reading = the label held by 2 of 3 seeds)
+  b* = the smallest budget whose SF set lowers F on SPLIT B to at most half of the unablated F.
+  SEPARABLE    b* exists and, at b*, S on SPLIT B drops by at most 3 points (SPEC 10's delta), and the SF set's F
+               drop exceeds the largest F drop of the 5 random sets at b* [K2-b].
+  DIFFUSE      b* exists with S within 3 points, but a random set of that size drops F as much: facts are fragile
+               to any removal of that size, not held by particular units [K2-b].
+  ENTANGLED    no budget up to 20% reaches half of F, or at b* S drops by 10 points or more.
+  PARTIAL      anything else.
+  Scope [K2-c]: every label is about the MLP-neuron basis. Under superposition a fact can live in directions spread
+  over many neurons that also carry skill; ENTANGLED says neuron sets do not separate facts from skill at 5M, not
+  that no parameter-level or direction-level separation exists, and SEPARABLE says a neuron set exists, not that
+  facts are stored only there. Reports and handoffs use these words.
+  Beside the label, at b*: KF's skill cost (the unconstrained overlap), the random sets' F and S drops (the floor a
+  targeted set must beat), Jaccard(SF set, SS set) against the random expectation b / (2 - b), and the per-layer
+  counts of SF and SS units.
+  Heads: a head is FACT-ONLY if its ablation lowers F by 5 points or more and S by under 1, SKILL-ONLY the mirror,
+  SHARED if both drop by 5 or more; CONFLICT arbitration: the change in context-follow rate per head ablation on
+  SPLIT B's CONFLICT items (the memory-head vs context-head reading of 2402.18154, exploratory at 5M).
+  Stability: split-half Jaccard of the SF top-5% set fitted on A vs fitted on B (seed 201 only, one extra fit);
+  across seeds, the correlation of the per-layer fact-effect profiles (units differ between seeds, layers do not).
+  FH vs F0: the per-layer profile of SS units in FH against F0 (do facts push skill units into other layers?).
+  Everything per slot frame as well (BIO order, matched vs crossed skill frames): head roles are template-sensitive
+  (arch.md F10, the Dotsinski et al. replication).
+  What each means: SEPARABLE says fact storage and in-context skill use different MLP units at 5M, so K3's surgery
+  has a target; ENTANGLED says they share units, so K3's P-F arm is expected to cost skill and K3-R (routing at
+  training time) or K5 (not storing at all) are the better routes; DIFFUSE says K3's P-F and P-R should behave
+  alike; PARTIAL is reported with the numbers.
+
+HANDOFF TO K3 (per seed, written to results.json before K3 starts)
+  P-F set = SF at b* (or, if ENTANGLED with no b*, the top 390 units, 10% of N1, by SF gate score); P-S set = SS at
+  the same count; P-R = random non-P-F units matched to P-F's count in every (layer, skill-effect quintile) cell
+  [K2-d], the quintiles of M3's single-unit dS on SPLIT A pooled over layers (M3's fallback attribution if M3 fell
+  back); an empty cell borrows from the nearest quintile of the same layer, logged. All three have the count n_p.
+
+KNOWN RISKS
+  - Every unit at 5M is polysemantic; "fact units" also carry format and language (localize.md 3.6).
+  - Masks optimize on SPLIT A and can find adversarial, non-local sets; SPLIT B and the random sets are the guard.
+  - Zero ablation is off-distribution; mean ablation beside it; a small drop does not show a unit is unused (Hydra).
+  - Facts may sit partly in heads and in the embedding rows of FB name tokens (Physics 3.3; the embedding is 31% of
+    the model). N1 masks can then never reach half of F: that reads ENTANGLED or PARTIAL, and the head and sublayer
+    maps say where the rest is. Embedding rows are not masked in K2 (reported as a limit).
+  - Likelihood and generation disagree (localize.md 2.2); S is LIK, and GEN is reported beside it.
+  - The fixed mask hyperparameters are set on seed 201's SPLIT A, so seed 201's A-fit is slightly favoured.
+  - A unit whose removal matters only once its gate is nearly shut (a saturated unit, or one backed up by another)
+    gives its HardConcrete gate almost no gradient [K2-e]. Masks can find it late or not at all: the saturated
+    skill unit S1 turned late (R-2's defaults missed it in 4 of 120 fits on seeds 6-11; K2-f's reached only
+    P(closed) 0.438 at 2,000 steps on one of 40 fresh seeds and 0.032 at 1,500, K2-g), and the saturated fact unit
+    F1 can be pushed open before its gate explores closing and stay there (REVIEW 4b M-1: MX-KF on fit's default
+    floors, 2 of 100 fits, 4,000 steps or lam 10 did not free it) [K2-h]. The 2 restarts keep the run whose set
+    scores better with its units ablated (400 of 400 fixture fits on fresh seeds, K2-h), but a unit neither run
+    closes is missed; M3's single-unit zero ablation does not miss it, so a unit M3 ranks in the top b that the SF
+    or KF set leaves out is listed, the stated backstop for any mask miss.
+
+DEPENDENCIES
+  K1's FH and F0 final checkpoints (all 3 seeds); SPEC 14's k2_ablate.py with tests (fixtures: a model with a planted
+  fact-only unit set is recovered by SF at the planted budget, built as code/tests/test_masks.py [K2-e]; a random-
+  weight model reads F and S at the floor; mutants: masks fitted on B, SPLIT B items leaking into A, random sets not
+  layer-matched).
+
+GPU HOURS (SPEC 13): 1.20 (masks 4 objectives x 4 budgets x 3 seeds, single-unit maps, heads, tracing, F0 maps);
+  the seed-201 run is timed first and the estimate replaced before seeds 202-203.
+
+CHANGES AFTER CRITIQUE (2026-09-27, adversarial critic; no model loaded, nothing run for these edits)
+  K2-a F was greedy exact match over 8,192 tokens while S was argmax over about 6-10 candidates. A small logit
+     perturbation breaks greedy recall long before it breaks a small-set argmax, so "half of F gone, S within 3
+     points" was easier to reach for facts by the metric alone: a bias toward SEPARABLE. F now uses a candidate
+     set of the skill size, masks use range-normalized CE for both sides, and greedy BIO_acc is reported only.
+  K2-b SEPARABLE did not have to beat the random sets. If any 5-10% of units halves fact recall (facts fragile and
+     spread), a selective mask also does, and the old rule read SEPARABLE. Now it must beat all 5 random sets;
+     otherwise DIFFUSE.
+  K2-c Neuron-basis scope stated (superposition): labels speak of MLP-neuron sets only.
+  K2-d P-R handoff stratified by skill effect (reason: K3 notes, K3-a).
+  Suggested, not applied (should): a per-parameter attribution (squared-gradient importance for fact loss vs skill
+  loss on SPLIT A, top-k overlap on SPLIT B) answers Max's "which parameters" in the weight basis at a few backward
+  passes per seed; SPLIT B skill items 512 -> 1,536 so the 3-point SEPARABLE margin sits above paired noise; head
+  labels on a paired test over SPLIT B items rather than the fixed 1-point and 5-point cuts.
+
+CHANGES BEFORE FIRST RUN (2026-09-27; no K run has started, so this is a pre-registration change. Mac CPU only:
+  tiny CPU models, no language model loaded, nothing trained, queued or committed)
+  K2-e Mask-fit defaults (independent code review, code/notes.txt REVIEW R-2). The build's masks.fit defaults (300
+     steps, lam 1, gate init 1.0) found a single planted unit, but on the reviewer's two-fact plant SF at budget 2
+     found both units on 1 of 3 seeds and KF on 2 of 3, and the planted-SET fixture DEPENDENCIES asks for was not
+     built. Fixture (code/tests/plantfix.py): a scrambled 3-layer harness model (d 64, 96 MLP units) with one planted
+     unit per fact (F1-F4), per skill (S1, S2) and one shared unit X (fact F5 and skill S3), each silent on every
+     other prompt at the unablated point. F1, F3 and S1 are saturated (CE 0.09 at gate 1, 0.11-0.12 at gate 0.2,
+     4.3-6.8 at 0 for F1 and F3; S1 0.44, 0.57, 7.6), F2 and S2 graded (CE 0.5-0.8 at gate 1, 1.2-1.7 at 0.5), F4
+     and X between. Ten cases, each at the planted budget: SF and KF on sets of 1, 2 and 4 fact units (one per
+     fact), and on the mixed plant SF (the 4 fact units, X left out), KF (5, with X), SS (S1, S2), KS (3, with X).
+     Two floor conventions: K2's (fact floor = CE with the planted fact units ablated, F0's role; skill floor =
+     chance) and fit's default (CE0 + 1). Found = the hardened set equals the planted set; a false positive = any
+     other unit whose P(closed) at the end exceeds 0.5.
+     Evidence (code/tests/mask_sweep.py; a set after S updates is read inside a longer run, identical to an S-step
+     fit: checked on 2 cases, and the 120 final 1,000-step fits reproduced every in-run set and P(closed) exactly):
+       every plant graded, seeds 0-2: every setting found every set (K2's floors: init 1-3 x lam 1-10 x 300-1,000
+         steps; default floors: init 1, 3 x lam 1, 10), so the failure needs saturation, which the fixture keeps;
+       build values, seeds 0-2: missed on 7 of 10 cases with K2's floors, 8 of 10 with the default floors. Every
+         miss left out a saturated unit except MX-KS seed 0 (X left out); MX-SF seed 0 on the default floors also
+         took the shared X, the selectivity SEPARABLE rests on;
+       init 3.0 (gates start clamped open, where a saturated unit gets no gradient): missed on 8 to 10 of 10 cases
+         at 300 steps and 4 to 8 of 10 at 1,000;
+       init 1.0: K2's floors found every set from 1,000 steps (lam 1, 3, 10); the default floors still missed a
+         case at every length tried up to 2,000 steps (lam 1: KF2 seed 1; lam 3: MX-KF);
+       init 0.0, lam 1: 300 steps found every set with K2's floors (seeds 0-5) but left planted gates as low as
+         P(closed) 0.03, and missed on 7 of 10 cases with the default floors (seeds 0-2); 500 steps missed 3 cases;
+         1,000, 1,500 and 2,000 steps found every set on both conventions (seeds 0-2); lam 3 did from 500 steps.
+     Change: defaults 1,000 steps, lam 1, gate init 0.0 (P(closed) 0.17 at step 0); lr 0.05 and eps 1e-6 as built;
+     fit also returns p_drop, the final P(closed) per unit. Confirmation at the defaults, seeds 3-5 not used to
+     choose (python tests/mask_sweep.py OUT --seeds 0 1 2 3 4 5 --floors k2 default): 120 of 120 fits found the
+     planted set; no other unit above P(closed) 0.351 (0.186 with K2's floors); every planted unit at 0.459 or more.
+     Every plant graded, seeds 0-2: 60 of 60, others at most 0.344. The reviewer's plant (review scratch plant.py,
+     sum of two fact CEs, default floors): SF and KF at budget 2 found both units on 3 of 3 seeds each, planted
+     P(closed) 0.95-0.99, every other unit 0.07 or less.
+     Limit found on the way: a unit that is its whole block's output (the build test's single plant, CE flat until
+     the gate is under 0.01) gives its gate almost no gradient. The build defaults picked its two units on P(closed)
+     margins of 0.00-0.03; at the new ones SF finds the fact unit on seeds 0 and 1 (0.56, 0.45) and SS misses the
+     skill unit on seed 1. It is in KNOWN RISKS, with M3's single-unit scan as the check; test_ablate no longer
+     asserts masks on that plant (tests/test_masks.py tests them on the fixture above).
+     Scale: lam weighs the budget overshoot against g, whose share per unit falls as b grows (the fixture's b is 1-5,
+     K2's 78-781), so the fixture fixes steps and init, and lam for K2 is still set on seed 201's SPLIT A (M1). Cost:
+     1,000 steps is 2 to 5 times the 200-500 the 1.20 GPU-h estimate assumed for masks; the seed-201 run is timed
+     first and the estimate replaced, as GPU HOURS registers.
+     Tests (code/tests/test_masks.py): the fixture's planted units dominate and are silent elsewhere, the saturated
+     ones stay near flat down to gate 0.2; at the defaults KF2 seed 1 (default floors) and MX-SF seed 0 (K2's) find
+     the planted set with no other unit above P(closed) 0.5 and every planted unit at 0.3 or more (the 120-fit sweep
+     is too slow for the suite). 9 mutants (code/tests/mutation_k.py), all killed.
+  K2-f Mask fit on a saturated skill unit (REVIEW 2 R-5, code/notes.txt K3 ROUND 1; Mac CPU, tiny fixture model).
+     At K2-e's defaults the sweep on seeds 6-11 (not used by K2-e) found 116 of 120 planted sets; all 4 misses left
+     out the saturated skill unit S1 on skill-side cases (MX-SS seed 6 on both floor conventions, MX-KS seed 6 and
+     MX-SS seed 11 on the default floors; S1's P(closed) 0.001-0.034) and took the unplanted unit (0, 11) at
+     0.27-0.33, which the 0.5 false-positive rule does not flag. Probe here (MX-SS and MX-KS, seeds 6 and 11, both
+     floors, 1,000 / 2,000 / 3,000 steps): lam 1 per unit found 4, 5 and 6 of 8; lam 3 per unit 7, 8, 8.
+     Change: the penalty is per budget unit, lam x relu(E[dropped] - b) / b (masks.fit per_budget), so lam prices one
+     unit over budget as a share of the budget, the same at the fixture's b (1-5) and K2's (78-781); defaults 2,000
+     steps, lam 6, init 0.0, lr 0.05, eps 1e-6.
+     Choosing (seeds 0-11, the ones R-2 and REVIEW 2 used): per-budget lam 4, 6 and 10 on the probe found 8 of 8 from
+     2,000 steps (lam 10 from 1,000); then all 10 cases on both floors: lam 6 found 240 of 240 at 1,500 and 2,000
+     steps (239 at 1,000: MX-SS on the default floors), at 2,000 no other unit's P(closed) above 0.2805 and every
+     planted unit's 0.566 or more [K2-g]; lam 10 found every set it ran at 1,500 and 2,000 steps (1,000: missed
+     MX-SF once on K2's floors, seed 5, its lowest planted gate at 0.040; the file holds 8 of the 24 lam-10 MX-KS
+     fits per step count, so 16 were cut by the sweep's time limit) [K2-g].
+     Verification (seeds 12-31, never used to choose; the defaults; 10 cases x 20 seeds x 2 floor conventions, 400
+     fits; python tests/mask_sweep.py OUT --seeds 12 ... 31 --floors k2 default --steps 1500 2000): 400 of 400 found
+     the planted set at 2,000 steps; no other unit's P(closed) above 0.364 (0.181 on K2's floors); every planted
+     unit's 0.577 or more. At 1,500 steps 399 of 400 (MX-SS seed 17 on K2's floors took (0, 11), S1 at 0.077), so
+     2,000 is the smallest length checked that missed nothing. Miss rate at the defaults: 0 of 400 (95% upper bound
+     0.75% per fit); M3's single-unit scan stays the stated backstop for a missed saturated unit (KNOWN RISKS).
+     Init: at these values init 1.0 also found 120 of 120 on seeds 0-5 at 2,000 steps (4 misses at 1,000), so init
+     0.0 is K2-e's choice kept, not re-chosen; init 3.0 misses MX-SS seed 6 (mutant mask_init_three).
+     Checked against the prereg: lam is still set on seed 201's SPLIT A, now from {4, 6, 10}; the pick is frozen
+     only if the planted-set sweep at the fixed steps, init and lam finds every set on seeds 32-51 (M1). Because the
+     penalty is per budget unit, the fixture and SPLIT A read lam on one scale.
+     Cost: 2,000 steps is twice K2-e's 1,000 per fit (masks were already 2-5x the 200-500 steps the 1.20 GPU-h
+     assumed); the seed-201 run is timed first and the estimate replaced, as registered.
+     Tests (code/tests/test_masks.py): RUN adds MX-SS seed 6 on K2's floors (missed at K2-e's defaults, 2,000 steps
+     here). Mutants: mask_defaults_r2 (K2-e's defaults: killed there, the set {(0, 9), (0, 11)}); mask_defaults_build,
+     mask_steps_300 retargeted to the new signature, killed. See code/notes.txt for mask_init_one.
+  K2-g Mask notes corrected (K3 round 2, 2026-09-27; REVIEW 3b D-2, D-3, D-5, M-1; no fit or default changed; Mac CPU,
+     tiny fixture model). M1 said the per-budget penalty "prices an extra unit the same at every b", which
+     masks.penalty contradicts (one unit over budget costs lam / b); M1 now says lam prices an overshoot as a share of
+     the budget. K2-f against k3/mask/choose.jsonl: every planted unit's P(closed) 0.566 or more (was "0.57"), no
+     other unit's above 0.2805 (0.28 before; 0.281 here until K2-h, D-1); lam 10's miss at 1,000 steps was MX-SF seed
+     5, its lowest planted gate at 0.040 (the 0.018 is a found SF1 fit, seed 1); the file holds 8 of the 24 lam-10
+     MX-KS fits per step count, so 16 were cut (was "28"). Fresh seeds 60-79 (REVIEW 3b; the defaults, both floor
+     conventions, 400 fits): 400 of 400 at 2,000 steps, other units at most 0.369 (default floors) and 0.187 (K2's),
+     planted units at least 0.438 (default floors: S1 on MX-SS seed 74) and 0.600 (K2's); 399 of 400 at 1,500 (MX-SS
+     seed 74 on the default floors hardened {(0, 9), (0, 11)}, S1 at 0.032; MX-SF seed 65 had another unit at 0.501).
+     With seeds 12-31: 800 of 800 at 2,000 steps (95% upper bound on the miss rate 0.37% per fit); the planted minimum
+     across the 40 fresh seeds is 0.44, not K2-f's 0.577 (seeds 12-31 only). The saturated unit still turns late, so
+     M3's single-unit scan stays the stated backstop for a missed unit (KNOWN RISKS), and the SPLIT A pick is still
+     frozen only if the sweep on seeds 32-51 finds every set (M1). tests/mask_sweep.py check_equivalence had compared
+     fit's defaults with init 1.0 and lam 1 per unit since R-2 (same set, E[dropped] off by 0.030); it now reads fit's
+     defaults (inspect.signature), and at them (MX-SF, K2's floors, 120 steps read inside a 200-step run) seeds 1 and
+     2 give the same set and E[dropped] within 6e-8, so the sweep's 1,500-step readings stand. Test
+     test_masks.test_sweep_reads_what_fit_returns, mutant sweep_equivalence_stale (the old call) killed.
+  K2-h Mask fit: a stuck saturated unit, and restarts (K3 round 3, 2026-09-27/28; REVIEW 4b M-1 and D-1; Mac CPU, tiny
+     fixture model; code/notes.txt K3 ROUND 3 has every number and command). REVIEW 4b found a failure KNOWN RISKS did
+     not describe: at K2-f's defaults MX-KF on fit's default floors left the saturated FACT unit F1 at P(closed) 0.001
+     and hardened the unplanted (0, 1) (0.334) on seed 98, and on seed 101 (F1 0.011), stuck rather than late: 4,000
+     steps left F1 at 0.000 and lam 10 at 0.006 (lam 4 and K2's floors found it). Over seeds 12-31, 60-79 and 80-99
+     that is 1 miss in 1,200 fits at 2,000 steps (K2-f's and K2-g's "0 of 800" are now 1 of 1,200), and 2 in 100 MX-KF
+     fits on the default floors, so M1's 400-fit freeze sweep would have missed at least once with probability about
+     1/3. Mechanism: the gate of a saturated unit sees no gain until it is nearly shut, while the budget penalty
+     pushes every gate open as long as E[dropped] (16 at init on the fixture) is over b, so it can be pushed open
+     before it ever explores closing. The stuck set's exact objective, with its units ablated, is lower than the
+     planted set's (KF: 3.827 against 4.949 on the default floors, 0.773 against 1.000 on K2's; (0, 1) alone 0.008),
+     so a run that finds the set wins on that objective.
+     Change: masks.fit keeps the better of 2 restarts (gate noise seeds s and s + 7919) by the exact objective with
+     the hardened set ablated (fit's "hard"; SPLIT A in K2), everything else as K2-f (2,000 steps, lam 6 per budget
+     unit, init 0.0, lr 0.05, eps 1e-6). Tried and dropped: a linear penalty warmup (lam from 0 over the first 500 or
+     1,000 steps) freed F1 on seeds 98 and 101 and raised planted margins on the hard skill cases, but with it MX-KF's
+     single runs stuck on 13 of 104 (seeds 0-11 and 140-159) against 2 of 200 without it (seeds 12-31 and 60-139).
+     Evidence (tests/mask_sweep.py, both floor conventions, 10 cases per seed; single runs are fit's restarts):
+       hard cases (the 12 misses or thin margins so far): 12 of 12, the first run stuck on MX-KF seeds 98 and 101
+         (default floors) and the second on MX-KF seed 7 (default floors), the other run kept each time;
+       fresh seeds 160-179, never used (400 fits): 400 of 400 sets found; single runs 796 of 800 (the default floors:
+         MX-KF seed 177 and MX-SS seeds 164, 167 and 173, the other run kept each time); planted units 0.541 or more
+         on K2's floors and 0.535 on the default ones, other units at most 0.188 and 0.375;
+       lam grid on fresh seeds 180-184 (the other SPLIT A candidates, 100 fits each): lam 4 100 of 100 (single runs
+         199 of 200), planted 0.580 or more, others 0.191 or less; lam 10 100 of 100 (199 of 200), 0.530 and 0.180.
+     Single-run misses at these values: 6 in 2,080 runs over seeds 12-31, 60-139 and 160-179 (MX-KF on the default
+     floors 3 of 140, every other case 3 of 1,940); with 2 restarts a fit misses only if both runs do. M3's
+     single-unit scan stays the backstop (F1's single-unit effect is large: 0.270 of the fact floor on K2's
+     normalization, (0, 1)'s 0.002), and a unit M3 ranks in the top b that the kept set leaves out is still listed.
+     Checked against the prereg: lam is still set on seed 201's SPLIT A from {4, 6, 10} and frozen only if the fixture
+     sweep on seeds 32-51 finds every set at the pick (M1), both floor conventions kept (K2 reads its own floors, but
+     the default ones found the stuck mode more often, so they keep the check strict); the restarts are part of the
+     fixed method, so the sweep runs with them. Cost: 2 restarts double M1's mask steps (4,000 per fit); the seed-201
+     run is timed first and the estimate replaced, as registered.
+     Tests (code/tests/test_masks.py): RUN adds MX-KF seed 98 on the default floors (its first run stuck, its second
+     kept); test_a_stuck_run_is_outscored_by_its_restart pins the stuck single run and the exact objective. Mutants:
+     mask_restarts_one, mask_restart_keeps_worst, mask_hard_unablated (killed; code/notes.txt).
+     D-1: masks.fit's docstring cited K2-f for seeds 60-79 (K2-g holds them); K2-g's "no other unit's above 0.281 (was
+     0.28)" is corrected back: choose.jsonl's maximum is 0.2805.
+  K2-i Mask fit, the restart pick's weights (K3 round 4, 2026-09-28; REVIEW 5b T-b; Mac CPU, tiny fixture model;
+     code/notes.txt K3 ROUND 4). No fit or default changed. REVIEW 5b showed the pick was watched only on KF (skill
+     weight 0): with the objective's weights dropped (g_fact + g_skill) MX-SF seed 300 on fit's default floors keeps
+     its first run's {F1, F3, F4, X} (X serves fact F5 and skill S3; SF 3.392 against the planted set's 4.015, 4.482
+     unweighted). SF and SS are K2's selective objectives, and at b 78-781 two restarts will seldom harden one set, so
+     the pick decides most reported sets. Tests: RUN adds MX-SF seed 300 on the default floors; test_the_restart_pick_
+     weighs_the_objective pins the two sets' SF and unweighted scores and _hard's linearity in the weights for KF, SF,
+     KS and SS. Mutant mask_hard_weights_dropped (killed, code/notes.txt).
+     Fresh seeds 400-411 (never used; tests/mask_sweep.py OUT --seeds 400 ... 411 --floors k2 default --procs 2, fit's
+     defaults; 240 fits, median 24 s per fit of 2 restarts): 240 of 240 planted sets found; single runs 479 of 480
+     (MX-KF seed 408 on the default floors missed in its second run, the first kept); planted units 0.589 or more on
+     K2's floors and 0.581 on the default ones, other units at most 0.183 and 0.275. On never-used seeds (160-179,
+     REVIEW 5b's 300-319, 400-411) fits with 2 restarts found 1,040 of 1,040 sets; single runs missed 7 of 2,080 (4 of
+     800, 2 of 800, 1 of 480). The documented miss rate is therefore the single-run one (about 1 in 300) squared for
+     independent restarts, and M3's single-unit scan stays the stated backstop (a unit M3 ranks in the top b that the
+     kept set leaves out is listed). The prereg is unchanged: lam is set on seed 201's SPLIT A from {4, 6, 10} and
+     frozen only if the fixture sweep on seeds 32-51 (both floor conventions, 2 restarts) finds every set at the pick
+     (M1); otherwise the grid value nearest the pick that does is used, logged as a deviation (M1's words).

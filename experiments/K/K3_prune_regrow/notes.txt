@@ -1,0 +1,126 @@
+K3: prune and regrow (Max's idea). Do fact units, reset and retrained on skill data, raise in-context skill?
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model. World, metrics, rule KR, seeds and hours:
+../SPEC.txt (SPEC n); starting models: ../K1_capacity/notes.txt; unit sets: ../K2_localize/notes.txt.
+
+PRE-REGISTRATION WRITTEN 2026-09-27 01:20 (before any K code, data, config or run exists; no model run for this
+entry. Nothing of K is queued or committed.)
+
+WHY
+  Max (2026-09-27): find the parameters that hold facts and overwrite them with ones that strengthen the skills.
+  Every prior found measures forgetting or recovery after removal, none a skill gain (localize.md 3.2 (b); arch.md
+  U3). What the literature predicts:
+  - Pruned concepts relearn fast when the retraining data contains them, and a same-count random prune hurt
+    DistilGPT2 more than the concept prune (Lo, Cohen, Barez, https://arxiv.org/abs/2401.01814). K3's continuation
+    holds no facts, so Lo predicts no fact regrowth, and the random arm is not a trivial floor.
+  - Removal mostly blocks access: fine-tuning on some facts recovers at least 88% of the rest at 8B (Deeb and Roger,
+    https://arxiv.org/abs/2410.08827), hence the relearning probe below.
+  - Unlearning costs small models more (Jang et al., ACL 2023, GPT-Neo 125M-2.7B, arXiv 2210.01504), and removal in
+    4 sequential chunks hurt far less than all at once; K3 prunes once (a staged prune is not an arm here).
+  - Resetting parts of a network can restore plasticity: embedding resets every 1000 steps (Chen et al.,
+    https://arxiv.org/abs/2307.01163) keep structural ICL where L2 does not (Anand et al.,
+    https://arxiv.org/abs/2406.00053), so part of any gain may be generic re-initialization: the P-R arm.
+  - With every fact line labelled, data filtering (never training on facts) was the most robust remover (gradient
+    routing, Cloud et al., https://arxiv.org/abs/2410.04332 v2), so K3 compares against the never-fact model, and
+    route-then-cut (K3-R) is compared against it too.
+
+QUESTIONS
+  Q1 From K1 FH, does resetting K2's fact-selective MLP units and continuing on skill data for 62.5M slots give a
+     higher S_ID than the same continuation without a reset?
+  Q2 Is a gain specific to fact units: does it beat resetting the same number of random units, or of skill units?
+  Q3 (reported) Does it reach the never-fact model at equal compute (K1 F0 plus the same continuation)? Do the facts
+     come back under a short refresh (hidden, not freed)?
+
+THE ONE MANIPULATION
+  Which MLP units are reset before the continuation: none (P-0), K2's fact-selective set (P-F), a random set matched
+  per layer and per skill-effect quintile (P-R, K2 HANDOFF [K3-a]) or K2's skill-selective set (P-S); one count n_p
+  per seed for all three reset arms (K2 HANDOFF).
+
+RESET AND REGROW (code/prune.py, on checkpoints; the same draws for a given seed and unit list)
+  For each chosen unit j of layer l: row j of W_gate and of W_up redrawn from the harness init (model.py
+  reset_parameters' std for that matrix, K3 generator seed 7700 + s); column j of W_down set to 0. At step 0 the
+  model's function equals zero ablation of those units, and the fresh input rows receive gradient through W_down (a
+  SwiGLU unit with both sides zero would stay dead). Nothing else in the checkpoint changes.
+
+CONTINUATION (identical for every arm, P-0 and F0-cont included)
+  C = 62.5M slots: 1,908 steps, schedule.full with warmup 76 and linear decay over the last 382 (E2's 62.5M length),
+  LR5 x g_K, weight decay unchanged, fresh optimizer state (NorMuon momentum and AdamW moments zero: the K1 final
+  checkpoints sit at the end of a decay, so every arm rewarms the same way). Data: SKILL 0.5 and LANG 0.5 (K1's
+  shares with FACT removed, renormalized), the same files and stream seed s + 1000 in every arm; no fact data.
+
+ARMS (seeds 201-203; each continues from that seed's K1 checkpoint)
+  P-0      FH final, no reset, continuation
+  P-F      FH final, reset K2's P-F set, continuation
+  P-R      FH final, reset the layer- and skill-effect-matched random set, continuation
+  P-S      FH final, reset K2's P-S set, continuation
+  F0-cont  F0 final, no reset, continuation (the never-fact model at equal compute)
+
+READINGS (KR, SPEC 10, on S_ID after continuation; contrasts C1-C4 below; SD_ref pooled over them, df 8; delta 3)
+  C1 P-F - P-0     C2 P-F - P-R     C3 P-F - P-S (reported)     C4 P-F - F0-cont (reported)
+  REGROW-WINS   C1 HIGHER and C2 HIGHER: resetting fact units and retraining on skill data gives more skill than
+                equal compute, beyond a generic reset effect. Max's idea works in this setting.
+  RESET-EFFECT  C1 HIGHER, C2 not HIGHER: resetting units helps (plasticity), not fact units in particular.
+  NO-GAIN       C1 EQUAL: the continuation reaches the same skill whether or not fact units were reset.
+  HARMFUL       C1 LOWER: the reset costs skill that the continuation does not buy back.
+  INCONCLUSIVE  anything else.
+  Step-0 guard [K3-a]: REGROW-WINS and RESET-EFFECT also need P-R's step-0 S_ID (Extra 1) within 3 points of
+  P-F's, averaged over seeds. Otherwise C2 is labelled STEP0-CONFOUND and only C1 is read: the random reset cost
+  skill that SF's selection spared, so C2 would measure that damage, not a fact-specific gain.
+  C4: EQUAL or HIGHER reads "never-fact skill reached"; LOWER reads "a gap to the never-fact model remains".
+  Context for the reading: if K1 read NO-CROWD-OUT, FH and F0 start level, so a REGROW-WINS here is a gain from
+  reset plus retraining, not a recovered capacity; if K2 read ENTANGLED, P-F is expected to cost skill at step 0.
+
+EXTRA REPORTS (descriptive)
+  1 Step 0 (right after the reset, before training): S_ID, BIO_acc and CE_C per arm (K2's prediction checked on the
+    full K-EVAL-ID).
+  2 After the continuation: fact recall and stored bits per arm (P-0 shows how fast facts fade under skill-only
+    data), every OOD column, per-family LIK, bpb (SPEC 10).
+  3 K-PROBE curves during the continuation (does P-F catch up early, late or never?).
+  4 Relearning probe (Deeb and Roger's test): after the continuation, each FH-descended arm and F0-cont trains on
+    bio docs of a seeded half R1 of FB_high, 10 exposures per entity (31,000 x 10 x 16 = 5.0M tokens, about 150
+    steps; constant LR 0.1 x LR5 x g_K, fresh optimizer), then BIO_acc on the other half R2, never refreshed. The
+    R2 gain in P-F is set against F0-cont's (the floor: F0 never stored R2) and P-0's: a P-F gain near P-0's says
+    the facts were hidden, not freed. Reported as numbers; R2 accuracy at zero is not taken as removal.
+  5 Weight movement: the norm of each reset unit's rows at the end, P-F against P-R (did the freed units get used?).
+
+K3-R (conditional, SPEC 13 order: route-then-cut, the training-time version of Max's idea)
+  From scratch with the FH config plus train.grad_route: 25% of each layer's MLP units (the last 122 of 488) are a
+  reserved block. Tokens whose target comes from a FACT-source item (bio docs; fact QA answers) send MLP gradient
+  only through the reserved block, all other tokens only through the rest (per-token stop-gradient masks, gradient
+  routing's mechanism; MemSinks, https://arxiv.org/abs/2507.09937, used 30% sink units). Attention and embeddings
+  train on everything. The flag draws nothing from the RNG, so init equals FH's. After K1's schedule: reset the
+  reserved block as above and run the same continuation. Arms: R-cut (seeds 201-203). Read against F0-cont and P-F
+  with KR (delta 3): R-cut EQUAL or HIGHER than F0-cont reads ROUTING-MATCHES-NEVER-FACT. The retain cost scales
+  with the routed share (Cloud et al.), so R-cut's pre-cut S_ID against FH's is reported.
+
+NOT IN K3, WITH REASON
+  Staged prunes (Jang's 4 chunks), shrink-and-perturb of the whole model (Ash and Adams), magnitude pruning (Jin et
+  al.'s baseline) and periodic resets during training: each is one more arm set; the cap (SPEC 13) has no room.
+  Head resets: K2 may name fact heads, but a head reset changes a whole attention slice; K3 stays on MLP units.
+
+KNOWN RISKS
+  - K2's sets carry format and language too; P-F may cost more than facts at step 0 (Extra 1 shows it).
+  - 62.5M of continuation may be too short or too long to show a difference; the K-PROBE curves say which.
+  - The continuation's LANG share keeps bpb comparable across arms but halves the skill dose against K1's mix.
+  - Rewarm: fresh optimizer state on a decayed checkpoint adds a loss bump shared by every arm (P-0 included).
+  - n_p comes from K2's b*: if b* is large (20%), P-R resets a fifth of the MLP and a RESET-EFFECT is likely.
+  - df 8 for SD_ref comes from K3's own residuals; three seeds limit what UNRESOLVED can rule out.
+
+DEPENDENCIES
+  K1 FH and F0 final checkpoints (seeds 201-203); K2's HANDOFF sets in K2 results.json; g_K (K0); SPEC 14's
+  prune.py (tests: a reset unit's output is exactly zero at step 0; untouched parameters bitwise equal; the same seed
+  gives the same draws; mutant: W_down left non-zero) and the weights-only start with fresh optimizer state.
+
+GPU HOURS (SPEC 13): 15 continuations x 0.10 (62.5M plus scoring) + relearning probes 0.15 = 1.65; K3-R 1.30 if
+  reached under the cap (3 x (0.31 x 1.05 from scratch + 0.10 continuation), speed factor assumed).
+
+CHANGES AFTER CRITIQUE (2026-09-27, adversarial critic; no model loaded, nothing run for these edits)
+  Fairness checked: P-0, P-F, P-R, P-S and F0-cont get the same continuation (62.5M slots, schedule, LR, fresh
+  optimizer, data files, stream seed s + 1000); P-R and P-S match P-F's count and layers. One flaw remained:
+  K3-a P-F is chosen by SF, which penalizes skill loss, so it avoids skill-carrying units; a random set matched only
+     by layer does not. P-R then starts lower on skill, and C2 (P-F - P-R) could read HIGHER from that step-0
+     damage alone, making REGROW-WINS look fact-specific when it is not. P-R now also matches P-F's distribution
+     of single-unit skill effect (K2 HANDOFF), and a step-0 guard labels C2 STEP0-CONFOUND when the arms still
+     start more than 3 points apart. No extra runs.
+  Suggested, not applied (should): draw fresh skill items for the continuation (a new draw seed) so it does not
+  re-read K1's training items, which a model could partly answer from memory; if n_p is 78 (b* at 2%), report
+  the reset as a small intervention whose NO-GAIN says little, since 2% of MLP units may be too few to move S_ID.
