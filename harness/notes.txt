@@ -628,15 +628,19 @@ permutation test over both invocations (7 distinct eager curves, 3 per candidate
   default+ce:det 0.35 / 0.35  0.19 / 0.18  0.20 / 0.04  0.55 / 0.16
   default+ce     0.32 / 0.28  0.13 / 0.11  0.16 / 0.06  0.59 / 0.20
   floors (mean|d|, last-50): 5M a 0.0098, 0.0323; 5M b 0.0181, 0.0652; 20M a 0.0403, 0.0139; 20M b 0.0148,
-  0.0036. All four invocations: pass. eager:det and default:det bitwise equal within and across invocations;
-  eager+ce:det and default+ce:det bitwise equal across invocations.
+  0.0036. All four invocations: pass. Each :det arm is bitwise equal to its own repeats, within and across
+  invocations (eager:det and default:det 4 runs each per size, eager+ce:det and default+ce:det 2 each); the
+  :det arms differ from one another (eager:det != default:det), as expected when the kernels change.
   pooled permutation p (mean|d| / last-50): 5M default 0.475 / 0.458, eager+ce 0.783 / 0.742, default+ce
-  0.658 / 0.642; 20M default 0.358 / 0.717, eager+ce 0.533 / 0.583, default+ce 0.367 / 0.742. No arm sits
-  further from eager than eager sits from itself (every p >= 0.36). PASS for all three candidates at both sizes.
+  0.658 / 0.642; 20M default 0.358 / 0.717, eager+ce 0.533 / 0.583, default+ce 0.367 / 0.742. No arm is
+  detectably further from eager than eager is from itself (every p >= 0.36; the smallest possible p with 120
+  relabelings is 1/120). This is absence of evidence at 3 candidate curves, not a proof of equality: e.g. 20M
+  default mean|d| compiled-eager median 0.0242 vs eager-eager 0.0208. The gate is the 2x-floor rule above.
+  PASS for all three candidates at both sizes.
   Pooled logs: PC p5m_pool.log; the 20M pool was run on the Mac from the two JSONs (same code).
-  Real-trainer tok/s (median per step, one run each, sequential, NOT an A/B): 5M eager 283 to 286k, default
-  588 to 589k, eager+ce 328 to 330k, default+ce 582 to 611k; 20M eager 101k, default 211k, eager+ce 107k,
-  default+ce 216 to 218k.
+  Real-trainer tok/s (median per step; range over the non-det runs of both invocations: eager 6 runs, every
+  other arm 2; sequential, NOT an A/B): 5M eager 279 to 287k, default 588 to 589k, eager+ce 328 to 330k,
+  default+ce 582 to 611k; 20M eager 101 to 102k, default 211k, eager+ce 107k, default+ce 216 to 218k.
 A/B, same batch (pc/bench_micro.py, --docs-per-row 1.0, accum 1, 20 timed steps + 5 warmup, arms eager (the
 defaults), default (+compile), eager+ce (+chunked, --ce-chunk 2048), default+ce (+both); 5 repeats in one
 process, the arm order reversed on odd repeats (ABBA), medians over fit-ok rows; paired = per-repeat ratio to
@@ -653,8 +657,8 @@ and 10M again on a quiet machine; the 5M and 10M rows below are these).
   30M causal  B8      68,560     129,805  +89.3% (+89.3..+89.5)    70,727   +3.2% (+3.0..+3.2)   131,325  +91.5% (+91.0..+91.7)  9.53/5.46/7.63/5.01
   30M docmask B8      69,511     132,588  +90.7% (+90.3..+91.3)    71,704   +3.2% (+3.0..+3.3)   135,406  +94.8% (+94.6..+95.1)  9.90/5.71/7.65/5.02
   Every cell mem_fit ok, n 5 per arm. Loads: h5 (20M, 30M) 1.00 at start, 1.76 at end, per-arm spread 0.2 to
-  0.7 percent. h10 (the 5M and 10M rows) 1.05 at start, 1.02 at its end, spread up to 3.6 percent (the
-  compiled arms vary more at 5M and 10M). The first 5M/10M run (h4: 1.02 at start, 5.6 after 5M, 13.6 at the
+  0.7 percent. h10 (the 5M and 10M rows) 1.05 at start, 1.02 when the A/B part ended (2.38 at the hold's
+  end, after the suite), spread up to 3.6 percent (the compiled arms vary more at 5M and 10M). The first 5M/10M run (h4: 1.02 at start, 5.6 after 5M, 13.6 at the
   end) gave +compile +121.0 / +117.7 percent (5M) and +93.2 / +91.9 (10M), within 5 points of these.
   +both vs +compile, paired: 5M causal +2.2% (+1.9..+4.3); 5M docmask +5.1% (+3.8..+5.1); 10M causal +3.2%
   (+1.7..+4.2); 10M docmask +2.7% (-0.8..+3.7); 20M causal +1.8% (+1.5..+2.3); 20M docmask +2.7% (+2.4..+2.9);
@@ -693,16 +697,20 @@ row). Loads 1.0 to 1.9 (h8, h9).
   +0.1% (-0.1..+0.3); 30M docmask -1.0% (-1.1..-1.0).
   Chunked CE alone at its larger micro batch is SLOWER than eager with accumulation at 5M and 10M (its step
   time grows 2.2 to 2.3x for 2x rows in the probe: 5M B16 0.112 s, B32 0.263 s; 10M B8 0.091, B16 0.202;
-  the compiled arms grow 1.9 to 2.0x). Not investigated further.
+  the compiled arms, same doublings, 1.85 to 2.14x). Those are 2-step probe rows (probe_fit says its timings
+  are rough); the timed rows agree at 5M, both accum 1: A/B B16 vs equal-rows B32 step time, eager+ce 2.29
+  to 2.34x, default 1.89 to 1.95x. Not investigated further.
 First-step (compile) time, bench_micro first_step_s, one warmup step (coldwarm_{cold,warm}.jsonl): cold = a
 fresh inductor + Triton cache dir, warm = a new process on that dir.
+  (eager column: the warm run's value; the cold run gave 0.64, 0.21, 0.59, 0.23; eager compiles nothing)
   cell            eager  +compile cold/warm  +both cold/warm  +chunked cold/warm
    5M causal  B16   0.59   17.74 / 1.37        20.64 / 5.22     0.89 / 0.17
    5M docmask B16   0.17   16.06 / 1.21        17.88 / 4.81     0.17 / 0.16
   20M causal  B8    0.60   20.34 / 1.95        21.08 / 6.77     0.25 / 0.24
   20M docmask B8    0.24   21.62 / 1.90        22.68 / 7.00     0.25 / 0.24
   (+chunked ran after the compiled arms in the same cold process, so its "cold" is not fully cold.) Inside
-  one process after dynamo.reset (A/B repeats 1 to 4, median): +compile 0.9 to 2.1 s, +both 4.5 to 8.9 s.
+  one process after dynamo.reset (A/B repeats 1 to 4 of the table rows, per-cell medians): +compile 1.0 to
+  2.1 s, +both 4.6 to 8.9 s (single rows 0.9 to 2.2 s and 4.5 to 9.0 s).
   In train.main (parity runs): 5M default:det 43.7 s for 200 steps on a cold cache, 17.4 s warm.
 Hours (bench tok/s, full rows, so lower bounds; 1e9 tokens): at equal rows eager -> +compile: 5M 1.06 ->
 0.47 h, 10M 1.58 -> 0.77, 20M 2.86 -> 1.48, 30M 3.87 -> 1.97 (docmask). 25B tokens at 5M: 26.5 -> 11.8 h;
