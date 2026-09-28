@@ -78,8 +78,10 @@ train:
   # compile: false                       # false (eager, the reference) | default (the only validated mode):
   #                                      # torch.compile the training forward + loss (CUDA); checkpoints
   #                                      # unchanged, resume works either way (test_compile_train.py).
-  #                                      # Opt-in, not measured on the 2026-09-26 defaults (notes SPEED V3)
+  #                                      # Off unless set. On the 2026-09-26 defaults (5070): parity
+  #                                      # passed, +75.5 to +106.8% tok/s vs eager best (notes SPEED V3 PROVE)
   # compile_backend: inductor            # aot_eager: no code generation (the CPU tests)
   # compile_dynamic: null                # passed to torch.compile(dynamic=...)
   # ce_chunk_rows: 0                     # > 0: lm_head + loss this many rows at a time, no full logits
-  #                                      # (chunked_ce.py); 0 = the reference loss path. Opt-in, unmeasured
+  #                                      # (chunked_ce.py); 0 = the reference loss path. Opt-in, for
+  #                                      # memory: parity passed, speed mixed (notes SPEED V3 PROVE)

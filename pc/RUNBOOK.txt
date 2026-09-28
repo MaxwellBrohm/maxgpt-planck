@@ -131,8 +131,10 @@ STEP 8  Verify CUDA, then measure                                               
   quiet-machine numbers, and log uptime load at the start and end of each A/B.
   The pre-2026-09-26 reference step: --batched-optim off --doc-attn mask (config: optim.batched
   false, train.doc_attn mask). SPEED V3 (branch speed/v3): train.compile and train.ce_chunk_rows exist,
-  both OFF by default and not yet measured on these defaults (harness/notes.txt SPEED V3); bench
-  --arms eager,default --repeats 5 and --ce-chunk N measure them.
+  both OFF in train.py unless a config sets them, and measured on these defaults (harness/notes.txt
+  SPEED V3 PROVE: compile parity passed, +75.5 to +106.8 percent tok/s against eager at its best batch;
+  ce_chunk_rows parity passed, worth memory rather than speed). Bench --arms eager,default --repeats 5
+  and --ce-chunk N measure them.
   Tests on the PC GPU: harness/test_speed_combined.py, test_optim_batched_cuda.py,
   test_s3_docattn.py, test_docattn_curve.py (all run inside the normal harness suite when
   CUDA is present; the PC's full harness run, 450 tests, took 3.6 min). A lean copy for that

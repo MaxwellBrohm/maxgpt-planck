@@ -808,3 +808,7 @@ beyond the CPU unit tests). From the correctness review (r1) and the numbers rev
       said every listed mode had a parity run and an A/B), bench_micro.py, compile_parity.py, sample_tiny.
       Test: test_compile_train.py::test_train_refuses_the_unvalidated_compile_mode (refused before the start
       record; default still accepted). Mutants: s3_train_accepts_autotune, s3_train_refuses_default.
+  (4) Stale comments after PROVE (r1 finding 4): harness/configs/sample_tiny/config.yaml (compile "not measured
+      on the 2026-09-26 defaults", ce_chunk_rows "unmeasured") and pc/RUNBOOK.txt STEP 8 ("not yet measured on
+      these defaults") now give the measured status. r1 listed no others; the remaining SPEED V3 comments were
+      checked against PROVE and left as they are.
