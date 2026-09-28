@@ -1,63 +1,26 @@
-"""Test of queue_dev_baselines.sh + queue_status.py on the Mac with fakes (no model, no GPU; notes STEP 9 QUEUE).
-A shim flock (the Mac has none) logs every call, can refuse the first N gpu.lock calls with exit 75, and runs the
-command. Checks: plan order (model, render template then plain, seed, dev before owncf), one lock call per process,
-one status line per run with the right counts, seeds and renders reaching the runs, the own-cf twin, NOENGINE, a
-failing process skipping the rest of its render, lock-timeout retries, a restart adding nothing for finished runs and
-leaving them byte-identical, a half-finished seed running only its missing run, the STOP file, the DONE marker, and
-engines.json's per-model "python" (notes STEP 9c): a model with one runs under it (~ expanded), the others under
-Q_PY, and a model whose python is not executable gets NOPYTHON lines and no lock call.
+"""Test of queue_dev_baselines.sh + queue_status.py on the Mac with fakes (no model, no GPU; notes STEP 9 QUEUE, 9g).
+test_queue_sessions.py holds the fakes: a flock stand-in with real locks (the Mac has none; logs every call, can
+refuse the first N gpu.lock calls with exit 75) and a Q_PY wrapper that logs every dev_batch.py process (lock held at
+its start and end, lock fds inherited) before running it. Checks: plan order (model, render template then plain,
+seed, dev before owncf), gpu.lock taken once for a queue whose processes fit one session, every process under it and
+without the queue's lock fds, one status line per run with the right counts and the session note, seeds and renders
+reaching the runs, the own-cf twin, NOENGINE, a failing process skipping the rest of its render, lock-timeout
+retries on the session lock, a restart adding nothing for finished runs and leaving them byte-identical, a
+half-finished seed running only its missing run, the STOP file, the DONE marker, and engines.json's per-model
+"python" (notes STEP 9c): a model with one runs under it (~ expanded), the others under Q_PY, and a model whose python
+is not executable gets NOPYTHON lines and no process; a queue killed while it waits for gpu.lock frees its queue
+lock at once and starts nothing; then the session cases (test_queue_sessions.sessions).
   python3 -B test_queue.py        (exit 0 = pass)"""
+import fcntl
 import hashlib
 import json
 import os
-import subprocess
+import signal
 import sys
 import tempfile
+import time
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-SHIM = """#!/bin/bash
-[ "$1" = -n ] && exit 0
-echo "$*" >> "$SHIM_LOG"
-n=$(wc -l < "$SHIM_LOG")
-[ -n "$FLOCK_FAIL" ] && [ "$n" -le "$FLOCK_FAIL" ] && exit 75
-shift 5; exec "$@"
-"""
-fails = []
-
-
-def check(cond, what):
-    if not cond:
-        fails.append(what)
-
-
-def queue(base, models, seeds="greedy 1", renders="template plain", **env):
-    e = dict(os.environ, Q_CODE=HERE, Q_ROOT=f"{base}/root", Q_LOGS=f"{base}/logs", Q_LOCKS=f"{base}/locks",
-             Q_PY=sys.executable, Q_ENGINES=f"{base}/engines.json", Q_MODELS=models, Q_SEEDS=seeds,
-             Q_RENDERS=renders, Q_LIMIT="12", PATH=f"{base}/shim:" + os.environ["PATH"], SHIM_LOG=f"{base}/flock.log")
-    e.update(env)
-    if os.path.exists(e["SHIM_LOG"]):
-        os.remove(e["SHIM_LOG"])
-    return subprocess.run(["bash", os.path.join(HERE, "queue_dev_baselines.sh")], env=e, timeout=300).returncode
-
-
-def setup(base):
-    os.makedirs(f"{base}/shim")
-    open(f"{base}/shim/flock", "w").write(SHIM)
-    os.chmod(f"{base}/shim/flock", 0o755)
-    json.dump({"models": {m: {"engine": "fake"} for m in ("IDEAL", "CAPPER", "SAMPLER", "NOPE")}},
-              open(f"{base}/engines.json", "w"))
-
-
-def status(base):
-    p = f"{base}/root/queue_status.txt"
-    return [dict([("key", " ".join(line.split()[:5]))] + [kv.split("=", 1) for kv in line.split()[5:]])
-            for line in open(p)] if os.path.exists(p) else []
-
-
-def lock_calls(base):
-    p = f"{base}/flock.log"
-    return [line.split() for line in open(p)] if os.path.exists(p) else []
-
+from test_queue_sessions import check, fails, held, lock_calls, procs, queue, sessions, setup, status, until
 
 def tree_hash(root):
     h = {}
@@ -114,9 +77,8 @@ def c_python():
     eng["models"]["SAMPLER"]["python"] = f"{b}/missing/bin/python"
     json.dump(eng, open(f"{b}/engines.json", "w"))
     check(queue(b, "IDEAL CAPPER SAMPLER", seeds="greedy", renders="template", HOME=b) == 0, "python: queue exit")
-    lc = lock_calls(b)
-    pys = {c[c.index("--responder") + 1]: c[c.index("dev_batch.py") - 2] for c in lc}
-    check(pys == {"fake:IDEAL": wrap, "fake:CAPPER": sys.executable}, f"python: per model {pys}")
+    pys = {x["args"][x["args"].index("--responder") + 1]: x["py"] for x in procs(b)}   # the Q_PY wrapper's log
+    check(pys == {"fake:CAPPER": f"{b}/shim/fakepy"}, f"python: per model {pys}")
     wl = open(f"{b}/wrap.log").read().splitlines() if os.path.exists(f"{b}/wrap.log") else []
     check(len(wl) == 1 and "--responder fake:IDEAL" in wl[0], f"python: wrapper ran {wl}")
     st = {x["key"]: x for x in status(b)}
@@ -127,8 +89,30 @@ def c_python():
           f"python: NOPYTHON {miss}")
 
 
+def c_killed_waiting():
+    """the queue SIGKILLed while it waits for gpu.lock (held here): its queue lock is free at once (the flock waiter
+    must not inherit fd 8, or it keeps the lock up to LOCK_WAIT), and no process starts once gpu.lock comes free."""
+    b = tempfile.mkdtemp(prefix="rc12_queue_kw_")
+    setup(b)
+    os.makedirs(f"{b}/locks")
+    g = os.open(f"{b}/locks/gpu.lock", os.O_RDONLY | os.O_CREAT, 0o666)
+    fcntl.flock(g, fcntl.LOCK_EX)
+    q = queue(b, "IDEAL", seeds="greedy", renders="template", wait=False)
+    until(lambda: lock_calls(b), 300)
+    time.sleep(0.5)
+    q.send_signal(signal.SIGKILL)
+    q.wait()
+    time.sleep(0.3)
+    qheld = held(f"{b}/locks/rc12_dev_queue.lock")
+    os.close(g)
+    time.sleep(1)
+    check(lock_calls(b) and not qheld and not procs(b, "start") and not held(f"{b}/locks/gpu.lock"),
+          f"killed waiting: queue lock held {qheld}, processes {len(procs(b, 'start'))}")
+
+
 def replies_of(d):
-    return [t["reply"] for line in open(f"{d}/transcripts.jsonl") for t in json.loads(line)["turns"]]
+    p = f"{d}/transcripts.jsonl"
+    return [t["reply"] for line in open(p) for t in json.loads(line)["turns"]] if os.path.exists(p) else None
 
 
 def main():
@@ -148,7 +132,7 @@ def main():
         m = x["key"].split()[0]
         if m in ("IDEAL", "CAPPER", "SAMPLER"):
             ok = x["exit"] == "0" and x["done"] == "1" and x["convs"] == "12" and x["replies"] == "144"
-            stops = {k: int(v) for k, v in (kv.split(":") for kv in x["stops"].split(","))}
+            stops = {k: int(v) for k, v in (kv.split(":") for kv in x["stops"].split(",") if ":" in kv)}
             check(ok and sum(stops.values()) == 144, f"fresh: counts {x}")
             check((m == "CAPPER") == ("cap" in stops), f"fresh: stop reasons {x['key']} {x['stops']}")
         elif m == "PARROT":
@@ -157,12 +141,15 @@ def main():
             s = x["key"].split()[2]
             check((x["exit"] != "0" and x["exit"] != "SKIP") if s == "greedy" else x["exit"] == "SKIP",
                   f"fresh: failure then skip {x}")
-    lc = lock_calls(base)
-    check(len(lc) == 14 and all(c[:4] == ["-E", "75", "-w", "7200"] and c[4] == f"{base}/locks/gpu.lock"
-                                and "dev_batch.py" in c for c in lc), f"fresh: lock calls {len(lc)}")
+    lc, pr = lock_calls(base), [x["args"] for x in procs(base) if x["held0"] and x["held1"] and not x["fds"]]
+    check(lc == [["-E", "75", "-w", "7200", "9"]] and len(pr) == 14, f"fresh: lock calls {lc}, processes {len(pr)}")
     check([c[c.index("--responder") + 1] + " " + c[c.index("--render") + 1] + " " + c[c.index("--seeds") + 1]
-           for c in lc][:5] == ["fake:IDEAL template greedy", "fake:IDEAL template 1", "fake:IDEAL plain greedy",
+           for c in pr][:5] == ["fake:IDEAL template greedy", "fake:IDEAL template 1", "fake:IDEAL plain greedy",
                                 "fake:IDEAL plain 1", "fake:CAPPER template greedy"], "fresh: process order")
+    notes = [x.get("note", "") for x in st if x["exit"] not in ("NOENGINE", "SKIP")]   # 14 processes, 2 lines each
+    sid = notes[0].split("_")[1] if notes and notes[0].count("_") == 3 else "?"
+    check(sid.endswith(".1") and notes == [f"session_{sid}_process_{k // 2 + 1}" for k in range(28)],
+          f"fresh: session notes {notes[:2]}")
     R = f"{base}/root"
     for m in ("IDEAL", "CAPPER", "SAMPLER"):
         for r in ("template", "plain"):
@@ -174,15 +161,17 @@ def main():
                     check(meta.get("render") == r and meta.get("seed") == (None if s == "greedy" else 1)
                           and meta.get("own_cf") == own and all((x["family"] == "OWN") == own or not own for x in rows)
                           and all(x["seed"] == meta.get("seed") and x["render"] == r for x in rows), f"fresh: {d}")
-    check(replies_of(f"{R}/SAMPLER/template/greedy") != replies_of(f"{R}/SAMPLER/template/1"), "fresh: seed reaches")
-    check(open(f"{base}/logs/rc12_dev_queue.DONE").readline().strip() == "complete 24 of 40 runs", "fresh: DONE")
+    a, b = replies_of(f"{R}/SAMPLER/template/greedy"), replies_of(f"{R}/SAMPLER/template/1")
+    check(a and b and a != b, "fresh: seed reaches")
+    done = f"{base}/logs/rc12_dev_queue.DONE"
+    check(os.path.exists(done) and open(done).readline().strip() == "complete 24 of 40 runs", "fresh: DONE")
     before = tree_hash(R)
     n0 = len(st)
     check(queue(base, models) == 0, "restart: queue exit")
     st2 = status(base)[n0:]
     check(all(x["key"].split()[0] in ("PARROT", "NOPE") for x in st2) and len(st2) == 16, f"restart: new lines "
           f"{[x['key'] for x in st2]}")
-    check(len(lock_calls(base)) == 2, f"restart: lock calls {len(lock_calls(base))}")
+    check(len(lock_calls(base)) == 1 and len(procs(base)) == 2, f"restart: lock calls {len(lock_calls(base))}")
     after = tree_hash(R)
     check({k: v for k, v in after.items() if "/NOPE/" not in k} == before, "restart: finished runs touched")
     for f in os.listdir(f"{R}/IDEAL/template/1_owncf"):
@@ -200,7 +189,7 @@ def main():
         queue(b, "IDEAL", renders="template", FLOCK_FAIL=str(fail_n))
         s4, lc4 = status(b), lock_calls(b)
         if ok:
-            check(len(lc4) == 4 and [x["exit"] for x in s4] == ["0"] * 4, f"lock retry: {len(lc4)} {s4}")
+            check(len(lc4) == 3 and [x["exit"] for x in s4] == ["0"] * 4 and len(procs(b)) == 2, f"lock retry: {s4}")
         else:
             check(len(lc4) == 3 and [x["exit"] for x in s4] == ["75", "75", "SKIP", "SKIP"], f"lock timeout: {s4}")
     b = tempfile.mkdtemp(prefix="rc12_queue_stop_")
@@ -215,14 +204,20 @@ def main():
     want = [f"{m.split('/')[-1]} {r} {s} - {run}" for m in PANEL for r in ("template", "plain")
             for s in ("greedy", "1", "2", "3") for run in ("dev", "owncf")]
     check([x["key"] for x in status(b)] == want and not lock_calls(b), "default plan: order or content")
-    check(open(f"{b}/logs/rc12_dev_queue.DONE").readline().strip() == "complete 0 of 208 runs", "default plan: DONE")
+    done = f"{b}/logs/rc12_dev_queue.DONE"
+    check(os.path.exists(done) and open(done).readline().strip() == "complete 0 of 208 runs", "default plan: DONE")
     status_unit()
     c_python()
-    for f in fails:
-        print("FAIL", f)
-    print("test_queue:", "PASS" if not fails else f"{len(fails)} FAILURES")
-    return 1 if fails else 0
+    c_killed_waiting()
+    sessions()
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    finished = False
+    try:
+        main()
+        finished = True
+    finally:   # the failures so far are printed even when a check crashes (then the traceback follows)
+        print("".join(f"FAIL {f}\n" for f in fails) + "test_queue: " + ("PASS" if finished and not fails else
+              f"{len(fails)} FAILURES" + ("" if finished else ", then a crash")))
+    sys.exit(1 if fails else 0)

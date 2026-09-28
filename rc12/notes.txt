@@ -1862,3 +1862,134 @@ OPEN (read, not run) verify_dev_runs --rerun R1 / R2 require equal replies betwe
   turns above; batched vs serial 161 / 240 identical in STEP 9c), so expect R1 / R2 FAIL lines for Doge under either
   chunker: read them as drift at the parity rule, not as a harness fault. parity_hf_vllm --engine hfb now chunks by
   the budget too (default), so a Doge parity rerun would not reproduce STEP 9c's numbers exactly.
+
+STEP 9g (2026-09-27 23:15 to 2026-09-28 00:45 EDT, branch rc12): gpu.lock SESSIONS for the dev-baseline queue, and a
+switch-over script (written and fake-tested, NOT run). No model loaded anywhere, no GPU use, nothing committed. Only
+read on the PC: the running queue (pid 103006, rc12_dg), rc12_dg, rc12_doge2 and its waiting run_doge_after.sh (pid
+2992946, started 23:14, md5 70411696 = STEP 9f's), boot.d.
+WHY: gpu.lock is shared by six waiters (E2, E006, the video editor, teacher and speed probes, this queue) and flock
+  hands it to a random one; this queue's vLLM processes hold it 2 to 4 min each. Queue log: LFM2.5-230M plain greedy
+  waited 19:28 to 21:01 for 107 s under the lock, plain 1 waited 21:03 to 22:11 for 100 s, plain 2 waiting since
+  22:13 (still at 23:22). About 5 processes finished from 15:14 to 23:14; about 70 remain.
+THE CHANGE (queue_dev_baselines.sh; everything else as before: order, skip rules, STOP between processes, TMO per
+  process, DONE marker, status lines)
+  The queue opens gpu.lock on its own fd 9 and takes it with flock -E 75 -w LOCK_WAIT (exit 75 retried 3 times, STOP
+  checked before each wait, as the per-process lock was). Consecutive processes then run under that one hold. Right
+  after each process the session ends (fd 9 closed) when it has crossed SESSION_S (1800) or when less than
+  max(SESSION_TAIL 300, that process's own time) is left, never mid-process; the next process waits for the lock
+  again. So a non-first process starts only with at least 5 min (and the last process's time) left; a model whose
+  processes take longer than half a session gets one per session; the first process of a session always runs.
+  STOP inside a session: the lock is released and the queue exits before the next process. Status lines: t0 / t1 are
+  the process's own start and end (for a session's first process t0 is when the lock was taken, the old .lockstart
+  meaning; a lock failure keeps the old t0 = the last wait's start); run lines now carry note=session_<pid>.<n>_
+  process_<k>. Q_SESSION_S 0 = one hold per process (the pre-9g behaviour).
+  FDS: dev_batch.py runs as timeout ... bash -c 'exec 9>&-; exec "$@"' ... 8>&-, so neither lock fd reaches it or
+  anything it starts; the timeout process keeps fd 9, so a queue killed mid-process keeps gpu.lock until that
+  process ends (the GPU is still in use) and then it goes; the queue lock goes at once. Measured on the PC (temp
+  files): the pre-9g form (flock FILE bash -c 'exec timeout ...') hands gpu.lock's fd to the process (fd 3), so a
+  lingering child of a dev_batch process could keep gpu.lock. On the Mac, bash 3.2's exec "$@" 9>&- leaves the lock
+  as fd 10 in the child (measured; bash 5.3 on the PC does not); the close-then-exec form is clean on both.
+  Q_CLOCK (a file with a fake epoch) is a test hook like the other Q_ overrides.
+EXPECTED (not measured): 100 to 240 s processes give 7 to 15 processes per hold of about 27 to 30 min, so the ~70
+  left need roughly 5 to 10 lock waits instead of ~70.
+TESTS (Mac, ~/.venvs/planck, fakes only)
+  test_queue_sessions.py (new, 248 lines): the fakes (a flock stand-in with REAL fcntl locks: fd mode and file mode,
+  a call log, FLOCK_FAIL exit-75 refusals, FLOCK_CLOCK_ADD fake waits; a Q_PY wrapper that logs every dev_batch
+  process: lock held at its start and end, lock fds 8 / 9 inherited, and every queue_status call: lock held or not;
+  fake processes advance a fake clock, may touch STOP, leave a grandchild) and five cases: A 16 fake 150 s processes
+  (+40 s per lock wait): sessions 11 + 5, 2 lock calls, every process under the lock with no lock fd, lock_secs 150
+  on all 32 lines, lock held at the status calls except right after the session-ending process and at the DONE
+  marker, free after the exit while the processes' grandchildren still run; B 1000 s processes: 1 per session; C
+  SESSION_S 0: one hold per process, a 5000 s process still runs; D STOP touched during process 2 of a session: 2
+  processes, lock free, no DONE; E the queue SIGKILLed mid-process: gpu.lock held while the process runs, queue lock
+  free, then free after it with its grandchild alive.
+  test_queue.py (rewritten on those fakes): as before plus one lock call for the 14 fresh processes (all in session
+  1, notes process 1 to 14), every process under the lock without lock fds, restart 1 lock call for 2 processes,
+  lock retry: FLOCK_FAIL 2 -> 3 calls and 4 runs in one session, FLOCK_FAIL 3 -> 75, 75, SKIP, SKIP; the failures so
+  far are printed even when a later check crashes. PASS (40 s).
+  mutation_queue.py: 50 mutants (30 before, 3 retargeted to the new lock text, 20 new), -j N, the log keeps each
+  kill's first FAIL line. Baseline pass, 50 / 50 KILLED (708 s at -j 3, logs/mutation_queue.txt), every first line
+  a FAIL line of the intended check (read: e.g. no tail -> sessions [12, 4]; no last-time estimate -> B [2, 1]; no
+  crossing release -> C [3, 1]; the process inherits fd 9 -> fds / lock kept by grandchildren; timeout without fd 9
+  -> E gpu.lock free while the process runs; release without closing -> lock held at every status call).
+PC (~/planck/dev/rc12_dg3, new: cp -a of rc12_dg plus the Mac's queue_dev_baselines.sh md5 6ce7c8dd,
+  test_queue.py c3a70f03, test_queue_sessions.py e8f20e86, mutation_queue.py 93e06a3e; engines.json rc12_dg's as it
+  is, md5 21f9e3da, Doge deferred: ~/planck/venv-doge-DEFERRED-see-STEP-9e/bin/python; diff -rq: only those 4 files)
+  test_queue.py with venv-vllm, CUDA hidden, PYTHONPATH = the PC repo's E004 code (text_e004 md5 = the Mac's; without
+  it the fake engine cannot import): PASS (26 s). With the REAL util-linux flock 2.41.3, bash 5.3, uutils timeout
+  (scratch pc_realflock.py, temp dirs): A sessions 11 + 5 and all lock checks, E crash, F another job waiting on
+  gpu.lock gets it between sessions (saw 1 process started and ended): PASS; 4 mutants there (process keeps fd 9,
+  timeout drops fd 9, sessions off, lock held through DONE) each fail A or E.
+SWITCH-OVER (scratchpad rc12s/switch_sessions.sh, md5 44f124cb; NOT run): checks first (rc12_dg3 complete with the
+  session queue, its engines.json defers Doge, run_doge_after.sh present, no STOP, no DONE, a running rc12_dg queue),
+  touching nothing unless all hold; notes the waiting run_doge_after.sh pids; touches rc12_dev_queue.STOP; waits on
+  the queue lock (flock) for the old queue to finish its process and exit; waits up to 120 s for those after-scripts
+  to exit (a zombie counts as gone; if one is still alive: STOP left, nothing started, exit 1); removes STOP; starts
+  Q_CODE=rc12_dg3 Q_MODELS=STEP 9e's order (Doge last, NOPYTHON) in the background (same log, lock, status, root);
+  once its start line with its pid is in rc12_dev_queue.log starts a fresh rc12_doge2/run_doge_after.sh; waits for
+  both. Log ~/planck/logs/rc12_switch_sessions.log. run_doge_after.sh read: after the queue lock comes free it exits
+  on a STOP file (before the DONE check), so the waiting copy starts nothing and the fresh one requires the new
+  queue's DONE marker.
+  test_switch.py (scratch; the old queue is rc12_dg's script byte for byte, the after-script is the real one, md5 =
+  the PC's; every "flock -n" slowed 1 s): A with the after waiting, B without: the old queue stops after 1 process,
+  the old after logs "STOP file present", the new queue runs the other 3 (none twice, all after the old one's STOP
+  line), Doge NOPYTHON x 4, one fake Doge pass after the DONE marker, DONE.pass2 kept, STOP gone; C an after that
+  ignores STOP: exit 1, STOP left, no new queue; D no old queue / STOP already there / Doge not deferred: exit 1,
+  nothing touched. PASS on the Mac (stand-in flock) and on the PC in /tmp with the real flock. 11 mutants of the
+  script, 11 KILLED (e.g. no wait for the old queue -> B; after started before the queue holds the lock -> A, B; a
+  zombie counted alive -> A).
+  To switch (Mac):  <scratchpad>/pcdetach.sh <scratchpad>/rc12s/switch_sessions.sh
+OPEN
+  Power cuts: boot.d/30_rc12.sh resumes a cut-off queue from CODE=rc12_dg (no sessions); after the switch it needs
+  CODE=~/planck/dev/rc12_dg3 (one line, then re-pull boot.d as the runbook says). A cut also kills the waiting
+  run_doge_after.sh and nothing resumes it (true before this step too).
+  The shared-GPU rule in memory says one hold per run; the Planck chat's own rule allows 30 to 60 min per hold. A
+  session is up to about 30 min plus the process that crosses it.
+  If the old queue is waiting for gpu.lock when STOP is touched, it still takes the lock and runs that one process
+  before stopping, so the switch can take up to one lock wait (at most 2 h) plus a process.
+
+STEP 9g VERIFY (2026-09-28, 00:35 to 01:15 EDT): adversarial review of STEP 9g (the session queue, its tests, the
+switch-over script, boot resume). No model loaded, no GPU use, nothing committed; on the PC nothing running was edited,
+stopped or restarted (old queue pid 103006 and after-script pid 2992946 only read). PC writes: rc12_dg3's
+queue_dev_baselines.sh, test_queue.py and mutation_queue.py refreshed (nothing runs from it; the 4 AppleDouble ._ files
+this review's tar left there removed; diff -rq vs rc12_dg: the 4 STEP 9g files only), temp dirs in /tmp.
+READ (the diff as bash): order, skip rules, SKIP / NOENGINE / NOPYTHON lines, lock timeouts (3 x 75 -> an exit-75
+  status with t0 = the last wait's start, then SKIP), a failed process inside a session (its render SKIPs, the lock is
+  kept, the next render runs in the same session), STOP in a session and before a wait, the last process and the DONE
+  marker (lock released first), release by closing fd 9 (the timeout process has exited by then, no other holder),
+  SIGKILL mid-process (timeout keeps fd 9 until the process ends, as designed): all as STEP 9g says.
+FOUND AND FIXED
+  1 The gpu.lock waiter (flock -w, fd 9) inherited fd 8, the queue lock: a queue killed while it waits (where it spends
+    most of its time) left its queue lock with the orphaned waiter for up to LOCK_WAIT (2 h), so a restart exits
+    ("another queue holds") and run_doge_after.sh or the switch waits that long. Pre-9g had the same leak, and its
+    orphaned waiter still started the process once it got gpu.lock (scratch probe on rc12_dg's script: 1 process).
+    Fix: flock -E 75 -w "$LOCK_WAIT" 9 8>&-. test_queue.py c_killed_waiting, red before the fix ("queue lock held
+    True"); mutant 51 killed on that line. PC, REAL flock 2.41.3, temp dirs: fixed -> queue lock free, 0 processes,
+    gpu.lock free after release; the mutant -> queue lock held.
+  2 boot.d/30_rc12.sh resumed a cut-off queue from a fixed CODE (rc12_dg): after the switch a power cut would resume
+    WITHOUT sessions, and a cut during the Doge pass (rc12_doge2's queue) would resume code where Doge is deferred
+    (NOPYTHON lines, then a DONE marker: Doge's remaining runs silently skipped). Now CODE = the code dir named in the
+    cut-off run's own "queue: start, code X," line (RC12_CODE still overrides; a named dir without the queue script is
+    not resumed, exit 1). Right before the switch (rc12_dg), after it (rc12_dg3) and in the Doge pass (rc12_doge2), so
+    it can be installed at any time. GNU sed on the PC reads rc12_dg from the live log and rc12_dg3 from the new format.
+    pc/tests/test_boot_rc12.py (2 cases, both red on the old script); 4 mutants in pc/tests/mutation_check.py (fixed
+    dir, first start line, RC12_CODE ignored, missing dir resumed), each killed on its intended assert (read); group
+    boot 24 / 24; pc/tests 103 passed. Install (not done): pcsync.sh pc/wsl/boot.d bootd, then in WSL
+    cp -p ~/planck/dev/bootd/30_rc12.sh ~/planck/boot.d/. RUNBOOK's 30_rc12.sh line ("Edit CODE ...") is now stale.
+RESULTS Mac: test_queue.py PASS; mutation_queue.py -j 3: baseline pass, 51 / 51 KILLED (891 s), first FAIL lines read.
+  PC rc12_dg3 (queue md5 7fe92b42): test_queue.py PASS (27 s); pc_realflock.py A, E, F PASS.
+SWITCH (switch_sessions.sh unchanged, md5 44f124cb). New scratch test test_switch_wait.py for the PC's live state, the
+  old queue WAITING for gpu.lock when STOP lands: W1 the other holder releases: the old queue runs that 1 process, the
+  session queue the other 3, the old after-script exits on STOP, a fresh one runs Doge once after DONE, STOP gone; W2
+  the old wait times out (75): it stops at try 2 with 0 processes, the session queue runs all 4. PASS on the Mac and on
+  the PC (real flock), test_switch.py PASS there too against the refreshed rc12_dg3. 5 switch mutants vs W1 / W2: 5
+  killed. Timing: the old queue stops only after its current lock wait (up to 2 h) plus one process.
+NOT TESTABLE WITHOUT THE GPU: back-to-back vLLM starts. 0 of the 33 queue processes so far started within 6 min of the
+  previous one (queue log, every wait 376 s or more); inside a session the next starts about 1 s after the last exits.
+  The installed vLLM refuses to start below gpu_memory_utilization (0.85) of free memory (v1/worker/utils.py), forks its
+  engine core by default and terminates and joins it at exit (5 s, then kill), so normally it is gone first; if not,
+  process 2 of a session fails at load and its render SKIPs (a restart retries). Read the first session's status lines.
+OPEN a power cut still kills the waiting run_doge_after.sh and nothing re-arms it (resume brings the queue back, not
+  Doge); after such a queue's DONE, start run_doge_after.sh by hand (detached). Clock: sessions use date +%s, so a
+  backward jump lengthens a session by the jump. A model change inside a session uses the last model's time as the
+  estimate (the tail still applies), so a long first process of the next model can stretch a session past 30 min.

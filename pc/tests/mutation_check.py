@@ -93,7 +93,8 @@ MUTANTS = [
     ("bench", "wrong_shape", "bench_micro.py", "cfg = sol.cfg.replace(seq_len=a.seq_len)",
      "cfg = sol.cfg.replace(seq_len=a.seq_len, n_layers=sol.cfg.n_layers + 1)",
      "tests/test_bench_micro.py"),
-] + [("boot", n, "wsl/" + f, old, new, "tests/test_boot_resume.py::" + t) for n, f, old, new, t in [
+] + [("boot", n, "wsl/" + f, old, new, t if t.startswith("tests/") else "tests/test_boot_resume.py::" + t)
+      for n, f, old, new, t in [
     # boot.d (RUNBOOK "RESUME AFTER A REBOOT"): each claim of test_boot_resume.py, broken on purpose
     ("e2_ignores_its_end_lines", "boot.d/10_e2.sh", "ENDS=' (plan finished", "ENDS=' (NEVER",
      "test_e2_run_that_ended_itself_is_left_alone"),
@@ -120,6 +121,16 @@ MUTANTS = [
      "test_rc12_own_stop_file_holds_it"),
     ("rc12_wrong_code", "boot.d/30_rc12.sh", 'env Q_CODE="$CODE" bash', "env bash",
      "test_cut_off_queue_resumes_and_dry_run_starts_nothing"),
+    ("rc12_fixed_code_dir", "boot.d/30_rc12.sh",
+     'CODE=${RC12_CODE:-$(sed -n "${start}s/.* queue: start, code \\([^,]*\\), root .*/\\1/p" "$QL")}',
+     "CODE=${RC12_CODE:-$HOME/planck/dev/rc12_dg}",
+     "tests/test_boot_rc12.py::test_rc12_resumes_from_the_cut_off_runs_code"),
+    ("rc12_first_start_code", "boot.d/30_rc12.sh", 'sed -n "${start}s/', 'sed -n "1s/',
+     "tests/test_boot_rc12.py::test_rc12_resumes_from_the_cut_off_runs_code"),
+    ("rc12_override_ignored", "boot.d/30_rc12.sh", "CODE=${RC12_CODE:-", "CODE=${RC12_UNSET:-",
+     "test_cut_off_queue_resumes_and_dry_run_starts_nothing"),
+    ("rc12_missing_code_resumed", "boot.d/30_rc12.sh", '[ -f "$CODE/queue_dev_baselines.sh" ] ||', "true ||",
+     "tests/test_boot_rc12.py::test_rc12_cut_off_runs_code_missing_is_not_resumed"),
     ("e2_no_fallback", "boot.d/10_e2.sh", 'trying the fallback"\nfallback', 'trying the fallback"\ntrue',
      "test_e2_falls_back_when_launch_e2_never_reaches_the_queue"),
     ("e2_fallback_after_queue_ran", "boot.d/10_e2.sh", "grep -q '^code .* plan '; then", "false; then",
