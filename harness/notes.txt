@@ -714,13 +714,17 @@ fresh inductor + Triton cache dir, warm = a new process on that dir.
   In train.main (parity runs): 5M default:det 43.7 s for 200 steps on a cold cache, 17.4 s warm.
 Hours (bench tok/s, full rows, so lower bounds; 1e9 tokens): at equal rows eager -> +compile: 5M 1.06 ->
 0.47 h, 10M 1.58 -> 0.77, 20M 2.86 -> 1.48, 30M 3.87 -> 1.97 (docmask). 25B tokens at 5M: 26.5 -> 11.8 h;
-30B at 30M: 116.2 -> 59.1 h.
+30B at 30M: 116.2 -> 59.1 h. (The eager hours use eager's largest-fit micro batch; the NUMBERS REVIEW below
+found half that batch x 2 faster for eager by 1 to 9 percent, so these eager hours are too high by about that.)
 Verdicts (the rule: a switch defaults on only if it passes its tests alone and combined AND wins its A/B; E2
 and E3 stay pinned to the current engine regardless).
   train.compile default: passes alone and combined (suite, CUDA tests, both parity sizes, bitwise leak probe
     through the compiled varlen forward), and wins every A/B cell: +89 to +120 percent at the same batch,
-    +94 to +125 percent at equal rows, on a quiet machine. The old tree's +59 percent is superseded: with
-    the batched optimizer the forward is a larger share of the step. RECOMMEND: default for NEW
+    +94 to +125 percent at equal rows, on a quiet machine. Those eager baselines are eager's largest fit,
+    not its fastest: against eager at half the micro batch x 2 (same rows per step, faster for eager at
+    every size, 10M within noise), compile at its best is +75.5 to +106.8 percent (NUMBERS REVIEW below).
+    The old tree's +59 percent is superseded: with the batched optimizer the forward is a larger share of
+    the step. RECOMMEND: default for NEW
     experiments (set train.compile: default in their configs). Flipping train.py's own default would move
     every config that omits the key, so E2 and E3 configs must say compile: false first; not done here.
     Costs: 16 to 23 s compile per new shape cold, 1 to 2 s warm; 3 graph breaks at cu_seqlens (6 graphs
@@ -734,3 +738,49 @@ and E3 stay pinned to the current engine regardless).
     RECOMMEND: opt-in only (for memory headroom: a bigger vocab, a bigger model, or a longer row).
   Both together: the fastest arm at the same batch everywhere (+91.5 to +130.2 percent), parity pass; the
     gain over compile alone is the chunked-CE margin above. Opt-in (compile on, chunk as needed).
+SPEED V3 PROVE, NUMBERS REVIEW (2026-09-28, adversarial review of the entry above; PC 5070, the same lean copy
+~/planck/dev/speed3, code md5 equal to speed/v3; two gpu.lock holds of 3.2 and 8.4 minutes, released between).
+Recomputed from the raw rows (PC ~/planck/dev/speed3_out, md5 equal to the Mac copies), with my own scripts:
+every median, paired range, resGiB and +both vs +compile figure of the same-batch A/B; every fit verdict
+(re-derived from peak_reserved vs free_before + reserved_before, and free vs the 0.5 GiB edge) and the
+largest-fit table; the equal-rows table (joined through er.jsonl.rep; 30M docmask eager n 3); cold/warm
+first_step_s; hours; parity floors, worst ratios, pass/fail and pooled permutation p (own implementation over
+the stored loss curves). All matched, except the lines corrected above (real-trainer tok/s ranges and run
+counts, the :det bitwise sentence, the pooled p wording, compiled step-time growth, in-process recompile
+times, the cold/warm eager column, the h10 end load). Headline gains are ratios of medians; the paired range
+is per repeat, so a headline can sit at the edge of it (5M docmask +both: +130.2, median pair +129.0).
+Host load. Hold start loads 0.9 to 1.9. A/B arms are interleaved ABBA in one process, so a load change hits
+every arm; h4 (load up to 13.6) and h10 (about 1.0) agree within 5 points; eager tok/s matches SPEED
+INTEGRATE 2's (5M docmask B16 255,660 then, 254,415 here; 20M B8 94,826 vs 95,104). No sign of a load
+artefact. The 30M eager rows at 0.67 to 1.04 GiB free show no paging (step max/median <= 1.02, the same
+tok/s on ok and edge rows).
+Re-time, order reversed (hold rev3, 04:43 to 04:46; load 1.00 at start, up to 3.7 during inductor compiles,
+2.10 at end): 30M first, then 5M; arms default,eager (compile first on even repeats); 7 repeats in one
+process; docmask, --docs-per-row 1.0.
+  30M B8:  eager 69,516  compile 132,386  +90.4% (paired +89.8..+91.1); Prove +90.7% (+90.3..+91.3)
+  5M B16:  eager 256,850  compile 561,741  +118.7% (+117.2..+120.6); Prove +118.9% (+117.1..+120.5)
+  In this order 3 of 7 30M eager rows were "edge" (10.28 GiB reserved, 0.29 free: eager right after a
+  compiled arm keeps more reserved); their tok/s is unchanged (69,428 to 69,582). A fit verdict near the
+  edge depends on what ran before it in the process; a fresh process gives 9.50 GiB, 0.93 free.
+Eager is not fastest at its largest fit (new; hold rev3b, 05:56 to 06:05; load 1.00 at start, up to 3.5
+during compiles, 1.23 at end). Same rows per optimizer step, B x 1 vs B/2 x 2, eager and compile, docmask,
+--docs-per-row 1.0, every (micro batch, arm) a fresh process, 3 repeats, order reversed on odd repeats:
+  cell  rows  eager B x1   eager B/2 x2 (paired)      compile B x1  compile B/2 x2  compile best vs eager best
+  5M    16    254,516      272,048 +6.9% (+6.6..+8.1)   562,600       550,754 -2.1%   +106.8% (+103.1..+107.1)
+  10M    8    169,890      171,693 +1.1% (-1.5..+1.3)   333,348       313,970 -5.8%    +94.2% (+94.2..+96.8)
+  20M    8     95,210      100,335 +5.4% (+4.4..+5.9)   186,009       180,086 -3.2%    +85.4% (+84.3..+87.1)
+  30M    8     69,490       75,576 +8.8% (+8.6..+8.9)   132,660       130,927 -1.3%    +75.5% (+75.3..+75.9)
+  Compile vs eager at the same batch in fresh processes: +121.0, +96.2, +95.4, +90.9 percent, so the
+  Prove's same-batch figures reproduce a third way. But eager runs up to 8.8 percent faster at half the
+  micro batch x 2 (10M within noise) while compile prefers the larger batch, so the Prove's same-batch and
+  equal-rows tables compare compile with a slower eager configuration than eager's best. Against eager's
+  best of these two, compile is +75.5 to +106.8 percent. The eager gap tracks the eager arm's reserved
+  memory (10M 5.63 GiB: +1.1; 30M 9.50 GiB: +8.8); cause not investigated. A 30M B4 x 2 eager run inside
+  hold rev3 agrees (75,495). Not measured: eager at B/4 x 4 (so the +75.5 to +106.8 may still be high) and
+  the equal-rows configs (R 32, R 16) at half batch. The recommendation stands (compile wins every cell by at
+  least 1.75x). Side effect: a run that stays eager (E2, E3, any config without compile) at its largest-fit
+  micro batch may be 5 to 9 percent slower than half the batch with twice the accumulation at 5M, 20M and
+  30M (same rows per step, not bit-identical). Chunked CE's slowdown at its larger batch (above) is at
+  least partly this eager effect.
+  Raw: PC ~/planck/dev/speed3_rev3/{retime,retime_b4,batchcheck}.jsonl (+ batchcheck.jsonl.rep), logs
+  ~/planck/logs/speed3_rev3.log and speed3_rev3b.log.
