@@ -109,5 +109,45 @@
   "stage": "B",
   "recorded_by": "e2chain.py",
   "recorded": "2026-09-28 09:44 EDT"
+ },
+ "stage_C": {
+  "argmin": 1.0,
+  "argmin_125M": 1.0,
+  "at_edge": null,
+  "axis": [
+   0.25,
+   0.5,
+   1.0,
+   2.0,
+   4.0
+  ],
+  "decided": true,
+  "extend_with": [],
+  "extensions_used": 2,
+  "gap_next_to_argmin": false,
+  "guard_moved": false,
+  "lrs": {
+   "pick": [
+    0.003,
+    1.0
+   ],
+   "runner_up": [
+    0.0015,
+    1.0
+   ]
+  },
+  "pick": 1.0,
+  "ready": true,
+  "runner_up": 0.5,
+  "runs": {
+   "0.25": "5m_e0.75_r1_b250M",
+   "0.5": "5m_e1.5_r1_b250M",
+   "1": "5m_e3_r1_b250M",
+   "2": "5m_e6_r1_b250M",
+   "4": "5m_e12_r1_b250M"
+  },
+  "stage": "C",
+  "recorded_by": "e2chain.py",
+  "recorded": "2026-09-28 09:46 EDT"
  }
 }
