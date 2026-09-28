@@ -1684,3 +1684,181 @@ planck-kit/rc12_reorder.sh, log ~/planck/logs/rc12_reorder.log). Nothing about h
 changes. Open: Doge's cost. If the greedy run times out or takes near 3 h, its seven other runs need a smaller
 max_batch (memory, not correctness: batched vs serial was NEAR_TIE at 32) or a longer timeout, decided from this
 run's measured time before Doge starts again; a max_batch change is recorded as a deviation for all Doge runs.
+  STEP 9e addendum (16:45): the Doge template greedy process ended by the 3 h timeout (exit 124, 10,802 s under the
+  lock, a third allocator OOM at 14:36; no output, all-or-nothing). The queue then restarted as planned (15:14:49,
+  vLLM models first). So that the running queue does not spend 3 h again on Doge's retry, the PC's running copy
+  rc12_dg/engines.json now names a non-existent python for Doge (backup engines.json.before_doge_defer): the queue
+  records NOPYTHON for Doge's runs and finishes. Doge then runs from a separate code copy with the speed fix
+  (STEP 9f, in progress). The repo's engines.json is unchanged by this; the PC edit touches only Doge's python path.
+
+STEP 9f (2026-09-27 16:39 to 22:10 EDT, branch doge2): why Doge-160M's greedy run hit the 3 h timeout, measured; a
+length-aware chunker with a token budget and a CUDA cache release per chunk in hf_batched.py; a PC script that runs
+Doge's 8 processes after the running queue (written and tested, NOT started). No model loaded on the Mac; nothing
+committed; the running queue (pid 103006, code ~/planck/dev/rc12_dg) and rc12_dg untouched (read and copied only).
+Doge in the running queue: deferred (STEP 9e addendum; rc12_dg/engines.json names ~/planck/venv-doge-DEFERRED-see-
+STEP-9e/bin/python since 16:38), so that queue writes NOPYTHON for Doge's 8 processes and ends with its DONE marker.
+WORK DIRS (PC) ~/planck/dev/rc12_doge2 = a copy of rc12_dg with this step's hf_batched.py, test_hf_batched.py,
+  mutation_hf_batched.py and the Mac engines.json (the real venv-doge python; otherwise equal to rc12_dg's); nothing
+  else differs (cmp). Probes in rc12_doge2/probe9f/ (dist9f.py, meas9f.py, budget9f.py, hf_batched_pre9f.py = the
+  pre-9f hf_batched.py), results in probe9f/out/, logs ~/planck/logs/rc12_doge2_{hold1..4,cputests}.log.
+GPU HOLDS (gpu.lock, flock -w 7200, released between): hold 1 17:49:49 to 18:07:51 (18.0 min), hold 2 19:05:56
+  to 19:17:39 (11.7), hold 3 20:11:06 to 20:23:30 (12.4), hold 4 21:45:57 to 21:54:34 (8.6). Each waited 52 to 82 min
+  for the lock (the video editor, E006, speed3, a teacher probe and the queue share it).
+WHERE THE TIME WENT (hold 1; the pre-9f code, the 64 dev conversations with the most user tokens, greedy, max_batch
+  32, lockstep: 2 chunks of 32 per turn). Per turn: widest prompt, s per chunk (256 steps), peak allocated / peak
+  reserved GiB, tokens/s:
+    t1 66 4.7 0.72/0.90 1538   t2 363 4.8 1.12/1.76 1509   t3 646 6.1 2.15/2.80 1065   t4 926 7.6 3.50/4.96 813
+    t5 1211 9.3 5.28/7.61 633  t6 1495 15.1 7.38/11.64 378 t7 1776 52.8 9.80/17.32 99   t8 1790 411 9.90/21.91 12
+  Stopped at its 14 min deadline after turn 8 (1024 s). 0 allocator retries, 0 OOMs, yet reserved reached 21.9 GiB
+  on the 11.94 GiB card: under WSL a cudaMalloc past the card does not fail, the excess lives in shared (system)
+  memory. The caching allocator kept the blocks of every earlier width while allocated peaked at 9.9, so from turn 7
+  every chunk ran partly from shared memory, turn 8 27 times slower than turn 6. A full run has 19 chunks a turn (608
+  twelve-turn conversations), about 2.2 h per late turn at turn 8's rate: the 3 h timeout. The real run's 3 OOM
+  warnings (1.64, 2.30, 2.42 GB) fit one fp32 [32, 6, T, T] softmax at T = 1462, 1731 and 1775 (sizes rounded to the
+  allocator's 2 MiB), presumably when shared memory ran short too.
+  Memory by width (hold 1 grid, one chunk each, cache emptied first, distinct dev histories per row), peak allocated
+  GiB for 8 / 16 / 32 rows: w256 0.45/0.57/0.82, w512 0.64/0.97/1.61, w1024 1.24/2.18/4.06, w1536 2.16/3.99/7.66,
+  w1789 2.71/5.10/9.87 (32 x 1789: reserved 11.63, free 0.00; 7.4 s for 22 steps where 16 rows took 1.5 s). Fit
+  (15 greedy chunks): peak GiB = 0.327 + 6.907e-8 rows w^2 + 4.314e-5 rows w, largest residual 0.006 GiB (w^2: eager
+  attention's [rows, 6 heads, w, w] tensors). The grid's replies stopped after 21 to 40 tokens (greedy on ideal
+  histories), so it measures memory; per-chunk time comes from the lockstep runs.
+PROMPT LENGTHS (PC CPU, Doge's tokenizer, all 640 dev conversations, history fitted to 1792 = ctx - 256 as
+  runner.play_steps does; dist9f.py). A twelve-turn conversation has 77 to 195 user tokens in all: the prompt is
+  Doge's own replies. Parity run (hfb greedy, 20 conversations): 103 of 240 replies capped at 256, median prompt at
+  turn 12 1520, p90 1728. Reply models per turn (p50 / p90 / max; share >= 1700): 256-token replies (the upper
+  bound): t4 888/915/929, t6 1449/1480/1501, t7 to t12 about 1725/1750/1781 (0.94 to 0.99 >= 1700); Doge's parity
+  reply lengths cycled: t4 637/885/925, t6 819/1418/1491, t8 1153/1714/1790 (0.11), t12 1580/1724/1785 (0.22). The
+  64-conversation probe's own greedy replies: 325 of 512 capped, median 1738 at t7, 1705 at t8, max 1792.
+  So under the pre-9f chunker (32 consecutive conversations a chunk, width = the chunk's longest) nearly every chunk
+  from turn 7 on is 1750 to 1792 wide: 32 rows at the 9.9 GiB peak, every late turn.
+THE FIX (hf_batched.py; max_batch stays 32 for Doge as the upper bound, eager and bf16 unchanged)
+  plan_chunks(lengths, max_batch, budget): longest prompt first (ties in request order), a new chunk when one more
+  row would pass max_batch or rows x width^2 > budget (width = the chunk's first, longest prompt); one prompt over
+  the budget alone is a chunk of one; budget None = the pre-9f chunker (consecutive runs of max_batch).
+  TOKEN_BUDGET = 53 * 2^20 = 55,574,528 (17.3 rows at 1792; 32 rows up to width 1317), fixed by budget9f.py before
+  hold 2 from the grid fit: the largest multiple of 2^20 for which every width 1..1792 at rows = min(32, budget //
+  w^2) is predicted <= 6.0 GiB (worst 5.98), half the card. HFBatched(token_budget=TOKEN_BUDGET) for every hfb engine
+  (only Doge uses hfb); no engines.json key, so dev_batch / runner / meta.json are unchanged.
+  reply_batch encodes every request once, runs the plan, puts each reply back at its request's index (replies and
+  the trace in request order, as before), and empties CUDA's cache right before every chunk. Per call before hold 3,
+  per chunk after: in hold 2 (per call) budget-filled chunks of one turn differ slightly in shape (17 x 1791^2 <
+  18 x 1744^2 < 22 x 1579^2), no cached block fitted the next, reserved reached 12.53 GiB and those chunks slowed
+  (t9's third chunk 18.4 s where its neighbours took 7.6 to 8.1). Also one progress line per call on stdout (the
+  process log): requests, chunks, widths, seconds, peak GiB. self.chunks records (rows, width) per chunk.
+  Measured with the final code (holds 3 and 4, 186 chunks): max peak allocated 5.92 GiB, max peak reserved 7.84,
+  min free 2.87, 0 retries, 0 OOMs; 17 to 22 rows at widths 1600 to 1792 take 7.5 to 8.5 s per 256-step greedy
+  chunk. On the 64 longest (hold 4) greedy 228 s for all 12 turns (the pre-9f code needed 1024 s for 8 turns and
+  was still slowing), sampled (seed 1) 283 s; with the per-call release (hold 2) 253 and 289 s.
+EQUIVALENCE (hold 3; hold 2's copy lost 12 rows: my probe wrote its comparison rows and its chunk log to the same
+  file, the rest agreed with hold 3 on all 500): the new chunker (max_batch 32, TOKEN_BUDGET) replied to EXACTLY the
+  histories of the pre-9f run (hold 1: 64 conversations x turns 1 to 8, 512 turns), one reply_batch per turn, greedy,
+  vs the pre-9f replies. 512 of 512 prompts equal; 337 turns identical (ids, stop, text); 175 differ, every first
+  difference at |log p(new token) - log p(old token)| <= 0.375 nats under one unpadded forward (parity_hf_vllm
+  .hf_margin; 0 over 0.5, 3 at 0.375, the rest <= 0.25), the old token the unpadded top-1 on 119, 2nd on 52, 3rd on
+  4; median first
+  differing token 46; 28 stop disagreements, all on turns whose text differs. NEAR_TIE by the parity rule, the same
+  level as STEP 9c's batched-vs-serial check (161 / 240 identical, max 0.25): bf16 batch-composition drift. The 16
+  turns at 0.25 to 0.375 read (first 90 characters of both): 12 identical that far; where they split both are
+  fluent (lookup-007 t4 "October: Osaka" vs "October: Toronto", lookup-040 t7, lookup-028 t6 and t7).
+TESTS (Mac, no model; PC CPU for the toy model)
+  test_hf_batched.py c_chunk (new, pure Python): plan_chunks on 6 fixed and 400 random cases (every request exactly
+  once, <= max_batch rows, rows x width^2 <= budget unless one row, longest first with ties in request order, a cut
+  only where one more row breaks a limit, budget None = consecutive runs); reply_batch on a model-free HFBatched
+  (fake encode, _chunk, torch.cuda): replies and trace in request order, every _chunk call within max_batch and the
+  budget and equal to plan_chunks' plan, the default budget is TOKEN_BUDGET, one empty_cache right before every
+  chunk on cuda / cuda:0 and none on the CPU, batches recorded, [] for no requests. c_engine (PC, toy Llama, CPU,
+  float32): equal to serial HFResponder on 12 greedy / sampled requests at max_batch 12 and 5 with TOKEN_BUDGET, 5
+  with budget None, and 12 with a 3-rows-at-the-widest budget (chunks [(3, 417), (4, 334), (5, 215)]).
+  Mac: test_hf_batched --split-only PASS; test_parity, test_hf_trust, test_dev_batch, test_lockstep PASS;
+  mutation_step9 47 / 47 killed, baseline clean (in a scratch copy of rc12 + experiments/E004 code).
+  PC (venv-doge, CUDA hidden, scratch copy rc12_doge2_mut): test_hf_batched PASS (full); mutation_hf_batched 32 / 32
+  killed (23 CHUNK mutants: sort order, ties, the max_batch and budget cuts, width from the wrong row, lost or
+  unreset chunks, the budget-None runs, reply scatter, prompt pairing, trace order, default budget, the cache
+  release missing / extra / first chunk only, cuda:0, batch sizes; 9 ENGINE mutants as before, texts retargeted),
+  baseline clean; the same 23 CHUNK mutants killed on the Mac (--chunk-only). The engine check runs only when the
+  pure checks pass (a mutant that loses a request used to crash c_engine instead of failing c_chunk).
+ESTIMATE (final code; one full dev_batch process = 640 dev conversations + the 48-conversation own-cf twin)
+  Measured (hold 3): every 5th dev record (128 conversations, 1470 of the dev run's 7328 requests) 424 s; the twin
+  itself (48 OWN, --own-cf) 178 s. Dev x 4.985 = 2114 s: a greedy process about 35 + 3 = 38 min under the lock.
+  Sampled / greedy on the 64 longest with the final code (hold 4): 279.5 / 224.7 s of chunk time = 1.24 (RowSampler
+  draws per row and step), so a sampled process about 48 min. Cross-check, a chunk time model fitted on the
+  unspilled chunks (greedy 204: sec = 0.066 + steps (1.270e-2 + 1.390e-4 rows + 3.521e-7 rows w) + 2.030e-8 rows
+  w^2, median error 3%, largest 76% on a short chunk; sampled 75, median 2%) with every chunk at 256 steps: 35 min
+  (Doge's parity reply lengths) to 44 min (every reply 256 tokens) greedy; sampled 43 to 51. The pre-9f
+  chunker would be 39 min by the same model only if nothing spilled, which hold 1 shows it does. All under the
+  90 min target and the queue's 3 h timeout.
+  Measured on the template render only; plain was not measured (its role cut shortens the histories, so its
+  prompts should be no wider). The 8 processes (2 greedy, 6 sampled): about 6 h under gpu.lock, plus each one's wait
+  for the lock (52 to 82 min per hold tonight).
+RUN SCRIPT (PC, written, NOT started) ~/planck/dev/rc12_doge2/run_doge_after.sh (md5 70411696...; a copy in this
+  session's scratchpad). Waits on locks/rc12_dev_queue.lock until the running queue exits; then only if that queue
+  ended on its own (rc12_dev_queue.DONE present, no STOP file) and rc12_doge2 holds the 9f hf_batched.py and
+  venv-doge's python is executable, it keeps the DONE marker as rc12_dev_queue.DONE.pass2 and runs
+    Q_CODE=~/planck/dev/rc12_doge2 Q_MODELS=SmallDoge/Doge-160M-Instruct \
+      bash ~/planck/dev/rc12_doge2/queue_dev_baselines.sh
+  (same queue name, log, lock, status file and root; template then plain, greedy 1 2 3; TMO 10800 as before), then
+  touches rc12_doge2_after.DONE. A STOP file or no DONE marker (the queue died) starts nothing. Log:
+  ~/planck/logs/rc12_doge2_after.log. Tested on the PC in a temp dir with a fake queue and real flock: waits for the
+  held lock (3.5 s of a 4 s hold), calls the queue once with Q_CODE / Q_MODELS, keeps DONE.pass2; STOP, no DONE, a
+  pre-9f hf_batched.py and a non-executable python start nothing; 6 mutants (no wait, no STOP / DONE / chunker /
+  python check, Q_MODELS dropped) each fail a case.
+  To start it (Mac): pcdetach.sh on a one-line script  exec bash $HOME/planck/dev/rc12_doge2/run_doge_after.sh
+  (scratchpad start_doge_after.sh). Do not edit run_doge_after.sh while it waits (bash reads it as it goes).
+OPEN
+  Not started: run_doge_after.sh (Max's or the orchestrator's call). After Doge's runs: verify_dev_runs --model
+  SmallDoge/Doge-160M-Instruct with venv-doge's python FROM rc12_doge2 (its --rerun must rebuild the engine with the
+  same chunker), then --rerun 5 under gpu.lock (STEP 9c OPEN).
+  meta.json does not name the chunker (dev_batch unchanged): the queue log's "code ~/planck/dev/rc12_doge2" line and
+  each process log's "hfb: ... chunks" lines do. No Doge dev run finished under the pre-9f chunker, so all 8 Doge
+  runs share one chunker; it is not a max_batch change (STEP 9e's deviation note does not apply).
+  The Mac rc12 has this step's three files; rc12_doge2 is rc12_dg (not the Mac tree) plus them, so a later sync of
+  the Mac tree to the PC must keep them.
+
+STEP 9f VERIFY (2026-09-27, 22:00 to 23:20 EDT): adversarial check of STEP 9f (hf_batched.py's chunker, its tests, the
+numbers, run_doge_after.sh). No model loaded on the Mac; nothing committed; no rc12 code changed (nothing found to
+fix); the running queue (pid 103006, rc12_dg) and rc12_doge2 only read. Scratch: a Mac copy of rc12 + E004 code, PC
+~/planck/dev/rc12_doge2_v9f (a copy of rc12_doge2; logs ~/planck/logs/rc12_doge2_v9f_{hold,cpu,mut}.log).
+CHUNKER (read the diff; pure-Python attacks on the scratch copy, Mac and PC): equal widths (100 x 1792 -> 17,17,17,17,
+  17,15 in request order; 70 x 1317 -> 32,32,6; 1318 -> 31), one or two prompts over the budget alone (chunks of one,
+  the rest together), empty input ([] with and without a budget), max_batch 1, zero-length prompts, max_batch > n,
+  mixed seeds with repeated conversation ids and own-cf style twins (every reply back on its own request, seed and
+  width), reply() (one request), one progress line per call and none for []: all pass. Predicted worst peak at the
+  budget over widths 1..1792: 5.979 GiB. 3 of 4 mutants of hf_batched fail it (a bucketed sort survives it and is
+  killed by test_hf_batched's random cases). Nothing broke.
+NON-DOGE PATHS: rc12's diff vs HEAD touches only hf_batched.py, test_hf_batched.py, mutation_hf_batched.py and these
+  notes; vllm_responder, runner, dev_batch, lockstep, hf_responder, queue_dev_baselines.sh and engines.json have
+  HEAD's md5s, equal to the running queue's rc12_dg copies. hf_batched is imported only in runner's hfb branch and
+  parity's hfb stage. Probe (scratch): after test_vllm_responder's checks and make_responder for all 12 vllm models of
+  engines.json, hf_batched is not in sys.modules; the control (make_responder hfb, HF load stubbed) imports it.
+NUMBERS recomputed from the saved outputs (d9f copies, md5 = PC): replay_cmp 512 prompts equal, 337 identical, 175
+  differ, max margin 0.375 (3), 0 over 0.5, old-token rank 0/1/2 on 119/52/4, median first difference 46, 28 stop
+  disagreements all on differing turns; hold 2's 500 rows equal hold 3's on every field. 67 of the 175 first
+  differences are exact bf16 ties (margin 0); of the other 108 the pre-9f token leads on 55 and the 9f token on 53, so
+  no direction. Hold-1 table: the width and s-per-chunk columns are the MEANS of each turn's two chunks (t8 chunks
+  1792 / 1787, 412.4 / 410.0 s), not the widest prompt; the rest as written. Grid fit reproduced (0.3265, 6.907e-8,
+  4.314e-5, residual 0.0057). 9f chunk logs: 186 chunks, peak allocated <= 5.92, reserved <= 7.84, 0 retries, 0 OOMs;
+  sums 418.2 s (sample5), 175.9 (twin), 224.7 / 279.5 (64 longest greedy / seed 1). Hold times as written.
+GPU HOLD (gpu.lock 23:11:33 to 23:13:04, 1.5 min after 67 min of waiting; rc12_doge2 code as is, Doge hfb bf16 eager,
+  max_batch 32, TOKEN_BUDGET), histories from hold 1's trace, all 256 steps: 17 x 1792 greedy 8.22 s, seed 1 8.58 s
+  (peak 5.41 / reserved 6.39 GiB); 32 x 1291 greedy 9.88 s, seed 1 11.68 s (5.80 / 7.63, free 3.09): the slowest
+  chunk is the 32-row sampled one, not the widest. 0 retries, 0 OOMs. Replay of turns 7 and 8 (128 of the 512): ids
+  equal to the old trace on 39 and 41 = replay_cmp's counts, flags agree 64 / 64 on both turns (deterministic).
+  Ceiling from these: at most 38 chunks a turn (17 rows minimum) x 12 turns x 12 s (11.7 measured, rounded up for
+  32 x 1317) plus the twin (3 chunks a turn) = about 98 min per process, under the 3 h timeout even if every chunk
+  ran the slowest way.
+TESTS (Mac, ~/.venvs/planck, scratch copy): test_hf_batched --split-only, test_parity, test_hf_trust, test_dev_batch,
+  test_lockstep, test_vllm_responder, test_queue, test_verify_dev_runs all PASS; mutation_hf_batched --chunk-only
+  23 / 23, mutation_step9 47 / 47, baselines clean. PC (venv-doge, CUDA hidden, scratch copy): full test_hf_batched
+  PASS; mutation_hf_batched 32 / 32.
+run_doge_after.sh (md5 70411696, NOT started) against the REAL queue script in a temp tree (real flock, fake
+  dev_batch pythons): main queue running -> it waits (first Doge process 0.24 s after the last main one ends) and a
+  direct Doge queue start refuses ("another queue holds"); two afters at once -> 8 Doge processes, 0 overlapping;
+  STOP before -> nothing; STOP during -> the Doge queue stops after 1 process; main queue SIGKILLed (no DONE) ->
+  nothing. PASS 5 / 5. Minor, not fixed: it touches rc12_doge2_after.DONE and logs "Doge queue exit 0" even when the
+  queue ran nothing (STOP, or refused); a second copy started by mistake reruns the queue after the first (all
+  skipped) and can overwrite DONE.pass2 with the Doge pass's marker.
+OPEN (read, not run) verify_dev_runs --rerun R1 / R2 require equal replies between a 5-conversation replay and the
+  stored 640-conversation run; under hfb the batch changes the bf16 numerics (rechunking alone changed 175 of 512
+  turns above; batched vs serial 161 / 240 identical in STEP 9c), so expect R1 / R2 FAIL lines for Doge under either
+  chunker: read them as drift at the parity rule, not as a harness fault. parity_hf_vllm --engine hfb now chunks by
+  the budget too (default), so a Doge parity rerun would not reproduce STEP 9c's numbers exactly.
