@@ -1,0 +1,63 @@
+{
+ "model": "EleutherAI/pythia-70m",
+ "grid": [
+  "5e-05",
+  "3e-04",
+  "1e-03"
+ ],
+ "rows": [
+  {
+   "lr": 5e-05,
+   "LW": 1.0,
+   "TS": 0.6562,
+   "NU": 0.5,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.5,
+   "mean": 0.7187,
+   "loss_first10": 1.4013,
+   "loss_last50": 0.0646,
+   "lock_in_step": null
+  },
+  {
+   "lr": 0.0003,
+   "LW": 0.7812,
+   "TS": 0.4219,
+   "NU": 0.2656,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.2656,
+   "mean": 0.4896,
+   "loss_first10": 1.4354,
+   "loss_last50": 0.4034,
+   "lock_in_step": null
+  },
+  {
+   "lr": 0.001,
+   "LW": 0.3646,
+   "TS": 0.3594,
+   "NU": 0.3906,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.3594,
+   "mean": 0.3715,
+   "loss_first10": 2.2817,
+   "loss_last50": 0.922,
+   "lock_in_step": null
+  }
+ ],
+ "ineligible": {},
+ "final": false,
+ "decision": "CHOSEN",
+ "chosen": "5e-05",
+ "line": "CHOSEN 5e-05"
+}

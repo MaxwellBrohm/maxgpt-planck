@@ -1,0 +1,63 @@
+{
+ "model": "roneneldan/TinyStories-33M",
+ "grid": [
+  "5e-05",
+  "3e-04",
+  "1e-03"
+ ],
+ "rows": [
+  {
+   "lr": 5e-05,
+   "LW": 0.5677,
+   "TS": 0.625,
+   "NU": 0.8594,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.5677,
+   "mean": 0.684,
+   "loss_first10": 4.1433,
+   "loss_last50": 0.3881,
+   "lock_in_step": null
+  },
+  {
+   "lr": 0.0003,
+   "LW": 0.3073,
+   "TS": 0.2656,
+   "NU": 0.4219,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.2656,
+   "mean": 0.3316,
+   "loss_first10": 3.2087,
+   "loss_last50": 0.4898,
+   "lock_in_step": null
+  },
+  {
+   "lr": 0.001,
+   "LW": 0.4375,
+   "TS": 0.25,
+   "NU": 0.5469,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.25,
+   "mean": 0.4115,
+   "loss_first10": 3.3951,
+   "loss_last50": 1.007,
+   "lock_in_step": null
+  }
+ ],
+ "ineligible": {},
+ "final": false,
+ "decision": "CHOSEN",
+ "chosen": "5e-05",
+ "line": "CHOSEN 5e-05"
+}

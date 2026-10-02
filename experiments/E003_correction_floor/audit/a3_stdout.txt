@@ -1,0 +1,124 @@
+Clopper-Pearson one-sided 95% upper bound after 0/3: 0.632
+
+== ts1m
+  per-object tracking: 0/3; crossed pair d10 by seed 0.000 0.000 0.000; base 0.000
+  s1: LW 69/192 ub 0.429 TS 20/64 ub 0.434 NU 31/64 ub 0.604  robust-failing ['LW', 'TS', 'NU']
+  s2: LW 84/192 ub 0.508 TS 18/64 ub 0.401 NU 27/64 ub 0.544  robust-failing ['LW', 'TS', 'NU']
+  s3: LW 83/192 ub 0.503 TS 23/64 ub 0.482 NU 28/64 ub 0.559  robust-failing ['LW', 'TS', 'NU']
+  fam base: day LW 0.52 TS 0.34 NU 0.38 | color LW 0.35 TS 0.31 NU 0.50
+  fam s1  : day LW 0.33 TS 0.31 NU 0.53 | color LW 0.39 TS 0.31 NU 0.44
+  fam s2  : day LW 0.46 TS 0.38 NU 0.44 | color LW 0.42 TS 0.19 NU 0.41
+  fam s3  : day LW 0.46 TS 0.44 NU 0.44 | color LW 0.41 TS 0.28 NU 0.44
+  fits<=512 s1: LW 39/91=0.43 TS 13/38=0.34 NU 31/64=0.48
+  fits<=512 s2: LW 44/91=0.48 TS 14/38=0.37 NU 27/64=0.42
+  fits<=512 s3: LW 46/91=0.51 TS 15/38=0.39 NU 28/64=0.44
+  fitting-items pass: 0/3
+  kbig base acc 0.501 (uninformative): s1 -0.5 [-4.1,+3.2] excl0=False (stored -0.4 [-4.1,+3.2]); s2 -1.6 [-5.2,+2.0] excl0=False (stored -1.6 [-5.2,+1.8]); s3 -1.1 [-4.5,+2.3] excl0=False (stored -1.1 [-4.8,+2.3])
+  lock-in [None, None, None]; probe steps [0, 50, 100]..400 (9 points); last probe s3: {'step': 400, 'LW': 0.5312, 'TS': 0.3438, 'NU': 0.4688}
+
+== p14m
+  per-object tracking: 0/3; crossed pair d10 by seed 0.000 0.000 0.000; base 0.047
+  s1: LW 74/192 ub 0.456 TS 20/64 ub 0.434 NU 33/64 ub 0.634  robust-failing ['LW', 'TS', 'NU']
+  s2: LW 74/192 ub 0.456 TS 24/64 ub 0.497 NU 28/64 ub 0.559  robust-failing ['LW', 'TS', 'NU']
+  s3: LW 69/192 ub 0.429 TS 20/64 ub 0.434 NU 32/64 ub 0.619  robust-failing ['LW', 'TS', 'NU']
+  fam base: day LW 0.27 TS 0.31 NU 1.00 | color LW 0.12 TS 0.34 NU 0.94
+  fam s1  : day LW 0.32 TS 0.25 NU 0.62 | color LW 0.45 TS 0.38 NU 0.41
+  fam s2  : day LW 0.38 TS 0.31 NU 0.44 | color LW 0.40 TS 0.44 NU 0.44
+  fam s3  : day LW 0.38 TS 0.31 NU 0.53 | color LW 0.34 TS 0.31 NU 0.47
+  kbig base acc 0.585 (uninformative): s1 -9.1 [-14.1,-4.1] excl0=True (stored -9.1 [-14.3,-4.1]); s2 -6.8 [-11.6,-1.8] excl0=True (stored -6.8 [-11.8,-1.8]); s3 -9.8 [-14.7,-4.8] excl0=True (stored -9.8 [-14.7,-4.8])
+  lock-in [None, None, None]; probe steps [0, 50, 100]..400 (9 points); last probe s3: {'step': 400, 'LW': 0.375, 'TS': 0.3125, 'NU': 0.5938}
+
+== ts3m
+  per-object tracking: 0/3; crossed pair d10 by seed 0.016 0.016 0.016; base 0.000
+  s1: LW 67/192 ub 0.419 TS 19/64 ub 0.418 NU 35/64 ub 0.663  robust-failing ['LW', 'TS', 'NU']
+  s2: LW 67/192 ub 0.419 TS 25/64 ub 0.513 NU 33/64 ub 0.634  robust-failing ['LW', 'TS', 'NU']
+  s3: LW 66/192 ub 0.413 TS 20/64 ub 0.434 NU 37/64 ub 0.691  robust-failing ['LW', 'TS', 'NU']
+  fam base: day LW 0.43 TS 0.38 NU 0.50 | color LW 0.36 TS 0.31 NU 0.47
+  fam s1  : day LW 0.38 TS 0.38 NU 0.47 | color LW 0.32 TS 0.22 NU 0.62
+  fam s2  : day LW 0.34 TS 0.44 NU 0.50 | color LW 0.35 TS 0.34 NU 0.53
+  fam s3  : day LW 0.31 TS 0.31 NU 0.62 | color LW 0.38 TS 0.31 NU 0.53
+  fits<=512 s1: LW 35/91=0.38 TS 14/38=0.37 NU 35/64=0.55
+  fits<=512 s2: LW 34/91=0.37 TS 15/38=0.39 NU 33/64=0.52
+  fits<=512 s3: LW 41/91=0.45 TS 12/38=0.32 NU 37/64=0.58
+  fitting-items pass: 0/3
+  kbig base acc 0.469 (uninformative): s1 +2.3 [-2.0,+6.6] excl0=False (stored +2.3 [-1.8,+6.6]); s2 +2.9 [-1.4,+7.3] excl0=False (stored +2.9 [-1.1,+7.3]); s3 +1.8 [-2.3,+5.9] excl0=False (stored +1.8 [-2.0,+5.9])
+  lock-in [None, None, None]; probe steps [0, 50, 100]..400 (9 points); last probe s3: {'step': 400, 'LW': 0.625, 'TS': 0.3438, 'NU': 0.4688}
+
+== p31m
+  per-object tracking: 0/3; crossed pair d10 by seed 0.734 0.750 0.766; base 0.078
+  s1: LW 191/192 ub 0.999 TS 48/64 ub 0.840 NU 32/64 ub 0.619  robust-failing ['NU']
+  s2: LW 189/192 ub 0.995 TS 48/64 ub 0.840 NU 33/64 ub 0.634  robust-failing ['NU']
+  s3: LW 192/192 ub 1.000 TS 46/64 ub 0.814 NU 34/64 ub 0.648  robust-failing ['NU']
+  fam base: day LW 0.12 TS 0.12 NU 0.97 | color LW 0.35 TS 0.41 NU 0.41
+  fam s1  : day LW 1.00 TS 1.00 NU 1.00 | color LW 0.99 TS 0.50 NU 0.00
+  fam s2  : day LW 1.00 TS 1.00 NU 1.00 | color LW 0.97 TS 0.50 NU 0.03
+  fam s3  : day LW 1.00 TS 1.00 NU 1.00 | color LW 1.00 TS 0.44 NU 0.06
+  kbig base acc 0.628 (read): s1 -3.2 [-7.3,+0.7] excl0=False (stored -3.2 [-7.0,+0.9]); s2 -3.9 [-7.9,+0.0] excl0=False (stored -3.9 [-7.9,+0.2]); s3 -0.5 [-4.5,+3.6] excl0=False (stored -0.4 [-4.5,+3.6])
+  lock-in [None, None, None]; probe steps [0, 50, 100]..400 (9 points); last probe s3: {'step': 400, 'LW': 1.0, 'TS': 0.75, 'NU': 0.5312}
+
+== ts8m
+  per-object tracking: 0/3; crossed pair d10 by seed 0.016 0.000 0.000; base 0.016
+  s1: LW 98/192 ub 0.580 TS 28/64 ub 0.559 NU 38/64 ub 0.705  robust-failing ['LW', 'TS', 'NU']
+  s2: LW 81/192 ub 0.493 TS 22/64 ub 0.466 NU 31/64 ub 0.604  robust-failing ['LW', 'TS', 'NU']
+  s3: LW 95/192 ub 0.565 TS 23/64 ub 0.482 NU 32/64 ub 0.619  robust-failing ['LW', 'TS', 'NU']
+  fam base: day LW 0.45 TS 0.34 NU 0.41 | color LW 0.31 TS 0.31 NU 0.59
+  fam s1  : day LW 0.49 TS 0.47 NU 0.59 | color LW 0.53 TS 0.41 NU 0.59
+  fam s2  : day LW 0.41 TS 0.34 NU 0.47 | color LW 0.44 TS 0.34 NU 0.50
+  fam s3  : day LW 0.45 TS 0.38 NU 0.50 | color LW 0.54 TS 0.34 NU 0.50
+  fits<=512 s1: LW 49/91=0.54 TS 16/38=0.42 NU 38/64=0.59
+  fits<=512 s2: LW 44/91=0.48 TS 12/38=0.32 NU 31/64=0.48
+  fits<=512 s3: LW 47/91=0.52 TS 13/38=0.34 NU 32/64=0.50
+  fitting-items pass: 0/3
+  kbig base acc 0.476 (uninformative): s1 +1.1 [-2.7,+5.0] excl0=False (stored +1.1 [-2.5,+5.0]); s2 +1.6 [-2.3,+5.4] excl0=False (stored +1.6 [-2.3,+5.4]); s3 +0.9 [-2.9,+4.8] excl0=False (stored +0.9 [-2.9,+4.8])
+  lock-in [None, None, None]; probe steps [0, 50, 100]..400 (9 points); last probe s3: {'step': 400, 'LW': 0.625, 'TS': 0.4062, 'NU': 0.4375}
+
+== p70m
+  per-object tracking: 0/3; crossed pair d10 by seed 0.594 0.547 0.531; base 0.172
+  s1: LW 191/192 ub 0.999 TS 42/64 ub 0.761 NU 33/64 ub 0.634  robust-failing ['TS', 'NU']
+  s2: LW 190/192 ub 0.997 TS 44/64 ub 0.788 NU 33/64 ub 0.634  robust-failing ['TS', 'NU']
+  s3: LW 189/192 ub 0.995 TS 42/64 ub 0.761 NU 35/64 ub 0.663  robust-failing ['TS', 'NU']
+  fam base: day LW 0.09 TS 0.16 NU 1.00 | color LW 0.49 TS 0.59 NU 0.28
+  fam s1  : day LW 0.99 TS 1.00 NU 1.00 | color LW 1.00 TS 0.31 NU 0.03
+  fam s2  : day LW 1.00 TS 1.00 NU 1.00 | color LW 0.98 TS 0.38 NU 0.03
+  fam s3  : day LW 0.99 TS 1.00 NU 1.00 | color LW 0.98 TS 0.31 NU 0.09
+  kbig base acc 0.635 (read): s1 -2.0 [-6.1,+2.0] excl0=False (stored -2.0 [-6.3,+2.3]); s2 -2.3 [-6.8,+2.0] excl0=False (stored -2.3 [-6.8,+2.3]); s3 -5.2 [-9.8,-0.9] excl0=True (stored -5.2 [-9.8,-0.9])
+  lock-in [None, None, None]; probe steps [0, 50, 100]..400 (9 points); last probe s3: {'step': 400, 'LW': 1.0, 'TS': 0.7188, 'NU': 0.5}
+
+== ts33m
+  per-object tracking: 0/3; crossed pair d10 by seed 0.016 0.000 0.000; base 0.000
+  s1: LW 112/192 ub 0.651 TS 33/64 ub 0.634 NU 32/64 ub 0.619  robust-failing ['LW', 'TS', 'NU']
+  s2: LW 101/192 ub 0.595 TS 27/64 ub 0.544 NU 47/64 ub 0.827  robust-failing ['LW', 'TS']
+  s3: LW 86/192 ub 0.519 TS 23/64 ub 0.482 NU 40/64 ub 0.733  robust-failing ['LW', 'TS', 'NU']
+  fam base: day LW 0.39 TS 0.28 NU 0.47 | color LW 0.39 TS 0.38 NU 0.56
+  fam s1  : day LW 0.62 TS 0.25 NU 0.44 | color LW 0.54 TS 0.78 NU 0.56
+  fam s2  : day LW 0.72 TS 0.41 NU 0.53 | color LW 0.33 TS 0.44 NU 0.94
+  fam s3  : day LW 0.59 TS 0.34 NU 0.69 | color LW 0.30 TS 0.38 NU 0.56
+  fits<=512 s1: LW 68/91=0.75 TS 15/38=0.39 NU 32/64=0.50
+  fits<=512 s2: LW 57/91=0.63 TS 13/38=0.34 NU 47/64=0.73
+  fits<=512 s3: LW 39/91=0.43 TS 13/38=0.34 NU 40/64=0.62
+  fitting-items pass: 0/3
+  kbig base acc 0.501 (uninformative): s1 +0.5 [-3.4,+4.3] excl0=False (stored +0.4 [-3.4,+4.3]); s2 +0.7 [-2.9,+4.5] excl0=False (stored +0.7 [-3.2,+4.5]); s3 -0.7 [-4.5,+3.2] excl0=False (stored -0.7 [-4.5,+3.2])
+  lock-in [None, None, None]; probe steps [0, 50, 100]..400 (9 points); last probe s3: {'step': 400, 'LW': 0.5, 'TS': 0.3125, 'NU': 0.625}
+
+== p160m
+  per-object tracking: 0/3; crossed pair d10 by seed 0.484 0.125 0.594; base 0.000
+  s1: LW 181/192 ub 0.968 TS 47/64 ub 0.827 NU 35/64 ub 0.663  robust-failing ['NU']
+  s2: LW 191/192 ub 0.999 TS 22/64 ub 0.466 NU 0/64 ub 0.057  robust-failing ['TS', 'NU']
+  s3: LW 175/192 ub 0.944 TS 41/64 ub 0.747 NU 37/64 ub 0.691  robust-failing ['TS', 'NU']
+  fam base: day LW 0.02 TS 0.03 NU 1.00 | color LW 0.18 TS 0.06 NU 0.59
+  fam s1  : day LW 0.98 TS 0.97 NU 0.94 | color LW 0.91 TS 0.50 NU 0.16
+  fam s2  : day LW 0.99 TS 0.69 NU 0.00 | color LW 1.00 TS 0.00 NU 0.00
+  fam s3  : day LW 0.95 TS 1.00 NU 1.00 | color LW 0.88 TS 0.28 NU 0.16
+  kbig base acc 0.694 (read): s1 -10.7 [-15.9,-5.4] excl0=True (stored -10.7 [-15.9,-5.7]); s2 -14.3 [-19.5,-9.1] excl0=True (stored -14.3 [-19.5,-9.3]); s3 -15.0 [-20.2,-9.8] excl0=True (stored -15.0 [-20.2,-9.8])
+  lock-in [None, None, None]; probe steps [0, 50, 100]..400 (9 points); last probe s3: {'step': 400, 'LW': 1.0, 'TS': 0.7812, 'NU': 0.5312}
+
+pythia-160m s2 noupd d10: 'later' (the other object's later value) on top in 64/64
+  31m s1 colour TS+NU d10: wrong 48/64, other object's later value on top 48
+  31m s2 colour TS+NU d10: wrong 47/64, other object's later value on top 47
+  31m s3 colour TS+NU d10: wrong 48/64, other object's later value on top 48
+  70m s1 colour TS+NU d10: wrong 53/64, other object's later value on top 53
+  70m s2 colour TS+NU d10: wrong 51/64, other object's later value on top 51
+  70m s3 colour TS+NU d10: wrong 51/64, other object's later value on top 51
+  160m s1 colour TS+NU d10: wrong 43/64, other object's later value on top 43
+  160m s2 colour TS+NU d10: wrong 64/64, other object's later value on top 64
+  160m s3 colour TS+NU d10: wrong 50/64, other object's later value on top 50

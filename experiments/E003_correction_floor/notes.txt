@@ -140,3 +140,157 @@ QUEUE (code/queue_e003.sh; one line per job in logs/queue.txt; ends with "QUEUE 
 DEVIATIONS: none yet.
 
 2026-09-24 14:15:33 DEFERRED by Claude after the E002 audit: the queue stopped at base_ts33m (a guard false positive: a shell whose text named a model script counted as a model job; guard.py fixed to count only real Python processes). Baselines exist for ts1m, p14m, ts3m, p31m, ts8m, p70m. The LR search and seeds are deferred: E002's audit showed these items can be passed by a wording-match shortcut, and E004 tests the real skill on the same tiny ladder. If E004's tiny models fail, E003 is run as the easy-version diagnostic.
+
+2026-09-26 00:29:00 RESUME (Claude). Infrastructure only: items, training code, analyzer, LR-pick rule and pass rule unchanged.
+  Condition met (the DEFERRED rule above: "If E004's tiny models fail, E003 is run as the easy-version diagnostic").
+  E004's tiny ladder ran as LR search only (dev draw, no scored seeds; E004 logs/tables.txt reads NOT_SCORED for
+  each) and every run stayed near chance (E004 chance row 0.15-0.24). Dev min / mean per LR, from E004 tables.txt:
+    TinyStories-1M  5e-05 0.06/0.20  3e-04 0.09/0.19  1e-03 0.06/0.21  3e-03 0.06/0.22  (pick 3e-04)
+    pythia-14m      5e-05 0.06/0.22  3e-04 0.09/0.30  1e-03 0.12/0.24  3e-03 0.06/0.18  (pick 1e-03)
+    TinyStories-3M  5e-05 0.12/0.24  3e-04 0.09/0.23  1e-03 0.12/0.20  3e-03 0.06/0.19  (pick 5e-05)
+    pythia-31m      5e-05 0.09/0.31  3e-04 0.06/0.34  1e-03 0.06/0.22                   (pick 5e-05)
+    TinyStories-8M  5e-05 0.03/0.18  3e-04 0.03/0.19  1e-03 0.09/0.22  3e-03 0.12/0.20  (pick 3e-03)
+  Means 0.18-0.34, mins 0.03-0.12. E004's SmolLM2-135M-Instruct reading is FAIL (all 5 seeds fail its rule).
+  Guard replaced: code/guard.py was the byte-for-byte copy of E002's guard taken 2026-09-24 (sha256
+  81c20d465bbfbead08c989fe8442e259b287edeaafd002987c45703f4a915ae9, as in logs/copied_from_E002.sha256; the old file
+  is kept as logs/guard_old_81c20d46.py). It is now E002's current master, copied byte-for-byte (sha256
+  30f97995f640ff5817a707a432849231f1f1ade6cd59448e5f28c35fd9ff2267, identical to E004's copy). Why: the 2026-09-24
+  14:14:35 stop was the old guard counting a shell whose command text named a model script. Differences (diff read):
+  only real Python processes count as model jobs; the swap kill needs growth > 768 MB together with free memory < 35%
+  on 2 consecutive 5 s samples, or growth > 4096 MB (the old rule killed on growth > 768 MB alone); the 3x wall-clock
+  cap excludes time paused for a closed lid on battery. Unchanged: < 15% free kills at once, the active-time
+  ceilings, the 35% start threshold, the LM Studio / ollama preflight, the MPS watermarks. Consequence:
+  validate_e003.py's copy check will now report "guard.py changed since it was copied from E002" (expected; the
+  record file is not edited).
+  Resume queue: code/queue_e003_resume.sh (written and dry-checked; NOT started at the time of this entry). Same
+  steps, order, job commands, arguments, ceilings, LR grids, pick_lr.py calls and analysis as queue_e003.sh. It skips
+  every job whose logs/<name>.guard.json records exit 0 and killed None and logs "already finished, not re-run" with
+  that verdict: dry_ts1m, dry_p14m, dry_ts3m, dry_p31m, dry_ts8m, dry_p70m, dry_ts33m, dry_p160m, base_ts1m,
+  base_p14m, base_ts3m, base_p31m, base_ts8m, base_p70m (14; their recorded commands equal queue_e003.sh's). It runs
+  base_ts33m (recorded preflight_refused, so it re-runs), base_p160m (never run), analyze, then section C for all 8
+  models (LR search, pick, at most one extension, seeds 1 2 3, analyze), a final analyze; last line
+  "QUEUE E003-RESUME DONE" or "QUEUE STOPPED: <reason>", appended to logs/queue.txt.
+  Differences from queue_e003.sh (infrastructure, as queue_e004_resume.sh): the start wait is for no model job by
+  guard.py's rule, then 60 s, and again (E002's queue is long finished); wait_idle before every job; a preflight
+  refusal because another model job started first is retried after 60 s (queue_e003.sh stopped on it); every other
+  preflight refusal and every memory verdict still stops the queue; a second running queue_e003*.sh stops it at
+  start; log lines add elapsed_s / peak_rss_mb / min_free and a LOSS_SELFCHECK_FAIL flag; R_* hooks for simulation.
+  Checks run (no model loaded, real logs untouched): zsh -n; an R_SIM start; the R_PLAN walk diffed against a stubbed
+  scratch copy of queue_e003.sh for 4 pick branches (CHOSEN; EXTEND then CHOSEN; NONE; EXTEND then NONE): identical
+  job, pick and skip sequences once the 14 finished jobs are removed; two mutants of the skip rule (every job
+  finished; no job finished) fail that diff; the double-start check fired on a second queue_e003_resume.sh and gave
+  0 false positives in 20 clean starts. Not exercised here: wait_idle with a live model job (copied unchanged from
+  queue_e004_resume.sh, which logged that path on 2026-09-25 20:48:52).
+  Time: the 14 finished jobs took 14 min (14:00:53 to 14:14:35); the pre-registered ~10 h estimate (6-15 h) for
+  the rest otherwise stands.
+2026-09-26 00:32:15 RESUME STARTED (Claude, reviewer): queue_e003_resume.sh started 00:31:14 (queue pid 75993, caffeinate -i -m -w pid 75994; stdout logs/queue_resume.out) after review (diff vs queue_e003.sh, guard.py byte-identical to E002's master, skip rule tested on synthetic verdicts) and idle checks (guard.other_model_jobs() empty, LM Studio and ollama empty). START 00:32:14; the 14 finished jobs were skipped; first job base_ts33m started under the guard 00:32:15 (guard pid 82287, child pid 82323). Mac was on battery (56%) at start.
+2026-09-26 01:03:24 DEVIATION (infrastructure): queue_e003_retry.sh wraps the resume queue and restarts it after a guard memory stop once free memory has stayed >= 50% for 5 min; guard unchanged; pid 20332
+2026-09-27 10:19:16 DEVIATION (infrastructure): retry wrapper restarted with a 400-stop cap (it gave up at 20 on 2026-09-27 06:33 while another project's data stream used the Mac's memory); pid 699
+
+2026-10-02 FINAL ANALYSIS PLAN (Claude, final analyst; written before the final analysis is run. The queue's interim
+logs/tables.txt of 2026-09-27 had already been read; it is not the record.)
+  1. Integrity, no model loaded (code/final_e003.py): every baseline, LR-search and scored run complete (record count
+     per set = run.json eval_counts = the pre-registered sizes; 400 finite losses; loss self-check within the
+     training script's 1e-3 tolerance); each job's final guard record exit 0 / killed None with the pre-registered
+     command (model, seed, LR, tag, sets); every out/ file of a job written inside that job's final successful run,
+     so no record from a killed attempt is read; one completed attempt per job in logs/queue.txt; each LR pick
+     recomputed with pick_lr.pick() (no file written) equal to logs/lr_pick_*.json; seeds trained at the picked LR.
+  2. code/analyze_e003.py re-run unchanged (unchanged since commit 9a10e0f of 2026-09-24, before any LR-search or
+     scored run). Its results.json and logs/tables.txt replace the queue's copies, which are diffed first.
+  3. The reading applied as written above: verdict per model (2 of 3 seeds); floor = smallest passing body per
+     ladder (Pythia clean, TinyStories secondary); secondary labels (per-object tracking; TinyStories fitting-items
+     diagnostic); "fails at every LR" = FAIL and no LR-search run reached dev min >= 0.8; knowledge change read as
+     uninformative where the untouched kbig accuracy is < 0.6.
+  POST-HOC, descriptive only, never a verdict: Wilson 95% intervals for every pass-rule cell; the failing cell(s) per
+  seed; cells split by item family and by the candidate picked; Clopper-Pearson bound on the per-seed pass probability
+  after 0/3; per-cell "component" ladders (smallest body where LW10, TS10 or NU10 alone reaches 0.8 on most seeds).
+  Deviations, numbered here (each already logged above as infrastructure; none touches items, training, scoring,
+  the LR-pick rule or the pass rule):
+    D1 guard.py replaced by E002's master (entry 2026-09-26 00:29): only real Python processes count as model jobs;
+       2-sample swap rule (kill on swap growth > 768 MB only together with free memory < 35% on 2 consecutive 5 s
+       samples, or on growth > 4096 MB); lid-closed pauses excluded from the wall-clock cap; a preflight refusal
+       caused by another model job is retried after 60 s.
+    D2 retry wrapper code/queue_e003_retry.sh (entry 2026-09-26 01:03): restarts the resume queue after a memory
+       stop once free memory has stayed >= 50% for 5 min; a killed job re-runs from scratch with the same command.
+    D3 retry cap raised from 20 to 400 stops (entry 2026-09-27 10:19).
+  Whether any of D1-D3 could change a verdict is answered from step 1's output, not assumed.
+
+2026-10-02 FINAL READING (Claude; plan above; outputs: results.json, logs/tables.txt, logs/final_e003.txt/.json)
+  Step 1, integrity (code/final_e003.py): 0 problems. 8 baselines, 29 LR-search runs and 24 scored seeds checked:
+  record counts, 400 finite losses, loss self-check, final guard record exit 0 / killed None, pre-registered command,
+  every out/ file inside its job's final run window, one completed attempt per job, all LR picks recompute identically
+  (pick_lr.pick), seeds trained at the picked LR. 34 killed attempts preceded completed runs (33 swap kills, 1 old-guard
+  preflight refusal): ft_ts33m_s1 16, ft_ts33m_s2 7, lr_p160m_3e-04 5, lr_ts1m_1e-03 2, lr_ts1m_3e-04 1, ft_p14m_s3 1,
+  ft_p160m_s2 1, base_ts33m 1. No record from a killed attempt is read.
+  Step 2: analyze_e003.py re-run unchanged; its results.json and tables.txt replaced the queue's copies (2026-10-02
+  18:08). Whether they were identical to the queue's copies can no longer be checked: those copies were overwritten
+  and no copy or hash of them was kept. It is plausible (no out/ file is newer than the last job's guard record, and
+  the analyzer is deterministic with a fixed bootstrap seed), and the audit's own rerun of the unchanged analyzer
+  reproduced the stored results.json, tables.txt and analyze_stdout.txt byte for byte.
+  Step 3, pre-registered reading:
+    Verdicts: all 8 models FAIL, 0/3 seeds each (TinyStories-1M 5e-05, pythia-14m 1e-02 after extension,
+    TinyStories-3M 1e-02 after extension, pythia-31m 5e-05, TinyStories-8M 3e-04, pythia-70m 5e-05,
+    TinyStories-33M 5e-05, pythia-160m 5e-05). Mean LW10/TS10/NU10 over seeds: ts1m 0.41/0.32/0.45; p14m 0.38/0.33/0.48;
+    ts3m 0.35/0.33/0.55; p31m 0.99/0.74/0.52; ts8m 0.48/0.38/0.53; p70m 0.99/0.67/0.53; ts33m 0.52/0.43/0.62;
+    p160m 0.95/0.57/0.38. Lock-in step: none on any seed.
+    Floor: no model passes, so no floor inside either ladder. Pythia (clean ladder): no model up to 85,056,000 body
+    passes with this recipe. TinyStories (secondary): no model up to 28,343,808 body passes. No size passes at all, so
+    it is not known that any Pythia size would, and TS10 and NU10 are non-monotone in size, so the ladders give no
+    trend to extrapolate (the generated "floor > N body" lines in logs/final_e003.txt mean only this). The only pass
+    at any size is E002's SmolLM2-135M-Instruct (106,203,456 body, 5/5), another family (data, depth, instruct
+    tuning) whose pass the E002 audit showed a wording shortcut can produce; (85.1M, 106.2M] is therefore not read as
+    a floor estimate.
+    Every model fails at every searched LR: no LR-search run reached dev min >= 0.8 (best dev min per model 0.30, 0.35,
+    0.38, 0.52, 0.31, 0.50, 0.57, 0.69 in queue order). Read as written: not learnable in 400 steps with this recipe at
+    these sizes; NOT proof of a capacity limit. Scope: "every LR" means every LR of the pre-registered grid, one seed-0
+    run each on the 320-item dev draw. The pick was the grid's lowest LR (5e-05, E002's rate) for 5 of 8 models
+    (TinyStories-1M, pythia-31m, pythia-70m, TinyStories-33M, pythia-160m), and the extension only goes up, so nothing
+    below 5e-05 was tried. This is weaker than "no learning rate works".
+    The two extended picks are near-divergent rates: at 1e-02 the mean training loss over the first 10 steps was 11.97
+    (pythia-14m) and 7.16 (TinyStories-3M), against 2.12 and 4.16 at 5e-05, and their scored seeds sit at chance.
+    pythia-14m at 5e-05 had dev LW 0.91 but NU 0.19 (below chance), so the min rule, as written, preferred the
+    all-chance 1e-02 run. The FAIL holds either way.
+    Secondary: per-object tracking 0/3 seeds for every model. TinyStories fitting-items diagnostic 0/3 for all four,
+    so the 512-token pretraining context does not explain the TinyStories failures. Position-table row norms (dry
+    runs) for rows 512+ are about half those of rows 0-511 and equal across 512-767 / 768-2047 (ts1m 0.143 vs 0.082,
+    ts33m 0.539 vs 0.284), consistent with untrained rows.
+    Non-monotone, reported as it came: on Pythia, TS10 0.33 -> 0.74 -> 0.67 -> 0.57 and NU10 0.48 -> 0.52 -> 0.53 ->
+    0.38 from 14m to 160m (pythia-160m s2 NU10 0.00).
+    Knowledge (kbig, read only where the untouched accuracy >= 0.6: pythia-31m 0.628, 70m 0.635, 160m 0.694):
+    pythia-160m -10.7, -14.3, -15.0 points (all 95% CIs exclude 0); pythia-70m -2.0, -2.3, -5.2 (only s3's CI
+    excludes 0); pythia-31m -3.2, -3.9, -0.5 (CIs include 0; s2's only just, upper bound +0.2 points). The other five
+    are uninformative by the rule (base 0.47-0.59). pythia-14m's drop is significant but read as uninformative by the
+    rule: -9.1, -6.8, -9.8 points, every 95% CI excludes 0 (McNemar p 0.0095 on s2, its smallest drop), and its
+    untouched accuracy is 0.585 < 0.6. It was trained at the near-divergent 1e-02 (above), so the drop is read as a
+    cost of that rate rather than of the task.
+    Display rounding: logs/tables.txt (the unchanged analyzer's output, left as generated) rounds the stored 4-decimal
+    dAcc again to 3 decimals; checked against the exact counts, five dAcc cells are off by 0.001: kbig_all ts1m s1
+    -0.004, p31m s2 -0.038, p31m s3 -0.004, ts33m s1 +0.004 and kbig_new ts3m s3 +0.013; from the exact counts these
+    are -0.005 (-2/441), -0.039 (-17/441), -0.005 (-2/441), +0.005 (+2/441) and +0.012 (+5/401). No reading depends
+    on them.
+  Deviations D1-D3: none could change a verdict. They decide only when a job is killed and restarted; step 1 shows
+  each job's records come from one completed run of the pre-registered command, and swap changes speed, not values
+  (final runs finished with up to 12.3 GB swap and 16% free memory, which the old 768 MB growth rule might have
+  killed). A restarted job on MPS is a fresh draw of the same seed's run, and restarts were triggered by memory only.
+  The one place a different draw could change a choice is TinyStories-1M's LR pick (dev mins 0.30 / 0.27 / 0.27 /
+  0.28; the 3e-04 and 1e-03 runs were restarts), but every LR there is at chance, so the verdict is FAIL either way.
+  A cosmetic slip: code/queue_e003_retry.sh's header comment says "Added 2026-09-26 01:40", which is wrong; D2 was
+  logged at 01:03:24 and the wrapper's first restart was at 01:08:24 (the script is left as it ran).
+  Every scored seed has a failing cell whose Wilson 95% upper bound is below 0.8, so no seed is a near-miss that a
+  different draw would plausibly flip.
+  POST-HOC (descriptive, never a verdict): the Pythia 31m/70m/160m failures sit in one item family. On weekday items
+  8 of 9 seeds score 0.94-1.00 on all three cells; on colour items TS10 is 0.00-0.50 and NU10 0.00-0.16, with the
+  other object's later colour on top (a "latest colour wins" rule). pythia-160m s2 picks the latest value on every
+  noupd item in both families. On the Pythia ladder only, LW10 alone reaches 0.8 on most seeds from pythia-31m (4.74M
+  body) up; on TinyStories it does not, including TinyStories-8M (6.3M body) and TinyStories-33M (28.3M body), LW10
+  0.42-0.58. TS10 and NU10 reach 0.8 on no scored seed; on the seed-0 dev draw single cells did (pythia-31m 5e-05 TS
+  0.91, TinyStories-33M 5e-05 NU 0.86). pythia-14m's seed-0 dev run at 5e-05 reached LW 0.91 (TS 0.33, NU 0.19) but
+  the min rule picked 1e-02 (see the near-divergence note above).
+  0/3 seeds bounds the per-seed pass probability at 0.63 (one-sided 95%), a weak bound; the decisive evidence is
+  that the same cell fails on every seed of a model, outside item noise.
+  Check on the integrity check (2026-10-02, in memory, no file changed): 5 mutants of final_e003.py's inputs (one
+  file's mtime outside its run window; one record missing; a job completed twice in queue.txt; a recomputed pick that
+  differs; a final guard record killed plus a seed command at the wrong LR) were each reported (5 of 5 killed); the
+  unmutated run then reported 0 problems again and rewrote logs/final_e003.*.
+  Notebook text for docs/EXPERIMENTS.md (E003 section): logs/notebook_e003.txt.
+Audit corrections applied (2026-10-02): from AUDIT.md, no verdict changed. FINAL READING: step 2's "identical to the queue's copies" reworded as uncheckable (Q2); floor lines reworded to "no model up to N body passes", no trend to extrapolate (Q5); "every LR" scoped to the grid, lowest-edge pick for 5 of 8 models, nothing below 5e-05 (Q4 caveat 1); near-divergent 1e-02 picks for pythia-14m and TinyStories-3M noted (Q4 caveat 2); pythia-31m knowledge -3.8/-0.4 corrected to -3.9/-0.5 plus s2's borderline CI (Q7); pythia-14m's significant but rule-uninformative drop stated (Q7); tables.txt 3-decimal double rounding noted, file left as generated; LW10 ladder scoped to Pythia and "TS10 and NU10 never do" scoped to scored seeds with the dev exceptions (Q9); retry wrapper header time slip noted, script left as it ran (Q10). logs/notebook_e003.txt: TinyStories "near chance at every size" reworded (Q9), floor and every-LR scope (Q4, Q5), pythia-14m near-divergent rate and knowledge drop (Q4, Q7), "What it changed" scoped to the tested models and searched LRs, Audit line updated.

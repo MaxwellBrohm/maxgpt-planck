@@ -67,7 +67,10 @@ def traces(out_dir):
 
 
 def analyze(out_dir, tr_dir):
-    res, L = {}, [f"E006 reading (analyze_e006.py), {time.strftime('%F %T')}", ""]
+    res, L = {}, [f"E006 reading (analyze_e006.py), {time.strftime('%F %T')}"]
+    res["tag_map"] = dict(B.FILE_TAG)
+    L += [f"record files read under another tag (notes.txt DEVIATION F1): "
+          + (", ".join(f"{a} -> {b}" for a, b in B.FILE_TAG.items()) or "none"), ""]
     for arm, prefix in (("C", "C"), ("P", "P"), ("G", "G"), ("e005w (E005 weights, CUDA)", "e005w"),
                         ("e004w (E004 weights, CUDA)", "e004w")):
         rd = PR.arm_readings(out_dir, [f"{prefix}{s}" for s in B.SEEDS])

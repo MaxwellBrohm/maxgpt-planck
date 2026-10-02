@@ -1,0 +1,14 @@
+{
+ "name": "dryC6b",
+ "command": "~/planck/venv-hf/bin/python -B e006_ft_test.py HuggingFaceTB/SmolLM2-135M-Instruct --bs 4 --accum 4 --max-len 768 --grad-ckpt --arm C --seed 0 --dry --chat --tag dryC6b",
+ "ceiling_s": 1800.0,
+ "killed": null,
+ "verdict": null,
+ "start": "2026-09-26 10:20:38",
+ "end": "2026-09-26 10:21:14",
+ "elapsed_s": 35.9,
+ "exit": 0,
+ "peak_temp_c": 58.0,
+ "peak_gpu_mem_mib": 4500.0,
+ "weights_sha256": "unsaved"
+}

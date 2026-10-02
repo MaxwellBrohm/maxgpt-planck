@@ -1,0 +1,14 @@
+{
+ "name": "e005w1_r2",
+ "command": "~/planck/venv-hf/bin/python -B e006_ft_test.py HuggingFaceTB/SmolLM2-135M-Instruct --bs 4 --accum 4 --max-len 768 --grad-ckpt --seed 1 --steps 0 --weights ../../E005_alias_eot/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s1 --chat --tag e005w1_r2",
+ "ceiling_s": 9000.0,
+ "killed": null,
+ "verdict": null,
+ "start": "2026-09-26 15:35:04",
+ "end": "2026-09-26 15:54:12",
+ "elapsed_s": 1147.9,
+ "exit": 0,
+ "peak_temp_c": 68.0,
+ "peak_gpu_mem_mib": 7972.0,
+ "weights_sha256": "f846ac3d88779cb060b53f5192826ca75a942db2ae183479397cf131ef04fa29"
+}

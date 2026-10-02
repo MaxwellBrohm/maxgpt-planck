@@ -1,0 +1,47 @@
+
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]
+Loading weights: 100%|█████████▉| 271/272 [00:00<00:00, 2698.85it/s]
+Loading weights: 100%|██████████| 272/272 [00:00<00:00, 2704.14it/s]
+loss self-check [first] hf=2.19846 answer_only=2.19846
+loss mutants [first] {'no_shift': 11.45664119720459, 'prompt_labelled': 2.2410085201263428} (must all differ from 2.19846)
+loss self-check [plain] hf=1.99833 answer_only=1.99833
+loss mutants [plain] {'no_shift': 11.100800514221191, 'prompt_labelled': 2.425694704055786} (must all differ from 1.99833)
+loss self-check [chat] hf=2.40136 answer_only=2.40136
+loss mutants [chat] {'no_shift': 12.059629440307617, 'prompt_labelled': 2.1964478492736816} (must all differ from 2.40136)
+loss self-check [replay] hf=2.04173 answer_only=2.04173
+loss mutants [replay] {'no_shift': 14.087885856628418, 'prompt_labelled': 2.289001226425171} (must all differ from 2.04173)
+probe step 0 {'step': 0, 'H1': 0.0, 'H2': 0.0, 'H3': 0.0, 'H4': 1.0, 'H5': 0.0, 'H6': 0.0, 'H7': 0.0, 'C_noupd': 0.0, 'C_twoslot': 0.0} mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+step 0 loss 3.1818 (update 2.6714 replay 0.5104) gnorm 8.33 (update part 8.27) lr 1.36e-05 2s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+step 1 loss 3.2531 (update 2.9152 replay 0.3379) gnorm 8.01 (update part 8.01) lr 1.47e-05 4s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+step 2 loss 2.6151 (update 2.2628 replay 0.3523) gnorm 7.40 (update part 7.40) lr 1.04e-05 6s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+step 3 loss 2.6938 (update 2.3591 replay 0.3347) gnorm 8.08 (update part 8.08) lr 3.58e-06 8s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+step 4 loss 3.0816 (update 2.5910 replay 0.4906) gnorm 8.40 (update part 8.34) lr 0.00e+00 10s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+probe step 5 {'step': 5, 'H1': 0.0, 'H2': 0.0, 'H3': 0.0, 'H4': 1.0, 'H5': 0.0, 'H6': 0.0, 'H7': 0.0, 'C_noupd': 0.0, 'C_twoslot': 0.0}
+scored e004/plain: 2 items in 0s
+scored e004/chat: 2 items in 0s
+scored new/plain: 2 items in 0s
+scored extra/plain: 2 items in 0s
+scored old/plain: 2 items in 0s
+scored uprobe/plain: 2 items in 0s
+scored cross/plain: 2 items in 0s
+scored new/chat: 2 items in 0s
+scored extra/chat: 2 items in 0s
+scored cross/chat: 2 items in 0s
+scored khard/plain: 2 items in 0s
+scored kbig/plain: 2 items in 0s
+scored big/plain: 2 items in 0s
+scored big/chat: 2 items in 0s
+scored h5l/plain: 2 items in 0s
+scored h5l/chat: 2 items in 0s
+scored al/plain: 2 items in 0s
+scored al/chat: 2 items in 0s
+generated e004/plain: 2 in 0s
+generated e004/chat: 2 in 0s
+generated cont/plain: 2 in 0s
+generated big/plain: 2 in 0s
+generated big/chat: 2 in 0s
+generated h5l/plain: 2 in 0s
+generated h5l/chat: 2 in 0s
+generated al/plain: 2 in 0s
+generated al/chat: 2 in 0s
+DONE HuggingFaceTB/SmolLM2-135M-Instruct dryG total 20s weights_sha256=unsaved lock_in_step=None loss_finite=True

@@ -620,8 +620,9 @@ POST-RUN LOG (kills, reruns, guard or queue edits, hand-run analyses; written as
     queue's restart rule (skip on a guard.json with exit 0, GAP on any other) does not cover a job with no guard.json:
     it starts C2 again, the guard refuses a name whose logs exist, and the queue stops after 12 refusals. No reading
     used any C2 output (the last is 20260927-052531__after_G1). The GPU sat idle until the restart below.
-    Rerun. By hand at 10:22:52 on the PC, with no E006 process running: every file of the attempt (logs/C2.log,
-    C2.guard.log, 27 out files, the 6 files of weights/..__C2; 34 in all) hashed into
+    Rerun (the queue reran C2; only the attempt's files were moved by hand). By hand at 10:22:52 on the PC, with no
+    E006 process running: every file of the attempt (logs/C2.log, C2.guard.log, 26 out files, the 6 files of
+    weights/..__C2; 34 in all) hashed into
     ~/planck/e006_run/crashed/C2_20260927-0603/MANIFEST_sha256.txt (sha256, bytes, lines, mtime; the manifest's own
     sha256 c66924e8...), then moved (not deleted) into that folder, outside out/ logs/ weights/; every moved file was
     rechecked against its recorded sha256 (all match) and nothing named C2 is left in the queue's paths. The queue
@@ -668,3 +669,101 @@ POST-RUN LOG (kills, reruns, guard or queue edits, hand-run analyses; written as
     reading so far is unchanged by the choice except where it read e005w1's gen_e004 chat (286 rows, not 640).
     At the final analysis the analyzer reads e005w1_r2's files for tag e005w1 (a mapping in analyze_e006, added
     after the queue ends so the running queue's code hash does not change).
+
+  2026-10-02 18:00-18:20  The final reading: copies, the queue's own "final", deviations F1-F4, the blinded sample.
+    Written by the analysis agent BEFORE the reading it describes was run and before the blinded sample's key or the
+    Q-chat section of any reading was opened. No model was loaded on either machine; nothing ran on the GPU; nothing
+    was written on the PC except a few small read-only scripts in planck-kit.
+    Copies. ~/planck/e006_run/out, logs and transcripts (1,221 files; weights/, replay/ (pool text) and crashed/ stay
+    on the PC) were streamed to the Mac as a tar through ssh and placed in this folder; every file's sha256 equals a
+    manifest computed on the PC in the same session (1,221 of 1,221). code/ on the Mac equals
+    logs/code_sha256_at_start_20260927-102507.txt (133 of 133 files). C2's rerun weights_sha256 is 641b454d..., the
+    crashed attempt's hash: the save survived and training reproduced.
+    The queue's own final reading. Queue step 6 wrote 20260928-145618__final ("C PARTIAL-X | P PARTIAL-X | G FAIL |
+    Q-H5 INCONCLUSIVE | Q-chat PROTECTS | knowledge REDUCES THE COST") with the queue's code, so without the e005w1
+    mapping decided at 2026-09-27 11:30. The unchanged analyzer run on the Mac from the copies (scratch readings
+    directory, trigger repro_nomap) reproduces it exactly: its .json, blind and key files byte-identical, its .txt
+    identical except the timestamp line.
+    DEVIATION F1 (analyzer; decided 2026-09-27 11:30, implemented now). analyze_e006_b.file_tag maps tag e005w1 to
+      e005w1_r2's record files (used by rec_path and passrule_e006.run_block); chat transcripts keep their tags
+      (chat_e005w1 exited 0 on E005 s1's weights, f846ac3d, 53 conversations). The reading prints the map.
+      Correction to the 11:30 entry: the killed attempt never wrote gen_big, gen_h5l, gen_al (plain and chat),
+      gen_cont or run.json, so every earlier reading, the queue's final included, read e005w seed 1 as MISSING for
+      GEN on BIG, H5L and AL, not only short on gen_e004 chat (286 of 640). Rechecked now on the Mac: its 20 files
+      hold records equal to e005w1_r2's (tag and weights_sha256 aside; gen_e004 chat on its 286).
+    DEVIATION F2 (which file is the record). Two readings carry the trigger "final". The record is the one this
+      entry's run writes (with F1); 20260928-145618__final stays as the queue wrote it. Where they differ, both are
+      reported.
+    DEVIATION F3 (place). The final analysis runs on the Mac from the verified copies (CPU only), not inside the
+      queue on the PC. E005's and E004's inputs are the repo's records, which the PC working copy mirrors.
+    DEVIATION F4 (blind order). Before the blinded sample was read, the queue's headline (Q-chat PROTECTS) was seen
+      in logs/readings/index.txt and logs/queue.txt while checking that the queue had finished. The sample was then
+      read and described here before the key or any Q-chat section was opened.
+    Blinded sample (20260928-145618__blind.json; 40 turns, arms unknown to the reader). About 25 of 40 replies open
+      with a training answer frame ("The latest plan says", "You ended up with", "That would be", "You chose", "You
+      have it on", "Green is the color", "Block out April for it", "The color is", "The city is"); at least 6 of
+      them put an unrelated value into a general question (healthy breakfast -> "The latest plan says blue"; what a
+      noun is -> "The color is black"; houseplants -> "Block out April for it"; coffee -> Lisbon). About 11 are
+      repeated-line loops, most of them a frame repeated to the cap. About 10 answer in ordinary prose (exercise,
+      coffee, the Moon, the ocean, Italy's capital, bees, a dog's name, a chef persona), mostly fluent, some wrong on
+      facts or ignoring the instruction (capital letters), one a prose loop ("I'm not sure how you're asking me").
+      Memory questions are often answered right inside a frame (Tucson, Biscuit, green, Priya). Expectation before
+      the key: the prose replies come mostly from one arm (G if replay works), the frames and frame loops mostly
+      from the other; with 25 frame replies and 20 per arm, at least 5 frame replies must come from the prose arm.
+    After the entry above (18:08-18:25). code/test_analyze_e006.py gains three tag-map checks (records under e005w1
+      itself not read; e005w1_r2's read; passrule run_block reads e005w1_r2's e004 files); the synthetic Q-H5 case
+      writes e005w s1 under the mapped name. ALL PASS on the Mac. Each new check was watched red: rec_path unmapped
+      (check 1 FAIL), run_block unmapped (check 3 FAIL), the map pointing at e005w1 itself (check 1 FAIL, then the
+      test stops on the existing file); the files were restored and hash-checked. mutation_e006 has no mutant in
+      the edited files and was not re-run.
+    THE FINAL READING (the record, DEVIATION F2): logs/readings/20261002-181132__final.txt and .json (Mac):
+      "C PARTIAL-X | P PARTIAL-X | G FAIL | Q-H5 INCONCLUSIVE | Q-chat PROTECTS | knowledge REDUCES THE COST", the
+      same line as the queue's 20260928-145618__final. Its blind sample and key are byte-identical to the queue's.
+      The two .txt files differ only in e005w lines (stopping s1 True, BIG H5 GEN pooled .649 not .672, BIG wrong
+      GEN picks, companion s1 GEN, C - e005w GEN on BIG now read, e005w1 GEN chat identical replies 640 of 640): no
+      verdict and no label of C, P or G changes. In the queue's file the .672 is printed as "(seeds [1, 2, 3, 4, 5])"
+      but is the mean of seeds 2-5 (s1 had no GEN on BIG), and its e005w s1 stopping False was read from the
+      286-record gen_e004 chat file: the "missing seed is NOT READ" rule was not applied to these descriptive lines
+      (AUDIT.md 10 (iii)). The record is complete, so nothing changes.
+    Blind key (opened after the description above): frame replies 18 C / 8 G; prose replies 10 G / 1 C; loops 10 C
+      / 1 G (G's is the prose loop); every frame that put an unrelated value into a general question was C's. As
+      expected before the key: G answers in prose far more often but still uses training frames on memory questions.
+      Caveat (AUDIT.md 9): G also opens three general questions with a training frame ("That would be a noun.", "That
+      would be oatmeal.", "You have it on the Pomodoro Technique."), so "G answers general questions in prose" holds
+      for most G turns, not all. The audit's mechanical classification (template first sentence / loop / other: C
+      8/8/4, G 8/0/12) agrees in direction with the hand count. F4 is logged; the reading order cannot be checked from
+      the files.
+    Margins read after the reading (descriptive): Q-chat (a) holds by 2.5 turns: TF_G 202 of 745 vs 0.5 x TF_C (409
+      of 745) = 204.5; 3 more template first sentences in G's 745 turns would make the label SMALL EFFECT (TF2: 4).
+      P's PARTIAL-X changes with 1 item flip (s5 LIK C_twoslot) and its any-seed variant is FAIL (s2, s4); G's FAIL
+      becomes PARTIAL-X with 1 flip (s2 GEN C_noupd) under the governing majority rule, but stays FAIL under the
+      any-seed variant (LIK control failures on s3 and s4); C's PARTIAL-X needs 3. Q-H5's intervals (LIK -.089 to
+      +.105) are wider than OPERATING CHARACTERISTICS' .054 half-width: per seed P_s - C_s on BIG H5 LIK spans -.120
+      to +.177 (SD about .12), as wide as C's own seed spread (.552-.729), so P and C behave as unpaired at the seed
+      level; the TF32 twins move BIG H5 LIK by .021 and .005, but C2t - C2 on BIG C_twoslot LIK is +0.036 (CI +0.005
+      to +0.073), the one twin interval clear of 0, and in the plain render TF32 alone changed 16 and 23 BIG H5 items
+      (C1t, C2t) against 26-48 for P - C.
+
+  2026-10-02  Audit caveats (AUDIT.md, an independent recomputation from the raw records; every verdict above stands).
+    Q-device. "0 of 59 intervals exclude 0" does not mean the cells match: 29 of the 55 score cells differ from 0 (by
+      at most 0.013; 21 of the 29 favour C), 20 of 90 pass-rule counts differ by 1-2 items (s1 GEN C_noupd 51 to 52
+      crosses the 0.8 bar, which is why C qualifies on 4 seeds where E005 qualified on 3), and C1's chat transcript
+      matches E005 s1's on only 51 of 149 turns (C2-C5: 135-149). Most intervals are degenerate ([0,0] or an endpoint
+      at 0), so "about 3.0 expected by chance" is not a calibrated null. What holds: no compared cell differs by more
+      than 1.3 points, no interval is clear of 0, and rescoring the same weights changes nothing.
+    Q-H5. INCONCLUSIVE rather than NOT THE CAUSE rests on seed 1: without s1 (descriptive) the label would read NOT
+      THE CAUSE (LIK -0.042, CI -0.116 to +0.029); without any other seed it stays INCONCLUSIVE. P stays credibly
+      below E004's weights (P - L4 LIK -0.127, CI -0.191 to -0.066); a partial gain of up to about 10 points (LIK) or
+      12 (GEN) is not excluded. The mechanism checks were too imprecise to show the predicted pattern either way:
+      P - C on BIG H5 LIK by introduction order is -0.018 (-0.074 to +0.032), -0.003 (-0.161 to +0.164) and +0.051
+      (-0.113 to +0.231), so the third-introduced rise of about 5 points is noise-level.
+    Q-chat. PROTECTS has 2.5 turns of slack out of 745. The halving holds pooled and on 2 of 5 seeds (G/C per seed
+      .52/.51/.43/.53/.47); it fails without s3 (170 > 167.5) or without any one of the conversations K_time,
+      O_add10, R_d5_multi, R_d6_name or R_d6_number. CHECKS rose only nominally: per-model mean 30.8 (C) to 37.6
+      (G), G - C +6.8 with CI -0.205 to +13.6, which includes 0.
+    Stopping. "Stopping learned" is measured in the eval's chat render. In the chat probe G hits the token cap on
+      11-56 of 149 turns per seed (the untouched model on 68).
+    Cost. No family carries a COST or LOWER mark for P or G, but G's pass rule reads FAIL where C's reads PARTIAL-X,
+      on thin control margins (G has 6 control cells under 52/64 on seeds 2-4, at 50-51 each); BIG controls show no
+      loss (plain render: every d within +-0.016; chat render: every CI includes 0).
+  Audit corrections applied (2026-10-02): C2 entry "27 out files" -> 26 (34 in all unchanged); C2's rerun attributed to the queue, only its files moved by hand; Q-chat margin "holds by 3 turns" -> 2.5; queue final's e005w BIG H5 GEN .672 "(seeds [1, 2, 3, 4, 5])" noted as the mean of seeds 2-5 and its s1 stopping False as read from a 286-record file; G's one-flip PARTIAL-X limited to the majority rule (any-seed variant stays FAIL); TF32 twin C_twoslot cell and item-change counts added; blind-key caveat (three G general questions open with a frame); audit caveats entry added (Q-device cells not identical, Q-H5 label rests on seed 1 and the mechanism checks are imprecise, Q-chat slack 2.5 of 745 and seed and conversation dependence, CHECKS rise nominal, G's probe cap counts, G's pass rule on thin control margins). No verdict changed. AUDIT.md's "Claims to reword" quote notebook text that is not in this folder, so those sentences were not found here; their caveats are in the entry above.

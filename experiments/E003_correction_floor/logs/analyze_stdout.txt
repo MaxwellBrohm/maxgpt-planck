@@ -1,72 +1,259 @@
 E003 correction floor: size ladder (body = non-embedding parameters; pass rule and seeds as E002)
 
 model                                 body        total | base LW/TS/NU     | LR     | seeds pass | verdict | mean LW10 TS10 NU10 | cross_pair@10 | kbig dAcc
-roneneldan/TinyStories-1M          398,464    3,745,984 | 0.44/0.33/0.44 | None   | 0/0        |   -     | None  None  None  | -             | -
-EleutherAI/pythia-14m            1,189,888   14,067,712 | 0.20/0.33/0.97 | None   | 0/0        |   -     | None  None  None  | -             | -
-roneneldan/TinyStories-3M        1,583,360    8,278,400 | 0.40/0.34/0.48 | None   | 0/0        |   -     | None  None  None  | -             | -
-EleutherAI/pythia-31m            4,739,072   30,494,720 | 0.24/0.27/0.69 | None   | 0/0        |   -     | None  None  None  | -             | -
-roneneldan/TinyStories-8M        6,312,448   19,702,528 | 0.38/0.33/0.50 | None   | 0/0        |   -     | None  None  None  | -             | -
-EleutherAI/pythia-70m           18,915,328   70,426,624 | 0.29/0.38/0.64 | None   | 0/0        |   -     | None  None  None  | -             | -
-roneneldan/TinyStories-33M      28,343,808   68,514,048 |   (none)        | None   | 0/0        |   -     | None  None  None  | -             | -
-EleutherAI/pythia-160m          85,056,000  162,322,944 |   (none)        | None   | 0/0        |   -     | None  None  None  | -             | -
+roneneldan/TinyStories-1M          398,464    3,745,984 | 0.44/0.33/0.44 | 5e-05  | 0/3        | FAIL    | 0.41  0.318 0.448 | 0.0           | -0.011
+EleutherAI/pythia-14m            1,189,888   14,067,712 | 0.20/0.33/0.97 | 1e-02  | 0/3        | FAIL    | 0.377 0.333 0.484 | 0.0           | -0.085
+roneneldan/TinyStories-3M        1,583,360    8,278,400 | 0.40/0.34/0.48 | 1e-02  | 0/3        | FAIL    | 0.347 0.333 0.547 | 0.016         | +0.023
+EleutherAI/pythia-31m            4,739,072   30,494,720 | 0.24/0.27/0.69 | 5e-05  | 0/3        | FAIL    | 0.993 0.74  0.516 | 0.75          | -0.025
+roneneldan/TinyStories-8M        6,312,448   19,702,528 | 0.38/0.33/0.50 | 3e-04  | 0/3        | FAIL    | 0.476 0.38  0.526 | 0.005         | +0.012
+EleutherAI/pythia-70m           18,915,328   70,426,624 | 0.29/0.38/0.64 | 5e-05  | 0/3        | FAIL    | 0.99  0.667 0.526 | 0.557         | -0.032
+roneneldan/TinyStories-33M      28,343,808   68,514,048 | 0.39/0.33/0.52 | 5e-05  | 0/3        | FAIL    | 0.519 0.432 0.62  | 0.005         | +0.001
+EleutherAI/pythia-160m          85,056,000  162,322,944 | 0.10/0.05/0.80 | 5e-05  | 0/3        | FAIL    | 0.95  0.573 0.375 | 0.401         | -0.133
 (E002) SmolLM2-135M-Instruct   106,203,456  134,515,008 | (see E002)        | 5e-05  | 5/5        | PASS    |
 
-== roneneldan/TinyStories-1M  body 398,464  total 3,745,984  (seeds: none)
+== roneneldan/TinyStories-1M  body 398,464  total 3,745,984  (seeds: s1, s2, s3)
+  lr_search: 5e-05 dev LW/TS/NU 0.39/0.30/0.56 (min 0.30) loss 4.3618->1.2935; 3e-04 dev LW/TS/NU 0.32/0.27/0.61 (min 0.27) loss 3.5628->1.1562; 1e-03 dev LW/TS/NU 0.36/0.27/0.55 (min 0.27) loss 3.6534->1.1728; 3e-03 dev LW/TS/NU 0.38/0.28/0.61 (min 0.28) loss 4.3336->1.1591 -> CHOSEN 5e-05
   run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
   base   | 0.44  0.33  0.44  fail | 0.61    0.56      0.58      0.64  0.61      0.00    | 0.43      0.00      0.06       0.03     | -      | (baseline)
-  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  s1     | 0.36  0.31  0.48  fail | 0.50    0.52      0.53      0.39  0.47      0.02    | 0.44      0.00      0.00       0.00     | None   | -0.004 [-0.041,+0.032]  +0.045 [-0.802,+0.892]
+  s2     | 0.44  0.28  0.42  fail | 0.44    0.56      0.58      0.48  0.44      0.00    | 0.41      0.00      0.00       0.03     | None   | -0.016 [-0.052,+0.018]  -0.084 [-0.825,+0.657]
+  s3     | 0.43  0.36  0.44  fail | 0.42    0.56      0.56      0.44  0.48      0.00    | 0.36      0.00      0.00       0.00     | None   | -0.011 [-0.048,+0.023]  -0.113 [-0.827,+0.601]
+  verdict (plain, pass rule): 0/3 seeds pass -> FAIL; lock-in rate 0.0
+  secondary: pass rule AND crossed pair@d10 >= 0.8 (per-object tracking): 0/3 seeds
+  secondary (DIAGNOSTIC, items within the pretraining context only): 0/3 seeds
+  knowledge s1: kbig_all n=441 0.501->0.497 dAcc -0.004 [-0.041,+0.032] dMargin +0.045 [-0.802,+0.892] | khard40 n=40 0.350->0.400 dAcc +0.050 [-0.075,+0.200] dMargin +0.525 [-2.694,+3.745] | kbig_new n=401 0.516->0.506 dAcc -0.010 [-0.047,+0.027] dMargin -0.003 [-0.879,+0.872] | K_closedbook60 n=60 0.600->0.633 dAcc +0.033 [-0.083,+0.150] dMargin +0.613 [-0.469,+1.696]
+  knowledge s2: kbig_all n=441 0.501->0.485 dAcc -0.016 [-0.052,+0.018] dMargin -0.084 [-0.825,+0.657] | khard40 n=40 0.350->0.425 dAcc +0.075 [-0.050,+0.200] dMargin -0.048 [-2.883,+2.787] | kbig_new n=401 0.516->0.491 dAcc -0.025 [-0.062,+0.013] dMargin -0.087 [-0.853,+0.678] | K_closedbook60 n=60 0.600->0.633 dAcc +0.033 [-0.067,+0.133] dMargin +0.579 [-0.242,+1.399]
+  knowledge s3: kbig_all n=441 0.501->0.490 dAcc -0.011 [-0.048,+0.023] dMargin -0.113 [-0.827,+0.601] | khard40 n=40 0.350->0.375 dAcc +0.025 [-0.100,+0.150] dMargin +0.167 [-2.374,+2.709] | kbig_new n=401 0.516->0.501 dAcc -0.015 [-0.052,+0.020] dMargin -0.141 [-0.885,+0.603] | K_closedbook60 n=60 0.600->0.600 dAcc +0.000 [-0.117,+0.117] dMargin +0.408 [-0.512,+1.327]
+  probe s1: 0:0.41/0.38/0.59 50:0.38/0.31/0.59 100:0.34/0.19/0.59 150:0.47/0.34/0.50 200:0.34/0.12/0.62 250:0.62/0.31/0.34 300:0.59/0.31/0.38 350:0.62/0.41/0.34 400:0.66/0.41/0.31
+  probe s2: 0:0.41/0.38/0.59 50:0.38/0.25/0.62 100:0.59/0.38/0.38 150:0.50/0.31/0.50 200:0.50/0.28/0.50 250:0.59/0.38/0.41 300:0.56/0.34/0.44 350:0.56/0.34/0.44 400:0.59/0.34/0.38
+  probe s3: 0:0.41/0.38/0.59 50:0.53/0.28/0.47 100:0.44/0.22/0.56 150:0.50/0.34/0.50 200:0.59/0.34/0.41 250:0.56/0.28/0.44 300:0.53/0.34/0.44 350:0.47/0.28/0.53 400:0.53/0.34/0.47
   plain d0/d4/d10 base: same_k1 0.56/0.45/0.56; same_k2 0.34/0.25/0.34; same_k3 0.39/0.36/0.41; twoslot 0.38/0.31/0.33; noupd 0.44/0.55/0.44; noupd_incid 0.45/0.47/0.61; keyorig 0.53/0.45/0.56; keycorr 0.55/0.45/0.58; pos 0.52/0.44/0.64; neutral 0.64/0.48/0.61
   POST-HOC (E002) crossed base: cross_A 0.27/0.25/0.25; cross_B 0.22/0.33/0.41; cross_pair 0.00/0.02/0.00
   uprobe base: Uneutral|d0 0.42; Uneutral|d10 0.31; Uneutral|d4 0.45; Usame|d0 0.43; Usame|d10 0.36; Usame|d4 0.31; khard open 0.40
   DIAGNOSTIC length split base: LW10|fits<=512 0.52 (n=91); LW10|over512 0.37 (n=101); TS10|fits<=512 0.37 (n=38); TS10|over512 0.27 (n=26); NU10|fits<=512 0.44 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+  plain d0/d4/d10 s1: same_k1 0.58/0.44/0.53; same_k2 0.42/0.33/0.25; same_k3 0.45/0.39/0.30; twoslot 0.42/0.34/0.31; noupd 0.41/0.58/0.48; noupd_incid 0.53/0.55/0.50; keyorig 0.64/0.48/0.52; keycorr 0.56/0.41/0.53; pos 0.56/0.45/0.39; neutral 0.70/0.34/0.47
+  POST-HOC (E002) crossed s1: cross_A 0.22/0.30/0.27; cross_B 0.31/0.38/0.23; cross_pair 0.02/0.02/0.00
+  uprobe s1: Uneutral|d0 0.47; Uneutral|d10 0.41; Uneutral|d4 0.45; Usame|d0 0.58; Usame|d10 0.41; Usame|d4 0.53; khard open 0.47
+  DIAGNOSTIC length split s1: LW10|fits<=512 0.43 (n=91); LW10|over512 0.30 (n=101); TS10|fits<=512 0.34 (n=38); TS10|over512 0.27 (n=26); NU10|fits<=512 0.48 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+  plain d0/d4/d10 s2: same_k1 0.53/0.44/0.58; same_k2 0.42/0.28/0.31; same_k3 0.33/0.31/0.42; twoslot 0.27/0.33/0.28; noupd 0.53/0.62/0.42; noupd_incid 0.48/0.55/0.44; keyorig 0.52/0.39/0.56; keycorr 0.50/0.45/0.58; pos 0.52/0.47/0.48; neutral 0.61/0.45/0.44
+  POST-HOC (E002) crossed s2: cross_A 0.28/0.28/0.30; cross_B 0.16/0.22/0.30; cross_pair 0.00/0.03/0.00
+  uprobe s2: Uneutral|d0 0.31; Uneutral|d10 0.43; Uneutral|d4 0.41; Usame|d0 0.45; Usame|d10 0.45; Usame|d4 0.45; khard open 0.45
+  DIAGNOSTIC length split s2: LW10|fits<=512 0.48 (n=91); LW10|over512 0.40 (n=101); TS10|fits<=512 0.37 (n=38); TS10|over512 0.15 (n=26); NU10|fits<=512 0.42 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+  plain d0/d4/d10 s3: same_k1 0.45/0.39/0.56; same_k2 0.33/0.36/0.31; same_k3 0.25/0.28/0.42; twoslot 0.30/0.31/0.36; noupd 0.56/0.59/0.44; noupd_incid 0.52/0.58/0.42; keyorig 0.41/0.44/0.56; keycorr 0.47/0.39/0.56; pos 0.44/0.47/0.44; neutral 0.52/0.48/0.48
+  POST-HOC (E002) crossed s3: cross_A 0.36/0.17/0.20; cross_B 0.12/0.25/0.23; cross_pair 0.00/0.00/0.00
+  uprobe s3: Uneutral|d0 0.36; Uneutral|d10 0.35; Uneutral|d4 0.40; Usame|d0 0.40; Usame|d10 0.46; Usame|d4 0.42; khard open 0.42
+  DIAGNOSTIC length split s3: LW10|fits<=512 0.51 (n=91); LW10|over512 0.37 (n=101); TS10|fits<=512 0.39 (n=38); TS10|over512 0.31 (n=26); NU10|fits<=512 0.44 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
 
-== EleutherAI/pythia-14m  body 1,189,888  total 14,067,712  (seeds: none)
+== EleutherAI/pythia-14m  body 1,189,888  total 14,067,712  (seeds: s1, s2, s3)
+  lr_search: 5e-05 dev LW/TS/NU 0.91/0.33/0.19 (min 0.19) loss 2.1155->0.2619; 3e-04 dev LW/TS/NU 0.54/0.44/0.16 (min 0.16) loss 1.5991->0.3033; 1e-03 dev LW/TS/NU 0.59/0.19/0.30 (min 0.19) loss 1.6795->0.4997; 3e-03 dev LW/TS/NU 0.42/0.23/0.56 (min 0.23) loss 3.4047->1.0372 -> EXTEND 1e-02
+  lr_search_final: 5e-05 dev LW/TS/NU 0.91/0.33/0.19 (min 0.19) loss 2.1155->0.2619; 3e-04 dev LW/TS/NU 0.54/0.44/0.16 (min 0.16) loss 1.5991->0.3033; 1e-03 dev LW/TS/NU 0.59/0.19/0.30 (min 0.19) loss 1.6795->0.4997; 3e-03 dev LW/TS/NU 0.42/0.23/0.56 (min 0.23) loss 3.4047->1.0372; 1e-02 dev LW/TS/NU 0.35/0.38/0.41 (min 0.35) loss 11.9689->1.1254 -> CHOSEN 1e-02
   run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
   base   | 0.20  0.33  0.97  fail | 1.00    0.00      1.00      0.41  0.53      0.00    | 0.17      0.00      0.00       0.00     | -      | (baseline)
-  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  s1     | 0.39  0.31  0.52  fail | 0.45    0.47      0.52      0.48  0.52      0.00    | 0.39      0.00      0.00       0.00     | None   | -0.091 [-0.143,-0.041]  -0.872 [-2.672,+0.929]
+  s2     | 0.39  0.38  0.44  fail | 0.42    0.56      0.55      0.55  0.42      0.00    | 0.39      0.00      0.00       0.09     | None   | -0.068 [-0.118,-0.018]  -1.617 [-3.500,+0.267]
+  s3     | 0.36  0.31  0.50  fail | 0.62    0.50      0.50      0.50  0.53      0.02    | 0.40      0.00      0.00       0.00     | None   | -0.098 [-0.147,-0.048]  -1.384 [-3.378,+0.610]
+  verdict (plain, pass rule): 0/3 seeds pass -> FAIL; lock-in rate 0.0
+  secondary: pass rule AND crossed pair@d10 >= 0.8 (per-object tracking): 0/3 seeds
+  knowledge s1: kbig_all n=441 0.585->0.494 dAcc -0.091 [-0.143,-0.041] dMargin -0.872 [-2.672,+0.929] | khard40 n=40 0.500->0.425 dAcc -0.075 [-0.250,+0.100] dMargin -2.507 [-9.329,+4.315] | kbig_new n=401 0.594->0.501 dAcc -0.092 [-0.145,-0.040] dMargin -0.708 [-2.571,+1.154] | K_closedbook60 n=60 0.717->0.633 dAcc -0.083 [-0.217,+0.050] dMargin +0.270 [-2.589,+3.128]
+  knowledge s2: kbig_all n=441 0.585->0.517 dAcc -0.068 [-0.118,-0.018] dMargin -1.617 [-3.500,+0.267] | khard40 n=40 0.500->0.550 dAcc +0.050 [-0.150,+0.250] dMargin -3.119 [-10.787,+4.548] | kbig_new n=401 0.594->0.514 dAcc -0.080 [-0.130,-0.030] dMargin -1.467 [-3.394,+0.461] | K_closedbook60 n=60 0.717->0.500 dAcc -0.217 [-0.350,-0.083] dMargin +0.781 [-2.023,+3.586]
+  knowledge s3: kbig_all n=441 0.585->0.487 dAcc -0.098 [-0.147,-0.048] dMargin -1.384 [-3.378,+0.610] | khard40 n=40 0.500->0.550 dAcc +0.050 [-0.150,+0.250] dMargin -3.613 [-11.249,+4.023] | kbig_new n=401 0.594->0.481 dAcc -0.112 [-0.162,-0.062] dMargin -1.162 [-3.221,+0.897] | K_closedbook60 n=60 0.717->0.633 dAcc -0.083 [-0.217,+0.033] dMargin +0.737 [-2.175,+3.649]
+  probe s1: 0:0.44/0.41/1.00 50:0.62/0.34/0.38 100:0.41/0.22/0.59 150:0.50/0.38/0.47 200:0.47/0.22/0.53 250:0.53/0.25/0.47 300:0.53/0.34/0.47 350:0.50/0.34/0.47 400:0.56/0.38/0.47
+  probe s2: 0:0.44/0.41/1.00 50:0.44/0.34/0.56 100:0.50/0.34/0.50 150:0.44/0.38/0.56 200:0.38/0.31/0.62 250:0.34/0.25/0.66 300:0.38/0.28/0.62 350:0.28/0.16/0.72 400:0.44/0.25/0.56
+  probe s3: 0:0.44/0.41/1.00 50:0.66/0.34/0.34 100:0.56/0.38/0.44 150:0.53/0.31/0.47 200:0.50/0.31/0.50 250:0.44/0.28/0.56 300:0.31/0.19/0.72 350:0.44/0.22/0.62 400:0.38/0.31/0.59
   plain d0/d4/d10 base: same_k1 0.38/0.38/0.25; same_k2 0.42/0.33/0.25; same_k3 0.42/0.30/0.09; twoslot 0.33/0.30/0.33; noupd 0.97/0.92/0.97; noupd_incid 1.00/1.00/1.00; keyorig 0.00/0.00/0.00; keycorr 1.00/1.00/1.00; pos 0.77/0.58/0.41; neutral 0.56/0.47/0.53
   POST-HOC (E002) crossed base: cross_A 0.44/0.34/0.30; cross_B 0.47/0.48/0.27; cross_pair 0.22/0.14/0.05
   uprobe base: Uneutral|d0 0.45; Uneutral|d10 0.44; Uneutral|d4 0.45; Usame|d0 0.31; Usame|d10 0.26; Usame|d4 0.35; khard open 1.00
+  plain d0/d4/d10 s1: same_k1 0.45/0.44/0.48; same_k2 0.39/0.36/0.34; same_k3 0.28/0.23/0.33; twoslot 0.33/0.28/0.31; noupd 0.50/0.55/0.52; noupd_incid 0.48/0.53/0.45; keyorig 0.48/0.47/0.47; keycorr 0.44/0.48/0.52; pos 0.47/0.48/0.48; neutral 0.50/0.64/0.52
+  POST-HOC (E002) crossed s1: cross_A 0.22/0.30/0.22; cross_B 0.28/0.27/0.28; cross_pair 0.02/0.02/0.00
+  uprobe s1: Uneutral|d0 0.50; Uneutral|d10 0.42; Uneutral|d4 0.40; Usame|d0 0.41; Usame|d10 0.39; Usame|d4 0.45; khard open 0.50
+  plain d0/d4/d10 s2: same_k1 0.58/0.64/0.55; same_k2 0.25/0.38/0.34; same_k3 0.39/0.23/0.27; twoslot 0.48/0.42/0.38; noupd 0.41/0.36/0.44; noupd_incid 0.64/0.56/0.42; keyorig 0.58/0.64/0.56; keycorr 0.58/0.64/0.55; pos 0.58/0.64/0.55; neutral 0.39/0.42/0.42
+  POST-HOC (E002) crossed s2: cross_A 0.27/0.25/0.27; cross_B 0.30/0.25/0.20; cross_pair 0.00/0.00/0.00
+  uprobe s2: Uneutral|d0 0.29; Uneutral|d10 0.32; Uneutral|d4 0.33; Usame|d0 0.49; Usame|d10 0.53; Usame|d4 0.44; khard open 0.53
+  plain d0/d4/d10 s3: same_k1 0.44/0.56/0.50; same_k2 0.36/0.42/0.36; same_k3 0.34/0.38/0.22; twoslot 0.31/0.34/0.31; noupd 0.56/0.45/0.50; noupd_incid 0.48/0.53/0.62; keyorig 0.44/0.56/0.50; keycorr 0.44/0.56/0.50; pos 0.42/0.58/0.50; neutral 0.44/0.59/0.53
+  POST-HOC (E002) crossed s3: cross_A 0.31/0.23/0.27; cross_B 0.27/0.30/0.23; cross_pair 0.00/0.00/0.00
+  uprobe s3: Uneutral|d0 0.53; Uneutral|d10 0.53; Uneutral|d4 0.46; Usame|d0 0.52; Usame|d10 0.47; Usame|d4 0.46; khard open 0.53
 
-== roneneldan/TinyStories-3M  body 1,583,360  total 8,278,400  (seeds: none)
+== roneneldan/TinyStories-3M  body 1,583,360  total 8,278,400  (seeds: s1, s2, s3)
+  lr_search: 5e-05 dev LW/TS/NU 0.45/0.23/0.41 (min 0.23) loss 4.1584->0.6934; 3e-04 dev LW/TS/NU 0.31/0.41/0.34 (min 0.31) loss 3.3548->0.7795; 1e-03 dev LW/TS/NU 0.36/0.30/0.56 (min 0.30) loss 3.7529->1.057; 3e-03 dev LW/TS/NU 0.34/0.34/0.48 (min 0.34) loss 5.38->1.1605 -> EXTEND 1e-02
+  lr_search_final: 5e-05 dev LW/TS/NU 0.45/0.23/0.41 (min 0.23) loss 4.1584->0.6934; 3e-04 dev LW/TS/NU 0.31/0.41/0.34 (min 0.31) loss 3.3548->0.7795; 1e-03 dev LW/TS/NU 0.36/0.30/0.56 (min 0.30) loss 3.7529->1.057; 3e-03 dev LW/TS/NU 0.34/0.34/0.48 (min 0.34) loss 5.38->1.1605; 1e-02 dev LW/TS/NU 0.39/0.38/0.47 (min 0.38) loss 7.1641->1.3899 -> CHOSEN 1e-02
   run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
   base   | 0.40  0.34  0.48  fail | 0.59    0.52      0.52      0.47  0.52      0.00    | 0.39      0.06      0.00       0.00     | -      | (baseline)
-  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  s1     | 0.35  0.30  0.55  fail | 0.61    0.39      0.47      0.44  0.45      0.00    | 0.40      0.00      0.00       0.00     | None   | +0.023 [-0.018,+0.066]  -0.132 [-1.429,+1.165]
+  s2     | 0.35  0.39  0.52  fail | 0.48    0.48      0.47      0.39  0.45      0.02    | 0.38      0.03      0.00       0.00     | None   | +0.029 [-0.011,+0.073]  -0.082 [-1.570,+1.406]
+  s3     | 0.34  0.31  0.58  fail | 0.39    0.42      0.50      0.42  0.42      0.05    | 0.38      0.06      0.00       0.03     | None   | +0.018 [-0.020,+0.059]  -0.071 [-1.550,+1.407]
+  verdict (plain, pass rule): 0/3 seeds pass -> FAIL; lock-in rate 0.0
+  secondary: pass rule AND crossed pair@d10 >= 0.8 (per-object tracking): 0/3 seeds
+  secondary (DIAGNOSTIC, items within the pretraining context only): 0/3 seeds
+  knowledge s1: kbig_all n=441 0.469->0.492 dAcc +0.023 [-0.018,+0.066] dMargin -0.132 [-1.429,+1.165] | khard40 n=40 0.350->0.350 dAcc +0.000 [-0.175,+0.175] dMargin -2.646 [-8.584,+3.292] | kbig_new n=401 0.481->0.506 dAcc +0.025 [-0.018,+0.067] dMargin +0.119 [-1.180,+1.417] | K_closedbook60 n=60 0.667->0.600 dAcc -0.067 [-0.200,+0.067] dMargin -0.258 [-1.860,+1.343]
+  knowledge s2: kbig_all n=441 0.469->0.499 dAcc +0.029 [-0.011,+0.073] dMargin -0.082 [-1.570,+1.406] | khard40 n=40 0.350->0.400 dAcc +0.050 [-0.125,+0.225] dMargin -3.799 [-10.321,+2.724] | kbig_new n=401 0.481->0.509 dAcc +0.027 [-0.015,+0.070] dMargin +0.289 [-1.211,+1.789] | K_closedbook60 n=60 0.667->0.600 dAcc -0.067 [-0.200,+0.067] dMargin +0.006 [-1.646,+1.657]
+  knowledge s3: kbig_all n=441 0.469->0.487 dAcc +0.018 [-0.020,+0.059] dMargin -0.071 [-1.550,+1.407] | khard40 n=40 0.350->0.425 dAcc +0.075 [-0.075,+0.250] dMargin -2.239 [-8.538,+4.059] | kbig_new n=401 0.481->0.494 dAcc +0.013 [-0.030,+0.055] dMargin +0.145 [-1.357,+1.646] | K_closedbook60 n=60 0.667->0.533 dAcc -0.133 [-0.267,+0.000] dMargin -0.527 [-2.166,+1.112]
+  probe s1: 0:0.38/0.25/0.62 50:0.66/0.44/0.41 100:0.47/0.38/0.53 150:0.41/0.28/0.59 200:0.44/0.19/0.59 250:0.62/0.38/0.31 300:0.41/0.28/0.50 350:0.47/0.34/0.59 400:0.50/0.38/0.56
+  probe s2: 0:0.38/0.25/0.62 50:0.34/0.25/0.69 100:0.59/0.47/0.47 150:0.56/0.47/0.44 200:0.50/0.38/0.59 250:0.53/0.44/0.44 300:0.56/0.38/0.38 350:0.56/0.38/0.50 400:0.53/0.44/0.53
+  probe s3: 0:0.38/0.25/0.62 50:0.56/0.38/0.41 100:0.53/0.31/0.38 150:0.50/0.28/0.50 200:0.56/0.28/0.34 250:0.50/0.31/0.47 300:0.59/0.28/0.44 350:0.53/0.28/0.53 400:0.62/0.34/0.47
   plain d0/d4/d10 base: same_k1 0.50/0.45/0.52; same_k2 0.45/0.28/0.34; same_k3 0.44/0.25/0.33; twoslot 0.27/0.34/0.34; noupd 0.52/0.55/0.48; noupd_incid 0.44/0.56/0.59; keyorig 0.52/0.47/0.52; keycorr 0.55/0.47/0.52; pos 0.50/0.44/0.47; neutral 0.56/0.48/0.52
   POST-HOC (E002) crossed base: cross_A 0.25/0.31/0.31; cross_B 0.25/0.19/0.20; cross_pair 0.00/0.00/0.00
   uprobe base: Uneutral|d0 0.50; Uneutral|d10 0.45; Uneutral|d4 0.46; Usame|d0 0.43; Usame|d10 0.49; Usame|d4 0.43; khard open 0.40
   DIAGNOSTIC length split base: LW10|fits<=512 0.46 (n=91); LW10|over512 0.34 (n=101); TS10|fits<=512 0.37 (n=38); TS10|over512 0.31 (n=26); NU10|fits<=512 0.48 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+  plain d0/d4/d10 s1: same_k1 0.52/0.45/0.39; same_k2 0.28/0.34/0.42; same_k3 0.36/0.31/0.23; twoslot 0.31/0.30/0.30; noupd 0.48/0.58/0.55; noupd_incid 0.58/0.55/0.61; keyorig 0.50/0.42/0.39; keycorr 0.55/0.47/0.47; pos 0.50/0.42/0.44; neutral 0.44/0.52/0.45
+  POST-HOC (E002) crossed s1: cross_A 0.30/0.25/0.23; cross_B 0.30/0.23/0.30; cross_pair 0.06/0.00/0.02
+  uprobe s1: Uneutral|d0 0.52; Uneutral|d10 0.41; Uneutral|d4 0.52; Usame|d0 0.55; Usame|d10 0.41; Usame|d4 0.46; khard open 0.42
+  DIAGNOSTIC length split s1: LW10|fits<=512 0.38 (n=91); LW10|over512 0.32 (n=101); TS10|fits<=512 0.37 (n=38); TS10|over512 0.19 (n=26); NU10|fits<=512 0.55 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+  plain d0/d4/d10 s2: same_k1 0.47/0.42/0.42; same_k2 0.31/0.28/0.22; same_k3 0.36/0.33/0.41; twoslot 0.34/0.30/0.39; noupd 0.55/0.59/0.52; noupd_incid 0.38/0.45/0.48; keyorig 0.42/0.55/0.48; keycorr 0.55/0.45/0.47; pos 0.47/0.47/0.39; neutral 0.58/0.66/0.45
+  POST-HOC (E002) crossed s2: cross_A 0.25/0.22/0.36; cross_B 0.12/0.28/0.20; cross_pair 0.02/0.00/0.02
+  uprobe s2: Uneutral|d0 0.38; Uneutral|d10 0.40; Uneutral|d4 0.35; Usame|d0 0.27; Usame|d10 0.36; Usame|d4 0.35; khard open 0.40
+  DIAGNOSTIC length split s2: LW10|fits<=512 0.37 (n=91); LW10|over512 0.33 (n=101); TS10|fits<=512 0.39 (n=38); TS10|over512 0.38 (n=26); NU10|fits<=512 0.52 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+  plain d0/d4/d10 s3: same_k1 0.44/0.53/0.52; same_k2 0.39/0.34/0.30; same_k3 0.28/0.33/0.22; twoslot 0.31/0.30/0.31; noupd 0.47/0.52/0.58; noupd_incid 0.52/0.50/0.39; keyorig 0.45/0.53/0.42; keycorr 0.45/0.55/0.50; pos 0.47/0.48/0.42; neutral 0.33/0.48/0.42
+  POST-HOC (E002) crossed s3: cross_A 0.17/0.27/0.25; cross_B 0.20/0.34/0.28; cross_pair 0.00/0.02/0.02
+  uprobe s3: Uneutral|d0 0.29; Uneutral|d10 0.30; Uneutral|d4 0.39; Usame|d0 0.33; Usame|d10 0.46; Usame|d4 0.39; khard open 0.40
+  DIAGNOSTIC length split s3: LW10|fits<=512 0.45 (n=91); LW10|over512 0.25 (n=101); TS10|fits<=512 0.32 (n=38); TS10|over512 0.31 (n=26); NU10|fits<=512 0.58 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
 
-== EleutherAI/pythia-31m  body 4,739,072  total 30,494,720  (seeds: none)
+== EleutherAI/pythia-31m  body 4,739,072  total 30,494,720  (seeds: s1, s2, s3)
+  lr_search: 5e-05 dev LW/TS/NU 1.00/0.91/0.52 (min 0.52) loss 1.8344->0.0611; 3e-04 dev LW/TS/NU 0.96/0.72/0.27 (min 0.27) loss 1.4894->0.1023; 1e-03 dev LW/TS/NU 0.41/0.42/0.45 (min 0.41) loss 1.6714->0.6379 -> CHOSEN 5e-05
   run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
   base   | 0.24  0.27  0.69  fail | 1.00    0.00      0.98      0.34  0.59      0.00    | 0.15      0.03      0.00       0.00     | -      | (baseline)
-  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  s1     | 0.99  0.75  0.50  fail | 1.00    0.33      1.00      1.00  0.73      0.00    | 1.00      0.47      0.03       0.00     | None   | -0.032 [-0.070,+0.009]  -0.421 [-1.131,+0.288]
+  s2     | 0.98  0.75  0.52  fail | 1.00    0.03      1.00      1.00  0.72      0.00    | 1.00      0.66      0.03       0.00     | None   | -0.038 [-0.079,+0.002]  -0.248 [-0.840,+0.343]
+  s3     | 1.00  0.72  0.53  fail | 1.00    0.16      1.00      1.00  0.97      0.00    | 1.00      0.56      0.00       0.19     | None   | -0.004 [-0.045,+0.036]  +0.197 [-0.629,+1.022]
+  verdict (plain, pass rule): 0/3 seeds pass -> FAIL; lock-in rate 0.0
+  secondary: pass rule AND crossed pair@d10 >= 0.8 (per-object tracking): 0/3 seeds
+  knowledge s1: kbig_all n=441 0.628->0.596 dAcc -0.032 [-0.070,+0.009] dMargin -0.421 [-1.131,+0.288] | khard40 n=40 0.675->0.525 dAcc -0.150 [-0.275,-0.025] dMargin -1.613 [-4.506,+1.280] | kbig_new n=401 0.623->0.604 dAcc -0.020 [-0.060,+0.020] dMargin -0.302 [-1.028,+0.423] | K_closedbook60 n=60 0.700->0.683 dAcc -0.017 [-0.133,+0.100] dMargin +0.386 [-0.440,+1.212]
+  knowledge s2: kbig_all n=441 0.628->0.590 dAcc -0.038 [-0.079,+0.002] dMargin -0.248 [-0.840,+0.343] | khard40 n=40 0.675->0.475 dAcc -0.200 [-0.350,-0.050] dMargin -0.410 [-2.966,+2.146] | kbig_new n=401 0.623->0.601 dAcc -0.022 [-0.062,+0.020] dMargin -0.232 [-0.832,+0.367] | K_closedbook60 n=60 0.700->0.650 dAcc -0.050 [-0.167,+0.067] dMargin -0.097 [-0.767,+0.573]
+  knowledge s3: kbig_all n=441 0.628->0.624 dAcc -0.004 [-0.045,+0.036] dMargin +0.197 [-0.629,+1.022] | khard40 n=40 0.675->0.550 dAcc -0.125 [-0.275,+0.025] dMargin -1.322 [-4.723,+2.080] | kbig_new n=401 0.623->0.631 dAcc +0.007 [-0.035,+0.050] dMargin +0.348 [-0.494,+1.190] | K_closedbook60 n=60 0.700->0.700 dAcc +0.000 [-0.117,+0.117] dMargin +0.815 [-0.188,+1.817]
+  probe s1: 0:0.34/0.34/0.69 50:0.81/0.16/0.28 100:1.00/0.69/0.50 150:1.00/0.88/0.56 200:1.00/0.69/0.50 250:1.00/0.78/0.50 300:1.00/0.78/0.50 350:1.00/0.88/0.50 400:1.00/0.84/0.50
+  probe s2: 0:0.34/0.34/0.69 50:0.47/0.31/0.69 100:0.94/0.66/0.50 150:1.00/0.56/0.50 200:1.00/0.56/0.50 250:1.00/0.72/0.53 300:1.00/0.94/0.53 350:1.00/0.81/0.50 400:1.00/0.75/0.50
+  probe s3: 0:0.34/0.34/0.69 50:0.66/0.50/0.66 100:0.97/0.56/0.38 150:1.00/0.72/0.44 200:1.00/0.88/0.84 250:1.00/0.81/0.66 300:1.00/0.75/0.50 350:1.00/0.75/0.50 400:1.00/0.75/0.53
   plain d0/d4/d10 base: same_k1 0.80/0.50/0.33; same_k2 0.58/0.19/0.12; same_k3 0.69/0.27/0.27; twoslot 0.45/0.22/0.27; noupd 0.48/0.78/0.69; noupd_incid 1.00/1.00/1.00; keyorig 0.00/0.00/0.00; keycorr 1.00/1.00/0.98; pos 0.94/0.55/0.34; neutral 0.69/0.39/0.59
   POST-HOC (E002) crossed base: cross_A 0.61/0.25/0.30; cross_B 0.67/0.48/0.19; cross_pair 0.34/0.11/0.08
   uprobe base: Uneutral|d0 0.42; Uneutral|d10 0.48; Uneutral|d4 0.41; Usame|d0 0.58; Usame|d10 0.06; Usame|d4 0.34; khard open 1.00
+  plain d0/d4/d10 s1: same_k1 1.00/1.00/1.00; same_k2 1.00/1.00/1.00; same_k3 1.00/1.00/0.98; twoslot 0.50/0.53/0.75; noupd 0.44/0.50/0.50; noupd_incid 1.00/1.00/1.00; keyorig 0.84/0.67/0.33; keycorr 1.00/1.00/1.00; pos 1.00/1.00/1.00; neutral 0.98/0.97/0.73
+  POST-HOC (E002) crossed s1: cross_A 0.55/0.53/0.78; cross_B 0.95/1.00/0.95; cross_pair 0.50/0.53/0.73
+  uprobe s1: Uneutral|d0 1.00; Uneutral|d10 0.95; Uneutral|d4 0.99; Usame|d0 1.00; Usame|d10 1.00; Usame|d4 1.00; khard open 1.00
+  plain d0/d4/d10 s2: same_k1 1.00/1.00/1.00; same_k2 1.00/1.00/1.00; same_k3 1.00/0.98/0.95; twoslot 0.66/0.64/0.75; noupd 0.47/0.50/0.52; noupd_incid 1.00/1.00/1.00; keyorig 0.52/0.34/0.03; keycorr 1.00/1.00/1.00; pos 1.00/1.00/1.00; neutral 1.00/1.00/0.72
+  POST-HOC (E002) crossed s2: cross_A 0.66/0.56/0.75; cross_B 1.00/1.00/1.00; cross_pair 0.66/0.56/0.75
+  uprobe s2: Uneutral|d0 1.00; Uneutral|d10 0.61; Uneutral|d4 1.00; Usame|d0 1.00; Usame|d10 1.00; Usame|d4 1.00; khard open 1.00
+  plain d0/d4/d10 s3: same_k1 1.00/1.00/1.00; same_k2 1.00/1.00/1.00; same_k3 1.00/1.00/1.00; twoslot 0.50/0.56/0.72; noupd 0.47/0.50/0.53; noupd_incid 1.00/1.00/1.00; keyorig 0.48/0.42/0.16; keycorr 1.00/1.00/1.00; pos 1.00/1.00/1.00; neutral 1.00/1.00/0.97
+  POST-HOC (E002) crossed s3: cross_A 0.55/0.58/0.77; cross_B 1.00/1.00/1.00; cross_pair 0.55/0.58/0.77
+  uprobe s3: Uneutral|d0 1.00; Uneutral|d10 0.81; Uneutral|d4 1.00; Usame|d0 1.00; Usame|d10 1.00; Usame|d4 1.00; khard open 1.00
 
-== roneneldan/TinyStories-8M  body 6,312,448  total 19,702,528  (seeds: none)
+== roneneldan/TinyStories-8M  body 6,312,448  total 19,702,528  (seeds: s1, s2, s3)
+  lr_search: 5e-05 dev LW/TS/NU 0.34/0.27/0.59 (min 0.27) loss 3.7245->0.71; 3e-04 dev LW/TS/NU 0.45/0.31/0.53 (min 0.31) loss 3.1322->0.7032; 1e-03 dev LW/TS/NU 0.36/0.30/0.50 (min 0.30) loss 3.3078->1.1292 -> CHOSEN 3e-04
   run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
   base   | 0.38  0.33  0.50  fail | 0.48    0.50      0.50      0.42  0.42      0.00    | 0.39      0.00      0.03       0.03     | -      | (baseline)
-  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  s1     | 0.51  0.44  0.59  fail | 0.67    0.58      0.70      0.73  0.62      0.08    | 0.48      0.00      0.00       0.00     | None   | +0.011 [-0.025,+0.050]  +0.236 [-0.750,+1.222]
+  s2     | 0.42  0.34  0.48  fail | 0.61    0.53      0.73      0.53  0.53      0.02    | 0.49      0.03      0.00       0.00     | None   | +0.016 [-0.023,+0.054]  +0.269 [-0.640,+1.178]
+  s3     | 0.49  0.36  0.50  fail | 0.62    0.69      0.55      0.69  0.67      0.03    | 0.58      0.00      0.00       0.00     | None   | +0.009 [-0.029,+0.048]  +0.094 [-0.976,+1.163]
+  verdict (plain, pass rule): 0/3 seeds pass -> FAIL; lock-in rate 0.0
+  secondary: pass rule AND crossed pair@d10 >= 0.8 (per-object tracking): 0/3 seeds
+  secondary (DIAGNOSTIC, items within the pretraining context only): 0/3 seeds
+  knowledge s1: kbig_all n=441 0.476->0.487 dAcc +0.011 [-0.025,+0.050] dMargin +0.236 [-0.750,+1.222] | khard40 n=40 0.375->0.400 dAcc +0.025 [-0.150,+0.200] dMargin +0.185 [-3.940,+4.309] | kbig_new n=401 0.486->0.496 dAcc +0.010 [-0.027,+0.050] dMargin +0.241 [-0.764,+1.247] | K_closedbook60 n=60 0.667->0.650 dAcc -0.017 [-0.150,+0.117] dMargin -0.810 [-1.998,+0.377]
+  knowledge s2: kbig_all n=441 0.476->0.492 dAcc +0.016 [-0.023,+0.054] dMargin +0.269 [-0.640,+1.178] | khard40 n=40 0.375->0.400 dAcc +0.025 [-0.125,+0.175] dMargin -1.491 [-5.176,+2.194] | kbig_new n=401 0.486->0.501 dAcc +0.015 [-0.025,+0.055] dMargin +0.445 [-0.485,+1.375] | K_closedbook60 n=60 0.667->0.700 dAcc +0.033 [-0.100,+0.167] dMargin -1.074 [-2.490,+0.342]
+  knowledge s3: kbig_all n=441 0.476->0.485 dAcc +0.009 [-0.029,+0.048] dMargin +0.094 [-0.976,+1.163] | khard40 n=40 0.375->0.475 dAcc +0.100 [-0.050,+0.250] dMargin -0.429 [-4.701,+3.842] | kbig_new n=401 0.486->0.486 dAcc +0.000 [-0.040,+0.040] dMargin +0.146 [-0.952,+1.244] | K_closedbook60 n=60 0.667->0.683 dAcc +0.017 [-0.117,+0.150] dMargin -0.161 [-1.468,+1.146]
+  probe s1: 0:0.53/0.22/0.47 50:0.44/0.41/0.56 100:0.41/0.28/0.59 150:0.44/0.28/0.56 200:0.62/0.38/0.44 250:0.56/0.31/0.53 300:0.56/0.44/0.62 350:0.62/0.47/0.72 400:0.66/0.53/0.72
+  probe s2: 0:0.53/0.22/0.47 50:0.44/0.38/0.56 100:0.62/0.41/0.41 150:0.56/0.38/0.47 200:0.50/0.34/0.50 250:0.44/0.44/0.56 300:0.69/0.41/0.28 350:0.56/0.38/0.44 400:0.59/0.34/0.47
+  probe s3: 0:0.53/0.22/0.47 50:0.66/0.47/0.34 100:0.41/0.25/0.53 150:0.56/0.31/0.44 200:0.59/0.25/0.47 250:0.38/0.22/0.66 300:0.66/0.34/0.41 350:0.62/0.41/0.41 400:0.62/0.41/0.44
   plain d0/d4/d10 base: same_k1 0.38/0.45/0.48; same_k2 0.28/0.33/0.39; same_k3 0.31/0.27/0.27; twoslot 0.30/0.44/0.33; noupd 0.50/0.52/0.50; noupd_incid 0.77/0.59/0.48; keyorig 0.23/0.39/0.50; keycorr 0.61/0.56/0.50; pos 0.45/0.55/0.42; neutral 0.41/0.44/0.42
   POST-HOC (E002) crossed base: cross_A 0.25/0.28/0.19; cross_B 0.30/0.27/0.22; cross_pair 0.05/0.03/0.02
   uprobe base: Uneutral|d0 0.47; Uneutral|d10 0.44; Uneutral|d4 0.48; Usame|d0 0.60; Usame|d10 0.43; Usame|d4 0.48; khard open 0.38
   DIAGNOSTIC length split base: LW10|fits<=512 0.47 (n=91); LW10|over512 0.30 (n=101); TS10|fits<=512 0.37 (n=38); TS10|over512 0.27 (n=26); NU10|fits<=512 0.50 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+  plain d0/d4/d10 s1: same_k1 0.53/0.77/0.59; same_k2 0.52/0.53/0.47; same_k3 0.48/0.56/0.47; twoslot 0.36/0.70/0.44; noupd 0.83/0.70/0.59; noupd_incid 0.88/0.84/0.67; keyorig 0.52/0.64/0.58; keycorr 0.75/0.77/0.70; pos 0.92/0.92/0.73; neutral 0.55/0.72/0.62
+  POST-HOC (E002) crossed s1: cross_A 0.31/0.33/0.27; cross_B 0.61/0.62/0.44; cross_pair 0.00/0.00/0.02
+  uprobe s1: Uneutral|d0 0.54; Uneutral|d10 0.48; Uneutral|d4 0.54; Usame|d0 0.45; Usame|d10 0.41; Usame|d4 0.54; khard open 0.57
+  DIAGNOSTIC length split s1: LW10|fits<=512 0.54 (n=91); LW10|over512 0.49 (n=101); TS10|fits<=512 0.42 (n=38); TS10|over512 0.46 (n=26); NU10|fits<=512 0.59 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+  plain d0/d4/d10 s2: same_k1 0.48/0.59/0.55; same_k2 0.45/0.47/0.38; same_k3 0.38/0.44/0.34; twoslot 0.25/0.55/0.34; noupd 0.45/0.38/0.48; noupd_incid 0.88/0.91/0.61; keyorig 0.30/0.55/0.53; keycorr 0.80/0.88/0.73; pos 0.53/0.70/0.53; neutral 0.28/0.58/0.53
+  POST-HOC (E002) crossed s2: cross_A 0.30/0.48/0.23; cross_B 0.23/0.50/0.30; cross_pair 0.02/0.00/0.00
+  uprobe s2: Uneutral|d0 0.38; Uneutral|d10 0.53; Uneutral|d4 0.41; Usame|d0 0.51; Usame|d10 0.53; Usame|d4 0.53; khard open 0.50
+  DIAGNOSTIC length split s2: LW10|fits<=512 0.48 (n=91); LW10|over512 0.37 (n=101); TS10|fits<=512 0.32 (n=38); TS10|over512 0.38 (n=26); NU10|fits<=512 0.48 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+  plain d0/d4/d10 s3: same_k1 0.56/0.59/0.59; same_k2 0.31/0.42/0.45; same_k3 0.28/0.48/0.44; twoslot 0.34/0.64/0.36; noupd 0.61/0.48/0.50; noupd_incid 0.88/0.88/0.62; keyorig 0.61/0.70/0.69; keycorr 0.36/0.59/0.55; pos 0.72/0.75/0.69; neutral 0.58/0.73/0.67
+  POST-HOC (E002) crossed s3: cross_A 0.17/0.44/0.19; cross_B 0.39/0.47/0.48; cross_pair 0.00/0.00/0.00
+  uprobe s3: Uneutral|d0 0.59; Uneutral|d10 0.55; Uneutral|d4 0.58; Usame|d0 0.46; Usame|d10 0.55; Usame|d4 0.53; khard open 0.47
+  DIAGNOSTIC length split s3: LW10|fits<=512 0.52 (n=91); LW10|over512 0.48 (n=101); TS10|fits<=512 0.34 (n=38); TS10|over512 0.38 (n=26); NU10|fits<=512 0.50 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
 
-== EleutherAI/pythia-70m  body 18,915,328  total 70,426,624  (seeds: none)
+== EleutherAI/pythia-70m  body 18,915,328  total 70,426,624  (seeds: s1, s2, s3)
+  lr_search: 5e-05 dev LW/TS/NU 1.00/0.66/0.50 (min 0.50) loss 1.4013->0.0646; 3e-04 dev LW/TS/NU 0.78/0.42/0.27 (min 0.27) loss 1.4354->0.4034; 1e-03 dev LW/TS/NU 0.36/0.36/0.39 (min 0.36) loss 2.2817->0.922 -> CHOSEN 5e-05
   run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
   base   | 0.29  0.38  0.64  fail | 1.00    0.00      1.00      0.50  0.62      0.00    | 0.06      0.00      0.03       0.12     | -      | (baseline)
-  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  s1     | 0.99  0.66  0.52  fail | 1.00    0.44      1.00      1.00  0.88      0.36    | 1.00      0.38      0.00       0.25     | None   | -0.020 [-0.064,+0.023]  +0.687 [-0.380,+1.754]
+  s2     | 0.99  0.69  0.52  fail | 1.00    0.16      1.00      1.00  0.92      0.16    | 1.00      0.44      0.03       0.03     | None   | -0.023 [-0.068,+0.023]  +0.928 [-0.256,+2.111]
+  s3     | 0.98  0.66  0.55  fail | 1.00    0.45      1.00      1.00  0.83      0.44    | 1.00      0.59      0.06       0.03     | None   | -0.052 [-0.098,-0.009]  +0.346 [-0.992,+1.683]
+  verdict (plain, pass rule): 0/3 seeds pass -> FAIL; lock-in rate 0.0
+  secondary: pass rule AND crossed pair@d10 >= 0.8 (per-object tracking): 0/3 seeds
+  knowledge s1: kbig_all n=441 0.635->0.615 dAcc -0.020 [-0.064,+0.023] dMargin +0.687 [-0.380,+1.754] | khard40 n=40 0.625->0.650 dAcc +0.025 [-0.125,+0.175] dMargin +1.748 [-2.708,+6.203] | kbig_new n=401 0.636->0.611 dAcc -0.025 [-0.067,+0.020] dMargin +0.581 [-0.507,+1.669] | K_closedbook60 n=60 0.700->0.683 dAcc -0.017 [-0.150,+0.117] dMargin +0.583 [-0.803,+1.970]
+  knowledge s2: kbig_all n=441 0.635->0.612 dAcc -0.023 [-0.068,+0.023] dMargin +0.928 [-0.256,+2.111] | khard40 n=40 0.625->0.700 dAcc +0.075 [-0.075,+0.225] dMargin -0.094 [-4.550,+4.362] | kbig_new n=401 0.636->0.604 dAcc -0.032 [-0.080,+0.015] dMargin +1.030 [-0.195,+2.255] | K_closedbook60 n=60 0.700->0.717 dAcc +0.017 [-0.133,+0.167] dMargin +1.735 [-0.176,+3.645]
+  knowledge s3: kbig_all n=441 0.635->0.583 dAcc -0.052 [-0.098,-0.009] dMargin +0.346 [-0.992,+1.683] | khard40 n=40 0.625->0.500 dAcc -0.125 [-0.275,+0.025] dMargin -1.549 [-7.319,+4.221] | kbig_new n=401 0.636->0.591 dAcc -0.045 [-0.092,+0.003] dMargin +0.535 [-0.821,+1.890] | K_closedbook60 n=60 0.700->0.750 dAcc +0.050 [-0.050,+0.167] dMargin +2.174 [+0.405,+3.943]
+  probe s1: 0:0.69/0.47/0.56 50:0.59/0.38/0.50 100:0.81/0.66/0.66 150:1.00/0.81/0.50 200:0.97/0.69/0.53 250:1.00/0.75/0.50 300:1.00/0.69/0.50 350:1.00/0.69/0.50 400:1.00/0.69/0.50
+  probe s2: 0:0.69/0.47/0.56 50:0.59/0.28/0.72 100:0.97/0.91/0.75 150:1.00/0.88/0.69 200:1.00/0.69/0.50 250:1.00/0.72/0.56 300:1.00/0.66/0.50 350:1.00/0.66/0.50 400:1.00/0.69/0.50
+  probe s3: 0:0.69/0.47/0.56 50:0.69/0.56/0.62 100:0.94/0.91/0.53 150:1.00/0.78/0.50 200:1.00/0.62/0.50 250:1.00/0.66/0.50 300:1.00/0.75/0.50 350:1.00/0.72/0.50 400:1.00/0.72/0.50
   plain d0/d4/d10 base: same_k1 0.70/0.53/0.55; same_k2 0.42/0.19/0.19; same_k3 0.50/0.23/0.14; twoslot 0.53/0.41/0.38; noupd 0.48/0.72/0.64; noupd_incid 0.98/1.00/1.00; keyorig 0.06/0.00/0.00; keycorr 1.00/1.00/1.00; pos 0.69/0.39/0.50; neutral 0.64/0.44/0.62
   POST-HOC (E002) crossed base: cross_A 0.48/0.42/0.28; cross_B 0.81/0.36/0.61; cross_pair 0.36/0.14/0.17
   uprobe base: Uneutral|d0 0.47; Uneutral|d10 0.47; Uneutral|d4 0.42; Usame|d0 0.41; Usame|d10 0.16; Usame|d4 0.32; khard open 1.00
+  plain d0/d4/d10 s1: same_k1 1.00/1.00/1.00; same_k2 1.00/1.00/1.00; same_k3 0.88/1.00/0.98; twoslot 0.67/0.53/0.66; noupd 0.47/0.45/0.52; noupd_incid 1.00/1.00/1.00; keyorig 0.69/0.66/0.44; keycorr 1.00/1.00/1.00; pos 1.00/1.00/1.00; neutral 1.00/1.00/0.88
+  POST-HOC (E002) crossed s1: cross_A 0.70/0.55/0.59; cross_B 1.00/1.00/1.00; cross_pair 0.70/0.55/0.59
+  uprobe s1: Uneutral|d0 1.00; Uneutral|d10 0.96; Uneutral|d4 1.00; Usame|d0 1.00; Usame|d10 1.00; Usame|d4 1.00; khard open 0.97
+  plain d0/d4/d10 s2: same_k1 1.00/1.00/1.00; same_k2 1.00/1.00/1.00; same_k3 1.00/0.98/0.97; twoslot 0.50/0.52/0.69; noupd 0.42/0.42/0.52; noupd_incid 1.00/1.00/1.00; keyorig 0.44/0.66/0.16; keycorr 1.00/1.00/1.00; pos 1.00/1.00/1.00; neutral 1.00/1.00/0.92
+  POST-HOC (E002) crossed s2: cross_A 0.50/0.52/0.55; cross_B 1.00/1.00/1.00; cross_pair 0.50/0.52/0.55
+  uprobe s2: Uneutral|d0 1.00; Uneutral|d10 1.00; Uneutral|d4 1.00; Usame|d0 1.00; Usame|d10 1.00; Usame|d4 1.00; khard open 1.00
+  plain d0/d4/d10 s3: same_k1 1.00/1.00/1.00; same_k2 1.00/1.00/1.00; same_k3 0.98/1.00/0.95; twoslot 0.50/0.53/0.66; noupd 0.48/0.50/0.55; noupd_incid 1.00/1.00/1.00; keyorig 0.78/0.73/0.45; keycorr 1.00/1.00/1.00; pos 1.00/1.00/1.00; neutral 1.00/1.00/0.83
+  POST-HOC (E002) crossed s3: cross_A 0.48/0.50/0.53; cross_B 1.00/1.00/1.00; cross_pair 0.48/0.50/0.53
+  uprobe s3: Uneutral|d0 1.00; Uneutral|d10 0.98; Uneutral|d4 1.00; Usame|d0 0.97; Usame|d10 1.00; Usame|d4 1.00; khard open 1.00
 
-== roneneldan/TinyStories-33M  body 28,343,808  total 68,514,048  (seeds: none)
+== roneneldan/TinyStories-33M  body 28,343,808  total 68,514,048  (seeds: s1, s2, s3)
+  lr_search: 5e-05 dev LW/TS/NU 0.57/0.62/0.86 (min 0.57) loss 4.1433->0.3881; 3e-04 dev LW/TS/NU 0.31/0.27/0.42 (min 0.27) loss 3.2087->0.4898; 1e-03 dev LW/TS/NU 0.44/0.25/0.55 (min 0.25) loss 3.3951->1.007 -> CHOSEN 5e-05
   run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
-  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  base   | 0.39  0.33  0.52  fail | 0.64    0.47      0.48      0.58  0.42      0.00    | 0.45      0.03      0.00       0.03     | -      | (baseline)
+  s1     | 0.58  0.52  0.50  fail | 1.00    0.67      0.64      1.00  0.72      0.06    | 0.44      0.16      0.03       0.03     | None   | +0.004 [-0.034,+0.043]  +0.332 [-0.527,+1.191]
+  s2     | 0.53  0.42  0.73  fail | 1.00    0.53      0.36      0.91  0.69      0.08    | 0.39      0.03      0.03       0.00     | None   | +0.007 [-0.032,+0.045]  +0.252 [-0.689,+1.192]
+  s3     | 0.45  0.36  0.62  fail | 1.00    0.86      0.28      0.78  0.84      0.06    | 0.76      0.00      0.03       0.00     | None   | -0.007 [-0.045,+0.032]  +0.451 [-0.358,+1.260]
+  verdict (plain, pass rule): 0/3 seeds pass -> FAIL; lock-in rate 0.0
+  secondary: pass rule AND crossed pair@d10 >= 0.8 (per-object tracking): 0/3 seeds
+  secondary (DIAGNOSTIC, items within the pretraining context only): 0/3 seeds
+  knowledge s1: kbig_all n=441 0.501->0.506 dAcc +0.004 [-0.034,+0.043] dMargin +0.332 [-0.527,+1.191] | khard40 n=40 0.400->0.525 dAcc +0.125 [-0.025,+0.275] dMargin +1.172 [-1.611,+3.955] | kbig_new n=401 0.511->0.504 dAcc -0.007 [-0.047,+0.032] dMargin +0.248 [-0.655,+1.151] | K_closedbook60 n=60 0.583->0.600 dAcc +0.017 [-0.117,+0.150] dMargin -0.613 [-1.975,+0.750]
+  knowledge s2: kbig_all n=441 0.501->0.508 dAcc +0.007 [-0.032,+0.045] dMargin +0.252 [-0.689,+1.192] | khard40 n=40 0.400->0.475 dAcc +0.075 [-0.075,+0.225] dMargin +0.624 [-2.776,+4.024] | kbig_new n=401 0.511->0.511 dAcc +0.000 [-0.037,+0.040] dMargin +0.214 [-0.764,+1.193] | K_closedbook60 n=60 0.583->0.617 dAcc +0.033 [-0.117,+0.183] dMargin +0.043 [-1.496,+1.583]
+  knowledge s3: kbig_all n=441 0.501->0.494 dAcc -0.007 [-0.045,+0.032] dMargin +0.451 [-0.358,+1.260] | khard40 n=40 0.400->0.475 dAcc +0.075 [-0.075,+0.225] dMargin +1.690 [-1.132,+4.513] | kbig_new n=401 0.511->0.496 dAcc -0.015 [-0.055,+0.025] dMargin +0.327 [-0.517,+1.171] | K_closedbook60 n=60 0.583->0.633 dAcc +0.050 [-0.083,+0.183] dMargin -0.266 [-1.535,+1.002]
+  probe s1: 0:0.56/0.34/0.50 50:0.50/0.16/0.59 100:0.50/0.25/0.53 150:0.41/0.28/0.59 200:0.53/0.19/0.44 250:0.56/0.44/0.50 300:0.72/0.50/0.56 350:0.88/0.53/0.59 400:0.84/0.50/0.59
+  probe s2: 0:0.56/0.34/0.50 50:0.41/0.22/0.59 100:0.66/0.47/0.34 150:0.25/0.22/0.81 200:0.28/0.19/0.81 250:0.53/0.44/0.84 300:0.47/0.31/0.75 350:0.50/0.34/0.84 400:0.56/0.31/0.78
+  probe s3: 0:0.56/0.34/0.50 50:0.69/0.44/0.31 100:0.44/0.25/0.59 150:0.56/0.38/0.44 200:0.62/0.53/0.53 250:0.59/0.31/0.50 300:0.53/0.34/0.53 350:0.50/0.38/0.66 400:0.50/0.31/0.62
+  plain d0/d4/d10 base: same_k1 0.39/0.47/0.47; same_k2 0.30/0.48/0.36; same_k3 0.23/0.30/0.33; twoslot 0.25/0.30/0.33; noupd 0.72/0.48/0.52; noupd_incid 0.70/0.73/0.64; keyorig 0.50/0.44/0.47; keycorr 0.58/0.53/0.48; pos 0.41/0.42/0.58; neutral 0.53/0.45/0.42
+  POST-HOC (E002) crossed base: cross_A 0.31/0.33/0.20; cross_B 0.20/0.30/0.25; cross_pair 0.02/0.02/0.00
+  uprobe base: Uneutral|d0 0.49; Uneutral|d10 0.33; Uneutral|d4 0.41; Usame|d0 0.23; Usame|d10 0.45; Usame|d4 0.31; khard open 0.50
+  DIAGNOSTIC length split base: LW10|fits<=512 0.44 (n=91); LW10|over512 0.34 (n=101); TS10|fits<=512 0.26 (n=38); TS10|over512 0.42 (n=26); NU10|fits<=512 0.52 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+  plain d0/d4/d10 s1: same_k1 0.86/0.91/0.86; same_k2 0.66/0.84/0.48; same_k3 0.70/0.91/0.41; twoslot 0.44/0.45/0.52; noupd 0.66/0.78/0.50; noupd_incid 1.00/1.00/1.00; keyorig 0.77/0.52/0.67; keycorr 0.80/0.81/0.64; pos 0.98/1.00/1.00; neutral 0.95/0.69/0.72
+  POST-HOC (E002) crossed s1: cross_A 0.27/0.12/0.44; cross_B 0.75/0.89/0.53; cross_pair 0.03/0.02/0.02
+  uprobe s1: Uneutral|d0 0.33; Uneutral|d10 0.25; Uneutral|d4 0.29; Usame|d0 0.74; Usame|d10 0.58; Usame|d4 0.73; khard open 0.50
+  DIAGNOSTIC length split s1: LW10|fits<=512 0.75 (n=91); LW10|over512 0.44 (n=101); TS10|fits<=512 0.39 (n=38); TS10|over512 0.69 (n=26); NU10|fits<=512 0.50 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+  plain d0/d4/d10 s2: same_k1 0.72/0.72/0.62; same_k2 0.72/0.70/0.48; same_k3 0.78/0.70/0.47; twoslot 0.31/0.45/0.42; noupd 0.75/0.72/0.73; noupd_incid 1.00/1.00/1.00; keyorig 0.61/0.72/0.53; keycorr 0.64/0.50/0.36; pos 0.86/0.88/0.91; neutral 0.91/0.84/0.69
+  POST-HOC (E002) crossed s2: cross_A 0.22/0.20/0.25; cross_B 0.80/0.84/0.33; cross_pair 0.05/0.06/0.00
+  uprobe s2: Uneutral|d0 0.42; Uneutral|d10 0.20; Uneutral|d4 0.41; Usame|d0 0.57; Usame|d10 0.58; Usame|d4 0.64; khard open 0.55
+  DIAGNOSTIC length split s2: LW10|fits<=512 0.63 (n=91); LW10|over512 0.44 (n=101); TS10|fits<=512 0.34 (n=38); TS10|over512 0.54 (n=26); NU10|fits<=512 0.73 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
+  plain d0/d4/d10 s3: same_k1 0.53/0.52/0.41; same_k2 0.53/0.69/0.38; same_k3 0.67/0.84/0.56; twoslot 0.30/0.56/0.36; noupd 0.78/0.72/0.62; noupd_incid 1.00/1.00/1.00; keyorig 0.70/0.80/0.86; keycorr 0.25/0.31/0.28; pos 0.84/0.92/0.78; neutral 0.94/0.83/0.84
+  POST-HOC (E002) crossed s3: cross_A 0.23/0.14/0.11; cross_B 0.77/0.84/0.53; cross_pair 0.03/0.00/0.00
+  uprobe s3: Uneutral|d0 0.71; Uneutral|d10 0.73; Uneutral|d4 0.67; Usame|d0 0.64; Usame|d10 0.54; Usame|d4 0.58; khard open 0.60
+  DIAGNOSTIC length split s3: LW10|fits<=512 0.43 (n=91); LW10|over512 0.47 (n=101); TS10|fits<=512 0.34 (n=38); TS10|over512 0.38 (n=26); NU10|fits<=512 0.62 (n=64); NU10|over512   -   (n=0); pass on fitting items: False
 
-== EleutherAI/pythia-160m  body 85,056,000  total 162,322,944  (seeds: none)
+== EleutherAI/pythia-160m  body 85,056,000  total 162,322,944  (seeds: s1, s2, s3)
+  lr_search: 5e-05 dev LW/TS/NU 0.72/0.69/0.77 (min 0.69) loss 1.0125->0.0977; 3e-04 dev LW/TS/NU 0.43/0.30/0.48 (min 0.30) loss 1.7392->0.7425; 1e-03 dev LW/TS/NU 0.39/0.42/0.52 (min 0.39) loss 4.3066->0.9758 -> CHOSEN 5e-05
   run    | LW10  TS10  NU10  pass | incid10 keyorig10 keycorr10 pos10 neutral10 all5@10 | oldU@4-10 owner2@10 twohop2@10 persp2@10 | lockin | kbig dAcc [95% CI]        dMargin [95% CI]
-  verdict (plain, pass rule): 0/0 seeds pass -> no scored seeds; lock-in rate None
+  base   | 0.10  0.05  0.80  fail | 1.00    0.00      0.98      0.67  0.73      0.00    | 0.38      0.19      0.03       0.12     | -      | (baseline)
+  s1     | 0.94  0.73  0.55  fail | 1.00    0.61      1.00      1.00  0.95      0.22    | 0.99      0.50      0.00       0.25     | None   | -0.107 [-0.159,-0.057]  +0.314 [-1.553,+2.180]
+  s2     | 0.99  0.34  0.00  fail | 1.00    1.00      1.00      1.00  1.00      0.00    | 0.98      0.69      0.00       0.03     | None   | -0.143 [-0.195,-0.093]  -1.021 [-2.995,+0.953]
+  s3     | 0.91  0.64  0.58  fail | 1.00    0.08      1.00      1.00  0.80      0.00    | 0.94      0.28      0.03       0.12     | None   | -0.150 [-0.202,-0.098]  -1.282 [-3.621,+1.058]
+  verdict (plain, pass rule): 0/3 seeds pass -> FAIL; lock-in rate 0.0
+  secondary: pass rule AND crossed pair@d10 >= 0.8 (per-object tracking): 0/3 seeds
+  knowledge s1: kbig_all n=441 0.694->0.587 dAcc -0.107 [-0.159,-0.057] dMargin +0.314 [-1.553,+2.180] | khard40 n=40 0.650->0.600 dAcc -0.050 [-0.225,+0.125] dMargin -0.947 [-8.170,+6.277] | kbig_new n=401 0.698->0.586 dAcc -0.112 [-0.165,-0.060] dMargin +0.440 [-1.486,+2.365] | K_closedbook60 n=60 0.783->0.717 dAcc -0.067 [-0.167,+0.033] dMargin +2.669 [+0.492,+4.846]
+  knowledge s2: kbig_all n=441 0.694->0.551 dAcc -0.143 [-0.195,-0.093] dMargin -1.021 [-2.995,+0.953] | khard40 n=40 0.650->0.625 dAcc -0.025 [-0.225,+0.150] dMargin -2.462 [-9.852,+4.929] | kbig_new n=401 0.698->0.544 dAcc -0.155 [-0.207,-0.102] dMargin -0.878 [-2.922,+1.167] | K_closedbook60 n=60 0.783->0.617 dAcc -0.167 [-0.283,-0.050] dMargin +1.528 [-1.130,+4.185]
+  knowledge s3: kbig_all n=441 0.694->0.544 dAcc -0.150 [-0.202,-0.098] dMargin -1.282 [-3.621,+1.058] | khard40 n=40 0.650->0.575 dAcc -0.075 [-0.275,+0.125] dMargin -3.506 [-13.242,+6.230] | kbig_new n=401 0.698->0.541 dAcc -0.157 [-0.212,-0.105] dMargin -1.060 [-3.446,+1.327] | K_closedbook60 n=60 0.783->0.600 dAcc -0.183 [-0.300,-0.067] dMargin +2.701 [-0.764,+6.167]
+  probe s1: 0:0.31/0.12/0.78 50:0.62/0.47/0.44 100:0.44/0.34/0.81 150:0.69/0.50/0.62 200:0.72/0.25/0.56 250:1.00/0.72/0.28 300:1.00/0.72/0.41 350:1.00/0.69/0.47 400:1.00/0.69/0.50
+  probe s2: 0:0.31/0.12/0.78 50:0.84/0.19/0.31 100:0.97/0.59/0.12 150:0.81/0.56/0.44 200:0.94/0.44/0.28 250:1.00/0.22/0.03 300:1.00/0.28/0.00 350:1.00/0.19/0.06 400:1.00/0.16/0.00
+  probe s3: 0:0.31/0.12/0.78 50:0.91/0.34/0.12 100:0.97/0.56/0.09 150:1.00/0.72/0.38 200:0.88/0.75/0.75 250:1.00/0.75/0.53 300:1.00/0.81/0.53 350:1.00/0.75/0.53 400:1.00/0.78/0.53
+  plain d0/d4/d10 base: same_k1 0.91/0.48/0.23; same_k2 0.78/0.06/0.03; same_k3 0.91/0.06/0.03; twoslot 0.06/0.08/0.05; noupd 0.05/0.78/0.80; noupd_incid 0.94/1.00/1.00; keyorig 0.20/0.00/0.00; keycorr 1.00/0.98/0.98; pos 0.94/0.59/0.67; neutral 0.98/0.50/0.73
+  POST-HOC (E002) crossed base: cross_A 0.11/0.03/0.03; cross_B 0.83/0.12/0.11; cross_pair 0.08/0.00/0.00
+  uprobe base: Uneutral|d0 0.88; Uneutral|d10 0.57; Uneutral|d4 0.60; Usame|d0 0.93; Usame|d10 0.02; Usame|d4 0.25; khard open 1.00
+  plain d0/d4/d10 s1: same_k1 1.00/1.00/1.00; same_k2 1.00/1.00/0.95; same_k3 0.89/0.97/0.88; twoslot 0.86/0.80/0.73; noupd 0.61/0.59/0.55; noupd_incid 1.00/1.00/1.00; keyorig 0.61/0.56/0.61; keycorr 1.00/1.00/1.00; pos 1.00/1.00/1.00; neutral 0.95/0.98/0.95
+  POST-HOC (E002) crossed s1: cross_A 0.53/0.47/0.52; cross_B 0.98/1.00/0.97; cross_pair 0.52/0.47/0.48
+  uprobe s1: Uneutral|d0 0.98; Uneutral|d10 0.95; Uneutral|d4 0.98; Usame|d0 0.99; Usame|d10 0.96; Usame|d4 1.00; khard open 1.00
+  plain d0/d4/d10 s2: same_k1 1.00/1.00/1.00; same_k2 1.00/1.00/1.00; same_k3 0.92/0.98/0.98; twoslot 0.38/0.23/0.34; noupd 0.00/0.00/0.00; noupd_incid 1.00/1.00/1.00; keyorig 1.00/1.00/1.00; keycorr 1.00/1.00/1.00; pos 1.00/1.00/1.00; neutral 1.00/1.00/1.00
+  POST-HOC (E002) crossed s2: cross_A 0.06/0.00/0.12; cross_B 0.98/1.00/1.00; cross_pair 0.05/0.00/0.12
+  uprobe s2: Uneutral|d0 0.98; Uneutral|d10 0.95; Uneutral|d4 0.99; Usame|d0 1.00; Usame|d10 0.98; Usame|d4 0.99; khard open 1.00
+  plain d0/d4/d10 s3: same_k1 1.00/1.00/1.00; same_k2 1.00/0.98/0.95; same_k3 0.81/0.94/0.78; twoslot 0.70/0.64/0.64; noupd 0.67/0.53/0.58; noupd_incid 1.00/1.00/1.00; keyorig 0.00/0.12/0.08; keycorr 1.00/1.00/1.00; pos 1.00/1.00/1.00; neutral 0.56/0.73/0.80
+  POST-HOC (E002) crossed s3: cross_A 0.61/0.59/0.64; cross_B 0.95/0.97/0.95; cross_pair 0.56/0.56/0.59
+  uprobe s3: Uneutral|d0 0.77; Uneutral|d10 0.83; Uneutral|d4 0.94; Usame|d0 0.93; Usame|d10 0.93; Usame|d4 0.96; khard open 0.90
 

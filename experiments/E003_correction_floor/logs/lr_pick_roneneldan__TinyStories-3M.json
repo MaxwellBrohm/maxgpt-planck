@@ -1,0 +1,80 @@
+{
+ "model": "roneneldan/TinyStories-3M",
+ "grid": [
+  "5e-05",
+  "3e-04",
+  "1e-03",
+  "3e-03"
+ ],
+ "rows": [
+  {
+   "lr": 5e-05,
+   "LW": 0.4479,
+   "TS": 0.2344,
+   "NU": 0.4062,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.2344,
+   "mean": 0.3628,
+   "loss_first10": 4.1584,
+   "loss_last50": 0.6934,
+   "lock_in_step": null
+  },
+  {
+   "lr": 0.0003,
+   "LW": 0.3125,
+   "TS": 0.4062,
+   "NU": 0.3438,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.3125,
+   "mean": 0.3542,
+   "loss_first10": 3.3548,
+   "loss_last50": 0.7795,
+   "lock_in_step": null
+  },
+  {
+   "lr": 0.001,
+   "LW": 0.3646,
+   "TS": 0.2969,
+   "NU": 0.5625,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.2969,
+   "mean": 0.408,
+   "loss_first10": 3.7529,
+   "loss_last50": 1.057,
+   "lock_in_step": null
+  },
+  {
+   "lr": 0.003,
+   "LW": 0.3385,
+   "TS": 0.3438,
+   "NU": 0.4844,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.3385,
+   "mean": 0.3889,
+   "loss_first10": 5.38,
+   "loss_last50": 1.1605,
+   "lock_in_step": null
+  }
+ ],
+ "ineligible": {},
+ "final": false,
+ "decision": "EXTEND",
+ "extend": "1e-02",
+ "line": "EXTEND 1e-02"
+}

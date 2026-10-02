@@ -1,0 +1,49 @@
+[
+ {
+  "batch_tokens": 32768,
+  "config_sha256": "cb0ba22eea438eed0ce81d2e6dbbe6218c71191d50537429d323abd61061ee5f",
+  "doc_attn": "varlen",
+  "env": {
+   "cuda": "13.0",
+   "gpu": "NVIDIA GeForce RTX 5070",
+   "python": "3.14.4",
+   "torch": "2.13.0+cu130"
+  },
+  "event": "start",
+  "n_params": 5010133,
+  "optim_batched": true,
+  "precision": "bf16",
+  "prereg_committed": true,
+  "prereg_id": "E3",
+  "prereg_sha256": "be89babbfee883adb28f5012f758cde169695c013d4dee74e3dd7fe5e1d7d80c",
+  "resumed_from": null,
+  "run": "e3_5m_A_s1",
+  "schedule": {
+   "decay_start": 6104,
+   "mode": "full",
+   "total_steps": 7630,
+   "warmup_steps": 76
+  },
+  "step": 0
+ },
+ {
+  "drawn_cccc": 102445949,
+  "drawn_dolly": 3957098,
+  "drawn_gutenberg": 36580654,
+  "drawn_irc": 9894294,
+  "drawn_oasst2": 2967736,
+  "drawn_stackexchange": 54885195,
+  "drawn_wikimedia": 36581461,
+  "dropped_long_dolly": 79,
+  "dropped_long_oasst2": 43,
+  "event": "end",
+  "loss": 3.237968571835804,
+  "prereg_id": "E3",
+  "run": "e3_5m_A_s1",
+  "seconds": 993.7,
+  "step": 7630,
+  "sup_tokens": 244494589,
+  "tokens": 247216446,
+  "total_steps": 7630
+ }
+]

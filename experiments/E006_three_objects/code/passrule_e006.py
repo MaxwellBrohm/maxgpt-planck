@@ -10,6 +10,7 @@ readings are E004's and E005's (rules_e004 / rules_e005 / evidence_e005 / analyz
 from itertools import combinations
 
 import analyze_e004 as A
+import analyze_e006_b as B6
 import evidence_e005 as V
 import rules_e004 as RU
 import rules_e005 as R5
@@ -19,7 +20,9 @@ MODEL = "HuggingFaceTB/SmolLM2-135M-Instruct"
 
 
 def run_block(out_dir, tag):
-    """analyze_e005.run_block's content for one run (cells, evidence, alias, chat), or None."""
+    """analyze_e005.run_block's content for one run (cells, evidence, alias, chat), or None. The tag's record files
+    are B6.file_tag(tag)'s (DEVIATION F1: e005w1 reads e005w1_r2)."""
+    tag = B6.file_tag(tag)
     cells = A.run_cells(out_dir, MODEL, tag)
     if cells is None:
         return None

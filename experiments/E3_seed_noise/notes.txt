@@ -172,6 +172,129 @@ CHANGES AFTER CRITIQUE (2026-09-26; no run existed, nothing committed)
   9 Data are E2's pinned shares (E2 change 1); warmup_steps and ckpt_every written explicitly.
   10 The budget line and the yield order were added.
 
-PART 1 QUEUED (2026-09-28 16:40 EDT, Claude): e3plan.py --a5 0.003,1 --b5 0.0015,1 (E2's final 5M pick and runner-up,
-E2 results.json stage_C) wrote 18 configs and plans/part1.txt (A1 B1 ... A8 B8, then A1's replays R2 R3; waits for
-"E2 5M DONE"; marks "E3 PART 1 DONE"). Part 2 (20M) waits for E2's 20M picks; Part 3 needs the data_seed patch.
+PART 1 QUEUED (2026-09-28, by 16:24:40 EDT, Claude; this entry is in commit e39112a, dated 16:24:40, and the queue saw
+E2's mark at 16:24:55; it was first labelled 16:40, a wrong time, corrected 2026-10-02 per AUDIT.md): e3plan.py
+--a5 0.003,1 --b5 0.0015,1 (E2's final 5M pick and runner-up, E2 results.json stage_C) wrote 18 configs and
+plans/part1.txt (A1 B1 ... A8 B8, then A1's replays R2 R3; waits for "E2 5M DONE"; marks "E3 PART 1 DONE"). Part 2
+(20M) waits for E2's 20M picks; Part 3 needs the data_seed patch.
+
+PART 1 ANALYSIS, DEVIATIONS (2026-10-02, Claude; by the analyst's account, written after the hash and settings checks
+and before any bpb value was read into a statistic. The files cannot show that order: this entry and PART 1 RESULT
+are one uncommitted append, and notes.txt is dated 18:11, after results.json at 18:10. None of D1-D3 changes a
+statistic that a verdict reads). Part 1 finished 2026-09-29 08:46 ("MARK E3 PART 1 DONE", one queue start at
+e39112a, 18 runs, each trained once with rc 0, none resumed, none diverged, no GAP). Records copied from the PC to
+out/<run>/ (bpb.jsonl; train_tail.jsonl = log records with step > 7,477.4; run_records.json = the runs.jsonl start and
+end lines with host and paths removed; preflight.json) and logs/ (queue_e3.txt, status_e3.jsonl, the queue start's
+code_sha256 list). Checkpoints and full log.jsonl stay on the PC. Analyzer: e3analyze.py (stdlib).
+  D1 Training loss "mean over the last 2% of steps": the harness logs the loss of every 10th step only (trainer.py
+     writes last_loss at log steps), so the mean is over the 16 logged steps 7,480..7,630 (steps > 7,630 - 152.6).
+     Same steps in every run, so A and B and the replays are compared like for like.
+  D2 Code version and the missing E3 FIXED log. E3 Part 1 ran at e39112a. Its harness/ + data_prep/ .py digest
+     (FIXED 2 recipe) is b773159e68662910, not E2's FIXED 92deaef0...: harness/train.py, trainer.py and model.py
+     differ from 93ea41c and the SPEED V3 switches landed (harness commits b0c37b4..6b9fb0f, 2026-09-27/28). Both
+     switches are off in every E3 run: the recorded engine block equals FIXED 1 (train.compile false, ce_chunk_rows 0,
+     engine_fixed "2026-09-26 93ea41c"), and harness/notes.txt records a default-path parity proof on CPU fp32 (7e7c802
+     vs that tree: identical log records and final checkpoint). Correction 2026-10-02 (AUDIT.md D2): this line first
+     said no CUDA parity run of the default path is recorded. harness/notes.txt at e39112a does record one:
+     default_parity.py --device cuda (main 7e7c802 vs the speed/v3 tree 2522edd/25c616d, varlen + batched,
+     deterministic, 24 steps), log, checkpoint, start record and module set identical, PASS. Per the audit, the
+     harness .py files at 7e7c802 equal 93ea41c's, the 25c616d..e39112a diff touches only compile-on paths, and by
+     code reading the eager path at e39112a does the same computation (not re-run).
+     data_prep/bpb.py and evalwin.py, the tokenizer, the eval sets, shares, source files, schedule and n_params all
+     equal FIXED. The FIXED log this file asks for before the first scored E3 run was never appended; the analyzer's
+     check list (results.json "checks") is the after-the-fact record. Effect: every E3 statistic compares runs of one
+     commit, so under the reading taken here (a disclosed deviation, no rerun) none is affected. Under a strict
+     reading of FIXED ("Everything in E2's FIXED block, with the same values", including the harness commit, and E2's
+     analyzer refuses a run whose recorded value differs), all 18 runs would be refused and Part 1 would give no noise
+     numbers. The noise numbers stand only under the first reading; the LR verdict is the same under both, because A
+     stays unless there is evidence for B (AUDIT.md D2). The "free extra pair" (E2's 5m_e3_r1 trunk + branch ran at
+     92cb29c, harness = 93ea41c) now differs from A1 by code path AND harness version, and is reported with that
+     label. Nothing is rerun (policy: only a recorded engine or data mismatch reruns, and the engine block matches); a
+     person may judge otherwise.
+  D3 Training manifest sha256 (FIXED 4, 23647db7...) is not in any record copied back; preflight's n_files and shares
+     match FIXED. Correction 2026-10-02 (AUDIT.md D3): this first said "Not checked further", which is too
+     conservative. The manifest was checked at preflight, indirectly: E2_lr_transfer/preflight.py (5fe0febf, the
+     version in the queue's code list) refuses a run unless the shard manifest file's sha256 equals the config's
+     recorded shard_manifest_sha256; base5m.yaml (070d32cd, equal to FIXED 5) sets that value to
+     23647db7...ef41344 (FIXED 4); and all 18 preflights are ok and strict with no refusals. No copied record
+     shows the hash itself.
+  Notes, not departures: scipy is not in Planck's venv, so the analyzer computes t and chi-square quantiles from a
+  regularized incomplete beta and gamma. A check against scipy 1.13.1 on the system python was reported, but no file
+  or later entry records it (this line first said "below"); the audit's own cross-check (audit/a1_scipy_quantiles.py)
+  matches scipy to 5e-11 on quantiles and 1e-14 on p-values. Likewise no mutation test of e3analyze.py's checks is on
+  file (e3analyze.py has no mutation mode); the audit's mutation test of its own checks (audit/a4_mutants.py, 13 of
+  13 mutants killed) covers the substance. k_needed is also
+  printed with the unpaired SD (sqrt(2) sigma_seed), which HOW LATER SCREENS USE IT rule 2 needs for the other classes;
+  no E3 rule reads it. E3 Part 1 defines only 250M full runs, so no shorter-length noise exists to report. Part 2
+  (20M), Part 3 and Part 4 have not run.
+
+PART 1 RESULT (2026-10-02, Claude; e3analyze.py over out/, results.json sha256 1f017ecb1e6d14dd4f676c90ca703c20e9395b217fc841f83fffcb93e57994a2,
+tables.txt has every metric). This is the record; no interim reading was written before it. 5M, 250M slots, full WSD,
+A = (3e-3, r 1), B = (1.5e-3, r 1), d = B - A, N = 8 pairs (df 7) unless marked.
+  Checks: 31 of 35 pass; the 4 that fail are D2's code hashes (digest, train.py, trainer.py, model.py). Every run:
+    tokenizer, eval sets, scorer invocation, engine block, shares, files, config bytes, prereg sha, schedule, one
+    clean train, no resume. CRN holds as recorded: A_s and B_s drew identical per-source token counts at every seed,
+    the 8 seeds drew 8 different streams, R2 and R3 drew A1's per-source counts, and so did E2's 5m_e3_r1 (trunk +
+    branch). The evidence is equal counts (drawn, tokens, sup_tokens, dropped_long at every tail log step and at the
+    end), not hashed token content: strong evidence of identical streams, not proof.
+  Seed noise (rel = fraction of A's mean):
+    F(CHAT)   mean A 1.1467; sigma_seed 0.00293 (0.255%); SD_d 0.00278 (0.242%); rho 0.617.
+    F(PROSE)  mean A 1.3814; sigma_seed 0.00205 (0.149%); SD_d 0.00202 (0.146%); rho 0.530.
+    With df 7 these SDs are imprecise: the 95% interval for SD_d is [0.00184, 0.00565] for F(CHAT) and [0.00133,
+    0.00411] for F(PROSE) (AUDIT.md Q1, audit/a5_stdout.txt).
+    Seeds 2..8 (df 6): F(CHAT) SD_d 0.00239 (0.209%), F(PROSE) SD_d 0.00161 (0.117%).
+    Seeds 2..8 MDE (factor 3.353; in results.json noise_5M_250M_seeds2to8, first printed in tables.txt 2026-10-02 as
+    the pre-registration asks; the audit's recomputation gives the same), % of A's mean, k = 1, 2, 3, 5:
+      F(CHAT)  paired 0.699 0.495 0.404 0.313; unpaired 1.242 0.878 0.717 0.555.
+      F(PROSE) paired 0.392 0.277 0.226 0.175; unpaired 0.716 0.506 0.413 0.320.
+    Paired, these are below the 8-seed values, so the 8-seed table is the more conservative; unpaired, they are above
+    (k1 F(CHAT) 1.242% vs 1.177%, F(PROSE) 0.716% vs 0.685%). No E3 verdict reads either.
+    Noisy secondary metrics: CHAT user turns SD_d 0.958%, dolly 0.722% (rho -0.05).
+  A vs B, F(CHAT): mean d +0.00527 (B worse by 0.46%), 95% CI [+0.00295, +0.00759], t(7) p = 0.0010; B is worse at
+    all 8 seeds. F(PROSE): +0.00262, CI [+0.00093, +0.00431], p = 0.0079, B worse at 7 of 8. Resolved on both as a
+    descriptive reading, not a pre-registered verdict: no registered rule reads this 8-seed test or labels it
+    resolved; the only registered A-vs-B rule is the seeds 2..8 re-check below. The 8 seeds include seed 1, which E2
+    selected (change 3: that biases a test toward A); here d_1 is the smallest F(CHAT) difference, so including it
+    lowers mean d. On F(PROSE) the later-screen WIN rule (rule 3: every seed pair must improve) would not be met,
+    because s1 goes the other way (d -0.00074). Using R2, R3 or the replay mean in place of A1 for pair 1: F(CHAT)
+    p 0.0006, 0.0002, 0.0005; F(PROSE) p 0.0051, 0.0035, 0.0052; the direction never changes (AUDIT.md Q2).
+  Replays (A1, R2, R3; df 2): NOT deterministic. F(CHAT) 1.14974 / 1.14865 / 1.14634, sigma_rep 0.00174, so the point
+    estimate of the paired variance share from GPU nondeterminism at a fixed seed and stream is 0.78 (2 sigma_rep^2 /
+    SD_d^2). It is very loose: with df 2 its 95% interval from sigma_rep's chi-square alone is 0.21 to 30.8, before
+    counting SD_d's own uncertainty, so the data allow anything from about a fifth of the paired variance to all of
+    it. The share also assumes B has A's GPU noise, but only A1 was replayed; and R2 and R3 ran about 15 h after A1,
+    at the end of the queue, with the three values in time order, so three runs cannot separate drift from noise (the
+    pairs ran back to back, which protects d from slow drift). F(PROSE) sigma_rep 0.00051, share 0.13 (95% interval
+    from sigma_rep alone 0.03 to 5.0). Free extra pair (D2: also a harness-version difference): E2's
+    5m_e3_r1 F(CHAT) 1.14790 is 0.20 sigma_rep below the replay mean, F(PROSE) 1.38302 is 1.61 sigma_rep above it:
+    inside the replay spread on CHAT, at its edge on PROSE (df 2; no test was registered for it).
+  E2 RE-CHECK (rule: paired t on F(CHAT), seeds 2..8, df 6): mean d +0.00586, t +6.49, p 0.0006. B is not lower.
+    VERDICT: CONFIRM. The 5M LR stays A, eta 3e-3, r 1; screens use (3e-3, r 1). E2's single-seed gap at seed 1
+    (+0.0008) and E3's d_1 (+0.0011) both understate the 8-seed gap. Scope: the re-check tests A against B only, so
+    it confirms E2's pick against B, not against the other neighbour, 6e-3. E2's single-seed 6e-3 gap was +0.0032
+    bpb, 1.15 SD_d and below the k=1 paired MDE of 0.0091 bpb; E3 does not resolve A against 6e-3, and no rule asked
+    it to (AUDIT.md Q3).
+  CRN ratio (sqrt2 sigma_seed / SD_d): F(CHAT) 1.49, F(PROSE) 1.44. The rule reads the point estimate, and both point
+    estimates are below 2: CRN stays the default, not mandatory; unpaired seeds are allowed without a deviation.
+    "Below 2" is not established, though: the Fisher 95% interval for rho ([-0.16, 0.92] F(CHAT), [-0.28, 0.90]
+    F(PROSE)) puts the ratio at about 0.93 to 3.56 for F(CHAT) and 0.88 to 3.15 for F(PROSE) (audit/a5_stdout.txt).
+    Two metrics are above 2 at the point estimate: irc 3.00 and training loss 12.8 (shared stream). No rule reads
+    them (every rule reads F).
+  Averaging rule: M's SD_d is higher than F's, by 2.3% for CHAT and 14.5% for PROSE (tables.txt prints these as a
+    "reduction" of -2.3% and -14.5%): M is noisier, not quieter. Screens decide on F, not M.
+  MDE (80% power, two-sided 0.05), as % of A's mean [with the 80% upper-bound SD]:
+    same init, same stream (SD_d)   F(CHAT) k1 0.790% k2 0.558% [0.756%] k3 0.456% k5 0.353%
+                                    F(PROSE) k1 0.476% k2 0.337% [0.456%] k3 0.275% k5 0.213%
+    other classes (sqrt2 sigma_seed, Part 3 not run)
+                                    F(CHAT) k1 1.177% k2 0.832% [1.126%] k3 0.679% k5 0.526%
+                                    F(PROSE) k1 0.685% k2 0.484% [0.655%] k3 0.395% k5 0.306%
+    In bpb, F(CHAT) k2: 0.0064 paired, 0.0095 unpaired.
+  k_needed (paired | unpaired): F(CHAT) 0.5%: 3|6, 1%: 1|2, 2%: 1|1; F(PROSE) 0.5%: 1|2, 1%: 1|1. Under rule 2
+    (k = max(2, k_needed)), a default 1% bet on F(CHAT) or F(PROSE) runs 2 seeds in every class; a 0.5% bet on
+    F(CHAT) needs 3 paired or 6 unpaired (above 5: "underpowered").
+  Two-seed subsets agreeing in sign with the 8-seed d: F(CHAT) 28/28, F(PROSE) 21/28.
+  Refresh reference (rule 5): a 3-pair F(CHAT) mean d outside [+0.00082, +0.00972] or a 3-pair SD above 0.00481
+    triggers a Part 1 rerun; F(PROSE) [-0.00061, +0.00585], SD 0.00349.
+  Not run: Part 2 (20M; its re-check and the 20M SDs), Part 3 (sigma_init, sigma_data), Part 4. No length shorter than
+  250M is defined for Part 1.
+Audit corrections applied (2026-10-02, from AUDIT.md; no verdict changed, no reported statistic changed, results.json untouched): PART 1 QUEUED time label 16:40 corrected to by 16:24:40 (commit e39112a); "written before any bpb value was read" marked as the analyst's account that files cannot show; D2 now records the CUDA default-path parity PASS and says the noise numbers stand only under the disclosed-deviation reading (strict FIXED reading would refuse all 18 runs); D3 "Not checked further" corrected to checked at preflight, indirectly; scipy check "below" and analyzer mutation test marked as having no record, audit files cited; CRN wording narrowed to equal counts, not hashed content; 95% intervals for SD_d added; seeds 2..8 MDEs added (here and in tables.txt, labelled as hand-added); "RESOLVED" A vs B marked descriptive, not pre-registered, with the seed-1 selection, PROSE WIN-rule and pair-1 sensitivity caveats; replay share 0.78 marked a point estimate with its 0.21 to 30.8 interval, the untested B GPU noise and time-order drift; E2 re-check scope limited to A vs B (6e-3 unresolved); CRN "below 2" marked not established (ratio about 0.9 to 3.6) and irc 3.00 noted; averaging sign rewritten (M is noisier by 2.3% and 14.5%).

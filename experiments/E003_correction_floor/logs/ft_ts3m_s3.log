@@ -1,0 +1,70 @@
+Loading weights:   0%|          | 0/108 [00:00<?, ?it/s]Loading weights: 100%|██████████| 108/108 [00:00<00:00, 55431.33it/s]
+[transformers] [1mGPTNeoForCausalLM LOAD REPORT[0m from: roneneldan/TinyStories-3M
+Key                                                               | Status     |  | 
+------------------------------------------------------------------+------------+--+-
+transformer.h.{0, 1, 2, 3, 4, 5, 6, 7}.attn.attention.bias        | UNEXPECTED |  | 
+transformer.h.{0, 1, 2, 3, 4, 5, 6, 7}.attn.attention.masked_bias | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+loaded roneneldan/TinyStories-3M params=8,278,400 (config 8,278,400, body 1,583,360) sanity_nll=0.844 in 3.7s mps_alloc=0.06G driver=1.03G peak_driver=1.03G
+loss self-check hf=5.38145 answer_only=5.38145
+probe step 0 {'step': 0, 'LW': 0.375, 'TS': 0.25, 'NU': 0.625} mps_alloc=0.06G driver=2.07G peak_driver=2.07G
+step 0 loss 6.4245 gnorm 262.01 lr 1.00e-03 1s mps_alloc=0.19G driver=2.11G peak_driver=2.11G
+step 10 loss 5.6316 gnorm 68.39 lr 5.99e-03 11s mps_alloc=0.19G driver=3.18G peak_driver=3.18G
+step 20 loss 4.4941 gnorm 5.51 lr 9.93e-03 21s mps_alloc=0.19G driver=3.20G peak_driver=3.20G
+step 30 loss 2.1275 gnorm 5.23 lr 9.85e-03 32s mps_alloc=0.19G driver=4.20G peak_driver=4.20G
+step 40 loss 3.1931 gnorm 6.35 lr 9.74e-03 41s mps_alloc=0.19G driver=4.20G peak_driver=4.20G
+probe step 50 {'step': 50, 'LW': 0.5625, 'TS': 0.375, 'NU': 0.4062}
+step 50 loss 2.8950 gnorm 9.96 lr 9.60e-03 57s mps_alloc=0.19G driver=2.13G peak_driver=4.20G
+step 60 loss 3.6453 gnorm 5.69 lr 9.44e-03 68s mps_alloc=0.19G driver=3.18G peak_driver=4.20G
+step 70 loss 2.7248 gnorm 7.40 lr 9.24e-03 77s mps_alloc=0.19G driver=3.19G peak_driver=4.20G
+step 80 loss 2.6951 gnorm 5.88 lr 9.02e-03 87s mps_alloc=0.19G driver=3.21G peak_driver=4.20G
+step 90 loss 2.0749 gnorm 4.91 lr 8.78e-03 97s mps_alloc=0.19G driver=3.21G peak_driver=4.20G
+probe step 100 {'step': 100, 'LW': 0.5312, 'TS': 0.3125, 'NU': 0.375}
+step 100 loss 3.1105 gnorm 6.41 lr 8.51e-03 114s mps_alloc=0.19G driver=2.15G peak_driver=4.20G
+step 110 loss 2.5579 gnorm 5.08 lr 8.22e-03 123s mps_alloc=0.19G driver=3.17G peak_driver=4.20G
+step 120 loss 1.7870 gnorm 3.86 lr 7.91e-03 134s mps_alloc=0.19G driver=3.17G peak_driver=4.20G
+step 130 loss 1.9069 gnorm 3.34 lr 7.58e-03 144s mps_alloc=0.19G driver=4.19G peak_driver=4.20G
+step 140 loss 2.1358 gnorm 3.66 lr 7.23e-03 153s mps_alloc=0.19G driver=4.19G peak_driver=4.20G
+probe step 150 {'step': 150, 'LW': 0.5, 'TS': 0.2812, 'NU': 0.5}
+step 150 loss 1.6984 gnorm 3.19 lr 6.88e-03 171s mps_alloc=0.19G driver=2.13G peak_driver=4.20G
+step 160 loss 1.9584 gnorm 3.60 lr 6.51e-03 181s mps_alloc=0.19G driver=3.19G peak_driver=4.20G
+step 170 loss 1.7761 gnorm 3.16 lr 6.13e-03 190s mps_alloc=0.19G driver=3.19G peak_driver=4.20G
+step 180 loss 1.5581 gnorm 3.01 lr 5.74e-03 200s mps_alloc=0.19G driver=3.20G peak_driver=4.20G
+step 190 loss 1.6276 gnorm 3.27 lr 5.35e-03 210s mps_alloc=0.19G driver=3.20G peak_driver=4.20G
+probe step 200 {'step': 200, 'LW': 0.5625, 'TS': 0.2812, 'NU': 0.3438}
+step 200 loss 1.4115 gnorm 2.62 lr 4.96e-03 227s mps_alloc=0.19G driver=2.16G peak_driver=4.20G
+step 210 loss 1.6605 gnorm 3.27 lr 4.57e-03 238s mps_alloc=0.19G driver=3.21G peak_driver=4.20G
+step 220 loss 1.7161 gnorm 2.62 lr 4.18e-03 247s mps_alloc=0.19G driver=3.24G peak_driver=4.20G
+step 230 loss 1.7843 gnorm 2.43 lr 3.79e-03 256s mps_alloc=0.19G driver=3.25G peak_driver=4.20G
+step 240 loss 1.6698 gnorm 3.02 lr 3.42e-03 265s mps_alloc=0.19G driver=3.25G peak_driver=4.20G
+probe step 250 {'step': 250, 'LW': 0.5, 'TS': 0.3125, 'NU': 0.4688}
+step 250 loss 1.6434 gnorm 3.31 lr 3.05e-03 283s mps_alloc=0.19G driver=2.16G peak_driver=4.25G
+step 260 loss 1.8449 gnorm 6.81 lr 2.70e-03 293s mps_alloc=0.19G driver=3.18G peak_driver=4.25G
+step 270 loss 1.4945 gnorm 2.39 lr 2.35e-03 303s mps_alloc=0.19G driver=3.18G peak_driver=4.25G
+step 280 loss 1.5551 gnorm 2.76 lr 2.03e-03 313s mps_alloc=0.19G driver=4.18G peak_driver=4.25G
+step 290 loss 1.4025 gnorm 2.16 lr 1.72e-03 322s mps_alloc=0.19G driver=4.18G peak_driver=4.25G
+probe step 300 {'step': 300, 'LW': 0.5938, 'TS': 0.2812, 'NU': 0.4375}
+step 300 loss 1.5519 gnorm 6.26 lr 1.44e-03 338s mps_alloc=0.19G driver=2.14G peak_driver=4.25G
+step 310 loss 1.6306 gnorm 2.20 lr 1.17e-03 347s mps_alloc=0.19G driver=3.15G peak_driver=4.25G
+step 320 loss 1.3531 gnorm 2.13 lr 9.32e-04 355s mps_alloc=0.19G driver=3.16G peak_driver=4.25G
+step 330 loss 1.1754 gnorm 2.25 lr 7.16e-04 363s mps_alloc=0.19G driver=3.17G peak_driver=4.25G
+step 340 loss 1.3547 gnorm 4.92 lr 5.27e-04 371s mps_alloc=0.19G driver=3.18G peak_driver=4.25G
+probe step 350 {'step': 350, 'LW': 0.5312, 'TS': 0.2812, 'NU': 0.5312}
+step 350 loss 1.2322 gnorm 2.50 lr 3.66e-04 385s mps_alloc=0.19G driver=2.15G peak_driver=4.25G
+step 360 loss 1.3480 gnorm 4.22 lr 2.33e-04 394s mps_alloc=0.19G driver=4.20G peak_driver=4.25G
+step 370 loss 1.2544 gnorm 2.38 lr 1.29e-04 402s mps_alloc=0.19G driver=4.20G peak_driver=4.25G
+step 380 loss 1.2897 gnorm 2.35 lr 5.56e-05 410s mps_alloc=0.19G driver=4.21G peak_driver=4.25G
+step 390 loss 1.3891 gnorm 2.53 lr 1.25e-05 418s mps_alloc=0.19G driver=4.22G peak_driver=4.25G
+step 399 loss 1.4844 gnorm 2.82 lr 0.00e+00 425s mps_alloc=0.19G driver=4.23G peak_driver=4.25G
+probe step 400 {'step': 400, 'LW': 0.625, 'TS': 0.3438, 'NU': 0.4688}
+scored new/plain: 1728 items in 77s mps_alloc=0.19G driver=2.09G peak_driver=4.25G
+scored extra/plain: 192 items in 5s mps_alloc=0.19G driver=1.08G peak_driver=4.25G
+scored old/plain: 1116 items in 30s mps_alloc=0.19G driver=2.10G peak_driver=4.25G
+scored uprobe/plain: 576 items in 22s mps_alloc=0.19G driver=2.08G peak_driver=4.25G
+scored khard/plain: 80 items in 2s mps_alloc=0.19G driver=1.08G peak_driver=4.25G
+scored kbig/plain: 441 items in 6s mps_alloc=0.19G driver=1.08G peak_driver=4.25G
+scored cross/plain: 384 items in 22s mps_alloc=0.19G driver=2.08G peak_driver=4.25G
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 34.94it/s]
+DONE roneneldan/TinyStories-3M s3 total 606s peak_driver=4.249G lock_in_step=None loss_finite=True

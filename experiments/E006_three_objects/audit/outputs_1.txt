@@ -1,0 +1,202 @@
+######## python a0_copies.py pc_hashes.out
+PC files 1221; identical on the Mac 1219
+differ: ['logs/readings/index.txt', 'logs/tables.txt']
+PC only: []
+Mac only: ['logs/readings/20261002-181132__blind.json', 'logs/readings/20261002-181132__blind_key.json', 'logs/readings/20261002-181132__final.json', 'logs/readings/20261002-181132__final.txt']
+######## python a1_integrity.py pc_hashes.out
+base: files 27, missing 0, short 0, record hashes ['5af571cb'], run.json 5af571cb arm None seed 0 steps 0 lr 0.00015 tf32 False | guard exit 0 killed None w 5af571cb
+C1: files 27, missing 0, short 0, record hashes ['9efee059'], run.json 9efee059 arm C seed 1 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 9efee059 | PC file 9efee059 ==
+C2: files 27, missing 0, short 0, record hashes ['641b454d'], run.json 641b454d arm C seed 2 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 641b454d | PC file 641b454d ==
+C3: files 27, missing 0, short 0, record hashes ['514b41f3'], run.json 514b41f3 arm C seed 3 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 514b41f3 | PC file 514b41f3 ==
+C4: files 27, missing 0, short 0, record hashes ['500ddcd2'], run.json 500ddcd2 arm C seed 4 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 500ddcd2 | PC file 500ddcd2 ==
+C5: files 27, missing 0, short 0, record hashes ['444f2236'], run.json 444f2236 arm C seed 5 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 444f2236 | PC file 444f2236 ==
+P1: files 27, missing 0, short 0, record hashes ['0b8530dd'], run.json 0b8530dd arm P seed 1 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 0b8530dd | PC file 0b8530dd ==
+P2: files 27, missing 0, short 0, record hashes ['764bf1ae'], run.json 764bf1ae arm P seed 2 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 764bf1ae | PC file 764bf1ae ==
+P3: files 27, missing 0, short 0, record hashes ['25bfda88'], run.json 25bfda88 arm P seed 3 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 25bfda88 | PC file 25bfda88 ==
+P4: files 27, missing 0, short 0, record hashes ['2a41496d'], run.json 2a41496d arm P seed 4 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 2a41496d | PC file 2a41496d ==
+P5: files 27, missing 0, short 0, record hashes ['62cca3bb'], run.json 62cca3bb arm P seed 5 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 62cca3bb | PC file 62cca3bb ==
+G1: files 27, missing 0, short 0, record hashes ['a23aabbb'], run.json a23aabbb arm G seed 1 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w a23aabbb | PC file a23aabbb ==
+G2: files 27, missing 0, short 0, record hashes ['9a9bb3fd'], run.json 9a9bb3fd arm G seed 2 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 9a9bb3fd | PC file 9a9bb3fd ==
+G3: files 27, missing 0, short 0, record hashes ['2fce1c50'], run.json 2fce1c50 arm G seed 3 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 2fce1c50 | PC file 2fce1c50 ==
+G4: files 27, missing 0, short 0, record hashes ['0fa2b48a'], run.json 0fa2b48a arm G seed 4 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w 0fa2b48a | PC file 0fa2b48a ==
+G5: files 27, missing 0, short 0, record hashes ['f4fbd4e7'], run.json f4fbd4e7 arm G seed 5 steps 400 lr 0.00015 tf32 False | guard exit 0 killed None w f4fbd4e7 | PC file f4fbd4e7 ==
+e005w1: files 20, missing 0, short 0, record hashes ['f846ac3d'], run.json None arm None seed None steps None lr None tf32 None | guard exit -15 killed gpu_mem w None
+e005w2: files 27, missing 0, short 0, record hashes ['4ef6230a'], run.json 4ef6230a arm None seed 2 steps 0 lr 0.00015 tf32 False | guard exit 0 killed None w 4ef6230a
+e005w3: files 27, missing 0, short 0, record hashes ['aa5f99f1'], run.json aa5f99f1 arm None seed 3 steps 0 lr 0.00015 tf32 False | guard exit 0 killed None w aa5f99f1
+e005w4: files 27, missing 0, short 0, record hashes ['1d330be9'], run.json 1d330be9 arm None seed 4 steps 0 lr 0.00015 tf32 False | guard exit 0 killed None w 1d330be9
+e005w5: files 27, missing 0, short 0, record hashes ['131c8113'], run.json 131c8113 arm None seed 5 steps 0 lr 0.00015 tf32 False | guard exit 0 killed None w 131c8113
+e004w1: files 16, missing 0, short 0, record hashes ['91a3aab0'], run.json 91a3aab0 arm None seed 1 steps 0 lr 0.00015 tf32 False | guard exit 0 killed None w 91a3aab0
+e004w2: files 16, missing 0, short 0, record hashes ['aee5a7fa'], run.json aee5a7fa arm None seed 2 steps 0 lr 0.00015 tf32 False | guard exit 0 killed None w aee5a7fa
+e004w3: files 16, missing 0, short 0, record hashes ['efd68a20'], run.json efd68a20 arm None seed 3 steps 0 lr 0.00015 tf32 False | guard exit 0 killed None w efd68a20
+e004w4: files 16, missing 0, short 0, record hashes ['8ad34021'], run.json 8ad34021 arm None seed 4 steps 0 lr 0.00015 tf32 False | guard exit 0 killed None w 8ad34021
+e004w5: files 16, missing 0, short 0, record hashes ['1bb9f377'], run.json 1bb9f377 arm None seed 5 steps 0 lr 0.00015 tf32 False | guard exit 0 killed None w 1bb9f377
+C1t: files 12, missing 0, short 0, record hashes ['3c892fa5'], run.json 3c892fa5 arm C seed 1 steps 400 lr 0.00015 tf32 True | guard exit 0 killed None w 3c892fa5 | PC file 3c892fa5 ==
+C2t: files 12, missing 0, short 0, record hashes ['6663f740'], run.json 6663f740 arm C seed 2 steps 400 lr 0.00015 tf32 True | guard exit 0 killed None w 6663f740 | PC file 6663f740 ==
+e005w1_r2: files 27, missing 0, short 0, record hashes ['f846ac3d'], run.json f846ac3d arm None seed 1 steps 0 lr 0.00015 tf32 False | guard exit 0 killed None w f846ac3d
+distinct weight sets: 28 ; shared: [['e005w1', 'e005w1_r2']]
+chat probes checked: 21
+s1: C digest ae2e040f3ecd G ae2e040f3ecd P 5d9210fb2798 | G replay threads 1600 | P rejected 110 C rejected 102
+s2: C digest 7821e42189d6 G 7821e42189d6 P 1ac653c05010 | G replay threads 1600 | P rejected 106 C rejected 112
+s3: C digest f3c18f2c85a4 G f3c18f2c85a4 P a35144d89778 | G replay threads 1600 | P rejected 94 C rejected 101
+s4: C digest 793ca033af2f G 793ca033af2f P 5378dc457385 | G replay threads 1600 | P rejected 106 C rejected 107
+s5: C digest 399d72540651 G 399d72540651 P f250148dd1e1 | G replay threads 1600 | P rejected 129 C rejected 102
+e005w1 al__chat.jsonl: 64 vs r2 64, equal on the first 64: True
+e005w1 al__plain.jsonl: 64 vs r2 64, equal on the first 64: True
+e005w1 big__chat.jsonl: 576 vs r2 576, equal on the first 576: True
+e005w1 big__plain.jsonl: 576 vs r2 576, equal on the first 576: True
+e005w1 cross__chat.jsonl: 384 vs r2 384, equal on the first 384: True
+e005w1 cross__plain.jsonl: 384 vs r2 384, equal on the first 384: True
+e005w1 e004__chat.jsonl: 640 vs r2 640, equal on the first 640: True
+e005w1 e004__plain.jsonl: 640 vs r2 640, equal on the first 640: True
+e005w1 extra__chat.jsonl: 192 vs r2 192, equal on the first 192: True
+e005w1 extra__plain.jsonl: 192 vs r2 192, equal on the first 192: True
+e005w1 gen_e004__chat.jsonl: 286 vs r2 640, equal on the first 286: True
+e005w1 gen_e004__plain.jsonl: 640 vs r2 640, equal on the first 640: True
+e005w1 h5l__chat.jsonl: 192 vs r2 192, equal on the first 192: True
+e005w1 h5l__plain.jsonl: 192 vs r2 192, equal on the first 192: True
+e005w1 kbig__plain.jsonl: 441 vs r2 441, equal on the first 441: True
+e005w1 khard__plain.jsonl: 80 vs r2 80, equal on the first 80: True
+e005w1 new__chat.jsonl: 1728 vs r2 1728, equal on the first 1728: True
+e005w1 new__plain.jsonl: 1728 vs r2 1728, equal on the first 1728: True
+e005w1 old__plain.jsonl: 1116 vs r2 1116, equal on the first 1116: True
+e005w1 uprobe__plain.jsonl: 576 vs r2 576, equal on the first 576: True
+BIG H5: rebuilt == file: True
+BIG C_noupd: rebuilt == file: True
+BIG C_twoslot: rebuilt == file: True
+big_items sha256 566ef4676b199731
+prompt hashes per set: {'e004': 640, 'big': 576, 'h5l': 192, 'al': 64}
+PROBLEMS: none
+######## python a2_passrule.py
+== C: PARTIAL-X H5 (4 seeds) | any-seed PARTIAL-X H5 (4 seeds)
+   LOO {'-s1': 'PARTIAL-X H5', '-s2': 'PARTIAL-X H5', '-s3': 'PARTIAL-X H5', '-s4': 'PARTIAL-X H5', '-s5': 'PARTIAL-X H5'}
+   fewest flips 3 [(1, 'LIK', 'C_noupd'), (5, 'LIK', 'C_twoslot')]
+   seeds passing all but H5: [1, 2, 3, 5]
+   s1 failing: ['LIK H5 39', 'GEN H5 38']; thin (52-53): ['LIK C_noupd 52', 'GEN C_noupd 52', 'GEN C_twoslot 53']
+   s2 failing: ['LIK H5 45', 'GEN H5 45']; thin (52-53): []
+   s3 failing: ['LIK H5 42', 'GEN H5 43']; thin (52-53): []
+   s4 failing: ['LIK H5 41', 'GEN H5 41', 'GEN C_twoslot 50']; thin (52-53): ['LIK C_noupd 52', 'GEN C_noupd 52', 'LIK C_twoslot 52']
+   s5 failing: ['LIK H5 44', 'GEN H5 43']; thin (52-53): ['LIK C_twoslot 53', 'GEN C_twoslot 53']
+   alias DATA GAP (HIGH 5, LOW 0): ['s1 40/42 41/42', 's2 39/42 40/42', 's3 39/42 39/42', 's4 40/42 40/42', 's5 37/42 38/42']
+   stopping learned: True per seed [True, True, True, True, True] gaps [(-0.031, 0.047), (-0.047, 0.031), (-0.031, 0.031), (0.0, 0.047), (-0.062, 0.047)]
+== P: PARTIAL-X H5 (3 seeds) | any-seed FAIL
+   LOO {'-s1': 'FAIL', '-s2': 'PARTIAL-X H5', '-s3': 'FAIL', '-s4': 'PARTIAL-X H5', '-s5': 'FAIL'}
+   fewest flips 1 [(5, 'LIK', 'C_twoslot')]
+   seeds passing all but H5: [1, 3, 5]
+   s1 failing: ['LIK H5 46', 'GEN H5 47']; thin (52-53): []
+   s2 failing: ['LIK H5 41', 'GEN H5 39', 'LIK C_noupd 49', 'GEN C_noupd 48']; thin (52-53): ['LIK H3 53', 'GEN H3 53', 'LIK C_twoslot 53']
+   s3 failing: ['LIK H5 45', 'GEN H5 45']; thin (52-53): ['LIK C_noupd 53', 'GEN C_noupd 53']
+   s4 failing: ['LIK H5 38', 'GEN H5 40', 'LIK C_twoslot 48', 'GEN C_twoslot 49']; thin (52-53): ['GEN C_noupd 52']
+   s5 failing: ['LIK H5 38', 'GEN H5 39']; thin (52-53): ['LIK C_twoslot 52']
+   alias DATA GAP (HIGH 5, LOW 0): ['s1 40/42 40/42', 's2 39/42 38/42', 's3 41/42 40/42', 's4 42/42 42/42', 's5 39/42 39/42']
+   stopping learned: True per seed [True, True, True, True, True] gaps [(-0.031, 0.047), (0.0, 0.047), (-0.031, 0.031), (-0.031, 0.047), (-0.031, 0.031)]
+== G: FAIL | any-seed FAIL
+   LOO {'-s1': 'FAIL', '-s2': 'FAIL', '-s3': 'FAIL', '-s4': 'FAIL', '-s5': 'FAIL'}
+   fewest flips 1 [(2, 'GEN', 'C_noupd')]
+   seeds passing all but H5: [1, 5]
+   s1 failing: ['LIK H5 38', 'GEN H5 40']; thin (52-53): ['LIK H3 52', 'GEN H3 53', 'GEN C_noupd 53', 'LIK C_twoslot 53', 'GEN C_twoslot 53']
+   s2 failing: ['LIK H5 44', 'GEN H5 44', 'GEN C_noupd 51']; thin (52-53): []
+   s3 failing: ['LIK H5 41', 'GEN H5 42', 'LIK C_noupd 51', 'GEN C_noupd 51', 'GEN C_twoslot 51']; thin (52-53): ['LIK H6 53', 'LIK C_twoslot 53']
+   s4 failing: ['LIK H5 37', 'GEN H5 40', 'LIK C_twoslot 50', 'GEN C_twoslot 51']; thin (52-53): ['LIK C_noupd 52', 'GEN C_noupd 53']
+   s5 failing: ['LIK H5 44', 'GEN H5 45']; thin (52-53): ['LIK C_twoslot 53']
+   alias DATA GAP (HIGH 5, LOW 0): ['s1 40/42 40/42', 's2 40/42 40/42', 's3 39/42 40/42', 's4 41/42 41/42', 's5 38/42 37/42']
+   stopping learned: True per seed [True, True, True, True, True] gaps [(0.0, 0.047), (-0.062, 0.016), (-0.047, 0.047), (-0.047, 0.031), (-0.047, 0.062)]
+== e005w: PARTIAL-X H5 (3 seeds) | any-seed PARTIAL-X H5 (3 seeds)
+   LOO {'-s1': 'PARTIAL-X H5', '-s2': 'FAIL', '-s3': 'FAIL', '-s4': 'PARTIAL-X H5', '-s5': 'FAIL'}
+   fewest flips 2 [(5, 'LIK', 'C_twoslot')]
+   seeds passing all but H5: [2, 3, 5]
+   s1 failing: ['LIK H5 39', 'GEN H5 37', 'GEN C_noupd 51']; thin (52-53): ['LIK C_noupd 52']
+   s2 failing: ['LIK H5 46', 'GEN H5 45']; thin (52-53): []
+   s3 failing: ['LIK H5 42', 'GEN H5 44']; thin (52-53): []
+   s4 failing: ['LIK H5 41', 'GEN H5 41', 'GEN C_twoslot 50']; thin (52-53): ['LIK C_noupd 52', 'GEN C_noupd 52', 'LIK C_twoslot 52']
+   s5 failing: ['LIK H5 42', 'GEN H5 42']; thin (52-53): ['LIK C_twoslot 53', 'GEN C_twoslot 53']
+   alias DATA GAP (HIGH 5, LOW 0): ['s1 39/42 41/42', 's2 39/42 40/42', 's3 39/42 39/42', 's4 40/42 40/42', 's5 37/42 38/42']
+   stopping learned: True per seed [True, True, True, True, True] gaps [(-0.047, 0.062), (-0.062, 0.031), (-0.031, 0.031), (0.0, 0.047), (-0.062, 0.047)]
+== e004w: FAIL | any-seed FAIL
+   LOO {'-s1': 'FAIL', '-s2': 'FAIL', '-s3': 'FAIL', '-s4': 'FAIL', '-s5': 'FAIL'}
+   fewest flips None 
+   seeds passing all but H5: []
+   s1 failing: ['LIK H1 43', 'GEN H1 42', 'LIK H2 45', 'GEN H2 45', 'LIK H5 45', 'GEN H5 45']; thin (52-53): ['LIK C_twoslot 52']
+   s2 failing: ['LIK H1 45', 'GEN H1 46', 'LIK H2 51', 'LIK H5 46', 'GEN H5 45']; thin (52-53): ['GEN H2 52', 'GEN C_noupd 52']
+   s3 failing: ['LIK H1 45', 'GEN H1 49', 'LIK H2 43', 'GEN H2 50']; thin (52-53): ['LIK H3 53', 'LIK H6 52']
+   s4 failing: ['LIK H1 43', 'GEN H1 42', 'LIK H2 42', 'GEN H2 42', 'LIK H5 48', 'GEN H5 47']; thin (52-53): ['LIK H3 52']
+   s5 failing: ['LIK H1 42', 'GEN H1 42', 'LIK H2 48', 'GEN H2 48', 'LIK H5 51']; thin (52-53): ['LIK H3 53', 'GEN H3 53', 'GEN C_twoslot 53']
+   alias REAL LIMIT (HIGH 0, LOW 4): ['s1 9/42 8/42', 's2 18/42 18/42', 's3 15/42 22/42', 's4 11/42 11/42', 's5 10/42 11/42']
+   stopping learned: False per seed [False, False, False, False, False] gaps [(-0.906, -0.656), (-0.75, -0.266), (-0.859, -0.75), (-0.875, -0.516), (-0.688, -0.219)]
+== E005: PARTIAL-X H5 (3 seeds) | any-seed PARTIAL-X H5 (3 seeds)
+   LOO {'-s1': 'PARTIAL-X H5', '-s2': 'FAIL', '-s3': 'FAIL', '-s4': 'PARTIAL-X H5', '-s5': 'FAIL'}
+   fewest flips 2 [(5, 'LIK', 'C_twoslot')]
+   seeds passing all but H5: [2, 3, 5]
+   s1 failing: ['LIK H5 39', 'GEN H5 37', 'GEN C_noupd 51']; thin (52-53): ['LIK C_noupd 52']
+   s2 failing: ['LIK H5 46', 'GEN H5 45']; thin (52-53): []
+   s3 failing: ['LIK H5 42', 'GEN H5 44']; thin (52-53): []
+   s4 failing: ['LIK H5 41', 'GEN H5 41', 'GEN C_twoslot 50']; thin (52-53): ['LIK C_noupd 52', 'GEN C_noupd 52', 'LIK C_twoslot 52']
+   s5 failing: ['LIK H5 42', 'GEN H5 42']; thin (52-53): ['LIK C_twoslot 53', 'GEN C_twoslot 53']
+   alias DATA GAP (HIGH 5, LOW 0): ['s1 39/42 41/42', 's2 39/42 40/42', 's3 39/42 39/42', 's4 40/42 40/42', 's5 37/42 38/42']
+   stopping learned: True per seed [True, True, True, True, True] gaps [(-0.047, 0.062), (-0.062, 0.031), (-0.031, 0.031), (0.0, 0.047), (-0.062, 0.047)]
+######## python a3_qh5.py
+P - C BIG H5 LIK: +0.002, CI -0.089 to +0.105 | P - L4 -0.127, CI -0.191 to -0.066 | H5L P - C +0.001, CI -0.038 to +0.046
+P - C BIG H5 GEN: +0.013, CI -0.086 to +0.121 | P - L4 -0.122, CI -0.195 to -0.059 | H5L P - C -0.008, CI -0.049 to +0.039
+L4 - C 0.129 (flag if < 0.05: False); dev C - e005w +0.0010
+LABEL: INCONCLUSIVE
+pooled C: LIK 0.649 GEN 0.652 per seed LIK [0.552, 0.729, 0.693, 0.578, 0.693]
+pooled P: LIK 0.651 GEN 0.665 per seed LIK [0.729, 0.609, 0.703, 0.604, 0.609]
+pooled e004w: LIK 0.778 GEN 0.786 per seed LIK [0.771, 0.719, 0.844, 0.76, 0.797]
+pooled e005w: LIK 0.648 GEN 0.649 per seed LIK [0.547, 0.729, 0.693, 0.583, 0.688]
+per seed P - C LIK: ['+0.177', '-0.120', '+0.010', '+0.026', '-0.083'] sd 0.116
+per seed P - C GEN: ['+0.188', '-0.135', '+0.057', '+0.016', '-0.062'] sd 0.123
+BIG H5 intro order counts {1: 76, 2: 77, 3: 39} gold is last statement: 0
+C: intro 0.918/0.486/0.446 reweighted 0.658 after_ind F/T 0.598/0.700 NL right/wrong 0.619/0.679 | LIK wrong 337, = last statement 193 | GEN wrong 334, first value named = last statement 193
+P: intro 0.900/0.483/0.497 reweighted 0.663 after_ind F/T 0.600/0.702 NL right/wrong 0.646/0.656 | LIK wrong 335, = last statement 198 | GEN wrong 322, first value named = last statement 190
+e004w: intro 0.903/0.670/0.749 reweighted 0.789 after_ind F/T 0.748/0.808 NL right/wrong 0.779/0.777 | LIK wrong 213, = last statement 91 | GEN wrong 205, first value named = last statement 91
+e005w: intro 0.916/0.486/0.446 reweighted 0.657 after_ind F/T 0.598/0.698 NL right/wrong 0.617/0.679 | LIK wrong 338, = last statement 192 | GEN wrong 337, first value named = last statement 195
+  P - C LIK intro 1: -0.018, CI -0.074 to +0.032
+  P - C LIK intro 2: -0.003, CI -0.161 to +0.164
+  P - C LIK intro 3: +0.051, CI -0.113 to +0.231
+  P - C GEN intro 1: -0.021, CI -0.074 to +0.034
+  P - C GEN intro 2: +0.016, CI -0.166 to +0.192
+  P - C GEN intro 3: +0.072, CI -0.072 to +0.231
+D4004 H5 LIK C: 0.659 intro [0.881, 0.5, 0.494]
+D4004 H5 LIK P: 0.650 intro [0.874, 0.49, 0.482]
+D4004 H5 LIK e004w: 0.756 intro [0.881, 0.64, 0.694]
+D4004 H5 LIK e005w: 0.656 intro [0.881, 0.51, 0.471]
+D4004 H5 LIK E005: 0.656 intro [0.881, 0.51, 0.471]
+D4004 H5 LIK E004: 0.756 intro [0.881, 0.64, 0.694]
+control BIG C_noupd LIK P - C: -0.003, CI -0.030 to +0.022
+control BIG C_noupd GEN P - C: -0.006, CI -0.035 to +0.025
+control BIG C_twoslot LIK P - C: +0.013, CI -0.018 to +0.046
+control BIG C_twoslot GEN P - C: +0.006, CI -0.029 to +0.042
+######## python a4_qchat.py
+base: turns 149 TF 0.01 TF2 0.01 LOOP 0.013 CAP 68 EOS 81 CHECKS 21/73
+C1: turns 149 TF 0.54 TF2 0.54 LOOP 0.678 CAP 104 EOS 45 CHECKS 28/73
+C2: turns 149 TF 0.56 TF2 0.56 LOOP 0.161 CAP 24 EOS 125 CHECKS 33/73
+C3: turns 149 TF 0.50 TF2 0.50 LOOP 0.403 CAP 62 EOS 87 CHECKS 33/73
+C4: turns 149 TF 0.59 TF2 0.59 LOOP 0.107 CAP 18 EOS 131 CHECKS 32/73
+C5: turns 149 TF 0.56 TF2 0.57 LOOP 0.369 CAP 59 EOS 90 CHECKS 28/73
+G1: turns 149 TF 0.28 TF2 0.28 LOOP 0.040 CAP 33 EOS 116 CHECKS 36/73
+G2: turns 149 TF 0.28 TF2 0.28 LOOP 0.020 CAP 30 EOS 119 CHECKS 42/73
+G3: turns 149 TF 0.21 TF2 0.21 LOOP 0.060 CAP 56 EOS 93 CHECKS 38/73
+G4: turns 149 TF 0.32 TF2 0.32 LOOP 0.020 CAP 11 EOS 138 CHECKS 36/73
+G5: turns 149 TF 0.26 TF2 0.26 LOOP 0.067 CAP 37 EOS 112 CHECKS 36/73
+P1: turns 149 TF 0.50 TF2 0.50 LOOP 0.550 CAP 87 EOS 62 CHECKS 32/73
+P2: turns 149 TF 0.56 TF2 0.56 LOOP 0.228 CAP 51 EOS 98 CHECKS 28/73
+P3: turns 149 TF 0.58 TF2 0.58 LOOP 0.289 CAP 43 EOS 106 CHECKS 31/73
+P4: turns 149 TF 0.54 TF2 0.54 LOOP 0.396 CAP 73 EOS 76 CHECKS 33/73
+P5: turns 149 TF 0.57 TF2 0.57 LOOP 0.188 CAP 29 EOS 120 CHECKS 29/73
+e005w1: turns 149 TF 0.58 TF2 0.58 LOOP 0.624 CAP 87 EOS 62 CHECKS 30/73
+e005w2: turns 149 TF 0.57 TF2 0.57 LOOP 0.168 CAP 25 EOS 124 CHECKS 33/73
+e005w3: turns 149 TF 0.50 TF2 0.50 LOOP 0.403 CAP 62 EOS 87 CHECKS 33/73
+e005w4: turns 149 TF 0.59 TF2 0.59 LOOP 0.107 CAP 18 EOS 131 CHECKS 32/73
+e005w5: turns 149 TF 0.54 TF2 0.55 LOOP 0.369 CAP 59 EOS 90 CHECKS 29/73
+G - C TF: -0.278, CI -0.372 to -0.183  (G total 202, C total 409, turns 745)
+G - C TF2: -0.281, CI -0.380 to -0.184  (G total 202, C total 411, turns 745)
+G - C LOOP: -0.302, CI -0.519 to -0.117  (G total 31, C total 256, turns 745)
+G - C CHECKS: +6.800, CI -0.205 to +13.600  (G total 188, C total 154, turns 745)
+(a) True [TF 202 <= 204.5; TF2 202 <= 205.5] (b) True (c) True (d) True -> PROTECTS
+margin: G may gain 2 TF turns and 3 TF2 turns before (a) fails
+  s1: TF C 81 G 42 ratio 0.52
+  s2: TF C 83 G 42 ratio 0.51
+  s3: TF C 74 G 32 ratio 0.43
+  s4: TF C 88 G 47 ratio 0.53
+  s5: TF C 83 G 39 ratio 0.47
+P (not ruled): TF 411/745 = 0.552; P - C +0.003, CI -0.090 to +0.097
+ratio condition fails when dropping conversation: ['K_time', 'O_add10', 'R_d5_multi', 'R_d6_name', 'R_d6_number']

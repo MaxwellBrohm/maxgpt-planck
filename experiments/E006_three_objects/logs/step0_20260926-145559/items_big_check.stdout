@@ -1,0 +1,59 @@
+scorer                                        H5   C_noupd C_twoslot
+--------------------------------------------------------------------
+O1 first mention                            0.09      0.47      0.00
+O2 last mention                             0.00      0.00      0.00
+O3 last marked, else first                  0.16      0.05      0.13
+O4 prefix copy (3/2 words)                  0.06      0.09      0.05
+O5 content words vs question                0.44      0.83      0.30
+O5 content words vs q+prefix                0.44      0.83      0.28
+O5 all words vs question                    0.29      0.55      0.20
+O5 3-word runs vs q+prefix                  0.14      0.29      0.07
+O6 latest naming asked                      0.48      1.00      0.38
+O7 latest naming no other                   0.50      0.27      0.45
+O8 most frequent                            0.07      0.03      0.08
+X1 second-to-last statement                 0.20      0.12      0.23
+X2 latest with update cue                   0.05      0.00      0.15
+X3 latest naming asked, full phrase         0.41      1.00      0.22
+X4 value at last naming                     0.48      1.00      0.38
+X5 statement after last echo                0.00      0.05      0.10
+X6 latest with no q/p overlap               0.00      0.00      0.01
+X7 first naming asked                       0.25      1.00      0.00
+X8 latest acked with value                  0.07      0.03      0.08
+X9 latest unmarked naming asked             0.29      1.00      0.17
+X10 longest statement                       0.09      0.21      0.06
+X11 third-to-last statement                 0.21      0.37      0.48
+T topic tracker (diagnostic)                1.00      1.00      1.00
+IDEAL                                       1.00      1.00      1.00
+chance                                      0.15      0.23      0.19
+H5L (the mirror; not gated except IDEAL):
+scorer                                        H5
+------------------------------------------------
+O1 first mention                            0.00
+O2 last mention                             1.00
+O3 last marked, else first                  0.40
+O4 prefix copy (3/2 words)                  0.82
+O5 content words vs question                0.35
+O5 content words vs q+prefix                0.35
+O5 all words vs question                    0.26
+O5 3-word runs vs q+prefix                  0.62
+O6 latest naming asked                      0.38
+O7 latest naming no other                   1.00
+O8 most frequent                            0.68
+X1 second-to-last statement                 0.00
+X2 latest with update cue                   0.88
+X3 latest naming asked, full phrase         0.30
+X4 value at last naming                     0.38
+X5 statement after last echo                1.00
+X6 latest with no q/p overlap               0.62
+X7 first naming asked                       0.08
+X8 latest acked with value                  0.68
+X9 latest unmarked naming asked             0.23
+X10 longest statement                       0.15
+X11 third-to-last statement                 0.00
+T topic tracker (diagnostic)                1.00
+IDEAL                                       1.00
+chance                                      0.15
+intro order (first/second/third): H5 {1: 76, 2: 77, 3: 39}; H5L {1: 64, 2: 64, 3: 64}
+BIG prompt-list sha256 6ad251860a5e68c1 (draft trial 6ad25186)
+file equals the rebuild and its sha256: True
+RESULT: ALL PASS (sha256 566ef4676b1997317e91cdbb0baf6162bd5531ece5def44a105669caa625166e)

@@ -72,7 +72,10 @@ def other_model_jobs():
         pid, cmd = line.split(None, 1)
         if int(pid) == me or "guard.py" in cmd:
             continue
-        if "python" in cmd and any(s in cmd for s in MODEL_SCRIPTS):
+        # Only a real Python process counts. A shell whose command TEXT merely mentions a model
+        # script (an agent's grep or heredoc) is not a model job: that false positive stopped E003.
+        exe = os.path.basename(cmd.split()[0]).lower()
+        if exe.startswith("python") and any(s in cmd for s in MODEL_SCRIPTS):
             hits.append(line[:200])
     return hits
 
@@ -166,6 +169,7 @@ def main():
     paused, paused_s, n_pauses = False, 0.0, 0
     active, t_prev = 0.0, time.time()
     last_mem = 0.0
+    swap_low_streak = 0   # consecutive 5 s samples meeting the swap rule
     while p.poll() is None:
         time.sleep(1)
         now = time.time()
@@ -202,12 +206,21 @@ def main():
         reason = None
         if active > a.ceiling:
             reason = f"active_time_ceiling_{a.ceiling}s"
-        elif el > 3 * a.ceiling:
+        elif el - paused_s > 3 * a.ceiling:   # time paused for a closed lid on battery does not count
             reason = f"wall_clock_ceiling_{3 * a.ceiling}s"
         elif 0 <= f < 15:
             reason = f"free_memory_{f}pct"
-        elif s - swap0 > 768:
-            reason = f"swap_grew_{s - swap0:.0f}MB"
+        # Swap growth alone is not pressure: macOS pushes ~1 GB to swap on wake from sleep with
+        # plenty of free memory (a 135M chat probe was killed that way at 50-71% free). Kill only
+        # when growth coincides with low free memory, or when swap runs away.
+        # The low-free reading must hold on 2 consecutive samples (5-10 s): browser tabs dip free
+        # memory below 35% for about 3 s (measured 2026-09-25 20:48: 71% -> 30% -> 66%), and on a long
+        # job swap drifts past +768 MB, so one sample killed two E005 chat probes that used 560 MB.
+        # The < 15% kill above stays immediate.
+        else:
+            swap_low_streak = swap_low_streak + 1 if (s - swap0 > 768 and 0 <= f < 35) else 0
+            if swap_low_streak >= 2 or s - swap0 > 4096:
+                reason = f"swap_grew_{s - swap0:.0f}MB"
         if reason:
             log(f"KILL: {reason}")
             killed = reason

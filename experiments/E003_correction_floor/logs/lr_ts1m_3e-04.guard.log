@@ -1,0 +1,24 @@
+00:53:30 start free=57% swap=6398MB cmd=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B e003_ft_test.py roneneldan/TinyStories-1M --bs 4 --accum 4 --max-len 768 --grad-ckpt --seed 0 --sets dev --save 0 --lr 3e-04 --tag lr3e-04_s0
+00:54:02 t=   32s active=   32s free=53% swap=6398MB rss=1476MB
+00:54:33 t=   63s active=   63s free=57% swap=6286MB rss=1699MB
+00:55:05 t=   94s active=   94s free=43% swap=6206MB rss=455MB
+00:55:36 t=  125s active=  125s free=39% swap=6198MB rss=1990MB
+00:56:07 t=  156s active=  156s free=41% swap=6818MB rss=912MB
+00:56:38 t=  187s active=  187s free=49% swap=6802MB rss=2008MB
+00:56:59 KILL: swap_grew_1071MB
+00:57:04 end exit=-15 killed=swap_grew_1071MB active=208s paused=0s pauses=0 min_free=31% max_swap=7469MB peak_rss=2277MB
+01:09:26 start free=68% swap=7268MB cmd=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B e003_ft_test.py roneneldan/TinyStories-1M --bs 4 --accum 4 --max-len 768 --grad-ckpt --seed 0 --sets dev --save 0 --lr 3e-04 --tag lr3e-04_s0
+01:09:57 t=   32s active=   32s free=60% swap=7212MB rss=1847MB
+01:10:28 t=   62s active=   62s free=31% swap=7212MB rss=1409MB
+01:10:59 t=   93s active=   93s free=32% swap=7754MB rss=1176MB
+01:11:30 t=  124s active=  124s free=35% swap=7754MB rss=2021MB
+01:12:00 t=  154s active=  154s free=36% swap=7754MB rss=1698MB
+01:12:31 t=  185s active=  185s free=58% swap=7730MB rss=2027MB
+01:13:02 t=  216s active=  216s free=58% swap=7730MB rss=2231MB
+01:13:32 t=  247s active=  247s free=43% swap=7722MB rss=1702MB
+01:14:04 t=  278s active=  278s free=33% swap=7714MB rss=1350MB
+01:14:35 t=  309s active=  309s free=36% swap=7698MB rss=1393MB
+01:15:05 t=  340s active=  340s free=36% swap=7698MB rss=2096MB
+01:15:37 t=  371s active=  371s free=55% swap=7690MB rss=2277MB
+01:16:08 t=  402s active=  402s free=56% swap=7682MB rss=2318MB
+01:16:27 end exit=0 killed=None active=421s paused=0s pauses=0 min_free=27% max_swap=7754MB peak_rss=2397MB

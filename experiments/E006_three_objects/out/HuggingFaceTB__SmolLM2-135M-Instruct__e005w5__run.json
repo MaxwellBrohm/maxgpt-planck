@@ -1,0 +1,226 @@
+{
+ "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+ "weights_in": "../../E005_alias_eot/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s5",
+ "arm": null,
+ "seed": 5,
+ "steps": 0,
+ "lr": 0.00015,
+ "bs": 4,
+ "accum": 4,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "cuda",
+ "dry": false,
+ "tag": "e005w5",
+ "sets": [
+  "al",
+  "big",
+  "cont",
+  "eval",
+  "h5l",
+  "know"
+ ],
+ "chat": true,
+ "max_new": 48,
+ "checks": {
+  "params_config": {
+   "total": 134515008,
+   "embedding": 28311552,
+   "body": 106203456,
+   "tok_emb": 28311552,
+   "out_head": 0,
+   "pos_emb": 0,
+   "layers": 30,
+   "d": 576,
+   "vocab": 49152,
+   "n_ctx": 8192
+  },
+  "params_model": 134515008,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": true,
+  "config_says_tied": true,
+  "sanity_nll": 2.3005
+ },
+ "numerics": {
+  "float32_matmul_precision": "highest",
+  "tf32_matmul": false,
+  "tf32_cudnn": false,
+  "cudnn_benchmark": false,
+  "cudnn_deterministic": true,
+  "deterministic_algorithms": true,
+  "deterministic_warn_only": true,
+  "cublas_workspace_config": ":4096:8",
+  "sdpa": {
+   "flash": false,
+   "mem_efficient": false,
+   "math": true,
+   "cudnn": false
+  },
+  "hf_hub_offline": "1",
+  "hf_home_set": true,
+  "versions": {
+   "torch": "2.13.0+cu130",
+   "transformers": "5.15.1",
+   "tokenizers": "0.22.2",
+   "safetensors": "0.8.0"
+  },
+  "cuda": "13.0",
+  "cuda_available": true,
+  "gpu": "NVIDIA GeForce RTX 5070",
+  "driver": "596.49"
+ },
+ "tf32": false,
+ "replay_pool_sha256": null,
+ "params": 134515008,
+ "train_stream": null,
+ "train_stats": null,
+ "losses": [],
+ "probe": [],
+ "lock_in_step": null,
+ "loss_finite": true,
+ "weights_sha256": "131c81134f227a4b7893cfa58c16ebb63a66766ea39930c9825811ef65299cb4",
+ "weights": "../E005_alias_eot/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s5",
+ "eval_s": 1313.1,
+ "eval_counts": {
+  "e004/plain": 640,
+  "e004/chat": 640,
+  "new/plain": 1728,
+  "extra/plain": 192,
+  "old/plain": 1116,
+  "uprobe/plain": 576,
+  "cross/plain": 384,
+  "new/chat": 1728,
+  "extra/chat": 192,
+  "cross/chat": 384,
+  "khard/plain": 80,
+  "kbig/plain": 441,
+  "big/plain": 576,
+  "big/chat": 576,
+  "h5l/plain": 192,
+  "h5l/chat": 192,
+  "al/plain": 64,
+  "al/chat": 64,
+  "gen_e004/plain": 640,
+  "gen_e004/chat": 640,
+  "gen_cont/plain": 416,
+  "gen_big/plain": 576,
+  "gen_big/chat": 576,
+  "gen_h5l/plain": 192,
+  "gen_h5l/chat": 192,
+  "gen_al/plain": 64,
+  "gen_al/chat": 64
+ },
+ "summary": {
+  "LIK e004/plain": {
+   "C_noupd": 0.9375,
+   "C_twoslot": 0.8281,
+   "H1": 0.8906,
+   "H2": 0.9219,
+   "H3": 0.8906,
+   "H4": 0.9062,
+   "H5": 0.6562,
+   "H6": 0.8594,
+   "H7": 0.9531,
+   "ID": 0.9375
+  },
+  "LIK e004/chat": {
+   "C_noupd": 0.8594,
+   "C_twoslot": 0.8594,
+   "H1": 0.9062,
+   "H2": 0.9062,
+   "H3": 0.8281,
+   "H4": 0.9062,
+   "H5": 0.7031,
+   "H6": 0.9062,
+   "H7": 0.9531,
+   "ID": 0.9375
+  },
+  "LIK big/plain": {
+   "C_noupd": 0.8646,
+   "C_twoslot": 0.8438,
+   "H5": 0.6875
+  },
+  "LIK big/chat": {
+   "C_noupd": 0.8438,
+   "C_twoslot": 0.8594,
+   "H5": 0.6354
+  },
+  "LIK h5l/plain": {
+   "H5L": 0.8958
+  },
+  "LIK h5l/chat": {
+   "H5L": 0.9115
+  },
+  "LIK al/plain": {
+   "AL": 0.9688
+  },
+  "LIK al/chat": {
+   "AL": 0.9844
+  },
+  "GEN e004/plain": {
+   "C_noupd": 0.8906,
+   "C_twoslot": 0.8281,
+   "H1": 0.9062,
+   "H2": 0.9375,
+   "H3": 0.8906,
+   "H4": 0.9062,
+   "H5": 0.6562,
+   "H6": 0.9375,
+   "H7": 0.9531,
+   "ID": 0.9375,
+   "capped": 0
+  },
+  "GEN e004/chat": {
+   "C_noupd": 0.8281,
+   "C_twoslot": 0.8281,
+   "H1": 0.9531,
+   "H2": 0.9219,
+   "H3": 0.8281,
+   "H4": 0.9375,
+   "H5": 0.7031,
+   "H6": 0.9688,
+   "H7": 0.9531,
+   "ID": 0.9375,
+   "capped": 0
+  },
+  "GEN cont/plain": {
+   "all": 0.9303,
+   "capped": 0
+  },
+  "GEN big/plain": {
+   "C_noupd": 0.8646,
+   "C_twoslot": 0.8333,
+   "H5": 0.6562,
+   "capped": 0
+  },
+  "GEN big/chat": {
+   "C_noupd": 0.8542,
+   "C_twoslot": 0.849,
+   "H5": 0.6615,
+   "capped": 0
+  },
+  "GEN h5l/plain": {
+   "H5L": 0.9167,
+   "capped": 0
+  },
+  "GEN h5l/chat": {
+   "H5L": 0.8906,
+   "capped": 0
+  },
+  "GEN al/plain": {
+   "AL": 0.9844,
+   "capped": 0
+  },
+  "GEN al/chat": {
+   "AL": 1.0,
+   "capped": 0
+  }
+ },
+ "selftest_fail": [],
+ "total_s": 1316.2,
+ "peak_cuda_gb": 2.558
+}

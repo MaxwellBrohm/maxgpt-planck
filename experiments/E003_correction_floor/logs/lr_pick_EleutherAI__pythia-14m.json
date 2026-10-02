@@ -1,0 +1,80 @@
+{
+ "model": "EleutherAI/pythia-14m",
+ "grid": [
+  "5e-05",
+  "3e-04",
+  "1e-03",
+  "3e-03"
+ ],
+ "rows": [
+  {
+   "lr": 5e-05,
+   "LW": 0.9062,
+   "TS": 0.3281,
+   "NU": 0.1875,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.1875,
+   "mean": 0.4739,
+   "loss_first10": 2.1155,
+   "loss_last50": 0.2619,
+   "lock_in_step": null
+  },
+  {
+   "lr": 0.0003,
+   "LW": 0.5365,
+   "TS": 0.4375,
+   "NU": 0.1562,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.1562,
+   "mean": 0.3767,
+   "loss_first10": 1.5991,
+   "loss_last50": 0.3033,
+   "lock_in_step": null
+  },
+  {
+   "lr": 0.001,
+   "LW": 0.5885,
+   "TS": 0.1875,
+   "NU": 0.2969,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.1875,
+   "mean": 0.3576,
+   "loss_first10": 1.6795,
+   "loss_last50": 0.4997,
+   "lock_in_step": null
+  },
+  {
+   "lr": 0.003,
+   "LW": 0.4219,
+   "TS": 0.2344,
+   "NU": 0.5625,
+   "n": [
+    192,
+    64,
+    64
+   ],
+   "min": 0.2344,
+   "mean": 0.4063,
+   "loss_first10": 3.4047,
+   "loss_last50": 1.0372,
+   "lock_in_step": null
+  }
+ ],
+ "ineligible": {},
+ "final": false,
+ "decision": "EXTEND",
+ "extend": "1e-02",
+ "line": "EXTEND 1e-02"
+}

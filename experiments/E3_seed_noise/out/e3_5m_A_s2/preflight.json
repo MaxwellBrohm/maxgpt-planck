@@ -1,0 +1,65 @@
+{
+ "ok": true,
+ "runs": [
+  {
+   "config": "experiments/E3_seed_noise/configs/e3_5m_A_s2.yaml",
+   "config_sha256": "232571ab7a0244078788f2b7a2d20dc6bc2154ed87e1f16530649db612443b5a",
+   "engine": {
+    "data.max_item_len": 2048,
+    "data.mode": "pack",
+    "data.window_tokens": 131072,
+    "optim.batched": true,
+    "train.auto_micro_on_oom": false,
+    "train.ce_chunk_rows": 0,
+    "train.compile": false,
+    "train.compile_backend": "inductor",
+    "train.compile_dynamic": null,
+    "train.cuda_mem_cap_gib": null,
+    "train.cuda_mem_margin_gib": 0.5,
+    "train.doc_attn": "varlen",
+    "train.lazy_metrics": false,
+    "train.precision": "bf16"
+   },
+   "engine_fixed": "2026-09-26 93ea41c",
+   "engine_not_read_by_harness": [
+    "train.auto_micro_on_oom",
+    "train.cuda_mem_cap_gib",
+    "train.cuda_mem_margin_gib"
+   ],
+   "file_sha256": "5abefe8c80a4cee5e9dc4ae2ab16a101b46cc68a98e629545bdd4a85c02c564a",
+   "n_files": {
+    "cccc": 31,
+    "dolly": 1,
+    "gutenberg": 6,
+    "irc": 6,
+    "oasst2": 1,
+    "stackexchange": 11,
+    "wikimedia": 3
+   },
+   "n_params": 5010133,
+   "name": "e3_5m_A_s2",
+   "ok": true,
+   "prereg": {
+    "committed": true,
+    "id": "E3",
+    "sha256": "be89babbfee883adb28f5012f758cde169695c013d4dee74e3dd7fe5e1d7d80c"
+   },
+   "refusals": [],
+   "schedule": {
+    "mode": "full",
+    "total_steps": 7630,
+    "warmup_steps": 76
+   },
+   "shares": {
+    "cccc": 0.414241,
+    "dolly": 0.016002,
+    "gutenberg": 0.147915,
+    "irc": 0.040004,
+    "oasst2": 0.012001,
+    "stackexchange": 0.221922,
+    "wikimedia": 0.147915
+   }
+  }
+ ],
+ "strict": true
+}

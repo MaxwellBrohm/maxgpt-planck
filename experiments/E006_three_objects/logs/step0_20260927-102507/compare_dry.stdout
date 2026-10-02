@@ -1,0 +1,8 @@
+repro dryC6a vs dryC6b: max |diff| 0.0 over 29 numbers (bitwise equal)
+identity dryC5 vs dryC6a: max |diff| 0.0 over 29 numbers
+timing dryC5: s_per_step 1.66 train_s 8.3 total_s 14.1
+timing dryC6a: s_per_step 1.86 train_s 9.3 total_s 22.6
+timing dryC6b: s_per_step 2.14 train_s 10.7 total_s 25.6
+timing dryP: s_per_step 1.74 train_s 8.7 total_s 17.8
+timing dryG: s_per_step 2.16 train_s 10.8 total_s 20.1
+RESULT: ALL PASS

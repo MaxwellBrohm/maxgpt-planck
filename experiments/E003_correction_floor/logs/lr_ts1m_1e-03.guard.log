@@ -1,0 +1,32 @@
+01:16:29 start free=47% swap=7666MB cmd=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B e003_ft_test.py roneneldan/TinyStories-1M --bs 4 --accum 4 --max-len 768 --grad-ckpt --seed 0 --sets dev --save 0 --lr 1e-03 --tag lr1e-03_s0
+01:17:01 t=   32s active=   32s free=38% swap=7658MB rss=1462MB
+01:17:31 t=   63s active=   63s free=47% swap=7642MB rss=2281MB
+01:18:02 t=   93s active=   93s free=26% swap=8158MB rss=668MB
+01:18:33 t=  124s active=  124s free=42% swap=8142MB rss=1930MB
+01:19:04 t=  155s active=  155s free=42% swap=8126MB rss=1778MB
+01:19:34 t=  186s active=  186s free=33% swap=8684MB rss=1900MB
+01:19:34 KILL: swap_grew_1018MB
+01:19:39 end exit=-15 killed=swap_grew_1018MB active=186s paused=0s pauses=0 min_free=26% max_swap=8684MB peak_rss=2281MB
+01:27:42 start free=58% swap=8308MB cmd=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B e003_ft_test.py roneneldan/TinyStories-1M --bs 4 --accum 4 --max-len 768 --grad-ckpt --seed 0 --sets dev --save 0 --lr 1e-03 --tag lr1e-03_s0
+01:28:13 t=   32s active=   32s free=41% swap=8276MB rss=1246MB
+01:28:44 t=   62s active=   62s free=44% swap=8252MB rss=2316MB
+01:29:15 t=   93s active=   93s free=25% swap=9052MB rss=373MB
+01:29:46 t=  124s active=  124s free=35% swap=9557MB rss=1838MB
+01:30:01 KILL: swap_grew_1217MB
+01:30:06 end exit=-15 killed=swap_grew_1217MB active=139s paused=0s pauses=0 min_free=25% max_swap=9605MB peak_rss=2316MB
+01:36:38 start free=83% swap=8893MB cmd=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B e003_ft_test.py roneneldan/TinyStories-1M --bs 4 --accum 4 --max-len 768 --grad-ckpt --seed 0 --sets dev --save 0 --lr 1e-03 --tag lr1e-03_s0
+01:37:10 t=   32s active=   32s free=60% swap=8893MB rss=1513MB
+01:37:41 t=   62s active=   62s free=55% swap=8885MB rss=2234MB
+01:38:11 t=   93s active=   93s free=51% swap=8861MB rss=1950MB
+01:38:42 t=  124s active=  124s free=65% swap=8861MB rss=2030MB
+01:39:13 t=  155s active=  155s free=68% swap=8789MB rss=2048MB
+01:39:44 t=  186s active=  186s free=53% swap=8789MB rss=1055MB
+01:40:15 t=  216s active=  216s free=54% swap=8789MB rss=1984MB
+01:40:45 t=  247s active=  247s free=58% swap=8781MB rss=2189MB
+01:41:16 t=  278s active=  278s free=61% swap=8749MB rss=1082MB
+01:41:47 t=  309s active=  309s free=66% swap=8741MB rss=2046MB
+01:42:18 t=  340s active=  340s free=63% swap=8741MB rss=1950MB
+01:42:49 t=  370s active=  370s free=59% swap=8717MB rss=2115MB
+01:43:19 t=  401s active=  401s free=57% swap=8717MB rss=2321MB
+01:43:50 t=  432s active=  432s free=41% swap=8709MB rss=789MB
+01:43:52 end exit=0 killed=None active=434s paused=0s pauses=0 min_free=41% max_swap=8893MB peak_rss=2321MB

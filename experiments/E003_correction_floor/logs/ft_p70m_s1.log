@@ -1,0 +1,62 @@
+Loading weights:   0%|          | 0/76 [00:00<?, ?it/s]Loading weights: 100%|██████████| 76/76 [00:00<00:00, 2945.41it/s]
+loaded EleutherAI/pythia-70m params=70,426,624 (config 70,426,624, body 18,915,328) sanity_nll=3.2192 in 2.2s mps_alloc=0.26G driver=1.04G peak_driver=1.04G
+loss self-check hf=2.98111 answer_only=2.98097
+probe step 0 {'step': 0, 'LW': 0.6875, 'TS': 0.4688, 'NU': 0.5625} mps_alloc=0.26G driver=1.13G peak_driver=1.13G
+step 0 loss 2.9505 gnorm 303.75 lr 5.00e-06 1s mps_alloc=0.96G driver=2.18G peak_driver=2.18G
+step 10 loss 0.7815 gnorm 78.96 lr 2.99e-05 10s mps_alloc=0.96G driver=3.12G peak_driver=3.12G
+step 20 loss 1.0566 gnorm 94.10 lr 4.97e-05 19s mps_alloc=0.96G driver=3.12G peak_driver=3.12G
+step 30 loss 0.9590 gnorm 61.74 lr 4.93e-05 28s mps_alloc=0.96G driver=3.13G peak_driver=3.13G
+step 40 loss 0.7806 gnorm 71.58 lr 4.87e-05 37s mps_alloc=0.96G driver=3.13G peak_driver=3.13G
+probe step 50 {'step': 50, 'LW': 0.5938, 'TS': 0.375, 'NU': 0.5}
+step 50 loss 0.9050 gnorm 47.81 lr 4.80e-05 50s mps_alloc=0.96G driver=2.12G peak_driver=3.13G
+step 60 loss 0.3763 gnorm 43.21 lr 4.72e-05 59s mps_alloc=0.96G driver=3.13G peak_driver=3.13G
+step 70 loss 0.3134 gnorm 39.63 lr 4.62e-05 68s mps_alloc=0.96G driver=3.13G peak_driver=3.13G
+step 80 loss 0.2078 gnorm 42.21 lr 4.51e-05 77s mps_alloc=0.96G driver=3.13G peak_driver=3.13G
+step 90 loss 0.2024 gnorm 47.81 lr 4.39e-05 86s mps_alloc=0.96G driver=3.14G peak_driver=3.14G
+probe step 100 {'step': 100, 'LW': 0.8125, 'TS': 0.6562, 'NU': 0.6562}
+step 100 loss 0.4020 gnorm 38.02 lr 4.25e-05 99s mps_alloc=0.96G driver=2.11G peak_driver=3.14G
+step 110 loss 0.4531 gnorm 51.05 lr 4.11e-05 109s mps_alloc=0.96G driver=3.12G peak_driver=3.14G
+step 120 loss 0.2054 gnorm 26.56 lr 3.95e-05 118s mps_alloc=0.96G driver=3.12G peak_driver=3.14G
+step 130 loss 0.3583 gnorm 27.39 lr 3.79e-05 127s mps_alloc=0.96G driver=3.13G peak_driver=3.14G
+step 140 loss 0.2085 gnorm 24.80 lr 3.62e-05 136s mps_alloc=0.96G driver=3.13G peak_driver=3.14G
+probe step 150 {'step': 150, 'LW': 1.0, 'TS': 0.8125, 'NU': 0.5}
+step 150 loss 0.3296 gnorm 38.82 lr 3.44e-05 148s mps_alloc=0.96G driver=2.11G peak_driver=3.14G
+step 160 loss 0.2199 gnorm 28.44 lr 3.25e-05 157s mps_alloc=0.96G driver=3.11G peak_driver=3.14G
+step 170 loss 0.3466 gnorm 41.81 lr 3.06e-05 166s mps_alloc=0.96G driver=3.12G peak_driver=3.14G
+step 180 loss 0.2328 gnorm 29.57 lr 2.87e-05 175s mps_alloc=0.96G driver=3.13G peak_driver=3.14G
+step 190 loss 0.2295 gnorm 29.64 lr 2.68e-05 184s mps_alloc=0.96G driver=3.13G peak_driver=3.14G
+probe step 200 {'step': 200, 'LW': 0.9688, 'TS': 0.6875, 'NU': 0.5312}
+step 200 loss 0.1411 gnorm 25.69 lr 2.48e-05 196s mps_alloc=0.96G driver=2.12G peak_driver=3.14G
+step 210 loss 0.1238 gnorm 27.52 lr 2.28e-05 205s mps_alloc=0.96G driver=3.11G peak_driver=3.14G
+step 220 loss 0.1569 gnorm 34.50 lr 2.09e-05 214s mps_alloc=0.96G driver=3.12G peak_driver=3.14G
+step 230 loss 0.2527 gnorm 37.43 lr 1.90e-05 223s mps_alloc=0.96G driver=3.13G peak_driver=3.14G
+step 240 loss 0.0004 gnorm 0.20 lr 1.71e-05 233s mps_alloc=0.96G driver=3.13G peak_driver=3.14G
+probe step 250 {'step': 250, 'LW': 1.0, 'TS': 0.75, 'NU': 0.5}
+step 250 loss 0.0284 gnorm 9.53 lr 1.53e-05 245s mps_alloc=0.96G driver=2.11G peak_driver=3.14G
+step 260 loss 0.2037 gnorm 69.93 lr 1.35e-05 254s mps_alloc=0.96G driver=3.12G peak_driver=3.14G
+step 270 loss 0.4566 gnorm 46.03 lr 1.18e-05 263s mps_alloc=0.96G driver=3.13G peak_driver=3.14G
+step 280 loss 0.0588 gnorm 14.83 lr 1.01e-05 271s mps_alloc=0.96G driver=3.13G peak_driver=3.14G
+step 290 loss 0.0530 gnorm 13.69 lr 8.61e-06 280s mps_alloc=0.96G driver=3.13G peak_driver=3.14G
+probe step 300 {'step': 300, 'LW': 1.0, 'TS': 0.6875, 'NU': 0.5}
+step 300 loss 0.1611 gnorm 23.30 lr 7.18e-06 293s mps_alloc=0.96G driver=2.11G peak_driver=3.14G
+step 310 loss 0.0111 gnorm 4.46 lr 5.86e-06 302s mps_alloc=0.96G driver=3.11G peak_driver=3.14G
+step 320 loss 0.0305 gnorm 9.52 lr 4.66e-06 311s mps_alloc=0.96G driver=3.12G peak_driver=3.14G
+step 330 loss 0.0105 gnorm 5.59 lr 3.58e-06 321s mps_alloc=0.96G driver=3.12G peak_driver=3.14G
+step 340 loss 0.0018 gnorm 1.21 lr 2.64e-06 330s mps_alloc=0.96G driver=3.12G peak_driver=3.14G
+probe step 350 {'step': 350, 'LW': 1.0, 'TS': 0.6875, 'NU': 0.5}
+step 350 loss 0.0206 gnorm 9.09 lr 1.83e-06 342s mps_alloc=0.96G driver=2.10G peak_driver=3.14G
+step 360 loss 0.0539 gnorm 15.84 lr 1.16e-06 351s mps_alloc=0.96G driver=3.11G peak_driver=3.14G
+step 370 loss 0.0391 gnorm 12.88 lr 6.46e-07 360s mps_alloc=0.96G driver=3.12G peak_driver=3.14G
+step 380 loss 0.0873 gnorm 21.69 lr 2.78e-07 368s mps_alloc=0.96G driver=3.12G peak_driver=3.14G
+step 390 loss 0.0072 gnorm 4.16 lr 6.24e-08 377s mps_alloc=0.96G driver=3.12G peak_driver=3.14G
+step 399 loss 0.1356 gnorm 22.24 lr 0.00e+00 385s mps_alloc=0.96G driver=3.12G peak_driver=3.14G
+probe step 400 {'step': 400, 'LW': 1.0, 'TS': 0.6875, 'NU': 0.5}
+scored new/plain: 1728 items in 37s mps_alloc=0.96G driver=2.09G peak_driver=3.14G
+scored extra/plain: 192 items in 3s mps_alloc=0.96G driver=2.09G peak_driver=3.14G
+scored old/plain: 1116 items in 21s mps_alloc=0.96G driver=2.09G peak_driver=3.14G
+scored uprobe/plain: 576 items in 14s mps_alloc=0.96G driver=2.09G peak_driver=3.14G
+scored khard/plain: 80 items in 1s mps_alloc=0.96G driver=2.09G peak_driver=3.14G
+scored kbig/plain: 441 items in 4s mps_alloc=0.96G driver=2.09G peak_driver=3.14G
+scored cross/plain: 384 items in 15s mps_alloc=0.96G driver=2.09G peak_driver=3.14G
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 11.45it/s]
+DONE EleutherAI/pythia-70m s1 total 489s peak_driver=3.143G lock_in_step=None loss_finite=True

@@ -24,12 +24,19 @@ SLUG = MODEL.replace("/", "__")
 SEEDS = (1, 2, 3, 4, 5)
 N_SET = {"e004": 640, "big": 576, "h5l": 192, "al": 64, "kbig": 441}
 _ITEMS = {}
+# notes.txt POST-RUN LOG 2026-09-27 11:30 and DEVIATION F1 (2026-10-02): the killed e005w1 job's complete rerun is the
+# record, so tag e005w1 reads e005w1_r2's record files. Chat transcripts keep their own tags (chat_e005w1 ran cleanly).
+FILE_TAG = {"e005w1": "e005w1_r2"}
+
+
+def file_tag(tag):
+    return FILE_TAG.get(tag, tag)
 
 
 def rec_path(out_dir, tag, name):
     if tag.startswith("mac_al:"):
         return os.path.join(out_dir, f"{tag.split(':', 1)[1]}__{name}.jsonl")
-    return os.path.join(out_dir, f"{SLUG}__{tag}__{name}.jsonl")
+    return os.path.join(out_dir, f"{SLUG}__{file_tag(tag)}__{name}.jsonl")
 
 
 def records(out_dir, tag, set_name, render="plain", part="LIK"):

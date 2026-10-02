@@ -9,6 +9,8 @@ read-only and writes only into a temporary directory.
     H5L equal), then NOT THE CAUSE (P = C), then the NO DROP flag (L4 = C)
   Q-chat plumbing: C = E005's transcripts, G = the untouched model's: PARTLY PROTECTS, failing (c) and (d); knowledge
     C = E005's kbig, G = E004's: NO EFFECT
+  tag map (DEVIATION F1): with records under the name e005w1 only, e005w seed 1 is not read (Q-H5's device shift is
+    None); under e005w1_r2 it is; the pass rule's run_block reads e005w1_r2's e004 files for tag e005w1
   readings: a second reading with the same file name is refused (FileExistsError), index.txt gets one line per reading
 usage: python -B test_analyze_e006.py   (exit 0 = all pass)"""
 import json
@@ -19,6 +21,7 @@ import tempfile
 sys.dont_write_bytecode = True
 
 import analyze_e006 as AN
+import analyze_e006_b as B6
 import analyze_e006_c as QC
 import analyze_e006_d as QD
 import chatmeasures_e006 as CM
@@ -105,8 +108,17 @@ def main():
             synth(out, f"C{s}", lambda f, i: i % 4 != 0)
             synth(out, f"P{s}", lambda f, i: True)
             synth(out, f"e004w{s}", lambda f, i: i % 10 != 0)
-            synth(out, f"e005w{s}", lambda f, i: i % 4 != 0)
+            if s > 1:
+                synth(out, f"e005w{s}", lambda f, i: i % 4 != 0)
+        synth(out, "e005w1", lambda f, i: i % 4 != 0)
         r, L = QC.q_h5(out)
+        ok(r["dev_shift_lik"] is None, f"tag map: records under e005w1 itself are not read ({r['dev_shift_lik']})")
+        synth(out, B6.file_tag("e005w1"), lambda f, i: i % 4 != 0)
+        r, L = QC.q_h5(out)
+        ok(B6.file_tag("e005w1") == "e005w1_r2" and r["dev_shift_lik"] == 0.0, "tag map: e005w1 reads e005w1_r2's records")
+        link(os.path.join(E5, "out"), "s1", out, "e005w1_r2", ["e004__plain.jsonl", "gen_e004__plain.jsonl"])
+        ok(PR.run_block(out, "e005w1") is not None and PR.run_block(out, "e005w9") is None,
+           "tag map in the pass rule: run_block(e005w1) reads e005w1_r2's e004 files")
         ok(r["label"]["label"] == "RESTORED" and r["label"]["suffix"] == "no loss where the gold is last" and
            abs(r["d"]["LIK"][0] - 0.25) < 1e-9 and not r["label"]["flags"], f"Q-H5 synthetic 1: {r['label']} d {r['d']['LIK'][:3]}")
         for s in range(1, 6):

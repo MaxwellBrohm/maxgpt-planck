@@ -1,0 +1,35 @@
+numerics_e006: {'float32_matmul_precision': 'highest', 'tf32_matmul': False, 'tf32_cudnn': False, 'cudnn_benchmark': False, 'cudnn_deterministic': True, 'deterministic_algorithms': True, 'deterministic_warn_only': True, 'cublas_workspace_config': ':4096:8', 'sdpa': {'flash': False, 'mem_efficient': False, 'math': True, 'cudnn': False}, 'hf_hub_offline': '1', 'hf_home_set': True, 'versions': {'torch': '2.13.0+cu130', 'transformers': '5.15.1', 'tokenizers': '0.22.2', 'safetensors': '0.8.0'}, 'cuda': '13.0', 'cuda_available': True, 'gpu': 'NVIDIA GeForce RTX 5070', 'driver': '596.49'}
+
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]
+Loading weights:  48%|████▊     | 131/272 [00:00<00:00, 1302.88it/s]
+Loading weights: 100%|██████████| 272/272 [00:00<00:00, 1499.02it/s]
+loaded HuggingFaceTB/SmolLM2-135M-Instruct params=134,515,008 sanity_nll=1.9598 1.4s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+loss self-check [first] hf=2.19846 answer_only=2.19846
+loss mutants [first] {'no_shift': 11.45664119720459, 'prompt_labelled': 2.2410085201263428} (must all differ from 2.19846)
+loss self-check [plain] hf=1.99833 answer_only=1.99833
+loss mutants [plain] {'no_shift': 11.100800514221191, 'prompt_labelled': 2.425694704055786} (must all differ from 1.99833)
+loss self-check [chat] hf=2.40136 answer_only=2.40136
+loss mutants [chat] {'no_shift': 12.059629440307617, 'prompt_labelled': 2.1964478492736816} (must all differ from 2.40136)
+probe step 0 {'step': 0, 'H1': 0.0, 'H2': 0.0, 'H3': 0.0, 'H4': 1.0, 'H5': 0.0, 'H6': 0.0, 'H7': 0.0, 'C_noupd': 0.0, 'C_twoslot': 0.0} mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+step 0 loss 2.6714 gnorm 8.27 lr 1.36e-05 2s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+step 1 loss 2.9149 gnorm 8.01 lr 1.47e-05 3s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+step 2 loss 2.2624 gnorm 7.40 lr 1.04e-05 4s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+step 3 loss 2.3583 gnorm 8.08 lr 3.58e-06 6s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+step 4 loss 2.5900 gnorm 8.35 lr 0.00e+00 7s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+probe step 5 {'step': 5, 'H1': 0.0, 'H2': 0.0, 'H3': 0.0, 'H4': 1.0, 'H5': 0.0, 'H6': 0.0, 'H7': 0.0, 'C_noupd': 0.0, 'C_twoslot': 0.0}
+scored e004/plain: 2 items in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+scored e004/chat: 2 items in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+scored new/plain: 2 items in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+scored extra/plain: 2 items in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+scored old/plain: 2 items in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+scored uprobe/plain: 2 items in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+scored cross/plain: 2 items in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+scored new/chat: 2 items in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+scored extra/chat: 2 items in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+scored cross/chat: 2 items in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+scored khard/plain: 2 items in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+scored kbig/plain: 2 items in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+generated e004/plain: strict 0/2 in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+generated e004/chat: strict 1/2 in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+generated cont/plain: strict 0/2 in 0s mps_alloc=0.00G driver=0.00G peak_driver=0.00G
+DONE HuggingFaceTB/SmolLM2-135M-Instruct dryC5 total 14s peak_driver=0.0G lock_in_step=None loss_finite=True
