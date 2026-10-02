@@ -48,7 +48,7 @@ fi
 before=$(wc -l < "$LL" 2>/dev/null || echo 0)
 launch "$QUEUE" bash "$KIT/launch_e2.sh" && exit 0
 # launch_e2.sh writes "code <commit> in qcode/..., plan <name>" just before it hands over to the queue
-if tail -n +"$((before + 1))" "$LL" 2>/dev/null | grep -q '^code .* plan '; then
+if tail -n +"$((before + 1))" "$LL" 2>/dev/null | grep -aq '^code .* plan '; then
     say "launch_e2.sh reached the queue and the queue exited: last queue line [$(tail -1 "$Q")]"
     exit 1
 fi

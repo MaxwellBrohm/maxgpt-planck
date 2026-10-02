@@ -111,6 +111,18 @@ def test_e2_only_the_last_start_counts(box):
     assert "cut off" in script(box, "10_e2.sh") and started(box).startswith("launch")
 
 
+def test_e2_log_with_a_nul_tail_still_resumes(box):
+    # 2026-09-29: a power cut left NUL bytes at the end of queue_e2.txt; grep then called the file binary, printed
+    # no line, and boot resume said "no queue start line" for a queue that had been cut off mid-run. Only GNU grep
+    # (the PC) treats the file as binary: on the Mac (BSD grep) this test passes on the old code too.
+    cut_off(box)
+    q = box["home"] / "runs" / "E2" / "queue_e2.txt"
+    put(str(q), f"{E2_START}\n2026-09-27 05:20:00 train a\n")
+    with open(q, "ab") as f:
+        f.write(b"\0" * 300)
+    assert "cut off" in script(box, "10_e2.sh") and started(box).startswith("launch")
+
+
 def test_e2_falls_back_when_launch_e2_never_reaches_the_queue(box):
     cut_off(box)
     put(str(box["kit"] / "launch_e2.sh"),

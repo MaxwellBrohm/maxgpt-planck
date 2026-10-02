@@ -32,11 +32,11 @@ running() {   # running ERE: 0 when some process's full command line matches ERE
 }
 
 last_start() {   # last_start FILE ERE: line number of the last line matching ERE (empty if none)
-    grep -nE "$2" "$1" 2>/dev/null | tail -1 | cut -d: -f1
+    grep -anE "$2" "$1" 2>/dev/null | tail -1 | cut -d: -f1
 }
 
 ended_after() {  # ended_after FILE LINE ERE: the last line at or after LINE that matches ERE (empty if none)
-    tail -n +"$2" "$1" | grep -E "$3" | tail -1
+    tail -n +"$2" "$1" | grep -aE "$3" | tail -1
 }
 
 uptime_s() { cut -d' ' -f1 /proc/uptime 2>/dev/null || echo "?"; }
