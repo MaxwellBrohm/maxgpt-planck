@@ -104,3 +104,12 @@ baseline row 19, E3 notes (E2 re-check), SCREENS C1)
   3 (should) The arm is labelled "AdamW with cautious WD".
   4 IND onset labelled LR-confounded (C6); the clip rate is reported (C5).
   Unchanged after checking: the class (same init, E3 rule 1's optimizer row).
+
+C1-a GATE (2026-10-02; Claude; SCREENS.txt "C1-a GATE RESULTS"; nothing committed, no config changed)
+  NOT GATED: S003 changes optim.kind only, and train.compile compiles the training forward alone (the optimizer
+  step runs on the plain module, harness/train.py), so its compiled forward is BASE's, whose 200-step compiled
+  parity is SPEED V3 PROVE's. S003 runs compiled as written (train.compile default), its search and seed runs alike.
+
+AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this screen is EAGER (train.compile false),
+  the stage A-C search and the seed runs alike (C1-a had left S003 compiled); paired with the shared eager BASE.
+  Configs rebuilt; each carries the C6 eval.induction hook.

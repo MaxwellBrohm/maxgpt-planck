@@ -198,3 +198,29 @@ for MQRAR in every .py file found none)
     stated; the arm is recorded as not starting at the BASE function.
   7 (should, partly) The P-020 toy runs before S005's g-check only if its code lands before stage 2; none exists.
   Not applied: a new-module LR multiplier for w and b (another selection axis).
+
+C1-a GATE (2026-10-02, the PC 5070; Claude; method, the batch table and the findings in SCREENS.txt
+"C1-a GATE RESULTS"; nothing committed, no screen run queued, no config changed)
+  RESULT: FAIL, by the registered rule (the forget arm failed one invocation; its own BASE passed both). All S005
+  arms run eager on the mask engine, its own BASE included. Logged before any S005 run; none has run.
+  The ENGINE edit (screens_lib S005 "train.compile": False) and the rebuild of its 5 configs (all still
+  train.compile default) are NOT done here; they come before any S005 run.
+  (1) Compiled smokes, micro 8 x accum 2, mask engine, 300 steps: own BASE (s005_base_s101.yaml) ok, 1 graph, 0
+      breaks, no limit line, loss 8.88 to 4.72, 308k tok/s, 2.37 GiB peak reserved; forget (s005_forget_g1_s1)
+      ok, 1 graph, 0 breaks, 5,014,765 params, loss 8.81 to 4.69, 243k tok/s, 3.87 GiB peak reserved (compiled;
+      eager memory at micro 8 is still unmeasured).
+  (2) Parity, 2 invocations each (worst ratio to the limit, mean|d| / last-50): own BASE (S005:base) a PASS 0.73 /
+      0.76, b PASS 0.72 / 0.76, pooled p 0.125 / 0.125 (the smallest possible with 8 relabelings: of the 8
+      distinct curves the compiled one is furthest on average from the rest, though inside the 2x rule); forget a
+      FAIL 0.95 / 1.08, b PASS 0.64 / 0.54 (a's last-50 floor 0.0155 against b's 0.0310; the compiled and eager:det
+      curves are the same bits in both), pooled p 0.125 / 0.500. The mask-path :det arms ran and repeated
+      bitwise. Parity speed (synthetic data, 200 steps): forget eager 85.5k to 85.8k tok/s, default:det 153k.
+  DIAGNOSTIC (one invocation with plain, non-deterministic compiled arms, what the screens train; no effect on
+  the result): own BASE PASS 0.52 / 0.57, pooled p over a, b and it 0.311 / 0.294; forget PASS 0.34 / 0.32, 0.297
+  / 0.615. Plain compiled on synthetic data: own BASE 313k tok/s, forget 241k to 246k.
+
+AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this screen is EAGER (train.compile false),
+  its own BASE included (mask engine, micro 8 x accum 2). GPU HOURS keeps 0.49 h (own BASE) and x1.1 (arm) until
+  the eager smoke; the C1-a parity's eager arms on synthetic data at micro 8 x 2 ran 85.5k to 85.8k tok/s (forget)
+  against 194k (own BASE), so the arm may cost about twice the assumed hours. Configs rebuilt; each carries the C6
+  eval.induction hook.

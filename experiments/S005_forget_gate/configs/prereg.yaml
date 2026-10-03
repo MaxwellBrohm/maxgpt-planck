@@ -1,0 +1,10 @@
+# S005 pre-registration for the harness gate (train.py refuses a run without it; the queue passes
+# --require-committed, so it must be committed unchanged). The full pre-registration is experiments/S005_forget_gate/notes.txt and experiments/SCREENS.txt (C1-C9; C1-b, which withdrew C1-a)
+# AT THE SAME COMMIT; where this summary and those files differ, they govern.
+id: S005
+hypothesis: >-
+  Q1: does the forget gate on attention logits (model.forget_gate true; both arms in the mask engine, micro 8 x accum 2, own BASE) change held-out chat bpb at 5M, 250M? (LEDGER P-020)
+metric: >-
+  F(CHAT) = data_prep/bpb.py bits per byte of the run's FINAL checkpoint on the oasst2 eval set (eval sets v0, fp32, batch 16384 tokens, all windows); guard F(PROSE) = cccc + gutenberg + wikimedia pooled (SCREENS.txt C5). Seed-1 runs only select an LR (C3) and are never in a paired analysis.
+decision_rule: >-
+  SCREENS.txt C7: d_s = F_arm,s - F_BASE,s at paired seeds 101..100+k (k from E3 results.json, C4); thr_m = t(0.975, df_ref) * SD_ref / sqrt(k); BETTER/WORSE need |dbar| > thr and every d_s on that side; EQUAL needs |dbar| + thr < 1% of BASE's mean; NOMINATE = BETTER_CHAT and not WORSE_PROSE, REJECT = WORSE_CHAT, TIE = EQUAL_CHAT and not WORSE_PROSE, GUARD-FAIL, else INCONCLUSIVE; a diverged arm seed scores +inf. LR per arm: C3 g-check at seed 1, g in {0.5, 1, 2} x LR5, E2's pick rule and extensions.

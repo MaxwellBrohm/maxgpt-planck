@@ -203,3 +203,27 @@ reset_parameters, E2 notes (branch lengths, r))
   4 (should) One head vs loop.md's 2-4 stated; a test that IND reads next-token logits; clip rate; compute exposure
     as equivalent BASE slots, and a compute-matched BASE if the arm nominates. The aux norm gain's LR is stated,
     and the C2 allowance names both keys.
+
+C1-a GATE (2026-10-02, the PC 5070; Claude; method, the batch table and the findings in SCREENS.txt
+"C1-a GATE RESULTS"; nothing committed, no screen run queued, no config changed)
+  RESULT: FAIL, by the registered rule. All S006 arms run eager, with S006's own eager BASE per seed. Logged before
+  any S006 run; none has run.
+  The ENGINE edit (screens_lib S006 "train.compile": False) and the rebuild of the 3 g-check configs (all still
+  train.compile default) are NOT done here; they come before any S006 run.
+  (1) Compiled smoke, s006_mtp_g1_s1.yaml, micro 16, 300 steps: ok. 6 graphs, 3 breaks (varlen cu_seqlens), no
+      limit line, start record mtp {heads 1, weight 1.0, training_only_params 37,056}, loss 8.81 to 4.76, 391k
+      tok/s median (shared BASE smoke 548k, so about 0.71x), 7.40 GiB peak reserved of 11.94. That is compiled
+      memory; S006 now runs eager, whose memory at micro 16 with the second logit head is unmeasured (SPEED V3
+      PROVE probe_fit: eager BASE alone 8.31 GiB at 5M docmask B16), so this file's mem_fit question stays open.
+  (2) Parity (flag_parity.py S006:mtp), 2 invocations: a PASS (worst ratio mean|d| 0.37, last-50 0.20), b FAIL
+      (0.93, 1.14; b's last-50 floor 0.0033 against a's 0.0185; the compiled and eager:det curves are the same bits
+      in both). Pooled p 0.375 / 1.000. A marginal fail; SCREENS.txt names the decision this leaves for a person.
+  DIAGNOSTIC (one invocation with plain, non-deterministic compiled arms, what the screens train; no effect on
+  the result): FAIL 0.49 / 2.31, with that invocation's last-50 floor at 0.0027. Its compiled last-50 means
+  (0.3927, 0.4016) lie inside the 9 plain eager runs of the three invocations (0.3877 to 0.4154); pooled p over a,
+  b and it 0.269 / 0.629.
+
+AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this screen is EAGER (train.compile false),
+  paired with the shared eager BASE per seed. Eager memory at micro 16 with the second logit head is still
+  unmeasured: the eager smoke (mem_fit; the registered micro 8 x accum 2 switch if it fails) comes before stage 2.
+  Configs rebuilt; each carries the C6 eval.induction hook (IND reads model(idx), never the aux head: tested).

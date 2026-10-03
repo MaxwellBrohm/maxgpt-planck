@@ -16,6 +16,9 @@ What is computed, exactly:
   --max-windows N keeps the N windows with the lowest stored rank h, the same subsample for every
   checkpoint and tokenizer.
   Precision: fp32 by default (logits and log-softmax in fp32 either way); bf16 autocast on request.
+  --hd (off by default; SCREENS C6): each chat set also gets "hd", the history-dependence reading of
+  bpb_hd.py (own / foreign / no context on the same targets, per turn index and role). Without --hd the output
+  is unchanged.
 The tokenizer must match the checkpoint's vocab and have the harness control ids; the eval set is
 tokenizer-free, so any tokenizer family member can be scored on it (P-158).
 """
@@ -135,7 +138,7 @@ def summarize(items, nll, ntok, trunc) -> dict:
 
 
 def score(model, cfg, evaldir: str, tok_path: str, sets=None, device: str = "cpu", precision: str = "fp32",
-          batch_tokens: int = 16384, max_windows: int | None = None) -> dict:
+          batch_tokens: int = 16384, max_windows: int | None = None, hd: bool = False) -> dict:
     info = C.tokenizer_info(tok_path)
     assert info["vocab"] <= cfg.vocab_size, f"tokenizer vocab {info['vocab']} > model vocab {cfg.vocab_size}"
     encode = C.encoder(C.load_tokenizer(tok_path))
@@ -148,6 +151,10 @@ def score(model, cfg, evaldir: str, tok_path: str, sets=None, device: str = "cpu
         items, trunc = build_items(st["kind"], docs, wins, encode, info, cfg.seq_len, max_windows)
         nll, ntok = nll_items(model, items, device, info["pad_id"], batch_tokens, precision)
         res["sets"][name] = summarize(items, nll, ntok, trunc)
+        if hd and st["kind"] == "chat":               # SCREENS C6 HD (bpb_hd.py), only on request
+            from bpb_hd import score_hd
+            res["sets"][name]["hd"] = score_hd(model, docs, wins, encode, info, cfg.seq_len, device, batch_tokens,
+                                               precision, max_windows)
     return res
 
 
@@ -162,11 +169,12 @@ def main(argv=None) -> int:
     ap.add_argument("--batch-tokens", type=int, default=16384)
     ap.add_argument("--max-windows", type=int, default=None)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--hd", action="store_true", help="add the C6 history-dependence reading to chat sets")
     a = ap.parse_args(argv)
     t0 = time.time()
     model, cfg, ck = load_model(a.ckpt, a.device)
     res = score(model, cfg, a.evalset_dir, a.tokenizer, a.sets.split(",") if a.sets else None, a.device,
-                a.precision, a.batch_tokens, a.max_windows)
+                a.precision, a.batch_tokens, a.max_windows, a.hd)
     res.update({"checkpoint": os.path.basename(a.ckpt), "step": ck.get("step"), "tokens_trained": ck.get("tokens"),
                 "seconds": round(time.time() - t0, 2)})
     txt = json.dumps(res, indent=1, sort_keys=True)

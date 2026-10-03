@@ -363,3 +363,344 @@ its flag arm (graph count and breaks logged, no recompile-limit message); (2) a 
 compiled vs eager, by compile_parity.py's rule. A screen whose flag fails either check runs ALL its arms eager, and
 the failure is logged in its notes.txt before any of its arms run. LR5 still comes from E2/E3 (eager); compile does
 not change the function trained, only its speed, within the parity result above.
+
+FIXED, BATCH PARAMETERS (2026-10-02 19:10 EDT, Claude; no run, no model, nothing committed). Read by
+experiments/screens/screens_lib.py params(), which refuses to build if either results.json hash changes.
+  E2 results.json sha256 78f7c3d0075d548bb5b75a1040e925b6d6064e1803a2849600c22ef8a543e018: stage_C lrs.pick
+    [0.003, 1.0], its 250M branch 5m_e3_r1_b250M (7,630 steps).
+  E3 results.json sha256 1f017ecb1e6d14dd4f676c90ca703c20e9395b217fc841f83fffcb93e57994a2: e2_recheck CONFIRM,
+    lr5_for_screens [0.003, 1.0] (E3 AUDIT.md Q3: confirmed against B only, not against 6e-3).
+  LR5 = (eta_5 3e-3, r_5 1): optim.lr = embed_lr = scalar_lr = 3e-3 at g = 1.
+  B = 7,630 steps x 32,768 = 250,019,840 slots; E3 arm A: 7,630 steps, warmup 76, decay from 6,104
+    (harness schedule.full). Both equal C1's numbers, so the batch does not stop here.
+  E3 Part 1 (5M, 250M, 8 pairs, df 7): F(CHAT) mean A 1.14674, SD_d 0.00278 (0.242%), sigma_seed 0.00293
+    (0.255%); F(PROSE) mean A 1.38141, SD_d 0.00202 (0.146%), sigma_seed 0.00205 (0.149%). sigma_init: none
+    (Part 3 not run), so NEW INIT uses sqrt(2) sigma_seed. u = 1.3533 (E3 quantiles ub80_df7).
+  k_needed(1%), CHAT / PROSE: same init (paired SD_d) 1 / 1; SIA (u x SD_d, df 7) 2 / 1; new init (unpaired,
+    sqrt(2) sigma_seed) 2 / 1. k = max(2, k_needed) = 2 in every class: screen seeds 101, 102.
+  E3 refresh (rule 5): NOT CURRENT by its text, and not decided here. Rule 5 lists a change of the engine flags
+    as a refresh trigger; C1-a turns train.compile on for every screen run, and E3 Part 1 ran eager. C1-a's
+    argument (200-step parity within eager noise) covers the LR, not E3's SDs, and E3's replay noise (sigma_rep,
+    a point share of 78% of the paired variance, 95% interval 0.21 to 30.8 per AUDIT.md Q4) is GPU
+    nondeterminism that compiled kernels can change. A person decides whether C1-a exempts rule 5 or the
+    3-pair refresh (A and B at seeds 9, 10, 11, compiled: 6 runs, about 0.97 h at 0.162 h per run) runs before
+    the first screen verdict (rule 5: "before the next screen decision"). Selection runs read no verdict.
+  Code: harness/ and data_prep/ are unchanged from 6b9fb0f to HEAD 12e9408 (git diff empty), so E3 Part 1 (run
+    at e39112a) and the screens use the same .py files; engine_fixed "2026-10-02 6b9fb0f SCREENS C1-a".
+  Setting: tok_v0_8k and the starter mix (base5m.yaml provenance), as E3. No DEVIATION is needed for scope.
+
+BUILT (2026-10-02 19:10 EDT, Claude; Mac CPU only, no GPU, no model above tiny unit-test size, nothing
+committed). Everything below is files; no run is queued and plans/CURRENT trains nothing until a person
+records ORDER 0 (stage1_select waits for the mark SCREENS_PRECONDITIONS_OK).
+  experiments/screens/: screens_lib.py (arm registry, C2 / RC-12 / C1-a / 2% check, E2 and E3 parameters),
+    screens.py (build, config, s003-arm, seeds, plan, check, hours), queue_screens.sh (queue_e2.sh's engine
+    with three changes: config lookup across the screen dirs, screens.py check before preflight, a stop when an
+    out_dir holds rc12_eval.jsonl; queue_e2.sh itself knows only E2 and E3 and was not edited),
+    qlib_screens.sh, launch_screens.sh (launch_e3.sh's flow), flag_parity.py (the C1-a gate: compile_parity.main
+    unchanged, with the screen's flag and engine keys added to every parity arm, plus Dynamo graph and break
+    counts and recompile-limit lines), configs/screens_base.yaml and prereg.yaml, plans/CURRENT,
+    stage1_select.txt, stage2_select.txt, tests/ (4 test files and mutation_screens.py).
+  Configs (48, each passing screens.py check): base_s101, base_s102 (shared BASE: E3 arm A key for key, differs
+    only in name, out_dir, seed, engine_fixed and train.compile default); s005_base_s101, s005_base_s102
+    (S005's own BASE: train.doc_attn mask, micro 8 x accum 2); C3 g-checks at seed 1, g 0.5 / 1 / 2, for
+    S001 nogate, S002 novres / noqknorm / nonormscale, S004 canonac, S005 forget, S006 mtp, S007 smear (24);
+    S003 stage A (eta 0.75 / 1.5 / 3 / 6 / 12 x 1e-3, r 1, trunk + b62M / b125M / b250M: 20), each equal to
+    E2's own stage config except name, out_dir, optim.kind adamw, train.compile default, engine_fixed and the
+    branch init_from. Keys that differ from the arm's BASE (besides name, out_dir, seed and g x LR5): S001
+    model.attn_gate false; S002 model.value_residual / qk_norm / norm_scaling false (one each); S003
+    optim.kind adamw; S004 model.canon AC, canon_kernel 4; S005 model.forget_gate true (against S005's own
+    BASE); S006 train.mtp 1, mtp_weight 1.0; S007 model.smear_key true.
+  Not written yet, because they need picks: the seed-set configs and plans (screens.py seeds, after each g-check
+    pick and S003's stage C), S003 stages B and C (screens.py s003-arm), extensions (screens.py config).
+  Tests (Mac CPU, ~/.venvs/planck): 190 passed in 17 s: E2/E3 parameters; BASE vs E3 arm A; every config
+    checked; every arm differs from its BASE in exactly its registered keys; LRs; parameter counts (BASE
+    5,010,133; nogate 5,005,525; novres 5,010,112; noqknorm 5,009,109; canonac 5,022,421; forget 5,014,765;
+    smear 5,010,157; mtp deployed 5,010,133 plus 37,056 training-only); full-size resolution through the
+    harness's own functions (compile_mode, check_compile, mtp_settings, build_schedule); E2 preflight.py, whose
+    only refusals on the Mac are the PC data paths; 24 refusals (22 one-edit configs, 2 wrong directories); the
+    seed-set generator for each pick; plan order; the queue's config lookup under bash 3.2; a 2-step CPU
+    smoke of all 48 configs through train.main (tiny shape, fake data, compile off, mask engine; S003
+    branches off a tiny trunk); init isolation: S002, S004, S005, S006, S007 keep every BASE draw bitwise at
+    seeds 101 and 102 (SIA holds),
+    S001 does not (NEW INIT, as registered). mutation_screens.py on scratch copies: 23 of 23 mutants killed
+    (among them an extra key passing C2, the RC-12 guard removed or skipped for BASE, C1-a dropped, LRs not
+    scaled, a harness switch that draws from the RNG, and flag_parity.py dropping the flag).
+  GPU hours at the compiled 5M rate (556,994 slots/s, harness/notes.txt SPEED V3 PROVE, 5M docmask B16,
+    --docs-per-row 1.0), screens.py hours: a full 5M run 0.162 h with E3's measured overheads (x1.02 trainer
+    vs bench, 105 s of scoring, 22 s cold compile), 0.143 h by this file's +15% rule. Registered runs: 24
+    g-checks + 11 S003 search points (44 runs) + 22 seed-set runs (k = 2) = 11.2 h (9.4 h by +15%); up to
+    4.2 h of extensions and 0.7 h of matched-LR IND runs. S005's compiled mask-engine rate is ASSUMED (eager
+    mask 162,849 x compile's same-batch gain); Canon x1.1, forget x1.1, MTP x1.3 are still the assumed factors.
+  Still open before stage 1 (ORDER 0), none built here: the eval.induction hook (IND and the GATE curve; it
+    must exist before the first run, since keep_last 2 keeps no early checkpoints), bpb.py HD modes, the
+    attention diagnostic, test_model_mask.py on testutil.ARMS, the analyzer (C3 picks, C7, noise checks, Holm,
+    cap; and the run-directory RC-12 refusal it owns), E4's status, the E3 rule 5 question above, and the
+    commit (each prereg.yaml must be committed unchanged). Before stage 2: each flag's PC smoke run and CUDA
+    tests, flag_parity.py per flag (never run on CUDA), and S005's micro 8 x 2 row-order test. queue_screens.sh
+    and launch_screens.sh have not run (they need the PC's bash 4 and flock); bash -n parses both.
+
+C1-a GATE RESULTS (2026-10-02 19:12 to 23:21 EDT, the PC 5070, plus a diagnostic to 00:50 on 10-03; Claude; nothing
+committed, no screen run queued, no screen config changed). AMENDMENT C1-a's gate, run for every arm that changes
+the forward pass: the code flags (S004 canonac, S005 forget on the mask path, S006 mtp, S007 smear), S005's own
+mask-engine BASE, and the config-only forward changes S001 nogate and S002 novres / noqknorm / nonormscale. S003
+(optim.kind only) is not gated: its forward is BASE's, whose compiled parity is SPEED V3 PROVE's.
+  Code: lean copy PC ~/planck/dev/screens_gate (harness/ and pc/ as main d536070, harness unchanged since 6b9fb0f;
+  experiments/screens and S00* as in this tree; plus E2's base5m.yaml and engine.yaml, which every screen config
+  extends), 184 .py/.yaml/.sh files, md5 list 305704d0 on both machines; planck_root there is a scratch directory
+  (data/ linked to the PC's data, runs/ scratch), so no smoke wrote into a real run directory or runs.jsonl. torch
+  2.13.0+cu130, bf16. Changed for the gate in experiments/screens (uncommitted): flag_parity.py takes SID:ARM and
+  SID:base and records what each arm ran (start record, model flags read back from its config, break reasons);
+  an arm that did not carry its flag, engine or compile mode fails the gate. New: gate_smoke.py (the compiled
+  smoke), c1a_gate.sh (the PC driver). tests/test_flag_parity.py 21 passed on the Mac and on the PC CPU, among
+  them a real Dynamo recompile-limit line reaching the log grab (torch 2.13); screens suite 204 passed;
+  mutation_screens.py: the 14 flag_parity / gate_smoke mutants (11 new) all killed (scratch copies).
+  Guards: only gpu.lock (flock -w 7200), one step per hold under timeout 1800 s (holds 1 to 15 min, 31 in all);
+  WSL / had 96 to 215 GB available and /mnt/d was mounted at every check; GPU 41 to 57 C at hold starts. The E2
+  20M queue and the teacher pipeline took the lock between holds, as designed.
+  (1) Smoke: gate_smoke.py on the arm's own g = 1, seed 1 config as written (S005's BASE: s005_base_s101.yaml;
+      shared BASE base_s101.yaml for reference), real starter data, 300 of its 7,630 steps (--max-steps; the full
+      WSD schedule), checkpoints deleted after. Pass = 300 steps, finite losses, compile default in the start
+      record, no Dynamo recompile or cache-limit line. Labelled smoke, never read.
+  (2) Parity: flag_parity.py SID:ARM, compile_parity.main unchanged, two invocations: budget.py's 5M shape with
+      the arm's keys on every arm, synthetic data, micro 8 x accum 2, 200 steps; arms eager:det x2, eager x3,
+      default:det x2 (compile_parity's default list). Rule as in PROVE: every compiled arm against every eager:det
+      arm within 2x the eager-eager floor (largest distance among the 3 plain eager runs) on mean |d loss| and on
+      |d last-50 mean|; the gate needs both invocations to pass. Pooled permutation p over the two (--pool):
+      reported, no rule.
+  Per arm (ratios are the worst compiled-vs-eager:det ratio to the limit, mean|d| / last-50; smoke = graphs /
+  breaks / limit lines, median tok/s):
+  arm               smoke                     parity a              parity b              arm    SCREEN
+  BASE (reference)  6/3/0, 548k               (PROVE)               (PROVE)
+  S001 nogate       6/3/0, 589k               PASS 0.47 / 0.04      FAIL 1.03 / 0.06      FAIL   S001 FAIL
+  S002 novres       6/3/0, 577k               PASS 0.55 / 0.58      PASS 0.55 / 0.58      PASS
+  S002 noqknorm     6/3/0, 577k               PASS 0.24 / 0.22      PASS 0.27 / 0.27      PASS
+  S002 nonormscale  6/3/0, 544k               PASS 0.33 / 0.25      FAIL 0.46 / 1.22      FAIL   S002 FAIL
+  S004 canonac      6/3/0, 467k               FAIL 469 / 176        FAIL 250 / 86         FAIL   S004 FAIL
+  S005 own BASE     1/0/0, 308k (mask, 8x2)   PASS 0.73 / 0.76      PASS 0.72 / 0.76      PASS
+  S005 forget       1/0/0, 243k (mask, 8x2)   FAIL 0.95 / 1.08      PASS 0.64 / 0.54      FAIL   S005 FAIL
+  S006 mtp          6/3/0, 391k (7.40 GiB)    PASS 0.37 / 0.20      FAIL 0.93 / 1.14      FAIL   S006 FAIL
+  S007 smear        6/3/0, 540k               PASS 0.36 / 0.23      PASS 0.64 / 0.33      PASS   S007 PASS
+  S003 adamw        not gated (BASE's forward)                                                     compiled
+  Every smoke: 300 steps, losses finite and falling (8.69 to 8.88 at step 10, 4.69 to 4.96 at step 300), no
+  limit line; the 3 breaks are all "Dynamic shape operator" (varlen cu_seqlens, as BASE and PROVE). Every parity
+  arm carried its flag and engine (start records), no limit line in any compiled arm, each :det arm bitwise
+  repeatable within and across invocations except S004's default:det. Pooled p (mean|d| / last-50; 8
+  relabelings and 1 distinct compiled curve, so 0.125 is the smallest possible): S001 0.625 / 0.750, novres
+  0.875 / 0.750, noqknorm 0.875 / 0.750, nonormscale 0.750 / 0.750, S004 0.003 / 0.003 (4 distinct compiled
+  curves, 330 relabelings), S005 BASE 0.125 / 0.125, forget 0.125 / 0.500, S006 0.375 / 1.000, S007 0.625 /
+  1.000.
+  RESULT, by the registered rule: S007 runs compiled; S003 runs compiled; S001, S002, S004, S005 and S006 run ALL
+  their arms eager (logged in each notes.txt before any of their arms run). NOT done here: the ENGINE edit
+  (screens_lib "train.compile": False for those five) and the config rebuild. Every written config of those
+  screens still says train.compile default; each must be rebuilt before any of its runs. A default-engine screen
+  that runs eager (S001, S002, S004, S006) cannot pair with the compiled shared BASE (DEFAULTS DECISION: an arm and
+  its BASE share the setting), so each needs its own eager BASE per seed; screens.py hours must be rerun.
+  Findings:
+  - S004 is a real defect, not a margin: under torch deterministic mode the compiled Canon model does not train
+    (loss 9.05 at step 1, 9.04 to 9.07 at step 200, against eager:det 0.18), and its default:det curves are not
+    repeatable; the smoke (compiled, not deterministic) trained. The DIAGNOSTIC below shows the plain compiled
+    arm also fails the rule (1.90 / 4.59). Not investigated further: a harness issue for the flag's owner.
+  - The other four fails are marginal (1.03 to 1.22 of the limit, in one invocation of two). The compiled and
+    eager:det curves are bitwise the same in both invocations (every :det arm repeats exactly), so the second
+    invocation re-draws only the floor, the largest of 3 eager-eager distances; across the 16 non-S004 gate
+    invocations that floor ranged 0.0033 to 0.0252 (mean|d|) and 0.0026 to 0.0464 (last-50), and in each of the
+    four fails the failing invocation had the lower floor on the failing metric (S001 0.0033 vs 0.0073;
+    nonormscale 0.0031 vs 0.0150; forget 0.0155 vs 0.0310; S006 0.0033 vs 0.0185). In SPEED V3 PROVE the same
+    rule passed 4 of 4 at 5M and 20M (worst 0.62). A third invocation was not run: it would only re-draw the
+    floor until one passed.
+  - The gate's compiled arms were all :det, while the screens train compiled WITHOUT deterministic mode.
+    DIAGNOSTIC (no effect on any verdict above; c1a_diag.sh, a scratch helper not in the repo): one invocation per
+    arm with arms eager:det x2, eager x3, default x2, same rule, and the pooled p over all three invocations:
+      arm                one invocation, plain compiled   pooled p over a, b and nd (mean|d| / last-50)
+      S001 nogate        PASS 0.48 / 0.13                 0.528 / 0.364   (10 eager, 3 compiled, 286 relab.)
+      S002 novres        PASS 0.65 / 0.76                 0.846 / 0.892
+      S002 noqknorm      PASS 0.27 / 0.25                 0.853 / 0.860
+      S002 nonormscale   PASS 0.28 / 0.11                 0.517 / 0.608
+      S004 canonac       FAIL 1.90 / 4.59                 0.002 / 0.003 with the broken :det curves; plain
+                                                          compiled only: 0.212 / 0.333 (2 compiled, 66 relab.)
+      S005 own BASE      PASS 0.52 / 0.57                 0.311 / 0.294
+      S005 forget        PASS 0.34 / 0.32                 0.297 / 0.615
+      S006 mtp           FAIL 0.49 / 2.31                 0.269 / 0.629
+      S007 smear         PASS 0.46 / 0.31                 0.538 / 0.538
+    S004 and S006 fail it with tiny floors (last-50 0.0049 and 0.0027); their plain compiled last-50 means (S004
+    0.6298, 0.6722; S006 0.3927, 0.4016) lie inside the range of the 9 plain eager runs of the three invocations
+    (S004 0.6405 to 0.6976; S006 0.3877 to 0.4154). Plain compiled is faster than default:det, most on the mask
+    engine (S005 BASE 313k vs 194k tok/s, forget 241k to 246k vs 153k). The S004 "plain compiled only" pool was
+    computed on the Mac from the same JSONs with the default:det runs left out (compile_parity --pool, CPU).
+  Decisions for a person: (a) apply the result as registered (five screens eager, own eager BASE runs, hours
+  rerun), or (b) amend C1-a's rule for this gate, knowing it would be an amendment written after these results
+  (for example a floor pooled over both invocations' eager runs, or the pooled permutation test); S004's
+  default:det arms fail by 86x to 469x, so S004 fails under any reading that keeps them. Raw: PC
+  ~/planck/dev/screens_gate/gate_out/ (JSON and logs per step), logs ~/planck/logs/screens_gate.log and
+  screens_gate_diag.log.
+  NOTE (2026-10-03 01:00, after the gate): main moved while it ran. f314eb7 changed harness/runio.py and
+  from_pipeline.py and added durable.py (checkpoint and latest.json writes fsynced before the rename; no change to
+  the model, the forward, train.compile or the loss), and e787508 rewrote E2 results.json (Q2, sha256 b08062c8...).
+  So the FIXED entry above is stale on two counts (harness no longer equal to 6b9fb0f; the E2 hash), and
+  screens_lib.params() now refuses, as designed: test_screens_configs.py and test_screens_refusals.py stop at
+  collection on that refusal (test_flag_parity.py and test_screens_smoke.py: 70 passed). The gate ran on main
+  d536070's harness; refilling the FIXED log is not done here.
+
+REVIEW (2026-10-03 01:05 EDT, Claude, adversarial review of BUILT and C1-a GATE RESULTS; Mac CPU only, PC read-only
+(the gate JSONs and logs), no GPU, nothing committed or queued).
+  Checked, holds: (1) every config resolved with harness runio.load_yaml and diffed by a script independent of
+  screens_lib: base_s101/102 differ from E3 e3_5m_A_s1 only in name, out_dir, seed, engine_fixed, train.compile;
+  s005_base differs from base only in doc_attn, micro_batch, grad_accum; each g-check differs from its BASE only in
+  its registered keys plus the three LRs (= g x 3e-3, absent at g 1); no schedule, data, provenance or eval key
+  differs; each S003 search config differs from E2's own file on disk only in optim.kind, train.compile,
+  engine_fixed and (branches) init_from. (2) FIXED hashes: E3 matches; E2 78f7c3d0... is d536070's file; the
+  current one (e787508) only adds a "q2" key, stage_C pick still [0.003, 1.0]. E3 values in FIXED (means, SD_d,
+  sigma_seed, u, k) match results.json. (3) Gate math recomputed on the PC from the raw JSONs in plain Python: every
+  floor, ratio, PASS/FAIL, bitwise-repeat claim and pooled p in C1-a GATE RESULTS reproduces; 31 holds (28 + 3
+  diagnostic), 0.8 to 14.6 min; disk 96 to 215 GB. (4) Plans follow ORDER; the launch path runs only a bundle
+  clone of committed main, refuses a dirty tree, runs screens.py check and preflight --strict, and train.py
+  --require-committed (prereg.yaml). (5) Tests: in this tree 2 files stop at collection (the E2 hash pin), 70 pass;
+  on a scratch copy with d536070's E2 results.json 207 pass; with the current E2 results.json and only E2_SHA
+  changed, 207 pass. mutation_screens.py on scratch: 36 of 36 killed.
+  Changed (screens files only): screens_lib.check now requires an S003 branch's init_from to be exactly E2's
+  branch point in this arm's SCREENS trunk (before, any stable_<8 digits>.pt of that trunk passed: a b62M branch
+  from stable_00003052.pt passed check and preflight); screens.py hours uses the eager rate (254,415; mask
+  162,849) for a screen whose ENGINE sets train.compile False (before, a rerun after the ENGINE edit would have
+  printed compiled hours). Tests: 2 refusal cases, 1 hours test; mutants: 2 new, 1 updated.
+  Not done (decision first): the gate result is NOT in the configs or in code. All 23 configs of S001, S002, S004,
+  S005, S006 say train.compile default, and check() would pass them once the hash is refilled.
+  Corrections and readings for the decision: f314eb7 also changed data_prep (eval_sets.py, prep_common.py,
+  pretokenize.py; write-path fsync only; bpb.py unchanged), so the FIXED refill covers data_prep too. C1-a's text
+  names the gate for "each screen's new flag (S004 ... S007)" and one "200-step parity"; S001 and S002 (no new
+  flag) being gated, both invocations having to pass, and :det-only compiled arms are choices written with the
+  results. Eager sets under each reading (registered hours, k 2, screens.py run_h rates): as reported, S001 S002
+  S004 S005 S006, 20.0 h (18.2 h if one eager BASE per seed serves S001, S002, S004, S006, C4's "one BASE per
+  seed"; screens_lib today would write four); S004-S007 scope and both invocations, S004 S005 S006, 15.9 h; that
+  scope and the first invocation, S004 S005, 14.3 h; as built, 11.2 h. S004 is eager and S007 compiled under every
+  reading. Under the first, every extension and IND run gives about 28 h, past the 25 h cap.
+
+AMENDMENT C1-b (2026-10-03, before any screen run; decided by Claude under Max's standing delegation, reversible
+before the first screen run). Every screen runs EAGER: BASE, every arm, S005's own BASE, the S003 search and every
+seed run set train.compile false, and every other engine flag keeps E2's FIXED 1 values (engine.yaml). This
+withdraws AMENDMENT C1-a; its gate is no longer a precondition, and its record above stays as written (flag_parity.py,
+gate_smoke.py and c1a_gate.sh are kept as that record). Reasons:
+  1 The C1-a gate showed that S004's compiled Canon model does not train under deterministic mode (a defect, for
+    the harness owner later), and S001, S002 (nonormscale), S005 (forget) and S006 came 3-22% over the limit in one
+    of two invocations.
+  2 Choosing a lenient reading of the gate after seeing its results would be a forking path.
+  3 Eager is the engine E3 measured, so E3's rule 5 refresh is not triggered by the engine flags and E3's noise
+    numbers apply as measured. This closes the FIXED entry's open "E3 refresh (rule 5)" question.
+  4 No verdict depends on compile; the cost is about 2x the GPU hours of C1-a (GPU HOURS's eager figures apply).
+Consequences: one shared eager BASE per seed (screens/configs/base_s<seed>.yaml) serves S001, S002, S003, S004, S006
+and S007 (C4's "one BASE run per seed"); S005 keeps its own mask-engine BASE (micro 8 x accum 2). The ORDER cap and
+cut rule apply to the eager hours exactly as written (HOURS AND CAP, C1-b, below).
+
+FIXED REFILL (2026-10-03, Claude; Mac CPU, no model above unit-test size; replaces the FIXED entry's E2 hash and
+code line; everything else in that entry stands).
+  E2 results.json sha256 b08062c8b8778796f6bdaf086684fd254e4f751f814df26fcfa152c995d509ea (commit e787508). The
+    only change from 78f7c3d0 (d536070) is a new "q2" key: stage_A, stage_B and stage_C load equal as JSON, so the
+    stage C pick is unchanged, [0.003, 1.0] (LR5 = eta 3e-3, r 1), and the 250M branch is still 5m_e3_r1_b250M.
+  E3 results.json sha256 1f017ecb1e6d14dd4f676c90ca703c20e9395b217fc841f83fffcb93e57994a2: unchanged; k = 2 in
+    every class, seeds 101, 102; u = 1.3533. screens_lib.params() pins both hashes and passes.
+  Code: harness/ and data_prep/ changed since 6b9fb0f only in f314eb7 (durable saves: harness durable.py, runio.py,
+    from_pipeline.py; data_prep eval_sets.py, prep_common.py, pretokenize.py; fsync before rename on the write path,
+    I/O only; bpb.py, model.py, blocks.py, trainer.py, optim.py unchanged; its commit message records default_parity
+    CPU with log, checkpoint and start record identical, the new durable import the only difference). The ORDER 0
+    commit that carries this entry adds default-off code only (eval.induction, attn_diag.py, bpb.py --hd, tests);
+    default_parity.py against HEAD 3c102f7's harness: CPU PASS (24 log records, checkpoint, start record and imported
+    modules identical; CUDA in ORDER 0 BUILT below). engine_fixed "2026-10-03 f314eb7 SCREENS C1-b" in every config.
+  IND file experiments/screens/ind_v0_8k.json sha256 0eafbca2eb050958f48add5a6271d053a16c5f57d211ae894ccc0dec85fdc338
+    (make_ind.py: numpy default_rng(20261003), 64 x 128 ids from tok_v0_8k's non-control ids 7..8191); pinned in
+    screens_base.yaml eval.induction.sha256, and the hook refuses another file.
+  Configs: the 48 run configs rebuilt by screens.py build under C1-b (train.compile false everywhere, the C6 hook in
+    every one), each passing screens.py check; sha256 of the 57 sorted config-file hashes (48 runs, 8 prereg, the
+    base) fe0cba355c1507ee...; screens_base.yaml 2fcfd0fc..., base_s101.yaml ba0c527c..., screens prereg.yaml
+    82615e50... Every prereg.yaml summary now cites C1-b.
+
+ORDER 0 BUILT (2026-10-03, Claude; Mac CPU tests on tiny models; the PC for CUDA tests under gpu.lock and one CPU
+hook check; no screen run queued, no mark recorded). Each item is default off, tested, and its tests were watched
+failing on mutants (scratch copies only).
+  1 eval.induction hook (C6 IND and the GATE curve): harness/induction.py, installed by train.py only when a config
+    sets eval.induction (the default path imports nothing new). It reads the pinned IND file, draws from no RNG (the
+    torch CPU and CUDA RNG states are compared around every reading; a change stops the run), and calls the plain
+    module as model(idx) (doc=None, fp32, next-token logits) every 153 steps and at the last step, appending step,
+    ind, nll_copy1, nll_copy2, gate and seconds to out_dir/diag.jsonl. GATE (attn_gate runs only) = attn_diag's
+    per-layer, per-head mean 2*sigmoid(W x) on the 32 lowest-h oasst2 windows (bpb.py's --max-windows rule). The
+    start record carries induction {every, file_sha256, gate}. screens_base.yaml turns it on for every screen run.
+    Tests (harness/test_induction.py, 8): a uniform model scores IND 0; a hand-built copy model scores > 0.95 ln V
+    (copy 2 NLL < 1e-6); 12-step CPU runs with the hook on and off are bitwise equal (weights, optimizer, loader
+    state, torch RNG, every log record); readings at steps 5, 10, 12 with a 2 x 2 GATE, none on an attn_gate false
+    run; the last reading equals ind_score on the final checkpoint's plain model, on a train.mtp run too (IND never
+    reads S006's aux head); a changed file is refused; an RNG draw inside a reading stops the run. Mutants
+    (mutation_check.py --group induction): 10 of 10 killed (copies swapped, copy 2 off by one, a reading that
+    consumes a batch, an RNG draw, the RNG guard removed, no reading at the last step, GATE never, GATE without a
+    gate, the file hash unchecked, the hook not installed). The screens' 2-step CPU smoke runs the hook on all 48
+    configs (tiny inputs). PC, CPU only, no lock: the hook built from base_s101, s001_nogate_g1_s1 and
+    s005_base_s101 on the PC's eval set (planck_root read only): 64 x 128 sequences, 32 GATE windows (longest 1,201
+    tokens); one reading each on a random-init 5M model: IND 0.0001 / -0.0005 / 0.0001, copy 1 NLL 9.049 (ln 8192
+    = 9.011), gate 1.0 in all 8 x 3 cells (the zero-init gate), no GATE for nogate; 1.2 to 2.3 s per reading.
+  2 bpb.py HD modes (C6 HD): data_prep/bpb_hd.py, reached by bpb.py --hd (off by default; without it the output is
+    unchanged, tested). Own, foreign and no-context inputs on the same target bytes and tokens (asserted). Foreign =
+    as many prior-turn bytes as the own window holds, from the end of the next conversation in eval-set order that
+    holds that many (after the last comes the first; never itself), cut by evalwin's newest-first boundary rule.
+    Windows of turn index 0 and windows without prior-turn bytes (ct == t) are left out and counted. Output per turn
+    index and role and per role: own, foreign and none bpb, HD, HD_none. Tests (data_prep/tests/test_bpb_hd.py, 6):
+    a uniform model gives HD and HD_none 0 (|x| < 1e-12); a context-bag model on conversations whose turns repeat
+    the previous turn's words gives HD and HD_none > 0.5 on every turn; same targets in every mode; the foreign rule;
+    the exclusions; the CLI adds only "hd". Mutants (data_prep/mutation_check.py): 7 of 7 killed (foreign = own
+    context, no-context keeps the context, foreign may be the conversation itself, turn 0 kept, whole turns only,
+    HD sign flipped, --hd on by default); the 7 earlier bpb mutants re-run, all killed.
+  3 Attention diagnostic (C6 SINK and GATE): harness/attn_diag.py. Hooks take each Attention call's real input
+    (after the norm, the norm scale and Canon-A) and its own output; the tool rebuilds q and k with the arm's
+    transforms (S007's smear on the raw key, QK-norm when on, RoPE), the causal logits, S005's forget bias, the
+    probabilities, the values (value residual), the gate and o_proj, and checks the rebuilt output against the
+    module's output on every call. SINK per effective layer and head over real query positions >= 64; GATE mean,
+    p10, p90. CLI: python harness/attn_diag.py CKPT EVALSET_DIR --tokenizer TOK (200 lowest-h oasst2 windows).
+    Tests (harness/test_attn_diag.py, 32): the check on all 21 testutil arms on scrambled weights (max relative
+    error < 1e-5; measured <= 4.7e-7); SINK closed forms (uniform attention 1 / (t + 1); a fixed forget gate,
+    f = 0.9); batch independence; GATE = 1 with W = 0, and p10 <= mean <= p90; the GATE-only reading equals the
+    full one; hooks removed after a reading; a module that computes something else fails the check. Mutants
+    (--group attndiag): 8 of 8 killed (QK-norm skipped, forget bias omitted, smear skipped, value residual
+    omitted, RoPE skipped, SINK on key 1, pad queries counted, check blind).
+  4 test_model_mask.py: test_packed_equals_alone now runs over testutil.ARMS (21 arms; canon_ac, forget_gate and
+    smear_key among them) on testutil.scramble'd weights; the alone side is model(doc) on the doc=None path (atol
+    2e-5; measured max 4.7e-6). Mutants (--group maskarms): 7 of 7 killed (Canon ignores document starts, Canon only
+    with doc, smear across documents, smear only with doc, forget bias only with doc, documents see each other,
+    value residual across documents). HEAD's version of the file against the same 7: the 5 flag mutants survive,
+    2 killed (the vacuity CODE THAT MUST LAND FIRST named, measured).
+  5 Analyzer (C3 picks, C7 verdicts, C4 noise checks, Holm, the cap, C6 onsets, the run-directory RC-12 refusal):
+    experiments/screens/analyze_lib.py (the rules, pure functions) and analyze.py (picks | verdicts --runs DIR).
+    C3 is E2's own e2pick.py (pick, PROSE guard, ties to the lower LR, at most 2 extensions; S003 through
+    e2pick.stage under the SCREENS run names). C7 per metric with SD_ref by class (same init SD_d; SIA u x SD_d;
+    new init sqrt(2) sigma_seed; all x BASE's mean, df 7); a diverged arm seed +inf, a diverged BASE seed dropped;
+    CCCC-ONLY exempts NOMINATE only; the same-init and pooled SIA noise checks re-read at the new-init SD
+    (labelled underpowered); Holm over every contrast that ran. Any run directory holding rc12_eval.jsonl refuses
+    the whole analysis (exit 3) and every run read is checked again. Tests (tests/test_analyze.py, 22). Mutants
+    (tests/mutation_screens.py): 22 of 22 killed (the every-seed clause dropped either way, sign flipped, delta
+    ignored, a diverged pair dropped, u left at 1, sqrt(2) dropped, CCCC-ONLY ignored or unblocking a TIE, Holm
+    without step-down, cut order swapped, the current seed set not kept, the P-022 toy ignored, both noise checks
+    blind or never applied, the re-read not labelled, both RC-12 refusals removed, the extension cap ignored,
+    onset_abs at the arm's own final).
+  Also (C1-b, FIXED): screens_lib checks train.compile false and BASE's hook keys in every config; screens.py hours
+    uses GPU HOURS' eager figures and prints ORDER's cap check (analyze_lib.cap_cut); make_ind.py and the IND file.
+  Mac CPU totals: experiments/screens/tests 235 passed; harness suite 879 passed, 44 skipped (CUDA), 1 failed:
+    test_rc12_eval.py::test_e2e_scores_through_score_py, which runs rc12/score.py from the working tree, where
+    another session has uncommitted rc12/ edits (the families it prints lack LOOKUP); this harness with HEAD's rc12/
+    passes test_rc12_eval.py and test_rc12_hook.py (17 passed). data_prep tests 58 passed. Mutation:
+    mutation_screens.py 63 of 63 killed (36 from BUILT and REVIEW, 3 of them rewritten for C1-b, 5 new for C1-b,
+    the hook and the hours, 22 analyzer); harness groups 25 of 25; data_prep 7 new + 7 rechecked.
+
+HOURS AND CAP (C1-b; screens.py hours: GPU HOURS' registered method, 255,660 slots/s eager, mask 162,849, +15%,
+the assumed flag factors; E3's k = 2 in every class). Runs (selection + seed), hours per run, hours:
+  BASE shared 0 + 2, 0.312, 0.62 | S001 3 + 2, 0.312, 1.56 | S002 9 + 6, 0.312, 4.69 | S003 search 11 + 0, 0.359,
+  3.95 | S003 seeds 0 + 2, 0.312, 0.62 | S004 3 + 2, 0.344, 1.72 | S005 arm 3 + 2, 0.539, 2.70 | S005 own BASE
+  0 + 2, 0.490, 0.98 | S006 3 + 2, 0.406, 2.03 | S007 3 + 2, 0.312, 1.56. Total 35 + 22 runs, 20.44 h (20.43 h at
+  measured overheads; GPU HOURS' own k = 2 figure: 20.3 h). Counted only once queued: up to 7.15 h of extensions
+  and up to 1.44 h of matched-LR IND runs.
+  Cap check before stage 1's first g-check: 0 measured screen hours + 20.44 h queued = 20.44 h <= 25 h, nothing
+  cut. If the C1-a gate's 2.01 GPU hours count as measured (31 holds, summed from the PC gate logs): 22.45 h,
+  nothing cut.
+  Not a rule input yet (the eager smokes replace the assumed factors before stage 2): the C1-a parity's eager speeds
+  (synthetic data, micro 8 x 2; nonormscale's 292k tok/s as the BASE stand-in) give Canon x1.36 (assumed x1.1),
+  forget x2.26 of its own BASE (x1.1), MTP x1.21 (x1.3), smear x1.04 (x1.0). Read at face value the total is about
+  23.6 h, and with the gate's 2.01 h about 25.6 h, which would cut S006 (first in the cut order) at stage 2's check.
+
+E4 STATUS (ORDER 0, E4 GATE): E4 runs after the RC-12 lock (PLAN 3a: "It uses RC-12 dev, so it runs after the
+lock"); prereg/RC-12.draft.txt is still "DRAFT, NOT LOCKED", and no E4 experiment exists in the repo, so E4 has not
+reported. ORDER 0's precondition is that E4 has NOT reported "no multi-turn signal at 5M": it holds. E4 does not run
+first; the batch runs, with the hours spent before E4 reports as the accepted risk the E4 GATE names.

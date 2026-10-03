@@ -168,6 +168,13 @@ def main(argv=None) -> int:
         if hook is not None:
             tr.hooks.append(hook)
             print(f"[train] RC-12 eval every {hook.every} steps on {len(hook.recs)} conversations", flush=True)
+    ind = None
+    if (cfg.get("eval") or {}).get("induction"):   # off unless eval.induction.every > 0 (induction.py, SCREENS C6)
+        from induction import make_hook as induction_hook
+        ind = induction_hook(cfg, base, out_dir, device, model)
+        if ind is not None:
+            tr.hooks.append(ind)
+            print(f"[train] IND every {ind.every} steps, GATE {ind.gate_rows is not None}", flush=True)
 
     resumed_from = None
     last = None if a.no_resume else runio.latest_checkpoint(out_dir)
@@ -203,6 +210,8 @@ def main(argv=None) -> int:
         start["ce_chunk_rows"] = ce_chunk
     if head is not None:                    # S006: deployed total (n_params) and training-only, apart
         start["mtp"] = {"heads": mtp, "weight": mtp_weight, "training_only_params": meta["mtp_params"]}
+    if ind is not None:                     # SCREENS C6: logging only, recorded when on
+        start["induction"] = {"every": ind.every, "file_sha256": ind.file_sha256, "gate": ind.gate_rows is not None}
     runio.append_jsonl(runs_jsonl, start)
     print(f"[train] {name}: {n_params:,} params, {device}/{precision}, steps {tr.step}->"
           f"{sched.total_steps} ({sched.mode}), {batch_tokens:,} tokens/step"

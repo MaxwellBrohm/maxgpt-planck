@@ -1,0 +1,8 @@
+# The plan launch_screens.sh runs (one name from plans/, first non-comment line). Change it by commit.
+# stage1_select starts with "wait_mark SCREENS PRECONDITIONS OK": it trains nothing until a person records
+# SCREENS ORDER 0 as met (touch ~/planck/runs/SCREENS/marks/SCREENS_PRECONDITIONS_OK on the PC, after the
+# preconditions and the cap check are logged in SCREENS.txt). stage2_select waits the same way for
+# SCREENS_STAGE_2_SMOKES_RECORDED (each flag's eager smoke run on the PC, labelled smoke, logged in its notes.txt:
+# mem_fit, tok/s for the GPU HOURS factors, leak self-test; AMENDMENT C1-b: every run eager, no compile gate).
+# Seed plans come from screens.py seeds.
+stage1_select

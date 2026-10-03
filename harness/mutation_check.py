@@ -51,7 +51,8 @@ def make_copy(mutant: dict | None) -> str:
 
 
 def run_suite(d: str, files: list[str], timeout: int = 110) -> tuple[int, list[str], float]:
-    env = {**os.environ, "PLANCK_TEST_THREADS": "2", "PYTHONDONTWRITEBYTECODE": "1"}
+    env = {**os.environ, "PLANCK_TEST_THREADS": "2", "PYTHONDONTWRITEBYTECODE": "1",
+           "PLANCK_DATA_PREP": os.path.join(os.path.dirname(HERE), "data_prep")}   # read only (eval sets code)
     args = [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "--tb=no", "-rf", *files]
     t0 = time.time()
     try:

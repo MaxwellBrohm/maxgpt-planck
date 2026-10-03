@@ -140,3 +140,17 @@ data_prep/bpb.py (model(idx), no doc), harness/model.py and blocks.py (doc=None 
   3 (must, M5) The smear is registered on every path, including doc=None (the path bpb.py scores), with a test and
     a mutant; the claim that testutil.ARMS reaches test_model_mask.py was false and is corrected.
   4 (should) alpha's LR (the embedding LR) is stated; the unrun P-024 toy (1 vs 2 layers) is named.
+
+C1-a GATE (2026-10-02, the PC 5070; Claude; method, the batch table and the findings in SCREENS.txt
+"C1-a GATE RESULTS"; nothing committed, no screen run queued, no config changed)
+  RESULT: PASS. S007's arms run compiled (train.compile default, as written), paired with the compiled shared BASE.
+  (1) Compiled smoke, s007_smear_g1_s1.yaml, 300 steps: ok. 6 graphs, 3 breaks (varlen cu_seqlens, as BASE), no
+      limit line, 5,010,157 params, loss 8.82 to 4.71, 540k tok/s median (shared BASE smoke 548k), 4.43 GiB peak.
+  (2) Parity (flag_parity.py S007:smear), 2 invocations: a PASS (worst ratio mean|d| 0.36, last-50 0.23), b PASS
+      (0.64, 0.33). Pooled p 0.625 / 1.000. No limit line in any compiled arm.
+  DIAGNOSTIC (one invocation with plain, non-deterministic compiled arms, what the screens actually train; no
+  effect on the result): PASS 0.46 / 0.31; pooled p over a, b and it 0.538 / 0.538.
+
+AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this screen is EAGER (train.compile false),
+  although its C1-a gate passed (C1-b runs every screen eager, so S007 still pairs with the shared BASE). Configs
+  rebuilt; each carries the C6 eval.induction hook (IND onset at matched LR, C6).

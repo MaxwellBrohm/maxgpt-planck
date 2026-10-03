@@ -1,0 +1,7 @@
+# SCREENS S001 arm nogate, g 2 x LR5, seed 1: C3 g-check (screens.py)
+extends: ../../screens/configs/screens_base.yaml
+name: s001_nogate_g2_s1
+out_dir: ../../../planck_root/runs/SCREENS/s001_nogate_g2_s1
+seed: 1
+optim: {lr: 0.006, embed_lr: 0.006, scalar_lr: 0.006}
+model: {attn_gate: false}

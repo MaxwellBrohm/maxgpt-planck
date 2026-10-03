@@ -1,5 +1,10 @@
 """Document masking, per-document positions, summed loss, and the leak self-test.
-CPU only, models under 0.1M parameters."""
+CPU only, models under 0.1M parameters.
+
+test_packed_equals_alone runs over testutil.ARMS (every attention and looping mode, and each screen flag:
+canon_ac, forget_gate, smear_key) on testutil.scramble'd weights, so zero-init paths (the attention gate, the
+value residual's second weight, Canon kernels, smear alpha) are live and a leak through them is visible. The
+alone side is model(doc) with no document ids: the doc=None path data_prep/bpb.py scores (SCREENS ORDER 0)."""
 from __future__ import annotations
 
 import pytest
@@ -11,6 +16,8 @@ import model as M
 import selftest
 from config import PlanckConfig
 from model import build_model, document_causal_mask, positions_from_doc
+from testutil import ARMS as ALL_ARMS
+from testutil import scramble
 
 
 def tiny(**kw) -> PlanckConfig:
@@ -20,7 +27,7 @@ def tiny(**kw) -> PlanckConfig:
     return PlanckConfig(**base)
 
 
-ARMS = [{}, {"n_loops": 2}, {"n_loops": 2, "loop_order": "immediate", "n_prelude": 1, "n_coda": 1},
+SELFTEST_ARMS = [{}, {"n_loops": 2}, {"n_loops": 2, "loop_order": "immediate", "n_prelude": 1, "n_coda": 1},
         {"qk_share": 2, "kv_tie": True}, {"mlp_hidden": 0}, {"value_residual": False},
         {"attn_gate": False, "qk_norm": False, "norm_scaling": False}]
 
@@ -39,11 +46,12 @@ def test_mask_shape_and_content():
     assert torch.equal(m, exp)
 
 
-@pytest.mark.parametrize("kw", ARMS)
-def test_packed_equals_alone(kw):
-    """Three documents packed in one row give the same logits as each run alone."""
+@pytest.mark.parametrize("arm", sorted(ALL_ARMS))
+def test_packed_equals_alone(arm):
+    """Three documents packed in one row (mask path) give the same logits as each run alone (doc=None)."""
+    kw = ALL_ARMS[arm]
     torch.manual_seed(0)
-    m = build_model(tiny(**kw)).eval()
+    m = scramble(build_model(tiny(**kw)), seed=0)
     lens = [7, 20, 13]
     docs = [torch.randint(0, 97, (1, n)) for n in lens]
     row = torch.cat(docs, dim=1)
@@ -53,7 +61,7 @@ def test_packed_equals_alone(kw):
         at = 0
         for d in docs:
             alone, _ = m(d)
-            assert torch.allclose(packed[:, at:at + d.size(1)], alone, atol=1e-5), kw
+            assert torch.allclose(packed[:, at:at + d.size(1)], alone, atol=2e-5), arm
             at += d.size(1)
 
 
@@ -80,7 +88,7 @@ def test_sum_reduction_matches_mean_times_count():
     assert zero.detach().item() == 0.0
 
 
-@pytest.mark.parametrize("kw", ARMS)
+@pytest.mark.parametrize("kw", SELFTEST_ARMS)
 def test_selftest_passes_clean_model(kw):
     torch.manual_seed(0)
     out = selftest.run_selftests(build_model(tiny(**kw)), "cpu")

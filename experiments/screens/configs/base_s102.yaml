@@ -1,0 +1,6 @@
+# SCREENS BASE (C1: E3 arm A, C1-b eager), LR5, seed 102 (screens.py)
+extends: screens_base.yaml
+name: base_s102
+out_dir: ../../../planck_root/runs/SCREENS/base_s102
+seed: 102
+optim: {lr: 0.003, embed_lr: 0.003, scalar_lr: 0.003}

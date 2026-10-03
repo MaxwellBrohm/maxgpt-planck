@@ -115,3 +115,26 @@ test_model_mask.py, test_budget.py, trainer.py (clip); E3 notes rule 1 and KNOWN
   3 (must, M3) IND onset read only at matched LR.
   4 (should) REJECT now says what it changes; the clip rate is reported; the test_model_mask.py claim is corrected.
   Not applied: the plain_block fourth arm (cost against the cap), recorded as a known risk instead.
+
+C1-a GATE (2026-10-02, the PC 5070; Claude; method, the batch table and the findings in SCREENS.txt
+"C1-a GATE RESULTS"; nothing committed, no screen run queued, no config changed)
+  RESULT: FAIL, by the registered rule (nonormscale failed one invocation; C1-a: a failed flag sends ALL the
+  screen's arms eager). All three S002 arms run eager, with S002's own eager BASE per seed. Logged before any
+  S002 run; none has run.
+  The ENGINE edit (screens_lib S002 "train.compile": False) and the rebuild of the 9 g-check configs (all still
+  train.compile default) are NOT done here; they come before any S002 run.
+  (1) Compiled smokes, each arm's g1_s1 config, 300 steps: all ok, 6 graphs, 3 breaks (varlen cu_seqlens), no
+      limit line. novres 5,010,112 params, loss 8.82 to 4.73, 577k tok/s, 4.16 GiB; noqknorm 5,009,109, 8.81 to
+      4.96, 577k, 4.09 GiB; nonormscale 5,010,133, 8.69 to 4.72, 544k, 4.32 GiB (shared BASE smoke 548k).
+  (2) Parity, 2 invocations each (worst ratio to the limit, mean|d| / last-50): novres a PASS 0.55 / 0.58, b PASS
+      0.55 / 0.58, pooled p 0.875 / 0.750; noqknorm a PASS 0.24 / 0.22, b PASS 0.27 / 0.27, pooled p 0.875 /
+      0.750; nonormscale a PASS 0.33 / 0.25, b FAIL 0.46 / 1.22 (b's last-50 floor 0.0031 against a's 0.0150;
+      the compiled and eager:det curves are the same bits in both), pooled p 0.750 / 0.750. A marginal fail;
+      SCREENS.txt names the decision this leaves for a person.
+  DIAGNOSTIC (one invocation with plain, non-deterministic compiled arms, what the screens train; no effect on
+  the result): novres PASS 0.65 / 0.76, pooled p over a, b and it 0.846 / 0.892; noqknorm PASS 0.27 / 0.25,
+  0.853 / 0.860; nonormscale PASS 0.28 / 0.11, 0.517 / 0.608.
+
+AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this screen is EAGER (train.compile false),
+  all three arms paired with the shared eager BASE per seed; the C1-a result above decides nothing now. Configs
+  rebuilt; each carries the C6 eval.induction hook (IND every 153 steps and at the last step).

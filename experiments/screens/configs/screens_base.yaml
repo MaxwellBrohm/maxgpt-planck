@@ -1,0 +1,27 @@
+# SCREENS BASE settings (experiments/SCREENS.txt C1 and AMENDMENT C1-b). Every screen run config extends this
+# file and sets only name, out_dir, seed, its LRs and the keys its notes.txt registers (screens_lib.py ARMS).
+#
+# C1: BASE = E3's arm A config key for key. E3's arm A run configs (experiments/E3_seed_noise/configs/
+# e3_5m_A_s*.yaml) extend E2's base5m.yaml (and so engine.yaml) and add schedule {mode full, decay_frac 0.2},
+# train {total_steps 7630, ckpt_every 153}; the same lines are here. The LRs (LR5 = eta 3e-3, r 1, from E2
+# results.json stage_C and E3 results.json e2_recheck) are written in each run config, as E3 did.
+# AMENDMENT C1-b (2026-10-03, withdrawing C1-a): every screen run is EAGER, train.compile false as E3 ran, and every
+# other engine flag keeps E2's FIXED 1 value (engine.yaml: compile_dynamic null = unset, ce_chunk_rows 0, doc_attn
+# varlen, batched, bf16, pack). engine_fixed: the date and the harness commit the engine values were checked
+# against (f314eb7: harness/ last changed there, durable saves, I/O only; the SCREENS ORDER 0 commit adds only
+# default-off code, default_parity.py against it).
+# eval.induction (C6 IND every 153 steps plus the last step; GATE on attn_gate runs): logging only, training
+# bitwise unchanged (harness/test_induction.py). Paths are relative to each RUN config (experiments/<dir>/configs).
+extends: ../../E2_lr_transfer/configs/base5m.yaml
+engine_fixed: "2026-10-03 f314eb7 SCREENS C1-b"
+schedule: {mode: full, decay_frac: 0.2}
+train: {total_steps: 7630, ckpt_every: 153, compile: false}
+eval:
+  induction:
+    every: 153
+    file: ../../screens/ind_v0_8k.json
+    sha256: 0eafbca2eb050958f48add5a6271d053a16c5f57d211ae894ccc0dec85fdc338
+    gate_evalset: ../../../planck_root/data/evalsets/v0
+    gate_set: oasst2
+    gate_windows: 32
+    gate_tokenizer: ../../../tokenizer/v0/tok_v0_8k.json

@@ -1,0 +1,15 @@
+# SCREENS stage 2 selection at seed 1 (ORDER 2, priority S005 S004 S007 S006) (screens.py). train = screens check, preflight, train, score
+wait_mark SCREENS SCREENS STAGE 2 SMOKES RECORDED
+train s005_forget_g0.5_s1
+train s005_forget_g1_s1
+train s005_forget_g2_s1
+train s004_canonac_g0.5_s1
+train s004_canonac_g1_s1
+train s004_canonac_g2_s1
+train s007_smear_g0.5_s1
+train s007_smear_g1_s1
+train s007_smear_g2_s1
+train s006_mtp_g0.5_s1
+train s006_mtp_g1_s1
+train s006_mtp_g2_s1
+mark SCREENS STAGE 2 SELECTION DONE

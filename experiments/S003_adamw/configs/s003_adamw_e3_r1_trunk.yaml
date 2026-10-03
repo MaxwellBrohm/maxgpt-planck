@@ -1,0 +1,8 @@
+# SCREENS S003 AdamW search point eta 0.003, r 1 (E2 SCHEDULE, seed 1) (screens.py)
+extends: ../../screens/configs/screens_base.yaml
+name: s003_adamw_e3_r1_trunk
+out_dir: ../../../planck_root/runs/SCREENS/s003_adamw_e3_r1_trunk
+seed: 1
+optim: {lr: 0.003, embed_lr: 0.003, scalar_lr: 0.003, kind: adamw}
+schedule: {mode: trunk, branch_points: [1526, 3052, 6104]}
+train: {total_steps: 6105, ckpt_every: 122}

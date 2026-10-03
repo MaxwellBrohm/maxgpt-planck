@@ -1,0 +1,7 @@
+# SCREENS S005 own BASE (ENGINE keys), LR5, seed 102 (screens.py)
+extends: ../../screens/configs/screens_base.yaml
+name: s005_base_s102
+out_dir: ../../../planck_root/runs/SCREENS/s005_base_s102
+seed: 102
+optim: {lr: 0.003, embed_lr: 0.003, scalar_lr: 0.003}
+train: {doc_attn: mask, micro_batch: 8, grad_accum: 2}

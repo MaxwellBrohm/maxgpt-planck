@@ -111,3 +111,23 @@ test_s3_leak.py, test_s3_docattn.py, test_budget.py; LEDGER P-021)
   4 (should) GATE is logged during training (the IND hook), since keep_last 2 keeps no early checkpoints.
   5 (should) Recorded that the gate is also a per-head output scale in (0, 2), so Q1 is not evidence about sinks.
   Unchanged after checking: the NEW INIT class (model.py draws attn_gate_proj as an nn.Linear, then zeroes it).
+
+C1-a GATE (2026-10-02, the PC 5070; Claude; method, the batch table and the findings in SCREENS.txt
+"C1-a GATE RESULTS"; nothing committed, no screen run queued, no config changed)
+  RESULT: FAIL, by the registered rule. All S001 arms run eager, and S001 needs its own eager BASE per seed (an
+  eager arm may not pair with the compiled shared BASE). Logged before any S001 run; none has run.
+  The ENGINE edit (screens_lib S001 "train.compile": False) and the rebuild of the 3 g-check configs (all still
+  train.compile default) are NOT done here; they come before any S001 run.
+  (1) Compiled smoke, s001_nogate_g1_s1.yaml, 300 steps: ok. 6 graphs, 3 breaks (varlen cu_seqlens, as BASE), no
+      recompile or cache-limit line, 5,005,525 params, loss 8.87 (step 10) to 4.75 (step 300), 589k tok/s median
+      (shared BASE smoke 548k), 4.23 GiB peak reserved.
+  (2) Parity (flag_parity.py S001:nogate), 2 invocations: a PASS (worst ratio to the 2x-floor limit: mean|d| 0.47,
+      last-50 0.04), b FAIL (1.03, 0.06). The compiled and eager:det curves are the same bits in both invocations;
+      only the eager-eager floor differed (mean|d| 0.0033 in b, 0.0073 in a). Pooled p 0.625 / 0.750. A marginal
+      fail (3% over the limit); SCREENS.txt names the decision this leaves for a person.
+  DIAGNOSTIC (one invocation with plain, non-deterministic compiled arms, what the screens train; no effect on
+  the result): PASS 0.48 / 0.13; pooled p over a, b and it 0.528 / 0.364 (10 eager, 3 compiled curves).
+
+AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this screen is EAGER (train.compile false),
+  paired with the shared eager BASE per seed; the C1-a result above decides nothing now. Configs rebuilt; each
+  carries the C6 eval.induction hook, which logs GATE every 153 steps in BASE (gate on) and none in nogate.

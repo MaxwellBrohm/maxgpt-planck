@@ -158,3 +158,29 @@ list)
     mutant; the claim that testutil.ARMS reaches test_model_mask.py was false and is corrected.
   4 (should) The C2 allowance names both keys; the conv LR (the embedding LR, g x r_5 x eta_5) is stated; the
     conditional must-run status is stated.
+
+C1-a GATE (2026-10-02, the PC 5070; Claude; method, the batch table and the findings in SCREENS.txt
+"C1-a GATE RESULTS"; nothing committed, no screen run queued, no config changed)
+  RESULT: FAIL, and not by a margin. All S004 arms run eager, with S004's own eager BASE per seed. Logged before
+  any S004 run; none has run.
+  The ENGINE edit (screens_lib S004 "train.compile": False) and the rebuild of the 3 g-check configs (all still
+  train.compile default) are NOT done here; they come before any S004 run.
+  (1) Compiled smoke, s004_canonac_g1_s1.yaml, 300 steps: ok. 6 graphs, 3 breaks (varlen cu_seqlens, as BASE), no
+      limit line, 5,022,421 params, loss 8.81 to 4.70, 467k tok/s median (shared BASE smoke 548k, so about
+      0.85x), 5.43 GiB peak reserved.
+  (2) Parity (flag_parity.py S004:canonac), 2 invocations: a FAIL (worst ratio mean|d| 469, last-50 176), b FAIL
+      (250, 86); pooled p 0.003 / 0.003. Under torch deterministic mode the compiled Canon model does not train:
+      loss 9.05 at step 1 and 9.04 to 9.07 at step 200 (eager:det 0.18), and its default:det curves are not
+      repeatable, within or across invocations (every other arm's are). A harness defect in the compiled Canon
+      path under deterministic algorithms, not investigated here; the flag's owner should look before any
+      compiled Canon run.
+  DIAGNOSTIC (one invocation with plain, non-deterministic compiled arms, what the screens train; no effect on
+  the result): FAIL 1.90 / 4.59, with that invocation's floor at 0.0039 / 0.0049. Its two compiled last-50 means
+  (0.6298, 0.6722) lie inside the 9 plain eager runs of the three invocations (0.6405 to 0.6976); pooled p of the
+  plain compiled curves alone against all 10 eager curves 0.212 / 0.333 (computed on the Mac from the same JSONs).
+  So the deterministic compiled path is broken, and the plain one is not shown to differ, nor shown equal.
+
+AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this screen is EAGER (train.compile false),
+  paired with the shared eager BASE per seed; no S004 run compiles, and the compiled-Canon deterministic defect
+  above stays a finding for the flag's owner. Configs rebuilt; each carries the C6 eval.induction hook. Before
+  stage 2: the eager smoke (mem_fit, tok/s to replace the assumed x1.1) and this flag's CUDA tests.

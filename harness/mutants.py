@@ -226,3 +226,5 @@ import mutants_mtp  # noqa: E402,F401
 import mutants_smear  # noqa: E402,F401
 # ---------------- SPEED V3 train.compile + train.ce_chunk_rows: mutants_speed3.py (same split) ----------------
 import mutants_speed3  # noqa: E402,F401
+# ---------------- SCREENS ORDER 0 (eval.induction, attn_diag, test_model_mask on ARMS): mutants_diag.py ----------------
+import mutants_diag  # noqa: E402,F401

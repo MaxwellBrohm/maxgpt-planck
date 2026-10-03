@@ -1,0 +1,35 @@
+# SCREENS stage 1 selection at seed 1 (ORDER 1): S001 g-check, S002 g-checks, S003 stage A (screens.py). train = screens check, preflight, train, score
+wait_mark SCREENS SCREENS PRECONDITIONS OK
+train s001_nogate_g0.5_s1
+train s001_nogate_g1_s1
+train s001_nogate_g2_s1
+train s002_novres_g0.5_s1
+train s002_novres_g1_s1
+train s002_novres_g2_s1
+train s002_noqknorm_g0.5_s1
+train s002_noqknorm_g1_s1
+train s002_noqknorm_g2_s1
+train s002_nonormscale_g0.5_s1
+train s002_nonormscale_g1_s1
+train s002_nonormscale_g2_s1
+train s003_adamw_e0.75_r1_trunk
+train s003_adamw_e0.75_r1_b62M
+train s003_adamw_e0.75_r1_b125M
+train s003_adamw_e0.75_r1_b250M
+train s003_adamw_e1.5_r1_trunk
+train s003_adamw_e1.5_r1_b62M
+train s003_adamw_e1.5_r1_b125M
+train s003_adamw_e1.5_r1_b250M
+train s003_adamw_e3_r1_trunk
+train s003_adamw_e3_r1_b62M
+train s003_adamw_e3_r1_b125M
+train s003_adamw_e3_r1_b250M
+train s003_adamw_e6_r1_trunk
+train s003_adamw_e6_r1_b62M
+train s003_adamw_e6_r1_b125M
+train s003_adamw_e6_r1_b250M
+train s003_adamw_e12_r1_trunk
+train s003_adamw_e12_r1_b62M
+train s003_adamw_e12_r1_b125M
+train s003_adamw_e12_r1_b250M
+mark SCREENS STAGE 1 SELECTION A DONE
