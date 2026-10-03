@@ -1,0 +1,8 @@
+# E3 20M arm B (eta 0.0015, r 1), seed 3 (e3plan.py)
+extends: ../../E2_lr_transfer/configs/base20m.yaml
+name: e3_20m_B_s3
+out_dir: ../../../planck_root/runs/E3/e3_20m_B_s3
+seed: 3
+optim: {lr: 0.0015, embed_lr: 0.0015, scalar_lr: 0.0015}
+schedule: {mode: full, decay_frac: 0.2}
+train: {total_steps: 15259, ckpt_every: 305}

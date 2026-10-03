@@ -319,3 +319,19 @@ checkpoints of E2's 20m_e6_r1_trunk at 0 bytes while the queue had marked it don
   one code version. Part 2 against Part 1 (rule 4 takes the larger relative SD) and against E2's 20M grid differ in
   this I/O path as well as in size. Read as a disclosed deviation, as D2 is; under D2's strict reading Part 2 would be
   refused along with Part 1.
+
+PART 2 QUEUED (2026-10-03 00:41 EDT, Claude; after D4, in a later commit than D4's). E2's 20M grid finished
+2026-10-02 23:43 ("MARK E2 20M DONE"); e2pick.py q2 (E2 results.json "q2"): 20M argmin at 500M g 1, not at an edge, no
+extension; runner-up g 0.5. So A20 = (3e-3, r 1), B20 = (1.5e-3, r 1). e3plan.py --a5 0.003,1 --b5 0.0015,1 --a20
+0.003,1 --b20 0.0015,1 rewrote the 18 Part 1 configs and plans/part1.txt byte-identical (a dry run to a scratch
+directory compared all 19 first) and wrote 6 configs and plans/part2.txt (waits for "E2 20M DONE", runs A1 B1 A2 B2 A3
+B3, marks "E3 PART 2 DONE"; sha256 6b9962074b7e996d...). plans/CURRENT = part2. Each config extends base20m.yaml,
+full WSD with decay_frac 0.2 (15,259 steps, decay from step 12,207, warmup 76 from base), ckpt_every 305, seed s:
+    83e28d5f80ddf646fdbf593e1949aa32664f3adb688667fdd063a211d78c580f e3_20m_A_s1.yaml
+    aa1be48b280708985625ee2efcdfaa74037eb31c6d555a81da26dd89a5507475 e3_20m_A_s2.yaml
+    a6e329e86163d580940df1bad7379e42eaf2b9d02e46e7fd9c9a3bd9d7e0c2d7 e3_20m_A_s3.yaml
+    a2843208b338f67cf352264330c326092198dde65414da28c9ac6572e6a4ac4b e3_20m_B_s1.yaml
+    a952ce4b1fcc9b0d3b1b1878d0346f6b2c7174b651879243ae236ed4586cdb62 e3_20m_B_s2.yaml
+    55908528a0f86c38a9f0a7563401be0d4a84c31bf101e50951b94e5698764b7f e3_20m_B_s3.yaml
+  e3analyze.py covers Part 1 only (5M steps, one queue start at e39112a); Part 2 needs its own analysis step before
+  any Part 2 number is read.
