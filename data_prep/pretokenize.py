@@ -142,7 +142,7 @@ def run_source(a, source: str, tok_path: str, tok_info: dict) -> dict:
                       for s in shards],
            "code_sha256": C.code_hashes(CODE)}
     C.write_json(os.path.join(part, "manifest.json"), man)
-    os.replace(part, final)
+    C.durable.publish_dir(part, final)        # every shard fsynced before the rename (harness/durable.py)
     shutil.rmtree(work, ignore_errors=True)
     return man
 

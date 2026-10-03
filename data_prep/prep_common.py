@@ -17,6 +17,7 @@ for _p in (os.path.join(ROOT, "harness"), os.path.join(ROOT, "corpus"), os.path.
     if _p not in sys.path:
         sys.path.append(_p)
 
+import durable                                     # noqa: E402  harness/durable.py: fsync, rename, fsync dir
 from oodh import in_oodh_reserve                   # noqa: E402  the ONE OOD-H rule
 from sample_plan import SPECIAL_RE, SPECIAL_STRINGS  # noqa: E402  the tokenizer-sample rule
 
@@ -143,11 +144,9 @@ def sha256_file(path: str) -> str:
 
 
 def write_json(path: str, obj) -> None:
-    tmp = path + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
+    with durable.atomic_write(path, encoding="utf-8") as f:
         json.dump(obj, f, indent=1, sort_keys=True)
         f.write("\n")
-    os.replace(tmp, path)
 
 
 def read_json(path: str):

@@ -187,7 +187,7 @@ def main(argv=None) -> int:
     C.write_json(os.path.join(part, "manifest.json"), man)
     if os.path.exists(out):
         shutil.rmtree(out)
-    os.replace(part, out)
+    C.durable.publish_dir(part, out)          # every file fsynced before the rename (harness/durable.py)
     return 0
 
 

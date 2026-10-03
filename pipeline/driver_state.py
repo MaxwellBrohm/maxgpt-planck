@@ -13,6 +13,7 @@ import json
 import os
 
 import dedup
+import durable
 import shards
 
 PINNED = ("shard_seed", "register", "gen_version", "max_attempts", "source", "gate_hash")
@@ -33,10 +34,8 @@ def pin(out, cfg):
     else:
         have = {**want, "created": cfg.get("created"), "sessions": 1}
     have["n"] = max(have.get("n", 0), cfg["n"])
-    tmp = path + ".tmp"
-    with open(tmp, "w") as f:
+    with durable.atomic_write(path) as f:              # fsynced before the rename, directory after
         json.dump(have, f, indent=1, sort_keys=True)
-    os.replace(tmp, path)
     return have
 
 

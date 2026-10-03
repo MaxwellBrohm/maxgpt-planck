@@ -19,6 +19,8 @@ import time
 import torch
 import yaml
 
+import durable
+
 PREREG_REQUIRED = ("id", "hypothesis", "metric", "decision_rule")
 
 
@@ -94,9 +96,11 @@ def append_jsonl(path: str, rec: dict) -> None:
 # ---------------------------- checkpoints ----------------------------
 
 def _atomic_save(obj, path: str) -> None:
+    """torch.save to path.tmp (the same call, so the same bytes), fsync it, rename, fsync the directory: a power cut
+    cannot leave path published but empty (durable.py, incident 2026-09-29)."""
     tmp = path + ".tmp"
     torch.save(obj, tmp)
-    os.replace(tmp, path)
+    durable.publish_file(tmp, path)
 
 
 def save_checkpoint(out_dir: str, payload: dict, step: int, keep_last: int = 2,
@@ -107,10 +111,8 @@ def save_checkpoint(out_dir: str, payload: dict, step: int, keep_last: int = 2,
     name = f"{tag or 'ckpt'}_{step:08d}.pt"
     path = os.path.join(out_dir, name)
     _atomic_save(payload, path)
-    tmp = os.path.join(out_dir, "latest.json.tmp")
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump({"path": name, "step": step}, f)
-    os.replace(tmp, os.path.join(out_dir, "latest.json"))
+    with durable.atomic_write(os.path.join(out_dir, "latest.json"), encoding="utf-8") as f:
+        json.dump({"path": name, "step": step}, f)    # only after the checkpoint itself is on disk
     if tag is None and keep_last > 0:
         for old in sorted(glob.glob(os.path.join(out_dir, "ckpt_*.pt")))[:-keep_last]:
             try:

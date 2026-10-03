@@ -52,6 +52,7 @@ sys.dont_write_bytecode = True
 
 import checker  # noqa: E402
 import driver_state  # noqa: E402
+import durable  # noqa: E402
 import heldout  # noqa: E402
 import parse  # noqa: E402
 import records  # noqa: E402
@@ -158,9 +159,8 @@ def pin_flags(out, flags, fresh):
     if not fresh and {**FLAGS_OFF, **flags} != FLAGS_OFF:
         raise SystemExit(f"refusing to resume {out} (written before decode.json) with decoding flags {flags}")
     os.makedirs(out, exist_ok=True)
-    with open(path + ".tmp", "w") as f:
+    with durable.atomic_write(path) as f:              # fsynced before the rename, directory after
         json.dump(flags, f, sort_keys=True)
-    os.replace(path + ".tmp", path)
 
 
 def file_source(path):

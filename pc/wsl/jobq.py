@@ -24,6 +24,8 @@ import json
 import os
 import subprocess
 
+import durable   # fsync before every rename: a power cut cannot leave an empty job file
+
 DIRS = ("pending", "running", "done", "failed")
 
 
@@ -64,10 +66,8 @@ def load(path: str) -> dict:
 
 
 def save(job: dict, path: str) -> None:
-    tmp = path + ".tmp"
-    with open(tmp, "w") as f:
+    with durable.atomic_write(path) as f:
         json.dump(job, f, indent=1)
-    os.replace(tmp, path)
 
 
 def pending(home: str) -> list[str]:
@@ -82,7 +82,7 @@ def running(home: str) -> list[str]:
 
 def move(path: str, home: str, which: str) -> str:
     dst = os.path.join(qdir(home, which), os.path.basename(path))
-    os.replace(path, dst)
+    durable.replace(path, dst)          # both directories fsynced: the move survives a power cut
     return dst
 
 
@@ -136,7 +136,5 @@ def append_jsonl(path: str, rec: dict) -> None:
 
 
 def write_json(path: str, obj: dict) -> None:
-    tmp = path + ".tmp"
-    with open(tmp, "w") as f:
+    with durable.atomic_write(path) as f:
         json.dump(obj, f, indent=1, sort_keys=True)
-    os.replace(tmp, path)

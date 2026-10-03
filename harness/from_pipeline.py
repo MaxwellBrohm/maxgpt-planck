@@ -44,6 +44,7 @@ import os
 import re
 import sys
 
+import durable
 from chat_template import ChatTemplate
 
 VERSION = "from_pipeline/1"
@@ -245,7 +246,7 @@ def run(inputs: list[str], out: str, *, allow_nontrainable: bool = False, tokeni
         json.dump(manifest, f, indent=1)
     if os.path.exists(out):
         os.rmdir(out)
-    os.rename(tmp, out)
+    durable.publish_dir(tmp, out)     # shards and manifest fsynced before the rename (durable.py)
     return manifest
 
 

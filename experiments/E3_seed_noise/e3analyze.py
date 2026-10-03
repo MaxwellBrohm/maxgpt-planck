@@ -32,6 +32,10 @@ FIXED = {"tokenizer": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a4057
          "shares": {"cccc": 0.414241, "stackexchange": 0.221922, "gutenberg": 0.147915, "wikimedia": 0.147915,
                     "irc": 0.040004, "dolly": 0.016002, "oasst2": 0.012001},
          "n_files": {"cccc": 31, "stackexchange": 11, "gutenberg": 6, "irc": 6, "wikimedia": 3, "dolly": 1, "oasst2": 1}}
+# DEVIATION D4 (notes.txt; E2 DEVIATION 1), 2026-10-03: the durable-saves commit changes harness/runio.py's bytes, not
+# its computation (fsync before rename). A code list taken at or after that commit carries this hash; it passes the
+# runio.py check, labelled D4. FIXED["files"] keeps 438d4f54, which Part 1's code list carries.
+FIXED_D4 = {"harness/runio.py": "ffcdf24596ab46cb"}
 
 
 def _betacf(a, b, x):
@@ -110,7 +114,8 @@ def checks(runs):
     add("code digest harness+data_prep .py == FIXED 2 (92deaef0)", dig == FIXED["code_digest"], f"{dig[:16]} over {len(hp)} files")
     fh = dict(rows)
     for p, h in FIXED["files"].items():
-        add(f"{p} == FIXED 2", fh.get(p, "")[:16] == h, fh.get(p, "missing")[:16])
+        got, d4 = fh.get(p, "")[:16], FIXED_D4.get(p)
+        add(f"{p} == FIXED 2", got == h or got == d4, fh.get(p, "missing")[:16] + (" (D4)" if got == d4 else ""))
     q = open(os.path.join(HERE, "logs", "queue_e3.txt")).read().split("\n")
     starts = [ln for ln in q if "queue start" in ln]
     add("one queue start, commit e39112a", len(starts) == 1 and "e39112adf088" in starts[0], f"{len(starts)} start(s)")

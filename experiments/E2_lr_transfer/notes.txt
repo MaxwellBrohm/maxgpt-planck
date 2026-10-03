@@ -412,3 +412,37 @@ at 4946410, plan grid20m.txt; 20m_e6_r1_trunk crash-resumed as logged above). e2
     20M 250M -> 500M -0.24. Longer runs prefer a lower LR; past 125M the drift is under a quarter of a grid step per
     doubling at both sizes.
   Next: E3 Part 2 with --a20 0.003,1 --b20 0.0015,1 (E3 notes). D1 and D2 have not run.
+
+DEVIATION 1 (2026-10-03 00:35 EDT, Claude; written before any further E2 or E3 run, in the same commit as the code
+change). Code: durable saves. The commit holding this entry changes how harness/runio.py publishes a file:
+_atomic_save does torch.save to path.tmp (the same call, so the same bytes), fsyncs it, renames it onto path and
+fsyncs the directory; latest.json is written the same way, after the checkpoint. The new harness/durable.py holds
+those steps; harness/from_pipeline.py and data_prep/prep_common.py, pretokenize.py and eval_sets.py use it for their
+own outputs (none of those writers runs in E2 or E3). I/O only: no line that computes a loss, a gradient, an update,
+a data order or a score changed; data_prep/bpb.py and evalwin.py are byte-identical (bpb.py now imports durable
+through prep_common, import only).
+  Reason: the 2026-09-29 power cut left 20m_e6_r1_trunk's ckpt_00012200.pt, stable_00012207.pt and
+  final_00012208.pt at 0 bytes while TRUNK_DONE and latest.json said done (CRASH RESUME above): os.replace without an
+  fsync lets ext4 commit the rename before the data.
+  Evidence the training math is unchanged: harness/default_parity.py, the committed harness (before the change;
+  unchanged since e39112a) vs the changed tree, CPU fp32 on the Mac, 2026-10-03: every log record, the final
+  checkpoint (model, optimizer, data_state, rng, step, tokens) and the start record identical; the one difference is
+  the new import, durable, which the tool's module-set check reports (its verdict is FAIL for that reason alone). Not
+  re-run on CUDA. Tests of the change on the Mac before the commit: harness/test_durable.py 22 passed,
+  pipeline/tests/test_durable_state.py 3, pc/tests/test_jobq_durable.py 4, data_prep/tests/test_durable_writes.py 3.
+  Pins that move (FIXED 2): harness/runio.py 438d4f5438aeee79 -> ffcdf24596ab46cb (sha256
+  ffcdf24596ab46cb934c3518a064c6dd2e98836221cc79e57831f7126c9eb4fa). The FIXED 2 digest over the harness/ and
+  data_prep/ .py files goes from b773159e (97 files; E3 Part 1 at e39112a and every 20M grid run, whose queue starts
+  were at e39112a, d536070 and 4946410; harness/ and data_prep/ have no change from e39112a to e787508) to
+  56b4a68f38d43cc8 (100 files: + harness/durable.py, harness/test_durable.py, data_prep/tests/test_durable_writes.py).
+  E2's own FIXED value, 92deaef0 at 93ea41c, was already not met from E3 Part 1 on (E3 D2), and the E2 20M grid ran at
+  b773159e too; no E2 entry before this one records that for the 20M grid (E3 D2 gives the default-path parity
+  evidence for that harness). Noted here, not resolved here.
+  Where a pin is checked: no queue-time check reads either value. queue_e2.sh (E2 and E3) refuses a dirty checkout
+  and records code_sha256_<time>.txt; preflight.py and train.py --require-committed check configs, provenance and
+  the prereg, not code hashes. The one check that reads 438d4f54 is E3's e3analyze.py (FIXED["files"]); it now
+  also accepts ffcdf245, labelled D4 (E3 notes), and E3 Part 1's results.json reproduces byte for byte with the
+  edited analyzer (sha256 1f017ecb..., checked 2026-10-03). E2 has no analyzer that reads code hashes (e2pick.py
+  reads bpb only).
+  Scope: every E2 or E3 run started at or after this commit (E3 Part 2 and Part 3, E2 D1 and D2). Runs inside one
+  comparison share one commit, so arms compare like for like; across commits they differ in this I/O path only.

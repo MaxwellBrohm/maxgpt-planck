@@ -298,3 +298,24 @@ A = (3e-3, r 1), B = (1.5e-3, r 1), d = B - A, N = 8 pairs (df 7) unless marked.
   Not run: Part 2 (20M; its re-check and the 20M SDs), Part 3 (sigma_init, sigma_data), Part 4. No length shorter than
   250M is defined for Part 1.
 Audit corrections applied (2026-10-02, from AUDIT.md; no verdict changed, no reported statistic changed, results.json untouched): PART 1 QUEUED time label 16:40 corrected to by 16:24:40 (commit e39112a); "written before any bpb value was read" marked as the analyst's account that files cannot show; D2 now records the CUDA default-path parity PASS and says the noise numbers stand only under the disclosed-deviation reading (strict FIXED reading would refuse all 18 runs); D3 "Not checked further" corrected to checked at preflight, indirectly; scipy check "below" and analyzer mutation test marked as having no record, audit files cited; CRN wording narrowed to equal counts, not hashed content; 95% intervals for SD_d added; seeds 2..8 MDEs added (here and in tables.txt, labelled as hand-added); "RESOLVED" A vs B marked descriptive, not pre-registered, with the seed-1 selection, PROSE WIN-rule and pair-1 sensitivity caveats; replay share 0.78 marked a point estimate with its 0.21 to 30.8 interval, the untested B GPU noise and time-order drift; E2 re-check scope limited to A vs B (6e-3 unresolved); CRN "below 2" marked not established (ratio about 0.9 to 3.6) and irc 3.00 noted; averaging sign rewritten (M is noisier by 2.3% and 14.5%).
+
+DEVIATION D4 (2026-10-03 00:40 EDT, Claude; written before any E3 Part 2 run, in the same commit as the code change;
+E2 notes DEVIATION 1 has the full record). Code: durable saves. From that commit on, harness/runio.py publishes every
+checkpoint and latest.json by write to path.tmp, fsync, rename, fsync the directory (new harness/durable.py; the
+data_prep writers and harness/from_pipeline.py use it too, and none of them runs in E3). I/O only, training math
+unchanged: harness/default_parity.py (committed harness vs the changed tree, CPU fp32, Mac, 2026-10-03) found every
+log record, the final checkpoint and the start record identical, the one difference being the new import (durable);
+not re-run on CUDA. data_prep/bpb.py and evalwin.py are unchanged. Reason: the 2026-09-29 power cut left three
+checkpoints of E2's 20m_e6_r1_trunk at 0 bytes while the queue had marked it done (E2 notes, CRASH RESUME).
+  Pin: harness/runio.py moves from 438d4f5438aeee79 (FIXED 2, and E3 Part 1's code list) to ffcdf24596ab46cb. The
+  only check that reads it is e3analyze.py: FIXED["files"] keeps 438d4f54 and FIXED_D4 adds ffcdf245, which passes
+  the runio.py check with the detail labelled "(D4)". With the edited analyzer, Part 1's results.json reproduces byte
+  for byte (sha256 1f017ecb...); a code list carrying ffcdf245 passes, one carrying another hash fails, and with
+  FIXED_D4 removed from the comparison the ffcdf245 list fails (checked 2026-10-03 on a scratch copy). No queue-time
+  check reads a code hash (queue_e2.sh, preflight.py, train.py --require-committed).
+  Effect on E3: Part 2 runs at a commit whose harness/ + data_prep/ .py digest is 56b4a68f38d43cc8 (100 files), not
+  Part 1's b773159e (97 files) or E2 FIXED 2's 92deaef0; the train.py, trainer.py and model.py differences D2
+  describes carry over unchanged. All six Part 2 runs share that commit, so A20 vs B20 and the 20M SDs compare runs of
+  one code version. Part 2 against Part 1 (rule 4 takes the larger relative SD) and against E2's 20M grid differ in
+  this I/O path as well as in size. Read as a disclosed deviation, as D2 is; under D2's strict reading Part 2 would be
+  refused along with Part 1.
