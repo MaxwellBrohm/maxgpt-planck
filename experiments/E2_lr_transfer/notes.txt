@@ -376,3 +376,16 @@ Extensions at 20M (argmin at an edge) are left for a Claude session (e2pick q2).
     398dd60384f4acdd9990c4862aaba041fbc1733a4cf0467bb8a7d09d877a3e64 20m_e6_r1_b250M.yaml
     180102c169715e00d89fb1a3af33f567b858aa58369b6fcdbb281ca6948e1235 20m_e6_r1_b500M.yaml
     43d290b08ee07328e2939c2c8fb3856ccc5fdc020ff593378253e1a8cc780ad2 20m_e6_r1_trunk.yaml
+
+CRASH RESUME, 20m_e6_r1_trunk (2026-10-02 21:24 EDT, Claude). The 2026-09-29 power cut (PC up again 14:52) hit at
+about 14:03, while the trunk wrote its last saves: ckpt_00012200.pt, stable_00012207.pt and final_00012208.pt are
+0 bytes although TRUNK_DONE was written (runio._atomic_save renames a temp file without fsync, so ext4 can lose the
+data of a just-renamed file on power loss; harness fix to follow, after this grid, so E2's pinned code is
+unchanged). The queue relaunched 2026-10-02 20:24 trained 20m_e6_r1_b250M from stable_00006104.pt (intact,
+170,933,183 B; its run is valid) and then stopped at preflight for 20m_e6_r1_b500M (torch.load EOFError on the
+0-byte stable_00012207.pt). Repair, per the DEVIATIONS POLICY's crash rule (one exact resume from the last
+checkpoint, logged, not a deviation): the three 0-byte files, TRUNK_DONE and latest.json moved to
+runs/E2/20m_e6_r1_trunk/crashed_0929/ on the PC; latest.json now points at ckpt_00011956.pt (zip CRC ok, loads,
+step 11956); the trunk reruns steps 11956-12208 and rewrites stable_00012207 and final. log.jsonl keeps its earlier
+records for those steps (no NUL bytes found), so it will hold two copies of steps 11957-12208; readers take the
+last record per step. The D: archive's 0-byte copies were removed so the repaired files are archived.
