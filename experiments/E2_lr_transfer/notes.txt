@@ -390,8 +390,9 @@ step 11956); the trunk reruns steps 11956-12208 and rewrites stable_00012207 and
 records for those steps (no NUL bytes found), so it will hold two copies of steps 11957-12208; readers take the
 last record per step. The D: archive's 0-byte copies were removed so the repaired files are archived.
 
-Q2 RESULT (2026-10-03, by 00:30 EDT, Claude). The 20M grid finished 2026-10-02 23:43 ("MARK E2 20M DONE"; queue start
-at 4946410, plan grid20m.txt; 20m_e6_r1_trunk crash-resumed as logged above). e2pick.py q2 --runs ~/planck/runs/E2
+Q2 RESULT (2026-10-03, by 00:30 EDT, Claude). The 20M grid finished 2026-10-02 23:43 ("MARK E2 20M DONE"; queue starts
+at e39112a, d536070 and 4946410, the last of which finished it (first written "queue start at 4946410", corrected
+2026-10-03 on verification), plan grid20m.txt; 20m_e6_r1_trunk crash-resumed as logged above). e2pick.py q2 --runs ~/planck/runs/E2
 --eta5 0.003 --r5 1, run on the PC at qcode/49464100381c (e2pick.py sha256 32b605a6...), output in results.json "q2".
   F(CHAT) / F(PROSE), final checkpoint, 4 decimals:
     eta       250M             500M
@@ -442,7 +443,8 @@ through prep_common, import only).
   and records code_sha256_<time>.txt; preflight.py and train.py --require-committed check configs, provenance and
   the prereg, not code hashes. The one check that reads 438d4f54 is E3's e3analyze.py (FIXED["files"]); it now
   also accepts ffcdf245, labelled D4 (E3 notes), and E3 Part 1's results.json reproduces byte for byte with the
-  edited analyzer (sha256 1f017ecb..., checked 2026-10-03). E2 has no analyzer that reads code hashes (e2pick.py
+  edited analyzer (sha256 1f017ecb..., checked 2026-10-03) under the project venv's Python 3.12.13; under Python
+  3.14.4 three rho values differ in the last digit (found 2026-10-03 on verification). E2 has no analyzer that reads code hashes (e2pick.py
   reads bpb only).
   Scope: every E2 or E3 run started at or after this commit (E3 Part 2 and Part 3, E2 D1 and D2). Runs inside one
   comparison share one commit, so arms compare like for like; across commits they differ in this I/O path only.
