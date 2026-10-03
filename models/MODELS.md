@@ -46,16 +46,22 @@ neither imports torch or loads weights. Tests: `python3 models/tests/test_regist
 - **The archive is the D: drive** (about 466 GB free), as `/mnt/d/planck-archive` from WSL. Layout: the
   registry id is the path, e.g. `/mnt/d/planck-archive/E005/135m/s1/model.safetensors`. Each id directory
   holds the entry's registered files under their own names (not the whole run directory).
-- **Archive status (2026-09-26, 17:37)**: all 38 saved models, 185 files, 10.18 GB (10,181,981,296
-  bytes), every file re-hashed there by `verify --where pc` (0 missing or mismatched) and listed in its
-  entry: E002 5 and E003 18 (uploaded from the Mac 17:20-17:31 on the home network at about 7 MB/s, each
-  file hash-checked on the PC before its location was added), E004/E005 135m s1-s5 (copied on the PC from
-  their hash-verified `~/planck/dev/e006_refs_*` copies) and the 5 E2 smoke checkpoints. Those 5 are now
-  archive-only: a second smoke run into `~/planck/runs/smoke` (17:07-17:11) overwrote their run-area files
-  with different ones, so that location was removed from their entries; the 17:07 run is not registered.
-  E006 has no saved weights yet (17:21: `weights/` empty, its queue still rescoring the E004/E005
-  reference weights before any training job), and its dry runs saved none (`weights_sha256` "unsaved" or
-  null in their guard records).
+- **Archive status (2026-10-03, 00:30)**: all 158 saved models in the registry, 419 files, 29.06 GB
+  (29,058,924,614 bytes), every PC copy re-hashed by `verify --where pc` on the PC (683 files, archive and
+  run areas: 0 missing or mismatched). Added 2026-10-03: E003 ts33m and p160m s1-s3 (6, uploaded from the
+  Mac and hash-checked on the PC), E006 17 trained models plus C2's power-cut attempt (byte-identical to C2),
+  E2 78 (5M: 27 branch finals, 9 trunk finals, 27 stables; 20M: 6 branch finals, 3 trunk finals, 6 stables)
+  and E3 18. Layout exception: what `~/planck/bin/archive_loop.sh` copies (E2, E3, E006) sits under the run
+  folder's name (`E2/<run>/`, `E3/<run>/`, `E006/<tag>/`), not the id path; each entry's location says
+  which. No registered file reaches the 4 GB FAT32 limit (largest 649 MB). The loop (rewritten 2026-10-03)
+  copies TRUNK_DONE or SCORED runs of any capitalized `runs/<EXP>` and every `e<NNN>_run/weights` folder
+  older than 60 min, never overwrites, never copies a 0-byte file, and skips a pass when D: is not mounted;
+  its first pass left 2 MISMATCHes as they are (`E2/20m_e6_r1_trunk/log.jsonl` and `train.out` in the
+  archive are the 2026-09-29 crashed attempt's; the run folder holds the longer resumed ones). The scored
+  rolling checkpoints of E2/E3 are in `data_offload/` (corpus/stats/offload_2026-10.txt), not registered
+  one by one. Earlier (2026-09-26 17:37): 38 models, 185 files, 10.18 GB; the 5 E2 smoke checkpoints are
+  archive-only (a second smoke run into `~/planck/runs/smoke`, 17:07-17:11, overwrote their run-area files;
+  that run is not registered).
 - `~/planck/dev/...` is a working area that has been cleaned by another process once; a copy there
   (for example E006's reference copies of E004/E005) is listed but is never the only copy.
 - **Off-site backup (option, needs Max)**: a private Hugging Face model repo per experiment, pushed with
@@ -166,11 +172,11 @@ once it is chosen (README: "to be chosen before the first model release"). Excep
 |---|---|---|---|---|---|---|
 | E001 | no (scores public models and MaxGPT-3 read-only) | n/a | n/a | n/a | done | none needed |
 | E002 | SmolLM2-135M-I, 400 steps | yes from seed 1 (`--save` default 1; dry and steps-0 runs skipped) | mac (5, 2.71 GB) | s0 (ran before the save code), 2 dry; the 360M arm never ran | done | none: no future runs |
-| E003 | 8 public bases, 1M-160M | scored seeds yes (`--save 1`); LR search no (`--save 0`); dry no | mac (18, 1.82 GB) | 26 LR, 8 dry, 12 killed attempts | RUNNING on the Mac: ts33m s1-s3 and the p160m block remain | not edited; register the new dirs when the queue ends (p160m's 3 LR runs will be not_saved) |
+| E003 | 8 public bases, 1M-160M | scored seeds yes (`--save 1`); LR search no (`--save 0`); dry no | mac (24, 4.62 GB) + archive | 29 LR, 8 dry, 33 killed attempts | done 2026-09-27 20:56, audited 2026-10-02; every run registered (2026-10-03: ts33m and p160m s1-s3, p160m's 3 LR runs, 21 later killed attempts) | none: no future runs |
 | E004 | SmolLM2-135M-I + tiny ladder | 135M seeds yes; LR searches no; tiny-ladder seeds never ran (their queue lines carry `--save 0`) | mac (5, 2.71 GB) + pc dev copy | 21 LR, 7 dry, 1 killed | done | none: no future runs; a rerun of the ladder passes `--save 1` |
 | E005 | SmolLM2-135M-I | yes (`--save 1`) | mac (5, 2.71 GB) + pc dev copy | 1 dry | done (AL diagnostic is eval only) | none |
-| E006 | SmolLM2-135M-I arms C/P/G x 5 seeds + 2 TF32 twins | yes (`--save 1`), saved and hashed before scoring, `weights_sha256` in each guard record | `pc:~/planck/e006_run/weights` | dry runs (outputs deleted by design) | STOPPED 12:04:57 (queue.txt: gpu_mem kill in e005w1, an eval-only steps-0 job) before any training job; `weights/` empty | not edited; afterwards archive and register from the guard records (its dry runs dryC5, dryC6a, dryC6b, dryP, dryG are not registered yet) |
-| E2, E3 | harness, from scratch, 5M and 20M | yes: `final_*.pt` and `stable_*.pt` never pruned; rolling `keep_last 2` (pre-registered) | `pc:~/planck/runs/E2`, `.../E3` | rolling checkpoints beyond 2 | queue ready, not started at 14:28 (no `~/planck/runs/E2` or `E3` on the PC); smoke ran 2026-09-26 (5 lines, archived) | none: runs need committed code and checked config sha256, and saving already meets section 1 |
+| E006 | SmolLM2-135M-I arms C/P/G x 5 seeds + 2 TF32 twins | yes (`--save 1`), saved and hashed before scoring, `weights_sha256` in each guard record | `pc:~/planck/e006_run/weights` + archive | dry runs (outputs deleted by design) | done 2026-09-28 14:56, audited 2026-10-02; registered 2026-10-03: 17 trained models, C2's power-cut attempt (weights byte-identical to C2's) and the 5 dry runs | none: archive_loop.sh copies new `e<NNN>_run/weights` dirs |
+| E2, E3 | harness, from scratch, 5M and 20M | yes: `final_*.pt` and `stable_*.pt` never pruned; rolling `keep_last 2` (pre-registered) | `pc:~/planck/runs/E2`, `.../E3` + archive (scored rolling checkpoints in `data_offload/`) | rolling checkpoints beyond 2 | E2 5M and 20M done (2026-10-02 23:43; 20m_e6_r1_trunk crash-resumed once after the 09-29 power cut), E3 Part 1 done (18 runs); registered 2026-10-03 (E2 84 lines, E3 18) | none: runs need committed code and checked config sha256, and saving already meets section 1; archive_loop.sh copies finished runs |
 | S001-S007 | harness, 5M | as E2 (SCREENS.txt: keep_last 2 plus final; C8 keeps finals until post-lock scoring) | PC | as E2 | pre-registered, no config yet | none: C8's "kept until then" becomes "kept" |
 | RC-12 baselines | no (13 public models, inference) | nothing to save | n/a | n/a | PC queue | proposal: record each model's HF snapshot revision in the run records; not implemented (PC-side code, outside experiments/) |
 
