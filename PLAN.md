@@ -56,6 +56,8 @@ The comparison model is Qwen2.5-0.5B-Instruct. It runs in the same harness on th
 
 We want a capability-per-parameter result that holds across the curve, not one lucky run. The test is frozen and its hash is published before any Planck model is scored on any split of it. Every seed and every failed idea is published.
 
+**What is new, and what is not** (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 15); evidence in `research/NOVELTY_2026-10.md`, related work in `research/REPORT.md` s2.1). Planck does not claim to be the first to ask how small a chat model can be (SmallTalkLLM), the first from-scratch chat model under 30M (BananaMind-2, Loom, Veyra2, Vertex, Micro Language Models, MiniMind), the first to train tiny models on synthetic multi-turn dialogue (RxT, Micro Language Models), or the first to keep facts outside the weights (LMLM, Co-LMLM, KLLM, Loom). The claim we are trying to earn is the first measured floor for strict multi-turn state skills: the smallest from-scratch model that passes a sealed, mutation-tested 12-turn test on its own conversation history (corrections, binding, rule persistence, own-answer consistency, role, loops), with seeds, against a public panel in one harness. As of 2026-10-02 no published work shows a model under 150M passing such a test or a measured minimum-size curve for these skills. The lock's dated push is the priority claim, so it stays on schedule.
+
 **Level R** (reported along the way). Exact wording:
 > "Planck-{N}M ({N}M total parameters, {B}M non-embedding) is non-inferior to Qwen2.5-0.5B-Instruct on RC-12, a pre-registered, sealed 12-turn conversation test. On its own conversation history, the lower bound of the paired 95% confidence interval on the RC-12 composite (bootstrap over conversations and seeds) is no worse than -3 points ({k} training seeds, {c} conversations, {n} scored turns). On OOD-H, {h} conversations with human-written user turns, the paired difference is {d} points (95% CI {lo} to {hi}). It is the smallest model on our curve that does this."
 
@@ -80,6 +82,7 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 - Level A is claimed only at a size with at least 3 seeds. Any curve point with fewer seeds states its count.
 
 *What counts as the model*
+- Both levels score the bare model: each reply is generated from the conversation's own history (the scripted user turns, including any table a user turn supplies, and the model's own earlier replies), with no retrieval, memory store, state card, repetition penalty or other help from the harness; the OWN counterfactual twin (prereg s9) edits one assistant turn and can only remove credit. (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 15); the same sentence goes into the pre-registration's claim rules.)
 - A note the model writes and reads itself counts as the model.
 - A harness-maintained state card is reported only as "Planck-{N}M + state card (scaffold)".
 
@@ -593,6 +596,9 @@ Dec 17 comes after Ultra's pretraining (ends about Dec 3-7, est.), Ultra's SFT/D
 - Jan 15 - Feb 21, for whichever size qualifies first.
 
 **Release.** Each size's weights and model card go out once its sealed numbers are final, after Max approves each release. Approvals are batched into STATUS reads.
+- **One model per size (Max, Oct 2).** Every curve point that passes Level R (or Level A) is released as its own model, named `planck-{N}m` (for example planck-5m, planck-10m, planck-20m, planck-30m), so users can pick a size. A size that does not pass is still kept and archived (keep-every-model) and can be released as a reported curve point, labelled as not passing.
+- **Speed and footprint at every curve point (added Oct 2).** The use case that matters at these sizes is many conversations at once on modest hardware (for example every character in a game with its own persona and memory, answering instantly, with no server). So each released size reports, on a plain CPU and on the Mac: weights size; peak memory per conversation; time to first token and tokens per second at batch 1; and the number of concurrent 12-turn conversations one CPU sustains at a stated latency. Measured with a fixed script on fixed hardware, never estimated. Report only, never a gate.
+- **Release demo (added Oct 2).** A small demo with several characters chatting at once, each with its own persona card and conversation memory, running locally. It shows the role and identity skills (RC-12 ROLE) and the multi-conversation speed claim together. Built after the first size passes, not before.
 
 **Ledger ids.** P-055 (the curve), P-094, P-005, and the baseline blind-human-test item.
 
@@ -895,7 +901,7 @@ All figures are estimates, from arithmetic on REPORT s7, loop.md, compute.md and
 
 | risk | early sign | response or kill criterion |
 |---|---|---|
-| **The strict bar is unreachable at 150M** | P-001 flat; by Nov 22 no 30M arm lifts correction margins at 4+ turns beyond seed noise | Level A is attempted only at 60M and 150M with the best-margin arm. If nothing passes by Jan 31, no Level A claim. **Fallback claims, in order:** (1) Level R at the smallest passing curve size, plus per-skill size floors, which are new because nobody has measured multi-turn sub-skills below about 90M; (2) the note arm, which counts as the model, if it passes where the plain model does not; (3) "Planck-{N}M + state card (scaffold)", clearly labeled; (4) a negative result: strict corrections not reached at 150M or below with these interventions, and where each one failed. |
+| **The strict bar is unreachable at 150M** | P-001 flat; by Nov 22 no 30M arm lifts correction margins at 4+ turns beyond seed noise | Level A is attempted only at 60M and 150M with the best-margin arm. If nothing passes by Jan 31, no Level A claim. **Fallback claims, in order:** (1) Level R at the smallest passing curve size, plus per-skill size floors, which are new because no strict pass/fail floor for multi-turn sub-skills has been published (the published multi-turn numbers below 150M are loose and show failure: BananaMind-2, RxT, Loom; Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 15)); (2) the note arm, which counts as the model, if it passes where the plain model does not; (3) "Planck-{N}M + state card (scaffold)", clearly labeled; (4) a negative result: strict corrections not reached at 150M or below with these interventions, and where each one failed. |
 | Level R also fails | Sealed lower bound below -3 at 150M | The claim becomes per-skill floors on the curve plus the negative result (paper path in section 8). Odds: 40-60% (judgment). |
 | Someone already clears the bar | LFM2.5-230M or Falcon-90M passes Level R (or A) on RC-12 in Phase 0 | "First" moves to sizes below that model. The curve points under 90M/230M carry the claim, or the claim becomes capability per parameter. |
 | The test is invalid | Mutants survive; LFM2-2.6B fails a Level A family; families sit at floor or ceiling | No lock until fixed. The re-anchor rule applies before the lock, with a 0.60 floor, never after. |
