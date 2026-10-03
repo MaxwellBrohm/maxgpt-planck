@@ -149,5 +149,154 @@
   "stage": "C",
   "recorded_by": "e2chain.py",
   "recorded": "2026-09-28 09:46 EDT"
+ },
+ "q2": {
+  "decided": "2026-10-03, by 00:30 EDT",
+  "rule": "e2pick.py q2 --runs ~/planck/runs/E2 --eta5 0.003 --r5 1 (notes RULES: Vertex, Transfer), run on the PC at qcode 49464100381c (e2pick.py sha256 32b605a6...)",
+  "eta5_r5": [
+   0.003,
+   1.0
+  ],
+  "e2pick": {
+   "grid_20m": {
+    "argmin_g": 1.0,
+    "extend_with_g": [],
+    "extensions_used": 0,
+    "runner_up_g": 0.5
+   },
+   "primary": {
+    "s": -0.1679778314274536,
+    "s_interval": [
+     -0.1679778314274536,
+     -0.1679778314274536
+    ],
+    "verdict": "HOLDS"
+   },
+   "secondary": {
+    "s": 0.25305687651810693,
+    "s_interval": [
+     0.25305687651810693,
+     0.25305687651810693
+    ],
+    "verdict": "HOLDS"
+   },
+   "vertices": {
+    "20m_b250M": {
+     "argmin_eta": 0.003,
+     "bound": null,
+     "hi": -8.432577553702245,
+     "lo": -8.432577553702245,
+     "v": -8.432577553702245
+    },
+    "20m_b500M": {
+     "argmin_eta": 0.003,
+     "bound": null,
+     "hi": -8.673467904339768,
+     "lo": -8.673467904339768,
+     "v": -8.673467904339768
+    },
+    "5m_b125M": {
+     "argmin_eta": 0.003,
+     "bound": null,
+     "hi": -8.505490072912314,
+     "lo": -8.505490072912314,
+     "v": -8.505490072912314
+    },
+    "5m_b250M": {
+     "argmin_eta": 0.003,
+     "bound": null,
+     "hi": -8.685634430220352,
+     "lo": -8.685634430220352,
+     "v": -8.685634430220352
+    },
+    "5m_b62M": {
+     "argmin_eta": 0.012,
+     "bound": "at or above the high edge",
+     "hi": "Infinity",
+     "lo": -6.380821783940931,
+     "v": null
+    }
+   }
+  },
+  "verdict": "HOLDS",
+  "s_primary_equal_tpp": -0.168,
+  "s_secondary_equal_tokens": 0.2531,
+  "extension_20m": "none: the 500M argmin (g 1) is not at an edge of g {0.5, 1, 2}",
+  "A20": [
+   0.003,
+   1.0
+  ],
+  "B20": [
+   0.0015,
+   1.0
+  ],
+  "A20_is_g1": true,
+  "q3": {
+   "note": "Q3, no rule: vertex v = log2(eta) of the F(CHAT) parabola, and eta = 2^v",
+   "5m_b62M": {
+    "v": null,
+    "bound": "eta at or above 0.012 (argmin at the stage A/C high edge)"
+   },
+   "5m_b125M": {
+    "v": -8.5055,
+    "eta": 0.002752
+   },
+   "5m_b250M": {
+    "v": -8.6856,
+    "eta": 0.002429
+   },
+   "20m_b250M": {
+    "v": -8.4326,
+    "eta": 0.002894
+   },
+   "20m_b500M": {
+    "v": -8.6735,
+    "eta": 0.002449
+   },
+   "change_per_doubling": {
+    "5m 62.5M->125M": "at most -2.1247 (62.5M is a bound)",
+    "5m 125M->250M": -0.1801,
+    "20m 250M->500M": -0.2409
+   }
+  },
+  "final_bpb_20m": {
+   "note": "final checkpoint, split all; chat = F(CHAT), prose = F(PROSE); 4 decimals as the rules compare",
+   "0.0015": {
+    "b250M": {
+     "chat": 1.0227,
+     "prose": 1.2716
+    },
+    "b500M": {
+     "chat": 0.9749,
+     "prose": 1.2281
+    }
+   },
+   "0.003": {
+    "b250M": {
+     "chat": 1.0179,
+     "prose": 1.27
+    },
+    "b500M": {
+     "chat": 0.9726,
+     "prose": 1.2288
+    }
+   },
+   "0.006": {
+    "b250M": {
+     "chat": 1.0237,
+     "prose": 1.2752
+    },
+    "b500M": {
+     "chat": 0.9814,
+     "prose": 1.2357
+    }
+   }
+  },
+  "runs": {
+   "0.5": "20m_e1.5_r1",
+   "1": "20m_e3_r1",
+   "2": "20m_e6_r1"
+  },
+  "recorded_by": "Claude (orchestrated session)"
  }
 }

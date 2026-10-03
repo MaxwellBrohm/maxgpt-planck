@@ -389,3 +389,26 @@ runs/E2/20m_e6_r1_trunk/crashed_0929/ on the PC; latest.json now points at ckpt_
 step 11956); the trunk reruns steps 11956-12208 and rewrites stable_00012207 and final. log.jsonl keeps its earlier
 records for those steps (no NUL bytes found), so it will hold two copies of steps 11957-12208; readers take the
 last record per step. The D: archive's 0-byte copies were removed so the repaired files are archived.
+
+Q2 RESULT (2026-10-03, by 00:30 EDT, Claude). The 20M grid finished 2026-10-02 23:43 ("MARK E2 20M DONE"; queue start
+at 4946410, plan grid20m.txt; 20m_e6_r1_trunk crash-resumed as logged above). e2pick.py q2 --runs ~/planck/runs/E2
+--eta5 0.003 --r5 1, run on the PC at qcode/49464100381c (e2pick.py sha256 32b605a6...), output in results.json "q2".
+  F(CHAT) / F(PROSE), final checkpoint, 4 decimals:
+    eta       250M             500M
+    1.5e-3    1.0227 / 1.2716  0.9749 / 1.2281
+    3e-3      1.0179 / 1.2700  0.9726 / 1.2288
+    6e-3      1.0237 / 1.2752  0.9814 / 1.2357
+  20M argmin at 500M: g 1 (eta 3e-3, r 1), not at an edge of g {0.5, 1, 2}: no extension (extend_with_g []).
+    Runner-up g 0.5 (1.5e-3; 0.9749 vs 6e-3's 0.9814). A20 = (3e-3, 1), B20 = (1.5e-3, 1). The 20M argmin is g = 1,
+    the 5M LRs unchanged. (PROSE at 500M: 3e-3 is 0.06% above the best, 1.5e-3; the 5M stage guard's 1% is not
+    reached, though no 20M rule reads it.)
+  Vertices v = log2(eta) (parabola through the F(CHAT) argmin and its neighbours): 5M 125M -8.5055 (eta 2.75e-3),
+    5M 250M -8.6856 (2.43e-3), 20M 250M -8.4326 (2.89e-3), 20M 500M -8.6735 (2.45e-3); 5M 62.5M is only a bound
+    (argmin at the 12e-3 edge: eta at or above 12e-3).
+  Q2 primary (equal tokens per parameter, 25): s = v20(500M) - v5(125M) = -0.1680 (a factor 0.89): |s| < 1, HOLDS.
+    Secondary (equal tokens, 250M): s = v20(250M) - v5(250M) = +0.2531 (a factor 1.19): HOLDS. They agree.
+    Per RULES, 20M and larger runs use the 20M argmin, which is g = 1: (3e-3, r 1). No E2b.
+  Q3 (no rule), v per doubling of run length: 5M 62.5M -> 125M at most -2.12 (62.5M is a bound), 125M -> 250M -0.18;
+    20M 250M -> 500M -0.24. Longer runs prefer a lower LR; past 125M the drift is under a quarter of a grid step per
+    doubling at both sizes.
+  Next: E3 Part 2 with --a20 0.003,1 --b20 0.0015,1 (E3 notes). D1 and D2 have not run.
