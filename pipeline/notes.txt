@@ -1053,3 +1053,166 @@ driver.py, teacher_client.py and pipeline/teachers/ are the serve session's and 
     tests/test_round2_units.py; changed assemble, check_base, check_behav, check_events, check_text, checker,
     checker_mutants, defects_text, fake_data, fake_teacher (comment), fixtures_bound, fixtures_pilot, lexicons,
     mutation_checker, render_intents, render_prompt, skeleton, tests/test_pilot_fixes, SPEC (sections 5, 6, 13, 14).
+
+DRY PILOT 3, PRE-REGISTRATION (2026-10-02 20:38, written before any generation. DRY: FAKE banks; renders stay on the
+PC under runs/teachers/dry/<teacher>/dp3_1002/<arm>/, marked dry, trainable false; nothing is training data; nothing
+under data/ or sealed/; no model on the Mac; nothing committed or pushed)
+  What it measures: form and checker yield of the round 2 code (cbc395d: checker, prompt p3, skel-v0.3, labels-v2,
+    lowercased forced literals) on its first GPU run, one preset per teacher, beside a same-day control of the frozen
+    round 1 (dp2 FIX) code. It is NOT the teacher pick (banks FAKE; OFFTOPIC and REQ_WORD say little here).
+  Code: round 2 = git archive cbc395d (pipeline, tokenizer v0 8k, tools, E004 code; tar sha256 78e10f13...) unpacked
+    to teach/dp3/new on the PC; py hash 5d29861f (sha256 of the sorted sha256sum list of pipeline and E004 code *.py;
+    the repo pipeline is unchanged after cbc395d). Round 1 = teach/dp2/new copied to teach/dp3/old, py hash b017bb02,
+    equal to teach/dp2/new (diff -r clean; the code dp2 called ada4858c). Tests of the synced round 2 copy on the PC
+    CPU (GPU hidden): teachers 112 run, 111 pass, 1 skip; pipeline/tests 119 pass. Mac at cbc395d: pipeline/tests 119
+    pass; teachers 112 run, 95 pass, 17 skip.
+  Skeletons: the dp2 seeds (teachdry:1-200 plus dp2new0927:1-400, register RM, RNG_VERSION skel-v0.1) built by round
+    2's skel-v0.3, so the content hash is NOT dp2's: dp3_skels600 sha256 65b62275..., dp2's 409345dc.... Field diff
+    against dp2's file: same seed 600, same event kinds 600, same user 597, same turn count 592; skel_id differs in
+    all 600 (it hashes content), must_exclude in 294 (recall answers), required words in about 150 (none on goodbyes),
+    and a tail of intents, texts, bank refs, closings and event values (10 to 43 each) where the v0.3 edits shift
+    later draws. So the R2 arms see the same chat plans with the round 2 edits, not byte-equal skeletons. The control
+    reads dp2's file itself (409345dc, --n 200 = teachdry). Smoke: dp2smoke0927:1-8 rebuilt by v0.3 (0c107350...).
+  Arms, 2 attempts per skeleton (first plus one more, --repair), --structured labels_exact, --ban-dashes:
+    R2 (round 2 code, 600): qwen card (0.7 / 0.8, top_k 20, presence 1.5), ministral shared (0.8 / 0.95), gemma card
+      (1.0 / 0.95 / 64, min_p 0). Decoding as built in cbc395d: labels-v2 (no END inside a line, END once, alone,
+      EOS after it), forced literals = parse.exact_text (lowercased for a lowercase-style user), dash ban. NOT on:
+      the AI-ism phrase ban (the round 2 serve entry left it off by default, probe only, since the teachers write
+      broken substitutes) and a length-limited last line (not built: every capped form cost too much or hit vLLM's
+      5 s regex compile timeout, open item 1). I build neither here (no code edits).
+    R1 CONTROL (frozen round 1 code, dp2 FIX flags, labels-v1, card preset): qwen card and gemma card, the 200.
+    Concurrency as dp2: qwen 32, ministral 16, gemma 4. serve_http --gpu-util 0.86 --dash-ban.
+    Holds: [qwen R2, qwen R1], [ministral R2, gemma R1], [gemma R2]; each a gpu.lock hold (flock -w 7200) capped at
+      33.5 min (timeout -k 30 1980; drivers stop 150 s before), repeated until its arms are final; a stopped arm
+      resumes (driver_state). A hold that finds over 2,000 MiB in use loads nothing and retries; under 40 GB free on
+      / aborts.
+    Smoke gate: in each teacher's first R2 hold, the 8 smoke skeletons (card, own dir, not counted). TEACHER_ERROR
+      over 10%, or a call whose server record lacks labels_exact, labels-v2, the dash ban or the preset, or shows the
+      phrase ban: ABORT, nothing more runs until decided and recorded.
+  Metrics per arm (drive_report and count_planck as dp2, plus a scratch dp3_analyze.py):
+    yield per attempt, per skeleton and on the first attempt, Wilson 95%; on all, the 200 and the 400;
+    reject codes: primary, hit, and only (the one failing gate code); attempt kinds first / retry / repair, repair
+      yield reported apart;
+    Planck tok/h: tokenizer v0 8k (md5 94005755...), accepted turn text over summed driver wall time, all / teacher;
+    distinct-1/2/3 and gzip ratio of teacher-written turns at a FIXED WORD BUDGET: accepted chats in conv_id order,
+      words = [a-z'] runs of the lowercased turn, n-grams inside a turn, cut at exactly 4,000 words (an arm with
+      fewer is reported short); gzip ratio = compressed / raw bytes of the same cut text, turns joined by newlines;
+    form: finish reasons, label rule and flags per call, END_IN_TURN and USER_STYLE hits, lowercase user lines;
+    headroom: share of attempts that would pass with a code set ignored (dp2's sets), for "what still blocks 60%".
+  Naturalness, blinded: 15 accepted chats per arm (5 arms, 75), drawn by a seeded RNG (dp3nat1002:<arm>) from the
+    arm's accepted records, all 75 shuffled (seed dp3nat1002-shuffle), numbered N01 to N75. The blind file shows user
+    style, roles and turn text only; the key (number to arm and conv_id) is a separate file that I do not open; a
+    join script prints per-arm results only after the ratings file is written. Limit: round 1 forces sentence-case
+    literals in lowercase chats, so some control chats can be recognised; a teacher's style may be too.
+    Rubric (fixed now): how natural the chat reads as a real exchange between a person and a helpful assistant; not
+    the checker's rules.
+      5 natural throughout; nothing a reader would stop at.
+      4 natural; one small stiff or slightly odd line.
+      3 readable but clearly scripted: repeated frames, a forced word, or one clearly odd line.
+      2 several odd lines, or one serious slip (the assistant claims a life, talks about the user in the third
+        person, contradicts the chat, a garbled line).
+      1 broken: garbled, incoherent or mostly unnatural.
+    One integer and one line of reason per chat, in N order, all written before the key is read.
+  Comparisons:
+    C1 R2 vs R1 control on the 200, same day (qwen card, gemma card): the round 2 bundle net (checker stricter, so
+       not the generation effect alone).
+    C2 R1 control vs dp2 FIX on the 200 (qwen card 16.9, gemma card 22.4 per attempt): day drift of frozen code.
+    C3 R2 vs dp2 outputs re-checked by round 2 (qwen card 11.9, ministral shared 7.3, gemma card 13.9): what the
+       generation side (prompt, skeleton, literals, labels-v2) wins back of what the stricter checker took.
+    C4 the 200 vs the 400 inside R2.
+  Expectations (not decisions): USER_STYLE far below its re-check count (lowercased literals); END_IN_TURN near 0
+    (labels-v2); Gemma AI_ISM below its 82 re-check hits (greet-back wording) but not 0 (no ban); no arm at 60%.
+  No decision is taken on these numbers (no teacher pick, no drop); they feed the bank pass and the next fix round.
+
+DRY PILOT 3, RESULTS (2026-10-02 20:58 to 10-03 00:24; PC RTX 5070; DRY: FAKE banks, renders under
+runs/teachers/dry/<teacher>/dp3_1002/ on the PC, all accepted records trainable false; nothing under data/ or sealed/;
+no model on the Mac; nothing committed or pushed; no example texts)
+  Ran as pre-registered above. Smoke gates passed for all three (qwen 14 records, ministral 15, gemma 12; 0
+    TEACHER_ERROR; every call's server record: labels_exact, labels-v2, dash ban, card preset, no phrase ban). Every
+    R2 call (3,178) recorded labels_exact, labels-v2, the dash ban and its arm's preset; 0 phrase-banned calls; R1
+    calls had labels-v1 (no label_rule key), the ban and card. teachdry:178 is SKEL_INFEASIBLE in every arm.
+    Correction to the pre-registration's field diff (verifier, 10-03): its 294, "about 150" and "10 to 43" count
+    changed fields, not skeletons. In skeletons: must_exclude differs in 228 (8 of them change turn count), required
+    words in 208.
+  Holds (gpu.lock): 20:58-21:18 qwen R2 + R1; 21:49-22:13 ministral R2 + gemma R1; 22:48-23:19 gemma R2 (stopped at
+    the deadline, 755 attempts); 00:14-00:24 gemma R2 resumed (2 sessions). Longest 30.9 min; waits 20, 31, 35, 56
+    min. Before load 449 to 526 MiB, after unload 451 to 526. Readings at driver ends 10,874 to 11,421 MiB, except
+    ministral shared 11,722 MiB (util 0.86; above gpuguard's 11,600, which does not watch this job).
+  The analysis script, pointed at dp2's records, reproduces dp2's table exactly (qwen card 17.5 / 31.5 / 19.7,
+    213,157 tok/h; gemma CONTROL 3.1 / 6.0 / 5.0).
+  RESULTS (Wilson 95%; per attempt / per skeleton over 600 or 200 / first attempt; Planck tok/h, tokenizer v0 8k,
+  all turns / teacher-written turns; distinct-1/2/3 and gzip of teacher-written turns at 4,000 words)
+    arm             attempts acc  per attempt        per skeleton       first attempt     tok/h all / teacher
+    R2 qwen card      1085   174  16.0 (14.0-18.3)   29.0 (25.5-32.8)   19.0 (16.1-22.3)  188,479 / 132,127
+    R2 ministral sh   1105   151  13.7 (11.8-15.8)   25.2 (21.9-28.8)   15.7 (13.0-18.8)  244,750 / 161,686
+    R2 gemma card      991   288  29.1 (26.3-32.0)   48.0 (44.0-52.0)   34.7 (31.0-38.6)  101,017 / 67,081
+    R1 qwen card       366    55  15.0 (11.7-19.1)   27.5 (21.8-34.1)   16.5 (12.0-22.3)  190,428 / 129,747
+    R1 gemma card      346    79  22.8 (18.7-27.5)   39.5 (33.0-46.4)   26.5 (20.9-33.0)   77,951 / 52,006
+    distinct / gzip: R2 qwen 0.219 / 0.645 / 0.836, 0.352; R2 ministral 0.236 / 0.679 / 0.865, 0.361; R2 gemma
+    0.181 / 0.493 / 0.689, 0.310; R1 qwen 0.232 / 0.668 / 0.857, 0.365; R1 gemma 0.198 / 0.516 / 0.707, 0.317.
+    Driver wall s 816 / 484 / 2,298 / 274 / 822; out tok/s 430 / 681 / 132 / 450 / 132.
+    Attempt kinds (attempted / accepted): first 600/114, 600/94, 600/208, 200/33, 200/53; blind retry 453/50,
+    494/56, 370/67, 153/17, 141/24; repair 32/10, 11/1, 21/13, 13/5, 5/2 (repairs are chosen near misses).
+  Reject codes (primary; then failing on that code alone)
+    R2 qwen: REQ_SPAN 312, FORBID_SPAN 124, OFFTOPIC 92, LEN_USER 81, REQ_WORD 44, VALUE_EARLY 43, PERSIST_FAIL 25,
+      OPEN_END 24, PERSPECTIVE 24, USER_STYLE 18; alone OFFTOPIC 61, REQ_SPAN 32, FORBID_SPAN 32, ABSTAIN_MISSING 18.
+      Hits: PROMPT_ECHO 194, PERSPECTIVE 152, PERSIST_FAIL 125, ANSWER_WRONG 104, PLANT_MISSING 104, AI_ISM 85.
+    R2 ministral: REQ_SPAN 191, LEN_ASSIST 150, OFFTOPIC 115, REQ_WORD 110, FORBID_SPAN 79, LEN_USER 75,
+      FORMAT_LINES 30; alone OFFTOPIC 83, HELDOUT_ECHO 22, LEN_ASSIST 21, REQ_SPAN 21. Hits: HELDOUT_ECHO 110,
+      SELF_CLAIM 98, AI_ISM 59, END_IN_TURN 28, NON_ENGLISH 25, MARKDOWN 14.
+    R2 gemma: OFFTOPIC 254, REQ_SPAN 106, AI_ISM 74, REQ_WORD 42, LEN_USER 35, PROMPT_ECHO 29; alone OFFTOPIC 153,
+      AI_ISM 57, REQ_SPAN 32, PROMPT_ECHO 25, HELDOUT_ECHO 20. Hits: AI_ISM 182, PROMPT_ECHO 120, HELDOUT_ECHO 57.
+    R1 qwen: REQ_SPAN 78, FORBID_SPAN 45, OFFTOPIC 42, LEN_USER 29, PERSIST_FAIL 20. R1 gemma: OFFTOPIC 96,
+      REQ_SPAN 48, HELDOUT_ECHO 22, PROMPT_ECHO 19 (round 1 checker).
+  C1 R2 vs R1 on the 200, same day: qwen 12.3 (9.4-16.1) vs 15.0 (11.7-19.1); gemma 28.3 (23.7-33.3) vs 22.8
+    (18.7-27.5). Intervals overlap in both; R2 is judged by the stricter checker.
+  C2 R1 vs dp2 FIX on the 200: qwen 15.0 vs 16.9, gemma 22.8 vs 22.4: no drift beyond noise.
+  C3 R2 vs dp2 re-checked by round 2 (600): qwen 16.0 vs 11.9, ministral shared 13.7 vs 7.3, gemma 29.1 vs 13.9
+    per attempt (per skeleton 29.0 vs 21.5, 25.2 vs 13.8, 48.0 vs 23.7). Under the same checker the generation
+    side won back all of it for Gemma (above dp2's round 1 25.6) and Ministral (above 10.9), most of it for Qwen.
+  C4 the 200 vs the 400: qwen 12.3 vs 18.0, ministral 11.5 vs 14.8, gemma 28.3 vs 29.5 (dp2: within 1 point for
+    Qwen). Not explained here.
+  What the round 2 fixes did (counts over all attempts)
+    USER_STYLE: 60 / 19 / 17 hits, alone 4 / 2 / 5 attempts (dp2 re-check: 163 lost accepts on it alone). Met.
+    END_IN_TURN: 0 for Qwen and Gemma; Ministral 28. Ministral still runs on to max_tokens in 30 attempts (all
+      FORMAT_LINES): a closing word repeated in 23 ("End" or "end" 21, "Bye" 1, "Quiet" 1), zero-width or no-break
+      spaces in 3, prose that never closes in 3, a "*/*" run in 1: the routes labels-v2 leaves open (no last-line
+      cap; no capital END inside a line in any R2 raw output). No dash, 0 semicolon lines in R2 accepts.
+    NEW DEFECT FROM THE LOWERCASED LITERALS: Qwen copies a lowercase user's casing into its own turns. In lowercase
+      chats 125 REQ_SPAN and 80 ANSWER_WRONG hits are case-only (the name or value is there, lowercased); 0 in R1.
+      Qwen R2 yield in lowercase chats 8.1% vs 19.3% elsewhere (dp2 17.4 vs 17.5; R1 13.5 vs 15.7). Ignoring
+      those hits alone frees only 11 attempts (the same chats fail other codes). Accepted R2 chats also hold
+      assistant turns that start in lowercase (qwen 32, ministral 11, gemma 0; R1 0): no checker rule covers the
+      assistant's case (D1). Ministral has the case-only misses too (8 + 6), Gemma barely (6 + 4).
+    AI_ISM: Gemma 182 of 991 attempts (mostly the happy-to-help and how-can-I-help family, 57 alone); Qwen 85
+      (here-to-help); Ministral 59. The greet-back rewording did not remove it; no phrase ban was on.
+  WHAT STILL BLOCKS 60% (upper bounds, % of attempts passing if a code set is ignored, text unchanged)
+    set ignored                              qwen card  ministral shared  gemma card
+    none                                       16.0         13.7             29.1
+    OFFTOPIC + REQ_WORD (FAKE bank)            23.7         26.2             46.3
+    + LEN_USER, LEN_ASSIST                     25.5         31.8             48.3
+    + REQ_SPAN, FORBID_SPAN                    32.7         39.9             52.7
+    + USER_STYLE                               34.1         40.6             53.7
+    then cumulative: qwen + PROMPT_ECHO 36.4, + PERSPECTIVE 37.1, + PERSIST_FAIL 41.0, + VALUE_EARLY 44.3,
+    + ANSWER_WRONG 48.7, + PLANT_MISSING 51.1; ministral + HELDOUT_ECHO 45.9, + SELF_CLAIM 49.2, + PERSIST_FAIL
+    52.9, + PERSPECTIVE 56.0, + OPEN_END 58.5, + AI_ISM 61.7; gemma + AI_ISM 65.7, + PROMPT_ECHO 73.0.
+    Only Gemma reaches 60% with one more code (AI_ISM) ignored; Qwen needs more than six; and the first rows rest
+    on FAKE word sets. No arm is near 60% as measured.
+  NATURALNESS, blinded (rubric and procedure as pre-registered; 75 chats rated N01 to N75 with a reason each,
+  ratings file sha256 a4ec97d0... written before the key was read; 1-5, mean (sd) [counts of 1/2/3/4/5]):
+    R2 qwen 2.73 (0.70) [0/6/7/2/0]; R2 ministral 3.07 (0.88) [0/5/4/6/0]; R2 gemma 3.07 (0.70) [0/3/8/4/0];
+    R1 qwen 2.20 (0.68) [1/11/2/1/0]; R1 gemma 2.73 (0.59) [0/5/9/1/0]. No chat got a 5. R2 is above R1 for both
+    teachers (qwen +0.53, gemma +0.33) at n 15; a rough signal. Common faults in the reasons: user or assistant non
+    sequiturs from forced topic turns, flat acknowledgement frames, invented details, recall of a value never said,
+    third-person talk about the user, sentence-case user lines or an all-lowercase assistant in lowercase chats,
+    odd sign-offs. Limit: R1's sentence-case literals can mark a control lowercase chat. A second limit (verifier,
+    10-03): just before the read, the reader saw per-arm counts showing lowercase assistant starts only in R2 qwen and
+    ministral accepts, with 12 sample openings; none of the 12 is in the blind set, and one blind chat has such
+    lines (N26, R2 qwen, rated 2).
+  Next fixes this points to (none made here): a checker rule and prompt line for the assistant's own casing in
+    lowercase chats (names and turn starts), so lowercased literals stop costing Qwen; the AI_ISM service family at
+    the prompt (Gemma); Ministral's run-ons (a last-line cap that compiles, or a rule on invisible characters).
+  Files (PC): runs/teachers/dry/<teacher>/dp3_1002/<arm>/ (run/, report.dry.json, planck.dry.json, accepted_texts,
+    accepted_examples, rejected_examples .dry.jsonl), runs/teachers/dry/dp3_summary_1002.dry.json/.txt,
+    runs/teachers/dry/dp3_nat_1002/ (blind, key, ratings, scores), teach/dp3 (new, old, skeleton files, scripts),
+    logs dp3_*.log.
