@@ -869,3 +869,10 @@ gpu.lock; labelled smoke, never read; no screen run queued, no config or code ch
     SCREENS_PRECONDITIONS_OK. Stage 2 waits for its own mark, SCREENS_STAGE_2_SMOKES_RECORDED (a person's); what BUILT
     listed for it besides the smokes: the CUDA tests (run 2026-10-03, VERIFICATION OF ORDER 0 (3)) and S005's micro 8 x
     2 row-order loader test (still open; S005's FIXED line before its g-check).
+
+SCREENS_PRECONDITIONS_OK (2026-10-04, recorded by Claude on Max's explicit authorization). Max, 2026-10-04, answering
+"After the uncompiled flag tests pass, may I record that sign-off for you and launch stage 1?": "Yes, sign off and
+launch". Basis: the ORDER 0 verification (SCREENS.txt "VERIFICATION OF ORDER 0", fc135b9) and the eager smokes
+(1ddc77c, independently verified against the raw logs): every ORDER 0 precondition MET. The mark file is written on the
+PC as ~/planck/runs/SCREENS/marks/SCREENS_PRECONDITIONS_OK after this entry is committed; stage 1 (plans/stage1_select:
+S001, S002, S003 selection) then launches from the commit holding this entry.
