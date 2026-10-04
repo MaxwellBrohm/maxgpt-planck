@@ -6,13 +6,19 @@ runs/fakes/<NAME>/transcripts.jsonl + scores.jsonl, READ BACK from disk and scor
      events; Level A met (comparator = IDEAL itself).
   G2 every cheater, on the families it targets: family <= 0.40 and every cell <= 0.50; USERVOICE, ECHO, DEFLECT,
      SHOTGUN (plus ABSTAIN, ROLECAP) score 0.00 on every value-graded unit. Generic cheaters target all 10
-     composite families; P_NEVER / P_ONCE / P_FIRST5 target PERSIST; P_OBEYALL targets PERSIST:override (it is
+     gated families (FAMS: the 9 composite families and LOOKUP, which left R on 2026-10-02 but keeps its s8 gates
+     because its cells are still reported; Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md
+     (item 1)); P_NEVER / P_ONCE / P_FIRST5 target PERSIST; P_OBEYALL targets PERSIST:override (it is
      IDEAL on hold by construction); L_* target LOOP.
   G3 no generic cheater meets any Level A content criterion (CORR:U, CORR:C_noupd, CORR:C_twoslot, BIND), judged
-     both by score.level_a's verdict and against 0.80 here (the fixed "Okay, noted." ack already fails the loop
+     both by score.level_a's verdict and against BAR level_a here (0.60 since the s10 re-anchor; Max, 2026-10-02: took
+     all recommendations in rc12/DECISIONS_FOR_MAX.md (item D); the fixed "Okay, noted." ack already fails the loop
      criterion, so Level A as a whole must not be the only thing checked); every generic and LOOP cheater misses
-     Level A as a whole (comparator = IDEAL); LOOP cheaters miss the loop bar.
-  G4 per composite unit, the number of the generic cheaters that pass it (unit score 1.0) is <= 3; histogram.
+     Level A as a whole (comparator = IDEAL); LOOP cheaters miss the loop bar. LOOKUP claim (Max, 2026-10-04: its
+     own headline claim, prereg draft s10b): no LOOKUP cheater (the generic cheaters, the audit value rules and
+     ORDER_ABS, which OD3 allows 0.50 at the cell bar) meets it, neither by score.lookup_claim nor against BAR lookup
+     here; the family fakes are IDEAL on LOOKUP by construction. G1 also asks IDEAL and IDEAL_ALT to meet it.
+  G4 per gated-family unit (FAMS), the number of the generic cheaters that pass it (unit score 1.0) is <= 3; histogram.
      OVERLAP_A and OVERLAP_B are the two variants of ONE cheater (SPEC s5), so 11 cheaters are counted (D14).
   Step 5 audit cheaters (fakes_audit.py): the value rules get G2 and G3 exactly like the generic cheaters;
      ORDER_ABS is gated on the cells it targets (RECALL:abstain, LOOKUP:*) at the cell bar; MYONLY, MARKER_OBJ
@@ -38,7 +44,8 @@ OUT = os.path.join(HERE, "runs", "fakes")
 VALUE_FAMS = ["RECALL", "CORR", "BIND", "TWOHOP", "OWN", "TOPIC", "ROLE", "LOOKUP"]
 ZERO_ON_VALUE = ["USERVOICE", "ECHO", "DEFLECT", "SHOTGUN", "ABSTAIN", "ROLECAP"]
 A_CONTENT = ["CORR:U", "CORR:C_noupd", "CORR:C_twoslot", "BIND"]
-BAR = dict(family=0.40, cell=0.50, item=3, level_a=0.80)
+BAR = dict(family=0.40, cell=0.50, item=3, level_a=0.60, lookup=0.60)
+FAMS = S.COMPOSITE + S.REPORTED                     # the families the s8 gates cover (LOOKUP kept, item 1)
 NAMES = ["IDEAL", "IDEAL_ALT"] + F.GENERIC + list(FF.FAMILY) + FA.AUDIT
 GATED = F.GENERIC + FA.VALUE_RULES                 # G2 on every composite family and cell, and G3
 
@@ -66,12 +73,14 @@ def g1(name, s):
         bad.append(f"role-leak events in {s['capture_rate']:.3f} of conversations")
     if not s["level_a_met"]:
         bad.append("Level A not met")
+    if not s["lookup_claim"]["met"]:
+        bad.append("LOOKUP claim bar not met")
     return [f"G1 {name}: {b}" for b in bad]
 
 
 def targets(name):
     if name in GATED:
-        return S.COMPOSITE, None
+        return FAMS, None
     return [FF.FAMILY[name][0]], FF.FAMILY[name][1]
 
 
@@ -110,11 +119,14 @@ def g3(name, s):
         bad.append(f"loop rate {s['loop_rate']:.3f} meets the loop bar")
     if (name in GATED or name.startswith("L_")) and s["level_a_met"]:
         bad.append("meets Level A")
+    lk = s["keys"].get("LOOKUP")
+    if (name in GATED or name == "ORDER_ABS") and (s["lookup_claim"]["met"] or lk is None or lk >= BAR["lookup"]):
+        bad.append(f"LOOKUP={lk} meets the LOOKUP claim bar (s10b)")
     return [f"G3 {name}: {b}" for b in bad]
 
 
 def table(summ):
-    keys = S.COMPOSITE + ["CORR:U", "CORR:C_noupd", "CORR:C_twoslot", "T0", "K:followup"]
+    keys = FAMS + ["CORR:U", "CORR:C_noupd", "CORR:C_twoslot", "T0", "K:followup"]
     lines = [f"{'fake':11s}" + "".join(f"{k.replace('CORR:', '')[:8]:>9s}" for k in keys) + "   loop    ack  R_ug"]
     for n, s in summ.items():
         vals = "".join(f"{s['keys'].get(k, float('nan')):9.2f}" for k in keys)
@@ -128,7 +140,7 @@ def g4(rows, names=F.GENERIC):
     passes = defaultdict(set)
     for n in names:
         for u in S.units(rows[n]):
-            if u["family"] in S.COMPOSITE and (u["family"], u["cell"]) not in S.DIAG:
+            if u["family"] in FAMS and (u["family"], u["cell"]) not in S.DIAG:
                 key = (u["family"], u["cell"], u["uid"])
                 passes[key] |= {n.split("_")[0] if n.startswith("OVERLAP") else n} if u["score"] == 1.0 else set()
     hist = Counter(len(v) for v in passes.values())

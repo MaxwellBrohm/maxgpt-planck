@@ -1,4 +1,4 @@
-RC-12 mutation_e2e.py part 5/8: 11 of 88 mutants, fresh process each, 153 s. No model.
+RC-12 mutation_e2e.py part 5/8: 13 of 104 mutants, fresh process each, 80 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #04 runner: truncated probes not failed  <- trunc: ctx 556: only 0 truncated probes
@@ -12,5 +12,7 @@ KILLED    #60 score_stats: OD1 b: cf replies counted in PERSIST base rates  <- s
 KILLED    #68 score: OD1 b: misaligned join (cf rows zipped to the own ids in reverse order)  <- owngate: random units: OWN_GATED:list 0.296875, per-unit AND 0.3125
 KILLED    #76 own_cf: OD1 b: own_cf finds list lines with a looser rule than G-DYN (the pre-fix ITEM rule)  <- owncf: LISTBLANK OWN under --own-cf = 0.33, want 0.0
 KILLED    #84 fakes_family: F2: the machinery checks read every D turn as asking (their expected counts ignore the annotation)  <- ackrep: ACKER ack-repeat 0.17712882096069868 / 0.46859205776173285, want 0.17712882096069868 / 0.6956055734190782
-killed 11 | survived 0 | crashed 0 | malformed 0
+KILLED    #92 score: LOOKUP claim bar at 0.50 (ORDER_ABS's 0.50 meets it)  <- G3 ORDER_ABS: LOOKUP=0.5 meets the LOOKUP claim bar (s10b)
+KILLED    #100 score_stats: LOOKUP CI: units not resampled  <- stats: LOOKUP CI does not resample units (ORDER_ABS, 24 of 48 right; want about 0.36 to 0.64): {'value': 0.5, 'lo': 0.5, 'hi': 0.5, 'n': 2000, 'units'
+killed 13 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

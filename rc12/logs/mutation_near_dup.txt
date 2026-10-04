@@ -1,0 +1,13 @@
+baseline: exit 0
+KILLED   #1 grade_loop.py: 13-word replies counted  [FAIL unit thirteen got True]
+KILLED   #2 grade_loop.py: 12-word replies dropped  [FAIL unit twelve got False]
+KILLED   #3 grade_loop.py: two word edits instead of one  [FAIL unit replace got False]
+KILLED   #4 grade_loop.py: equal replies counted  [FAIL unit equal got True]
+KILLED   #5 grade_loop.py: only the previous reply compared  [FAIL unit two_back got False]
+KILLED   #6 grade_loop.py: a replaced word costs as much as two edits  [FAIL unit replace got False]
+KILLED   #7 grade_loop.py: an empty reply can be a near-duplicate  [FAIL unit empty got True]
+KILLED   #8 score.py: LOOP replies counted  [FAIL selfcopy LOOP not counted flags [[], [], ['LOOP'], []] rate 0.25]
+KILLED   #9 score.py: a count, not a share  [FAIL rate a 1]
+KILLED   #10 score.py: --own-cf rows counted  [FAIL parrot plus one word before 0.0 after 0.0008680555555555555 loop 0.0 turn 3 'Makes sense, thanks indeed.']
+10 mutants, 0 problems
+ALL MUTANTS KILLED

@@ -10,7 +10,8 @@ modules (no model, no GPU; notes STEP 9c).
              on vllm and when not a positive int
   parity     parity_hf_vllm passes both to both HF stages and forwards them from stage all; --trust-remote-code
              with --engine vllm is refused
-  verify     verify_dev_runs --rerun rebuilds the engine with the run's meta.json options
+  verify     verify_dev_runs --rerun (rerun_tie.replay_runs since 2026-10-02, item 2) rebuilds the engine with the
+             run's meta.json options
 The stubs replace transformers and torch in sys.modules before anything imports them, so no real library loads.
 Run: python3 -B test_hf_trust.py   (exit 1 on any failure)"""
 import json
@@ -188,15 +189,17 @@ def c_parity():
 
 
 def c_verify_rerun():
-    """verify_dev_runs --rerun rebuilds the engine with the run's own HF load options (meta.json)."""
-    import verify_dev_runs as VD
+    """verify_dev_runs --rerun rebuilds the engine with the run's own HF load options (meta.json); the replay lives in
+    rerun_tie.replay_runs since 2026-10-02 (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md
+    (item 2))."""
+    import rerun_tie as RT
     for meta, t, a, mb in (({"engine": "hfb", "dtype": "bfloat16", "trust_remote_code": True, "max_batch": 32,
                              "attn_implementation": "eager"}, True, "eager", 32), ({"engine": "hfb"}, False, NO, 64)):
         BUILT.clear()
         CALLS.clear()
         R.make_responder = fake_engine
         try:
-            VD.rerun(types.SimpleNamespace(render="template", rerun=0, model="org/Doge"),
+            RT.replay_runs(types.SimpleNamespace(render="template", rerun=0, model="org/Doge"),
                      {"greedy": {"meta": meta, "rows": []}}, {})
         finally:
             R.make_responder = REAL_MAKE

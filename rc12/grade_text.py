@@ -28,7 +28,9 @@ def lwords(t):
     return [w.lower() for w in toks(t)]
 
 
-SENT_END = re.compile(r"(?<=[.!?])\s+|\n+")
+# a closing quote after . ! ? ends the sentence too (the T0 audit's grader gap 2, folded into the regrade 2026-10-04,
+# notes STEP 11b): 'You mentioned "I grew up in Porto." Porto is ...' is two sentences
+SENT_END = re.compile(r"(?<=[.!?])\s+|(?<=[.!?][\"'])\s+|\n+")
 NEG_CUE = rx(r"\b(?:not|no|never|neither|nor|without|cannot|none)\b|n't\b|\binstead of\b|\brather than\b")
 NO_INTERJ = rx(r"\bno(?:\s+(?:problem|worries|doubt))?\s*[,.!;:]")
 POST_NEG = rx(r"^\s+(?:(?:is|was|are|were|has|had|does|did)\s+(?:not|never|no longer)\b|(?:isn't|wasn't|aren't|weren't"
@@ -82,9 +84,42 @@ def list_lines(text):
     return [ln for ln in (text or "").splitlines() if LIST_LINE.match(ln)]
 
 
+# Inflected forms (the T0 audit's grader gap 1, folded into the regrade 2026-10-04, notes STEP 11b; prereg draft s6
+# v2): a weekday or a count-noun value (instrument, food, project) also matches as its plural / singular
+# ("Thursdays" for Thursday, "drum" for drums: -s for a value ending in s, else +s and +es). Such a form counts
+# AGAINST a reply wherever a value does (another candidate, a guess, the shotgun list, an abstain's values,
+# in-context values, the voice scan), but asserts the GOLD only after a second-person word in its sentence
+# (asserted_hits gold=True: addressed), since the plural is also the generic form ("Typically, Fridays are common
+# days off"). Colours, jobs, names, months, cities, towns, OWN options and K answers match only as written: a
+# colour's or a job's plural is another word or a group ("greens", "oranges", "mechanics", "pilots like yourself"),
+# never the answer, and inflecting them only charged false captures and guesses in the first regrade (notes 11b).
+INFLECT = frozenset(V.WEEKDAY + V.INSTRUMENT + V.FOOD + V.PROJECT)
+
+
+def forms(v):
+    if "inflect" in OFF or v not in INFLECT:
+        return []
+    return [v[:-1]] if v.endswith("s") else [v + "s", v + "es"]
+
+
 def value_hits(text, v):
-    """match objects for every mention of pool value v (whole word; capitalized values case-sensitive)."""
-    return list(V.value_re(v).finditer(text or ""))
+    """match objects for every mention of pool value v (whole word; capitalized values case-sensitive), its
+    inflected forms included (forms), in text order."""
+    hits = list(V.value_re(v).finditer(text or ""))
+    for f in forms(v):
+        hits += list(V.value_re(f).finditer(text or ""))
+    return sorted(hits, key=lambda m: m.start())
+
+
+def inflected(m, v):
+    return m.group(0).lower() != v.lower()
+
+
+def addressed(text, m):
+    """an inflected gold asserts only after a second-person word (you, your, you're, yours) in its sentence."""
+    if "inflect_you" in OFF:
+        return True
+    return SECOND_P.search(text[sentence_span(text, m.start())[0]:m.start()]) is not None
 
 
 def mentioned(text, v):
@@ -121,7 +156,7 @@ def alternative(text, m, s0, s1, altvals):
         return False
     if text[max(0, m.start() - 1):m.start()] == "/" or text[m.end():m.end() + 1] == "/":
         return True
-    low_alt = {a.lower() for a in altvals}
+    low_alt = {f.lower() for a in altvals for f in [a] + forms(a)}
     for o in re.finditer(r"\bor\b", text[s0:s1], re.I):
         a, b = s0 + o.start(), s0 + o.end()
         if b < m.start() - P["alt_chars"] or a > m.end() + P["alt_chars"]:
@@ -183,8 +218,10 @@ def why_not_asserted(text, m, altvals=()):
     return None
 
 
-def asserted_hits(text, v, altvals=()):
-    return [m for m in value_hits(text, v) if why_not_asserted(text, m, altvals) is None]
+def asserted_hits(text, v, altvals=(), gold=False):
+    """asserted mentions of v; for the gold (gold=True) an inflected form must also be addressed (forms above)."""
+    return [m for m in value_hits(text, v) if why_not_asserted(text, m, altvals) is None
+            and not (gold and inflected(m, v) and not addressed(text, m))]
 
 
 def captures(v, text):

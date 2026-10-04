@@ -6,14 +6,20 @@ bootstrap_diff(rows_a, rows_b, n)  D = R(a) - R(b). Each resample: units resampl
     each drawn training seed (nested); percentile 95% CI. Level R holds when the CI's lower bound is >= -3 points
     (level_r). The OWN slot holds the OD1 b gated units (score.py), so both models need their --own-cf OWN rows;
     without them it refuses.
+lookup_ci(rows, n)  the LOOKUP claim's 95% CI (prereg draft s10b; Max, 2026-10-04): one model, LOOKUP units
+    resampled, training and sampling seeds resampled as above; reported beside the claim, never part of R.
 OW = oodh_wording.py, the OOD-H wording rule of s1: OW.paired_diff (OOD-H paired difference, paired bootstrap over
     threads and seeds), OW.decide (D worse than -5 points: "non-inferior on RC-12's format" with the OOD-H result
     beside it, the unqualified wording refused; provisional until OOD-H Part 2 is scored), OW.refusals.
-headroom(panel)  panel {model: score.summarize(...)} (template render, mean of 3 seeds, core panel only). A family
-    or Level A key fails if EVERY model is <= 0.05 (floor) or EVERY model is >= 0.95 (ceiling). A composite family
-    is judged on the score that enters R (summary families: OWN = OWN_GATED, OD1 b).
+headroom(panel, keys)  panel {model: score.summarize(...)} (template render, mean of 3 seeds, core panel only). A
+    family or Level A key fails if EVERY model is <= 0.05 (floor) or EVERY model is >= 0.95 (ceiling). A composite
+    family is judged on the score that enters R (summary families: OWN = OWN_GATED, OD1 b). keys: HEADROOM_KEYS (the
+    composite families and the Level A keys); a reported family (score.REPORTED, LOOKUP since 2026-10-02) can be
+    passed to see its row, which decides nothing.
 persist_base_rates(rows, rules)  compliance share of each (rule, arg) over every reply of every NON-PERSIST
-    conversation; rules above 0.30 for any core baseline are dropped (persist_drops).
+    conversation; rules above 0.30 for any core baseline are dropped (persist_drops). The rows are the TEMPLATE
+    render's (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 6); prereg draft s11):
+    PERSIST is scored on the template render and the plain render is diagnostic.
 sensitivity(summary, comparator)  the composite without the families where the comparator is <= 0.05 (R None when
     a composite family is missing, e.g. OWN without the --own-cf rows)."""
 import random
@@ -86,9 +92,29 @@ def level_r(ci):
     return ci["lo"] >= LEVEL_R_MARGIN
 
 
-def headroom(panel):
+def lookup_ci(rows, n=10000, seed=0):
+    """95% percentile CI of the LOOKUP claim's score (score.lookup_claim; prereg draft s10b; Max, 2026-10-04): per
+    resample one draw of LOOKUP units (shared by every run of the model), training seeds resampled, sampling seeds
+    resampled inside each drawn training seed (nested), as bootstrap_diff does for R. One model, not paired."""
+    table = {}
+    for (tr, sd), rr in S.runs(S.select(rows)).items():
+        table.setdefault(tr, {})[sd] = {u["uid"]: u["score"] for u in S.units(rr) if u["family"] == S.LOOKUP_CLAIM}
+    uids = sorted(next(iter(next(iter(table.values())).values())))
+    assert uids and all(sorted(us) == uids for by in table.values() for us in by.values()), "LOOKUP unit sets differ"
+    arrs = {tr: [[us[u] for u in uids] for us in by.values()] for tr, by in table.items()}
+    trs, rng, vals = list(arrs), random.Random(seed), []
+    for _ in range(n):
+        draw = [rng.randrange(len(uids)) for _ in uids]
+        picks = [a for tr in [rng.choice(trs) for _ in trs] for a in [rng.choice(arrs[tr]) for _ in arrs[tr]]]
+        vals.append(sum(sum(a[i] for i in draw) / len(draw) for a in picks) / len(picks))
+    vals.sort()
+    return dict(value=S.summarize(rows)["lookup_claim"]["value"], lo=vals[int(0.025 * n)],
+                hi=vals[min(n - 1, int(0.975 * n))], n=n, units=len(uids))
+
+
+def headroom(panel, keys=None):
     out = {}
-    for k in HEADROOM_KEYS:
+    for k in HEADROOM_KEYS if keys is None else keys:
         vals = {m: s["families"][k] if k in s["families"] else s["keys"].get(k) for m, s in panel.items()}
         known = [v for v in vals.values() if v is not None]
         floor = bool(known) and len(known) == len(vals) and all(v <= HEADROOM["floor"] for v in known)

@@ -46,7 +46,7 @@ MUTANTS = [
      "return mean(x for v in by_train.values() for x in v)", "flat mean instead of nested seed means"),
     ("score", "seeds = sampled or {None}", "seeds = {None}", "greedy scored when sampling seeds exist"),
     ("score", 'loop_rate=degen.get("LOOP")', 'loop_rate=degen.get("RUNAWAY")', "loop rate counts runaways"),
-    ("score", "BARS = dict(level_a=0.80,", "BARS = dict(level_a=0.50,", "Level A bar lowered"),
+    ("score", "BARS = dict(level_a=0.60,", "BARS = dict(level_a=0.50,", "Level A bar lowered"),
     ("score", "loop=0.02,", "loop=0.10,", "loop bar raised"),
     ("score", "met=comparator_loop is not None and loop_rate <= comparator_loop)", "met=True)",
      "loop-vs-comparator always met"),
@@ -174,4 +174,34 @@ MUTANTS = [
      "F3 report: --own-cf rows counted"),
     ("fakes_family", 'if p is None or self.name == "TERSE_VAL_CTRL":', "if p is None:",
      "F3: the control fake confirms with the bare gold too (it loops)"),
+    # Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 1: LOOKUP out of R; item D: the
+    # four Level A content bars re-anchored to 0.60) (validate_machinery.c_scoring, c_stats)
+    ("score", '"TOPIC", "ROLE", "LOOP"]', '"TOPIC", "ROLE", "LOOKUP", "LOOP"]', "item 1: LOOKUP back in the composite"),
+    ("score", "BARS = dict(level_a=0.60,", "BARS = dict(level_a=0.80,", "item D: the pre-re-anchor 0.80 bar"),
+    ("score", 'ks[k] >= BARS["level_a"])', 'ks[k] > BARS["level_a"])', "item D: a key at exactly 0.60 misses"),
+    ("score", 'fam = {f: ks.get(GATE.get(f, f)) for f in COMPOSITE}',
+     'fam = {f: ks.get(GATE.get(f, f)) for f in COMPOSITE + REPORTED}', "item 1: LOOKUP listed as an R family"),
+    # Max, 2026-10-04: LOOKUP is its own pre-registered headline claim (prereg draft s10b), reported beside R and never
+    # folded into it (score.lookup_claim, score_stats.lookup_ci; validate_e2e G1 / G3, validate_machinery c_scoring,
+    # c_stats)
+    ("score", "lookup=0.60)", "lookup=0.50)", "LOOKUP claim bar at 0.50 (ORDER_ABS's 0.50 meets it)"),
+    ("score", 'met = v is not None and v >= BARS["lookup"]', 'met = v is not None and v > BARS["lookup"]',
+     "LOOKUP claim: exactly 0.60 misses"),
+    ("score", "claimable=met and not why,", "claimable=met,", "LOOKUP claim claimable with 1 seed, plain or greedy"),
+    ("score", 'why = [] if n_train >= BARS["min_train_seeds"] else', "why = [] if n_train >= 1 else",
+     "LOOKUP claim claimable with fewer than 3 training seeds"),
+    ("score", 'if renders != ["template"]:', "if False:", "LOOKUP claim claimable on the plain render"),
+    ("score", 'if any(r["seed"] is None for r in rows if r["family"] == LOOKUP_CLAIM):', "if False:",
+     "LOOKUP claim claimable on greedy rows"),
+    ("score", 'if p.get("kind") == kind]', 'if p.get("kind") != kind]', "LOOKUP claim: P and X probe rates swapped"),
+    ("score", "lookup_claim=lookup_claim(ks, rows, n_train),",
+     'lookup_claim=lookup_claim(dict(ks, LOOKUP=(composite({f: ks.get(f) for f in COMPOSITE}) or 0) / 100), rows, '
+     'n_train),',
+     "LOOKUP claim reads the composite instead of the LOOKUP family"),
+    ("score_stats", "draw = [rng.randrange(len(uids)) for _ in uids]", "draw = list(range(len(uids)))",
+     "LOOKUP CI: units not resampled"),
+    ("score_stats", "[rng.choice(trs) for _ in trs]", "trs", "LOOKUP CI: training seeds not resampled"),
+    ("validate_e2e", "lookup=0.60)", "lookup=0.40)", "G3 LOOKUP bar at 0.40: ORDER_ABS's 0.50 must trip the gate"),
+    ("score_stats", "for a in [rng.choice(arrs[tr]) for _ in arrs[tr]]]", "for a in arrs[tr]]",
+     "LOOKUP CI: sampling seeds not resampled (verifier, 2026-10-04)"),
 ]

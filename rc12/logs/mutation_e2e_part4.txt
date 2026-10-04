@@ -1,4 +1,4 @@
-RC-12 mutation_e2e.py part 4/8: 11 of 88 mutants, fresh process each, 192 s. No model.
+RC-12 mutation_e2e.py part 4/8: 13 of 104 mutants, fresh process each, 81 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #03 runner: role cut not recorded as the stop reason  <- stops: CONTINUER plain: fake user turn not cut
@@ -12,5 +12,7 @@ KILLED    #59 score_stats: OD1 b: sensitivity row computed with OWN missing  <- 
 KILLED    #67 score: OD1 b: product of rates (own-history unit x the cf run's rate)  <- owngate: random units: OWN_GATED:list 0.3391927083333333, per-unit AND 0.3125
 KILLED    #75 own_cf: OD1 b: a pick rewrite that did not take passes as swapped  <- owngate: unswapped cf rows not scored 0 in OWN_GATED ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0}, pick 1.0)
 KILLED    #83 grade_loop: F2: small-talk fillers ask again (SMALLTALK loops)  <- ackrep: ACKER ack-repeat 0.17712882096069868 / 0.6956055734190782, want 0.17712882096069868 / 0.46859205776173285
-killed 11 | survived 0 | crashed 0 | malformed 0
+KILLED    #91 score: item 1: LOOKUP listed as an R family  <- scoring: LOOKUP out of R / 9 families: R with LOOKUP 0 100.0, with CORR 0 88.88888888888889 (want 100, 88.89)
+KILLED    #99 score: LOOKUP claim reads the composite instead of the LOOKUP family  <- scoring: LOOKUP claim claimable only with 3 training seeds, template, sampled: {'3 seeds': False, '2 seeds': False, 'plain': False, 'greedy': False}
+killed 13 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

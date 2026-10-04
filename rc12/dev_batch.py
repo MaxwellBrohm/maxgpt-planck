@@ -16,13 +16,16 @@ engines.json may also set, for an hf / hfb model only, "trust_remote_code": true
 and "attn_implementation" (e.g. "eager"), for hfb only "max_batch" (rows per generate call, default
 hf_batched.MAX_BATCH), and for any model a "python" (the venv the queue runs it with). Doge uses all four (notes
 STEP 9c). meta.json records them (max_batch None = the default) and sys.executable; its audit records the attention
-the model loaded with.
+the model loaded with. Item 14 extras (notes STEP 11): "token_budget" (hfb only, rows x width^2 per chunk, default
+hf_batched.TOKEN_BUDGET) and "chat_template" (any engine: a Jinja chat template set on the tokenizer before any
+prompt is built, for a checkpoint that ships none; Loom-Spark-3.2's card format); meta.json records both.
 hf: responders need --hf-untested-ok (runner.py rule) and go through lockstep.Serial (no batching); hfb: (hf_batched.py,
 batched, same flag) is gated on its parity.json like vllm: (parity_hf_vllm.py --engine hfb).
 Run on the PC under the GPU lock (pc_jobs.py writes the job):
   python -B dev_batch.py --responder vllm:Qwen/Qwen2.5-0.5B-Instruct --render template --seeds greedy,1,2,3 \\
       --root ~/planck/runs/rc12_dev"""
 import argparse
+import errno
 import json
 import os
 import shutil
@@ -62,11 +65,43 @@ def chosen_dtype(model_id, path=ENGINES):
 
 def hf_options(model_id, path=ENGINES):
     """engines.json's HF options for model_id: trust_remote_code (True only where the checkpoint's own code must run;
-    a non-boolean value counts as False), attn_implementation (None = the library default), max_batch (None = the
-    default)."""
+    a non-boolean value counts as False), attn_implementation (None = the library default), max_batch and
+    token_budget (hfb; None = hf_batched's defaults), chat_template (any engine; None = the tokenizer's own; notes
+    STEP 11, item 14), nan_guard (hf / hfb: hf_responder.guard_nans's module class; None = no hook) and use_cache
+    (hf / hfb: hf_responder.set_use_cache; None = the checkpoint's config) (item 14)."""
     e = json.load(open(path))["models"].get(model_id, {}) if os.path.exists(path) else {}
     return dict(trust_remote_code=e.get("trust_remote_code", False) is True,
-                attn_implementation=e.get("attn_implementation"), max_batch=e.get("max_batch"))
+                attn_implementation=e.get("attn_implementation"), max_batch=e.get("max_batch"),
+                token_budget=e.get("token_budget"), chat_template=e.get("chat_template"),
+                nan_guard=e.get("nan_guard"), use_cache=e.get("use_cache"))
+
+
+DECODE_KEYS = ("top_p", "repetition_penalty")       # what a reported decoding row may change (item 14 card row)
+
+
+def decode_override(model_id, path=ENGINES):
+    """engines.json "decode" for model_id: {} when absent (the s4 decoding, hf_responder.DECODE). A separate engines
+    file (engines_card.json) carries it for a REPORTED decoding row run to its own root, e.g. a model card's
+    recommended sampling (NOVELTY_2026-10 s6: Vertex-0.6-15M, top_p 0.9, repetition penalty 1.3; notes STEP 11,
+    ITEM 14). Only DECODE_KEYS may change: top_p in (0, 1], repetition_penalty >= 1. Raises ValueError otherwise."""
+    e = json.load(open(path))["models"].get(model_id, {}) if os.path.exists(path) else {}
+    d = e.get("decode", {})
+    if not isinstance(d, dict) or set(d) - set(DECODE_KEYS):
+        raise ValueError(f"engines.json decode for {model_id}: a dict of {DECODE_KEYS} only, not {d!r}")
+    for k, v in d.items():
+        if type(v) not in (int, float) or not (0 < v <= 1 if k == "top_p" else v >= 1):
+            raise ValueError(f"engines.json decode {k}={v!r} for {model_id} is out of range")
+    return dict(d)
+
+
+def apply_decode(model_id, path, kind):
+    """set engines.json's decode (decode_override) into hf_responder.DECODE, which every engine reads per request;
+    vllm only (hf_batched's row sampler draws at the temperature alone, without top_p). Returns the override."""
+    d = decode_override(model_id, path)
+    if d and kind != "vllm":
+        raise ValueError(f"engines.json decode for {model_id}: vllm only, not {kind}")
+    HR.DECODE.update(d)
+    return d
 
 
 def engine_audit(eng):
@@ -111,6 +146,42 @@ def versions():
     return out
 
 
+_DIR_WARNED = set()
+
+
+def fsync_path(path, is_dir=False):
+    """fsync a file, or a directory (so a rename in it is on disk). The rule of harness/durable.py; rc12 is synced to
+    the PC alone, so its few lines live here. A file fsync error raises. A directory fsync is best effort on every
+    platform: the files are fsynced first, so a refusal (a drvfs mount such as /mnt/d, FAT, a network fs) can lose
+    only the rename, never publish empty files; it is warned once per error kind on stderr and the run goes on."""
+    try:
+        fd = os.open(path, os.O_RDONLY)
+        try:
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+    except OSError as e:
+        if not is_dir:
+            raise
+        code = errno.errorcode.get(e.errno, str(e.errno))
+        if code not in _DIR_WARNED:
+            _DIR_WARNED.add(code)
+            print(f"dev_batch: directory fsync refused on {path} ({code}): a rename there may not survive a power cut",
+                  file=sys.stderr, flush=True)
+
+
+def publish_run(tmp, final):
+    """every file of the finished run (transcripts, scores, meta.json, DONE) and the run dir fsynced, then the rename,
+    then the parent fsynced: a power cut cannot leave a published run dir holding DONE and empty files (incident
+    2026-09-29, experiments/E2_lr_transfer/notes.txt CRASH RESUME)."""
+    for d, _, files in os.walk(tmp, topdown=False):
+        for n in sorted(files):
+            fsync_path(os.path.join(d, n))
+        fsync_path(d, is_dir=True)
+    os.replace(tmp, final)
+    fsync_path(os.path.dirname(os.path.abspath(final)), is_dir=True)
+
+
 def run_one(eng, name, data, render, seed, own_cf, final, ctx, extra):
     tmp = final + ".partial"
     shutil.rmtree(tmp, ignore_errors=True)
@@ -124,7 +195,7 @@ def run_one(eng, name, data, render, seed, own_cf, final, ctx, extra):
                 finished=time.strftime("%Y-%m-%d %H:%M:%S"))
     json.dump(meta, open(os.path.join(tmp, "meta.json"), "w"), indent=1)
     open(os.path.join(tmp, "DONE"), "w").close()
-    os.replace(tmp, final)
+    publish_run(tmp, final)
     print(f"{final}: {len(rows)} conversations, {meta['seconds']} s, R_ungated {meta['R_ungated']}", flush=True)
 
 
@@ -153,12 +224,23 @@ def main():
     chosen = chosen_engine(model_id, args.engines)
     dtype = chosen_dtype(model_id, args.engines) or args.dtype   # engines.json's dtype wins (verifier 2026-09-26)
     hfo = hf_options(model_id, args.engines)
-    if (hfo["trust_remote_code"] or hfo["attn_implementation"] is not None) and kind not in ("hf", "hfb"):
+    hf_only = ("attn_implementation", "nan_guard", "use_cache")
+    if (hfo["trust_remote_code"] or any(hfo[k] is not None for k in hf_only)) and kind not in ("hf", "hfb"):
         sys.exit(f"engines.json sets HF load options for {model_id}: hf / hfb only, not {kind}")
-    if hfo["max_batch"] is not None and (kind != "hfb" or type(hfo["max_batch"]) is not int or hfo["max_batch"] < 1):
-        sys.exit(f"engines.json max_batch {hfo['max_batch']!r} for {model_id}: a positive int, hfb only (not {kind})")
+    for k in ("max_batch", "token_budget"):
+        if hfo[k] is not None and (kind != "hfb" or type(hfo[k]) is not int or hfo[k] < 1):
+            sys.exit(f"engines.json {k} {hfo[k]!r} for {model_id}: a positive int, hfb only (not {kind})")
+    for k in ("chat_template", "nan_guard"):
+        if hfo[k] is not None and (type(hfo[k]) is not str or not hfo[k]):
+            sys.exit(f"engines.json {k} for {model_id}: a non-empty string")
+    if hfo["use_cache"] is not None and type(hfo["use_cache"]) is not bool:
+        sys.exit(f"engines.json use_cache for {model_id}: true or false")
     if chosen is not None and chosen != kind and not args.no_parity_gate:
         sys.exit(f"engine gate: engines.json names {chosen} for {model_id}, not {kind}")
+    try:
+        apply_decode(model_id, args.engines, kind)          # meta.json "decode" records HR.DECODE as run
+    except ValueError as e:
+        sys.exit(str(e))
     if gated and verdict not in PASSING and chosen != kind and not args.no_parity_gate:
         sys.exit(f"parity gate: {model_id} has parity verdict {verdict}; run parity_hf_vllm.py first")
     todo = plan(root, model_id, args.render, R.parse_seeds(args.seeds))

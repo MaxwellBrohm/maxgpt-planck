@@ -61,8 +61,8 @@ class StubHF(HR.HFResponder):
     flip, think, torch = False, False, types.SimpleNamespace(__version__="stub")
 
     def __init__(self, model_id, render="template", dtype=None, device=None, trust_remote_code=False,
-                 attn_implementation=None):          # the HF load options stage_hf passes (notes STEP 9c)
-        self.v = TV.make()
+                 attn_implementation=None, chat_template=None, use_cache=None):   # stage_hf's options (9c; item 14)
+        self.v, self.chat_template, self.use_cache = TV.make(), chat_template, use_cache
         self.tok, self.render, self.qwen3 = self.v.tok, render, self.v.qwen3 or self.think
         self.eot, self.stop_ids, self.eos, self.ctx, self.device = self.v.eot, self.v.stop_ids, self.v.eos, None, device
 

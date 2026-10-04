@@ -10,9 +10,13 @@ ids are the dev run's OWN ids; R is not None), C3 seeds (every row carries its r
 prompts, differ across sampling seeds), C4 stops (template: eos / eot / cap; plain adds role, and reply = strip of
 the role cut of raw), C5 the turn-3 prompt of one conversation rebuilt from its own history with the model's
 tokenizer (printed; no system turn passed; Qwen3-family prompts end in an empty think block).
---rerun N: R1 the first N conversations of the first sampled run, replayed in lockstep, equal the stored rows; R2 the
-same N greedy in lockstep equal the same N played sequentially (runner.play, one request per engine call), and both
-are compared with the stored greedy rows. Prints PASS / FAIL / INFO lines; exit 1 on any FAIL."""
+--rerun N (rerun_tie.py; Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 2)): R1 the
+first N conversations of the first sampled run, replayed in lockstep, vs the stored rows; R2 the same N greedy in
+lockstep vs the same N played sequentially (runner.play, one request per engine call), and vs the stored greedy rows.
+Each passes when every conversation's first differing turn differs at a near-tie (margin <= 0.5 nats under one HF
+forward, the parity rule's NEAR_TIE), for every engine; the identical share is printed. The replay and the margins
+run as separate processes (one model on the GPU at a time). --tie-margin-stub X: fake engines only (tests).
+Prints PASS / FAIL / INFO lines; exit 1 on any FAIL."""
 import argparse
 import json
 import os
@@ -21,6 +25,7 @@ import sys
 import dev_batch as DB
 import hf_responder as HR
 import render as RD
+import rerun_tie as RT
 import runner as R
 import score as S
 import vllm_responder as VR
@@ -72,6 +77,9 @@ def c1_config(name, run, engines, expect):
     chosen = DB.chosen_engine(m["model"], engines)
     if chosen is not None and chosen != m["engine"]:
         say("FAIL", f"C1 {name}: engine {m['engine']} but engines.json names {chosen}")
+    for k in ("chat_template", "nan_guard", "use_cache"):                            # notes STEP 11, item 14
+        if m.get(k) != DB.hf_options(m["model"], engines)[k]:
+            say("FAIL", f"C1 {name}: {k} {m.get(k)!r} is not engines.json's")
     exp = expect[1] if m["own_cf"] else expect[0]           # (records, OWN records) of --data: 640, 48 on dev
     if len(run["rows"]) != m["conversations"] or (m.get("limit") is None and m["conversations"] != exp):
         say("FAIL", f"C1 {name}: {len(run['rows'])} rows, meta {m['conversations']} conversations, expected {exp}")
@@ -137,9 +145,12 @@ def c4_stops(name, run, render):
 
 def c5_prompt(model, render, run):
     from transformers import AutoConfig, AutoTokenizer
-    tok, cfg = AutoTokenizer.from_pretrained(model), AutoConfig.from_pretrained(model)
+    trust = run["meta"].get("trust_remote_code") is True              # the run's own load options (item 14)
+    tok = AutoTokenizer.from_pretrained(model, trust_remote_code=trust)
+    cfg = AutoConfig.from_pretrained(model, trust_remote_code=trust)
     shim = VR.VLLMResponder(model, render=render, tokenizer=tok, model_type=getattr(cfg, "model_type", ""),
-                            native=VR.native_len(cfg), llm=object(), sampling_params=dict)
+                            native=VR.native_len(cfg), llm=object(), sampling_params=dict,
+                            chat_template=run["meta"].get("chat_template"))
     row = next(r for r in run["rows"] if r["family"] != "T0")
     hist = []
     for t in row["turns"][:3]:
@@ -149,48 +160,10 @@ def c5_prompt(model, render, run):
     print(f"C5 {model} {render} {row['id']} turn 3, qwen3 {shim.qwen3} rule_differs {shim.thinking_rule_differs}:\n"
           f"{s!r}")
     missing = [m["content"] for m in hist if m["content"] not in s]
-    if missing or (render == "template" and shim.qwen3 and not s.endswith("<think>\n\n</think>\n\n")):
+    tmpl = str(tok.chat_template or "")          # item 14: a Qwen3-architecture checkpoint whose own template has no
+    thinks = "<think>" in tmpl or "enable_thinking" in tmpl     # thinking mode (Vertex, Veyra2) has none to switch off
+    if missing or (render == "template" and shim.qwen3 and thinks and not s.endswith("<think>\n\n</think>\n\n")):
         say("FAIL", f"C5 {model}: history text missing {missing[:2]} or thinking not off")
-
-
-def rerun(args, runs, recs):
-    sampled = [n for n in runs if n.isdigit()]
-    ref = runs[sampled[0]] if sampled else None
-    greedy = runs.get("greedy")
-    m = (ref or greedy)["meta"]
-    ns = argparse.Namespace(render=args.render, dtype=m.get("dtype") or "bfloat16", device="cuda",
-                            gpu_mem=m.get("gpu_mem", 0.85), max_model_len=m.get("max_model_len"),
-                            batch_invariant=bool(m.get("batch_invariant")), lockstep=True, hf_untested_ok=True,
-                            vllm_untested_ok=True, trust_remote_code=m.get("trust_remote_code") is True,
-                            attn_implementation=m.get("attn_implementation"),   # the run's HF options (STEP 9c)
-                            max_batch=m.get("max_batch"))
-    spec = f"{m['engine']}:{args.model}"
-    eng, name = R.make_responder(spec, ns)
-    ctx = getattr(eng, "ctx", None)
-    seq = eng if hasattr(eng, "start") else R.make_responder(spec, argparse.Namespace(**{**vars(ns), "lockstep": False}))[0]
-
-    def cmp(tag, a, b):
-        diff = [(x["id"], ta["i"], ta["reply"][:80], tb["reply"][:80]) for x, y in zip(a, b)
-                for ta, tb in zip(x["turns"], y["turns"]) if (ta["reply"], ta["stop"]) != (tb["reply"], tb["stop"])]
-        convs = sum(all((ta["reply"], ta["stop"]) == (tb["reply"], tb["stop"]) for ta, tb in zip(x["turns"], y["turns"]))
-                    for x, y in zip(a, b))
-        say("FAIL" if diff else "PASS", f"{tag}: {convs} / {len(a)} conversations identical, {len(diff)} turns differ"
-            + (f"; first {diff[0]}" if diff else ""))
-    if ref is not None:
-        seed = ref["meta"]["seed"]
-        stored = ref["rows"][:args.rerun]
-        again = R.run([recs[r["id"]] for r in stored], eng, args.render, [seed], ctx, None, name, 0, False, True)
-        cmp(f"R1 seed {seed} lockstep replay vs stored", again, stored)
-        other = R.run([recs[r["id"]] for r in stored], eng, args.render, [seed + 100], ctx, None, name, 0, False, True)
-        same = sum(a["turns"][0]["reply"] == b["turns"][0]["reply"] for a, b in zip(other, stored))
-        say("INFO", f"R1 seed {seed + 100} vs seed {seed}: turn-1 replies identical {same} / {len(stored)}")
-    ids = [r["id"] for r in (greedy or ref)["rows"][:args.rerun]]
-    lock = R.run([recs[i] for i in ids], eng, args.render, [None], ctx, None, name, 0, False, True)
-    serial = R.run([recs[i] for i in ids], seq, args.render, [None], ctx, None, name, 0, False, False)
-    cmp("R2 greedy lockstep vs sequential", lock, serial)
-    if greedy is not None:
-        cmp("R2 greedy lockstep replay vs stored greedy run", lock, greedy["rows"][:args.rerun])
-    say("INFO", f"R batches {getattr(eng, 'batches', [])[:30]}")
 
 
 def main():
@@ -201,6 +174,7 @@ def main():
     ap.add_argument("--data", default=R.DEV)
     ap.add_argument("--engines", default=DB.ENGINES)
     ap.add_argument("--rerun", type=int, default=0)
+    ap.add_argument("--tie-margin-stub", type=float, default=None, help="fake engines only: every R margin (tests)")
     ap.add_argument("--no-prompt", action="store_true", help="skip C5 (no tokenizer: fakes)")
     args = ap.parse_args()
     base = os.path.join(os.path.expanduser(args.root), DB.slug(args.model), args.render)
@@ -209,6 +183,14 @@ def main():
         say("FAIL", f"no finished run under {base}")
         return 1
     say("INFO", f"runs {sorted(runs)}")
+    try:                                     # --engines' decode for the model (dev_batch.apply_decode; item 14 card
+        dec = DB.decode_override(args.model, args.engines)   # row): C1 then expects that decoding, and only it
+    except ValueError as e:
+        say("FAIL", f"C1 {e}")
+        dec = {}
+    HR.DECODE.update(dec)
+    if dec:
+        say("INFO", f"C1 decoding row: engines.json decode {dec}, so C1 expects {HR.DECODE}")
     data = R.load(args.data)
     expect = (len(data), sum(r["family"] == "OWN" for r in data))
     for n, run in runs.items():
@@ -219,7 +201,7 @@ def main():
     if not args.no_prompt:
         c5_prompt(args.model, args.render, next(r for n, r in sorted(runs.items()) if not n.endswith("_owncf")))
     if args.rerun:
-        rerun(args, runs, {r["id"]: r for r in data})
+        RT.check(args, say, next(iter(runs.values()))["meta"]["engine"])
     print(f"VERIFY {'FAIL' if FAILS else 'PASS'} ({len(FAILS)} failures) {args.model} {args.render}")
     return 1 if FAILS else 0
 

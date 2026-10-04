@@ -72,24 +72,39 @@ def hf_kw(args):
                 attn_implementation=getattr(args, "attn_implementation", None))
 
 
+def eng_kw(args):
+    """--engines FILE (notes STEP 11, item 14): the model's engines.json chat_template (every stage) and, for the
+    hfb stage, max_batch and token_budget, so the parity plays the engine the dev runs use. No --engines: none."""
+    path = getattr(args, "engines", None)
+    if not path:
+        return dict(chat_template=None, max_batch=None, token_budget=None, nan_guard=None, use_cache=None)
+    import dev_batch as DB
+    o = DB.hf_options(args.model, path)
+    return {k: o[k] for k in ("chat_template", "max_batch", "token_budget", "nan_guard", "use_cache")}
+
+
 def stage_vllm(args):
-    engine = getattr(args, "engine", "vllm")
+    engine, ek = getattr(args, "engine", "vllm"), eng_kw(args)
     if engine == "hfb":                          # Doge and anything vLLM rejects: batched HF vs serial HF
         import hf_batched as HB
         import transformers as vllm              # its version goes in the meta's "vllm" field
-        v = HB.HFBatched(args.model, "template", args.dtype, args.device, **hf_kw(args))
+        sized = {k: ek[k] for k in ("max_batch", "token_budget") if ek[k] is not None}
+        v = HB.HFBatched(args.model, "template", args.dtype, args.device, **hf_kw(args), **sized,   # nan_guard:
+                         chat_template=ek["chat_template"], nan_guard=ek["nan_guard"],   # this stage only (serial HF
+                         use_cache=ek["use_cache"])                     # has no padding, no NaN to guard)
         v.thinking_rule_differs = False
     else:
         import vllm
         import vllm_responder as VR
-        v = VR.VLLMResponder(args.model, "template", args.dtype, args.gpu_mem, args.max_model_len)
+        v = VR.VLLMResponder(args.model, "template", args.dtype, args.gpu_mem, args.max_model_len,
+                             chat_template=ek["chat_template"])
     v.trace = []
     recs = pick(R.load(args.data), args.n, args.pick)
     R.run(recs, v, "template", [None], v.ctx, os.path.join(args.out, "vllm_run"), args.model, lockstep=True)
     write(os.path.join(args.out, "vllm.jsonl"), v.trace)
     meta = dict(model=args.model, engine=engine, vllm=vllm.__version__, ctx=v.ctx, stop_ids=v.stop_ids, eot=v.eot, qwen3=v.qwen3,
                 thinking_rule_differs=v.thinking_rule_differs, batches=v.batches, n=len(recs), pick=args.pick,
-                ids=[r["id"] for r in recs])
+                ids=[r["id"] for r in recs], **ek)
     json.dump(meta, open(os.path.join(args.out, "vllm_meta.json"), "w"), indent=1)
 
 
@@ -108,7 +123,9 @@ def hf_margin(h, prompt, prefix, a, b):
 def stage_hf(args):
     import hf_responder as HR
     import transformers
-    h = HR.HFResponder(args.model, "template", args.dtype, args.device, **hf_kw(args))
+    ek = eng_kw(args)        # use_cache is a load option of both stages, like trust / attn (cRia; notes STEP 11)
+    h = HR.HFResponder(args.model, "template", args.dtype, args.device, **hf_kw(args),
+                       chat_template=ek["chat_template"], use_cache=ek["use_cache"])
     seen, dec = {}, h.tok.decode
 
     def capture(ids, **kw):
@@ -129,7 +146,7 @@ def stage_hf(args):
                         ids=ids, text=text, stop=stop, first_diff=j, margin=margin, vllm_rank_under_hf=rank))
     write(os.path.join(args.out, "hf.jsonl"), out)
     meta = dict(model=args.model, transformers=transformers.__version__, torch=h.torch.__version__, qwen3=h.qwen3,
-                stop_ids=h.stop_ids, eot=h.eot, ctx=h.ctx)
+                stop_ids=h.stop_ids, eot=h.eot, ctx=h.ctx, chat_template=h.chat_template, use_cache=h.use_cache)
     json.dump(meta, open(os.path.join(args.out, "hf_meta.json"), "w"), indent=1)
 
 
@@ -228,6 +245,8 @@ def main():
                     help="HF loads the checkpoint's own modeling code (Doge-160M, hfb only; notes STEP 9c)")
     ap.add_argument("--attn-implementation", choices=["eager", "sdpa"], default=None,
                     help="HF stages' attention (default: the library's); Doge needs eager (notes STEP 9c)")
+    ap.add_argument("--engines", default=None,
+                    help="engines.json: the model's chat_template (all stages), max_batch / token_budget (hfb)")
     args = ap.parse_args()
     if args.trust_remote_code and args.engine != "hfb":
         sys.exit("--trust-remote-code: hfb only (vLLM's stage does not take it)")
@@ -240,6 +259,7 @@ def main():
                 str(args.gpu_mem), "--engine", args.engine] + (["--max-model-len", str(args.max_model_len)] if args.max_model_len else [])
         base += ["--trust-remote-code"] if args.trust_remote_code else []
         base += ["--attn-implementation", args.attn_implementation] if args.attn_implementation else []
+        base += ["--engines", args.engines] if args.engines else []
         for st in ("vllm", "hf"):
             cmd = base + ["--stage", st]
             print(f"stage {st}", flush=True)

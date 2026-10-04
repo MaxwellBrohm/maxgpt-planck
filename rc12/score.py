@@ -6,12 +6,23 @@ Unit: a conversation's unit score (runner/graders: mean of its probes, or all-ri
   LOOKUP), except BIND, whose unit is the PAIR (both twins right; twins joined by pair_id within one run).
 Run: one (train_seed, seed) combination. Family score = mean over its units in a run, then over sampling seeds,
   then over training seeds (nested means). Seeds: sampling seeds when any are present, else greedy (--seeds).
-Level R composite R = 100 x unweighted mean of the 10 COMPOSITE family scores (T0 is a gate, K is reported
-  separately, TWOHOP:COMPOSE is diagnostic and never enters TWOHOP).
-Level A (proposal thresholds, SPEC s6): CORR:U (U-diff + U-same units pooled) >= 0.80, CORR:C_noupd >= 0.80,
-  CORR:C_twoslot >= 0.80, BIND pair rate >= 0.80, LOOP rate over every reply of every conversation (all
-  families, LOOP flag only) <= 2% and no higher than the comparator's. Claimable only with >= 3 training seeds
-  and T0 >= 0.90. Without a comparator the last sub-criterion is unknown and Level A is not met.
+Level R composite R = 100 x unweighted mean of the 9 COMPOSITE family scores (T0 is a gate, K is reported
+  separately, TWOHOP:COMPOSE is diagnostic and never enters TWOHOP). LOOKUP is graded and reported (REPORTED: its
+  family and cell keys, its s8 cheater gates) but not in R (Max, 2026-10-02: took all recommendations in
+  rc12/DECISIONS_FOR_MAX.md (item 1); prereg draft s11: every core baseline at the floor on dev).
+LOOKUP claim (Max, 2026-10-04: LOOKUP is its own pre-registered headline claim, reported beside R and never folded
+  into it; prereg draft s1, s10b): lookup_claim() reads the LOOKUP family score (every cell; a unit is right only if
+  its P probe AND its abstain X probe are right) against BARS lookup 0.60 (proposal), inclusive. Claimable only with
+  >= 3 training seeds, every own-history row in the template render and sampled (no greedy row). The P and X probe
+  rates and the cells are reported beside it; its 95% CI is score_stats.lookup_ci (bootstrap as for R).
+Level A (SPEC s6; thresholds re-anchored by the s10 rule, prereg draft s10, notes STEP 10c): CORR:U (U-diff + U-same
+  units pooled) >= 0.60, CORR:C_noupd >= 0.60, CORR:C_twoslot >= 0.60, BIND pair rate >= 0.60 (each was 0.80; Max,
+  2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item D)), LOOP rate over every reply of every
+  conversation (all families, LOOP flag only) <= 2% and no higher than the comparator's. Claimable only with >= 3
+  training seeds and T0 >= 0.90. Without a comparator the last sub-criterion is unknown and Level A is not met.
+near_duplicate (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 12)): the share of
+  replies (every reply, the loop rate's denominator) that grade_loop.near_dup marks (12 words or fewer, exactly one
+  word edit from an earlier reply) and that are not LOOP; reported beside the loop rate, never gated.
 Ack-repeat (OD6 iii, ruled 2026-09-25): a reply to a statement turn (S L C I O T, and since F2 a small-talk D filler
   with asks: false) equal to an earlier reply; the mark is never a flag (grade_loop.py); its rate is reported
   beside the loop rate (ack_repeat over every reply, ack_repeat_of_statements over statement-turn replies) and
@@ -35,11 +46,17 @@ import argparse
 import json
 from collections import defaultdict
 
-COMPOSITE = ["RECALL", "CORR", "BIND", "TWOHOP", "PERSIST", "OWN", "TOPIC", "ROLE", "LOOKUP", "LOOP"]
+import grade_loop as L
+import grade_text as T
+
+COMPOSITE = ["RECALL", "CORR", "BIND", "TWOHOP", "PERSIST", "OWN", "TOPIC", "ROLE", "LOOP"]
+REPORTED = ["LOOKUP"]               # graded, reported, cheater-gated (s8); out of R (item 1, 2026-10-02)
 DIAG = {("TWOHOP", "COMPOSE")}
 LEVEL_A = {"CORR:U": ("CORR", ("U-diff", "U-same")), "CORR:C_noupd": ("CORR", ("C_noupd",)),
            "CORR:C_twoslot": ("CORR", ("C_twoslot",)), "BIND": ("BIND", None)}
-BARS = dict(level_a=0.80, loop=0.02, t0=0.90, min_train_seeds=3)
+BARS = dict(level_a=0.60, loop=0.02, t0=0.90, min_train_seeds=3,     # level_a: the s10 re-anchor (item D)
+            lookup=0.60)                                              # the LOOKUP claim (Max, 2026-10-04; s10b)
+LOOKUP_CLAIM = "LOOKUP"             # its key: the family score, never a COMPOSITE family
 DEGEN = ("LOOP", "RUNAWAY", "EMPTY", "LEAK")
 GATE = {"OWN": "OWN_GATED"}          # OD1 (b): composite family -> the key that fills its slot in R
 SLOT = {v: k for k, v in GATE.items()}
@@ -182,6 +199,21 @@ def equality_only_stats(rows):
     return dict(out)
 
 
+def near_duplicate_stats(rows):
+    """item 12 (2026-10-02): share of every reply (the loop rate's denominator) that grade_loop.near_dup marks and the
+    loop rule did not flag LOOP. Reported beside the loop rate, never in Level A. None without replies, or when a row
+    carries no turns (synthetic rows, as ack_stats)."""
+    if any("turns" not in r for r in rows):
+        return None
+    n = hits = 0
+    for r in rows:
+        ws = [T.lwords(T.norm(t["reply"])) for t in r["turns"]]
+        for i, fl in enumerate(r["flags"]):
+            n += 1
+            hits += "LOOP" not in fl and L.near_dup_ws(ws[i], ws[:i])
+    return hits / n if n else None
+
+
 def composite(fam):
     missing = [f for f in COMPOSITE if fam.get(f) is None]
     if missing:
@@ -198,6 +230,32 @@ def level_a(ks, loop_rate, comparator_loop=None, n_train=1, t0=None):
     met = all(c["met"] for c in crit.values())
     claimable = met and n_train >= BARS["min_train_seeds"] and t0 is not None and t0 >= BARS["t0"]
     return crit, met, claimable
+
+
+def probe_rate(rows, family, kind):
+    """nested share of the family's probes of one kind (P, X) that are right (diagnostic beside the claim)."""
+    per = {}
+    for rk, rr in runs(rows).items():
+        oks = [p["ok"] for r in rr if r["family"] == family for p in r["probes"] if p.get("kind") == kind]
+        if oks:
+            per[rk] = mean(oks)
+    return nested(per) if per else None
+
+
+def lookup_claim(ks, rows, n_train):
+    """the LOOKUP headline claim (module docstring; prereg draft s10b). rows: the selected own-history rows. Never in
+    R: it reads only the LOOKUP keys and probes. why lists what keeps a met bar from being claimable."""
+    v = ks.get(LOOKUP_CLAIM)
+    met = v is not None and v >= BARS["lookup"]
+    why = [] if n_train >= BARS["min_train_seeds"] else [f"{n_train} training seed(s), < {BARS['min_train_seeds']}"]
+    renders = sorted({str(r.get("render")) for r in rows if r["family"] == LOOKUP_CLAIM})
+    if renders != ["template"]:
+        why.append(f"render {renders} (s10b: the template render)")
+    if any(r["seed"] is None for r in rows if r["family"] == LOOKUP_CLAIM):
+        why.append("greedy rows (s10b: sampled, T 0.6)")
+    return dict(value=v, bar=BARS["lookup"], met=met, claimable=met and not why, why_not=why,
+                cells={k.split(":", 1)[1]: x for k, x in ks.items() if k.startswith(LOOKUP_CLAIM + ":")},
+                P=probe_rate(rows, LOOKUP_CLAIM, "P"), X=probe_rate(rows, LOOKUP_CLAIM, "X"), n_train_seeds=n_train)
 
 
 def summarize(rows, comparator=None, seeds=None):
@@ -223,8 +281,9 @@ def summarize(rows, comparator=None, seeds=None):
         R=composite(fam), R_ungated=composite({f: ks.get(f) for f in COMPOSITE}), families=fam, keys=ks,
         loop_rate=degen.get("LOOP"), degenerate_rates=degen,
         ack_repeat=ack_all, ack_repeat_of_statements=ack_stated, ack_repeat_of_answers=answer_repeat_stats(rows),
-        equality_only=equality_only_stats(rows),
+        equality_only=equality_only_stats(rows), near_duplicate=near_duplicate_stats(rows),
         replies=n_rep, level_a=crit, level_a_met=met, level_a_claimable=claimable, n_train_seeds=n_train,
+        lookup_claim=lookup_claim(ks, rows, n_train),
         seeds=sorted({str(r["seed"]) for r in rows}),
         t0=dict(score=t0, met=t0 is not None and t0 >= BARS["t0"],
                 failures=sorted({r["id"] for r in rows if r["family"] == "T0" and r["unit"] < 1})),

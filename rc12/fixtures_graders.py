@@ -182,9 +182,62 @@ def vfix(rec, p, gold=None, ideal=None, avoid=()):
         out += [fx(rec, p, "stale_change_ok", f"It moved from {s} to {gold}.", True),
                 fx(rec, p, "stale_was_ok", f"{ideal} It was {s} before.", True),
                 fx(rec, p, "stale_asserted", f"{ideal} It is on {s}.", False)]
+        # recap frames (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 3)); clean ones
+        # pass only through initial(ly) / previous / prior, the planted ones carry a frame word that is not a recap
+        # of the stale value and must still fail
+        i_ = ideal.rstrip(".")
+        out += [fx(rec, p, "stale_initially_ok", f"{ideal} Initially scheduled for {s}.", True),
+                fx(rec, p, "stale_initial_ok", f"{i_}, after the initial choice of {s}.", True),
+                fx(rec, p, "stale_previous_ok", f"{ideal} Previous: {s}. Updated: {gold}.", True),
+                fx(rec, p, "stale_prior_ok", f"{ideal} (Prior plan: {s}.)", True),
+                fx(rec, p, "stale_recap_planted", f"{ideal} Initially I hesitated, but it is {s}.", False),
+                fx(rec, p, "stale_prior_swapped", f"It is {s} now; the prior plan said {gold}.", False)]
+    out += inflect_quote_fixtures(rec, p, gold, ideal, others, outside, obj, mode)
     if p.get("pool_values") and o:
         adj = p["question"].rstrip("?").split()[-1]
         out.append(fx(rec, p, "compose_than_ok", f"Your {gold} is {adj} than your {o}.", True))
+    return out
+
+
+def inflects(v):
+    """the T0 audit's grader gap 1 (2026-10-02; regraded 2026-10-04): weekdays and count-noun values (instrument,
+    food, project) also match as their plural / singular. Written here independently of grade_text.forms."""
+    return v in V.WEEKDAY + V.INSTRUMENT + V.FOOD + V.PROJECT
+
+
+def infl(v):
+    return v[:-1] if v.endswith("s") else v + "s"
+
+
+def inflect_quote_fixtures(rec, p, gold, ideal, others, outside, obj, mode):
+    """the two grader gaps of the T0 audit (rc12/runs/dev_panel/t0; folded into the regrade 2026-10-04, notes STEP
+    11b). Inflection: an inflected gold asserts only after a second-person word in its sentence; an inflected other
+    value or guess counts against the reply. Quote: a closing quote after . ! ? ends the sentence, so a person
+    marker or hedge inside one quoted sentence does not reach the next, and a quoted question stays a question."""
+    out = []
+    if inflects(gold):
+        f = infl(gold)
+        out += [fx(rec, p, "inflect_you_ok", f"For you, that's {f}.", True),
+                fx(rec, p, "inflect_generic", f"{cap(f)} are popular with a lot of people.", False),
+                fx(rec, p, "inflect_you_after", f"{cap(f)} are popular, whatever your plans.", False)]
+        if mode == "user":
+            out.append(fx(rec, p, "inflect_voice", f"You know, I have {f} now.", False))
+    o = next((v for v in others if inflects(v)), None)
+    if o:
+        out.append(fx(rec, p, "inflect_other", f"{ideal} {cap(infl(o))} are nice too.", False))
+    lo = next((v for v in others if v.islower() and inflects(v)), None)
+    if lo:                                    # an inflected lowercase value offers an alternative ("X or Ys")
+        out.append(fx(rec, p, "inflect_alt", f"the answer: {gold} or {infl(lo)}.", False))
+    nc = next((v for v in others if v.islower() and not inflects(v)), None)
+    if nc:                                    # a colour's or a job's plural is another word, never the value
+        out.append(fx(rec, p, "noinflect_ok", f"{ideal} Lots of {infl(nc)} around here.", True))
+    g = next((v for v in outside if inflects(v)), None)
+    if g:
+        out.append(fx(rec, p, "inflect_guess", f"{ideal} {cap(infl(g))} are nice too.", False))
+    if mode == "user":
+        out += [fx(rec, p, "quote_split_ok", f'You said, "I picked {gold}." {cap(gold)} is right.', True),
+                fx(rec, p, "quote_hedge_ok", f'You said, "It is {gold}." I think that is all.', True)]
+    out.append(fx(rec, p, "quote_question", f'Is it "{gold}?" Yes.', False))
     return out
 
 
@@ -209,4 +262,6 @@ def afix(rec, p):
             fx(rec, p, "echo", p["question"], False)]
     if c2:
         out.append(fx(rec, p, "alt_or", f"{cap(c)} or {c2}.", False))
+    if inflects(c):                           # the T0 audit's gap 1: an inflected value is still a value (a3_value)
+        out.append(fx(rec, p, "inflect_value", f"You haven't told me, but {infl(c)} would be my guess.", False))
     return out

@@ -11,6 +11,7 @@ from collections import defaultdict
 
 import grade_voice as GV
 import graders as G
+import pools_vals as V
 import runner as RN
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -20,6 +21,11 @@ VAL_VARIANTS = [
     ("bare", "{g}.", True), ("its", "It's {g}.", True), ("ideal", "{i}", True), ("sure", "Sure! {i}", True),
     ("tail", "{i} Let me know if anything else changes.", True), ("not_other", "Not {o}. It's {g}.", True),
     ("stale_not", "{i_} now, not {s}.", True), ("stale_from", "{i_} now; it was moved from {s}.", True),
+    # recap frames (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 3); notes STEP 10c)
+    ("stale_initially", "{i_} now. Initially scheduled for {s}.", True),
+    ("stale_initial", "{i_}, after the initial choice of {s}.", True), ("stale_previous", "{i_}. Previous: {s}.", True),
+    ("stale_prior", "{i_}; prior plan: {s}.", True),
+    ("stale_recap_far", "{i_}. Initially that seemed fine, but now it's {s}.", False),
     ("think", "I think it's {g}.", False), ("guess_d", "I'd guess {g}.", False),
     ("best_guess", "My best guess is {g}.", False), ("probably", "Probably {g}.", False),
     ("if_remember", "If I remember right, it's {g}.", False), ("or", "It's {g} or {o}.", False),
@@ -65,6 +71,16 @@ VAL_VARIANTS = [
     ("g_names", "Your name's {g}.", False), ("g_go_by", "You go by {g}.", False), ("g_youd_be", "I said you'd be {g}.", False),
     ("g_call_me", "I told you to call me {g}.", False), ("g_gave_you", "I gave you the name {g}.", False),
     ("g_youre", "You're {g}.", False),
+    # the T0 audit's two grader gaps, folded into the regrade 2026-10-04 (notes STEP 11b). infl_*: only where the gold
+    # inflects (a lowercase value or a weekday); {f} its plural / singular, {fo} another candidate's. quote_*: only on
+    # user-held probes
+    ("infl_for_you", "For you it's {f}.", True), ("infl_your_answer", "Your answer: {f}.", True),
+    ("infl_you_said", "You said {f}, so that's it.", True), ("infl_generic", "{F} are popular.", False),
+    ("infl_typically", "Typically, many people pick {f}.", False),
+    ("infl_you_after", "{F} are common, whatever you prefer.", False), ("infl_hedge", "You might like {f}.", False),
+    ("infl_other", "It's {g}. {Fo} are nice too.", False),
+    ("quote_then", 'You said "It is {g}." That is the answer.', True),
+    ("quote_marker", 'You mentioned "I have {g}." So {g} it is.', True), ("quote_q", 'Is it "{g}?" Yes.', False),
 ]
 ABS_VARIANTS = [
     ("ideal", "{i}", True), ("havent", "You haven't told me that.", True), ("never", "You never mentioned it.", True),
@@ -142,12 +158,29 @@ def fill(tpl, p, rec):
     gold = p.get("gold") or ""
     others = [c for c in p.get("candidates") or [] if c != gold and c not in (p.get("stale") or [])]
     ideal = p["ideal"]
+    fo = infl(next((c for c in others if inflects(c)), "?"))
     return tpl.format(g=gold, o=(others or ["?"])[0], s=(p.get("stale") or ["?"])[0], i=ideal,
                       i_=ideal.rstrip("."), l=(p.get("candidates") or ["?"])[-1], k=p.get("key") or "that day",
-                      w=(p.get("object_words") or ["answer"])[0].lower())
+                      w=(p.get("object_words") or ["answer"])[0].lower(), f=infl(gold), F=infl(gold)[:1].upper()
+                      + infl(gold)[1:], fo=fo, Fo=fo[:1].upper() + fo[1:])
+
+
+def inflects(v):
+    return v in V.WEEKDAY + V.INSTRUMENT + V.FOOD + V.PROJECT
+
+
+def infl(v):
+    return v[:-1] if v.endswith("s") else v + "s"
 
 
 def applicable(name, p):
+    if name == "infl_other":
+        return inflects(p.get("gold")) and any(c != p.get("gold") and c not in (p.get("stale") or []) and inflects(c)
+                                               for c in p.get("candidates") or [])
+    if name.startswith("infl_"):
+        return inflects(p.get("gold"))
+    if name in ("quote_then", "quote_marker"):
+        return GV.mode_of(p) == "user"
     if name.startswith("stale"):
         return bool(p.get("stale"))
     if name == "not_other":        # with every candidate named it is SPEC's shotgun (known strict case (b), notes)

@@ -11,6 +11,22 @@ G10/G11 as locked gates (yes). Code for OD1 and OD6: rc12/notes.txt STEP 7. OD6 
 under Max's standing permission and reversible before the lock: F1 parroted answers are LOOPs (notes F1); F2
 small-talk statement fillers do not ask (notes STEP 8); F3 (strict case d, widened on 2026-09-26 to a right answer
 that repeats any earlier reply of the model, in every family) open until the dev baselines.
+SECOND ROUND, after the dev baselines (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md; code,
+runs and checks: rc12/notes.txt STEP 11): LOOKUP out of the composite, 9 families (item 1; s9, s11); the rerun check
+at the parity rule's near-tie for every engine (item 2; s4); recap frames in the stale-value exemption and every
+stored dev run regraded (item 3; s6); sealed size 600 with the seed-spread table beside it (item 4; s9); PERSIST base
+rates read the template render (item 6; s11); s12's baseline clause read as the CI part and widened to every public
+panel model (item 7; s12); gemma's extra stop id left as it is (item 8; s16); strict cases (a) / (b) unchanged (item
+9; s6); F3 kept strict, the PERSIST statement-filler P turns stay asking, a near-duplicate rate reported beside the
+loop rate (items 10-12; s6, s7, s17); the -3 margin, the PERSIST 0.30 bar, the zero-5-gram rule and the S6 list
+confirmed, T0 0.90 left to its audit (items 16, 5); the four Level A content bars at 0.60 in score.py (item D; s10).
+THIRD ROUND (Max, 2026-10-04, after asking whether dropping LOOKUP removed the project's core idea; code, runs and
+checks: rc12/notes.txt STEP 11b): LOOKUP is its own pre-registered headline claim, the LOOKUP claim (s1, s10b),
+reported beside R and never folded into it; R keeps its 9 families and the s11 headroom rule. Also in STEP 11b, the
+T0 audit (item 5) applied: the gate stays 0.90, its two grader gaps (inflected values, the closing-quote sentence
+end) are fixed and every stored dev run regraded again (s6, s16), and its result is written (s9, T0 RESULT).
+Integrated 2026-10-04 (rc12/notes.txt STEP 11c): item 14, the public sub-30M chat models as reported extras (s12,
+s10b's comparison); item 15, the bare-model sentence (s1, Rules for both); item 2's GPU rerun check (s4).
 Sources: rc12/SPEC.txt v0.1; rc12/notes.txt (steps 2-6: deviations D1-D22 and the step 5 audit); PLAN.md s1 (Level R
 and Level A wording, the re-anchor rule) and Phase 0 (headroom rule, sealed isolation, decoding, sizing, OOD-H, the
 public pre-registration); PLAN Phase 4 (the human test); LEDGER.md (P-003, P-004, P-033, P-045, P-049, P-082, P-137);
@@ -55,7 +71,8 @@ becomes training text). The two share the label D8 by accident.
   unchanged.
   Not done: no baseline scored on dev; the HF responder has never run on a real model (HF_TESTED = False); no vLLM
   responder exists; likelihood rows (s4) are not built; no sealed split; no OOD-H; no Planck tokenizer; no trained
-  Planck model.
+  Planck model. (That was the state at drafting. Since then: engines named after parity (s4, s16), likelihood rows
+  and OOD-H Part 1 built (s4, s14), the dev baselines scored and the s9-s11 rules applied (2026-10-02, s16).)
   Hard rule (PLAN): no Planck model is scored on any RC-12 split, dev included, until this file is pushed. That
   includes the dev-battery screens (E7 vocabulary grid, E-tok decay branches), which wait for the push.
   Disclosure: plumbing tests ran random-initialized networks of at most 0.50M parameters with a toy byte-level
@@ -93,11 +110,29 @@ becomes training text). The two share the label D8 by accident.
     than Qwen2.5-0.5B-Instruct. In a blind pairwise test ({r} raters, 150 conversations, 3 ratings each), raters
     judged it as good as or better than Qwen2.5-0.5B-Instruct in {w}% of judgments (95% CI {lo} to {hi}), meeting the
     pre-registered 50%. To our knowledge it is the smallest model shown to pass this bar."
+  LOOKUP claim (headline, beside Level R and Level A; Max, 2026-10-04: LOOKUP is its own pre-registered headline
+    claim, reported beside R and never folded into it. New wording, not in PLAN, whose s1 lists "reading from a
+    supplied lookup" among the target skills; the bar, the comparison and what counts are in s10b):
+    "Planck-{N}M ({N}M total parameters, {B}M non-embedding) reads facts from tables supplied in the conversation. On
+    sealed RC-12's LOOKUP family ({c} conversations, each with an old and a new table of the same shape in the
+    user's turns), pooled over {k} training seeds, it both answers a key from the table asked about and says that
+    table lacks a key only the other table holds in {x} of conversations (95% CI {lo} to {hi}; pre-registered bar
+    0.60). No public model on our panel at or below {N}M reached the bar; the best panel model, of any size up to
+    2.6B, scored {y} on the same test. It is the smallest model on our curve that does this."
+    It scores the bare model as Level R and Level A do: the tables are ordinary user turns, and no retrieval, memory
+    store, lookup tool or state card is involved. The retrieval-tool conditions (a BM25-retrieved table, shuffled
+    table, no table: s5, P-082) are not this claim. Its 0.60 is a proposal until the push and never changes after it.
   Rules for both: the thresholds 0.80, 2%, 50%, -3 and -5 are proposals until the push and never change after it.
     Level A only at a size with >= 3 training seeds (5 if seed lock-in is shown: seed pass rates on a pass/fail
     family spread by more than 0.3 at 30M). Any curve point with fewer seeds states its count. A note the model writes
     and reads itself counts as the model; a harness-maintained state card is reported only as "Planck-{N}M + state
     card (scaffold)". After the first sealed scoring, any recipe change is labeled post hoc.
+    Both levels score the bare model (the LOOKUP claim too): each reply is generated from the conversation's own
+    history (the scripted user turns, including any table a user turn supplies, and the model's own earlier
+    replies), with no retrieval, memory store, state card, repetition penalty or other help from the harness; the OWN
+    counterfactual twin (s9) edits one assistant turn and can only remove credit. (Max, 2026-10-02: took all
+    recommendations in rc12/DECISIONS_FOR_MAX.md (item 15); the same sentence is in PLAN.md's "What counts as the
+    model", with "prereg s9" for "s9".)
 
 2. SCOPE AND BINDING RULES
   Target: conversational mechanics over the conversation's own context. Stored world knowledge is out of scope.
@@ -179,6 +214,28 @@ becomes training text). The two share the label D8 by accident.
     MaxGPT-3 and anything vLLM rejects. Conversations advance in lockstep batches (turn t of every conversation in one
     batch). A greedy HF-vs-vLLM parity check on 20 conversations per model family runs before any scored run. The
     locked file names one engine per model (OPEN, s16).
+  Rerun check of stored runs (rc12/verify_dev_runs.py --rerun N, rc12/rerun_tie.py; Max, 2026-10-02: took all
+    recommendations in rc12/DECISIONS_FOR_MAX.md (item 2)): R1 replays the first N conversations of a sampled run with
+    its seed, R2 the same N greedy in lockstep against the same N played one at a time and against the stored greedy
+    run. For EVERY engine a comparison passes when each conversation's first differing turn (where the two prompts are
+    still identical) differs at a near-tie: the margin between the two first differing tokens, under one HF forward on
+    that prompt plus their shared prefix, is <= 0.5 nats (the parity rule's NEAR_TIE); a turn with no margin (equal
+    tokens, a different stop) fails; the identical share is reported. Exact replay is not the bar because the stored
+    dev runs drift with the batch on every engine: replayed in batches of 48 instead of 640, turn 1 was identical in
+    915 of 2,304 vLLM conversations and 47 of 192 Doge ones (notes STEP 10a). Under sampling one seed's draw can flip
+    between two tokens that are not near-tied, so R1 may fail on drift alone; its margins are printed.
+    GPU rerun (2026-10-04, rc12/notes.txt STEP 11c; --rerun 5 once per engine family, template render, each in its
+    own gpu.lock hold, code md5-equal to this tree): R2 PASSES on both families and R1 FAILS on both, as the line
+    above warned. vLLM (Qwen2.5-0.5B-Instruct): R2 lockstep vs sequential and R2 vs the stored greedy run each 1 of 5
+    conversations identical, every first divergence within 0.125 nats; R1 0 of 5 identical, margins 0.25, 0.625,
+    1.125, 2.125, 2.625. Batched HF (Doge-160M-Instruct): R2 0 of 5 identical both ways, every margin within 0.125;
+    R1 0 of 5 identical, margins 0.25, 1.06, 1.12, 2.0, 2.56. C1-C5 pass for both. Both samplers draw a token from
+    a seeded noise value (vLLM: argmax of p / q with exponential noise q from the request's generator; batched HF:
+    multinomial with the row's generator), so a small drift in p can flip the draw between two tokens whose log
+    probabilities are far apart; the margin in log p bounds a greedy flip, not a sampled one. FLAGGED for Max, not
+    decided here: as written, verify_dev_runs --rerun fails every engine on R1. Options: (a) R2 (greedy) is the
+    gate, R1's identical share and margins are reported; (b) a sampled R1 bar that adds the seeded noise to the
+    margin (new code and GPU time); (c) keep R1 as written, which fails every engine.
   Likelihood rows (diagnostic, P-004; BUILT 2026-09-26, rc12/notes.txt STEP 11, no model scored): every probe with a
     closed candidate set also gets a row on GOLDEN history (IDEAL replies) with a forced answer prefix from a
     separate prefix pool; right iff the gold's summed log-prob is strictly above every other candidate's (E004 lik.py
@@ -244,16 +301,17 @@ becomes training text). The two share the label D8 by accident.
   ROLE      48  user's name, job, town, two lure names, and in half the assistant's given   all       composite
                 name, all in u1-u6 (D3); P "What's my name?" (u8-u12); X "Tell me a little
                 about yourself." after the statements (u7-u11)
-  LOOKUP    48  two same-shape fictional tables (old / new) in u1-u4; 3 shapes x which      all       composite
-                first x which asked, 4 each; P asks a key of the named table, X a key absent
-                from it (must abstain); probe order balanced 8/8 per shape (D16)
+  LOOKUP    48  two same-shape fictional tables (old / new) in u1-u4; 3 shapes x which      all       LOOKUP
+                first x which asked, 4 each; P asks a key of the named table, X a key absent           claim
+                from it (must abstain); probe order balanced 8/8 per shape (D16)                       (s10b)
   LOOP      40  a story request, then 11 continuation requests drawn from 16 (never         mean      composite
                 repeat or summarize); score = share of the 12 replies not degenerate,
                 plus the echo clause (D7)
   K     32+32   follow-up needing a referent plus world knowledge, and the same question in  mean      separate
                 one turn with the referent named; reports follow-up rate, control rate, gap
   Total 640 records (608 twelve-turn conversations + 32 one-turn K controls). Scored knowledge-free composite units:
-  482 (BIND counted as 30 pairs). Out of RC-12 from PLAN F1-F8 (OD4 (c), ruled 2026-09-25; reasons in s17): F6
+  434 (BIND counted as 30 pairs; 482 with LOOKUP, which left the composite on 2026-10-02 by the s11 rule and since
+  2026-10-04 is its own headline claim, s10b, reported beside R and never folded into it). Out of RC-12 from PLAN F1-F8 (OD4 (c), ruled 2026-09-25; reasons in s17): F6
   sharded vs full, F7 persona, F8 social basics.
   Deferred LOOKUP conditions (not dev v1): shuffled table, no table, BM25-retrieved table (P-082).
 
@@ -261,18 +319,23 @@ becomes training text). The two share the label D8 by accident.
   grade_role.py)
   G-VAL, strict value grader (closed candidate set). Right only if ALL hold:
     v1 non-empty, not degenerate (s7), stop reason is not the 256-token cap;
-    v2 the gold is ASSERTED: some whole-word, case-insensitive mention (E004 value matching: grey/gray, number words)
-       sits in a sentence that is not a question, not negated (a cue among not, no, never, neither, nor, without,
-       cannot, none, any n't word, instead of, rather than in the 3 word tokens before it, or a negated copula right
+    v2 the gold is ASSERTED: some whole-word mention (lowercase values in any case, capitalized values as written,
+       pools_vals.value_re; this said "case-insensitive" until 2026-10-04, wrong for capitalized values, found by the
+       T0 audit; E004's grey/gray and number-word variants have no value to match in the dev pools), or an inflected
+       form (below) addressed to the user, sits in a sentence that is not a question, not negated (a cue among not,
+       no, never, neither, nor, without, cannot, none, any n't word, instead of, rather than in the 3 word tokens
+       before it, or a negated copula right
        after it; the interjection "no," is not a negation), not hedged (sentence-scoped hedge list, extended by
        grade_cues.HEDGE_MORE and near_hedge: "I'd guess X", "X, if I recall correctly", "Maybe. It is X."), not in
        an example or an if-clause, not one side of "X or Y" (other side capitalized, a digit or a pool value), not a
        bare list line, not right after "than"; an unsure or deflecting phrase ("I'm not sure", "remind me") fails
        the whole reply;
     v3 no other candidate is asserted; a stale value of the asked object may appear only in a change phrase ("moved
-       from X", "X was changed to") and only when the gold is asserted; any pool value NOT in the user turns up to
-       the probe fails (a guess); a reply mentioning every candidate in any form fails (shotgun; COMPOSE exempt,
-       D11);
+       from X", "X was changed to", and a recap: "Initially scheduled for X", "the initial choice of X", "Previous:
+       X", "prior plan: X": within 3 words after initial(ly), previous or prior; Max, 2026-10-02: took all
+       recommendations in rc12/DECISIONS_FOR_MAX.md (item 3)) and only when the gold is asserted; any pool value NOT
+       in the user turns up to the probe fails (a guess); a reply mentioning every candidate in any form fails
+       (shotgun; COMPOSE exempt, D11);
     v4 assistant voice: the gold's sentence does not bind a user fact to the first person ("My cat is Biscuit",
        "I'm Marcus"; "my" within 3 words before an object or holder word). For assistant-held probes (OWN, "What
        did I call you?") the reverse is checked ("You picked X", "Your name is X"). Report frames (D23,
@@ -296,6 +359,23 @@ becomes training text). The two share the label D8 by accident.
        4-grams copied from the probe question, OR the reply contains the whole question (4+ words) word for word
        (D8).
     Lenient twin (diagnostic only): the first candidate mentioned is the gold.
+    Sentences (every sentence-scoped rule here and in the voice and role scans): a sentence ends at . ! or ?
+       followed by whitespace, at . ! or ? and a closing quote followed by whitespace, or at a newline
+       (grade_text.SENT_END). The closing quote was added 2026-10-04 (the T0 audit's grader gap 2, rc12/notes.txt
+       STEP 11b): before it, 'You mentioned "I grew up in Porto." Porto is a city ...' was one sentence, so the
+       quoted "I grew" bound the second Porto to the first person, and a hedge or question mark in a quoted
+       sentence reached the next one. (G-FMT's one-sentence count, abs_voice and the ROLE X sentence scan keep
+       their own unchanged splitters.)
+    Inflected forms (2026-10-04, the T0 audit's grader gap 1, notes STEP 11b; grade_text.forms, value_hits,
+       addressed): a weekday or a count-noun value (instrument, food, project) also matches as its plural or
+       singular: minus s for a value ending in s ("drum" for drums), else plus s or es ("Thursdays" for
+       Thursday). Such a form counts AGAINST a reply wherever a value does (v3 other, guess and shotgun, G-ABS's
+       values, in-context values, an "or" alternative, the voice scan); it asserts the GOLD (v2) only after a
+       second-person word (you, your, you're, yours) in its sentence, because the plural is also the generic form
+       ("Typically, Fridays are common days off"; "You have off work on Thursdays" passes). Colours, jobs,
+       names, months, cities, towns, OWN options and K answers match only as written: their plurals are other
+       words or groups ("greens", "oranges", "mechanics", "pilots like yourself"), and inflecting them in a first
+       regrade only charged false captures and guesses.
   G-ABS, abstain grader: an abstain cue (grade_text.ABS_CUE extended by grade_cues.ABS_MORE: "you haven't told me",
     "I don't think you've told me that", "That hasn't come up yet", "That list skips Thursday") AND no pool value
     mentioned at all. Lenient twin (reported): a value is allowed in a sentence that names its own correct holder. No
@@ -320,19 +400,34 @@ becomes training text). The two share the label D8 by accident.
     RULED 2026-09-25: (a) and (b) stay strict as the primary score with the lenient twins reported beside (OD7);
     (c) is settled by OD6 (iii) with F1 and F2 (s17): on an asking turn equality is charged against every earlier
     reply, on a statement turn only against earlier replies to asking turns (s7).
-    (d) (found 2026-09-25, NOT ruled; widened 2026-09-26 by the second verifier review) a RIGHT answer that equals,
-    normalized, an earlier reply of the model is a LOOP under the equality clause, so the probe fails (v1_degen and
-    its twins), in every family, not only OWN: a terse OWN answer that repeats the model's own Q reply ("Quizzards."
-    at Q and at the probe; "I picked Quizzards." passes), and a model that confirms a stated fact with the sentence it
-    later answers with ("Your bike is green." after "I ride a green bike to work.", then again at the probe).
-    Measured on dev with fakes (validate_machinery c_ackrep, notes STEP 8 round 2): RESTATE (IDEAL, but each VAL
-    probe's latest S or C source turn confirmed with that probe's IDEAL sentence) loop rate 0.060 (440 of 7,328),
-    R_ungated 40.0, RECALL, CORR, BIND, TWOHOP, TOPIC and ROLE 0.00 and T0 0.00; TERSE_VAL (the bare gold, "Green.",
-    as that confirmation and as the answer) the same; TERSE_VAL_CTRL (the bare gold answers, IDEAL
+    REVISITED 2026-10-02, as OD7 asked once the dev baselines existed (Max, 2026-10-02: took all recommendations in
+    rc12/DECISIONS_FOR_MAX.md (item 9)): no change. Strict-only failures are not common: 5 of the 120 failing Level A
+    units read from the strongest dev model (LFM2-2.6B) were true (a) / (b) cases, and even their upper bound adds at
+    most 0.18 to any Level A key of any model and leaves all four below 0.60 (rc12/notes.txt STEP 10c).
+    (d) (found 2026-09-25; widened 2026-09-26 by the second verifier review; DECIDED 2026-10-02, kept strict, option
+    (i) of s17 OD6 follow-up (3): Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 10)) a
+    RIGHT answer that equals, normalized, an earlier reply of the model is a LOOP under the equality clause, so the
+    probe fails (v1_degen and its twins), in every family, not only OWN: a terse OWN answer that repeats the model's
+    own Q reply ("Quizzards." at Q and at the probe; "I picked Quizzards." passes), and a model that confirms a stated
+    fact with the sentence it later answers with ("Your bike is green." after "I ride a green bike to work.", then
+    again at the probe). Measured on dev with fakes (validate_machinery c_ackrep, notes STEP 8 round 2): RESTATE
+    (IDEAL, but each VAL probe's latest S or C source turn confirmed with that probe's IDEAL sentence) loop rate 0.060
+    (440 of 7,328), R_ungated 40.0, RECALL, CORR, BIND, TWOHOP, TOPIC and ROLE 0.00 and T0 0.00; TERSE_VAL (the bare
+    gold, "Green.", as that confirmation and as the answer) the same; TERSE_VAL_CTRL (the bare gold answers, IDEAL
     acknowledgements) loop 0, R_ungated 100. Every probe records eq_only (it fails ONLY through the equality clause)
-    and score.py reports equality_only per family; on the dev baselines that count is the measurement, and the
-    options of s17 OD6 follow-up (3) are put to Max before the lock. Self-copy is separate: RESTATE's 12+ word TOPIC
-    sentences (27 of 48 TOPIC probes) fail by self-copy too, so they are not equality-only.
+    and score.py reports equality_only per family; on the dev baselines that count was the measurement. Dev result
+    (template, seeds 1-3): 0 to 62 equality-only probes per model; Qwen2.5-0.5B-Instruct's 62 are one refusal ("I'm
+    sorry, but I can't assist with that request.") repeated on LOOP turns, a loop under every option; every other
+    model has at most 18 (LFM2-2.6B none); option (ii) would change 1 probe over the 13 models, option (iii) at most
+    29 (mostly PERSIST). Obligation on the training pipeline: do not teach Planck terse restatements as
+    acknowledgements. Self-copy is separate: RESTATE's 12+ word TOPIC sentences (27 of 48 TOPIC probes) fail by
+    self-copy too, so they are not equality-only.
+  Evidence (2026-10-04, after the STEP 11b fixes; rc12/notes.txt STEP 11b): 504 new fixtures for the two T0 gaps;
+    the 399 that test the fixes (inflect_you_ok, _other, _guess, _value, _alt, quote_*) failed on the graders before
+    the fix and pass after it, and the 105 that guard against over-reach (inflect_generic, _you_after, _voice,
+    noinflect_ok) and every older fixture pass both times; mutation_graders 226 of 226 mutants killed over 9,071 fixtures (12 new mutants, each killed
+    by the fixture aimed at it); audit_graders 0 wrong verdicts over 36,764 paraphrases (11 new kinds, 2,146 new
+    variants; the graders before the fix gave 1,268 wrong verdicts, all on new ones). Earlier record:
   Evidence: mutation_graders 165 of 165 mutants killed (notes STEP 8: 160 after F2 and in the verifier re-run of
     2026-09-25 23:03 to 23:15 EDT; 165 after the second review's fixes, re-run 2026-09-26), none by a crash, each
     by the fixture or conversation test aimed at it (fixtures built from real items: 6,321 at step 3, cue and
@@ -358,8 +453,14 @@ becomes training text). The two share the label D8 by accident.
            PARROT_PLUS (PARROT with ", right" added to each parroted answer) loop 0.0052 (38 of 7,328, all
            self-copies: 11-word answers that the added word brought to 12), criterion met, answer-repeat 0;
            NEAR_D (a canned non-answer with the turn number appended, "Let me think about that one, number 4.",
-           on every asking D turn) loop 0, criterion met, R_ungated 100. A near-duplicate rate reported beside the
-           loop rate (never gated) is an open option for Max before the lock (s17 OD6 follow-up (4)).
+           on every asking D turn) loop 0, criterion met, R_ungated 100.
+  NEAR-DUPLICATE (reported beside the loop rate, never gated, never in Level A; Max, 2026-10-02: took all
+           recommendations in rc12/DECISIONS_FOR_MAX.md (item 12); rc12/grade_loop.near_dup,
+           score.near_duplicate_stats) r has 1 to 12 normalized words and is exactly one word edit (one word inserted,
+           deleted or replaced) from an earlier reply of the conversation, whatever turns they answered, and the loop
+           rule did not flag it LOOP. Rate over every reply. Two different one-word replies are one edit apart, so
+           short acknowledgements count too. It is the only place a parrot that changes one word shows. Dev (regraded
+           panel, template, mean of 3 seeds): 0.000 to 0.007 of replies per model (rc12/notes.txt STEP 11).
   ACK-REPEAT (reported beside, never in Level A; the mark itself is never a flag) r answers a statement turn and,
            normalized, equals an earlier reply. Rates: over every reply, and over statement-turn replies. The
            equality clause never charges an acknowledgement said again after an acknowledgement; self-copy is
@@ -415,12 +516,17 @@ becomes training text). The two share the label D8 by accident.
     reference      IDEAL, and IDEAL_ALT (picks a different option at Q; must still score 1.00, which only happens if
                    the runner feeds replies back and G-DYN takes the gold from them)
   Gates (run on the REAL items, before any baseline is scored; scripts exit non-zero on any failure):
-    G1  IDEAL and IDEAL_ALT score 1.00 on every family, cell, T0, K and COMPOSE key; 0 degenerate replies, 0 leaks.
+    G1  IDEAL and IDEAL_ALT score 1.00 on every family, cell, T0, K and COMPOSE key; 0 degenerate replies, 0 leaks;
+        both meet the LOOKUP claim's bar (s10b).
     G2  every gated cheater, on the families it targets: <= 0.40 per composite family and <= 0.50 per cell; ECHO,
-        DEFLECT, SHOTGUN, USERVOICE, ABSTAIN and ROLECAP 0.00 on every value-graded unit. ORDER_ABS is gated only
-        on its target cells (RECALL:abstain, LOOKUP:*) at the cell bar (OD3 (a), ruled 2026-09-25).
+        DEFLECT, SHOTGUN, USERVOICE, ABSTAIN and ROLECAP 0.00 on every value-graded unit. ORDER_ABS is gated only on
+        its target cells (RECALL:abstain, LOOKUP:*) at the cell bar (OD3 (a), ruled 2026-09-25). LOOKUP left the
+        composite on 2026-10-02 (s11; Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 1))
+        and keeps its G2 and G4 gates, because its family and cells are still reported (rc12/validate_e2e.py FAMS).
     G3  no cheater meets any Level A CONTENT criterion on its own (CORR:U, C_noupd, C_twoslot, BIND pair), and every
-        cheater misses Level A. (The fixed ack alone gives every generic cheater a loop rate far above the bar, so
+        cheater misses Level A. No LOOKUP cheater (the generic cheaters, the audit value rules and ORDER_ABS) meets
+        the LOOKUP claim's bar (s10b; added 2026-10-04): ORDER_ABS, which OD3 lets reach 0.50 at the cell bar, stays
+        under 0.60 (validate_e2e g3; its mutant moving the bar to 0.40 trips it). (The fixed ack alone gives every generic cheater a loop rate far above the bar, so
         Level A as a whole is not enough: 0.58 to 0.82 for the 12 generic cheaters under the original equality
         clause; 0.51 to 0.61 under OD6 (iii), audit cheaters up to 0.67, because the fixed ack also answers D
         turns, which the ruling counts as asking; 0.57 to 0.77 with F1, audit cheaters up to 0.84, because each
@@ -464,6 +570,8 @@ becomes training text). The two share the label D8 by accident.
     reported  MYONLY RECALL .65, ROLE .60 | MARKER_OBJ CORR:U-same .12 | CONSIST OWN 1.00 (0.00 under --own-cf;
               gated OWN 0.00 under OD1, R 13.7 against R_ungated 23.7, OD1 step) | VARIED LOOP 1.00
     Level A   no gated cheater meets any content criterion; every cheater misses Level A.
+    LOOKUP    no LOOKUP cheater meets the LOOKUP claim's 0.60 (s10b): ORDER_ABS 0.50, and the 12 generic cheaters
+    claim     and 14 audit value rules 0.00 each (logs/e2e_fakes.txt, re-run 2026-10-04, notes STEP 11b).
     machinery (validate_machinery only, not in this table): ACKER (loop 0, Level A loop criterion met,
               ack-repeat 0.18 of all replies, 0.47 of statement-turn replies, answer-repeat 0.00), PARROT (F1 and
               F2: loop 0.023, criterion NOT met, ack-repeat 0.023, answer-repeat 0.062) and SMALLTALK (F2: loop 0,
@@ -475,7 +583,8 @@ becomes training text). The two share the label D8 by accident.
   EXL_WORDING; C_twoslot: ANTEPENULT, PENULT_MARKER, PREV_FRESH, EXL_MARKER) and at 0.33-0.35 per family. With
   48-item families a chance-level rule moves by about 0.07, so the 0.40 family bar is tight by design. A
   family-specific cheater that is perfect elsewhere (P_NEVER R = 90.8, VARIED R = 100.0) shows that each composite
-  family is worth 10 points of R.
+  family is worth 10 points of R (measured with 10 families; with 9 since LOOKUP left the composite on 2026-10-02,
+  each is worth 11.1 points).
   The sealed split must pass G1-G11 in the sealed session before it is encrypted (s13).
 
 9. METRICS, COMPOSITE AND LEVEL R (rc12/score.py, score_stats.py)
@@ -490,32 +599,77 @@ becomes training text). The two share the label D8 by accident.
     counted in the report. The s1 words "on its own conversation history" (PLAN wording, kept) still hold for the
     claim: the gate can only remove OWN credit, the one edited assistant turn exists only in the --own-cf twin run,
     and every credited OWN unit was also right on the model's own history.
-  Composite R(m) = 100 x unweighted mean of F_f over the composite families: RECALL, CORR, BIND, TWOHOP, PERSIST,
-    OWN, TOPIC, ROLE, LOOKUP, LOOP (10 families, 10 points each). T0, K and COMPOSE never enter it. OD2 (a) keeps
-    LOOP and OD4 (c) keeps F6-F8 out (both ruled 2026-09-25); the list is frozen at the lock after the headroom rule
-    (s11).
+  Composite R(m) = 100 x unweighted mean of F_f over the composite families: RECALL, CORR, BIND, TWOHOP, PERSIST, OWN,
+    TOPIC, ROLE, LOOP (9 families, 100 / 9 points each). T0, K, COMPOSE and LOOKUP never enter it. OD2 (a) keeps LOOP
+    and OD4 (c) keeps F6-F8 out (both ruled 2026-09-25). LOOKUP was the tenth family until the headroom rule failed it
+    at the floor on dev and Max dropped it (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md
+    (item 1); the reason is in s11); its family and cells are graded and reported beside R and keep their s8 gates
+    (rc12/score.py COMPOSITE, REPORTED). Since 2026-10-04 LOOKUP is its own headline claim (Max, 2026-10-04; s1,
+    s10b), reported beside R and never folded into it: score.py's lookup_claim reads only the LOOKUP keys and probes,
+    and R reads none of them (validate_machinery c_scoring checks both directions). The list is frozen at the
+    lock.
   Paired difference D = R(Planck-{N}M) - R(Qwen2.5-0.5B-Instruct), template render, sampling T 0.6, on sealed.
   Bootstrap: 10,000 resamples. Each resample draws units within each family (stratified), with the SAME draw for both
     models (paired); training seeds resampled per model; sampling seeds resampled inside each drawn training seed
     (nested). Percentile 95% CI.
-  Level R holds at a size when, on sealed, with >= 3 training seeds at that size: the CI's lower bound is >= -3
-    points (proposal), T0 >= 0.90 (proposal), and the OOD-H wording rule of s1 is applied. It is claimed at the
-    smallest size that meets it. The OOD-H wording rule is not implemented yet (needs OOD-H).
+  Level R holds at a size when, on sealed, with >= 3 training seeds at that size: the CI's lower bound is >= -3 points
+    (confirmed: Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 16)), T0 >= 0.90
+    (kept: item 16 kept it "except as item 5 decides", and the item 5 audit recommends keeping it; T0 RESULT below),
+    and the OOD-H wording rule of s1 is applied. It is claimed at the smallest
+    size that meets it. The OOD-H wording rule is not implemented yet (needs OOD-H).
   Sensitivity row: the composite without the families where Qwen2.5-0.5B-Instruct is <= 0.05.
   Reported beside (never a claim): every cell; RECALL by d bin; CORR by reference form; PERSIST by rule; OWN
     source-fail rate; OWN from the own-history run alone and from the --own-cf run alone, and R_ungated (R with the
     own-history OWN); the count of cf rows whose rewrite did not take; lenient scores (OD7); likelihood rows;
-    degenerate-type rates; the ack-repeat and answer-repeat rates (s7, OD6); capture rate; plain vs template render;
-    greedy; K follow-up rate, control rate and gap; T0 failure list.
+    degenerate-type rates; the ack-repeat and answer-repeat rates (s7, OD6); the near-duplicate rate (s7, item 12);
+    the LOOKUP claim (s10b: its value, 95% CI, P and X probe rates and cells; out of R, item 1); capture rate;
+    plain vs template render; greedy; K follow-up rate, control rate and gap; T0 failure list.
+  T0 RESULT (DECISIONS item 5 audit, 2026-10-02, CPU only, rc12/runs/dev_panel/t0/; applied 2026-10-04, rc12/
+    notes.txt STEP 11b). No tested model reached the 0.90 gate: after the STEP 11b regrade the best dev T0 of any
+    model, render or seed is 0.531 (LFM2-2.6B, template, seed 3; its mean of 3 seeds 0.517, 0.510 before), and the
+    audit put LFM2-2.6B at most at 0.757 even if every failing reply that names its gold anywhere counted right. The
+    audit (its figures are from before the regrade) read 88 failing probes of LFM2-2.6B, Qwen2.5-0.5B-Instruct and
+    LFM2.5-350M in full: 68 real failures
+    (0.77; CP upper 0.86), 49 of them the assistant-persona deflection ("my favorite food" or "my day off" read as a
+    question about the assistant, or a privacy refusal: LFM2-2.6B passes 0.797 of object slots and 0.247 of
+    personal slots, food 0.04 over all 13 models); 15 right values failed by a clause as written (the 256-token cap,
+    a guess, a hedge, a 3-gram loop, voice); 2 grader errors, both general (inflected values, the closing-quote
+    sentence end), fixed in s6 and regraded (s16); 3 from one item weakness, recorded and not fixed: "When is my
+    birthday?" asks for a date when only a month was stated (7 of 96 T0 probes and 7 RECALL probes; pass rate over
+    13 models 0.20 against 0.28 for "Which month is my birthday in?"; an honest caveat such as "though you didn't
+    tell me the exact day" fails v2_unsure; expected cost about 0.005 of T0 to a model that caveats as often as the
+    strongest panel models do, 0.07 at worst). The riddle frame named in DECISIONS item 5 opens only 2 of the 48
+    items (LFM2-2.6B 0.522 without them) and is not the cause. The gate stays 0.90 (the audit's recommendation): T0
+    measures what it says, and lowering it now would pick a number after seeing dev with no rule behind it.
   Sealed size (PLAN sizing rule): from dev runs of Qwen2.5-0.5B-Instruct and the two baselines nearest to it,
     estimate the within-conversation correlation and the paired disagreement rate, simulate this analysis, and take
     the smallest count in steps of 100 (minimum 600, cap 1,500) with >= 80% power to show non-inferiority at -3 when
     the true difference is 0. If the cap is not enough, the margin stays at -3 and the achieved power is published.
+    Result: n = 600, the minimum (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 4): 600
+    as the rule gives, with the seed-spread table published beside it). Run 2026-10-02 on the 9-family composite and
+    the regraded dev runs (rc12/sizing.py, sizing_run.py; rc12/notes.txt STEP 10d for the method, STEP 11 for this
+    run): comparator Qwen2.5-0.5B-Instruct and the two baselines nearest to it on the dev composite R (template, mean
+    of 3 seeds: SmolLM2-360M-Instruct and gemma-3-270m-it); power at 600 is 0.848 when Planck's training seeds agree
+    like sampling seeds and 0.876 when they agree like two models (2,000 simulated splits per n, 10,000 resamples
+    each). Read with the two baselines nearest in size instead (Qwen3-0.6B, SmolLM2-360M-Instruct) the rule gives 700
+    (0.719 and 0.774 at 600, 0.805 and 0.839 at 700; 1,000 splits). Item 4 told Max both readings give 600; that held
+    for 10 families and does not for 9. This file keeps the dev-R reading (the one the rule was run with, STEP 10d);
+    FLAGGED for Max before the lock.
+    Published beside it (the rule cannot see how much Planck's R moves between training seeds; E3 measures that only
+    after the lock). Smallest size with >= 80% power for a given sd of a Planck seed's expected R, 9 families, 1,000
+    splits per n (Monte Carlo SE about 0.013): sd 0.5 point 600; 1 point 700; 1.5 points 900; 2 points 1,500, the cap
+    (0.81); 2.5 and 3 points no allowed size (0.66 and 0.55 at the cap). With 10 families the same table read 600,
+    600, 700, about 1,300 and none. Past about 2 points the protection is PLAN's 5-seed trigger, not more
+    conversations.
 
 10. LEVEL A (score.py LEVEL_A, BARS)
   On sealed, template render, 3 sampling seeds, point estimates pooled over >= 3 training seeds (proposal thresholds):
-    CORR:U (U-diff and U-same units pooled) >= 0.80, AND CORR:C_noupd >= 0.80, AND CORR:C_twoslot >= 0.80;
-    BIND pair rate >= 0.80 (chance 0.25; "first mentioned wins" scores 0);
+    CORR:U (U-diff and U-same units pooled) >= 0.60, AND CORR:C_noupd >= 0.60, AND CORR:C_twoslot >= 0.60;
+    BIND pair rate >= 0.60 (chance 0.25; "first mentioned wins" scores 0);
+    (these four: re-anchored 2026-10 by the mechanical rule, before the lock; each was 0.80; result below the rule;
+    rc12/score.py BARS level_a is 0.60 (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item
+    D)), pinned by validate_machinery c_scoring and three mutants_e2e mutants: back to 0.80, down to 0.50, and 0.60
+    made exclusive)
     loop rate (replies flagged LOOP by s7 as ruled under OD6, over every reply of every conversation, all families)
       <= 0.02 AND no higher than Qwen2.5-0.5B-Instruct's on the same split (without the comparator's rate the
       criterion is unknown, not met); the ack-repeat rates are reported beside and never enter it;
@@ -535,15 +689,107 @@ becomes training text). The two share the label D8 by accident.
     key's items and grader. If still below 0.80, that threshold becomes LFM2-2.6B's dev rate rounded down to 0.05,
     never below 0.60. If LFM2-2.6B is below 0.60, the threshold stays at 0.60 and this file says no tested model
     reached it. Never applied after the lock.
+  Re-anchor result (re-anchored 2026-10 by the mechanical rule, before the lock; rc12/notes.txt STEP 10c, the
+    script rc12/reanchor_audit.py). LFM2-2.6B on dev, template render, mean of 3 sampling seeds: CORR:U 0.250,
+    C_noupd 0.312, C_twoslot 0.250, BIND 0.089, all below 0.80. Audit: 30 failing units per key read (item, probe
+    reply, grader clauses), 120 in all: 0 item errors; 1 grader error (C_twoslot: a right answer whose stale value
+    sits only in a change recap, "Initially scheduled for Tuesday ... Moved to Thursday", which the stale-value
+    exemption did not recognize; fixed 2026-10-02, s6 v3, item 3: on the regraded dev runs that unit passes and
+    LFM2-2.6B's C_twoslot is 0.271); 104 real failures (a stale, B, lure or swapped value given, a false extra
+    binding, or no answer); 15 right values failed by a clause as written (256-token cap 5, strict cases (a) / (b)
+    5, voice 2, self-copy 1, guess 1, hedge 1). After the audit: 0.250, 0.312, 0.271, 0.089, still below 0.60, and
+    below 0.60 even if every failing unit whose reply names its gold anywhere were counted right (0.479, 0.562,
+    0.417, 0.322). So each of the four thresholds is 0.60 (above),
+    and no tested model reached it: the best dev rate of any model, render or seed is 0.281 (CORR:U), 0.500
+    (C_noupd), 0.312 (C_twoslot), 0.133 (BIND).
+
+10b. THE LOOKUP CLAIM (score.py lookup_claim, BARS lookup; score_stats.lookup_ci; Max, 2026-10-04: LOOKUP is its own
+  pre-registered headline claim, reported beside R and never folded into it)
+  The bar (proposal until the push): on sealed, template render, sampling T 0.6 with 3 sampling seeds, pooled over
+    >= 3 training seeds at the claimed size (nested means, as R), the LOOKUP family score is >= 0.60, inclusive.
+    score.lookup_claim is met at 0.60 and not at 0.5999 (validate_machinery c_scoring) and is claimable only with >= 3
+    training seeds, every LOOKUP row in the template render and no greedy row (it lists what is missing). Its 95% CI
+    is reported with it: score_stats.lookup_ci, 10,000 resamples, LOOKUP units resampled, training seeds resampled
+    and sampling seeds resampled inside each drawn training seed, as the s9 bootstrap does (one model, not paired;
+    c_stats checks that units, training seeds and sampling seeds are each resampled). The bar reads the point
+    estimate, as Level A's do; the CI is reported, never a gate. T0 and the loop rate are not part of this bar
+    (FLAGGED for Max: Level R and Level A both ask T0 >= 0.90; adding it here is one line of score.py).
+  What counts: all 48 LOOKUP units (sealed: every LOOKUP conversation) in all three shape cells, each right only if
+    BOTH its probes are right (unit "all", s5): P, a key of the named table answered with that table's value (G-VAL;
+    the other table's value for the same key is the lure), and X, a key only the other table holds, answered by
+    abstaining (G-ABS). The abstain X probe is part of the claim, not a side report: a model that always reads the
+    named table but never abstains scores 0, as one that always abstains does. The P and X probe rates and the three
+    cells are reported beside it (score.lookup_claim P, X, cells). The s8 gates stay: the generic cheaters and the
+    audit value rules at <= 0.40 per family and <= 0.50 per cell, ORDER_ABS (a perfect lookup that abstains by probe
+    position) at the cell bar only (OD3 (a)), where it scores 0.50, under the claim's 0.60 (G3, s8).
+  Never in R: LOOKUP is not a COMPOSITE family (s9, s11) and the claim reads no composite family; it is reported
+    beside R and Level A and never folded into either (c_scoring: only LOOKUP right gives R_ungated 0 and the claim
+    met; LOOKUP 0 gives R_ungated 100 and the claim unmet). The s11 headroom rule does not apply to it: that rule
+    guards a comparison with Qwen2.5-0.5B-Instruct, and this is an absolute bar whose point is that the panel sits
+    far below it.
+  The comparison: every public panel model's LOOKUP rate under the same harness, template render, its sampling
+    seeds (s12), with its CI, published beside the claim (dev: rc12/dev_panel.py rules.json lookup_claim; the item
+    14 extras: rc12/dev_extras14.py). The s12 baseline clause applies: a LOOKUP claim at size N stands only if no
+    public panel model at or below N reaches 0.60 (its point estimate pooled over its sampling seeds; the
+    training-seed count is not asked of it).
+  Dev reading (template, mean of 3 sampling seeds, after the STEP 11b regrade; public models only, never a claim;
+    rc12/notes.txt STEP 11b): no model meets the bar. LOOKUP 0.014 (95% CI 0.000 to 0.042) Qwen2.5-0.5B-Instruct,
+    0.007 (0.000 to 0.028) LFM2-2.6B, 0.007 (0.000 to 0.042) Qwen3-0.6B, 0.000 for the other 10; the highest single
+    seed or render is 0.021 (Qwen2.5-0.5B-Instruct, template seed 2). The floor is the X probe: P is passed often
+    (Qwen3-0.6B 0.694, LFM2-2.6B 0.542, LFM2-700M 0.340, Qwen3.5-0.8B 0.333), X almost never (at most 0.097,
+    Qwen2.5-0.5B-Instruct; 0.007 LFM2-2.6B), because the models give the other table's value for the absent key
+    (LFM2-2.6B 83%, s11). The item 14 extras (s12; 5M to 31M) sit at the same floor: LOOKUP 0.000 on every one
+    scored and on the Vertex card row (CI 0.000 to 0.000; P at most 0.007, X at most 0.069).
 
 11. HEADROOM RULE AND THE PERSIST BASE-RATE RULE (score_stats.headroom, persist_base_rates)
   After the dev baselines (core panel only, template render, mean of 3 seeds): a composite family or Level A key fails
   if EVERY core baseline scores <= 0.05 (floor) or EVERY core baseline scores >= 0.95 (ceiling). A failing family is
   rebuilt before the lock (harder or easier cells, same layout) or dropped from the composite with the reason written
   here. So a family where every baseline sits at the floor cannot be "passed" by matching the floor.
-  PERSIST base rates: each rule's compliance share over every reply of every NON-PERSIST conversation; a rule above
-  0.30 for any core baseline is dropped (proposal). one_sentence is expected to drop (plain replies comply). The drop
-  list is written here at the lock. NOT RUN: no baseline has been scored.
+  PERSIST base rates: each rule's compliance share over every reply of every NON-PERSIST conversation of the TEMPLATE
+  render (the render PERSIST is scored on; the plain render is diagnostic here as everywhere else: Max, 2026-10-02:
+  took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 6)); a rule above 0.30 for any core baseline is dropped
+  (0.30 confirmed: Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 16)). The draft
+  expected one_sentence to drop (plain replies comply); on the template render it did not (below). On the plain
+  render, which is not read, one_sentence is above 0.30 for 4 core models: LFM2.5-350M 0.602, Qwen3.5-0.8B 0.403,
+  Doge-160M 0.387, LFM2.5-230M 0.367 (rc12/notes.txt STEP 10e). The drop list is written here at the lock.
+  Result (measured 2026-10, before the lock; dev, core panel, template render, mean of 3 sampling seeds; the script
+    rc12/dev_s11.py, rc12/notes.txt STEP 10b). HEADROOM: LOOKUP fails at the floor: every core baseline scores 0.000
+    to 0.014 (on each seed and greedy too). Its X probe asks for a key that only the other table holds, and the
+    models give that table's value (LFM2-2.6B 83%); lenient units stay at or below 0.014. Every other composite family
+    and Level A key passes, OWN with one core baseline above 0.05 (LFM2-2.6B 0.076), RECALL and BIND with two; no
+    ceiling failure (highest 0.812).
+    LOOKUP DROPPED from the composite (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item
+    1)). Reason: every core baseline, the 2.6B reference included, sits at the floor (0.000 to 0.014, each seed and
+    greedy too), and the floor is a real failure of every model up to 2.6B (the X probe's two-table lure), not a
+    strict clause, since lenient scoring does not lift it. A floor family adds about 0 to D while cutting every other
+    family's weight from 11.1 to 10 points, so keeping it makes non-inferiority easier, the thing this rule exists to
+    stop. Abstention stays in R through RECALL:abstain. A rebuild (easier cells) would have needed a new dev hash, the
+    full check order and about 104 GPU reruns with no evidence that it clears 0.05. LOOKUP's family and cells stay
+    graded and reported beside R (s9).
+    LOOKUP AS ITS OWN CLAIM (Max, 2026-10-04, after asking whether dropping LOOKUP removed the project's core idea):
+    the drop above stands for R, and LOOKUP is now its own pre-registered headline claim (s1, s10b), reported beside
+    R and never folded into it. The floor that unfits it for a non-inferiority composite is what makes it a headline:
+    on dev no public model up to 2.6B passes it. This rule does not apply to s10b (an absolute bar, not a comparison
+    with Qwen2.5-0.5B-Instruct); its row here stays a report.
+    REGRADED 2026-10-02 (item 3, s6; rc12/dev_regrade.py, then rc12/dev_panel.py and rc12/dev_s11.py on the regraded
+    copy; notes STEP 11): 2 of the 71,552 stored rows changed, both LFM2-2.6B CORR (one C_twoslot unit up, one U-diff
+    unit still failing on another clause); LFM2-2.6B's CORR 0.266 -> 0.271, C_twoslot 0.250 -> 0.271. With the 9
+    composite families and the Level A keys the headroom rule fails nothing, on the mean of 3 seeds and on each seed
+    and greedy alone; OWN still passes only through LFM2-2.6B's 0.076; LOOKUP, reported, is still at the floor (max
+    0.014). PERSIST BASE RATES (16 rules, 20,256 replies per core baseline): none above 0.30 (highest question_end
+    0.181 and one_sentence 0.175, SmolLM2-360M-Instruct; the other 14 at most 0.003), so the dev drop list is empty
+    and one_sentence did not drop.
+    REGRADED AGAIN 2026-10-04 (rc12/notes.txt STEP 11b; the T0 audit's two grader gaps, s6; dev_regrade.py --expect
+    t0gaps on the item 3 copy, then dev_panel.py and dev_s11.py): 369 of 71,552 rows changed (mostly the role-leak
+    scan or a probe that already failed gaining a clause), 27 probe verdicts flipped (20 up, 7 down; every one read,
+    notes STEP 11b), and composite units moved for 2 models only, template seeds 1-3: LFM2-2.6B (RECALL and TOPIC
+    one unit down each; R 24.36 -> 24.22) and Qwen3.5-0.8B (TWOHOP one up; R 7.75 -> 7.83). The headroom rule
+    still fails nothing, on the mean of 3 seeds and on each seed and greedy alone; OWN still passes only through
+    LFM2-2.6B's 0.076; LOOKUP, reported, is at the floor (max 0.014); the PERSIST drop list is still empty (replies
+    and G-FMT unchanged). The s9 sizing trios (Qwen2.5-0.5B-Instruct, SmolLM2-360M-Instruct, gemma-3-270m-it,
+    Qwen3-0.6B) and every model s12 quotes have no composite unit changed, so the sizing result and the s12 CIs
+    stand without a re-run.
 
 12. BASELINE PANEL (dev first, then sealed; one harness, each model in its own template)
   Comparator: Qwen2.5-0.5B-Instruct.
@@ -551,16 +797,65 @@ becomes training text). The two share the label D8 by accident.
     Falcon-H1-Tiny-90M-Instruct, SmolLM2-135M-Instruct, SmolLM2-360M-Instruct, Doge-160M-Instruct, and LFM2-2.6B as
     the reference showing the bar is reachable.
   Extras, reported, not in the headroom panel: Qwen3-0.6B (thinking off), Gemma 3 270M-it, LFM2-700M, LFM2-1.2B, the
-    Falcon-H1-Tiny-90M checkpoints (P-144), SmolLM2 SFT-only vs Instruct (P-145), MaxGPT-3 (P-147).
+    Falcon-H1-Tiny-90M checkpoints (P-144), SmolLM2 SFT-only vs Instruct (P-145), MaxGPT-3 (P-147), and the public
+    small chat models of research/NOVELTY_2026-10.md s3 (Max, 2026-10-02: took all recommendations in
+    rc12/DECISIONS_FOR_MAX.md (item 14)): Veyra2-Blueberry-5M-Instruct, BananaMind-2-Nano-Chat,
+    Veyra2-Blueberry-10M-Instruct, Vertex-0.6-15M-Instruct, Veyra2-Mango-15M-Instruct, Loom-Spark-3.2,
+    BananaMind-2-Mini-Chat, Swen-28M, Veyra2-Mango-30M-Instruct and cRia-LM-75M-Instruct. Each runs at the hub
+    revision pinned in rc12/pins.json, with its licence read at that revision (Apache-2.0; MIT for Loom-Spark-3.2 and
+    Swen-28M), in fp32 (its checkpoint's dtype), in its own chat format, with the s4 decoding (no repetition penalty,
+    no DRY). Loom-Spark-3.2 runs with tools off in its card's <user> / <loom> format, carried as a chat template in
+    rc12/engines.json. Engines (rc12/engines.json, the s4 rule): vLLM for the Veyra2, Vertex and Loom families;
+    batched HF for BananaMind-2, Swen-28M and cRia, whose custom architectures vLLM rejects. Swen-28M runs with a NaN
+    guard on its attention (without it a left-padded batch turns NaN); cRia runs with its own KV cache switched on
+    (its config ships it off; replies are equal with and without it). Every family's parity passed (vLLM NEAR_TIE,
+    batched HF IDENTICAL). Vertex-0.6-15M also has a second row with its card's recommended sampling (top_p 0.9,
+    repetition penalty 1.3, applied over the whole context as vLLM and transformers apply it;
+    rc12/engines_card.json), reported beside its plain row and never in its place (NOVELTY_2026-10 s6). RxT-Alpha
+    (RAML non-commercial licence, gated) is not included. Every extra counts as a public panel model for the
+    baseline clause below and for the LOOKUP claim's comparison (s10b). An extra whose dev runs do not finish before
+    the lock is listed with "not run" and the reason, and is not read by the clause.
+    Dev (rc12/dev_extras14.py, rc12/notes.txt STEP 11 ITEM 14 and STEP 11c; template, seeds 1-3, 9 families, every
+    stored row regraded, 10,000 resamples): every state family of every scored extra is at the floor (RECALL to ROLE
+    at most 0.069) and each extra's R comes mostly from LOOP (0.026 to 0.779). R (paired CI vs
+    Qwen2.5-0.5B-Instruct, R 5.68): Veyra2-Blueberry-5M-Instruct (4,984,192 parameters) 5.01 (-2.19 to +0.91, CI part
+    met), BananaMind-2-Nano-Chat 0.37 (-6.66 to -3.99), Veyra2-Blueberry-10M-Instruct 3.52 (-3.61 to -0.70),
+    Vertex-0.6-15M-Instruct 8.64 (+1.02 to +4.93, met; card row 6.77, -0.54 to +2.64, met), Veyra2-Mango-15M-Instruct
+    0.87 (-6.20 to -3.41), Loom-Spark-3.2 9.55 (+2.10 to +5.68, met), Swen-28M 6.72 (-0.60 to +2.71, met),
+    Veyra2-Mango-30M-Instruct 0.61 (-6.43 to -3.71). No scored extra meets Level A. Every scored extra's LOOKUP is
+    0.000 (CI 0.000 to 0.000; P at most 0.007, X at most 0.069), the card row included. Not yet scored when this was
+    written (dev runs still on the 5070): BananaMind-2-Mini-Chat, cRia-LM-75M-Instruct and Swen-28M's plain render.
   Generation on the 5070 only (the Mac runs likelihood rows only). Every model: template render primary, plain render
-  diagnostic, 3 sampling seeds, greedy secondary. If LFM2.5-230M or Falcon-90M passes Level R, Planck's Level R claim
-  moves to curve points below that model's size (PLAN).
+  diagnostic, 3 sampling seeds, greedy secondary.
+  Baseline clause (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 7): the CI part,
+    widened). A claim at size N stands only if no public panel model at or below N passes the same bar. For Level R
+    the bar a released model is read against is the CI part only: its paired 95% CI lower bound against
+    Qwen2.5-0.5B-Instruct (template render, its sampling seeds, on sealed) is >= -3 points; T0 and the training-seed
+    count are not asked of it (a released model has one training seed, and no dev baseline reaches T0 0.90). For Level
+    A the bar is the s10 criteria other than the training-seed count and T0 (the four content keys and the loop
+    criterion, pooled over its sampling seeds). For the LOOKUP claim (s10b; Max, 2026-10-04) the bar is its LOOKUP
+    family score pooled over its sampling seeds >= 0.60 (template render, on sealed); the training-seed count is not
+    asked of it. (This replaces PLAN's narrower "If LFM2.5-230M or Falcon-90M passes
+    Level R, Planck's Level R claim moves to curve points below that model's size"; it covers the sub-30M public chat
+    models too.) On dev (rc12/dev_baseline_ci.py, 9 families, regraded, 10,000 resamples): LFM2.5-230M lower bound
+    +1.08, gemma-3-270m-it -0.73, LFM2.5-350M +9.12, SmolLM2-360M-Instruct -1.71 meet the CI part;
+    Falcon-H1-Tiny-90M-Instruct -4.26 (point -2.43), SmolLM2-135M-Instruct -5.86 and Doge-160M-Instruct -6.05 do not.
+    So the core panel and the earlier extras alone put a Planck Level R claim below 230M on dev. With the item 14
+    extras above, Veyra2-Blueberry-5M-Instruct (4,984,192 parameters) also meets the CI part, so on dev no size from
+    5.0M up is left at which a Planck Level R claim stands; against a comparator at R 5.68 whose state families sit
+    near the floor, the CI part is in effect a "does not loop" test among floor models (FLAGGED for Max, not decided
+    here: the clause is applied on sealed as written). No model meets Level A on dev, and none meets the LOOKUP
+    claim's bar (core panel at most 0.014, s10b; every scored item 14 extra 0.000).
 
 13. SEALED SPLIT PROCEDURE (built later, in a separate session; PLAN Phase 0, P-049)
   S1 Author. One dedicated Claude session (the sealed session) writes NEW templates, value frames, fillers, paraphrase
-     banks and slot pools for every family; D8 provenance rule: a Claude-written gold set, never training text.
-     It shares no template and no slot pool with dev (value pools included), and 0 word 5-grams of user text with
-     dev (proposal). PERSIST gets its own include-word pool, added to grade_fmt_dyn.STUFF_POOL for sealed scoring.
+     banks and slot pools for every family; D8 provenance rule: a Claude-written gold set, never training text. It
+     shares no template and no slot pool with dev (value pools included), and 0 word 5-grams of user text with dev
+     (confirmed: Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 16)). PERSIST gets its
+     own include-word pool, added to grade_fmt_dyn.STUFF_POOL for sealed scoring.
+     Inflected forms (s6, 2026-10-04; an obligation): the sealed weekday, instrument, food and project pools join
+     grade_text.INFLECT for sealed scoring, as dev's do, and hold no value whose plural or singular is another
+     common word (as "mechanics" is for mechanic, the reason jobs are not inflected).
      Filler labels (F2, s17 OD6 follow-up (2); an obligation, not a proposal): every sealed filler gets the same hand
      label as dev's, "question", "request" or "statement" (asks nothing), set by reading each one in the sealed
      session and stored with the filler as data, and the sealed build copies it onto every D turn as asks (false
@@ -584,10 +879,10 @@ becomes training text). The two share the label D8 by accident.
      with fake responders only (no model). Only the gate tables leave the session, never item text.
   S5 Hash. SHA-256 of every sealed file (items JSONL, pool and template modules, banks) and of the generator seed,
      written into the locked file.
-  S6 Decontamination list (proposal, except the OD5 condition, which is ruled): the sealed session also writes the
-     SHA-256 of every normalized word 13-gram of sealed user text, so training data can be decontaminated against
-     sealed without anyone reading it. Under OD5 (ruled, not a proposal) that decontamination also covers the
-     pipeline's program-written lookup lines.
+  S6 Decontamination list (confirmed: Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item
+     16); the OD5 condition was ruled before): the sealed session also writes the SHA-256 of every normalized word
+     13-gram of sealed user text, so training data can be decontaminated against sealed without anyone reading it.
+     Under OD5 (ruled, not a proposal) that decontamination also covers the pipeline's program-written lookup lines.
   S7 Encrypt. At once, in the same session: AES-256 with a random 256-bit key generated by a script that writes the
      key to a file outside any repository and never prints it (tool and exact command named at the lock). Only
      ciphertext sits in the working tree; sealed/ and private/ are gitignored (checked 2026-09-25).
@@ -645,18 +940,36 @@ becomes training text). The two share the label D8 by accident.
     ack-repeat and answer-repeat reports (s6, s7).
   The cheater set, gates G1-G9 with their bars (0.40 family, 0.50 cell, 3 generic cheaters per item), ORDER_ABS
     gated at the cell bar only (OD3), and G10 and G11 as locked gates for dev and sealed (OD8) (s8).
-  The composite definition with the OD1 gate on OWN, LOOP kept (OD2) and F6-F8 out (OD4); the paired bootstrap; the
-    sizing rule (s9).
+  The composite definition with the OD1 gate on OWN, LOOP kept (OD2), F6-F8 out (OD4) and LOOKUP out (s11,
+    2026-10-02); the paired bootstrap; the sizing rule (s9).
   The rulings of s17 (OD1-OD8, 2026-09-25), including OD3's and OD5's obligations on the training pipeline (OD5:
     the 13-gram decontamination of S6 covers the program-written lookup lines, whatever S6's final form).
   The Level A criteria and the human-test protocol, with thresholds subject only to the re-anchor rule (s10).
+  The LOOKUP claim (Max, 2026-10-04; s1, s10b): its bar (0.60, a proposal until the push), what counts (every
+    LOOKUP unit, P and the abstain X both right), the CI, the claimability conditions, the comparison with every
+    public panel model and the s12 clause; it is never part of R or of Level A.
   The headroom and PERSIST base-rate rules (s11); the baseline panel (s12); the sealed procedure (s13); OOD-H (s14).
 
 16. STILL OPEN, SETTLED BY A MEASUREMENT OR A MECHANICAL RULE (no judgment needed)
-  Dev baselines: none scored. The HF path has never run on a real model: the 20-conversation greedy parity check comes
-    first; the vLLM responder is not built; the engine per model is named after parity.
-  Headroom results and the rebuild / drop list (s11). Re-anchor results for CORR:U, C_noupd, C_twoslot, BIND (s10).
-  PERSIST drop list (s11). Sealed size (s9 sizing rule).
+  Dev baselines: SCORED (this line updated as Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md
+    (item D)). 13 models, template and plain render, 3 sampling seeds and greedy, each with its --own-cf OWN twin: 208
+    finished runs (rc12/notes.txt STEP 10a; engines named after parity, STEP 9b and 9c). Regraded on the Mac CPU on
+    2026-10-02 after item 3 (s6): 2 of 71,552 rows changed, both LFM2-2.6B CORR, one unit up (rc12/notes.txt STEP 11).
+    Regraded again on 2026-10-04 after the T0 audit's two grader gaps (s6 Sentences and Inflected forms; rc12/
+    notes.txt STEP 11b): 369 rows changed, 27 probe verdicts (20 up, 7 down, each read), composite units of 2 models
+    (s11). verify_dev_runs: 24 of 26 model x render pass; gemma-3-270m-it fails one config check (below). The GPU
+    rerun check (s4) ran 2026-10-04 (STEP 11c): R2 passes and R1 fails on both engine families; how R1 is read is
+    FLAGGED for Max in s4.
+  DONE 2026-10-04 (rc12/notes.txt STEP 11b): the T0 audit (DECISIONS item 5) applied: gate kept at 0.90, its result
+    line written (s9 T0 RESULT), its two grader gaps fixed and regraded (s6, above); the LOOKUP claim written (Max,
+    2026-10-04; s1, s10b) with score.py lookup_claim, score_stats.lookup_ci, their checks and mutants.
+  DONE 2026-10-02: headroom results and the drop list (s11: LOOKUP dropped); re-anchor results for CORR:U, C_noupd,
+  C_twoslot, BIND (s10: 0.60 each, score.py BARS since item D); PERSIST drop list (s11: empty); sealed size (s9:
+  600).
+  gemma-3-270m-it's extra generation_config stop id (<eos>, id 1, outside the HF stop list): left as it is (Max,
+    2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 8)). No stored reply stopped on it: a stop
+    there would have crashed the run (vllm_responder.stop_of refuses it), all 16 gemma runs finished, and the stored
+    stops are eos, cap and role only. gemma is an extra; verify_dev_runs C1 keeps reporting it.
   Planck's tokenizer does not exist and Phase 1 fixes it around Oct 18, after the lock window. So the lock fixes the
     RULE, not a hash: each checkpoint is scored with the tokenizer and ChatTemplate it was trained with, both recorded
     by hash in its run config and published with every scored run. The s3 token budget is then measured, not proxied.
@@ -681,10 +994,10 @@ becomes training text). The two share the label D8 by accident.
     full check order re-run (notes STEP 8).
   Every dev baseline and scored run needs its OWN --own-cf run (same seeds, same training seed); without it R is None
     (OD1).
-  Also OPEN, needing Max's judgment before the lock (s17 OD6 follow-up; s19 item 4), listed here so none reaches the
-    lock undecided: F3 (strict case (d) as widened, s6: a right answer equal to an earlier reply of the model, any
-    family; decided after the dev baselines' equality_only counts); PERSIST's graded P turns that reuse a statement
-    filler (46 dev turns, kind P, asking; s17 (2)); a near-duplicate rate reported beside the loop rate (s17 (4)).
+  DECIDED 2026-10-02 (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (items 10, 11, 12)),
+    formerly open here: F3 stays strict (option (i); s6 (d), s17 (3)); PERSIST's graded P turns that reuse a statement
+    filler (46 dev turns) stay asking (s17 (2)); a near-duplicate rate is reported beside the loop rate, never gated
+    (s7, s17 (4)).
   DONE 2026-09-26 (second verifier review, notes STEP 8 round 2): the F3 measurement (graders.eq_only, score.py
     equality_only, fakes RESTATE, TERSE_VAL, TERSE_VAL_CTRL in validate_machinery c_ackrep), the one-word parrot
     fixture and the missing-asks refusal test, 5 grader mutants, mutants_e2e #85-#87, mutation_e2e in 8 parts.
@@ -774,7 +1087,7 @@ becomes training text). The two share the label D8 by accident.
       the equality set since, and s7 states the rule as it now stands.)
       Follow-up (verifiers' review, 2026-09-25 night; not ruled by Max; (1) and (2) decided by Claude under Max's
       standing permission as F1 and F2, (3) left open as F3 and widened 2026-09-26, (4) added 2026-09-26 and open;
-      each reversible by Max before the lock):
+      each reversible by Max before the lock; (3), (4) and the P-turn question under (2) DECIDED by Max 2026-10-02):
         (1) Answer repeats. An identical statement-turn reply is an ack-repeat even when it copies an earlier ANSWER.
             PARROT (IDEAL, but its last short answer again on every later statement turn) has loop rate 0 and meets
             the Level A loop criterion; only its answer-repeat rate (0.19 on dev at STEP 7, before F1 and F2;
@@ -820,6 +1133,10 @@ becomes training text). The two share the label D8 by accident.
             Not covered by F2 (open, not decided): PERSIST's graded P turns reuse filler text (216 dev P turns, 46
             of them statement fillers). They stay kind P, which asks under the ruling, so an identical reply to two
             of them is a LOOP and fails G-FMT's freshness clause (f1_degen), as it did before F2.
+            DECIDED 2026-10-02 (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 11)):
+            option (a), they stay asking turns. Measured over the 13 dev models and 3 seeds: 1,794 such turns, 89
+            replies equal an earlier reply, and only 2 would be exempt if the turns were marked non-asking; option (b)
+            would need a dev rebuild, a new dev hash and the full check order.
         (3) The terse OWN restatement, strict case (d) of s6: measure its rate on the dev baselines first.
             DECIDED 2026-09-25 by Claude under Max's standing permission (reversible before the lock): F3 stays
             open. Strict case (d) (a terse OWN restatement of the model's own Q reply, charged as a LOOP) is measured
@@ -839,11 +1156,20 @@ becomes training text). The two share the label D8 by accident.
             or the OWN Q turn): it would cover RESTATE, TERSE_VAL and the OWN case. Self-copy is unchanged under
             each option, so a 12+ word restatement stays a LOOP (27 of RESTATE's 48 TOPIC probes fail by self-copy
             as well).
-        (4) Near-duplicates (second verifier review, 2026-09-26; OPEN, not decided). The rule charges only verbatim
-            repeats and 12+ word copies (s7), so a parrot with one word added escapes it: PARROT_PLUS loop 0.0052,
-            criterion met, answer-repeat 0; NEAR_D (a canned non-answer with the turn number on every asking D turn)
-            loop 0. Option: a near-duplicate rate (for example a short reply within one word of an earlier one)
+            DECIDED 2026-10-02 (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 10)):
+            (i), keep strict. The dev counts (s6 (d)): Qwen2.5's 62 equality-only probes are one refusal repeated on
+            LOOP turns, a loop under every option; no other model has more than 18; (ii) would change 1 probe over the
+            13 models, (iii) at most 29. The training pipeline can avoid teaching Planck terse restatements as
+            acknowledgements.
+        (4) Near-duplicates (second verifier review, 2026-09-26; DECIDED 2026-10-02, below). The rule charges only
+            verbatim repeats and 12+ word copies (s7), so a parrot with one word added escapes it: PARROT_PLUS loop
+            0.0052, criterion met, answer-repeat 0; NEAR_D (a canned non-answer with the turn number on every asking D
+            turn) loop 0. Option: a near-duplicate rate (for example a short reply within one word of an earlier one)
             reported beside the loop rate, never gated, before the lock; or leave the rule as it is and say so.
+            DECIDED 2026-10-02 (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 12)): the
+            near-duplicate rate is reported beside the loop rate and never gated (s7 NEAR-DUPLICATE;
+            rc12/grade_loop.near_dup with fixtures and 10 mutants, rc12/test_near_dup.py). The loop rule itself is
+            unchanged.
       (1) and (2) were taken together, as suggested: under (1) alone a statement-turn reply that repeated a reply to
       a small-talk D statement counted as a LOOP.
   OD7 Strict cases (a) and (b) of s6 (right answer plus another candidate with its right owner; "X, not Y or Z").
@@ -900,10 +1226,13 @@ becomes training text). The two share the label D8 by accident.
   OD6) and the mutant files updated. Check order re-run: see rc12/notes.txt STEP 7. F1 and F2 (s17 OD6 follow-up)
   decided and implemented, check order re-run: notes F1 and STEP 8; F3 open (widened 2026-09-26, its measurement
   built: notes STEP 8 round 2).
-  2 Parity check and engines (s16). 3 Dev baselines: every panel model, template and plain, 3 seeds and greedy; OWN
-  also under --own-cf (required by OD1: without it R is None). 4 Headroom, re-anchor, PERSIST drop list, strict-case
-  rates (strict case (d) as widened: score.py equality_only per family); Max decides the open OD6 follow-ups
-  (s16: F3, the PERSIST P-turn statement fillers, the near-duplicate report); results written here; any rebuild
-  re-runs every gate. 5 Sizing rule. 6 Sealed session (s13 S1-S8). 7 OOD-H
-  Part 1 (IDs hashed). 8 Final pass on this file: every (proposal) resolved, every OPEN closed, DRAFT removed. 9 Push,
-  release, Software Heritage snapshot, key copies checked in both places.
+  2 Parity check and engines (s16): DONE (notes STEP 9b, 9c); the GPU rerun check (s4) ran 2026-10-04 (STEP 11c: R2
+  passes, R1 fails on both engine families; its reading is Max's, s4). 3 Dev
+  baselines: every panel model, template and plain, 3 seeds and greedy; OWN also under --own-cf (required by OD1:
+  without it R is None): DONE 2026-10-02 for the 13 models (notes STEP 10a), regraded after item 3 (STEP 11). 4
+  Headroom, re-anchor, PERSIST drop list, strict-case rates (strict case (d) as widened: score.py equality_only per
+  family); Max decides the open OD6 follow-ups (s16: F3, the PERSIST P-turn statement fillers, the near-duplicate
+  report); results written here; any rebuild re-runs every gate: DONE 2026-10-02 (s10, s11, s17; Max took every
+  recommendation of rc12/DECISIONS_FOR_MAX.md; no rebuild). 5 Sizing rule: DONE, 600 (s9). 6 Sealed session (s13
+  S1-S8). 7 OOD-H Part 1 (IDs hashed). 8 Final pass on this file: every (proposal) resolved, every OPEN closed, DRAFT
+  removed. 9 Push, release, Software Heritage snapshot, key copies checked in both places.

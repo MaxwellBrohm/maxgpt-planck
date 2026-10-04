@@ -35,18 +35,69 @@ def conv_seed(seed, rid, turn):
     return int(hashlib.md5(f"{seed}:{rid}:{turn}".encode()).hexdigest()[:8], 16)
 
 
+def set_template(tok, chat_template):
+    """engines.json "chat_template" (notes STEP 11, item 14): the model's documented chat format for a checkpoint
+    that ships none (Loom-Spark-3.2, its card's <user> / <loom> format). None leaves the tokenizer's own template;
+    a string replaces it before any prompt is built. Returns what was set (None = the tokenizer's own)."""
+    if chat_template is None:
+        return None
+    if not isinstance(chat_template, str) or not chat_template:
+        raise ValueError(f"chat_template must be a non-empty string, not {chat_template!r}")
+    tok.chat_template = chat_template
+    return chat_template
+
+
+def _zero_nans(module, inputs, out):
+    t = out[0] if isinstance(out, tuple) else out
+    t.masked_fill_(t.isnan(), 0.0)
+
+
+def guard_nans(model, cls_name):
+    """engines.json "nan_guard" (hf / hfb; notes STEP 11, ITEM 14): a forward hook on every module of class cls_name
+    sets NaN in its output to 0. For remote code whose attention fills masked scores with -inf (Swen-28M): under left
+    padding a pad query sees only masked keys, its softmax is NaN, and the NaN reaches real rows through the next
+    layer's value product (0 x NaN). With the hook a pad row's attention output is 0 and real rows never see a NaN;
+    a real row's own scores are never all masked, so its numbers are unchanged. None: no hook. Returns the count."""
+    if cls_name is None:
+        return 0
+    if not isinstance(cls_name, str) or not cls_name:
+        raise ValueError(f"nan_guard must be a module class name, not {cls_name!r}")
+    mods = [m for _, m in model.named_modules() if type(m).__name__ == cls_name]
+    if not mods:
+        raise ValueError(f"nan_guard: no module of class {cls_name} in {type(model).__name__}")
+    for m in mods:
+        m.register_forward_hook(_zero_nans)
+    return len(mods)
+
+
+def set_use_cache(model, use_cache):
+    """engines.json "use_cache" (hf / hfb; notes STEP 11, ITEM 14): a bool sets model.config.use_cache, which remote
+    code may read in prepare_inputs_for_generation. cRia-LM-75M-Instruct ships config.json use_cache false, so its
+    generate recomputes the whole prefix at every step although its own KV cache is wired in (CPU probe 2026-10-04:
+    3 of 3 greedy replies equal with and without the cache, 0.4 s vs 1.1-2.1 s each). None leaves the config."""
+    if use_cache is None:
+        return None
+    if type(use_cache) is not bool:
+        raise ValueError(f"use_cache must be a bool, not {use_cache!r}")
+    model.config.use_cache = use_cache
+    return use_cache
+
+
 class HFResponder:
     def __init__(self, model_id, render="template", dtype="bfloat16", device="cuda", trust_remote_code=False,
-                 attn_implementation=None):
+                 attn_implementation=None, chat_template=None, nan_guard=None, use_cache=None):
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
         self.torch, self.device, self.render = torch, device, render
         self.trust_remote_code = bool(trust_remote_code)
         attn = {} if attn_implementation is None else {"attn_implementation": attn_implementation}
         self.tok = AutoTokenizer.from_pretrained(model_id, trust_remote_code=self.trust_remote_code)
+        self.chat_template = set_template(self.tok, chat_template)
         self.model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=getattr(torch, dtype),
                                                           trust_remote_code=self.trust_remote_code, **attn)
         self.attn = getattr(self.model.config, "_attn_implementation", None)       # as loaded
+        self.nan_guard, self.nan_guarded = nan_guard, guard_nans(self.model, nan_guard)
+        self.use_cache = set_use_cache(self.model, use_cache)
         self.model.to(device).eval()
         self.has_template = bool(getattr(self.tok, "chat_template", None))
         if render == "template" and not self.has_template:

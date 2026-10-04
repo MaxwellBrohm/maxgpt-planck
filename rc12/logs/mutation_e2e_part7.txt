@@ -1,4 +1,4 @@
-RC-12 mutation_e2e.py part 7/8: 11 of 88 mutants, fresh process each, 175 s. No model.
+RC-12 mutation_e2e.py part 7/8: 13 of 104 mutants, fresh process each, 73 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #06 runner: dropped-turn off by one  <- trunc: ctx 556: verdict, runner's lost turns and the fake's history disagree [('rc12-dev-t0-008', 12), ('rc12-dev-t0-022', 12), ('rc12-dev-t0-029', 12
@@ -12,5 +12,7 @@ KILLED    #62 score: OD6 iii: ack-repeat-of-statements rate over every reply  <-
 KILLED    #70 score: OD1 b: a cf run of another responder is a twin  <- owngate: cf run of another responder: gated OWN not missing ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0})
 KILLED    #78 score: OD6 iii: --own-cf rows counted in the answer-repeat rate  <- ackrep: PARROT: --own-cf rows moved the ack-repeat or equality-only reports: [0.023471615720524017, 0.06209386281588448, 0.06980684513724161, {'T0': [
 KILLED    #86 score: F3 report: --own-cf rows counted  <- ackrep: ACKER: --own-cf rows moved the ack-repeat or equality-only reports: [0.17712882096069868, 0.46859205776173285, 0.0, {'T0': [0, 96], 'RECALL': 
-killed 11 | survived 0 | crashed 0 | malformed 0
+KILLED    #94 score: LOOKUP claim claimable with 1 seed, plain or greedy  <- scoring: LOOKUP claim claimable only with 3 training seeds, template, sampled: {'3 seeds': True, '2 seeds': True, 'plain': True, 'greedy': True}
+KILLED    #102 validate_e2e: G3 LOOKUP bar at 0.40: ORDER_ABS's 0.50 must trip the gate  <- G3 ORDER_ABS: LOOKUP=0.5 meets the LOOKUP claim bar (s10b)
+killed 13 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

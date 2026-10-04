@@ -69,14 +69,16 @@ class VLLMResponder:
 
     def __init__(self, model_id, render="template", dtype="bfloat16", gpu_memory_utilization=GPU_MEM,
                  max_model_len=None, batch_invariant=False, trust_remote_code=False,
-                 tokenizer=None, model_type=None, native=None, llm=None, sampling_params=None):
+                 tokenizer=None, model_type=None, native=None, llm=None, sampling_params=None, chat_template=None):
         """tokenizer / model_type / native / llm / sampling_params: injected by the tests (no transformers, no
-        vllm); left None, they are loaded from model_id."""
+        vllm); left None, they are loaded from model_id. chat_template: engines.json's (hf_responder.set_template),
+        set on the tokenizer that builds every prompt (vLLM gets token ids only)."""
         if tokenizer is None:
             from transformers import AutoConfig, AutoTokenizer
             tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=trust_remote_code)
             cfg = AutoConfig.from_pretrained(model_id, trust_remote_code=trust_remote_code)
             model_type, native = getattr(cfg, "model_type", ""), native_len(cfg)
+        self.chat_template = HR.set_template(tokenizer, chat_template)
         self.model_id, self.tok, self.render = model_id, tokenizer, render
         self.has_template = bool(getattr(tokenizer, "chat_template", None))
         if render == "template" and not self.has_template:

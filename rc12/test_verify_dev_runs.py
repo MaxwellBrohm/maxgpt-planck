@@ -4,6 +4,11 @@ then corrupts one copy per case and requires the verifier to report the named fa
 fails only C3 (SAMPLER's sampled replies ignore the seed value, which is exactly what C3 exists to catch), and a copy
 whose seed-2 turn-1 replies differ passes. meta: every run records decode = hf_responder.DECODE, an audit, and the
 dtype engines.json names for the model (it overrides --dtype).
+Rerun standard (rerun_tie.py; Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 2)): a
+stored reply changed at turn 2 is a first divergence; with a stub margin of 0.3 or 0.5 R1 / R2 PASS (near-tie <= 0.5),
+with 0.8 or none they FAIL; a stub is refused for a vLLM run before anything loads, and by the margins stage itself;
+hf_margins on a stub tokenizer: the first differing token, abs of the margin, a stopped prefix against the stop id,
+none for a capped prefix or equal ids; history() drops the fitted-out pairs.
 Run: python3 -B test_verify_dev_runs.py   (exit 1 on any failure)"""
 import json
 import os
@@ -11,8 +16,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import types
 
 import hf_responder as HR
+import rerun_tie as RT
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 P = "SAMPLER/plain/"
@@ -88,10 +95,63 @@ CASES = [  # (name, run dir, corruption, text the verifier must print, --rerun?)
 ]
 
 
-def verify(root, rerun=False):
+TIE_CASES = [  # (name, run dir, corruption, --tie-margin-stub, text that must appear, text that must not)
+    ("near-tie sampled", P + "1", m_reply, 0.3, "PASS R1 seed 1 lockstep replay vs stored: 2 / 3", "FAIL R1"),
+    ("near-tie boundary", P + "1", m_reply, 0.5, "PASS R1 seed 1 lockstep replay vs stored: 2 / 3", "FAIL R1"),
+    ("past the tie", P + "1", m_reply, 0.8, "FAIL R1 seed 1 lockstep replay vs stored: 2 / 3", "PASS R1"),
+    ("near-tie greedy", P + "greedy", m_reply, 0.3, "PASS R2 greedy lockstep replay vs stored greedy run: 2 / 3",
+     "FAIL R2"),
+    ("stub on vLLM", P + "1", None, 0.3, "FAIL R: --tie-margin-stub is for fake engines only", "R replay stage"),
+]
+
+
+def verify(root, rerun=False, extra=()):
     cmd = [sys.executable, "-B", "verify_dev_runs.py", "--root", root, "--model", "SAMPLER", "--render", "plain",
            "--no-prompt", "--engines", os.path.join(root, "engines.json")] + (["--rerun", "3"] if rerun else [])
+    cmd += list(extra)
     return subprocess.run(cmd, cwd=HERE, capture_output=True, text=True, timeout=300)
+
+
+def c_stage_refusal(base):
+    """the margins stage itself refuses a stub for a non-fake replay (defense behind check()'s refusal)."""
+    d = os.path.join(base, "stage")
+    os.makedirs(d, exist_ok=True)
+    json.dump(dict(engine="vllm", hf={}, comparisons=[], info=[]), open(os.path.join(d, "replay.json"), "w"))
+    p = subprocess.run([sys.executable, "-B", "rerun_tie.py", "--stage", "margins", "--dir", d, "--model", "x",
+                        "--render", "plain", "--tie-margin-stub", "0.3"], cwd=HERE, capture_output=True, text=True)
+    ok = p.returncode != 0 and "fake engines only" in p.stderr and not os.path.exists(os.path.join(d, "margins.json"))
+    return [] if ok else [f"margins stage took a stub for vLLM: exit {p.returncode} {p.stderr[-200:]}"]
+
+
+def c_margins():
+    """hf_margins and history() on a stub tokenizer and margin function (no model)."""
+    voc = {}
+
+    class Tok:
+        def encode(self, text, add_special_tokens=False):
+            return [voc.setdefault(w, len(voc) + 10) for w in text.split()]
+    h = types.SimpleNamespace(tok=Tok(), encode=lambda hist: [1] * len(hist), stop_ids=[2])
+    calls = []
+
+    def margin(h_, prompt, prefix, a, b):
+        calls.append((len(prompt), list(prefix), a, b))
+        return (-0.4 if b != 2 and a != 2 else 0.2), 0
+    hist = [{"role": "user", "content": "u"}]
+    divs = [dict(history=hist, a="x y z", b="x q z", stop_a="eos", stop_b="eos"),
+            dict(history=hist, a="x y", b="x y w", stop_a="eos", stop_b="cap"),
+            dict(history=hist, a="x y", b="x y w", stop_a="cap", stop_b="eos"),
+            dict(history=hist, a="x y", b="x y", stop_a="eos", stop_b="cap")]
+    got = RT.hf_margins(h, divs, margin)
+    fails = []
+    v = voc
+    want_calls = [(1, [v["x"]], v["y"], v["q"]), (1, [v["x"], v["y"]], 2, v["w"])]
+    if got != [0.4, 0.2, None, None] or calls != want_calls:
+        fails.append(f"hf_margins: {got} calls {calls} want [0.4, 0.2, None, None] {want_calls}")
+    row = dict(turns=[dict(user=f"u{i}", reply=f"a{i}", dropped=0 if i < 3 else 1) for i in range(1, 5)])
+    hs = RT.history(row, 3)
+    if [m["content"] for m in hs] != ["u2", "a2", "u3", "a3", "u4"]:
+        fails.append(f"history with one dropped pair: {[m['content'] for m in hs]}")
+    return fails
 
 
 def main():
@@ -130,6 +190,19 @@ def main():
     p = verify(root)
     if p.returncode != 0 or "INFO C3 turn-1 replies identical, 1 vs 2: 0 / 640" not in p.stdout:
         fails.append(f"seed-dependent copy: exit {p.returncode}\n{p.stdout[-600:]}")
+    for name, d, act, stub, want, never in TIE_CASES:
+        root = os.path.join(base, "case")
+        shutil.rmtree(root, ignore_errors=True)
+        shutil.copytree(src, root)
+        if act is None:
+            for x in os.listdir(os.path.join(root, P)):
+                edit_meta(os.path.join(root, P, x), lambda m: m.update(engine="vllm"))
+        else:
+            edit_rows(os.path.join(root, d), act)
+        p = verify(root, True, ["--tie-margin-stub", str(stub)])
+        if want not in p.stdout or never in p.stdout:
+            fails.append(f"{name}: {want!r} missing or {never!r} printed\n{p.stdout[-700:]}{p.stderr[-300:]}")
+    fails += c_stage_refusal(base) + c_margins()
     shutil.rmtree(base, ignore_errors=True)
     for f in fails:
         print("FAIL", f)

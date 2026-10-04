@@ -1,0 +1,200 @@
+{
+ "_what": "RC-12 item 14 extras (rc12/notes.txt STEP 11; Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 14)): sub-30M public chat models (and cRia-75M) added as REPORTED extras, not headroom-panel members. Pinned from the Hugging Face API on 2026-10-02 from the Mac (metadata, card, config, tokenizer config and chat template only); weights downloaded on the PC only (HF cache ~/planck/hf, branch main, after checking free disk), where refs/main equalled the pinned revision and model.safetensors' sha256 equalled the hub's LFS sha256 for all ten. The runs load by repo id with HF_HUB_OFFLINE=1, i.e. exactly this snapshot. Licence checked at the pinned revision: Apache-2.0 or MIT for all ten. The 13 STEP 10a panel models are not pinned in this file.",
+ "skipped": {
+  "ReactiveAI/RxT-Alpha-Nano": "licence other (raml-v1.0, non-commercial), gated (click-through); item 14: skip unless Max accepts it, and he did not",
+  "ReactiveAI/RxT-Alpha-Micro-Supervised": "same as RxT-Alpha-Nano (raml-v1.0, gated)",
+  "BananaMind/BananaMind-2-Pro-Preview-Chat": "optional in research/NOVELTY_2026-10.md s3 and not in item 14's list; not added"
+ },
+ "models": {
+  "veyra-ai/Veyra2-Blueberry-5M-Instruct": {
+   "revision": "c36021703fcb1caa7bb343e1daac61e425ba5f80",
+   "license": "apache-2.0",
+   "license_evidence": "card YAML license: apache-2.0; card section 'License': Apache 2.0",
+   "created": "2026-09-28",
+   "last_modified": "2026-10-02",
+   "params": 4984192,
+   "weights": {
+    "file": "model.safetensors",
+    "dtype": "F32 (safetensors header)",
+    "bytes": 19942888,
+    "sha256": "f0caef1062e2f8cdd8e5c850efb7d0c15b857bef7f307763d934cda7dc9bab93"
+   },
+   "architecture": "Qwen3ForCausalLM",
+   "custom_code": false,
+   "ctx": 4096,
+   "checkpoint_dtype": "float32",
+   "chat_template": "chat_template.jinja at this revision"
+  },
+  "BananaMind/BananaMind-2-Nano-Chat": {
+   "revision": "6def7ab4d1bd8449d9b75b62bfb174f73d3a8ad6",
+   "license": "apache-2.0",
+   "license_evidence": "card YAML license: apache-2.0; card section 'License': Apache 2.0; not gated (the gated item is the separate BananaMind-Instruct-Bench dataset, not used)",
+   "created": "2026-07-22",
+   "last_modified": "2026-07-22",
+   "params": 9968128,
+   "weights": {
+    "file": "model.safetensors",
+    "dtype": "F32 (safetensors header)",
+    "bytes": 39883928,
+    "sha256": "f6a23feeb8fef8e18523122cb41496f62c151c4ae9a6fd9fc4e3c7787619da41"
+   },
+   "architecture": "BananaMind2NanoForCausalLM",
+   "custom_code": true,
+   "ctx": 4096,
+   "checkpoint_dtype": "float32",
+   "chat_template": "chat_template.jinja at this revision"
+  },
+  "veyra-ai/Veyra2-Blueberry-10M-Instruct": {
+   "revision": "8f8d91cab7cff3917659b7a7197d9b466c971d40",
+   "license": "apache-2.0",
+   "license_evidence": "card YAML license: apache-2.0; card section 'License': Apache 2.0",
+   "created": "2026-09-28",
+   "last_modified": "2026-10-02",
+   "params": 9976832,
+   "weights": {
+    "file": "model.safetensors",
+    "dtype": "F32 (safetensors header)",
+    "bytes": 39915848,
+    "sha256": "359a076c21aabe5bf9e4e2d8c8d3ff0418eb30ba9df72d021ecf8d211e99808d"
+   },
+   "architecture": "Qwen3ForCausalLM",
+   "custom_code": false,
+   "ctx": 4096,
+   "checkpoint_dtype": "float32",
+   "chat_template": "chat_template.jinja at this revision"
+  },
+  "VertexResearch/Vertex-0.6-15M-Instruct": {
+   "revision": "6c46634f96f88402ad89d19740ed4c43b1cb208e",
+   "license": "apache-2.0",
+   "license_evidence": "card YAML license: apache-2.0",
+   "created": "2026-09-06",
+   "last_modified": "2026-09-06",
+   "params": 14957568,
+   "weights": {
+    "file": "model.safetensors",
+    "dtype": "F32 (safetensors header)",
+    "bytes": 59842400,
+    "sha256": "86bd13957663706c671c765e9d9e99207bf4027deb7ac761206de113f974d4d3"
+   },
+   "architecture": "Qwen3ForCausalLM",
+   "custom_code": false,
+   "ctx": 2048,
+   "checkpoint_dtype": "float32",
+   "chat_template": "chat_template.jinja at this revision"
+  },
+  "veyra-ai/Veyra2-Mango-15M-Instruct": {
+   "revision": "82de125c199e1c6088c0978ebe53608d69f32725",
+   "license": "apache-2.0",
+   "license_evidence": "card YAML license: apache-2.0; card section 'License': Apache 2.0",
+   "created": "2026-09-28",
+   "last_modified": "2026-10-02",
+   "params": 15735168,
+   "weights": {
+    "file": "model.safetensors",
+    "dtype": "F32 (safetensors header)",
+    "bytes": 62948736,
+    "sha256": "670b46f290027e862f5f1720d80fed0380d45bed19e8ab5957d238787ccce039"
+   },
+   "architecture": "LlamaForCausalLM",
+   "custom_code": false,
+   "ctx": 4096,
+   "checkpoint_dtype": "float32",
+   "chat_template": "chat_template.jinja at this revision"
+  },
+  "textilelabs/Loom-Spark-3.2": {
+   "revision": "226570974dcfd5a7f0165e86dc59869a4bbbe47a",
+   "license": "mit",
+   "license_evidence": "card YAML license: mit; LICENSE file (MIT, Textile Labs) in the repo at this revision; card: 'Model: MIT. Training data retains its original licences'",
+   "created": "2026-10-01",
+   "last_modified": "2026-10-01",
+   "params": 22827840,
+   "weights": {
+    "file": "model.safetensors",
+    "dtype": "F32 (safetensors header)",
+    "bytes": 91331168,
+    "sha256": "eb9320e1e65ea4ee905b63e57da9fe303bea2a4c5e29ef178f494caa0d79f422"
+   },
+   "architecture": "LlamaForCausalLM",
+   "custom_code": false,
+   "ctx": 2048,
+   "checkpoint_dtype": "float32",
+   "chat_template": "none shipped; engines.json carries the card's <user>/<loom> format, tools off"
+  },
+  "BananaMind/BananaMind-2-Mini-Chat": {
+   "revision": "121fb22f6307f6b8be1976719357661be009628d",
+   "license": "apache-2.0",
+   "license_evidence": "card YAML license: apache-2.0; card section 'License': Apache 2.0; not gated (the gated item is the separate BananaMind-Instruct-Bench dataset, not used)",
+   "created": "2026-07-22",
+   "last_modified": "2026-07-22",
+   "params": 25178752,
+   "weights": {
+    "file": "model.safetensors",
+    "dtype": "F32 (safetensors header)",
+    "bytes": 100731072,
+    "sha256": "eb4ad342c45820929ac72e5b778b2a1d7f7329ee57e51d63eaa012dfbd9d61ae"
+   },
+   "architecture": "BananaMind2MiniForCausalLM",
+   "custom_code": true,
+   "ctx": 4096,
+   "checkpoint_dtype": "float32",
+   "chat_template": "chat_template.jinja at this revision"
+  },
+  "Sensente/Swen-28M": {
+   "revision": "f35bc2f5afe70ae9435798f0582caa51f85f69e0",
+   "license": "mit",
+   "license_evidence": "card YAML license: mit; LICENSE file (MIT) in the repo at this revision; card: weights and custom code under MIT",
+   "created": "2026-07-24",
+   "last_modified": "2026-08-21",
+   "params": 28844544,
+   "weights": {
+    "file": "model.safetensors",
+    "dtype": "F32 (safetensors header)",
+    "bytes": 115386272,
+    "sha256": "a8443932e20b6851afdc67486f2dc3f1c6149c353b9eed382f08f7a4675a9dac"
+   },
+   "architecture": "SwenForCausalLM",
+   "custom_code": true,
+   "ctx": 32768,
+   "checkpoint_dtype": "float32",
+   "chat_template": "chat_template.jinja at this revision"
+  },
+  "veyra-ai/Veyra2-Mango-30M-Instruct": {
+   "revision": "43d0d1121a1aff83ce3ceee4f9783e0f3e88813f",
+   "license": "apache-2.0",
+   "license_evidence": "card YAML license: apache-2.0; card section 'License': Apache 2.0",
+   "created": "2026-09-28",
+   "last_modified": "2026-10-02",
+   "params": 30683520,
+   "weights": {
+    "file": "model.safetensors",
+    "dtype": "F32 (safetensors header)",
+    "bytes": 122750120,
+    "sha256": "49d1f2c3fcfb2d9b34f10f82a24013d89bd0f26e53eeb75504c7fa87a968c534"
+   },
+   "architecture": "LlamaForCausalLM",
+   "custom_code": false,
+   "ctx": 4096,
+   "checkpoint_dtype": "float32",
+   "chat_template": "chat_template.jinja at this revision"
+  },
+  "sz14/cRia-LM-75M-Instruct": {
+   "revision": "f2daba0c5760e9b86d760a39a2ad3579ee044aa0",
+   "license": "apache-2.0",
+   "license_evidence": "card YAML license: apache-2.0; card section 'License': Apache License 2.0",
+   "created": "2026-09-11",
+   "last_modified": "2026-09-19",
+   "params": 75719395,
+   "weights": {
+    "file": "model.safetensors",
+    "dtype": "F32 (safetensors header)",
+    "bytes": 302907132,
+    "sha256": "4739a6ee5e9619e8e7fc74761978a67f0ba7dfa5aa5c5fbe1a6b4b240ff55feb"
+   },
+   "architecture": "RRTForCausalLM",
+   "custom_code": true,
+   "ctx": 4096,
+   "checkpoint_dtype": "float32",
+   "chat_template": "chat_template.jinja at this revision"
+  }
+ }
+}

@@ -1,4 +1,4 @@
-RC-12 mutation_e2e.py part 6/8: 11 of 88 mutants, fresh process each, 160 s. No model.
+RC-12 mutation_e2e.py part 6/8: 13 of 104 mutants, fresh process each, 75 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #05 runner: needed turn kinds narrowed  <- trunc: ctx 556: verdict, runner's lost turns and the fake's history disagree [('rc12-dev-lookup-001', 11), ('rc12-dev-lookup-002', 9), ('rc12-dev-look
@@ -12,5 +12,7 @@ KILLED    #61 score: OD6 iii: ack-repeats never counted  <- ackrep: ACKER ack-re
 KILLED    #69 score: OD1 b: a cf rewrite that did not take still counts  <- owngate: random units: OWN_GATED:pick 0.3671875, per-unit AND 0.3359
 KILLED    #77 score: OD6 iii: --own-cf rows counted in the ack-repeat rates  <- ackrep: ACKER: --own-cf rows moved the ack-repeat or equality-only reports: [0.17029352226720648, 0.45611657065401556, 0.0, {'T0': [0, 96], 'RECALL': 
 KILLED    #85 score: F3 report: every failing probe counted as equality-only (RESTATE's self-copies too)  <- ackrep: RESTATE: loop 0.060043668122270744 (want 0.060043668122270744), failing probes 440, equality-only {'T0': [96, 96], 'RECALL': [60, 72], 'CORR':
-killed 11 | survived 0 | crashed 0 | malformed 0
+KILLED    #93 score: LOOKUP claim: exactly 0.60 misses  <- scoring: LOOKUP claim bar is not 0.60 inclusive: {0.6: False, 0.5999: False}
+KILLED    #101 score_stats: LOOKUP CI: training seeds not resampled  <- stats: LOOKUP CI does not resample training seeds (rates 1.0 / 0.5 / 0.0): {'value': 0.5, 'lo': 0.4513888888888889, 'hi': 0.5486111111111112, 'n': 200
+killed 13 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

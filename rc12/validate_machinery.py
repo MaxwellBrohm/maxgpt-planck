@@ -9,8 +9,11 @@ Each check returns a list of failure strings; main() writes logs/e2e_machinery.t
              ctx 4096 gives the same rows as no limit
   seeds      SAMPLER: runs keep their seed; sampling seeds are scored by default, greedy only on request
   scoring    T0 / K / COMPOSE excluded from R; BIND unit = pair; nested seed means; Level A comparator and
-             claimability; K gap
-  stats      headroom floor / ceiling, paired bootstrap and Level R, PERSIST base rates, sensitivity row
+             claimability; K gap; the LOOKUP claim (Max, 2026-10-04; s10b): its value, P / X rates and cells, its
+             independence from R both ways, the 0.60 bar inclusive, claimable only with 3 training seeds, the
+             template render and sampled rows
+  stats      headroom floor / ceiling, paired bootstrap and Level R, PERSIST base rates, sensitivity row; the
+             LOOKUP claim's CI (units, training seeds and sampling seeds resampled)
   hf         hf_responder imports without torch and keeps HF_TESTED True (notes STEP 9b); runner refuses it
              without --hf-untested-ok
   owncf      the OWN counterfactual-history diagnostic (step 5 audit, own_cf.py); padded, blank-bulleted and
@@ -164,6 +167,39 @@ def c_scoring(recs):
     check(not S.summarize(ideal, comparator=si)["level_a_claimable"] and
           S.summarize(three, comparator=si)["level_a_claimable"], "claimable needs 3 training seeds", out)
     check(si["k"]["gap"] == 0 and si["own_source_fail"] == 0, "K gap / OWN source-fail rate", out)
+    # Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 1: LOOKUP out of R, 9 equal
+    # families; item D: the four Level A content bars at 0.60, inclusive)
+    zero = lambda fam: [dict(r, unit=0.0) if r["family"] == fam else r for r in ideal]  # noqa: E731
+    lk, co = S.summarize(zero("LOOKUP")), S.summarize(zero("CORR"))
+    check(lk["R_ungated"] == 100 and lk["keys"]["LOOKUP"] == 0 and "LOOKUP" not in lk["families"]
+          and abs(co["R_ungated"] - 800 / 9) < 1e-9, f"LOOKUP out of R / 9 families: R with LOOKUP 0 "
+          f"{lk['R_ungated']}, with CORR 0 {co['R_ungated']} (want 100, 88.89)", out)
+    bar = {v: S.level_a(dict.fromkeys(S.LEVEL_A, v), 0.0, 0.0)[0]["CORR:U"]["met"] for v in (0.60, 0.5999)}
+    check(bar == {0.60: True, 0.5999: False}, f"Level A content bar is not 0.60 inclusive: {bar}", out)
+    # Max, 2026-10-04: LOOKUP is its own headline claim (prereg draft s10b), beside R and never in it
+    lc = si["lookup_claim"]
+    check(lc["value"] == 1 and lc["met"] and not lc["claimable"] and lc["P"] == 1 and lc["X"] == 1
+          and len(lc["why_not"]) == 3 and set(lc["cells"]) == {"rota", "tour", "menu"},
+          f"LOOKUP claim on IDEAL (plain, greedy, 1 training seed): {lc}", out)
+    only = S.summarize([r if r["family"] == "LOOKUP" else dict(r, unit=0.0) for r in ideal])
+    check(only["R_ungated"] == 0 and only["lookup_claim"]["met"] and lk["lookup_claim"]["value"] == 0
+          and not lk["lookup_claim"]["met"], f"LOOKUP claim reads R, or R reads LOOKUP: only LOOKUP right -> R "
+          f"{only['R_ungated']}, claim {only['lookup_claim']['value']}; LOOKUP 0 -> claim {lk['lookup_claim']['value']}",
+          out)
+    abr = run([r for r in recs if r["family"] == "LOOKUP"], "ABSTAIN")
+    ab = S.summarize(abr)["lookup_claim"]
+    want = {k: S.mean(p["ok"] for r in abr for p in r["probes"] if p["kind"] == k) for k in ("P", "X")}
+    check(ab["P"] == want["P"] == 0 and ab["X"] == want["X"] > 0 and ab["value"] == 0,
+          f"LOOKUP P / X probe rates (ABSTAIN): {ab}, counted here {want}", out)
+    tmpl = [dict(r, render="template", seed=1, train_seed=t) for t in (0, 1, 2) for r in ideal
+            if r["family"] == "LOOKUP"]
+    claim = {k: S.summarize(rs)["lookup_claim"]["claimable"] for k, rs in (
+        ("3 seeds", tmpl), ("2 seeds", [r for r in tmpl if r["train_seed"] < 2]),
+        ("plain", [dict(r, render="plain") for r in tmpl]), ("greedy", [dict(r, seed=None) for r in tmpl]))}
+    check(claim == {"3 seeds": True, "2 seeds": False, "plain": False, "greedy": False},
+          f"LOOKUP claim claimable only with 3 training seeds, template, sampled: {claim}", out)
+    bar = {v: S.lookup_claim({"LOOKUP": v}, tmpl, 3)["met"] for v in (0.60, 0.5999)}
+    check(bar == {0.60: True, 0.5999: False}, f"LOOKUP claim bar is not 0.60 inclusive: {bar}", out)
     k = S.summarize(run(recs, "WORDING"))["keys"]
     check(k["CORR:U-diff"] != k["CORR:U-same"] and k["CORR:U"] == (k["CORR:U-diff"] + k["CORR:U-same"]) / 2,
           "CORR:U is not U-diff and U-same pooled", out)
@@ -205,9 +241,29 @@ def c_stats(recs):
           f"PERSIST base rates {rates}", out)
     check(ST.persist_drops({"IDEAL": rates}) == ["one_sentence:None"], "PERSIST drop list", out)
     sens = ST.sensitivity(sm["IDEAL"], sm["FIRST"])
-    check(sorted(sens["dropped"]) == ["BIND", "LOOKUP", "OWN", "PERSIST"] and sens["R"] == 100, "sensitivity", out)
+    check(sorted(sens["dropped"]) == ["BIND", "OWN", "PERSIST"] and sens["R"] == 100, "sensitivity", out)
     check(ST.sensitivity(sm["IDEAL"], sm["ECHO"])["R"] is None, "sensitivity with an all-floor comparator", out)
     check(ST.sensitivity(S.summarize(base["IDEAL"]), sm["FIRST"])["R"] is None, "sensitivity without the cf rows", out)
+    # the LOOKUP claim's CI (Max, 2026-10-04; prereg draft s10b): units and both seed levels resampled
+    lkr = [r for r in recs if r["family"] == "LOOKUP"]
+    ci = ST.lookup_ci(rows["IDEAL"], n=200)
+    check(ci["lo"] == ci["hi"] == ci["value"] == 1 and ci["units"] == 48, f"LOOKUP CI on IDEAL {ci}", out)
+    oa = run(lkr, "ORDER_ABS")
+    ci = ST.lookup_ci(oa, n=2000)
+    check(ci["value"] == 0.5 and 0.30 <= ci["lo"] <= 0.42 and 0.58 <= ci["hi"] <= 0.70,
+          f"LOOKUP CI does not resample units (ORDER_ABS, 24 of 48 right; want about 0.36 to 0.64): {ci}", out)
+    mix = [dict(r, train_seed=t) for t, src in enumerate((run(lkr, "IDEAL"), oa, run(lkr, "ABSTAIN"))) for r in src]
+    ci = ST.lookup_ci(mix, n=2000)
+    check(ci["value"] == 0.5 and ci["lo"] <= 0.2 and ci["hi"] >= 0.8,
+          f"LOOKUP CI does not resample training seeds (rates 1.0 / 0.5 / 0.0): {ci}", out)
+    # one training seed, three sampling seeds at 1.0 / 0.5 / 0.0 (verifier, 2026-10-04): wide only if they are resampled
+    mix = [dict(r, seed=s) for s, src in enumerate((run(lkr, "IDEAL"), oa, run(lkr, "ABSTAIN")), 1) for r in src]
+    try:                 # sampled rows only: a scorer that drops them leaves nothing to resample (report, not crash)
+        ci = ST.lookup_ci(mix, n=2000)
+    except Exception as e:  # noqa: BLE001
+        ci = dict(value=None, lo=None, hi=None, error=f"{type(e).__name__}: {e}"[:120])
+    check(ci["value"] == 0.5 and ci["lo"] is not None and ci["lo"] <= 0.2 and ci["hi"] >= 0.8,
+          f"LOOKUP CI does not resample sampling seeds (one training seed, rates 1.0 / 0.5 / 0.0): {ci}", out)
     try:
         ST.bootstrap_diff(base["IDEAL"], base["IDEAL"], n=10)
         out.append("bootstrap ran without the --own-cf rows (OD1 b)")

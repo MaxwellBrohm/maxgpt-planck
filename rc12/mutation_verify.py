@@ -11,7 +11,7 @@ import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-V, D = "verify_dev_runs.py", "dev_batch.py"
+V, D, T = "verify_dev_runs.py", "dev_batch.py", "rerun_tie.py"
 E004 = os.path.join(HERE, "..", "experiments", "E004_general_updating", "code")   # quick_shortcuts' import, by path
 ENV = dict(os.environ, PYTHONPATH=os.pathsep.join(p for p in (E004, os.environ.get("PYTHONPATH")) if p))
 MUTANTS = [
@@ -28,14 +28,35 @@ MUTANTS = [
     (V, 'kind = "FAIL" if common and same == len(common)', 'kind = "INFO" if common and same == len(common)',
      "seed-blind sampling passes"),
     (V, 'if len(run["rows"]) != m["conversations"] or', "if", "row count unchecked"),
-    (V, 'cmp(f"R1 seed {seed} lockstep replay vs stored", again, stored)', "pass", "no sampled replay"),
-    (V, 'cmp("R2 greedy lockstep replay vs stored greedy run", lock, greedy["rows"][:args.rerun])', "pass",
+    (T, 'comps.append(dict(tag=f"R1 seed {seed} lockstep replay vs stored", **divergences(again, stored)))', "pass",
+     "no sampled replay"),
+    (T, """comps.append(dict(tag="R2 greedy lockstep replay vs stored greedy run",""", "(dict(tag='x',",
      "no greedy replay"),
     (V, 'if a.get("vllm_default_sampling") not in ({}, None) or', "if", "vLLM defaults unchecked"),
     (V, 'if a.get("gen_config_stops_not_in_hf"):', "if False:", "gen-config stop ids unchecked"),
     (V, 'if a.get("sampled") != want or', "if", "vLLM kwargs unchecked"),
     (V, "if leak:", "if False:", "HF generation_config fields unchecked"),
-    (V, '(ta["reply"], ta["stop"]) != (tb["reply"], tb["stop"])]', "False]", "replay comparison blind"),
+    (T, 'if (ta["reply"], ta["stop"]) != (tb["reply"], tb["stop"])), None)', "if False), None)",
+     "replay comparison blind"),
+    # Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 2): the near-tie standard
+    (T, "ok = all(m is not None and m <= NEAR_TIE for m in ms)", "ok = all(m is not None for m in ms)",
+     "item 2: margins ignored (any divergence with a margin passes)"),
+    (T, "ok = all(m is not None and m <= NEAR_TIE for m in ms)", "ok = all(m is None or m <= NEAR_TIE for m in ms)",
+     "item 2: a divergence without a margin passes"),
+    (T, "ok = all(m is not None and m <= NEAR_TIE for m in ms)", "ok = not ms", "item 2: exact replay again"),
+    (T, "m <= NEAR_TIE for m in ms)", "m < NEAR_TIE for m in ms)", "item 2: a margin of exactly 0.5 fails"),
+    (T, 'if args.tie_margin_stub is not None and engine != "fake":', "if False:",
+     "item 2: a stub margin accepted for a real engine"),
+    (T, 'if rep["engine"] != "fake" and a.tie_margin_stub is not None:', "if False:",
+     "item 2: the margins stage takes a stub for a real engine"),
+    (T, "out.append(abs(margin(h, prompt, ta[:j], ta[j], tb[j])[0]))", "out.append(margin(h, prompt, ta[:j], ta[j], tb[j])[0])",
+     "item 2: a negative margin passes"),
+    (T, "out.append(abs(margin(h, prompt, ta[:j], ta[j], tb[j])[0]))",
+     "out.append(abs(margin(h, prompt, ta[:j], ta[0], tb[0])[0]))", "item 2: margin at the first token, not the split"),
+    (T, 'ok = st in ("eos", "eot") and stop is not None', "ok = False", "item 2: a stopped prefix has no margin"),
+    (T, 'ok = st in ("eos", "eot") and stop is not None', "ok = stop is not None", "item 2: a capped prefix gets one"),
+    (T, 'return msgs[2 * row["turns"][k]["dropped"]:]', "return msgs", "item 2: the fitted-out pairs kept"),
+    (T, "identical=same, divergences=out)", "identical=0, divergences=out)", "item 2: the identical share not reported"),
 ]
 
 

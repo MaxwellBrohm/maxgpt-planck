@@ -19,7 +19,8 @@ G-VAL clauses (a reply is right only if none fails):
               greeting vocative)
   v2_unsure   an unsure/deflecting phrase anywhere ("I'm not sure", "remind me", "you haven't told me")
   v3_other    another in-context value of the type is asserted; a STALE value of the asked object is allowed only
-              in a change phrase ("moved from Monday", "Monday was the old day") when the gold is asserted
+              in a change phrase ("moved from Monday", "Monday was the old day", and since 2026-10-02 a recap:
+              "Initially scheduled for Monday", "Previous: Monday") when the gold is asserted
   v3_guess    a value of the probe's pool that is NOT in the conversation is mentioned at all (a guess)
   v3_shotgun  every candidate (2+) is mentioned (not COMPOSE, whose answer compares the two holders)
   v4_voice    user voice: the gold bound to the first person (E001 captures) or "my" + an object/holder word
@@ -46,7 +47,11 @@ import pools_vals as V
 
 STOP = {"the", "a", "an", "of", "by", "on", "in", "at", "to", "for", "and", "my", "your", "is", "it", "that", "this"}
 NON_PERSON = ("user", "assistant", "world", None)
-STALE_BEFORE = T.rx(r"(?:\bfrom|\bchanged|\boriginally|\bpreviously|\bearlier|\bbefore|\bused to|\bwas|\bwere|\bold)"
+# Recap frames (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 3)): "Initially
+# scheduled for Tuesday", "the initial choice of orange", "Previous: Tuesday", "prior plan: Tuesday" are change
+# phrases too (s6), so initial(ly), previous and prior join the words before a stale value (notes STEP 10c).
+STALE_BEFORE = T.rx(r"(?:\bfrom|\bchanged|\boriginally|\bpreviously|\bearlier|\bbefore|\bused to|\bwas|\bwere|\bold"
+                    r"|\binitially|\binitial|\bprevious|\bprior)"
                     r"\W+(?:[\w']+\W+){0,3}$")
 STALE_AFTER = T.rx(r"^\W*(?:[\w']+\W+){0,1}(?:was|were|originally|previously|before|earlier|no longer)\b")
 
@@ -94,7 +99,7 @@ def g_val(reply, stop, prior, rec, probe, gold=None):
     fails = []
     if L.degenerate(reply, stop, prior, probe["kind"], L.turn_kinds(rec)[:len(prior)]):
         fails.append("v1_degen")
-    gold_ok = any(T.asserted_hits(text, g, pool) for g in gs)
+    gold_ok = any(T.asserted_hits(text, g, pool, gold=True) for g in gs)
     if not gold_ok:
         fails.append("v2_gold")
     if T.unsure(text):

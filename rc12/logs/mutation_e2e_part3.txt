@@ -1,4 +1,4 @@
-RC-12 mutation_e2e.py part 3/8: 11 of 88 mutants, fresh process each, 201 s. No model.
+RC-12 mutation_e2e.py part 3/8: 13 of 104 mutants, fresh process each, 89 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #02 runner: plain stop rule not applied  <- stops: CONTINUER plain: fake user turn not cut
@@ -12,5 +12,7 @@ KILLED    #58 score_stats: OD1 b: headroom judges the ungated OWN  <- owngate: h
 KILLED    #66 score: OD1 b: the gate takes the cf result alone (NEXT passes)  <- owngate: NEXT: bootstrap OWN slot not gated
 KILLED    #74 runner: OD1 b: the row drops the cf_unswapped mark  <- owngate: unswapped cf rows not scored 0 in OWN_GATED ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0}, pick 1.0)
 KILLED    #82 grade_loop: F1: ack after ack charged again (ACKER loops)  <- ackrep: ACKER: R 100.0, loop 0.17712882096069868, degenerate {'LOOP': 0.17712882096069868, 'RUNAWAY': 0.0, 'EMPTY': 0.0, 'LEAK': 0.0}, Level A loop cr
-killed 11 | survived 0 | crashed 0 | malformed 0
+KILLED    #90 score: item D: a key at exactly 0.60 misses  <- scoring: Level A content bar is not 0.60 inclusive: {0.6: False, 0.5999: False}
+KILLED    #98 score: LOOKUP claim: P and X probe rates swapped  <- scoring: LOOKUP P / X probe rates (ABSTAIN): {'value': 0.0, 'bar': 0.6, 'met': False, 'claimable': False, 'why_not': ['1 training seed(s), < 3', "rend
+killed 13 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

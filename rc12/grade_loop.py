@@ -28,12 +28,18 @@ ACK-REPEAT (OD6 iii, reported, never a flag by itself, never in Level A): turn t
 ANSWER REPEAT (reported apart, verifier 2026-09-25): the subset where r equals an earlier reply to an ASKING turn.
   Since F1 it marks exactly the statement-turn replies the equality clause charges (the same test, computed apart as
   a cross-check), so ack_repeat_of_answers overlaps the loop rate; it stays reported beside it.
-Normalization for equality: lowercase word tokens (punctuation and spacing ignored)."""
+Normalization for equality: lowercase word tokens (punctuation and spacing ignored).
+NEAR-DUPLICATE (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 12); reported, never a
+  flag, never in Level A): r has 1 to 12 normalized words and is exactly ONE word edit (one word inserted, deleted or
+  replaced) from some earlier reply, whatever turn either answered. A parrot that changes one word escapes the
+  equality clause; this is where it shows. score.py reports the share of replies that are near-duplicates and not
+  LOOP beside the loop rate."""
 import re
 
 import grade_text as T
 
 LP = dict(tri_rep=4, selfcopy=0.50, selfcopy_min=12)
+NEAR = dict(max_words=12, edits=1)  # item 12 (2026-10-02): the near-duplicate report, never a flag
 KINDS = frozenset("SLCIOTQDPXd")  # SPEC s1 turn kinds, plus d: a D filler that asks nothing (F2, loop_kind)
 ASKS = frozenset("PXQD")          # turns that ask something: the equality clause applies (OD6 iii); d does not
 ROLE_LINE = re.compile(r"^\s*[#*>\[\(]*\s*(?:user|assistant|human|system|ai|bot|model)\s*[\])*]*\s*:", re.I | re.M)
@@ -160,3 +166,30 @@ def conversation_answer_repeats(replies, kinds):
     """per-turn answer_repeat (None on asking turns, True / False on statement turns)."""
     assert len(replies) == len(kinds), (len(replies), len(kinds))
     return [answer_repeat(r, replies[:i], kinds[:i], k) for i, (r, k) in enumerate(zip(replies, kinds))]
+
+
+def word_edits(a, b, cap):
+    """word-level edit distance of word lists a and b (insert, delete, replace), or cap + 1 once it exceeds cap."""
+    if abs(len(a) - len(b)) > cap:
+        return cap + 1
+    prev = list(range(len(b) + 1))
+    for i, x in enumerate(a, 1):
+        cur = [i] + [0] * len(b)
+        for j, y in enumerate(b, 1):
+            cur[j] = min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (x != y))
+        if min(cur) > cap:
+            return cap + 1
+        prev = cur
+    return min(prev[-1], cap + 1)
+
+
+def near_dup_ws(ws, prior_ws):
+    """near_dup on normalized word lists (score.py passes them once per conversation)."""
+    if not ws or len(ws) > NEAR["max_words"]:
+        return False
+    return any(word_edits(ws, p, NEAR["edits"]) == NEAR["edits"] for p in prior_ws)
+
+
+def near_dup(reply, prior):
+    """item 12: r (1 to 12 words) is exactly one word edit from an earlier reply. Reported only (score.py)."""
+    return near_dup_ws(T.lwords(T.norm(reply)), [T.lwords(T.norm(p)) for p in prior])

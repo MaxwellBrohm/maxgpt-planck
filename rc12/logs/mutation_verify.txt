@@ -9,12 +9,24 @@ KILLED   #7 verify_dev_runs.py: twin ids not compared
 KILLED   #8 verify_dev_runs.py: row seeds unchecked
 KILLED   #9 verify_dev_runs.py: seed-blind sampling passes
 KILLED   #10 verify_dev_runs.py: row count unchecked
-KILLED   #11 verify_dev_runs.py: no sampled replay
-KILLED   #12 verify_dev_runs.py: no greedy replay
+KILLED   #11 rerun_tie.py: no sampled replay
+KILLED   #12 rerun_tie.py: no greedy replay
 KILLED   #13 verify_dev_runs.py: vLLM defaults unchecked
 KILLED   #14 verify_dev_runs.py: gen-config stop ids unchecked
 KILLED   #15 verify_dev_runs.py: vLLM kwargs unchecked
 KILLED   #16 verify_dev_runs.py: HF generation_config fields unchecked
-KILLED   #17 verify_dev_runs.py: replay comparison blind
-17 mutants, 0 problems, 130 s
+KILLED   #17 rerun_tie.py: replay comparison blind
+KILLED   #18 rerun_tie.py: item 2: margins ignored (any divergence with a margin passes)
+KILLED   #19 rerun_tie.py: item 2: a divergence without a margin passes
+KILLED   #20 rerun_tie.py: item 2: exact replay again
+KILLED   #21 rerun_tie.py: item 2: a margin of exactly 0.5 fails
+KILLED   #22 rerun_tie.py: item 2: a stub margin accepted for a real engine
+KILLED   #23 rerun_tie.py: item 2: the margins stage takes a stub for a real engine
+KILLED   #24 rerun_tie.py: item 2: a negative margin passes
+KILLED   #25 rerun_tie.py: item 2: margin at the first token, not the split
+KILLED   #26 rerun_tie.py: item 2: a stopped prefix has no margin
+KILLED   #27 rerun_tie.py: item 2: a capped prefix gets one
+KILLED   #28 rerun_tie.py: item 2: the fitted-out pairs kept
+KILLED   #29 rerun_tie.py: item 2: the identical share not reported
+29 mutants, 0 problems, 141 s
 ALL MUTANTS KILLED

@@ -155,12 +155,16 @@ def make_responder(spec, args):
             import lockstep as LS
             return LS.PerConv(lambda: FF.make(name), args.render), name
         return FF.make(name), name
+    tmpl = getattr(args, "chat_template", None)  # engines.json, via dev_batch (Loom-Spark-3.2; notes STEP 11, item 14)
+    guard = getattr(args, "nan_guard", None)     # engines.json, via dev_batch (Swen-28M; notes STEP 11, item 14)
+    cache = getattr(args, "use_cache", None)     # engines.json, via dev_batch (cRia-75M; notes STEP 11, item 14)
     if kind == "vllm":
         import vllm_responder as VR
         if not (VR.VLLM_TESTED or args.vllm_untested_ok):
             sys.exit("vllm responder is UNTESTED (no parity check has passed); rerun with --vllm-untested-ok")
         return VR.VLLMResponder(name, render=args.render, dtype=args.dtype, gpu_memory_utilization=args.gpu_mem,
-                                max_model_len=args.max_model_len, batch_invariant=args.batch_invariant), name
+                                max_model_len=args.max_model_len, batch_invariant=args.batch_invariant,
+                                chat_template=tmpl), name
     if kind in ("hf", "hfb"):                   # hfb: hf_batched.HFBatched (STEP 9), the same responder batched
         if not args.hf_untested_ok:
             sys.exit("hf responder is UNTESTED (no model was ever loaded through it); rerun with --hf-untested-ok")
@@ -170,10 +174,13 @@ def make_responder(spec, args):
         if kind == "hfb":
             import hf_batched as HB
             mb = getattr(args, "max_batch", None) or HB.MAX_BATCH
+            tb = getattr(args, "token_budget", None) or HB.TOKEN_BUDGET
             return HB.HFBatched(name, render=args.render, dtype=args.dtype, device=args.device, max_batch=mb,
-                                trust_remote_code=trust, attn_implementation=attn), name
+                                trust_remote_code=trust, attn_implementation=attn, token_budget=tb,
+                                chat_template=tmpl, nan_guard=guard, use_cache=cache), name
         return H.HFResponder(name, render=args.render, dtype=args.dtype, device=args.device,
-                             trust_remote_code=trust, attn_implementation=attn), name
+                             trust_remote_code=trust, attn_implementation=attn, chat_template=tmpl,
+                             nan_guard=guard, use_cache=cache), name
     if kind == "planck":
         import planck_responder as PR
         r = PR.from_checkpoint(name, args.planck_config, args.planck_tokenizer, args.planck_device,

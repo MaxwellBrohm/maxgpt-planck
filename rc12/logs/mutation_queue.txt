@@ -6,22 +6,22 @@ KILLED    queue_dev_baselines.sh: seed 3 missing | 2 lines, first: FAIL default 
 KILLED    queue_dev_baselines.sh: comparator not first | 1 lines, first: FAIL default plan: order or content
 KILLED    queue_dev_baselines.sh: core not by size | 1 lines, first: FAIL default plan: order or content
 KILLED    queue_dev_baselines.sh: an extra missing | 2 lines, first: FAIL default plan: order or content
-KILLED    queue_dev_baselines.sh: the seed does not reach the run | 33 lines, first: FAIL fresh: counts {'key': 'IDEAL template 1 fake dev', 'start': '2026-09-28T00:54:11', 'end': '2026-09-28T00:54:12', 'exit': '0', 'done': '0', 'convs
-KILLED    queue_dev_baselines.sh: the render does not reach the run | 33 lines, first: FAIL fresh: counts {'key': 'IDEAL plain greedy fake dev', 'start': '2026-09-28T00:54:16', 'end': '2026-09-28T00:54:16', 'exit': '0', 'done': '0', 'con
+KILLED    queue_dev_baselines.sh: the seed does not reach the run | 33 lines, first: FAIL fresh: counts {'key': 'IDEAL template 1 fake dev', 'start': '2026-10-04T13:08:31', 'end': '2026-10-04T13:08:31', 'exit': '0', 'done': '0', 'convs
+KILLED    queue_dev_baselines.sh: the render does not reach the run | 33 lines, first: FAIL fresh: counts {'key': 'IDEAL plain greedy fake dev', 'start': '2026-10-04T13:08:34', 'end': '2026-10-04T13:08:34', 'exit': '0', 'done': '0', 'con
 KILLED    queue_dev_baselines.sh: another lock file | 13 lines, first: FAIL fresh: lock calls [], processes 0
 KILLED    queue_dev_baselines.sh: lock wait not 7200 s | 2 lines, first: FAIL fresh: lock calls [['-E', '75', '-w', '60', '9']], processes 14
-KILLED    queue_dev_baselines.sh: no retry on a lock timeout | 2 lines, first: FAIL lock retry: [{'key': 'IDEAL template greedy fake dev', 'start': '2026-09-28T00:55:18', 'end': '2026-09-28T00:55:18', 'exit': '75', 'done': '0', '
-KILLED    queue_dev_baselines.sh: a lock timeout is not retried | 2 lines, first: FAIL lock retry: [{'key': 'IDEAL template greedy fake dev', 'start': '2026-09-28T00:56:01', 'end': '2026-09-28T00:56:01', 'exit': '75', 'done': '0', '
-KILLED    queue_dev_baselines.sh: a failure does not skip the rest of the render | 8 lines, first: FAIL fresh: failure then skip {'key': 'NOPE template 1 fake dev', 'start': '2026-09-28T00:55:57', 'end': '2026-09-28T00:55:57', 'exit': '1', 'done': '
-KILLED    queue_dev_baselines.sh: one failure skips every later render and model | 24 lines, first: FAIL fresh: failure then skip {'key': 'NOPE plain greedy fake dev', 'start': '2026-09-28T00:56:04', 'end': '2026-09-28T00:56:04', 'exit': 'SKIP', 'don
+KILLED    queue_dev_baselines.sh: no retry on a lock timeout | 2 lines, first: FAIL lock retry: [{'key': 'IDEAL template greedy fake dev', 'start': '2026-10-04T13:09:05', 'end': '2026-10-04T13:09:05', 'exit': '75', 'done': '0', '
+KILLED    queue_dev_baselines.sh: a lock timeout is not retried | 2 lines, first: FAIL lock retry: [{'key': 'IDEAL template greedy fake dev', 'start': '2026-10-04T13:09:26', 'end': '2026-10-04T13:09:26', 'exit': '75', 'done': '0', '
+KILLED    queue_dev_baselines.sh: a failure does not skip the rest of the render | 8 lines, first: FAIL fresh: failure then skip {'key': 'NOPE template 1 fake dev', 'start': '2026-10-04T13:09:28', 'end': '2026-10-04T13:09:28', 'exit': '1', 'done': '
+KILLED    queue_dev_baselines.sh: one failure skips every later render and model | 24 lines, first: FAIL fresh: failure then skip {'key': 'NOPE plain greedy fake dev', 'start': '2026-10-04T13:09:37', 'end': '2026-10-04T13:09:37', 'exit': 'SKIP', 'don
 KILLED    queue_dev_baselines.sh: STOP file ignored before a wait | 1 lines, first: FAIL STOP
 KILLED    queue_dev_baselines.sh: STOP ignored in a session | 1 lines, first: FAIL D: STOP in a session
 KILLED    queue_dev_baselines.sh: a model without an engine is run | 13 lines, first: FAIL fresh: status keys/order ['IDEAL template greedy fake dev', 'IDEAL template greedy fake owncf', 'IDEAL template 1 fake dev', 'IDEAL template 1 fa
-KILLED    queue_dev_baselines.sh: status for a run finished earlier | 1 lines, first: FAIL half: [{'key': 'IDEAL template 1 fake dev', 'start': '2026-09-28T00:57:32', 'end': '2026-09-28T00:57:33', 'exit': '0', 'done': '1', 'convs': '12'
+KILLED    queue_dev_baselines.sh: status for a run finished earlier | 1 lines, first: FAIL half: [{'key': 'IDEAL template 1 fake dev', 'start': '2026-10-04T13:10:19', 'end': '2026-10-04T13:10:19', 'exit': '0', 'done': '1', 'convs': '12'
 KILLED    queue_dev_baselines.sh: no status for the own-cf twin | 7 lines, first: FAIL fresh: status keys/order ['IDEAL template greedy fake dev', 'IDEAL template 1 fake dev', 'IDEAL plain greedy fake dev', 'IDEAL plain 1 fake dev',
-KILLED    queue_dev_baselines.sh: (test speed) limit dropped: full dev | 24 lines, first: FAIL fresh: counts {'key': 'IDEAL template greedy fake dev', 'start': '2026-09-28T00:57:38', 'end': '2026-09-28T00:57:40', 'exit': '0', 'done': '1', '
+KILLED    queue_dev_baselines.sh: (test speed) limit dropped: full dev | 24 lines, first: FAIL fresh: counts {'key': 'IDEAL template greedy fake dev', 'start': '2026-10-04T13:10:30', 'end': '2026-10-04T13:10:31', 'exit': '0', 'done': '1', '
 KILLED    queue_dev_baselines.sh: no DONE marker | 3 lines, first: FAIL fresh: DONE
-KILLED    queue_dev_baselines.sh: the engine or model does not reach the run | 57 lines, first: FAIL fresh: counts {'key': 'CAPPER template greedy fake dev', 'start': '2026-09-28T00:58:20', 'end': '2026-09-28T00:58:20', 'exit': '0', 'done': '0', 
+KILLED    queue_dev_baselines.sh: the engine or model does not reach the run | 57 lines, first: FAIL fresh: counts {'key': 'CAPPER template greedy fake dev', 'start': '2026-10-04T13:10:46', 'end': '2026-10-04T13:10:46', 'exit': '0', 'done': '0', 
 KILLED    queue_dev_baselines.sh: engines.json unread | 68 lines, first: FAIL fresh: status keys/order ['IDEAL template greedy - dev', 'IDEAL template greedy - owncf', 'IDEAL template 1 - dev', 'IDEAL template 1 - owncf', '
 KILLED    queue_dev_baselines.sh: sessions off: one hold per process | 8 lines, first: FAIL fresh: lock calls [['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', 
 KILLED    queue_dev_baselines.sh: no 5 min tail by default | 2 lines, first: FAIL A: 150 s processes, sessions [12, 4] (want 11, 5)
@@ -42,12 +42,12 @@ KILLED    queue_dev_baselines.sh: release keeps the lock fd open | 1 lines, firs
 KILLED    queue_dev_baselines.sh: a new lock wait before every process | 8 lines, first: FAIL fresh: lock calls [['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', 
 KILLED    queue_dev_baselines.sh: process count not reset per session | 3 lines, first: FAIL A: 150 s processes, sessions None (want 11, 5)
 KILLED    queue_dev_baselines.sh: every session the same id | 3 lines, first: FAIL A: 150 s processes, sessions None (want 11, 5)
-KILLED    queue_dev_baselines.sh: a lock timeout starts a session | 2 lines, first: FAIL lock retry: [{'key': 'IDEAL template greedy fake dev', 'start': '2026-09-28T01:04:20', 'end': '2026-09-28T01:04:21', 'exit': '0', 'done': '1', 'c
-KILLED    queue_status.py: first turn not counted | 24 lines, first: FAIL fresh: counts {'key': 'IDEAL template greedy fake dev', 'start': '2026-09-28T01:04:08', 'end': '2026-09-28T01:04:09', 'exit': '0', 'done': '1', '
+KILLED    queue_dev_baselines.sh: a lock timeout starts a session | 2 lines, first: FAIL lock retry: [{'key': 'IDEAL template greedy fake dev', 'start': '2026-10-04T13:13:50', 'end': '2026-10-04T13:13:50', 'exit': '0', 'done': '1', 'c
+KILLED    queue_status.py: first turn not counted | 24 lines, first: FAIL fresh: counts {'key': 'IDEAL template greedy fake dev', 'start': '2026-10-04T13:13:53', 'end': '2026-10-04T13:13:53', 'exit': '0', 'done': '1', '
 KILLED    queue_status.py: runs swapped | 2 lines, first: FAIL status unit: ['M template 2 vllm dev start=2026-09-26T09:59:56 end=2026-09-26T10:00:00 exit=0 done=1 convs=2 replies=24 stops=eos:24 secs=4 lock_
 KILLED    queue_status.py: start is the end | 1 lines, first: FAIL status unit: ['M template 2 vllm dev start=2026-09-26T10:00:00 end=2026-09-26T10:00:00 exit=0 done=1 convs=3 replies=36 stops=cap:3,eot:33 secs=1
 KILLED    queue_status.py: stop reasons unsorted | 1 lines, first: FAIL status unit: ['M template 2 vllm dev start=2026-09-26T09:59:50 end=2026-09-26T10:00:00 exit=0 done=1 convs=3 replies=36 stops=eot:33,cap:3 secs=1
 KILLED    queue_status.py: progress total wrong | 3 lines, first: FAIL fresh: DONE
 KILLED    queue_status.py: run in progress not shown | 1 lines, first: FAIL status unit: progress ['complete 2 of 16 runs', '  M                                template 2/4 done, dev run mean 10 s', '  M                  
 KILLED    queue_status.py: lock seconds wrong | 3 lines, first: FAIL status unit: ['M template 2 vllm dev start=2026-09-26T09:59:50 end=2026-09-26T10:00:00 exit=0 done=1 convs=3 replies=36 stops=cap:3,eot:33 secs=1
-MUTANTS killed 51/51; 891 s
+MUTANTS killed 51/51; 472 s

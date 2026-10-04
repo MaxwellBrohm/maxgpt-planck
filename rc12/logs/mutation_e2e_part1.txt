@@ -1,16 +1,18 @@
-RC-12 mutation_e2e.py part 1/8: 11 of 88 mutants, fresh process each, 173 s. No model.
+RC-12 mutation_e2e.py part 1/8: 13 of 104 mutants, fresh process each, 81 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #00 runner: history gets the IDEAL reply instead of the model's own  <- G1 IDEAL_ALT: OWN:list=0.00
 KILLED    #08 runner: history truncated but the drop not recorded  <- trunc: ctx 556: only 0 truncated probes
 KILLED    #16 render: own_reply off by one  <- G1 IDEAL: OWN:list=0.00
 KILLED    #24 score: loop bar raised  <- G3 L_REPEAT: loop rate 0.060 meets the loop bar
-KILLED    #32 score_stats: Level R margin  <- stats: bootstrap FIRST-IDEAL {'D': -86.29166666666667, 'lo': -88.84375, 'hi': -83.95833333333334, 'n': 200}
+KILLED    #32 score_stats: Level R margin  <- stats: bootstrap FIRST-IDEAL {'D': -84.76851851851852, 'lo': -87.12962962962963, 'hi': -82.06018518518519, 'n': 200}
 KILLED    #40 fakes: ABSTAIN answers right  <- G2 ABSTAIN: 394 value-graded units above 0 (e.g. ['rc12-dev-recall-001', 'rc12-dev-recall-002', 'rc12-dev-recall-003'])
 KILLED    #48 own_cf: OWN-CF list not swapped  <- owncf: CONSIST OWN under --own-cf = 0.33, want 0.0
 KILLED    #56 score_stats: OD1 b: bootstrap OWN slot takes the ungated units  <- owngate: CONSIST: bootstrap OWN slot not gated
 KILLED    #64 runner: OD6 iii: runner drops the ack-repeat record  <- ackrep: ACKER ack-repeat None / None, want 0.17712882096069868 / 0.46859205776173285
 KILLED    #72 score: OD1 b: cf rows choose the seeds  <- owngate: greedy history + sampled cf rows: seeds taken from the cf rows (replies 0, {'OWN': None, 'OWN_CF': 1.0, 'OWN_GATED': None, 'cf_unswapped': 0}
 KILLED    #80 runner: OD6 iii: runner drops the answer-repeat record  <- ackrep: ACKER answer-repeat None, want 0
-killed 11 | survived 0 | crashed 0 | malformed 0
+KILLED    #88 score: item 1: LOOKUP back in the composite  <- scoring: LOOKUP claim reads R, or R reads LOOKUP: only LOOKUP right -> R 10.0, claim 1.0; LOOKUP 0 -> claim 0.0
+KILLED    #96 score: LOOKUP claim claimable on the plain render  <- scoring: LOOKUP claim claimable only with 3 training seeds, template, sampled: {'3 seeds': True, '2 seeds': False, 'plain': True, 'greedy': False}
+killed 13 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

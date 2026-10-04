@@ -101,8 +101,10 @@ class RowSampler:
 
 class HFBatched(HR.HFResponder):
     def __init__(self, model_id, render="template", dtype="bfloat16", device="cuda", max_batch=MAX_BATCH,
-                 trust_remote_code=False, attn_implementation=None, token_budget=TOKEN_BUDGET):
-        super().__init__(model_id, render, dtype, device, trust_remote_code, attn_implementation)
+                 trust_remote_code=False, attn_implementation=None, token_budget=TOKEN_BUDGET, chat_template=None,
+                 nan_guard=None, use_cache=None):
+        super().__init__(model_id, render, dtype, device, trust_remote_code, attn_implementation, chat_template,
+                         nan_guard, use_cache)
         self.max_batch, self.batches, self.trace = max_batch, [], None
         self.token_budget, self.chunks, self.progress = token_budget, [], True
         self.rec = None

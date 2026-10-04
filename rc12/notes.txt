@@ -1993,3 +1993,886 @@ OPEN a power cut still kills the waiting run_doge_after.sh and nothing re-arms i
   Doge); after such a queue's DONE, start run_doge_after.sh by hand (detached). Clock: sessions use date +%s, so a
   backward jump lengthens a session by the jump. A model change inside a session uses the last model's time as the
   estimate (the tail still applies), so a long first process of the next model can stretch a session past 30 min.
+
+STEP 10a (2026-10-02, 18:00 to 18:30 EDT): verify_dev_runs over all 208 dev-baseline runs, the panel scored with the
+committed scorer (HEAD 505d564 score.py / score_stats.py), headroom / re-anchor / PERSIST / sensitivity computed and
+applied nowhere. No model loaded, no GPU, no gpu.lock, nothing committed. PC writes: the verify log only
+(~/planck/logs/rc12_s10a_verify.log and .DONE) and a one-line temp file, removed.
+COPY  ~/planck/runs/rc12_dev (1.1 GB, 208 run dirs with DONE, 0 .partial) streamed to the Mac scratchpad as per-model
+  tar.gz over ssh (nothing staged on the PC): 958 of 958 files md5-equal to a PC manifest. queue_status.txt: 208 run
+  lines exit=0 done=1 (plus Doge's earlier 2 x exit 124, 6 SKIP, 16 NOPYTHON); all 16 Doge runs started after the
+  2026-09-28 20:04 rc12_doge2 queue start, so all under the STEP 9f chunker.
+CODE  Graders, render, own_cf, score.py, fam_* and dev/rc12_dev.jsonl (008dda4b) are byte-identical in rc12_q9,
+  rc12_dg, rc12_dg3, rc12_doge2 and HEAD, so every run was graded by the code scored here. verify_dev_runs.py in
+  rc12_dg3 / rc12_doge2 = HEAD. score_stats.py on the PC dirs is pre-STEP-11 (not used: the panel is scored on the Mac).
+NEW (rc12) dev_panel.py: per model x render x seed score.summarize(dev rows + that seed's _owncf rows); mean of 3 =
+  score.summarize(seeds 1-3 + twins), Level A with Qwen2.5's summary of the same render as comparator; headroom,
+  persist_base_rates / persist_drops (core panel, template, seeds 1-3), sensitivity, re-anchor inputs. Checks: every
+  run's stored scores.jsonl == score.score_lines(rows) under HEAD, pooled mean == arithmetic mean of the 3 seeds.
+  dev_drift.py: dev run vs its own-cf twin on turns with provably identical prompts (below). Outputs, small:
+  runs/dev_panel/ panel.json, panel.tsv (per seed and mean3), rules.json (headroom, PERSIST, sensitivity, re-anchor
+  input, equality_only, K / lenient / T0 failures / capture), checks.json, drift.json, verify.log, verify_summary.tsv.
+  Checked by breaking them (scratch): one unit flipped -> stored-scores check False; one reply, raw only, or stop only
+  changed in a twin -> dev_drift reports that conversation at that turn; twin == dev -> 576 / 576 equal; a cf rewrite
+  -> equal through that turn, walk stops. The pooled-vs-arithmetic check was not mutation-tested.
+VERIFY (PC, CPU only: CUDA_VISIBLE_DEVICES empty, HF offline; rc12_dg3 + venv-vllm for the 12 vLLM models,
+  rc12_doge2 + venv-doge for Doge; no --rerun)
+  24 of 26 model x render: VERIFY PASS (0 failures). gemma-3-270m-it template and plain: VERIFY FAIL, 8 each, all
+  the same C1 line: "generation_config.json adds stop ids [1] (vLLM stops [1, 106], HF list [106])" (the STEP 9
+  VERIFY (1) gemma <eos> issue, still open). Realized effect on these runs: none. vLLM 0.30's primary eos is the
+  tokenizer's (renderers/base.py get_eos_token_id: <end_of_turn> 106); the extra generation_config id 1 goes into
+  stop_token_ids, and a stop there sets stop_reason 1 (v1/core/sched/utils.py check_stop), which
+  vllm_responder.stop_of refuses (raise: 1 is not in its stop_ids [106]). All 16 gemma processes exited 0 with every
+  conversation, so no gemma reply stopped on <eos>.
+  C4 template stops eos / eot / cap only; C5 prompts as STEP 9 VERIFY (3) (Qwen3 / Qwen3.5 template end in the empty
+  think block; Doge's Llama-3 layout with its default system block). The verifier's C2 R for all 104 dev runs equals
+  dev_panel's per-seed R (0 mismatches).
+  R1 / R2 (--rerun): NOT RUN (they load the engine on the GPU under gpu.lock; this step was not allowed the GPU). No
+  earlier R1 / R2 output exists in ~/planck/logs. So STEP 9f VERIFY's prediction for Doge was not observed.
+BATCH DRIFT FROM THE STORED RUNS (dev_drift.py; no GPU). Each own-cf twin replays the 48 OWN conversations with the
+  same engine, render, seed and per-reply seeds in batches of 48 (the dev run: 640, then 608). Up to and including
+  the cf rewrite (or the first differing reply) the prompts are identical, so outputs should match unless the batch
+  moves the numerics. Equal outputs (raw or reply, and stop) on identical prompts, pooled:
+    engine      render    turns on identical prompts   equal          turn 1 equal
+    vllm        template  3762                          1530 (0.407)   915 / 2304 (0.397)
+    vllm        plain     3960                          1741 (0.440)   834 / 2304 (0.362)
+    hfb (Doge)  template   265                            74 (0.279)    47 / 192 (0.245)
+    hfb (Doge)  plain      509                           329 (0.646)    97 / 192 (0.505)
+  Greedy alone: vllm template 403 / 959 (0.420), Doge template 19 / 67 (0.284). First differences sit mid-reply
+  (e.g. Qwen2.5 template greedy: character 7 to 1035, median 172; LFM2-2.6B 12 to 1110, median 274). 16 pairs read
+  (first 90 characters, Qwen2.5, LFM2-2.6B, Doge, gemma): the same text up to the split, then two continuations in
+  the model's usual style (Doge loops in both). So the vLLM runs drift with the batch as much as Doge's hfb runs do (vLLM runs
+  without --batch-invariant and with prefix caching, STEP 9 VERIFY risk note): an exact R1 / R2 would FAIL for
+  vLLM too. Margins at these first differences are NOT measured (a forward pass, i.e. a model load). The margins on
+  record for this kind of drift: Doge batched vs serial max 0.25 nats (STEP 9c), Doge rechunk max 0.375, 0 over 0.5
+  (STEP 9f); vLLM vs HF bf16 parity max 0.25 to 0.41 (NEAR_TIE families), 0.625 (Qwen3), 1.0 (Qwen2.5) (STEP 9b).
+PANEL, template render, mean of 3 sampling seeds (T 0.6; per seed, greedy and plain in panel.tsv). R and R_ungated in
+  points; families F_f (OWN = OWN_GATED); loop = Level A LOOP rate; ackR / ackS = ack-repeat over all / statement-turn
+  replies; ansR = answer-repeat. Core panel first (s12), then extras.
+  model                  R    R_ung  RECALL CORR BIND TWOHOP PERSIST OWN  TOPIC ROLE LOOKUP LOOP  C:U  C:noupd C:2slot T0   loop  ackR  ackS  ansR
+  Qwen2.5-0.5B-Instruct   5.3  5.5   0.01  0.02 0.01 0.04  0.11  0.01 0.00  0.07 0.01  0.24  0.03 0.02  0.00  0.18 0.291 0.006 0.015 0.005
+  Qwen3.5-0.8B            7.0  7.3   0.01  0.05 0.01 0.23  0.28  0.00 0.03  0.01 0.00  0.07  0.03 0.04  0.08  0.14 0.078 0.001 0.003 0.001
+  LFM2.5-230M             7.9  8.6   0.01  0.06 0.01 0.08  0.32  0.03 0.01  0.03 0.00  0.23  0.06 0.06  0.06  0.19 0.095 0.007 0.017 0.008
+  LFM2.5-350M            15.9 17.3   0.18  0.15 0.12 0.16  0.56  0.02 0.10  0.11 0.00  0.18  0.09 0.21  0.21  0.37 0.026 0.001 0.002 0.000
+  Falcon-H1-Tiny-90M      2.9  3.3   0.04  0.06 0.02 0.10  0.03  0.01 0.01  0.00 0.00  0.01  0.05 0.08  0.04  0.16 0.018 0.001 0.001 0.000
+  SmolLM2-135M            1.2  1.3   0.01  0.02 0.01 0.01  0.02  0.02 0.01  0.00 0.00  0.03  0.03 0.00  0.00  0.06 0.379 0.012 0.032 0.020
+  SmolLM2-360M            5.3  5.7   0.01  0.05 0.04 0.06  0.14  0.01 0.06  0.07 0.00  0.09  0.08 0.00  0.04  0.15 0.242 0.018 0.048 0.024
+  Doge-160M               0.9  1.0   0.01  0.01 0.00 0.00  0.02  0.00 0.01  0.00 0.00  0.06  0.00 0.02  0.00  0.02 0.519 0.010 0.027 0.016
+  LFM2-2.6B              21.9 23.7   0.14  0.27 0.09 0.26  0.81  0.08 0.17  0.28 0.01  0.10  0.25 0.31  0.25  0.51 0.022 0.000 0.000 0.000
+  Qwen3-0.6B             14.3 15.8   0.06  0.09 0.01 0.35  0.35  0.05 0.08  0.00 0.01  0.43  0.08 0.10  0.10  0.27 0.113 0.003 0.008 0.002
+  gemma-3-270m-it         6.1  7.0   0.01  0.02 0.01 0.19  0.02  0.04 0.01  0.01 0.00  0.30  0.01 0.00  0.06  0.12 0.111 0.013 0.033 0.009
+  LFM2-700M               6.9  7.2   0.06  0.10 0.04 0.19  0.20  0.01 0.01  0.02 0.00  0.06  0.12 0.17  0.00  0.23 0.032 0.000 0.000 0.000
+  LFM2-1.2B               9.9 10.5   0.07  0.11 0.09 0.15  0.36  0.05 0.03  0.03 0.00  0.10  0.07 0.19  0.10  0.33 0.031 0.000 0.000 0.000
+  (BIND column = the Level A BIND key.) Seed spread of R (sd of the 3 seeds): 0.14 to 1.22 points. Level A met: no
+  model (keys far below 0.80). Loop <= 0.02: Falcon-H1-Tiny (0.018) only; LFM2-2.6B 0.022. cf_unswapped: 0 in all
+  208 twins. Plain render (diagnostic): LFM2-2.6B 22.3, LFM2.5-350M 16.4, LFM2-700M 15.7, LFM2-1.2B 15.6,
+  LFM2.5-230M 14.9; Qwen2.5 1.8.
+RULES, COMPUTED, APPLIED NOWHERE (template, mean of 3, core panel of s12)
+  s11 headroom: LOOKUP fails at the FLOOR (every core model <= 0.05; max 0.014, Qwen2.5; LFM2-2.6B
+    is 0.007: 0, 0, 0.021 by seed; in seed 1 its ABS probe fails a3_value / a2_cue, probe-level ok 0.30, unit
+    all-right 0 of 48). Every other family and Level A
+    key passes, some barely: OWN (only LFM2-2.6B above 0.05, 0.076), RECALL and BIND (2 of 9 above).
+  s10 re-anchor input, LFM2-2.6B: CORR:U 0.250, C_noupd 0.312, C_twoslot 0.250, BIND 0.089: all four below 0.80 and
+    below 0.60. The rule's first step (audit each key's items and grader) is not done; if they stay below 0.60 the
+    rule's own text gives threshold 0.60 for all four and "no tested model reached it".
+  s11 PERSIST base rates (16 rules): none above 0.30 for any core model, so the drop list is empty. Highest:
+    question_end 0.181 and one_sentence 0.175 (SmolLM2-360M); the draft's expected one_sentence drop did not happen.
+    Extras: max one_sentence 0.199 (gemma).
+  s9 sensitivity: Qwen2.5 is <= 0.05 on 7 of 10 families; the row keeps PERSIST, ROLE, LOOP only.
+  s9 T0 (proposal gate 0.90 for Level R): no model near it; LFM2-2.6B 0.51 (lenient 0.76). Read (LFM2-2.6B seed 1):
+    T0's turn 1 "Give me a riddle that's easy to solve." keeps it in a riddle frame for the whole conversation; of
+    its failing T0 probes, some name the right value and fail v3_guess (other instruments named inside a riddle),
+    v5_echo or v4_voice ("The user included a riddle: ... The answer is obviously **Friday**").
+  equality_only (F3 input, template, seeds 1-3): 0 to 62 probes of 4212 per model (Qwen2.5 62, all LOOP family;
+    Doge 18; gemma 13; the rest <= 10).
+ALSO SEEN (model behavior, not harness): RUNAWAY (256-token cap) 0.08 to 0.78 of template replies (Falcon-H1-Tiny
+  0.78, LFM2-700M 0.68, LFM2-2.6B 0.55). LFM2-2.6B writes a <think> block unprompted in 47 of 7328 template replies
+  (seed 1), no thinking switch exists for it. Qwen3.5-0.8B plain: 2253 of 7328 replies empty (it opens a new "User:"
+  line at once and the role cut leaves nothing), 520 with think tags. Doge plain LEAK 0.061.
+OPEN, FOR MAX (none applied)
+  1 Rerun-check standard (verify_dev_runs R1 / R2). Exact equality cannot hold for either engine at this batch
+    drift (above). Options: (a) R1 / R2 compare at the parity rule's NEAR_TIE level for EVERY engine: each differing
+    turn's first difference must sit at margin <= 0.5 nats under one HF forward (parity_hf_vllm.hf_margin), the
+    identical share reported; (b) the task's draft: NEAR_TIE for hfb only, exact for vLLM (the stored runs predict
+    vLLM FAILs on drift alone); (c) exact replay of the stored batch composition (a full 640-conversation rerun per
+    run, GPU hours, and vLLM scheduling is not guaranteed deterministic); (d) report the identical share as INFO
+    only. Recommended: (a), the same standard that chose the engines, and it still catches a wrong seed, prompt or
+    stop (prompt mismatch, or margins far above 0.5). Then --rerun 5 once per engine family under gpu.lock.
+  2 LOOKUP at the floor (s11): rebuild with easier cells (same layout; new dev hash, LOOKUP's dev runs redone for
+    all 13 models) or drop it from the composite with the reason written in s11. Recommended: drop, because every
+    core model including the 2.6B reference sits at 0.00 to 0.014, RECALL's abstain cells still test abstention, and
+    a rebuild costs a dev rebuild plus a GPU rerun before the Oct 11-14 lock.
+  3 gemma <eos> (STEP 9 VERIFY): its C1 FAIL had no effect on these runs (above). Options: leave it, with this note
+    (gemma is an extra); or add "<eos>" to hf_responder.EOT_TOKENS, redo gemma's parity and its 16 runs.
+    Recommended: leave it.
+  4 Mechanical next steps, no choice: the re-anchor audit of CORR:U, C_noupd, C_twoslot and BIND items and graders
+    (s10); the sizing simulation (s9) from these runs; F3 now has its equality_only counts (s16). Worth Max's eye:
+    the comparator Qwen2.5 is near the floor on 7 of 10 families and no model reaches T0 0.90, so the T0 items and
+    graders deserve the same audit as the Level A keys.
+
+STEP 10c (2026-10-02 evening, after STEP 10a, finished about 18:35 EDT): the s10 re-anchor rule applied mechanically
+on dev, the strict-case rates and the comparator's loop rate. No model, no GPU, no PC access, nothing committed.
+Input: the STEP 10a raw copy (md5-checked, scratchpad) and runs/dev_panel. NEW rc12/reanchor_audit.py (CPU only):
+LFM2-2.6B's four Level A keys by score.summarize (asserted equal to dev_panel's reanchor_input), its failing units
+(CORR: a conversation with unit < 1; BIND: a pair not right in both twins), a sample of 30 failing units per key
+(Random("RC12:s10c:<key>"), shuffled, one unit per distinct item first), a dump of each, a tally of the reader's
+labels, the bounds below and the s10 arithmetic; strict-case counts for all 13 models. Outputs (gitignored)
+runs/dev_panel/reanchor/: reanchor.json, labels.json (the 120 labels, one line of reason each), CORR_U.txt,
+CORR_C_noupd.txt, CORR_C_twoslot.txt, BIND.txt (what was read). Checked by breaking it (scratch): reanchor() at
+0.80, 0.7999, 0.73, 0.65, 0.6499, 0.60, 0.5999 gives 0.80 kept, 0.75, 0.70, 0.65, 0.60, 0.60, 0.60 below-floor;
+crediting every failing unit gives 1.0 on each key; swapping every failing probe's gold to another candidate moves
+the gold-named bound (BIND 0.322 -> 0.689; C_twoslot same count, 14 units change membership); cp_upper(0, 30)
+0.116, (1, 30) 0.172; a rerun after the line wrapping wrote a byte-identical BIND.txt (deterministic sample).
+READ: per unit every user turn, the probe reply in full, the grader's clauses and, per value mention, asserted or
+  the reason it is not; earlier model replies cut to 200 characters (they are not graded except by the loop rule,
+  whose reason grade_loop.classify gave for the right-value v1_degen units: RUNAWAY, RUNAWAY, selfcopy). So the
+  units were not read "in full" as far as earlier replies go. Samples: CORR:U 29 distinct items + 1 repeat (72
+  failing units), C_noupd 30 of 33 (16 items), C_twoslot 30 of 36 (16 items), BIND all 30 pairs (60 conversations).
+RESULT (LFM2-2.6B, template, mean of 3 sampling seeds; labels per 30 read)
+  key        rate   real: wrong/noans/false  right value failed by a clause as written   grader err  item err
+  CORR:U     0.250        22 / 2 / 1          5 (cap 2, self-copy 1, voice 1, guess 1)       0           0
+  C_noupd    0.312        23 / 3 / 0          4 (cap 1, strict case (a) 2, hedge 1)          0           0
+  C_twoslot  0.250        17 / 9 / 0          3 (cap 2, voice 1)                             1           0
+  BIND       0.089        17 / 9 / 1 (pairs)  3 (strict cases (a) / (b) 3)                   0           0
+  wrong = a stale value, B's value or correction, a lure (another holder's same-type value) or, in BIND, the other
+  twin's value given as the answer; noans = no value committed ("I don't have access to personal information",
+  "it wasn't specified", a riddle frame, reading "getting painted pink" as discoloration); false = right value plus
+  a false binding (corr-031 s2: "before your dentist appointment on Wednesday", the stale tennis day; bind-21 s1:
+  "You called me Marlowe, but I prefer to go by Marcus"). Cap: right answer, then tips to the 256-token cap (v1).
+  ITEMS: 0 errors; every gold is the value the user turns support and no reference read as ambiguous.
+  GRADER ERROR (1): corr-060 seed 3, C_twoslot: "your book club meeting ... is scheduled for **Thursday** ...
+    Previous Meeting: Initially scheduled for Tuesday. Updated Meeting: Moved to Thursday." fails v3_other only:
+    graders.STALE_BEFORE / STALE_AFTER have no "initially" / "previous", so this change recap is not exempt, though
+    s6 allows a stale value in a change phrase. The same gap appears, not decisive, in corr-011 seed 3 ("the initial
+    choice of orange and the subsequent shift to blue").
+  Clause notes (as written, not errors): v3_guess fires on "Mint Green Blue" (a shade name, corr-011 s1) and on
+    "green plants"; v4_voice fires on "I inferred ... green!" (corr-027 s2) and "My team retreat is currently in
+    Seattle!" (corr-062 s2, the case the clause exists for); the hedge list's "unless" fails "unless there's a new
+    update, the meeting is now on Tuesday" (corr-048 s2); shotgun fails "I'm Zephyr! What's your name, Priya?".
+  AFTER THE AUDIT (grader error counted right): 0.250, 0.312, 0.271, 0.089. Bounds, all below 0.60: the sample's
+  grader-error share extrapolated 0.250 / 0.312 / 0.275 / 0.089; at its Clopper-Pearson 95% upper limit 0.337 /
+  0.392 / 0.379 / 0.194; right-value share (clause-as-written + grader error) extrapolated 0.375 / 0.404 / 0.350 /
+  0.180, at its upper limit 0.510 / 0.524 / 0.480 / 0.331; EVERY failing unit whose probe reply names its gold
+  anywhere counted right (the most any grader or rule change could credit): 0.479 / 0.562 / 0.417 / 0.322.
+  RULE (s10, mechanical): each key below 0.80 after the audit and below 0.60, so each threshold is 0.60 and the
+  file says no tested model reached it. Checked over every dev run (13 models, both renders, 3 seeds and greedy):
+  maxima CORR:U 0.281 (LFM2-2.6B template s3), C_noupd 0.500 (LFM2-2.6B plain s2), C_twoslot 0.312 (LFM2.5-350M
+  template greedy), BIND 0.133 (LFM2.5-350M template s3). Written into prereg draft s10 (the four bars and a result
+  paragraph), marked "re-anchored 2026-10 by the mechanical rule, before the lock". score.py BARS["level_a"] is
+  still 0.80 (one constant for the four keys): not changed here.
+STRICT-CASE RATES (template, seeds 1-3; s6 known strict cases, OD7, s19 item 4)
+  (a) / (b) upper bound = failing units whose every failing probe asserts the gold and fails only v3_other /
+  v3_shotgun (also catches a stale value outside a recognized change phrase and a false extra binding). Per key,
+  CORR:U / C_noupd / C_twoslot / BIND (pairs), count of failing units:
+    Qwen2.5 0/93 0/47 0/48 0/89; Qwen3.5-0.8B 17/93 7/46 4/44 1/89; LFM2.5-230M 1/90 0/45 0/45 0/89; LFM2.5-350M
+    0/87 2/38 0/38 0/79; Falcon-H1-Tiny 5/91 2/44 1/46 1/88; SmolLM2-135M 0 0 0 0; SmolLM2-360M 1/88 1/48 0/46
+    3/86; Doge 0 0 0 0; LFM2-2.6B 9/72 6/33 2/36 10/82; Qwen3-0.6B 2/88 0 0 0; gemma 0 1/48 0 0; LFM2-700M 3/84
+    2/40 2/48 1/86; LFM2-1.2B 0 1/39 2/43 5/82.
+  Read in LFM2-2.6B's sample, true (a) / (b) among those: CORR:U 0 of 2, C_noupd 2 of 6, C_twoslot 0 of 1 (it is
+  the grader error), BIND 3 of 5 pairs. LFM2-2.6B if every upper-bound unit passed: 0.344 / 0.438 / 0.292 / 0.200.
+  Lenient twins on the keys (reported beside, OD7), LFM2-2.6B: 0.333 / 0.479 / 0.375 / 0.222; no model above 0.479.
+  Per family, VAL probes failing only by v3_other / v3_shotgun: reanchor.json strict_cases families_ab (LFM2-2.6B
+  CORR 17/192, BIND 19/180, TOPIC 16/144, ROLE 13/144; Qwen3.5-0.8B CORR 28/192, LOOKUP 31/144; Qwen2.5 <= 11).
+  (c) ack-repeat, all / statement replies: STEP 10a panel (0.000 to 0.018 / 0.000 to 0.048; LFM2-2.6B 0 / 0).
+  (d) equality_only (F3), probes: Qwen2.5 62 of 1,440 LOOP; Doge 18 (LOOP 11, PERSIST 4, BIND 2, ROLE 1); gemma 13
+    (LOOP 11, T0 1, OWN 1); LFM2.5-230M 10; Qwen3-0.6B 8; Qwen3.5-0.8B 6; SmolLM2 135M / 360M 2 each; LFM2.5-350M
+    2; LFM2-2.6B, LFM2-700M, LFM2-1.2B, Falcon 0.
+COMPARATOR LOOP RATE (Level A loop sub-criterion), Qwen2.5-0.5B-Instruct, dev: template mean of 3 0.291 (seeds 0.289,
+  0.296, 0.288; greedy 0.469); plain 0.629. On dev the 0.02 bar, not the comparator, decides: only Falcon-H1-Tiny
+  (0.018) is under both; LFM2-2.6B 0.022.
+OPEN, FOR MAX (none applied)
+  1 The change-phrase gap. (a) add "initially / initial / previous / prior" recap frames to the stale exemption,
+    add the paraphrases to audit_graders (G11 missed them), re-run mutation_graders and the check order, regrade the
+    208 stored runs on CPU and rescore; (b) leave it, recorded here. Recommended: (a): it contradicts s6's own text
+    and costs no GPU; no threshold moves either way (bounds above).
+  2 OD7 revisit ("only if strict-only failures are common"): true (a) / (b) are 5 of 120 read units of the
+    strongest model; the upper bound adds at most 0.18 to any key of any model (Qwen3.5-0.8B CORR:U 0.031 ->
+    0.208) and leaves all below 0.60.
+    Recommended: keep strict primary, lenient beside.
+  3 Mechanical, no choice: score.py BARS for the four keys to 0.60 (with its mutants_e2e checks) when s10 is
+    accepted; F3, the T0 audit and the sizing simulation stay as STEP 10a listed them.
+
+STEP 10d (2026-10-02, 18:35 to 19:05 EDT): the s9 sealed-size rule run on the dev baselines. No model, no GPU, no
+PC access, nothing committed. Input: the STEP 10a raw copy (scratchpad, md5-checked) and runs/dev_panel/panel.json.
+NEW (rc12) sizing.py (estimate, generate, the s9 bootstrap vectorised, power), sizing_run.py (the run, fixed seed
+  20261002), test_sizing.py. Outputs (gitignored) runs/sizing/: estimates.json, power.json, power.tsv.
+TRIO ("the two baselines nearest to it"): SmolLM2-360M-Instruct (dev R 5.33) and gemma-3-270m-it (6.11), nearest to
+  Qwen2.5-0.5B-Instruct (5.25) on the dev composite R (template, mean of 3 seeds); next LFM2-700M 6.95, Qwen3.5-0.8B
+  6.98. Why R and not size: the rule simulates a true difference of 0, so the disagreement it needs is between
+  models at the comparator's level on the quantity D measures; Qwen3-0.6B (nearest in size) is 9 points better, and
+  part of its disagreement is that real difference. The size trio (Qwen3-0.6B 596.0M and SmolLM2-360M 361.8M vs
+  494.0M, safetensors headers, tied embeddings once; LFM2.5-350M 354.5M next) is run beside it: same n.
+ESTIMATES (the analysis's own units, score_stats.unit_table with OWN gated; seeds 1-3; 9 seed pairings per model
+  pair). p = mean rate of the two pairs (comparator, baseline); msd = mean squared paired unit difference (= the
+  paired disagreement rate for 0/1 units); phi_w = within-conversation correlation (ICC of the graded turns; only
+  PERSIST and LOOP have units made of several turns, every other composite unit is one 0/1 outcome); r* = latent
+  (probit) correlations: rw turns of one conversation, rs sampling seeds of one model, rx two models.
+  family   p      phi_w  msd_x  msd_s  rw     rs     rx
+  RECALL   0.011  -      0.022  0.022  -      0.000  0.000
+  CORR     0.029  -      0.057  0.056  -      0.011  0.000
+  BIND     0.019  -      0.039  0.022  -      0.806  0.000
+  TWOHOP   0.085  -      0.156  0.097  -      0.676  0.000
+  PERSIST  0.095  0.601  0.092  0.062  0.868  0.632  0.381
+  OWN      0.016  -      0.031  0.037  -      0.000  0.000
+  TOPIC    0.016  -      0.031  0.032  -      0.000  0.000
+  ROLE     0.054  -      0.103  0.083  -      0.457  0.000
+  LOOKUP   0.007  -      0.014  0.009  -      0.783  0.000
+  LOOP     0.218  0.052  0.050  0.030  0.099  0.080  0.000
+  Read: the two models agree on an item no more than chance (rx 0) in every family but PERSIST; a model agrees
+  with itself across sampling seeds on BIND, TWOHOP, LOOKUP, ROLE, PERSIST. Latent correlations are floored at 0,
+  so the simulated msd falls short of the observed one where the three models' rates differ (LOOP 0.045 vs 0.050);
+  net of each pair's mean difference the observed paired variance is at or below the simulated one in every
+  family to within 1.5% (CORR 0.0565 vs 0.0557).
+SIMULATION (assumptions): sealed family f gets round(dev units x n / 640) units (s5's 640 records; the cells
+  scaled, the layout kept: at 600, 452 composite units). Comparator 1 training seed x 3 sampling seeds; Planck
+  stand-in 3 training seeds x 3 (PLAN); both at rate p in every family, so D's true value is 0. Planck's training
+  seeds agree at the item level like sampling seeds (rt = rs) or like two models (rt = rx); not measurable before
+  Planck exists, both run, the rule takes the lower power (rt = rs here). No training-seed main effect in the rule's
+  run (the rule's inputs are the two dev estimates); it is a sensitivity row below. Each split: the s9 bootstrap,
+  10,000 resamples, lo >= -3 (score_stats.level_r). Primary curves 2,000 splits per n, the rest 1,000.
+RESULT: n = 600 (the minimum). Power, primary trio:
+  n          600   700   800   900   1000  1100  1200  1300  1400  1500
+  rt = rs    0.911 0.948 0.973 0.990 0.989 0.996 0.997 1.000 1.000 1.000
+  rt = rx    0.929 0.956 0.983 0.993 0.998 1.000 1.000 0.999 1.000 1.000
+  At 600 (rt = rs): mean D -0.005, sd of D 0.75, mean bootstrap SE 0.95 (the nested bootstrap counts seed noise
+  twice, so its CI is wider than D's spread), mean lo -1.90.
+  Same n = 600 under: size trio (0.819 / 0.846 at 600), units per 608 conversations (0.932), LOOKUP out of the
+  composite (0.857).
+  Training-seed main effect (sd of a Planck seed's expected R, points; rt = rs; 1,000 splits, MC SE about 0.013):
+  sd 0.5: 0.893 at 600 -> 600; 1.0: 0.808 -> 600; 1.5: 0.762 at 600, 0.800 at 700; 2.0: 0.625 at 600, 0.801 at 1300
+  (curve noisy, 0.737 at 900); 2.5: 0.713 at the cap; 3.0: 0.605 at the cap. So past about 2 points no n up to
+  1,500 reaches 0.80: the lever there is the training-seed count, not conversations.
+CHECKS test_sizing.py ALL PASS (12 s): phi2 endpoints and fixed-seed Monte Carlo; sizing.boot on bootstrap_diff's
+  own random.Random draws equals the committed score_stats.bootstrap_diff (D, lo, hi to 1e-9) on synthetic rows
+  (OWN with cf twins, BIND as pairs); numpy draws vs those draws (sd of D within 4%, comparator-seed and
+  Planck-seed data); estimator round trip from known p, rx, rs, rw (within 0.03); KNOWN ANSWER: with every seed
+  identical the analysis is a paired stratified bootstrap with power Phi(3 / sigma - 1.96), sigma^2 = 100 sum_f
+  delta / n_f: delta for 0.50 and 0.80 gives 0.499 and 0.794 (1,000 splits); delta 0 gives D = lo = 0, power 1;
+  tau_for's seed sd; mean D 0 under a seed main effect. Broken on purpose (scratch copies): 11 mutants, all killed
+  (unpaired draw, lo at 5%, Planck seeds not nested, comparator seeds not resampled, rs used for rx, no tau
+  threshold fix, rx from msd_s, ICC ignored, D sign, phi2 half-angle, power on lo >= 0). End to end: 3 realistic
+  600-conversation splits through the committed bootstrap_diff (10,000) vs sizing: same D, lo within 0.052.
+OPEN, FOR MAX (none applied; prereg s9 / s16 not edited)
+  1 The rule's n is 600 (s16 "Sealed size" settled by it). PLAN guessed 1,000-1,200. The one input the rule cannot
+    see is Planck's training-seed spread. Options: (a) 600 as the rule gives, the seed-sd row published beside it;
+    (b) a recorded deviation sizing for an assumed seed sd: 1.5 points -> 700, 2 points -> about 1,300; (c) the
+    cap, 1,500 (0.93 at sd 1.5, 0.84 at sd 2). Recommended: (a), because the rule's text gives 600 and above about
+    2 points no allowed n helps; PLAN's 5-seed trigger (E3 / P-026 lock-in) is the protection that works.
+  2 The trio reading ("nearest" on dev R, not size) is mine; both readings give 600, so it decides nothing here.
+
+STEP 10b (2026-10-02, 18:40 to 19:10 EDT; after STEP 10a, appended after STEP 10c and 10d): prereg draft s11 applied
+mechanically to the dev baselines, the headroom rule and the PERSIST base-rate rule. PROPOSAL: computed and applied
+nowhere except the s11 result text; LOOKUP's rebuild / drop is Max's. No model, no GPU, no PC access, nothing
+committed. Input: the STEP 10a raw copy (scratchpad, md5-checked against the PC) and dev/rc12_dev.jsonl (md5 008dda4b).
+NEW rc12/dev_s11.py (CPU, 6.5 min; output runs/dev_panel/s11.json, gitignored): core panel of s12, template render,
+  mean of 3 sampling seeds = score.summarize(seeds 1-3 + their own-cf twins), OWN = OWN_GATED; score_stats.headroom
+  over HEADROOM_KEYS (10 composite families + CORR:U, C_noupd, C_twoslot; the Level A BIND key is the BIND family,
+  asserted equal for all 9 models); the same per seed and greedy; LOOKUP probe evidence; persist_base_rates and
+  persist_drops, pooled and per seed. Checks: every value equals STEP 10a's rules.json (13 keys x 9 models, 16 rules x
+  9 models, the drop list; the same committed functions run again, not a second implementation); both rules re-run on
+  edited copies of the measured inputs react as s11 says (LOOKUP's top model at 0.050 still floor, at 0.051 passes;
+  LFM2-2.6B OWN at 0.05 fails OWN; nine CORR:U at 0.95 fail at the ceiling, one at 0.949 does not; a base rate of
+  0.30 is kept, 0.3001 dropped).
+(a) HEADROOM (fail: EVERY core baseline <= 0.05, or EVERY one >= 0.95)
+  key            Qw2.5  Qw3.5  L230   L350   Falc   S135   S360   Doge   L2.6   >0.05  verdict
+  RECALL         0.011  0.006  0.011  0.178  0.044  0.011  0.011  0.006  0.139   2     pass
+  CORR           0.021  0.047  0.062  0.151  0.057  0.016  0.052  0.005  0.266   5     pass
+  BIND           0.011  0.011  0.011  0.122  0.022  0.011  0.044  0.000  0.089   2     pass (also the Level A key)
+  TWOHOP         0.042  0.229  0.076  0.160  0.097  0.007  0.062  0.000  0.264   6     pass
+  PERSIST        0.113  0.282  0.323  0.559  0.031  0.018  0.137  0.018  0.812   6     pass
+  OWN (gated)    0.007  0.000  0.028  0.021  0.014  0.021  0.007  0.000  0.076   1     pass
+  TOPIC          0.000  0.035  0.014  0.104  0.014  0.007  0.056  0.007  0.167   3     pass
+  ROLE           0.069  0.014  0.035  0.111  0.000  0.000  0.069  0.000  0.278   4     pass
+  LOOKUP         0.014  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.007   0     FAIL, floor
+  LOOP           0.237  0.074  0.228  0.182  0.013  0.032  0.094  0.057  0.097   7     pass
+  CORR:U         0.031  0.031  0.062  0.094  0.052  0.031  0.083  0.000  0.250   5     pass
+  CORR:C_noupd   0.021  0.042  0.062  0.208  0.083  0.000  0.000  0.021  0.312   4     pass
+  CORR:C_twoslot 0.000  0.083  0.062  0.208  0.042  0.000  0.042  0.000  0.250   4     pass
+  No ceiling failure (highest core value 0.812, LFM2-2.6B PERSIST). Seeds 1, 2, 3 and greedy alone: LOOKUP only.
+  T0 and the loop rate are Level A criteria, not keys (s10 names the four keys); T0 runs 0.017 to 0.510, no fail.
+  LOOKUP EVIDENCE (template, seeds 1-3, 144 units per model)
+    Units right: Qwen2.5 2, LFM2-2.6B 1, the other seven 0; per seed at most 0.021, greedy 0 for all nine; every
+      cell (rota, menu, tour) <= 0.021. Extras: Qwen3-0.6B 0.007; gemma, LFM2-700M, LFM2-1.2B 0.
+    The unit needs both probes (s5). P (VAL, a key of the named table) is not at the floor: LFM2-2.6B 0.542,
+      Qwen3.5-0.8B 0.333, LFM2.5-350M 0.215, Qwen2.5 0.132, LFM2.5-230M 0.125 (Qwen3-0.6B 0.694). X (ABS, a key the
+      named table lacks and the other table holds) is: Qwen2.5 0.097, SmolLM2-360M 0.049, the other seven <= 0.007.
+    X replies give the OTHER table's value for that key: LFM2-2.6B 0.833, Qwen3.5-0.8B 0.799, LFM2.5-350M 0.632,
+      LFM2.5-230M 0.514, Qwen2.5 0.431, Falcon-H1-Tiny 0.410; an abstain cue appears in 0.000 to 0.181; SmolLM2 and
+      Doge mostly degenerate (a1_degen 0.43 to 0.72). Lenient twins (OD7) do not lift it: lenient units 0.000 to
+      0.014 for every core model. So the floor is X's two-table lure, a real failure of every model up to 2.6B, not
+      a strict clause.
+  NEAR THE FLOOR, PASSING (as written; no action): OWN has one core model above 0.05 (LFM2-2.6B 0.076; seeds 0.062,
+    0.104, 0.062, greedy 0.083); RECALL and BIND two (LFM2.5-350M, LFM2-2.6B); TOPIC three. Any regrade before the
+    lock (for example STEP 10c OPEN 1 (a)) re-runs dev_s11.py: LFM2-2.6B's OWN at 0.05 would fail OWN.
+  FOR MAX, LOOKUP (s11's two options; none applied):
+    (1) Rebuild with easier cells, same layout (two same-shape tables in u1-u4, a P and an X probe). The floor is
+      X, so an easier cell has to change X (a key neither table holds, or tables with disjoint keys), which moves it
+      toward RECALL:abstain. Cost: generator change, new dev hash, the full check order (G1-G11, mutation files),
+      LOOKUP's 48 conversations rerun on the GPU for every panel run (13 models x 2 renders x 4 seeds = 104 runs),
+      s11 re-run, all before the Oct 11-14 lock; nothing shows in advance that it would clear 0.05.
+    (2) Drop LOOKUP from the composite, reason written in s11, e.g.: "On dev every core baseline scored 0.000 to
+      0.014 (each seed and greedy too). The floor is the X probe: asked for a key that only the other table holds,
+      the models give that table's value (LFM2-2.6B 83%); lenient scoring does not lift it (<= 0.014)." Then R =
+      100 x the mean of 9 families (s9 "10 families, 10 points each" and score.py COMPOSITE change, with their
+      mutants_e2e checks); bootstrap and sensitivity row on 9; sizing unchanged at 600 (STEP 10d, LOOKUP out 0.857);
+      LOOKUP's cells stay reported beside (s9 "every cell").
+    RECOMMENDED (2), drop. A floor family adds about 0 to D and cuts every other family's weight from 11.1 to 10
+      points, so keeping it makes non-inferiority easier, the thing s11 exists to stop; abstention stays in R
+      through RECALL:abstain; OD5 already noted LOOKUP's tables could partly measure a format Planck's pipeline
+      trains; and a rebuild costs a dev rebuild, the check order and about 104 GPU runs with no evidence it clears.
+(b) PERSIST BASE RATES: the 16 (rule, arg) pairs of the dev PERSIST records; compliance share over every reply of
+  every non-PERSIST conversation (20,256 replies per model: seeds 1-3, cf twins out); template; core panel.
+  rule           Qw2.5  Qw3.5  L230   L350   Falc   S135   S360   Doge   L2.6
+  one_sentence   0.102  0.068  0.086  0.123  0.067  0.107  0.175  0.167  0.084
+  question_end   0.074  0.175  0.147  0.155  0.003  0.113  0.181  0.064  0.081
+  The other 14: at most 0.003 for any core model (first_word Indeed 0.0027, Falcon-H1-Tiny); brackets, closings
+    "over and out", "that is all", "until next time", first words Ahoy and Behold: 0 in every reply. One seed alone:
+    one_sentence 0.208 (SmolLM2-360M seed 3), question_end 0.195 (SmolLM2-360M seed 1). Extras: one_sentence up to
+    0.199 (gemma), question_end up to 0.053.
+  DROP LIST: EMPTY. No rule is above 0.30 for any core baseline, so all 16 stay. The draft's expected one_sentence
+    drop (from IDEAL's one-sentence replies) did not happen on real baselines. No choice for Max here.
+WRITTEN: prereg draft s11, "NOT RUN: no baseline has been scored." replaced by the result above, marked "measured
+  2026-10, before the lock". Nothing else in the draft changed (s9's family list, s16, s19 move only with Max's pick).
+SIDE CHECK (prereg s12's baseline clause, not s11; NEW rc12/dev_baseline_ci.py, output runs/dev_panel/baseline_ci.json):
+  score_stats.bootstrap_diff (10,000) of each sub-0.5B baseline vs Qwen2.5-0.5B-Instruct, dev, template, seeds 1-3,
+  with 10 families and with LOOKUP out (9; S.COMPOSITE rebound in that process only):
+    model                D (10)  CI lo   D (9)   CI lo   lo >= -3
+    Falcon-H1-Tiny-90M   -2.33   -4.00   -2.43   -4.26   no
+    SmolLM2-135M         -4.03   -5.48   -4.33   -5.86   no
+    Doge-160M            -4.33   -5.65   -4.65   -6.05   no
+    LFM2.5-230M          +2.63   +0.79   +3.08   +1.08   yes
+    gemma-3-270m-it      +0.86   -0.88   +1.11   -0.73   yes
+    LFM2.5-350M         +10.63   +8.09  +11.96   +9.12   yes
+    SmolLM2-360M         +0.07   -1.73   +0.23   -1.71   yes
+  So on dev, released models from 230M up already meet the CI part of Level R against the comparator, under either
+  family list, and Falcon-H1-Tiny-90M's point estimate is inside the -3 margin (its dev CI is not). None meets Level R
+  in full: one training seed each, and T0 0.017 to 0.510 against the 0.90 proposal (Qwen2.5 0.177). s12 moves
+  Planck's Level R claim below LFM2.5-230M's or Falcon-90M's size if either "passes Level R" (on sealed), and does not
+  say whether the T0 gate and the seed count apply to a released baseline there. For Max (not decided): (a) the
+  clause reads the CI part only, recommended, the conservative reading (on dev it already puts Planck's claim below
+  230M); (b) full Level R, which no baseline can meet while T0 sits at or below 0.51, so the clause would never fire.
+
+STEP 10e (2026-10-02 evening, after STEP 10b): adversarial check of STEP 10a-10d and the final list of Max's decisions
+(rc12/DECISIONS_FOR_MAX.md). No model, no GPU, no PC access, nothing committed, nothing under sealed/ read. Check
+code in the session scratchpad (s10e/, not in the repo), run on the STEP 10a raw copy.
+RECOMPUTE (own code, no score.py / score_stats.py call): units from each row's probes (mean, or all-right for RECALL
+  abstain, ROLE, LOOKUP; BIND pairs; OWN gated by its cf twin), family means, Level A keys, loop / degenerate / ack
+  rates, R. 10 random panel cells (Random("RC12:s10e:panel-cells")), then all 3,640 cells of panel.json (130 rows x
+  28 columns): 0 mismatches; 71,552 units recomputed from probes = stored unit. Headroom: 13 keys x 9 core models,
+  template, mean of 3 = s11.json, 0 mismatches; LOOKUP at the floor on each seed and greedy (max 0.021). Regrade: all
+  66,560 own-history rows (13 models x 2 renders x 4 seeds) through runner.grade with the working-tree graders =
+  stored probes, unit, flags, ack marks and leaks (0 differ). The check's own mutants (LOOKUP unit as a mean, cf twin
+  ignored, BIND unpaired, a probe reply replaced): each detected.
+RULES vs TEXT: s11 headroom, s10 re-anchor, s9 sensitivity and sizing, s11 PERSIST applied as written. One reading
+  not written down: the PERSIST base rates read the template render. On the plain render one_sentence is above 0.30
+  for LFM2.5-350M 0.602, Qwen3.5-0.8B 0.403, Doge 0.387, LFM2.5-230M 0.367 (committed persist_base_rates), so the
+  drop list depends on the render (DECISIONS item 6). question_end base rate re-implemented: within 0.0002. Batch
+  drift, turn 1, recomputed: vLLM template 915/2304, plain 834/2304, Doge 47/192, 97/192 (= STEP 10a). gemma stored
+  stops: eos, cap, role only.
+SIZING: test_sizing.py ALL PASS (known answer 0.499 / 0.794). Code read: one unit draw per family shared by both
+  models (paired, stratified), training then sampling seeds (nested), D = Planck - comparator, power = share with
+  lo >= -3. Extra case that sizing.generate never builds: every unit, seed and model independent Bernoulli(0.10),
+  n 600, my own generator, each split through the COMMITTED bootstrap_diff (B 2000) and sizing.boot on the same data:
+  true D 0: power 0.516 vs 0.519 (320 splits; sizing.power on the same world 0.494, 1,000 splits); true D -3.0:
+  0.006 both (160); true D +2.0: 0.956 both (160); point D equal in every split; sd of D 0.933 vs analytic 0.959.
+SEALED / MODELS (from the STEP 10 agents' tool calls in their transcripts): no write under sealed/ (its directory
+  mtime is 2026-09-26); no model loaded (PC verify read tokenizers and configs with CUDA hidden; STEP 10d read
+  safetensors headers only). One slip: a STEP 10d search ran grep -r from the repo root with --include *.txt / *.md
+  and dropped ./sealed lines from its output, so grep opened any such files under sealed/; nothing from them was
+  shown or written. Its later searches used --exclude-dir=sealed.
+NEW EVIDENCE FOR MAX (DECISIONS items 10-12): F3 equality-only probes: Qwen2.5's 62 are one refusal repeated on LOOP
+  turns (a loop under every option); option (ii) changes 1 probe over 13 models, (iii) at most 29. PERSIST P turns
+  with statement-filler text: 1,794 replies, 89 equal an earlier reply, 2 exempt if marked non-asking. Near-duplicate
+  (<= 12 words, one word from an earlier reply, not a LOOP): 0.000 to 0.007 of replies per model.
+PRIOR ART (the relayed request): answered by research/NOVELTY_2026-10.md (a separate search workflow, today);
+  summarized in DECISIONS, items 14 and 15 come from it. No new search in this step.
+
+STEP 11, ITEM 15 (2026-10-02 evening): public wording. Max, 2026-10-02: took all recommendations in
+rc12/DECISIONS_FOR_MAX.md (item 15). No model, no GPU, no PC access, nothing committed, nothing under sealed/ read
+or searched. Files changed: README.md, PLAN.md (claim sentences only), research/REPORT.md. The prereg draft is NOT
+edited here: the bare-model line below goes into s1 "Rules for both" through the integrator.
+WHAT CHANGED
+  README.md: the "smallest conversational models sit around 0.5B" paragraph rewritten (tiny chat models exist down to
+    about 5M; none of the 13 dev-panel models, 90M to 2.6B, reaches the strict bar); new section "What is new here,
+    and what is not": not the first to ask the question, to train sub-30M chat models from scratch, to train tiny
+    models on synthetic multi-turn dialogue, or to keep facts outside the weights; the aim is the first measured
+    floor for strict multi-turn state skills (NOVELTY_2026-10.md s4 item 1 wording, as an aim, not a result); a
+    bare-model sentence. The decision citation is an HTML comment there (not shown on the rendered page).
+  PLAN.md s1: a "What is new, and what is not" paragraph after the capability-per-parameter paragraph; "What counts
+    as the model" gains the bare-model bullet (same sentence as below, "prereg s9" for "s9"); the s7 risk table's
+    fallback (1) no longer says "nobody has measured multi-turn sub-skills below about 90M" (BananaMind-2, RxT and
+    Loom published loose numbers there); it now says no strict pass/fail floor has been published.
+  research/REPORT.md: an amendment line under the header; new s2.1 "Related work found after this report" with
+    links (SmallTalkLLM, Loom, BananaMind-2 and its bench, Vertex-0.6-15M, Veyra2, cRia-LM-75M, RxT 2510.03561,
+    EvolveScaler 2609.08435, SYNTH 2609.37891, LMLM 2505.15962, Co-LMLM 2607.07707, FLM 2509.02225, CICM 2609.38866);
+    Monad row "200B synthetic (3,530)" -> "~180B synthetic (~3,175)"; the s1.2 and s2 "nothing (nobody) past 3 turns
+    at this size" lines corrected (RxT's 9-step reward and Loom's 10- and 12-turn checks exist, both loose); an s9
+    source line; an appendix note of what this pass checked.
+CHECKED (what I ran)
+  curl -L on all 18 cited links: HTTP 200 each. arXiv titles of the 7 cited papers match the works described.
+  SYNTH paper (arxiv.org/html/2609.37891) Appendix B: "Monad-56M ... over ~180B tokens"; Baguettotron-350M (321M)
+  ~199B, so its 200B row stands. 180e9 / 56.7e6 = 3,175. Dev panel (runs/dev_panel/panel.tsv): 13 models, 130 rows,
+  level_a_met False in every row; key maxima CORR:U 0.281, C_noupd 0.500, C_twoslot 0.312, BIND 0.133 (= STEP 10c).
+  No em or en dash in the three files. NOT re-checked: the related-work facts themselves (NOVELTY_2026-10.md's
+  verifiers read the primary sources; s2.1 says so).
+BARE-MODEL LINE FOR THE PREREG (s1 "Rules for both"; drafted, not applied):
+  "Both levels score the bare model: each reply is generated from the conversation's own history (the scripted user
+  turns, including any table a user turn supplies, and the model's own earlier replies), with no retrieval, memory
+  store, state card, repetition penalty or other help from the harness; the OWN counterfactual twin (s9) edits one
+  assistant turn and can only remove credit."
+  Consistent with s3 (own history, nothing injected), s4 (repetition penalty 1.0, off), s9 (OWN gate only removes
+  credit), s1 (a note the model writes counts as the model; a state card is a scaffold) and LOOKUP's tables, which
+  are user turns (kind T) whether LOOKUP stays in the composite or not (item 1).
+NOTICED, NOT CHANGED (outside item 15)
+  PLAN s1 and prereg s1 Level A wording still say "at least 0.80" while prereg s10 now has 0.60 (re-anchored).
+  PLAN s1 says the panel runs "from 90M to 2.6B"; NOVELTY's "5M to 2.6B" holds only once item 14's extras are in.
+  README "Status" is stale ("Next: dev baselines on RC-12"; the dev baselines are scored, STEP 10a).
+
+STEP 11, ITEMS 1-4, 6-12, 16 AND D (2026-10-02, 20:33 to about 22:00 EDT): Max's picks applied to rc12/ and the
+prereg draft. Every change cites "Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item N)".
+No model loaded, no GPU, no PC access, nothing committed, nothing under sealed/ read or searched (the one search from
+the repo root used --exclude-dir=sealed). Not touched: engines.json, pin files, s12's model list (other agents'
+items). Input: the STEP 10a raw copy (scratchpad s10a/raw, 958 of 958 run files md5-equal to the PC manifest,
+re-checked).
+ITEM 1, LOOKUP OUT OF THE COMPOSITE
+  score.py COMPOSITE = the 9 families (RECALL CORR BIND TWOHOP PERSIST OWN TOPIC ROLE LOOP); REPORTED = ["LOOKUP"]
+    (graded, its keys reported, not in R or in summary families). score_stats.headroom(panel, keys) (default
+    HEADROOM_KEYS, now without LOOKUP; a reported family can be passed to see its row). validate_e2e FAMS = COMPOSITE
+    + REPORTED: LOOKUP keeps its G2 / G4 cheater gates (its cells are still reported), so the G4 histogram is
+    unchanged (0:310 1:43 2:76 3:53, re-run). validate_machinery c_scoring: IDEAL with every LOOKUP unit 0 keeps
+    R_ungated 100 and LOOKUP is not a summary family, with every CORR unit 0 R_ungated is 800 / 9; c_stats
+    sensitivity drop list now BIND, OWN, PERSIST. mutants_e2e #88 (LOOKUP back in COMPOSITE: killed, R 90.0 for both)
+    and #91 (LOOKUP listed as an R family: killed). dev_panel.py: F_LOOKUP as a reported column, headroom_reported;
+    dev_s11.py: LOOKUP's row as headroom_reported, --panel; sizing_run.py: estimate over COMPOSITE, R mean /
+    len(COMPOSITE) (it had "/ 10"), the nolookup config gone; test_sizing.py: the known-answer sigma^2 = (100 / F)^2
+    sum delta / n_f (it hard-coded F = 10: with 9 families "known-answer power 0.8" FAILED, sim 0.740, sd_D 1.199 vs
+    1.071; fixed: 0.526 / 0.828); dev_baseline_ci.py: 9fam and 10fam_withLOOKUP labels, an out path argument.
+  Prereg: s9 composite list and the reason pointer, s11 the reason, s5 table (LOOKUP "reported", 434 composite units),
+    s8 (LOOKUP keeps G2 / G4; 11.1 points per family), s15.
+  NOT CHANGED, outside my files: harness/test_rc12_eval.py line 232 asserts the summary's families include "LOOKUP";
+    it will fail now (not run here: it needs torch and a random-init network). harness/rc12_eval.py's docstring says
+    "all 10 composite families".
+ITEM 2, RERUN CHECK AT THE NEAR-TIE FOR EVERY ENGINE (code only; the GPU rerun is the integrator's)
+  NEW rerun_tie.py (201 lines). verify_dev_runs --rerun N now runs two subprocess stages (one model on the GPU at a
+    time, as parity): replay (the run's engine from meta.json, R1 sampled replay vs stored, R2 greedy lockstep vs
+    sequential and vs stored greedy; per conversation the FIRST differing turn, its history rebuilt from the row minus
+    the dropped pairs) and margins (HFResponder; both generations re-tokenized; |log p(a_j) - log p(b_j)| at the first
+    differing token on prompt + shared prefix via parity_hf_vllm.hf_margin; a stopped prefix vs HF's first stop id;
+    equal ids or a capped prefix -> None). PASS when every first divergence has a margin <= 0.5 (NEAR_TIE); None
+    fails; the identical share is printed. --tie-margin-stub X: fake engines only, refused for a real engine before
+    anything loads (and by the margins stage itself). verify_dev_runs keeps C1-C5; its rerun() moved to
+    rerun_tie.replay_runs (test_hf_trust.c_verify_rerun now drives that; its 3 option-forwarding mutants in a scratch
+    copy each turn it red).
+  CAVEAT for the GPU run: under sampling (R1) one seed's draw can flip between two tokens that are NOT near-tied when
+    the logits move a little, so R1 can FAIL on drift alone; R2 (greedy) is the parity case. Margins are printed.
+  test_verify_dev_runs.py: stored reply changed at turn 2 + stub 0.3 / 0.5 -> PASS R1 (2 / 3 identical), 0.8 -> FAIL,
+    greedy + 0.3 -> PASS R2; a stub on vLLM metas -> FAIL before any replay; the margins stage refuses a stub for
+    vLLM; hf_margins on a stub tokenizer (first differing token, abs, stopped prefix vs stop id, capped prefix and
+    equal ids None); history() minus a dropped pair. mutation_verify.py: 3 targets moved to rerun_tie.py, 12 new (29
+    in all); first FAIL lines read for #18-#29, each the intended case.
+ITEM 3, CHANGE-PHRASE GAP, REGRADE
+  graders.STALE_BEFORE adds initially, initial, previous, prior (0 to 3 words before the stale value, as before).
+    fixtures_graders: 4 clean (stale_initially_ok, stale_initial_ok, stale_previous_ok, stale_prior_ok: 12 each, all
+    FAILED on the old regex, pass now) and 2 planted (stale_recap_planted "Initially I hesitated, but it is X.",
+    stale_prior_swapped "It is X now; the prior plan said G."; must fail, do). audit_graders: 5 paraphrases (4 pass,
+    stale_recap_far must fail). mutants_graders: 5 (each frame word removed; the window unanchored).
+  NEW dev_regrade.py: every row of every stored run (208 run dirs, 71,552 rows incl. 4,992 cf rows) through
+    runner.make_row on its stored turns, 6 processes, 42 s. Result: 2 rows changed, both LFM2-2.6B template seed 3:
+    corr-060 (C_twoslot, the audited grader error) unit 0 -> 1; corr-011 (U-diff) loses v3_other but still fails
+    v3_guess. Every change is a probe that lost only v3_other (the built-in check: all expected True).
+  dev_panel.py on the regraded copy -> runs/dev_panel_regrade/ (0 check failures: stored scores = score_lines, pooled
+    = arithmetic mean); dev_s11.py -> runs/dev_panel_regrade/s11.json: headroom fails nothing (mean of 3, each seed,
+    greedy); LOOKUP reported at the floor (max 0.014); PERSIST drops empty, rates identical to STEP 10b; boundary
+    checks 7 / 7; equals the regraded panel's rules.json. Only changed panel values (besides R): LFM2-2.6B template
+    F_CORR 0.2656 -> 0.2708, C_twoslot 0.250 -> 0.2708. OWN still passes only through LFM2-2.6B 0.076.
+ITEM 4, SEALED SIZE: sizing_run.py re-run on the 9-family composite and the regraded copy (--sims 2000 --sens-sims
+  1000 --procs 8, seed 20261002, 17.6 min; runs/sizing_regrade/). Rule n = 600: primary trio (nearest on dev R:
+  SmolLM2-360M 5.92, gemma 6.79 vs Qwen2.5 5.68) 0.848 (rt = rs) / 0.876 (rt = rx) at 600. SIZE trio (Qwen3-0.6B,
+  SmolLM2-360M): 0.719 / 0.774 at 600, 0.805 / 0.839 at 700, so n = 700 under that reading. DECISIONS item 4 said both
+  readings give 600: true for 10 families, NOT for 9. Kept the dev-R reading, flagged in s9 for Max. Seed-spread
+  table (9 families, 1,000 splits): sd 0.5 -> 600 (0.839), 1.0 -> 700 (0.815; 0.772 at 600), 1.5 -> 900 (0.818),
+  2.0 -> 1500 (0.814), 2.5 / 3.0 none (0.659 / 0.548 at the cap); written beside the rule in s9 with the 10-family
+  row.
+ITEM 6: s11 (PERSIST base rates read the template render; the plain-render values named, not read); score_stats doc.
+ITEM 7: s12 baseline clause rewritten: CI part only, widened to every public panel model at or below N; Level A
+  read as the s10 criteria other than training seeds and T0 (MY reading of "the same bar" for Level A, flagged). Dev,
+  dev_baseline_ci.py on the regraded copy, 9 families (10,000): LFM2.5-230M lo +1.08, gemma -0.73, LFM2.5-350M +9.12,
+  SmolLM2-360M -1.71 meet the CI part; Falcon-H1-Tiny -4.26, SmolLM2-135M -5.86, Doge -6.05 do not (10-family numbers
+  equal STEP 10b's).
+ITEMS 8-11, 16 (recorded): s16 gemma <eos> left; s6 strict cases (a) / (b) unchanged (OD7 revisit); s6 (d) and s17 (3)
+  F3 kept strict; s17 (2) PERSIST statement-filler P turns stay asking; s9 -3 margin, s11 PERSIST 0.30, s13 S1 zero
+  5-grams and S6 list marked confirmed; T0 0.90 stays "(proposal)", item 5 decides.
+ITEM 12, NEAR-DUPLICATE RATE: grade_loop.near_dup (1-12 normalized words, exactly one word edit from an earlier reply;
+  word_edits), score.near_duplicate_stats (share of every reply, not LOOP; None for turnless synthetic rows),
+  summary field near_duplicate, dev_panel column. NEW test_near_dup.py: 11 near_dup and 4 word_edits unit fixtures, 4
+  rate checks and 3 through the real runner (IDEAL OWN loop 0; a parrot plus one word adds exactly 1 / n and no LOOP;
+  --own-cf rows left out); --mutate: 10 mutants, each killed on its intended fixture (log logs/mutation_near_dup.txt).
+  As defined (the STEP 10e measure), any two different one-word replies are one edit apart. Dev (regraded, template, mean of 3): 0.000 (LFM2-2.6B, LFM2-700M, LFM2-1.2B) to 0.007
+  (gemma 0.0069, SmolLM2-360M 0.0061).
+ITEM D: score.py BARS level_a 0.60; validate_e2e BAR level_a 0.60 (G3: no cheater reaches 0.60 on a Level A key);
+  validate_machinery c_scoring pins it (0.60 met, 0.5999 not); mutants_e2e #23 retargeted (0.60 -> 0.50, killed by G3
+  ANTEPENULT C_twoslot 0.50), #89 (back to 0.80) and #90 (>= made >) killed. s16 "Dev baselines" updated; s19 items
+  2-5 marked.
+CONCURRENT EDITS SEEN (another agent, item 14, not mine, not touched): dev_batch.py, engines.json, hf_batched.py,
+  hf_responder.py, parity_hf_vllm.py, runner.py, test_parity.py (chat_template, token_budget, fsync on publish; mtimes
+  20:37 to 21:32). rerun_tie.py forwards a recorded chat_template / token_budget from meta.json (getattr-safe, and the
+  margins stage passes chat_template only when set). Their hf_batched.py change makes mutation_hf_batched's #16
+  ("default is the pre-9f chunker", target "token_budget=TOKEN_BUDGET):") MALFORMED: its owner should retarget it.
+CHECK ORDER (21:10 to 21:48 EDT, each step alone, sequential, ~/.venvs/planck/bin/python -B; load average up to ~180
+  from other jobs; logs scratchpad s11/co/)
+  build_dev --stdout 0 (byte-identical to dev/rc12_dev.jsonl, 3e543f8d...; --stdout so the shared file was not
+  rewritten while other sessions read it), test_gens 0 (0 failures over 640), audit_rules 0 (GATE PASS), audit_graders
+  0 (0 wrong verdicts over 34,618; 34,378 before + 5 x 48), validate_e2e 0 (G1-G3 PASS, G4 PASS), validate_machinery 0
+  (11 groups), test_lik 0, test_lik_more 0, test_lik_adapters 0 (a fixed random bigram table, no language model),
+  test_oodh_wording 0, test_oodh_pairing 0, test_lockstep 0, test_vllm_responder 0, test_parity 0, test_dev_batch 0,
+  test_hf_trust 1 (AttributeError: verify_dev_runs.rerun, moved by item 2; fixed to rerun_tie.replay_runs, re-run
+  after the order: 0), test_hf_batched --split-only 0, test_queue 0, test_queue_sessions 0, test_verify_dev_runs 0,
+  test_sizing 0, test_near_dup 0.
+  mutation_graders 214 / 214 (fixtures 8,567: must-pass 2,492, must-fail 6,075; baseline 0), mutation_gens 33 / 33,
+  mutation_audit 7 / 7 + 6 / 6, mutation_e2e 8 parts 92 / 92 (baseline failures none in every part),
+  mutation_oodh_wording 44 / 44, mutation_lik 47 killed + 4 NOT RUN (LIK_TORCH_PY unset; re-run after with
+  LIK_TORCH_PY = the venv python: 51 / 51, 277 s), mutation_step9 16 + 16 + 15 = 47 / 47, mutation_hf_batched
+  --chunk-only 22 killed + 1 MALFORMED (#16, above), mutation_verify 29 / 29 (re-run after the last rerun_tie edit:
+  29 / 29, 197 s), test_near_dup --mutate 10 / 10, mutation_queue -j 3 51 / 51 (706 s).
+  After the order: rerun_tie.py (replay_runs split out; chat_template / token_budget forwarded) and test_hf_trust.py
+  changed; test_verify_dev_runs 0, test_hf_trust 0, mutation_verify 29 / 29 re-run on that tree. test_hf_trust's
+  verify-rerun claim watched failing in a scratch copy (trust, attn, max_batch each dropped in rerun_tie: red).
+OUTPUTS (gitignored): runs/dev_panel_regrade/ (panel.json, panel.tsv, rules.json, checks.json, s11.json,
+  baseline_ci.json), runs/sizing_regrade/; the regraded copy and regrade.json in the scratchpad (s11/regraded).
+  runs/dev_panel/ and runs/sizing/ (STEP 10a-10d) are left as they were.
+OPEN (for the integrator / Max): the GPU rerun (--rerun 5 once per engine family, under gpu.lock) and the R1 caveat;
+  the s9 trio reading (size trio now gives 700); harness/test_rc12_eval.py LOOKUP assertion; s1's Level A wording
+  still says 0.80 (s10 is 0.60); T0 0.90 (item 5); mutation_hf_batched #16.
+
+STEP 11b (2026-10-04, 09:00 to 10:10 EDT): the LOOKUP claim (Max, 2026-10-04) and the T0 audit applied. No
+model loaded, no GPU, no PC access (none was needed: every input is the Mac's STEP 10a / STEP 11 copy), nothing
+committed, nothing under sealed/ read or searched. Not touched: engines.json, pins, new-model files, s12's model list.
+Scratch: the session scratchpad, s11b/.
+LOOKUP CLAIM (Max, 2026-10-04, after asking whether dropping LOOKUP removed the project's core idea: LOOKUP is its own
+  pre-registered headline claim, reported beside R and never folded into it; R keeps 9 families and the s11 rule)
+  score.py: BARS lookup 0.60 (proposal), LOOKUP_CLAIM, probe_rate, lookup_claim(ks, rows, n_train) -> value (the
+    LOOKUP family score: every cell, a unit right only if P AND the abstain X are right), met (>= 0.60, inclusive),
+    claimable (met, >= 3 training seeds, every LOOKUP row template, no greedy row; why_not lists what is missing),
+    P and X probe rates, cells; summarize() reports it as lookup_claim. It reads only LOOKUP keys and probes.
+  score_stats.lookup_ci(rows, n): one-model 95% percentile CI, LOOKUP units resampled (one draw shared by every run),
+    training seeds resampled, sampling seeds resampled inside each drawn training seed (as bootstrap_diff).
+  validate_machinery c_scoring: IDEAL (plain, greedy, 1 seed) value 1, met, not claimable with 3 reasons, P = X = 1,
+    cells rota / tour / menu; only LOOKUP right -> R_ungated 0 and the claim met, LOOKUP 0 -> claim 0 and unmet;
+    ABSTAIN's P and X equal a count made from its rows (P 0, X > 0); claimable only for 3 training seeds + template
+    + sampled (2 seeds, plain, greedy each refused); bar 0.60 met, 0.5999 not. c_stats: CI on IDEAL [1, 1] over 48
+    units; ORDER_ABS (24 of 48) CI within 0.30-0.42 / 0.58-0.70 (units resampled); three training seeds at 1.0 /
+    0.5 / 0.0 give lo <= 0.2 and hi >= 0.8 (training seeds resampled).
+  validate_e2e: BAR lookup 0.60; G1 asks IDEAL / IDEAL_ALT to meet the claim; G3 asks every LOOKUP cheater (12 generic,
+    14 audit value rules, ORDER_ABS) not to (the family fakes are IDEAL on LOOKUP by construction, so not asked).
+    Result: ORDER_ABS 0.50, every other LOOKUP cheater 0.00; G1-G4 PASS, histogram unchanged (0:310 1:43 2:76 3:53).
+  mutants_e2e #92-#102 (11): bar 0.50 (G3 ORDER_ABS), > for >= , claimable without why, 1 training seed allowed,
+    plain render allowed, greedy allowed, P / X swapped, the claim reading the composite (first version crashed on
+    rows without every family; fixed to "or 0", then killed), CI without unit resampling, CI without training-seed
+    resampling, validate_e2e's own lookup bar at 0.40 (G3 fires on ORDER_ABS). Run alone first (scratch some_e2e.py,
+    baseline [] = no failure): all 11 killed, each by the check aimed at it.
+  dev_panel.py: columns LOOKUP_P, LOOKUP_X, lookup_claim_met; rules.json lookup_claim = every panel model's LOOKUP
+    rate with lookup_ci (template, seeds 1-3, 10,000) and P / X. dev_s11.py docstring only.
+  Prereg: s1 (claim wording, new, placeholders; bare model: the tables are user turns, no retrieval tool; the
+    BM25 / shuffled / no-table conditions of P-082 are not this claim), s5 (role "LOOKUP claim (s10b)"), s8 (G1, G3,
+    the cheater table), s9 (never in R), new s10b (bar, CI, what counts, never in R, no headroom rule, comparison,
+    s12 clause, dev reading), s11 (why the floor makes it a headline), s12 (clause), s15, s16, header.
+    FLAGGED in s10b: T0 is not part of the LOOKUP bar (the decision named none); Level R and A ask T0 >= 0.90.
+T0 AUDIT APPLIED (DECISIONS item 5: item 16 kept T0 0.90 "except as item 5 decides"; the audit recommends keeping it)
+  Gap 2, sentence end: grade_text.SENT_END also splits after . ! ? plus a closing quote and whitespace.
+  Gap 1, inflected values: grade_text.forms / value_hits / inflected / addressed; asserted_hits(gold=True) and
+    graders.g_val's gold check. A weekday, instrument, food or project value also matches as its plural / singular
+    (-s if it ends in s, else +s / +es); such a form counts against a reply everywhere (other, guess, shotgun,
+    G-ABS values, in-context values, "or" alternatives, the voice scan) and asserts the gold only after a
+    second-person word in its sentence. FIRST VERSION inflected every lowercase value; its regrade (533 rows, 37
+    flips) charged 8 ROLE X r4_capture debits, most of them false ("passion for mechanics" the field, "pilots like
+    yourself", "assist architects"), credited a COMPOSE "they're both dogs" and debited colour plurals ("deep
+    greens, vibrant reds"). Narrowed to the four count-noun / day types; that is the version below.
+  Red then green: the new fixtures (fixtures_graders inflect_quote_fixtures, afix inflect_value; 504) were run on a
+    scratch copy of rc12 with the two fixes reverted (s11b/oldg): 399 misses, exactly the fixtures that test the
+    fixes (inflect_you_ok 30, _other 25, _guess 29, _value 4, _alt 15, quote_split_ok 94, quote_hedge_ok 94,
+    quote_question 108), every older fixture passing; on the working tree 0 misses of 9,071. audit_graders: 11 new
+    paraphrase kinds (2,146 variants): 1,268 wrong verdicts before the fixes, all on new ones, 0 of 36,764 after.
+    (A first version of applicable() also caught the old DYN quote_you and widened VAL quote_my; seen in a count
+    diff against the earlier log, fixed, every old variant's count now as before.) mutants_graders: OFF
+    inflect, inflect_you + 10 SOURCE (quote split removed, gold condition removed, you anywhere in the sentence,
+    weekdays or count nouns dropped from INFLECT, singular of plurals dropped, every lowercase value inflected,
+    "or" alternatives without forms, the gold check without gold=True, the voice scan blind to inflected forms):
+    all killed, each by its fixture (some_graders.py, then the full mutation_graders).
+  dev_regrade.py --expect t0gaps (new; item3 stays the default): only probes, units and the role-leak scan may move,
+    never loop flags or ack marks, and no probe gains or loses a degenerate, echo, unsure or format clause (a probe
+    whose OWN source parse flips is exempt from the clause rule: its clauses are graded or skipped as a block).
+  REGRADE (source: the item 3 copy s11/regraded; out s11b/regraded; 85 s): 208 runs, 71,552 rows, 369 changed
+    (leaks only 109, probes only 219, probes + leaks 19, probes + unit 22; unit up 16, down 6), 265 probes changed,
+    all expected. 27 probe verdicts flipped, every one read (s11b/flips.txt; cause from scratch attrib.py):
+    UP 20. Quote split 7: right 5 (Falcon recall-050@s2 X "the specific name of your dog is "Juniper."", LFM2-1.2B
+      own-038 cf@s2, LFM2-2.6B role-038 greedy "you go by "Elena."", LFM2-2.6B plain role-030@s3 "Hugo", Qwen2.5
+      t0-014@s3 Porto, the audit's case); not right 2 (Falcon t0-017@s2: a suggested name, then "Sprocket is known
+      for his playful nature"; SmolLM2-135M t0-007 greedy: "the name "Biscuit" is a common and accepted way to refer
+      to a small, sweet, and tasty dog"), both passing for the reason their unquoted twins would (any unhedged
+      mention in a sentence asserts). Inflection 13: right 10 (LFM2-2.6B t0-003@s3 "You have off work on Thursdays",
+      t0-009@s3 "You play the drum!", plain t0-003@s1, plain t0-010@s2 and @s3, plain twohop-031@s2 "Your landlord
+      leads the chess club on Wednesdays"; Qwen2.5 lookup-020@s1 "you would typically get a "taco" dish"; Qwen3.5
+      twohop-007@s2 "meets on **Sundays**"; SmolLM2-360M plain t0-010@s3 and greedy "You have off work on
+      Fridays."), borderline 2 (Falcon plain recall-020@s1 "You can have off work on Saturdays, just in case.";
+      LFM2-2.6B plain recall-059@s1 X "if you've already shared that it's Saturday, then you have off work on
+      Saturdays"), not right 1 (Qwen3.5 t0-009@s2 "If you really want to play drums, the **drum sticks** ... are
+      the best tool for you!": a compound noun after a second-person word).
+    DOWN 7. Removing false credits 3 (LFM2-2.6B recall-045@s2, a deflection whose list held "a fragrant curry",
+      now a guess through "a fluffy pancake"; LFM2-700M t0-028@s3, "I can imagine a few possibilities: Chicken
+      Burritos ... Taco-Style Burritos"; LFM2.5-230M t0-031@s1, a list of instrument options). Strict rule on a
+      right answer 2 (LFM2-2.6B topic-012@s3 "both terrariums and treehouses are projects"; LFM2.5-350M t0-033
+      greedy "you might also enjoy learning about **trumpets**"): the exact forms fail the same way. RECALL abstain
+      a3_value 1 (LFM2.5-230M recall-059 greedy, "cellos", unit 0 before and after). OWN source 1 (LFM2-1.2B
+      own-006 cf@s2: with the quote split, "**Glowworms** is poetic ..." is its own asserted sentence, so the Q
+      reply asserts two options).
+  PANEL (dev_panel.py on s11b/regraded -> runs/dev_panel_11b/, 0 check failures; dev_s11.py -> runs/dev_panel_11b/
+    s11.json, equal to the panel's rules.json): template mean of 3 changed only for Qwen2.5 T0 0.177 -> 0.181,
+    Qwen3.5-0.8B R 7.75 -> 7.83 (TWOHOP 0.229 -> 0.236, T0 0.139 -> 0.142), LFM2.5-230M T0 0.188 -> 0.184,
+    Falcon-H1-Tiny T0 0.163 -> 0.167, LFM2-2.6B R 24.36 -> 24.22 (RECALL 0.139 -> 0.133, TOPIC 0.167 -> 0.160, T0
+    0.510 -> 0.517), LFM2-700M T0 0.233 -> 0.229. Plain: Falcon R 10.14 -> 10.20, SmolLM2-360M T0, LFM2-2.6B R 24.77
+    -> 24.93. The audit predicted 0.517 for LFM2-2.6B and 0.181 for Qwen2.5: both met. Headroom fails nothing (mean,
+    each seed, greedy); OWN still passes only through LFM2-2.6B 0.076; PERSIST drops empty; boundary checks 7 / 7.
+    Composite units changed for LFM2-2.6B (2) and Qwen3.5-0.8B (1) only (template seeds 1-3, unit_table compared),
+    so the s9 sizing inputs and the s12 CIs are unchanged and were not re-run.
+  Prereg: s6 (v2 matching text, the "case-insensitive" error fixed; Sentences; Inflected forms; Evidence), s9 (T0
+    kept; T0 RESULT line with the birthday item weakness, not fixed), s11, s13 S1 (sealed pools for the inflected
+    types join INFLECT and avoid plurals that are other words), s16.
+CHECK ORDER (09:31 to 10:03 EDT, each step alone, sequential, venv python -B, LIK_TORCH_PY set; logs s11b/co/)
+  build_dev --stdout byte-identical to dev/rc12_dev.jsonl (3e543f8d); test_gens, audit_rules (GATE PASS),
+  audit_graders, validate_e2e (G1-G3 PASS, G4 PASS), validate_machinery (11 groups), test_lik, test_lik_more,
+  test_lik_adapters, test_oodh_wording, test_oodh_pairing, test_lockstep, test_vllm_responder, test_parity,
+  test_dev_batch, test_hf_trust, test_hf_batched --split-only, test_queue, test_queue_sessions, test_verify_dev_runs,
+  test_sizing, test_near_dup: all exit 0. mutation_graders 226 / 226 (fixtures 9,071: must-pass 2,725, must-fail
+  6,346; IDEAL on 640 records 0 failures), mutation_gens 33 / 33, mutation_audit 7 / 7 + 6 / 6, mutation_e2e 8 parts
+  103 / 103 (baseline failures none in every part; #88, LOOKUP back in the composite, is now also caught by the new
+  independence check), mutation_oodh_wording 44 / 44, mutation_lik 51 / 51 (0 not run), mutation_step9 16 + 16 + 15,
+  mutation_verify 29 / 29, test_near_dup --mutate 10 / 10, mutation_queue 51 / 51. mutation_hf_batched --chunk-only
+  exit 1: 22 killed and #16 MALFORMED, unchanged from STEP 11 (another agent's hf_batched.py edit removed its target).
+  After the order: audit_graders' applicable() fix (above) and its re-run alone, 0 wrong of 36,764.
+OPEN: harness/test_rc12_eval.py:232 still expects LOOKUP among the summary families (outside rc12; not run, needs
+  torch); PLAN.md / README.md do not mention the LOOKUP claim (not my files); s1's Level A wording still says 0.80
+  (PLAN wording kept exactly; s10 is 0.60); the wording agent's bare-model line is still not in s1 "Rules for both"
+  (the LOOKUP claim carries its own); whether the LOOKUP bar should also ask T0 (s10b, flagged); the GPU rerun (s4);
+  mutation_hf_batched #16 (another agent's edit).
+STEP 11, ITEM 14 (2026-10-02 evening to 2026-10-04): panel extras, the public sub-30M chat models. Max, 2026-10-02:
+took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 14). Reported extras, never headroom-panel members. Begun
+2026-10-02 by an agent cut off by a usage limit (its transcript was read; its partial code was finished, not
+reverted), finished 2026-10-04. Nothing committed; prereg not edited (the s12 text is for the integrator); nothing
+under sealed/ read; no model loaded on the Mac (the CPU probes and every model load ran on the PC).
+PINS (rc12/pins.json, new): hub revision, licence and its evidence, params (safetensors header), weights sha256, read
+  from the HF API on the Mac (metadata, card, config, tokenizer config, chat template, remote code; no weights).
+  Licence at the pinned revision: Apache-2.0 for Veyra2 x4, BananaMind-2 x2, Vertex, cRia; MIT for Loom and Swen
+  (card YAML and a LICENSE file). None gated. Skipped: RxT-Alpha-Nano / -Micro-Supervised (licence other, RAML
+  v1.0 non-commercial, gated; Max did not accept it).
+DOWNLOAD (PC only, 2026-10-02): free disk first (/ 206G free), into ~/planck/hf; refs/main == the pin and
+  sha256(model.safetensors) == the hub's LFS sha256 for all ten. Runs load by repo id with HF_HUB_OFFLINE=1.
+CODE (rc12; engine options in engines.json, each recorded in meta.json and checked by verify_dev_runs C1):
+  chat_template  any engine: a Jinja template set on the tokenizer (hf_responder.set_template). Loom-Spark-3.2 ships
+                 none; its card's exact format with tools off (<tools:off>, <user>, <|eot|>, <loom>) is carried in
+                 engines.json (test_loom_template.py renders 72 dev histories against the card's rule).
+  token_budget   hfb: rows x width^2 per chunk (BananaMind-2 150M; Swen 80 x 2^20).
+  nan_guard      hf / hfb: hf_responder.guard_nans, a forward hook that sets NaN to 0 in the named module's output.
+                 Swen-28M's remote attention fills masked scores with -inf, so a left-padded pad query's softmax is
+                 NaN and reaches the real rows through the next layer (0 x NaN). CPU probe (venv-doge, fp32, 10 dev
+                 histories): batched vs serial greedy 1 of 10 equal without the hook (NaN logits in 19 of 19
+                 forwards), 10 of 10 with it. The parity applies it to the batched stage only.
+  use_cache      hf / hfb: hf_responder.set_use_cache. cRia ships config.json use_cache false, and its remote
+                 prepare_inputs_for_generation ANDs that with generate's flag, so no KV cache runs as shipped. CPU
+                 probe: 3 of 3 greedy replies equal with and without it, batched (with it) 6 of 6 equal to serial.
+                 The parity applies it to both stages (a load option, like trust_remote_code). Used by cRia's
+                 queued runs (below).
+  decode         the card row: dev_batch.decode_override / apply_decode set engines' "decode" (top_p,
+                 repetition_penalty only; vLLM only) into hf_responder.DECODE; verify_dev_runs --engines applies the
+                 same file. Only rc12/engines_card.json carries one (test: the main engines.json has none).
+  C5 (verify)    a Qwen3-architecture checkpoint whose own template has no thinking mode (Vertex, Veyra2 Blueberry)
+                 is no longer asked for an empty think block.
+  dev_extras14.py  scores the extras and the card row with this tree's scorer (every stored row regraded), the
+                 CI vs Qwen2.5 (s12 clause, CI part), the sensitivity row, PERSIST base rates and the LOOKUP claim
+                 (score.lookup_claim, score_stats.lookup_ci; Max, 2026-10-04).
+TESTS: test_chat_template, test_loom_template, test_decode_variant, test_engine_patches (a toy two-layer -inf-masked
+  attention on CPU torch: the padded row is NaN without the guard and equal to the row alone with it) PASS;
+  test_dev_batch, test_verify_dev_runs, test_hf_trust, test_parity, test_vllm_responder, test_dev_batch_durable,
+  test_lockstep, test_queue PASS. Mutation: mutation_s14.py 75 / 75 killed (logs/mutation_s14.txt; four by a
+  crash on the bad input, the rest by a named check); mutation_step9 47 / 47; mutation_verify 29 / 29;
+  mutation_hf_batched --chunk-only 23 / 23 after retargeting #16 (its text was the item 14 signature change).
+ENGINES AND PARITY (greedy, template, 20 conversations --pick spread, 240 turns, fp32 = each checkpoint's dtype):
+  vLLM: Veyra2-Blueberry-5M NEAR_TIE 237/240 (family verdict for Blueberry-10M), Vertex-0.6-15M NEAR_TIE 235/240,
+  Veyra2-Mango-15M NEAR_TIE 234/240 (for Mango-30M), Loom-Spark-3.2 NEAR_TIE 239/240; all first differences at
+  margin <= 0.010 nats, 0 prompt mismatches, 0 stop disagreements. hfb: BananaMind-2-Nano IDENTICAL 240/240 (for
+  Mini; vLLM 0.30 rejects the class), Swen-28M (venv-doge, transformers 4.55, nan_guard) IDENTICAL 240/240.
+RUNS (the panel's queue, STEP 9g sessions; template primary, plain diagnostic; greedy + seeds 1-3, each with its
+  own-cf twin; ~/planck/runs/rc12_dev): the six vLLM extras 96 / 96 runs (2026-10-02/03, 458-1,124 s under the lock
+  per model), BananaMind-2-Nano 16 / 16 (hfb, about 950 s per process). Card row: Vertex template seeds 1-3 with
+  twins, root ~/planck/runs/rc12_dev_card, 66-75 s each. Swen-28M template 4 / 4 (2026-10-04, 539-846 s each under
+  the lock, peak 6.4 GiB). STILL RUNNING when this note was written (STATUS below): Swen-28M plain, the rest of
+  BananaMind-2-Mini-Chat (template greedy done, 1,459 s), and cRia-LM-75M-Instruct.
+VERIFY (verify_dev_runs C1-C5, no --rerun; re-run 2026-10-04 with the final checks in ~/planck/dev/rc12_s14c): PASS
+  on both renders for the six vLLM extras and BananaMind-2-Nano, Swen-28M template PASS (venv-doge); the card row
+  PASS under engines_card.json, and checked against the plain engines.json C1 fails its decode on 6 of 6 runs (as it
+  should). Every scored run pulled to the Mac with 0 md5 manifest differences.
+cRIA-LM-75M-INSTRUCT: parity IDENTICAL 240/240 with use_cache in both stages; as shipped (no cache) 24 of 24 turns
+  identical to the cached batched trace; engines.json token_budget 512 x 2^20 (a smoke at the default budget: 64
+  conversations 388.4 s + 274.8 s twin, replies mostly at the 256-token cap). Its dev runs are queued; whether a
+  640-conversation process fits the 1,950 s process cap is not yet measured. A first parity run with the serial
+  stage as shipped was stopped by hand (no verdict). An earlier note (2026-10-02) said its KV cache was static at
+  max_seq 4,096; that was wrong (static_cache false; as shipped no cache ran at all).
+NOT ADDED: RxT-Alpha (licence). NOVELTY s6.3 sub-30M candidates (not in this item's list): Supra2-Medium-Instruct
+  (Apache-2.0, Qwen3, ctx 1,024), spark-13m, flame-27m and Pebble-25M (Apache-2.0, remote code), ShallowSeek-mini
+  (no HF model class), MiniMind2-Small (no licence on its HF card).
+SCORES (dev, template, seeds 1-3, 9 families, every row regraded with this tree; CI = paired bootstrap vs
+  Qwen2.5-0.5B-Instruct, R 5.68, 10,000 resamples; LOOKUP = score.lookup_claim): rc12/dev_extras14.py output in
+  runs/dev_panel/extras14/ (gitignored). R: Blueberry-5M 5.01 (CI -2.19 to +0.91, CI part met), Nano 0.37 (-6.66 to
+  -3.99), Blueberry-10M 3.52 (-3.61 to -0.70), Vertex-15M 8.64 (+1.02 to +4.93, met), Vertex card row 6.77 (-0.54
+  to +2.64, met), Mango-15M 0.87 (-6.20 to -3.41), Loom-Spark-3.2 9.55 (+2.10 to +5.68, met), Mango-30M 0.61 (-6.43
+  to -3.71), Swen-28M template 6.72 (-0.60 to +2.71, met). Every state family is at the floor (RECALL to ROLE at
+  most 0.069 on any extra); the R of each extra is mostly its LOOP family (0.026 to 0.779). LOOKUP 0.000 on every
+  extra and the card row (CI 0.000 to 0.000; P at most 0.007, the abstain X at most 0.069). No extra meets Level
+  A. The card's sampling lowered Vertex's R (8.64 to 6.77; LOOP 0.603 to 0.534) and left RECALL at 0.000.
+  (Swen-28M's plain render, BananaMind-2-Mini and cRia are not scored yet.)
+  READING for s12 (the clause): Veyra2-Blueberry-5M-Instruct (4,984,192 params) meets the CI part on dev, so under
+  the clause a Level R claim at any size from 5.0M up does not stand on dev; Level R against a comparator at R 5.68
+  is a LOOP-avoidance test among floor models. Flagged for Max in the return, not decided here.
+STATUS AT RETURN (2026-10-04, about 12:40 EDT): the chain ~/planck/logs/rc12_s14b_chain.log runs one queue at a time on
+  the panel's queue machinery: phase 2 Swen-28M plain (code ~/planck/dev/rc12_s14b, one process per gpu.lock hold,
+  cap 1,950 s), phase 3 BananaMind-2-Mini (code ~/planck/dev/rc12_s14, as Nano), phase 4 cRia (rc12_s14b; gated by
+  ~/planck/logs/rc12_s14b/CRIA_GO, written by a watcher after the parity and the as-shipped check passed). The GPU
+  is shared with another session's 33 min holds, so this takes hours. When ~/planck/logs/rc12_s14b_chain.DONE
+  exists: verify each (cd ~/planck/dev/rc12_s14c; verify_dev_runs.py --root ~/planck/runs/rc12_dev --model ID
+  --render R --engines engines.json; Swen with ~/planck/venv-doge/bin/python), pull the run dirs with an md5
+  manifest, rerun rc12/dev_extras14.py (--root, --panel-root, --card-root, --boot 10000) and add the rows. A cRia
+  process killed at the cap fails its render (the queue skips the rest); then cRia goes back to not_run with the
+  measured time. PC code dirs: rc12_s14 (Nano, Mini), rc12_s14b (Swen, card row, cRia), rc12_s14c (verify).
+FILES (item 14): engines.json, engines_card.json (new), pins.json (new), hf_responder.py, hf_batched.py, runner.py,
+  vllm_responder.py, parity_hf_vllm.py, dev_batch.py (its fsync hunk is another agent's), verify_dev_runs.py (its
+  rerun_tie hunk is item 2's), rerun_tie.py (the nan_guard / use_cache line), dev_extras14.py (new), test_parity.py,
+  test_chat_template.py, test_loom_template.py, test_decode_variant.py, test_engine_patches.py (new),
+  mutation_s14.py (new), mutation_hf_batched.py (#16 retargeted), logs/mutation_s14.txt (new).
+
+STEP 11c (2026-10-04, 12:40 to 13:45 EDT): integration of items 14 and 15 into the prereg, item 2's GPU rerun check,
+and the full check order on the final tree. Nothing committed; nothing under sealed/ read or searched; no model loaded
+on the Mac (both GPU runs were on the PC, each in its own gpu.lock hold); no other agent messaged.
+PREREG (prereg/RC-12.draft.txt):
+  s1 Rules for both: the wording agent's bare-model sentence (STEP 11, ITEM 15), as drafted, with "(the LOOKUP claim
+    too)" added and the item 15 citation; PLAN.md "What counts as the model" holds the same sentence.
+  s12 Extras: the ten item 14 models (STEP 11, ITEM 14's text: pins, licences, fp32, own chat format, s4 decoding,
+    engines, NaN guard, cRia's cache, parity, the Vertex card row, RxT not included, every extra a public panel model
+    for the clause and for s10b) and the dev numbers, checked against runs/dev_panel/extras14/extras14.log (R, CI,
+    LOOKUP, P / X for all 8 scored models and the card row) and rc12/pins.json (revision, licence, parameters). Added
+    one line of mine: an extra whose dev runs do not finish before the lock is listed as "not run" with the reason and
+    is not read by the clause. Mini, cRia and Swen-28M's plain render are named as not yet scored.
+  s12 clause reading: the old "the clause already puts a Planck Level R claim below 230M" now also says that with the
+    item 14 extras Veyra2-Blueberry-5M-Instruct meets the CI part, so on dev no size from 5.0M up is left, and that
+    the CI part is then in effect a "does not loop" test among floor models (FLAGGED for Max, not decided).
+  s10b: the comparison names rc12/dev_extras14.py; the dev reading adds the extras (LOOKUP 0.000, P <= 0.007, X <=
+    0.069). Header: an "Integrated 2026-10-04" line. s4, s16, s19 item 2: the GPU rerun result (below).
+  NOT CHANGED (flagged before, still open): s1's Level A wording says 0.80 while s10 / score.py use 0.60 (s1 keeps
+    PLAN's wording exactly); whether the LOOKUP bar also asks T0 (s10b).
+GPU RERUN, ITEM 2 (verify_dev_runs --rerun 5, template, NEAR_TIE rule as written)
+  Code: the Mac rc12 tree (112 files: *.py, *.json, *.sh, SPEC.txt, dev/rc12_dev.jsonl) copied to the PC as
+    ~/planck/dev/rc12_s11c, md5 manifest equal on both sides (the older rc12_s14c copy has the pre-item-2
+    verify_dev_runs.py, so it was not used). Script planck-kit/rc12_s11c_rerun.sh, log ~/planck/logs/
+    rc12_s11c_rerun.log; each model under flock -w 7200 gpu.lock with timeout 1980 s; HF_HUB_OFFLINE=1.
+  vLLM family, Qwen/Qwen2.5-0.5B-Instruct (venv-vllm; lock 12:56:46, 86 s): C1-C5 pass. R2 greedy lockstep vs
+    sequential PASS (1 / 5 identical, 4 first divergences, margins 0.0 / 0.0 / 0.0 / 0.125); R2 lockstep vs the stored
+    greedy run PASS (1 / 5, margins 0.125 / 0.0 / 0.125 / 0.125); R1 seed 1 replay vs stored FAIL (0 / 5 identical,
+    margins 1.125, 2.125, 0.25, 0.625, 2.625 for t0-001 to t0-005; first differing turns 1, 4, 1, 1, 2, after 28 to
+    874 shared characters of that turn's reply). Seed 101 vs seed 1: turn-1 replies identical 0 / 5.
+  Batched HF family, SmallDoge/Doge-160M-Instruct (venv-doge, eager, bf16; lock 13:30:44, 296 s): C1-C5 pass. R2
+    lockstep vs sequential PASS (0 / 5 identical, 5 margins, max 0.125); R2 vs stored greedy PASS (0 / 5, max 0.125);
+    R1 FAIL (0 / 5 identical, margins 2.5625, 1.125, 2.0, 1.0625, 0.25; first differing turns 3, 1, 1, 1, 1, after
+    23 to 768 shared characters). VERIFY FAIL (1 failure, R1) for both models.
+  Why R1 fails (read in the installed code, not measured further): vLLM 0.30's sampler with per-request generators
+    (v1/sample/ops/topk_topp_sampler.py, random_sample) takes argmax of p / q with exponential noise q drawn from the
+    request's generator; hf_batched.RowSampler takes torch.multinomial with the row's generator. In both, the same
+    seed gives the same noise, and a small drift in p (the batch changed) can move the pick between two tokens whose
+    log p differ by much more than 0.5, so the log-p margin bounds a greedy flip, not a sampled one. This is the
+    caveat STEP 11 wrote before the run; now measured on both families. Not decided here; options written in s4: (a)
+    R2 (greedy) gates and R1's identical share and margins are reported, (b) a sampled R1 bar that adds the seeded
+    noise to the margin (new code, GPU time), (c) keep R1 as written (every engine fails).
+  Kept on the PC: the work dirs /tmp/rc12_rerun_3nbmmq2b (Qwen2.5) and /tmp/rc12_rerun_hpdp47is (Doge) with
+    replay.json and margins.json. ~/planck/dev/rc12_s11c is left in place.
+CHECK ORDER (12:44 to 13:16 EDT, each step alone, sequential, ~/.venvs/planck/bin/python -B, LIK_TORCH_PY set
+  to it; the STEP 11b order plus the item 14 tests; logs in the session scratchpad s11c/co/; the rc12 code tree's
+  md5s were equal before and after the order)
+  49 of 49 steps exit 0. build_dev --stdout byte-identical to dev/rc12_dev.jsonl (3e543f8d); test_gens 0 failures
+  over 640; audit_rules GATE PASS; audit_graders 0 wrong of 36,764; validate_e2e G1-G3 PASS, G4 PASS (histogram
+  0:310 1:43 2:76 3:53); validate_machinery 11 groups PASS; test_lik, test_lik_more, test_lik_adapters,
+  test_oodh_wording, test_oodh_pairing, test_lockstep, test_vllm_responder, test_parity, test_dev_batch,
+  test_hf_trust, test_hf_batched --split-only, test_queue, test_queue_sessions, test_verify_dev_runs, test_sizing,
+  test_near_dup, test_chat_template, test_loom_template, test_decode_variant, test_engine_patches,
+  test_dev_batch_durable: exit 0. mutation_graders 226 / 226; mutation_gens 33 / 33; mutation_audit 7 / 7 + 6 / 6;
+  mutation_e2e 8 parts 103 / 103 (baseline failures none in every part); mutation_oodh_wording 44 / 44;
+  mutation_lik 51 / 51 (0 not run); mutation_step9 16 + 16 + 15; mutation_hf_batched --chunk-only 23 / 23 (#16 as
+  retargeted by item 14; the STEP 11 / 11b MALFORMED is gone); mutation_verify 29 / 29; test_near_dup --mutate
+  10 / 10; mutation_queue 51 / 51; mutation_s14 75 / 75.
+  Not in the order: harness/test_rc12_eval.py (outside rc12; its line 232 still expects LOOKUP among the summary
+  families; needs torch and a random-init network; not run, not edited).
+OPEN: R1's reading (s4, Max); the s12 clause reading at 5.0M (Max); s1's Level A 0.80 vs s10's 0.60; T0 in the
+  LOOKUP bar (s10b); harness/test_rc12_eval.py:232; PLAN.md / README.md do not mention the LOOKUP claim; item 14's
+  chain on the PC (~/planck/logs/rc12_s14b_chain.log; at 13:37 still in phase 2, Swen-28M plain with greedy, 1, 2
+  done; then BananaMind-2-Mini's remaining runs, then cRia): when ~/planck/logs/rc12_s14b_chain.DONE exists, the
+  STATUS commands of STEP 11 ITEM 14 apply, then the three rows go into s12's dev numbers (or "not run").
+FILES (this step): prereg/RC-12.draft.txt; rc12/notes.txt (this entry); rc12/logs/* rewritten by the check order.
+
+STEP 11d (2026-10-04, about 13:30 to 14:25 EDT): adversarial verification of STEP 11, 11b, 11c and ITEM 14 before the
+commit. No model loaded, no GPU or PC access, no agent messaged, nothing under sealed/ read or searched (only the
+sealed directory's own entry was stat'ed: mtime 2026-09-26 02:35, so nothing was created or removed in it since;
+gitignored, 0 tracked paths, nothing staged there). Mutants ran on a scratch copy of rc12 (code md5-equal to the tree).
+PREREG DIFF vs HEAD (33 hunks, each read): every item 1-12, 14-16 and D change and the LOOKUP claim cites its source
+  ("Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item N)"; "Max, 2026-10-04") and matches
+  the decision text and score.py / score_stats.py / graders.py / grade_text.py / grade_loop.py / rerun_tie.py /
+  validate_e2e.py / validate_machinery.py. Item 13 (OOD-H Part 1 review) is Max's own and is not in the tree. The
+  LOOKUP claim (s1, s10b) has the bar (>= 0.60, sealed, template, T 0.6 x 3 sampling seeds, >= 3 training seeds,
+  inclusive, CI reported), the comparison (every public panel model, dev core <= 0.014, extras 0.000), what counts
+  (all 48 units, P and the abstain X both right, the three cells; ORDER_ABS at the OD3 cell bar, 0.50) and "never
+  in R". The s1 bare-model sentence equals PLAN.md line 85 with "s9" for "prereg s9" and "(the LOOKUP claim too)".
+  FIXED here: s6 had lost its "G-ABS, abstain grader:" heading (the STEP 11b Inflected forms paragraph ran into the
+  G-ABS definition: "...false captures and guesses. an abstain cue ..."); heading restored, the v2 line rewrapped.
+  s10b said "claimable only with 3 training seeds" (code: >= 3); now ">= 3".
+RE-DERIVED (own code, scratch rederive.py, written from s5 / s9 / s10b, not score.py; stored units of the STEP 11b
+  regraded copy): R over 9 families (BIND pair unit, OWN gated by its cf twin, COMPOSE out of TWOHOP), every family,
+  LOOKUP (unit = P and X both right; stored unit checked equal), P, X and T0 for LFM2-2.6B, Qwen3.5-0.8B,
+  Qwen2.5-0.5B-Instruct and Qwen3-0.6B, template and plain, mean of seeds 1-3: equal to runs/dev_panel_11b/panel.json
+  within 1.8e-15. Template R 24.2207, 7.8279, 5.6842, 15.8410; LOOKUP 0.0069, 0.0000, 0.0139, 0.0069. With LOOKUP
+  folded back in (10 families) R would be 21.87, 7.05, 5.26, 14.33. The script's own mutants (OWN ungated, COMPOSE
+  in TWOHOP, LOOKUP in R) each fail it. Veyra2-Blueberry-5M-Instruct from the stored extras rows: R 5.0141, LOOKUP 0,
+  = extras14.tsv. dev_regrade.py --expect t0gaps over the 4 models' regraded runs (64 runs, 22,016 rows): 0 changed,
+  so the regraded copy is what this tree's graders give.
+MUTANTS, each read for the line that killed it:
+  change phrase (mutation_graders, 226 / 226): the four frame-word mutants by stale_initially_ok / _initial_ok /
+    _previous_ok / _prior_ok, the unanchored window by stale_recap_planted. T0 gaps: OFF inflect and inflect_you and
+    the 10 SOURCE mutants, each by its fixture (quote_split_ok, inflect_generic, inflect_you_after, inflect_you_ok,
+    inflect_other, noinflect_ok, inflect_alt, inflect_voice).
+  near-duplicate (test_near_dup --mutate): 10 / 10, each by its named fixture.
+  NEAR_TIE (mutation_verify 29 / 29; #18-#29 re-run one by one for their first FAIL line): margins ignored, a
+    divergence without a margin, exact replay, 0.5 exclusive, stub on a real engine (both stages), negative margin,
+    first token instead of the split, stopped prefix, capped prefix, dropped pairs kept, identical share not shown.
+  BARS / COMPOSITE / LOOKUP claim (mutants_e2e #23, #88-#102, each in a fresh process): #23 by G3 cheaters at 0.50;
+    #88 by the R-independence and 9-family checks; #89 / #90 by the 0.60-inclusive pin; #91 by the 9-family check;
+    #92 and #102 by G3 ORDER_ABS 0.50; #93 by the claim pin; #94-#97 by the claimability checks; #98 by ABSTAIN's
+    P / X; #99 by the independence check; #100 / #101 by the CI checks. Own adversarial mutants: claim value from P
+    only (killed: independence check, P stays 1 when units are 0), LOOKUP unit as the mean of P and X (killed: G2
+    ABSTAIN / DEFLECT 24 units above 0), no cells (killed), bar from another constant (killed). SURVIVED: (a) the CI
+    without sampling-seed resampling, though validate_machinery's docstring said c_stats checked it. FIXED: c_stats
+    now checks one training seed with sampling seeds at 1.0 / 0.5 / 0.0 (lo <= 0.2, hi >= 0.8) and mutants_e2e #103
+    removes the resampling: killed by that check alone (lo 0.458, hi 0.549). (b) score.REPORTED emptied and (c) G3's
+    claim check skipping ORDER_ABS: each removes a gate that passes at baseline, so no fixture can fail it; G2 on
+    LOOKUP units is watched failing by the mean-unit mutant above, and #102 shows G3 trips through ORDER_ABS. Left.
+EXTRAS: licence at each pinned revision read from the HF API (cardData and license tag, sha equal to the pin, not
+  gated): Apache-2.0 for the four Veyra2, two BananaMind-2, Vertex and cRia; MIT for Loom-Spark-3.2 and Swen-28M (a
+  LICENSE file in both), = pins.json. Decoding: engines.json has no "decode" entry; every stored extras meta.json
+  pulled to the Mac (main root) has temperature 0.6, top_p 1.0, top_k 0, repetition_penalty 1.0, 256 new tokens, no
+  DRY key; only the Vertex card row (its own root, engines_card.json) has top_p 0.9 and repetition penalty 1.3.
+  extras14.log equals every s12 number (R, CI, LOOKUP, P / X).
+  The first full mutation_e2e run with the new check: #21 (greedy scored when sampling seeds exist) CRASHED in it
+  (StopIteration: the mutant drops the sampled rows, so lookup_ci had nothing to resample). The check now reports an
+  error as a failure instead of raising; #21 is killed again (by owngate, as before) and #103 still by the new check.
+RE-RUN AFTER THE FIXES (scratch copy, code md5-equal to the tree; logs copied into rc12/logs): validate_machinery
+  11 groups PASS; test_oodh_wording 0 failures; mutation_oodh_wording 44 / 44 (it reads the edited prereg);
+  mutation_e2e 8 parts 104 / 104 killed, baseline failures none in every part, 0 crashed.
+NOT CHANGED, OPEN: s1's Level A wording still says 0.80 (s10 and score.py 0.60; s1 keeps PLAN's wording, Max's
+  call); R1's reading (s4); the s12 clause at 5.0M; T0 in the LOOKUP bar (s10b); harness/test_rc12_eval.py:232 and
+  README.md (outside this commit); the item 14 chain on the PC (Mini, cRia, Swen plain).
+FILES (this step): prereg/RC-12.draft.txt (s6 G-ABS heading and v2 wrap, s10b wording), rc12/validate_machinery.py
+  (c_stats sampling-seed check), rc12/mutants_e2e.py (#103), rc12/notes.txt (this entry and the STEP 11b scratch
+  path shortened), rc12/logs/mutation_e2e_part*.txt (re-run).

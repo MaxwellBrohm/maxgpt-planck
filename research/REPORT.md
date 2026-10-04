@@ -4,6 +4,8 @@ Date: 2026-09-23 (final, evening). For Max. Built from the synthesis draft (reco
 
 No model was loaded, run, fine-tuned or benchmarked for this final pass. It read saved JSON, JSONL and transcripts, fetched primary sources, and did arithmetic.
 
+Amended 2026-10-02 (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 15)): section 2.1 adds the related work found by a later prior-art search (`NOVELTY_2026-10.md`), and three statements are corrected (Monad's token count in section 2, and the "nothing past 3 turns at this size" lines in 1.2 and 2). Nothing else in this report was re-checked.
+
 Markers:
 - **[corrected]**: a lane fact-check changed the number or claim; the corrected form is what appears.
 - **[corrected in review]**: the adversarial review (or this final pass) changed a claim the draft made.
@@ -44,7 +46,7 @@ Markers:
   - Corrections in generation fail in 21 of 24 trials across 8 models; the passes are Qwen3-0.6B (2 of 3) and Falcon-90M (1 of 3).
   - Role capture (the assistant adopts the user's name or job) appears in 7 to 8 of 8 models from 90M to 0.6B.
   - Only LFM2-2.6B passes the likelihood correction items at d4 and d10. Nothing between 0.6B and 2.6B was tested.
-  - Nothing published measures coherence past 3 turns at this size, apart from agent task scores (tau2-Bench) and 2020-era chit-chat ratings.
+  - Published coherence numbers past 3 turns at this size are agent task scores (tau2-Bench), 2020-era chit-chat ratings, and loose self-reported checks on tiny from-scratch models: RxT's 9-step similarity reward and Loom's 10- and 12-turn release checks (section 2.1). None is a strict pass/fail state test. [corrected 2026-10-02: this line said nothing else existed]
 
 ### 1.3 What limits a ~150M model, in two columns
 
@@ -99,7 +101,7 @@ Body = non-embedding parameters. Tok/param = pretraining tokens / total params. 
 
 | model (release) | total | emb share (body) | pretraining tokens (tok/param) | recipe | chat evidence |
 |---|---|---|---|---|---|
-| PleIAs Monad (Nov 2025) | 56.7M | 3.7% (54.6M) | 200B synthetic (3,530) | SYNTH only, thinking traces, 64 layers | card: no multi-turn support |
+| PleIAs Monad (Nov 2025) | 56.7M | 3.7% (54.6M) | ~180B synthetic (~3,175) [corrected 2026-10-02: the SYNTH paper, arXiv 2609.37891, Appendix B, gives ~180B; this row said 200B] | SYNTH only, thinking traces, 64 layers | card: no multi-turn support |
 | BlenderBot 90M (2020) | 87.5M | seq2seq | Reddit + BST fine-tune | pre-LLM chit-chat | 14-turn human chats: engagingness beat Meena 2.6B 61-39; known failures: contradiction, forgetting, repetition |
 | Falcon-H1-Tiny-90M-Instruct (Jan 2026) | 91.1M | 18.4% (74.4M) | 800B (8,779) | attention + Mamba2 in every layer; 25% SFT data in pretraining; SFT; 1 epoch DPO; no teacher | IFEval 66.08, 2-turn MT-Bench 4.33 [vendor; corrected: 2-turn evalchemy MT-Bench, not MT-Bench-101, judge undetermined]; probe 0.46 / 0.40, zero deflection, best fixed-history recall per parameter |
 | Supra2-100M-Instruct (Aug 2026, community) | 100.7M | 25.0% (75.5M) | 30B (298) | community | its own card sample resolves "Sure!" to the wrong referent by surface association |
@@ -147,10 +149,36 @@ What the table says:
   - A 150M model with Max's 49k vocabulary has a 122M body at d=576 or 112M at d=768. With Planck's own 8-16k vocabulary it is about 137-145M (my arithmetic).
   - Against Qwen2.5-0.5B's 358M body, the gap is **2.9-3.2x** with the 49k vocabulary and about 2.5-2.6x with a small one. That is close to the 3.3x gap in the names. [corrected in review: the draft's "2.5-3.6x" mixed in other models]
 - **Vendors scope sub-400M models away from open chat.** Google says Gemma 3 270M is not built for complex conversation. Liquid recommends the 230M for extraction and on-device agents. MobileLLM-R1 is not a general chat model. Monad has no multi-turn support.
-- **Nobody publishes coherence metrics beyond 3 turns at this size**, except tau2-Bench agent completion for LFM2.5 [corrected].
+- **Almost nobody publishes coherence metrics beyond 3 turns at this size**: tau2-Bench agent completion for LFM2.5 [corrected], and loose self-reported checks on tiny from-scratch models (RxT, Loom; section 2.1) [corrected 2026-10-02].
 - **Not included as chat models:**
   - MobileLLM-R1-140M: math and code SFT, 53% embeddings.
   - The April 2026 "micro language models" (8-30M): they write only the first 4-8 words of a reply for a cloud model to finish (arXiv 2604.19642).
+
+### 2.1 Related work found after this report [added 2026-10-02]
+
+Added under Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 15). Facts are from `NOVELTY_2026-10.md`, whose verifiers read each primary source; this pass checked only that every link resolves and that the arXiv titles match. Sizes are total parameters.
+
+**What this changes.** None of the work below shows a model under 150M passing a strict multi-turn test with corrections, rule persistence and binding, and none publishes a measured minimum-size curve for those skills. But the question itself, tiny from-scratch chat models, training tiny models on synthetic multi-turn dialogue, and keeping facts outside the weights are all taken. Planck's open contribution is the strict bar and the measured floor, not the idea.
+
+**The same question, or the same sizes**
+- **SmallTalkLLM** (Anson Washeck), https://github.com/AnsonWasheck/SmallTalkLLM , protocol dated 2026-08-19, MIT. Asks how small a model can be and still hold casual conversation with knowledge removed, with a pre-registered ladder from 3.87M to 25.70M. Only the 6.69M model is trained and no curve result is published. Its bar is looser: 10 turns with no obviously broken reply plus probes such as recalling a dog's name, with no corrections, rule persistence or binding. A second line puts state, memory and repetition control in a harness around the model.
+- **Loom** (Textile Labs), https://huggingface.co/textilelabs/Loom-Spark-3.2 (22.8M, 2026-10-01, MIT; siblings from 7.18M to 155.0M). From-scratch chat models that keep facts outside the weights: the model writes a `<lookup>` query and a harness fetches one Wikipedia sentence. Each release has a 133-item acceptance battery (Spark 3.2: 122/133; a fact from turns 1-3 recalled at turn 9-10 in 2 of 4 conversations). No scored corrections, rule persistence or binding, no seeds, and no controlled size curve (each release changes recipe and data).
+- **BananaMind-2 chat models and BananaMind Instruct Bench 1.1**, https://huggingface.co/BananaMind/BananaMind-2-Nano-Chat , https://huggingface.co/BananaMind/BananaMind-2-Pro-Preview-Chat , https://huggingface.co/datasets/BananaMind/BananaMind-Instruct-Bench-1.1 (July 21 to Aug 3, 2026). From-scratch chat models at 10.0M, 25.2M, 49.6M and 139.0M, scored by deterministic graders with a multi-turn sub-score: 18/75, 19/75 and 26/75 at 10M, 25M and 139M (self-reported, repetition penalty 1.1). The model answers a scripted history, so its own replies are never fed back; no size passes; the item text is gated.
+- **Vertex-0.6-15M-Instruct**, https://huggingface.co/VertexResearch/Vertex-0.6-15M-Instruct (15.0M, 2026-09-06, Apache-2.0). The one sub-30M card that claims multi-turn in-context memory. No numbers; the card says greedy decoding loops badly.
+- **Veyra2 Instruct ladder**, https://huggingface.co/veyra-ai/Veyra2-Mango-30M-Instruct and siblings (4.9M to 30.7M, 2026-09-28, Apache-2.0). Single-turn benchmarks only.
+- **cRia-LM-75M-Instruct**, https://huggingface.co/sz14/cRia-LM-75M-Instruct (75.7M, 2026-09-11, Apache-2.0). Two-turn MT-Bench 1.76, second turn 1.33.
+
+**Synthetic multi-turn training and stateful tiny models**
+- **Reactive Transformer (RxT)** (Filipek), https://arxiv.org/abs/2510.03561 (2025-10-03); weights https://huggingface.co/ReactiveAI/RxT-Alpha-Nano (non-commercial licence, gated). Stateful 12M to 160M models trained from scratch on synthetic TinyStories multi-turn data; mean reward on 9-step dialogues 3.1 to 3.8 of 10 against 2.4 for a 22M stateless baseline. The reward is BLEU plus cosine similarity, not a pass/fail test; no corrections, rules or binding; custom architecture.
+- **EvolveScaler** (executable state machines for multi-turn data), https://arxiv.org/abs/2609.08435 (2026-09-08). Prior art for a program-built conversation skeleton that a teacher renders and a program verifies.
+- **SYNTH**, https://arxiv.org/abs/2609.37891 (2026-09-29). A fully synthetic single-stage training recipe; its smallest model, Monad-56M, saw about 180B tokens, is single-turn, and keeps facts in the weights by design.
+
+**Facts outside the weights**
+- **LMLM**, https://arxiv.org/abs/2505.15962 (2025-05-21, ICLR 2026), and **Co-LMLM**, https://arxiv.org/abs/2607.07707 (2026-07-08). From-scratch pretraining that sends facts to an external knowledge base, at 124M to 382M (Co-LMLM at 135M and 360M). No chat, no multi-turn. With KLLM (arXiv 2607.12831, already cited in section 6), training a small model to look facts up instead of memorizing them is published prior art.
+- **FLM position paper**, https://arxiv.org/abs/2509.02225 (2025-09-02). Argues for skills in the weights and facts in tools, with single-turn probes at 135M and up: the closest published statement of Planck's thesis.
+
+**Mechanism**
+- **CICM**, https://arxiv.org/abs/2609.38866 (2026-09-30). A multi-turn update benchmark scored on 3B and up. On Pythia-160M, removing the responsible attention heads fixes 38.4% of old-value errors (8.7% for random heads); the paper explains the failure as several old values outweighing the current one in attention. Relevant to the "first value wins" result of E001 and E004.
 
 ---
 
@@ -613,6 +641,7 @@ Steps 1-2 need no new hardware and can finish this week. Without the 5070, step 
 - Qwen2.5 https://arxiv.org/abs/2412.15115 ; Qwen3 https://arxiv.org/abs/2505.09388 ; Qwen3.5-0.8B https://huggingface.co/Qwen/Qwen3.5-0.8B
 - MobileLLM https://arxiv.org/abs/2402.14905 ; MobileLLM-R1 https://arxiv.org/abs/2509.24945 ; Danube3 https://arxiv.org/abs/2407.09276 ; Granite https://huggingface.co/ibm-granite/granite-4.0-350m-base ; PleIAs https://huggingface.co/PleIAs/Baguettotron , https://huggingface.co/PleIAs/Monad ; ufakzeka-1 https://arxiv.org/abs/2609.25081 ; nanochat https://github.com/karpathy/nanochat/discussions/1 ; Supra2 https://huggingface.co/SupraLabs/Supra2-100M-Instruct ; BlenderBot https://arxiv.org/abs/2004.13637 ; micro LMs https://arxiv.org/abs/2604.19642
 - Multi-IF https://arxiv.org/abs/2410.15553 ; MultiChallenge https://arxiv.org/abs/2501.17399 ; tau2-Bench https://arxiv.org/abs/2506.07982
+- Related work (section 2.1, added 2026-10-02): links inline there; evidence and search method in `NOVELTY_2026-10.md`. Monad's ~180B tokens: SYNTH paper https://arxiv.org/html/2609.37891 , Appendix B ("Monad-56M ... over ~180B tokens").
 - `lanes/census.md`, `lanes/census.verify.md`, `followup/floor.md`; panic report `/Library/Logs/DiagnosticReports/panic-full-2026-09-23-171933.0002.panic`
 
 ### Hands-on probe
@@ -684,6 +713,7 @@ Steps 1-2 need no new hardware and can finish this week. Without the 5070, step 
 - **Changed from the review's wording:**
   - "7 of 8 fail in generation" is stated as 6 of 8, because the transcript shows Falcon passing K_time.
   - The conditional strict odds are 30-40%, and they apply only if the repaired test passes with its controls.
+- **Amendment 2026-10-02** (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 15)): section 2.1 added, and the Monad row and the past-3-turns lines in 1.2 and 2 corrected. Checked for it: every link in 2.1 returned HTTP 200, the seven arXiv titles match the works described, and the SYNTH paper's Appendix B gives Monad-56M ~180B tokens (Baguettotron-350M's ~199B leaves that row's 200B standing). The other facts in 2.1 come from `NOVELTY_2026-10.md` and were not re-checked here.
 - **Not done:**
   - The review's ~35 spot-checks were not repeated.
   - No probe was re-run (the rule for this step). The new items, LFM2.5-230M, Falcon on the battery and the repaired `ft_test.py` are still proposals.

@@ -16,7 +16,7 @@ CLAUSES = ["v1_degen", "v2_gold", "v2_unsure", "v3_other", "v3_guess", "v3_shotg
 OFF = ["neg", "postneg", "question", "hedge", "hypo", "cond", "alt", "list", "than", "voc", "capture", "myobj",
        "assistrev", "unsure", "echo", "leak", "tri", "equal", "selfcopy", "runaway", "empty", "stale", "guess",
        "shotgun", "echo_contains", "cue", "absvalue", "absvoice", "short", "rule", "old", "source", "other", "assert",
-       "listvoice", "claim", "ownname", "self", "stuff"]
+       "listvoice", "claim", "ownname", "self", "stuff", "inflect", "inflect_you"]
 
 PARAM = [("grade_text", "P", "neg_window", 1), ("grade_text", "P", "echo", 0.95), ("grade_text", "P", "alt_chars", 0),
          ("grade_loop", "LP", "tri_rep", 5), ("grade_loop", "LP", "selfcopy", 0.9),
@@ -108,6 +108,14 @@ SOURCE = [
      'if not res["fails"] or res["fails"][0] not in DEGEN_CLAUSES:'),
     ("graders", "eq_only=eq_only(res, *args))", "eq_only=False)"),
     ("graders", "v in stale and gold_ok", "v in stale and not gold_ok"),
+    # recap frames (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 3)): each frame word
+    # removed is killed by its clean fixture (stale_initially_ok, stale_initial_ok, stale_previous_ok,
+    # stale_prior_ok); the window unanchored (any frame word within 40 characters) by stale_recap_planted
+    ("graders", r"|\binitially|", "|"),
+    ("graders", r"|\binitial|", "|"),
+    ("graders", r"|\bprevious|", "|"),
+    ("graders", r"|\bprior)", ")"),
+    ("graders", r'r"\W+(?:[\w' + "'" + r']+\W+){0,3}$")', r'r"\W+(?:[\w' + "'" + r']+\W+){0,3}")'),
     ("graders", "all(T.mentioned(text, v) for v in cands)", "any(T.mentioned(text, v) for v in cands)"),
     ("graders", "for v in outside)", "for v in outside[1:])"),
     ("graders", "ws |= set(T.lwords(h))", "ws |= set()"),
@@ -183,4 +191,20 @@ SOURCE = [
     ("grade_voice", "|you|your|you're|yours|you've)", ")"),
     ("grade_voice", "and not T.SECOND_P.search(text[s0:s1])", ""),
     ("graders", 'if mode not in ("given", "own"):', "if True:"),
+    # the T0 audit's two grader gaps, folded into the regrade 2026-10-04 (notes STEP 11b; prereg draft s6 v2): the
+    # closing-quote sentence end (quote_split_ok, quote_hedge_ok, quote_question) and inflected values
+    # (inflect_* fixtures; OFF "inflect" and "inflect_you" switch the whole rule and the second-person condition off)
+    ("grade_text", r"""|(?<=[.!?][\"'])\s+""", ""),
+    ("grade_text", "and not (gold and inflected(m, v) and not addressed(text, m))", ""),
+    ("grade_text", "SECOND_P.search(text[sentence_span(text, m.start())[0]:m.start()])",
+     "SECOND_P.search(text[slice(*sentence_span(text, m.start()))])"),
+    ("grade_text", "INFLECT = frozenset(V.WEEKDAY + V.INSTRUMENT + V.FOOD + V.PROJECT)",
+     "INFLECT = frozenset(V.INSTRUMENT + V.FOOD + V.PROJECT)"),
+    ("grade_text", "INFLECT = frozenset(V.WEEKDAY + V.INSTRUMENT + V.FOOD + V.PROJECT)", "INFLECT = frozenset(V.WEEKDAY)"),
+    ("grade_text", 'return [v[:-1]] if v.endswith("s") else [v + "s", v + "es"]', 'return [v + "s", v + "es"]'),
+    ("grade_text", 'if "inflect" in OFF or v not in INFLECT:', 'if "inflect" in OFF or not (v.islower() or v in INFLECT):'),
+    ("grade_text", "low_alt = {f.lower() for a in altvals for f in [a] + forms(a)}", "low_alt = {a.lower() for a in altvals}"),
+    ("graders", "gold_ok = any(T.asserted_hits(text, g, pool, gold=True) for g in gs)",
+     "gold_ok = any(T.asserted_hits(text, g, pool) for g in gs)"),
+    ("grade_voice", "for m in T.value_hits(text, v):", "for m in [x for x in T.value_hits(text, v) if not T.inflected(x, v)]:"),
 ]
