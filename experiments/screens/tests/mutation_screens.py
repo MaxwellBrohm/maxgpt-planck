@@ -51,6 +51,15 @@ ANALYZER_MUTANTS = [   # C7 / C4 / ORDER / C3 / the run-directory RC-12 refusal 
     ("c3_extension_cap_ignored", AN, 'res["extend_with"] = want if res["extensions_used"] < e2pick.MAX_EXT else []',
      'res["extend_with"] = want', AF),
     ("onset_abs_uses_own_final", ALIB, "    L = base_final / 2\n", "    L = final / 2\n", AF),
+    # verification 2026-10-04: each of these four passed the 22 tests above (fixtures at BASE 1.0, one Holm contrast,
+    # no S005 run); test_analyze.py's last three tests kill them
+    ("sd_ref_not_scaled_by_base_mean", ALIB, 'return rel * base_mean, int(n["df"])', 'return rel, int(n["df"])', AF),
+    ("noise_residuals_in_bpb", ALIB, 'return [(x - m) / c["readings"][key]["base_mean"] for x in d]',
+     "return [(x - m) for x in d]", AF),
+    ("holm_p_one_sided", ALIB, "else 2 * (1 - t_cdf(abs(dbar) / se, df))", "else (1 - t_cdf(abs(dbar) / se, df))", AF),
+    ("s005_paired_with_shared_base", AN,
+     'bname = (lambda x: f"{sid.lower()}_base_s{x}") if L.engine(sid) else (lambda x: f"base_s{x}")',
+     'bname = (lambda x: f"base_s{x}")', AF),
 ]
 MUTANTS = [   # name, file, old, new, tests (file or file::-k expr)
     ("c2_extra_key_passes", LIB, "sorted(diff(f, ref) - allowed):", "sorted(diff(f, ref) - allowed - set(f)):", RF),

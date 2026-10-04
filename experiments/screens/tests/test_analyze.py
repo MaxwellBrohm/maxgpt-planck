@@ -226,3 +226,39 @@ def test_verdicts_apply_the_noise_fallbacks(tmp_path):
         assert c[f"S002.{a}"]["class"] == "new init" and c[f"S002.{a}"]["class_registered"] == "SIA"
         assert "noise check failed (pooled SIA)" in c[f"S002.{a}"]["labels"]
     assert sorted(v["holm_family"]) == sorted(c) and all(x["holm"] in ("holds", "does not hold") for x in c.values())
+
+
+def test_sds_and_residuals_scale_with_a_real_base_mean():
+    """E3 carries SDs as a fraction of A's mean (C7: times BASE's mean). Every fixture above sits at BASE 1.0, where
+    a fraction and a bpb value are the same number; here BASE is 1.15 (verification 2026-10-04: dropping the scaling
+    from sd_ref, or reading the noise-check residuals in bpb, passed every test above)."""
+    b = 1.15
+    c = verdict([-0.004, -0.002], cls="same init", base=b)
+    r = c["readings"]["CHAT"]
+    assert abs(r["sd_ref"] - 0.002 * b) < 1e-12
+    assert abs(r["thr"] - AL.t_ppf(0.975, 7) * 0.002 * b / math.sqrt(2)) < 1e-12
+    assert abs(AL.same_init_check(c, NOISE)["CHAT"]["sd_rel"] - math.sqrt(2) * 0.001 / b) < 1e-12
+    sia = [verdict([-0.004, -0.002], cls="SIA", base=b), verdict([0.001, 0.003], cls="SIA", base=b)]
+    pooled = AL.pooled_sia_check(sia, NOISE, U)["CHAT"]
+    assert pooled["df"] == 2 and abs(pooled["sd_rel"] - math.sqrt(2) * 0.001 / b) < 1e-12
+
+
+def test_holm_reads_a_two_sided_p():
+    """C7's Holm reading uses the two-sided p of dbar / (SD_ref / sqrt(k)): at t(0.975, df) it is 0.05."""
+    d = -AL.t_ppf(0.975, 7) * 0.002 / math.sqrt(2)
+    assert abs(AL.metric_reading([d, d], 0.002, 7, 1.0)["p_two_sided"] - 0.05) < 1e-9
+
+
+def test_s005_pairs_with_its_own_mask_engine_base(tmp_path):
+    """C4: S005 pairs with its own BASE (s005_base_s<seed>, mask engine, micro 8 x accum 2), never the shared one."""
+    runs, p = str(tmp_path), L.params()
+    noise = json.load(open(os.path.join(L.E3D, "results.json")))["noise_5M_250M"]
+    for s, (shared, own, arm) in {101: (1.1467, 1.2000, 1.1950), 102: (1.1470, 1.2004, 1.1951)}.items():
+        write_run(runs, f"base_s{s}", shared, 1.381)
+        write_run(runs, f"s005_base_s{s}", own, 1.39)
+        write_run(runs, f"s005_forget_g1_s{s}", arm, 1.39)
+    c = A.verdicts(runs, p, noise, {"S005.forget": 1.0}, None)["contrasts"]["S005.forget"]
+    assert c["class"] == "SIA" and c["seeds"] == [101, 102]
+    assert abs(c["readings"]["CHAT"]["base_mean"] - 1.2002) < 1e-12
+    assert [round(x, 6) for x in c["readings"]["CHAT"]["d"]] == [-0.005, -0.0053]
+    assert c["verdict"] == "TIE"           # against the shared BASE every d_s would be about +0.048: REJECT

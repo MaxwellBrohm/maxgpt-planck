@@ -678,12 +678,13 @@ failing on mutants (scratch copies only).
     onset_abs at the arm's own final).
   Also (C1-b, FIXED): screens_lib checks train.compile false and BASE's hook keys in every config; screens.py hours
     uses GPU HOURS' eager figures and prints ORDER's cap check (analyze_lib.cap_cut); make_ind.py and the IND file.
-  Mac CPU totals: experiments/screens/tests 235 passed; harness suite 879 passed, 44 skipped (CUDA), 1 failed:
+  Mac CPU totals: experiments/screens/tests 235 passed; harness suite 879 passed, 67 skipped (CUDA), 1 failed:
     test_rc12_eval.py::test_e2e_scores_through_score_py, which runs rc12/score.py from the working tree, where
     another session has uncommitted rc12/ edits (the families it prints lack LOOKUP); this harness with HEAD's rc12/
     passes test_rc12_eval.py and test_rc12_hook.py (17 passed). data_prep tests 58 passed. Mutation:
     mutation_screens.py 63 of 63 killed (36 from BUILT and REVIEW, 3 of them rewritten for C1-b, 5 new for C1-b,
-    the hook and the hours, 22 analyzer); harness groups 25 of 25; data_prep 7 new + 7 rechecked.
+    the hook and the hours, 22 analyzer); harness: the 3 new groups 25 of 25 and the 14 earlier groups re-run,
+    123 of 123 as expected; data_prep: 52 of 52 killed (7 new).
 
 HOURS AND CAP (C1-b; screens.py hours: GPU HOURS' registered method, 255,660 slots/s eager, mask 162,849, +15%,
 the assumed flag factors; E3's k = 2 in every class). Runs (selection + seed), hours per run, hours:
@@ -704,3 +705,93 @@ E4 STATUS (ORDER 0, E4 GATE): E4 runs after the RC-12 lock (PLAN 3a: "It uses RC
 lock"); prereg/RC-12.draft.txt is still "DRAFT, NOT LOCKED", and no E4 experiment exists in the repo, so E4 has not
 reported. ORDER 0's precondition is that E4 has NOT reported "no multi-turn signal at 5M": it holds. E4 does not run
 first; the batch runs, with the hours spent before E4 reports as the accepted risk the E4 GATE names.
+
+VERIFICATION OF ORDER 0 (2026-10-04, Claude, adversarial verifier of 620c77c; Mac CPU and scratch copies of HEAD; on
+the PC logs, run directories and marks read, the kit bundle sent (620c77c) and one CPU preflight in a scratch clone;
+no GPU, no lock, no model above unit-test size, no run queued, no mark recorded).
+  (1) Configs: all 48 resolved with harness runio.load_yaml by a script that does not import screens_lib. train.compile
+    false in every one; each of engine.yaml's 16 keys equals E2's FIXED 1 value except S005's registered ENGINE keys
+    (doc_attn mask, micro 8, accum 2) in its 5 configs; engine_fixed "2026-10-03 f314eb7 SCREENS C1-b" and BASE's 7
+    eval.induction keys in all 48; no eval.rc12 anywhere. base_s101 / base_s102 differ from E3 e3_5m_A_s1 only in
+    name, out_dir, seed, engine_fixed and the hook keys; s005_base_s10x from base_s101 only in its 3 ENGINE keys (and
+    seed); each g-check from its BASE only in its registered keys and g x LR5 (no LR key differs at g 1); each S003
+    search config from E2's own file only in optim.kind, engine_fixed, the hook keys and (branches) init_from at E2's
+    branch point in the arm's SCREENS trunk. screens.py check: 48 ok. On the PC (CPU, no lock; a scratch clone of
+    620c77c from the kit bundle, planck_root linked to the PC's data, read only): E2 preflight.py --strict
+    --no-init-check on all 48 refuses none (resolved engine: 43 configs varlen, the 5 S005 configs mask, every other
+    engine value equal), and screens.py check prints 48 ok. Branch init_from is checked by the queue at run time.
+  (2) C1-b predates every screen run: committed in 620c77c (2026-10-03 01:42:28 EDT); on the PC there is no
+    runs/SCREENS directory, no SCREENS run name in runs/runs.jsonl and no launch_screens.log (checked 2026-10-04).
+    Pins equal the files: E2 results.json b08062c8 (its stage_A, stage_B, stage_C load equal to d536070's; only "q2" is
+    new), E3 1f017ecb, IND file 0eafbca2 (make_ind.py --check rebuilds it byte for byte), screens_base.yaml 2fcfd0fc,
+    base_s101.yaml ba0c527c, configs/prereg.yaml 82615e50, the 57-file digest fe0cba355c1507ee (sha256 of the
+    files' sha256s in path order, one per line). harness/ and data_prep/ moved between 6b9fb0f and 3c102f7 only in
+    f314eb7's 8 files. The C1-a gate's lock-held time, summed again from the two PC gate logs: 31 holds, 2.011 h.
+  (3) Code read against C6, C7, C4 and ORDER: induction.py and its train.py install, attn_diag.py, bpb_hd.py and the
+    bpb.py --hd branch, test_model_mask.py over testutil.ARMS, analyze_lib.py and analyze.py. Runs (Mac CPU):
+    experiments/screens/tests 235 passed at HEAD; harness suite 879 passed, 67 skipped (CUDA), 1 failed
+    (test_rc12_eval.py::test_e2e_scores_through_score_py, the working tree's uncommitted rc12/ edits; on a copy with
+    HEAD's rc12/ and E004 code, test_rc12_eval.py and test_rc12_hook.py 17 passed); data_prep tests 58 passed.
+    Mutants, on scratch copies of HEAD: mutation_screens.py 63 of 63 killed; harness groups induction 10/10, attndiag
+    8/8, maskarms 7/7 and the 14 earlier groups 123 of 123 as expected; data_prep mutation_check.py 52 of 52 killed
+    (the 7 HD mutants among them). default_parity.py CPU, 3c102f7's harness against HEAD's: PASS (24 log records,
+    checkpoint, start record and imported modules identical); the same comparison FAILS on a scratch mutant that
+    imports induction on the default path (new_imports ['induction']), so the check is not blind. The maskarms group
+    against 4b16eeb's test_model_mask.py: the 5 flag mutants survive, 2 killed (ORDER 0 BUILT 4 reproduced). The CUDA
+    half, read from the PC log (~/planck/logs/screens_order0.log), not re-run here: the tree it tested holds 121 files
+    md5-equal to 620c77c and its reference 86 files md5-equal to 3c102f7's harness; 2026-10-03 02:49 under gpu.lock,
+    13 test files (the screen flags' files, test_order0_cuda.py, test_induction.py, test_attn_diag.py,
+    test_model_mask.py) 315 passed, 4 skipped (the four flag *_run.py tests that need git commit 5c5a30a, absent in
+    that copy); 04:42 default_parity --device cuda PASS (log, checkpoint, start record and imports identical); a CPU
+    hook check on the PC's eval set as ORDER 0 BUILT 1 reports. This is the CUDA result FIXED REFILL points to ("CUDA
+    in ORDER 0 BUILT below"), which ORDER 0 BUILT did not carry.
+  Found and fixed (tests only; no rule, config or code changed). Seven mutants of this verifier's own, on scratch
+    copies: EQUAL without thr and the S003 search counted as 10 arms in hours were killed; one HD mutant survived
+    (below); four passed every analyzer test, because every fixture sat at BASE 1.0, the Holm test read one contrast
+    and no test read an S005 run: sd_ref not scaled by BASE's mean, the noise-check residuals in bpb instead of a
+    fraction of BASE, a one-sided Holm p, and S005 paired with the shared BASE instead of its own.
+    tests/test_analyze.py adds three tests (BASE 1.15; p = 0.05 at t(0.975, df); S005 against its own mask-engine
+    BASE) and mutation_screens.py the four mutants: 4 of 4 killed, the unmutated copy passes; the whole of
+    mutation_screens.py 67 of 67 killed; screens suite 238 passed.
+  Found, not fixed (data_prep is outside this verifier's commit scope): bpb_hd.history_bytes with its cc term
+    dropped (the foreign context would then carry the own window's whole first turn when the own window starts
+    mid-turn) passes test_bpb_hd.py, since no fixture keeps a window with cc > 0 (checked). The code matches
+    evalwin.chat_item; the test needs a kept window that starts mid-turn.
+  Also carried in this commit: the uncommitted 10-03 correction of ORDER 0 BUILT's totals above (67 skipped, not
+    44; the harness and data_prep mutation counts), each figure reproduced in (3).
+  ORDER 0, item by item:
+    "E2 5M DONE" and E2 results.json     MET   mark E2_5M_DONE 2026-09-28 16:24:52 (PC); stage_C pick [0.003, 1.0]
+    E3 Part 1 read (Part 3 if it ran)    MET   results.json 1f017ecb + AUDIT.md; Part 3 not run (sqrt(2) sigma_seed
+                                               serves NEW INIT). Part 2 finished 2026-10-03 11:38 (20M, not read by
+                                               any 5M rule); another session's uncommitted e3analyze_p2.py (seen
+                                               2026-10-04) writes results_part2.json and checks that results.json
+                                               is unchanged, so the pin holds (a rewrite would make
+                                               screens_lib.params() refuse until the FIXED pin is refilled).
+    shared code committed, tests watched MET   620c77c; (3) above, the four gaps closed here; the HD gap stays open
+      failing on mutants                       (a test gap, not a code fault)
+    one smoke run per new flag           NOT MET in the engine the screens run: the only smokes are C1-a's compiled
+                                               ones (withdrawn engine). No stage 1 screen has a new flag, ORDER 2
+                                               lets a flag become ready later, and stage2_select waits for the mark
+                                               SCREENS_STAGE_2_SMOKES_RECORDED; read literally as a batch
+                                               precondition it blocks stage 1 too.
+    E4 has not reported "no multi-turn   MET   E4 (PLAN: "It uses RC-12 dev, so it runs after the lock") has not
+      signal at 5M"                            run; prereg/RC-12.draft.txt is "DRAFT, NOT LOCKED" (lock window Oct
+                                               11-14); experiments/E004_general_updating is E004, not PLAN's E4.
+                                               PLAN's E4 decision point is line 510 now (E4 GATE cites 507, its
+                                               line on 2026-09-26; the text is unchanged).
+    E3 rule 5 question (FIXED)           CLOSED by C1-b: every screen runs E3's engine (E3 Part 1's 18 run records:
+                                               compile false, varlen; S005's mask engine is its pre-registered
+                                               KNOWN RISK, BASE_mask vs BASE reported)
+    cap check logged before stage 1      MET   HOURS AND CAP (C1-b) above
+  HOURS, recomputed by hand from GPU HOURS' registered method (255,660 slots/s eager, 162,849 mask, +15%, assumed
+    factors x1.1 Canon and forget, x1.3 MTP, 8,776 steps per S003 search arm, k = 2): 20.44 h for 35 selection + 22
+    seed runs, as screens.py hours prints. E3 Part 1's eager 5M runs held gpu.lock 18.4 to 18.6 min each (train and 3
+    scorings; queue_e3.txt, first three runs), 0.306 to 0.309 h against the 0.312 h used here. Cap: 0 measured + 20.44
+    h = 20.44 h <= 25 h, nothing cut; with the C1-a gate's 2.011 h counted as measured, 22.45 h, nothing cut. Not a
+    rule input until the eager smokes: at the C1-a parity's eager factors the estimate is 23.61 h (25.62 h with the
+    gate's hours, which would cut S006 at stage 2's check, leaving 23.73 h); the forget arm at x2.26 would train about
+    58 min per run under one gpu.lock hold. The IND hook's GPU time is unmeasured (1.2 to 2.3 s per reading on the PC
+    CPU; 50 readings per 7,630-step run).
+  LAUNCH: stage 1 (plans/CURRENT = stage1_select: S001, S002, S003 selection) is OK to start once this entry is
+    committed, the kit is sent again from that commit (the bundle on the PC is 620c77c) and a person records
+    SCREENS_PRECONDITIONS_OK; stage 2 is NOT, until each flag's eager smoke is logged.
