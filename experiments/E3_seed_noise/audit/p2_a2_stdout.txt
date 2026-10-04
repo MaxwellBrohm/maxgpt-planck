@@ -1,0 +1,37 @@
+PASS PC: E3 holds exactly the 18 Part 1 and 6 Part 2 run folders
+PASS PC: marks are exactly E3_PART_1_DONE and E3_PART_2_DONE
+PASS PC: runs.jsonl has 6 e3_20m starts and 6 ends, 18 and 18 for 5M, nothing else for E3
+PASS copy == PC: logs/part2/queue_e3.txt
+PASS copy == PC: logs/part2/status.jsonl
+PASS copy == PC: logs/part2/code_sha256_20261003_004304.txt
+PASS prereg.yaml on disk == 3c102f7 == be89babb
+PASS e3_20m_A_s1: copies == PC, config, preflight, records, scorer, one clean run
+PASS e3_20m_B_s1: copies == PC, config, preflight, records, scorer, one clean run
+PASS e3_20m_A_s2: copies == PC, config, preflight, records, scorer, one clean run
+PASS e3_20m_B_s2: copies == PC, config, preflight, records, scorer, one clean run
+PASS e3_20m_A_s3: copies == PC, config, preflight, records, scorer, one clean run
+PASS e3_20m_B_s3: copies == PC, config, preflight, records, scorer, one clean run
+PASS CRN seed 1: A and B equal on all 11 stream counters at all 31 tail steps and at the end
+PASS CRN seed 1: A and B are different runs (losses differ at every tail step)
+PASS CRN seed 2: A and B equal on all 11 stream counters at all 31 tail steps and at the end
+PASS CRN seed 2: A and B are different runs (losses differ at every tail step)
+PASS CRN seed 3: A and B equal on all 11 stream counters at all 31 tail steps and at the end
+PASS CRN seed 3: A and B are different runs (losses differ at every tail step)
+PASS 3 seeds drew 3 different streams (end counters)
+PASS Part 2 queue log begins with Part 1's committed queue log byte for byte
+PASS Part 2 queue section is exactly: one start at 3c102f7 with plan part2.txt, A1 B1 A2 B2 A3 B3 each trained once rc 0 and scored at 3 checkpoints, MARK, finish  [46 lines vs 46]
+PASS plans/part2.txt and plans/CURRENT on disk == 3c102f7
+PASS status: Part 1 prefix == committed status_e3.jsonl; then 6 Part 2 lines 'done and scored' in order
+PASS code list: every listed file's sha256 == its bytes at 3c102f7  [342 files, 0 differ]
+PASS FIXED 2 recipe at 3c102f7 (git ls-files harness data_prep | grep .py | sort | sha256sum): 56b4a68f over 100 files, not 92deaef0  [56b4a68f38d43cc8 over 100]
+PASS D4 pin: harness/runio.py == ffcdf245 in the code list
+PASS harness/ + data_prep/ .py vs Part 1's code list: exactly the 8 files D4 / E2 DEVIATION 1 name  [data_prep/eval_sets.py data_prep/prep_common.py data_prep/pretokenize.py data_prep/tests/test_durable_writes.py harness/durable.py harness/from_pipeline.py harness/runio.py harness/test_durable.py]
+PASS train.py, trainer.py, model.py as Part 1 (805bf5f8, 15d1a971, f4e61556)
+PASS data_prep/bpb.py and evalwin.py as Part 1
+PASS base20m.yaml, base5m.yaml, engine.yaml at 3c102f7 == Part 1 commit e39112a
+PASS e3analyze.py on disk == code list (3c102f7) == 620c77c
+PASS arms: A20 = E2 q2 argmin (3e-3, 1); B20 = the neighbour with the lower 500M F(CHAT) (1.5e-3: 0.9749 < 6e-3: 0.9814)
+PASS results.json, tables.txt, e3analyze.py == 620c77c, and AUDIT.md begins with 620c77c's (Part 1 audit untouched) (D5)
+PASS D5 reason: screens_lib.py (620c77c) pins E3_SHA 1f017ecb and asserts it
+PASS OUTPUTS: no machine name in run_records.json (Part 1's copies carry no env.host)
+36/36 pass

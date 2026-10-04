@@ -1,0 +1,99 @@
+E3 PART 2 TABLES (e3analyze_p2.py, importing e3analyze.py; 20M, 500M slots, full WSD; A20 3e-3 r 1, B20 1.5e-3 r 1; d = B - A)
+
+CHECKS: code digest harness+data_prep .py == FIXED 2 (92deaef0) FAILED (56b4a68f38d43cc8 over 100 files), harness/train.py == FIXED 2 FAILED (805bf5f85cdfb07c), harness/trainer.py == FIXED 2 FAILED (15d1a9719d972d8b), harness/model.py == FIXED 2 FAILED (f4e61556ee9ece8a)  [24/28 pass]
+
+NOISE, 3 seeds (df 2, factor 5.363); rel = fraction of A's mean; CRN ratio = sqrt2 sigma_seed / SD_d; p(d) is the 3-seed paired t (descriptive)
+metric                 mean A    mean d  sig_seed     rel      SD_d     rel    rho   CRN   p(d)  5M SD_d rel
+F(CHAT)                0.9741  +0.00009   0.00122  0.126%   0.00189  0.194% -0.455  0.91  0.945       0.242%
+F(PROSE)               1.2287  -0.00206   0.00113  0.092%   0.00057  0.047%  0.909  2.80  0.025       0.146%
+M(CHAT)                0.9759  -0.00040   0.00120  0.123%   0.00185  0.190% -0.346  0.92  0.743       0.247%
+M(PROSE)               1.2307  -0.00258   0.00099  0.081%   0.00052  0.043%  0.897  2.68  0.013       0.167%
+CHAT user              1.2959  +0.00322   0.01111  0.857%   0.01713  1.322% -0.197  0.92  0.776       0.958%
+CHAT assistant         0.9324  -0.00032   0.00124  0.133%   0.00019  0.021%  0.988  9.04  0.103       0.342%
+PROSE cccc             1.1574  -0.00208   0.00072  0.062%   0.00053  0.046%  0.770  1.93  0.021       0.175%
+PROSE gutenberg        1.3474  -0.00216   0.00113  0.084%   0.00116  0.086%  0.526  1.38  0.084       0.113%
+PROSE wikimedia        1.1798  -0.00194   0.00189  0.160%   0.00026  0.022%  0.991 10.35  0.006       0.196%
+stackexchange          1.2261  -0.00083   0.00122  0.099%   0.00079  0.064%  0.965  2.18  0.211       0.138%
+irc                    1.4007  -0.00275   0.00061  0.044%   0.00121  0.086% -0.947  0.72  0.059       0.133%
+dolly                  1.1723  -0.00022   0.00313  0.267%   0.00593  0.506% -0.822  0.75  0.955       0.722%
+train loss last 2%     2.8174  -0.00384   0.00232  0.082%   0.00162  0.058%  0.762  2.02  0.055       0.140%
+
+SEEDS 2..3 (df 1, factor 14.083; seed 1 selected A20 in E2's 20M grid)
+F(CHAT)              mean d  -0.00084  SD_d   0.00143 (0.147%)  sigma_seed 0.076%  t   -0.83  p 0.5604
+F(PROSE)             mean d  -0.00211  SD_d   0.00080 (0.065%)  sigma_seed 0.094%  t   -3.73  p 0.1666
+M(CHAT)              mean d  -0.00131  SD_d   0.00138 (0.141%)  sigma_seed 0.071%  t   -1.35  p 0.4064
+M(PROSE)             mean d  -0.00263  SD_d   0.00073 (0.060%)  sigma_seed 0.080%  t   -5.07  p 0.1239
+CHAT user            mean d  -0.00553  SD_d   0.01128 (0.868%)  sigma_seed 0.870%  t   -0.69  p 0.6139
+CHAT assistant       mean d  -0.00023  SD_d   0.00016 (0.017%)  sigma_seed 0.157%  t   -2.04  p 0.2897
+PROSE cccc           mean d  -0.00195  SD_d   0.00068 (0.059%)  sigma_seed 0.030%  t   -4.07  p 0.1534
+PROSE gutenberg      mean d  -0.00230  SD_d   0.00161 (0.119%)  sigma_seed 0.091%  t   -2.02  p 0.2920
+PROSE wikimedia      mean d  -0.00208  SD_d   0.00010 (0.009%)  sigma_seed 0.192%  t  -28.94  p 0.0220
+stackexchange        mean d  -0.00072  SD_d   0.00109 (0.089%)  sigma_seed 0.119%  t   -0.94  p 0.5189
+irc                  mean d  -0.00206  SD_d   0.00023 (0.017%)  sigma_seed 0.013%  t  -12.46  p 0.0510
+dolly                mean d  -0.00355  SD_d   0.00197 (0.168%)  sigma_seed 0.145%  t   -2.55  p 0.2379
+train loss last 2%   mean d  -0.00409  SD_d   0.00221 (0.078%)  sigma_seed 0.062%  t   -2.61  p 0.2328
+
+MDE at 20M (80% power, two-sided 0.05), % of A20's mean: paired (SD_d) | unpaired (sqrt2 sigma_seed); [80% upper-bound SD, x2.117]
+F(CHAT)              k1: 1.043%|0.952% [2.208%|2.016%]  k2: 0.737%|0.673% [1.561%|1.426%]  k3: 0.602%|0.550% [1.275%|1.164%]  k5: 0.466%|0.426% [0.987%|0.902%]
+F(PROSE)             k1: 0.250%|0.701% [0.530%|1.483%]  k2: 0.177%|0.495% [0.374%|1.049%]  k3: 0.144%|0.404% [0.306%|0.856%]  k5: 0.112%|0.313% [0.237%|0.663%]
+M(CHAT)              k1: 1.018%|0.933% [2.156%|1.975%]  k2: 0.720%|0.660% [1.524%|1.396%]  k3: 0.588%|0.539% [1.245%|1.140%]  k5: 0.455%|0.417% [0.964%|0.883%]
+M(PROSE)             k1: 0.228%|0.611% [0.483%|1.293%]  k2: 0.161%|0.432% [0.342%|0.915%]  k3: 0.132%|0.353% [0.279%|0.747%]  k5: 0.102%|0.273% [0.216%|0.578%]
+CHAT user            k1: 7.091%|6.502% [15.012%|13.764%]  k2: 5.014%|4.597% [10.615%|9.732%]  k3: 4.094%|3.754% [8.667%|7.947%]  k5: 3.171%|2.908% [6.714%|6.155%]
+CHAT assistant       k1: 0.112%|1.011% [0.237%|2.140%]  k2: 0.079%|0.715% [0.167%|1.513%]  k3: 0.065%|0.584% [0.137%|1.236%]  k5: 0.050%|0.452% [0.106%|0.957%]
+PROSE cccc           k1: 0.244%|0.470% [0.517%|0.995%]  k2: 0.173%|0.332% [0.365%|0.704%]  k3: 0.141%|0.271% [0.298%|0.574%]  k5: 0.109%|0.210% [0.231%|0.445%]
+PROSE gutenberg      k1: 0.463%|0.637% [0.980%|1.348%]  k2: 0.327%|0.450% [0.693%|0.953%]  k3: 0.267%|0.368% [0.566%|0.778%]  k5: 0.207%|0.285% [0.438%|0.603%]
+PROSE wikimedia      k1: 0.117%|1.214% [0.248%|2.569%]  k2: 0.083%|0.858% [0.176%|1.817%]  k3: 0.068%|0.701% [0.143%|1.483%]  k5: 0.052%|0.543% [0.111%|1.149%]
+stackexchange        k1: 0.346%|0.754% [0.732%|1.595%]  k2: 0.245%|0.533% [0.518%|1.128%]  k3: 0.200%|0.435% [0.423%|0.921%]  k5: 0.155%|0.337% [0.327%|0.713%]
+irc                  k1: 0.463%|0.333% [0.981%|0.705%]  k2: 0.328%|0.235% [0.694%|0.498%]  k3: 0.268%|0.192% [0.566%|0.407%]  k5: 0.207%|0.149% [0.439%|0.315%]
+dolly                k1: 2.712%|2.025% [5.740%|4.287%]  k2: 1.917%|1.432% [4.059%|3.031%]  k3: 1.565%|1.169% [3.314%|2.475%]  k5: 1.213%|0.906% [2.567%|1.917%]
+train loss last 2%   k1: 0.309%|0.625% [0.653%|1.323%]  k2: 0.218%|0.442% [0.462%|0.936%]  k3: 0.178%|0.361% [0.377%|0.764%]  k5: 0.138%|0.279% [0.292%|0.592%]
+
+MDE at 20M in bpb, paired | unpaired
+F(CHAT)              k1: 0.01016|0.00928  k2: 0.00718|0.00656  k3: 0.00587|0.00536  k5: 0.00454|0.00415
+F(PROSE)             k1: 0.00307|0.00861  k2: 0.00217|0.00609  k3: 0.00177|0.00497  k5: 0.00137|0.00385
+
+k_needed at 20M from its own SDs (df 2) for delta = 0.5% / 1% / 2% of A20's mean: paired | unpaired
+F(CHAT)              0.500%: 5|4  1.000%: 2|1  2.000%: 1|1
+F(PROSE)             0.500%: 1|2  1.000%: 1|1  2.000%: 1|1
+M(CHAT)              0.500%: 5|4  1.000%: 2|1  2.000%: 1|1
+M(PROSE)             0.500%: 1|2  1.000%: 1|1  2.000%: 1|1
+CHAT user            0.500%: 202|170  1.000%: 51|43  2.000%: 13|11
+CHAT assistant       0.500%: 1|5  1.000%: 1|2  2.000%: 1|1
+PROSE cccc           0.500%: 1|1  1.000%: 1|1  2.000%: 1|1
+PROSE gutenberg      0.500%: 1|2  1.000%: 1|1  2.000%: 1|1
+PROSE wikimedia      0.500%: 1|6  1.000%: 1|2  2.000%: 1|1
+stackexchange        0.500%: 1|3  1.000%: 1|1  2.000%: 1|1
+irc                  0.500%: 1|1  1.000%: 1|1  2.000%: 1|1
+dolly                0.500%: 30|17  1.000%: 8|5  2.000%: 2|2
+train loss last 2%   0.500%: 1|2  1.000%: 1|1  2.000%: 1|1
+
+PER-SEED VALUES: A, B, d
+F(CHAT)              s1 0.97408 0.97601 +0.00193  s2 0.97375 0.97393 +0.00018  s3 0.97453 0.97268 -0.00185
+F(PROSE)             s1 1.22961 1.22765 -0.00196  s2 1.22936 1.22668 -0.00268  s3 1.22727 1.22572 -0.00155
+M(CHAT)              s1 0.97589 0.97731 +0.00142  s2 0.97545 0.97511 -0.00034  s3 0.97642 0.97414 -0.00229
+M(PROSE)             s1 1.23150 1.22901 -0.00249  s2 1.23125 1.22810 -0.00314  s3 1.22944 1.22733 -0.00211
+train loss last 2%   s1 2.81490 2.81155 -0.00334  s2 2.81846 2.81281 -0.00565  s3 2.81883 2.81630 -0.00252
+
+E2 RE-CHECK AT 20M (paired t on F(CHAT) d_s = B - A, seeds 2..3, df 1 (reported, moves nothing)): d +0.00018, -0.00185; mean d -0.00084, t -0.826, p 0.5604, 95% CI [-0.01373, +0.01205]; B lower with p < 0.05: False; moves nothing (notes STATISTICS)
+
+CRN ratio at 20M: F(CHAT) 0.91, F(PROSE) 2.80 -> ratio >= 2 on F at 20M: CRN mandatory for every screen (reading d)
+
+AVERAGING at 20M (descriptive; the rule reads 5M): CHAT: F 0.00189, M 0.00185, reduction +2.2%; PROSE: F 0.00057, M 0.00052, reduction +8.6%
+
+RULE 4, 20M CONFIRMATIONS: reference = larger of the 20M (df 2) and 5M (df 7) relative SDs; k = max(2, k_needed); >5 underpowered
+F(CHAT)   same init, same stream (SD_d)      20M 0.194% 5M 0.242% -> 5M (df 7, factor 3.261); MDE k1 0.790% k2 0.558% k3 0.456% k5 0.353%; k_needed 0.500%:3 1.000%:1 2.000%:1; k 0.500%:3 1.000%:2 2.000%:2; underpowered 
+F(CHAT)   other classes (sqrt2 sigma_seed)   20M 0.178% 5M 0.361% -> 5M (df 7, factor 3.261); MDE k1 1.177% k2 0.832% k3 0.679% k5 0.526%; k_needed 0.500%:6 1.000%:2 2.000%:1; k 0.500%:6 1.000%:2 2.000%:2; underpowered 0.500%
+F(PROSE)  same init, same stream (SD_d)      20M 0.047% 5M 0.146% -> 5M (df 7, factor 3.261); MDE k1 0.476% k2 0.337% k3 0.275% k5 0.213%; k_needed 0.500%:1 1.000%:1 2.000%:1; k 0.500%:2 1.000%:2 2.000%:2; underpowered 
+F(PROSE)  other classes (sqrt2 sigma_seed)   20M 0.131% 5M 0.210% -> 5M (df 7, factor 3.261); MDE k1 0.685% k2 0.484% k3 0.395% k5 0.306%; k_needed 0.500%:2 1.000%:1 2.000%:1; k 0.500%:2 1.000%:2 2.000%:2; underpowered 
+
+20M vs 5M (descriptive): ratio of relative SDs 20M/5M [95% F interval, df 2 and 7]; 20M SD in bpb [95% chi-square interval, df 2]
+F(CHAT)   same init, same stream (SD_d)      ratio 0.80 [0.31, 5.04]; SD 0.00189 [0.00099, 0.01191]
+F(CHAT)   other classes (sqrt2 sigma_seed)   ratio 0.49 [0.19, 3.09]; SD 0.00173 [0.00090, 0.01087]
+F(PROSE)  same init, same stream (SD_d)      ratio 0.32 [0.12, 2.00]; SD 0.00057 [0.00030, 0.00360]
+F(PROSE)  other classes (sqrt2 sigma_seed)   ratio 0.62 [0.24, 3.90]; SD 0.00160 [0.00084, 0.01009]
+
+E2 20M ONE-SEED LABEL INPUT: E2 20M grid at 500M: g 1 (3e-3) 0.9726 vs runner-up g 0.5 (1.5e-3) 0.9749, difference 0.0023; 20M paired MDE k1 0.01016 -> not resolved; rule-4 paired MDE k1 0.00769 -> not resolved (E2's notes carry the label; E3 reports the input)
+
+PLAN: continuous confirmations use 3 seeds; rule 2 + 4 at delta 1%: {"F(CHAT)": {"same init, same stream (SD_d)": 2, "other classes (sqrt2 sigma_seed)": 2}, "F(PROSE)": {"same init, same stream (SD_d)": 2, "other classes (sqrt2 sigma_seed)": 2}}; lock-in: not read: lock-in turns on pass-rate spread (Part 4b), not run
+Quantiles: {"factor_df2": 5.3633, "factor_df1": 14.0826, "factor_df7": 3.2607, "ub80_df2": 2.1169, "ub80_df1": 3.9472, "F_0.025_df2_7": 0.0254, "F_0.975_df2_7": 6.5415, "chi2_0.025_df2": 0.0506, "chi2_0.975_df2": 7.3778}
+Not run: {"Part 3 (init/data split)": "not run (data_seed patch not committed)", "Part 4 (incl. 4b pass-rate spread at 20M)": "not run", "20M replays, sigma_rep, two-seed sign agreement": "not defined for Part 2"}

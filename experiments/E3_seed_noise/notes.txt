@@ -338,3 +338,147 @@ full WSD with decay_frac 0.2 (15,259 steps, decay from step 12,207, warmup 76 fr
     55908528a0f86c38a9f0a7563401be0d4a84c31bf101e50951b94e5698764b7f e3_20m_B_s3.yaml
   e3analyze.py covers Part 1 only (5M steps, one queue start at e39112a); Part 2 needs its own analysis step before
   any Part 2 number is read.
+
+PART 2 ANALYSIS, DEVIATIONS (2026-10-04, by 09:03 EDT, Claude; written after the records were copied and their
+structure checked, before any bpb value or tail-mean training loss was read into a statistic. Seen before this entry:
+each run's train.out, whose last line prints the final single-batch training loss (not a registered metric), read
+while checking that every run finished. Files cannot prove the order: this analyst does not commit; the sha256 of
+notes.txt as it stands with this entry is recorded in PART 2 RESULT.)
+  Runs: Part 2 finished 2026-10-03 11:38:54 ("MARK E3 PART 2 DONE"). One queue start (2026-10-03 00:43:04, plan
+  part2.txt sha256 6b9962074b7e996d, code commit 3c102f75dc68), the 6 runs in the registered order A1 B1 A2 B2 A3 B3,
+  each trained once ("train ... --require-committed" then "done ... rc 0") and scored at three checkpoints; runs.jsonl
+  holds one start and one end for each, resumed_from null; each log.jsonl has 1,526 loss records (steps 10..15,250 by
+  10, plus 15,259); latest.json points at final_00015259. No divergence, no GAP, no rerun.
+  Copied 2026-10-04, read-only from the PC: out/<run>/bpb.jsonl and preflight.json (sha256 equal to the PC files),
+  train_tail.jsonl (the log records with step > 14,953.82 = 0.98 x 15,259: 31 records per run), run_records.json (the
+  runs.jsonl start and end lines without config, out_dir, time and checkpoint, Part 1's key set). The queue log, the
+  status file and the queue start's code list go to logs/part2/ (sha256 equal to the PC files), not logs/:
+  e3analyze.py reads logs/queue_e3.txt and the first code_sha256_* in logs/ and asserts one queue start at e39112a, so
+  replacing those files would stop Part 1's results.json from reproducing.
+  Analysis step (the one PART 2 QUEUED asks for): e3analyze_p2.py imports e3analyze.py unchanged (noise(), factor(),
+  ub(), the t and chi-square quantiles, load(), METRICS, FIXED, FIXED_D4) and changes only what the size changes:
+  15,259 steps, decay_start 12,207, warmup 76, n_params 20,001,511, checkpoints 14,945, 15,250 and final 15,259, N = 3
+  pairs (seeds 1..3), the Part 2 queue start (3c102f7) and its code list. Checks: e3analyze.py's list at these values,
+  plus bpb records at exactly those three steps and CRN at every tail log step (the Part 1 audit's stronger form). The
+  expected failures are D2's four code checks (digest, train.py, trainer.py, model.py); runio.py passes as D4
+  (ffcdf245). Any other failure is reported and handled under DEVIATIONS POLICY before a value is read.
+  D5 Output files. OUTPUTS names one results.json and tables.txt. Part 1's results.json is pinned by sha256 in
+     experiments/screens/screens_lib.py (E3_SHA, asserted before a screen batch is built, "refill the FIXED log"
+     otherwise) and cited in SCREENS.txt; rewriting it would stop the screens, and this analyst may not edit them.
+     Part 2 writes results_part2.json and tables_part2.txt beside them; results.json (1f017ecb...) and tables.txt
+     (100a55ab...) stay unchanged. Later pre-registrations cite results_part2.json by its own sha256.
+  D6 Training loss over the last 2% of steps at 20M (D1's rule at this size): every logged step with step > 15,259 -
+     305.18, that is 14,960..15,250 by 10 and the final 15,259, 31 records, the same steps in every run. At 5M the
+     final step sat on the 10-step grid; here the end record is an extra log line, included because it is inside the
+     window.
+  Disclosed, not a deviation: M at 20M is the mean of the saves at 14,945, 15,250 and 15,259 (E2's scorer invocation:
+  final plus the two rolling saves before it). The last two are 9 steps apart because 15,259 is not a multiple of
+  305, so M is close to weighting the final weights twice (at 5M the gaps were 153 and 133 steps). M is computed as
+  registered; the averaging rule reads 5M only.
+  Readings fixed here, before any value:
+    a Noise table at 20M (N 3, df 2, factor 5.363, sensitivity x2.117): every statistic of STATISTICS per metric, from
+      noise(). sigma_rep, sigma_init, sigma_data and the two-seed sign agreement are not defined at 20M and are not
+      computed. The refresh columns noise() returns belong to rule 5 (5M) and are not read at 20M.
+    b Seed 1 selected A20 in E2's 20M grid (all seed-1 runs). The seeds 2..3 values (N 2, df 1) are printed beside
+      the table, and the registered 20M re-check is the paired t on F(CHAT) d_s over seeds 2..3 (df 1): reported,
+      moves nothing. The 3-seed paired test that noise() returns is descriptive, as Part 1's 8-seed test was.
+    c Rule 4 (20M confirmations use the larger of the 20M and 5M relative SDs, with the df of the one used), for
+      F(CHAT) and F(PROSE), per class of rule 1: same init and stream, SD_d; the other classes, sqrt(2) sigma_seed
+      (Part 3 not run). The 5M values are the 8-seed ones in results.json (df 7). Seeds for a 20M confirmation:
+      k = max(2, k_needed(delta)) for delta 0.5%, 1% and 2% of A20's mean (rule 2), k_needed from that SD with its
+      df's factor; above 5, "underpowered".
+    d CRN rule: it names no size. Read literally, a 20M point ratio of 2 or more on F(CHAT) or F(PROSE) makes CRN
+      mandatory for every screen, as a 5M one would; below 2 the 5M reading stands.
+    e The curve: PLAN's curve seeds (3 per size, 5 at 10M and 30M with lock-in) turn on pass-rate spread, which is
+      Part 4b (not run), so Part 2 makes no lock-in reading. Its consequence for continuous metrics is c, set against
+      PLAN's "3 for continuous confirmations"; a conflict is reported, not resolved here.
+    f E2's rule "After E3: each stage decision is labelled 'resolved at one seed' when its best-vs-second difference
+      exceeds E3's paired MDE at k = 1 (for F(CHAT))": for E2's 20M decision (500M, g 1 0.9726 vs g 0.5 0.9749, a
+      difference of 0.0023 at E2's 4 decimals) the input is the 20M paired MDE at k = 1 in bpb; the rule-4 reference
+      (c) at k = 1 is printed beside it. E3 reports the input; the label belongs in E2's notes.
+    g Descriptive only, no rule reads them: 20M against 5M as the ratio of relative SDs with a 95% F interval for the
+      variance ratio (df 2 and 7), and the 95% chi-square interval for each 20M SD (df 2).
+
+PART 2 RESULT (2026-10-04, by 09:09 EDT, Claude; e3analyze_p2.py over out/e3_20m_*, project venv Python 3.12.13;
+results_part2.json sha256 e8256d57c6a73e4abb2f52aac9d042bcf8cf43ff9670adc586dce8c97ec6eaba, tables_part2.txt sha256
+b9377cab87c9f6c4fe2ed65ab3021c8a1ef8a4d83e024a7b61a7ac5a687d5edd, every metric in the tables. notes.txt with the PART 2
+ANALYSIS entry had sha256 c3bb812fe1b68cb74392a904430ac44de28b1740c411d3270cf3d458e9bb6f42 at 09:03:08; the first
+statistics run printed 09:05:58 (shell timestamps; the analyst's account, not a commit). A later edit to the analyzer
+changed one table label (the df 1 factor, first hard-coded as 12.08, is 14.083); no number changed.) This is the
+record; no interim reading was written before it. 20M, 500M slots, full WSD, A20 = (3e-3, r 1), B20 = (1.5e-3, r 1),
+d = B - A, N = 3 pairs (df 2) unless marked.
+  Checks: 24 of 28 pass; the 4 that fail are D2's code checks (digest 56b4a68f over 100 files, which is D4's Part 2
+    digest as expected; train.py 805bf5f8, trainer.py 15d1a971, model.py f4e61556, the same values as Part 1).
+    runio.py passes as D4. Every run: tokenizer, eval sets, scorer invocation, engine block, shares, files, config
+    bytes (the 6 registered sha256), LRs and seed, prereg sha, schedule (15,259 steps, decay from 12,207, warmup 76),
+    n_params 20,001,511, bpb at 14,945, 15,250 and 15,259 for every set, 31 finite tail records, one clean train, no
+    resume; the registered order and one queue start at 3c102f7. The harness/ + data_prep/ .py files differ from
+    Part 1's code list in 8 files, all named by D4 and E2 DEVIATION 1 (runio.py, from_pipeline.py, eval_sets.py,
+    prep_common.py, pretokenize.py; new durable.py, test_durable.py, test_durable_writes.py). CRN holds as
+    recorded: A_s and B_s have equal drawn, dropped, tokens and sup_tokens counts at all 31 tail log steps and at
+    the end; the 3 seeds drew 3 different streams
+    (counts, not hashed content). Part 1's results.json and tables.txt are unchanged, and results.json still
+    reproduces byte for byte (1f017ecb) with the Part 2 files present (scratch copy). Mutation test of the Part 2
+    checks (e3analyze_p2_mutants.py, scratch copies only): 18 of 18 mutants killed; the unmutated copy fails only
+    D2's four. Cross-check with scipy 1.18.1 (system Python 3.14.4) of SD_d, sigma_seed, rho, t, p, the CRN ratio,
+    the k = 1 paired MDE and the df 1 and df 2 factors for F(CHAT) and F(PROSE): equal at the printed digits (no
+    file of this check is on record; the audit's own, audit/p2_a5_scipy.py, matches to 4e-15, AUDIT.md P2-Q1).
+  Seed noise at 20M (rel = fraction of A20's mean):
+    F(CHAT)   mean A 0.9741; sigma_seed 0.00122 (0.126%); SD_d 0.00189 (0.194%); rho -0.455.
+    F(PROSE)  mean A 1.2287; sigma_seed 0.00113 (0.092%); SD_d 0.00057 (0.047%); rho 0.909.
+    With df 2 each SD is known only to within about 0.52x to 6.3x (95% chi-square): SD_d F(CHAT) [0.00099,
+    0.01191], F(PROSE) [0.00030, 0.00360].
+    Seeds 2..3 (df 1): F(CHAT) SD_d 0.00143 (0.147%), F(PROSE) 0.00080 (0.065%).
+    Secondary metrics: CHAT user turns SD_d 1.322%, dolly 0.506%; CHAT assistant 0.021% and wikimedia 0.022%.
+  MDE at 20M from its own SDs (factor 5.363), % of A20's mean, k = 1, 2, 3, 5 [k2 with the 80% upper-bound SD]:
+    F(CHAT)  paired 1.043 0.737 0.602 0.466 [1.561]; unpaired 0.952 0.673 0.550 0.426 [1.426].
+    F(PROSE) paired 0.250 0.177 0.144 0.112 [0.374]; unpaired 0.701 0.495 0.404 0.313 [1.049].
+    In bpb, F(CHAT) k1 0.0102 paired, 0.0093 unpaired; k2 0.0072, 0.0066.
+    k_needed from the 20M SDs (paired | unpaired): F(CHAT) 0.5%: 5|4, 1%: 2|1, 2%: 1|1; F(PROSE) 0.5%: 1|2, 1%: 1|1.
+  20M against 5M (descriptive, reading g): every 20M relative SD on F is below its 5M value. SD_d: F(CHAT) 0.194% vs
+    0.242% (ratio 0.80), F(PROSE) 0.047% vs 0.146% (0.32). sqrt2 sigma_seed: F(CHAT) 0.178% vs 0.361% (0.49),
+    F(PROSE) 0.131% vs 0.210% (0.62). None is resolved: each 95% F interval (df 2 and 7) contains 1 (SD_d F(CHAT)
+    [0.31, 5.04], F(PROSE) [0.12, 2.00]; sigma_seed F(CHAT) [0.19, 3.09], F(PROSE) [0.24, 3.90]). Three pairs do not
+    show 20M noise to be lower or higher than 5M noise.
+  RULE 4 (registered consequence for 20M confirmations): in all four cases (F(CHAT), F(PROSE); paired, other
+    classes) the 5M relative SD is the larger, so 20M confirmations use the 5M SDs with df 7 (factor 3.261), and the
+    MDEs are Part 1's as fractions of the mean: F(CHAT) paired k1 0.790%, k2 0.558% (k1 0.0077 bpb at A20's mean);
+    F(PROSE) paired k1 0.476%. Seeds for a 20M confirmation, k = max(2, k_needed): F(CHAT) paired 0.5%: 3, 1%: 2,
+    2%: 2; F(CHAT) other classes 0.5%: 6 ("underpowered"), 1%: 2, 2%: 2; F(PROSE) 2 at every delta in both classes.
+    Rule 4 compares SDs, not MDEs: for F(CHAT) paired the 5M SD it selects carries the smaller factor (3.261 against
+    5.363), so its MDE (k1 0.790%) is below the 20M SD's own (1.043%), and a 0.5% effect gets 3 seeds where the 20M
+    SD with its own df would ask 5 (AUDIT.md P2-Q4; the same, without a seed-count change, for F(PROSE) other
+    classes, 0.685% against 0.701%). Applied as written.
+  Curve (reading e): Part 2 makes no lock-in reading (Part 4b not run), so PLAN's curve seeds (3 per size, 5 at 10M
+    and 30M only with lock-in) are not changed by E3. For continuous metrics, rules 2 and 4 ask 2 seeds at 20M for a
+    1% or 2% effect, fewer than PLAN's 3 for continuous confirmations: no conflict, PLAN asks more. A 0.5% effect on
+    F(CHAT) needs 3 paired seeds under rule 4 (PLAN's 3 is enough; the 20M SD with its own df would ask 5, AUDIT.md
+    P2-Q5) or 6 unpaired ("underpowered"; a null reads "not resolved").
+  A20 vs B20 (descriptive, 3 seeds, df 2; no rule reads it): F(CHAT) d +0.00193, +0.00018, -0.00185; mean +0.00009,
+    95% CI [-0.00462, +0.00479], p 0.945: no difference, and the interval is wide. F(PROSE) d -0.00196, -0.00268,
+    -0.00155; mean -0.00206 (B lower by 0.17%), CI [-0.00348, -0.00064], p 0.025, B lower at 3 of 3 seeds. E2's 500M
+    grid (seed 1, trunk + branch) also had 1.5e-3 lower on PROSE, by 0.06%. At 5M, B was worse on both (Part 1).
+    The F(PROSE) reading is descriptive and one of 13 uncorrected 3-seed tests. Read as a 20M confirmation under
+    rule 3 with rule 4's reference (5M SD_d, 0.00180 bpb at A20's mean, df 7, k 3), its mean improvement 0.00206 is
+    below the WIN threshold 0.00245, so it would not be a WIN although every pair improves (AUDIT.md P2-Q7).
+  E2 RE-CHECK AT 20M (registered: paired t on F(CHAT), seeds 2..3, df 1, moves nothing): d +0.00018, -0.00185; mean
+    -0.00084, t -0.83, p 0.560, 95% CI [-0.0137, +0.0121]. B is lower in the point estimate (by 0.00084), not at
+    p < 0.05. Moves nothing: 20M runs use
+    A20 = (3e-3, r 1), as E2 Q2 set.
+  E2's 20M one-seed label (reading f): the 500M decision's best-vs-second difference, 0.0023 bpb, is below the 20M
+    paired MDE at k = 1 (0.0102 bpb) and below the rule-4 one (0.0077): "not resolved". The pick stands either way
+    (E2 RULES). The label belongs in E2's notes and is not written there by this analyst (outside this write scope);
+    E2's notes do not yet carry this label for any stage, 5M or 20M.
+  CRN ratio at 20M (reading d): F(CHAT) 0.91, F(PROSE) 2.80. F(PROSE) is at or above 2 at the point estimate, so
+    under reading d, fixed before the values, CRN becomes mandatory for every screen: a screen may no longer use
+    unpaired seeds without a deviation. SCREENS.txt C4 already runs every arm at shared seed indices, so its design
+    as written is unchanged. The reading rests on 3 pairs: rho 0.909 at n = 3 has no Fisher interval (it needs
+    n > 3), and its exact test against rho = 0 (df 1) gives p 0.27 (F(CHAT): rho -0.455, p 0.70), so 3 pairs
+    cannot tell the ratio from 1 (AUDIT.md P2-Q8); F(CHAT)'s 20M ratio is 0.91, and at 5M the F(PROSE) ratio was 1.44 (8 pairs; 95% about 0.88 to 3.15).
+    Other 20M ratios at or above 2, which no rule reads: CHAT assistant 9.04, wikimedia 10.35, M(PROSE) 2.68,
+    stackexchange 2.18, training loss 2.02.
+  Averaging at 20M (descriptive; the rule reads 5M): M's SD_d is 2.2% below F's for CHAT and 8.6% below for PROSE,
+    far from 30%, and M at 20M nearly double-counts the final weights (disclosed above). Screens decide on F.
+  Not computed (not defined at 20M): sigma_rep, the two-seed sign agreement, the refresh bounds. Not run: Part 3,
+  Part 4 (including 4b, the 20M pass-rate spread).
+Part 2 audit corrections applied (2026-10-04, from AUDIT.md "E3 Part 2 audit"; no verdict changed, no reported statistic changed, results_part2.json and tables_part2.txt untouched and still regenerated byte for byte; the PART 2 ANALYSIS entry is left as written, so notes.txt through its last line still hashes to c3bb812f, checked by the audit): the six out/e3_20m_*/run_records.json carried env.host, the PC's machine name, which OUTPUTS forbids and Part 1's copies drop; the audit removed that one key (no statistic reads it). "Part 1's key set" in the ANALYSIS entry holds for the top-level keys only: env also keeps device, numpy and platform, which Part 1's copies drop (harmless, left as copied). Added to PART 2 RESULT: the scipy cross-check has no file (the audit's matches to 4e-15); rule 4 compares SDs, not MDEs, so for F(CHAT) paired its 5M reference gives a smaller MDE than the 20M SD with its own df and 3 seeds for a 0.5% effect where that would ask 5 (likewise in the curve reading); the F(PROSE) A20-vs-B20 reading is descriptive and would not be a WIN under rules 3 and 4; the 20M re-check has B lower in the point estimate, not at p < 0.05; the CRN-mandatory reading rests on a rho whose exact test against 0 gives p 0.27.
