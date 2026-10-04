@@ -154,3 +154,16 @@ C1-a GATE (2026-10-02, the PC 5070; Claude; method, the batch table and the find
 AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this screen is EAGER (train.compile false),
   although its C1-a gate passed (C1-b runs every screen eager, so S007 still pairs with the shared BASE). Configs
   rebuilt; each carries the C6 eval.induction hook (IND onset at matched LR, C6).
+
+EAGER SMOKE (2026-10-04 12:01:34 to 12:02:17 EDT, the PC 5070 under gpu.lock; Claude; labelled smoke, never read; the
+method, the scratch tree and the batch table in SCREENS.txt "SMOKES RECORDED"; no S007 run queued, no config changed)
+  smoke_s007_smear = s007_smear_g1_s1.yaml with only name and out_dir changed (scratch planck_root), eager
+  (train.compile false resolved, no compile key in the start record), varlen, micro 16 x accum 1, 300 of 7,630 steps.
+  Passed: 300 steps, rc 0; 5,010,157 params; loss 8.815 at step 10 to 4.716 at step 300, all 30 logged losses finite.
+  mem_fit ok: peak reserved 8.38 GiB, 2.38 GiB left at the peak (shared BASE smoke 8.28 GiB).
+  tok/s: 247,073 median, against the shared BASE smoke's 253,691 in the same session: x1.027 (assumed x1.0; the C1-a
+    parity's eager estimate x1.04). Hours per run by GPU HOURS' method with this factor: 0.321 h (0.312 h assumed).
+  Leak self-test (train.py startup, 12 checks, bf16 tolerance 3e-2): passed, largest ratio 0.0073.
+  The IND hook ran on CUDA (one reading at step 153, 0.19 s, 8 x 3 GATE values). Readings not read.
+  This settles this file's smoke line (tok/s, leak self-test). screens_lib.py's S007 entry has no "mult" (screens.py
+  hours uses its default 1.0; not edited here).

@@ -4,7 +4,9 @@ A uniform model (every logit 0) gives HD 0 and HD_none 0 on every turn. A contex
 already in its input) on conversations whose turns repeat the previous turn's words in another order: the own
 context lowers the loss, so HD > 0 and HD_none > 0 on every kept turn (this kills "foreign context = own" and
 "no-context keeps the context"). The foreign rule (next conversation with enough bytes, wrapping, never itself),
-the exclusions (turn index 0, no prior-turn bytes) and bpb.py's default output unchanged by --hd are checked.
+the exclusions (turn index 0, no prior-turn bytes), a window whose context enters its first turn mid-turn (cc > 0:
+only the bytes the own window holds count, which kills history_bytes without its cc term) and bpb.py's default
+output unchanged by --hd are checked.
 """
 from __future__ import annotations
 
@@ -104,6 +106,36 @@ def test_turn_zero_and_no_history_windows_are_left_out():
     assert cnt["first_turn"] == sum(w["t"] == 0 for w in wins) > 0
     assert cnt["no_history"] == sum(w["t"] == 1 and w["ct"] == 1 for w in wins) > 0
     assert cnt["kept"] == len(keys) == sum(w["t"] == 1 and w["ct"] == 0 for w in wins)
+
+
+def words(stem: str, n: int) -> str:
+    return " ".join(f"{stem}{i % 10}" for i in range(n))
+
+
+def test_mid_turn_context_counts_only_the_bytes_the_own_window_holds():
+    # Turn 1's 3,072-byte context budget runs out inside turn 0, so the own window enters turn 0 mid-turn
+    # (ct 0 < t 1, cc > 0). A's turn 0 is longer than everything B holds, while A's in-window context is not:
+    # the foreign context must match the in-window bytes, not the whole first turn (else A finds no source).
+    docs = [{"id": "a", "turns": [{"role": "user", "text": words("alpha", 600)},
+                                  {"role": "assistant", "text": words("omega", 15)}]},
+            {"id": "b", "turns": [{"role": "user", "text": words("beta", 560)},
+                                  {"role": "assistant", "text": words("gamma", 15)}]}]
+    wins = [{**w, "d": i, "k": k, "h": k} for i, d in enumerate(docs)
+            for k, w in enumerate(EW.chat_windows(d["turns"], 2048, 3072))]
+    tbs = [[t["text"].encode("utf-8") for t in d["turns"]] for d in docs]
+    mid = [w for w in wins if w["t"] == 1]
+    assert [w["d"] for w in mid] == [0, 1] and all(w["ct"] == 0 < w["cc"] for w in mid)
+    wa = mid[0]
+    own = len(tbs[0][0]) - wa["cc"]                    # prior-turn bytes in A's own window
+    assert own <= 3072 < sum(len(b) for b in tbs[1]) < len(tbs[0][0])
+    assert H.history_bytes(tbs[0], wa) == own
+    assert H.foreign_source(tbs, 0, own) == 1
+    fct, fcc = H.tail_context(tbs[1], own)
+    got = sum(len(tbs[1][j]) - (fcc if j == fct else 0) for j in range(fct, len(tbs[1])))
+    assert fct == 0 and own - 16 <= got <= own         # B's tail, cut at whitespace
+    items, keys, cnt = H.build_hd_items(docs, wins, C.encoder(C.load_tokenizer(TOK8)), C.tokenizer_info(TOK8), 4096)
+    assert cnt["no_foreign"] == 0 and cnt["no_history"] == 0 and cnt["kept"] == len(keys) == 2
+    assert keys == [(1, "assistant"), (1, "assistant")]
 
 
 def test_cli_hd_adds_a_key_and_changes_nothing_else(evalsets, tmp_path):

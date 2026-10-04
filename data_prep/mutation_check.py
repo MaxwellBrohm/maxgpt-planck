@@ -79,6 +79,7 @@ MUTANTS = [
     ("hd_first_turn_kept", D + "bpb_hd.py", "        if t == 0:\n", "        if False:\n"),
     ("hd_foreign_whole_turns_only", D + "bpb_hd.py", "            ct, cc = j, int(bnd[k])", "            pass"),
     ("hd_sign_flipped", D + "bpb_hd.py", 'out["HD"] = out["foreign"] - out["own"]', 'out["HD"] = out["own"] - out["foreign"]'),
+    ("hd_history_no_cc", D + "bpb_hd.py", 'len(tb[j]) - (w["cc"] if j == w["ct"] else 0) for j', "len(tb[j]) for j"),
     ("bpb_hd_default_on", D + "bpb.py", 'if hd and st["kind"] == "chat":', 'if st["kind"] == "chat":'),
     ("ngram_ignores_eot", D + "ngram_overlap.py", 'return src, _found(np.memmap(path, dtype="<u2", mode="r"))',
      'a = np.memmap(path, dtype="<u2", mode="r")\n        return src, _found(np.asarray(a)[np.asarray(a) != 1])'),

@@ -227,3 +227,19 @@ AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this
   paired with the shared eager BASE per seed. Eager memory at micro 16 with the second logit head is still
   unmeasured: the eager smoke (mem_fit; the registered micro 8 x accum 2 switch if it fails) comes before stage 2.
   Configs rebuilt; each carries the C6 eval.induction hook (IND reads model(idx), never the aux head: tested).
+
+EAGER SMOKE (2026-10-04 12:02:17 to 12:03:05 EDT, the PC 5070 under gpu.lock; Claude; labelled smoke, never read; the
+method, the scratch tree and the batch table in SCREENS.txt "SMOKES RECORDED"; no S006 run queued, no config changed)
+  smoke_s006_mtp = s006_mtp_g1_s1.yaml with only name and out_dir changed (scratch planck_root), eager (train.compile
+  false resolved, no compile key in the start record), varlen, micro 16 x accum 1, 300 of 7,630 steps.
+  Passed: 300 steps, rc 0; start record mtp {heads 1, weight 1.0, training_only_params 37,056}, n_params 5,010,133;
+  loss 8.814 at step 10 to 4.756 at step 300, all 30 logged losses finite.
+  mem_fit ok at micro 16 with the second logit tensor: peak reserved 9.28 GiB, 1.47 GiB left at the peak (free before
+    10.76 of 11.94 GiB). So the registered micro 8 x accum 2 switch does not apply: S006 runs micro 16 and pairs with
+    the shared eager BASE (no S006 BASE of its own).
+  tok/s: 215,563 median, against the shared BASE smoke's 253,691 in the same session: x1.177 (assumed x1.3; the C1-a
+    parity's eager estimate x1.21). Hours per run by GPU HOURS' method with this factor: 0.368 h (0.406 h assumed).
+  Leak self-test (train.py startup, 12 checks, bf16 tolerance 3e-2): passed, largest ratio 0.0076.
+  The IND hook ran on CUDA (one reading at step 153, 0.24 s, 8 x 3 GATE values). Readings not read.
+  This settles this file's smoke line (mem_fit at micro 16, tok/s). screens_lib.py's S006 "mult" still holds the
+  assumed 1.3 (not edited here).

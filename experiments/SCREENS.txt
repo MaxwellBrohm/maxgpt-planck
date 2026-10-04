@@ -795,3 +795,77 @@ no GPU, no lock, no model above unit-test size, no run queued, no mark recorded)
   LAUNCH: stage 1 (plans/CURRENT = stage1_select: S001, S002, S003 selection) is OK to start once this entry is
     committed, the kit is sent again from that commit (the bundle on the PC is 620c77c) and a person records
     SCREENS_PRECONDITIONS_OK; stage 2 is NOT, until each flag's eager smoke is logged.
+
+SMOKES RECORDED (2026-10-04, Claude; ORDER 0's "one smoke run per new flag", EAGER per AMENDMENT C1-b; the PC 5070 under
+gpu.lock; labelled smoke, never read; no screen run queued, no config or code changed, no mark recorded).
+  Code: a scratch tree on the PC (~/planck/dev/screens_smoke), git archive of main 129dd51 (harness/, pc/, data_prep/,
+    experiments/screens, S004 to S007, E2's configs, tok_v0_8k, corpus/oodh.py and sample_plan.py, tokenizer/spec.py;
+    129dd51 differs from fc135b9 only under experiments/E3_seed_noise), md5 list equal on both machines, plus two
+    scratch helpers not in the repo: eager_smoke.py (gate_smoke.py's scratch-root refusal and record fields with
+    compile off; adds mem_fit, the leak self-test dict, the IND readings and a falling-loss check) and cpu_check.py.
+    planck_root is a scratch directory (data/ linked read only, runs/ scratch): nothing was written under
+    ~/planck/runs (no runs/SCREENS directory; no smoke line in runs/runs.jsonl; checked after). torch 2.13.0+cu130,
+    bf16.
+  Configs: each smoke config extends the arm's own config and changes only name (smoke_<arm>) and out_dir: the g = 1,
+    seed 1 g-check config of each flag arm; base_s101.yaml (the shared BASE, the speed reference) and
+    s005_base_s101.yaml (S005's own BASE; S005's notes ask for both arms), seed 101.
+  Run: train.py --max-steps 300 (of 7,630; the full WSD schedule), --no-resume, checkpoints deleted after. Pass needs:
+    rc 0 at step 300; every logged loss finite; mean of the last 3 logged losses below the first 3; train.compile false
+    resolved and no compile key in the start record; the startup leak self-test passed (train.py run_selftests: 12
+    checks, causal, causal masked and document leaks, with and without grad, on the model and a scrambled copy;
+    tolerance 3e-2 under bf16); mem_fit ok. mem_fit is pc/bench_micro.py's rule, with free taken at the peak: "over"
+    when peak reserved > free before + reserved before, "edge" when under 0.5 GiB is left at the peak, else "ok". tok/s
+    = median of log.jsonl tok_per_s from the third logged step on (gate_smoke.py's rule; 30 records at log_every 10).
+  Holds (flock -w 7200 on gpu.lock, timeout 1800 s per hold): BASE 10:25:14 to 10:26:04; S005 own BASE 11:03:27 to
+    11:04:28; the four flag smokes in one hold, 11:58:39 to 12:03:11 (4.5 min; the driver was stopped while waiting and
+    restarted with one hold for the remaining four, since each lock wait took 27 to 46 minutes behind the RC-12 and
+    teacher queues). A first BASE hold at 09:55:51 ended after 10 s, rc 1: the scratch tree lacked corpus/oodh.py
+    (data_prep/prep_common.py imports it; the IND hook's GATE windows import bpb.py), a packaging error of the scratch
+    tree. The tree was rebuilt with the three files above, and a CPU pre-check (no lock) built every smoke config's
+    model, drew one loader batch from the real starter data and built the IND hook with one reading: 6 of 6 ok. In
+    the three passing holds the GPU was at 45 to 50 C with 321 to 374 MiB in use at start and end; free before 10.76
+    of 11.94 GiB in every smoke.
+  arm (engine, micro x accum)    params     loss s10 -> s300   tok/s  x BASE peak res. left  mem_fit leak max
+  BASE shared (varlen, 16 x 1)   5,010,133  8.881 -> 4.733   253,691  1      8.28 GiB  2.47  ok      0.0076
+  S005 own BASE (mask, 8 x 2)    5,010,133  8.881 -> 4.736   192,092  1.321  4.80      5.96  ok      0.0095
+  S005 forget (mask, 8 x 2)      5,014,765  8.814 -> 4.682    85,113  2.981  6.13      4.63  ok      0.0083
+  S004 canonac (varlen, 16 x 1)  5,022,421  8.814 -> 4.698   184,569  1.375  9.82      0.94  ok      0.0071
+  S007 smear (varlen, 16 x 1)    5,010,157  8.815 -> 4.716   247,073  1.027  8.38      2.38  ok      0.0073
+  S006 mtp (varlen, 16 x 1)      5,010,133  8.814 -> 4.756   215,563  1.177  9.28      1.47  ok      0.0076
+    (S006: plus 37,056 training-only parameters, start record mtp {heads 1, weight 1.0}.) Every smoke passed. Every
+    one ran the eval.induction hook on CUDA (one reading at step 153, 0.16 to 0.26 s, 8 x 3 GATE values; not read):
+    the IND hook's GPU time, unmeasured in VERIFICATION OF ORDER 0, is about 50 x 0.25 s = 13 s per 7,630-step run.
+  What the smokes settle (each notes.txt "EAGER SMOKE"): S004 fits micro 16 (0.94 GiB left, the smallest margin, on an
+    otherwise idle card). S005 fits micro 8 x accum 2 in both arms, so the micro 4 x 4 fallback is not needed. S006
+    fits micro 16 with its second logit tensor, so it runs micro 16 and pairs with the shared eager BASE (no S006
+    BASE). S007 costs about 3% over BASE.
+  Measured factors against the assumed ones: Canon x1.375 (x1.1), forget x2.257 of its own BASE (x1.1), MTP x1.177
+    (x1.3), smear x1.027 (x1.0); S005's own BASE at micro 8 x 2 runs 192,092 tok/s, faster than the micro-16 mask
+    bench figure GPU HOURS used (162,849, an upper bound). The BASE smoke's 253,691 is 0.8% under GPU HOURS' 255,660.
+  HOURS with these factors (GPU HOURS' method: 250.0M slots, 255,660 slots/s eager, +15%, each arm's time as its
+    factor against the shared BASE smoke above; S003 search 8,776 steps), by hand: BASE 0.62 | S001 1.56 | S002 4.69 |
+    S003 search 3.95 | S003 seeds 0.62 | S004 5 x 0.429 = 2.15 | S005 arm 5 x 0.931 = 4.66 | S005 own BASE 2 x 0.413 =
+    0.83 | S006 5 x 0.368 = 1.84 | S007 5 x 0.321 = 1.60. Total 57 runs, 22.52 h (registered estimate 20.44 h). One
+    forget run trains about 49 minutes at the smoke rate (about 56 with the +15%).
+  Cap (ORDER): 0 measured screen hours + 22.52 h = 22.52 h <= 25 h, nothing cut. With the C1-a gate's 2.011 h counted
+    as measured: 24.53 h; with these smokes' lock-held time too (0.109 h, the failed 10 s hold included): 24.64 h, still
+    <= 25 h, nothing cut, with 0.36 h of headroom (about one 0.31 h run): extensions and matched-LR IND runs count once
+    queued, and past the cap the cut rule cuts S006 first. screens.py hours still prints the assumed factors
+    (screens_lib.py "mult" S004 1.1, S005 1.1, S006 1.3; S005's own BASE at the mask bench rate): not edited here.
+  Raw: PC ~/planck/dev/screens_smoke/out (one JSON and log per smoke), ~/planck/logs/screens_eager_smoke.log.
+  HD TEST GAP (VERIFICATION OF ORDER 0, "Found, not fixed"): closed in this commit. data_prep/tests/test_bpb_hd.py
+    test_mid_turn_context_counts_only_the_bytes_the_own_window_holds: two conversations whose scored turn 1 enters turn
+    0 mid-turn (ct 0 < t 1; cc 1,133 in A, 287 in B); A's in-window context (3,066 bytes) fits in B (3,463 bytes) but
+    A's whole turn 0 (4,199) does not. It checks history_bytes equals the in-window bytes, the foreign source and its
+    tail (3,062 bytes, cut at whitespace; the test allows 16 short), and that build_hd_items keeps both windows with
+    no_foreign 0. Mutant hd_history_no_cc (data_prep/mutation_check.py: history_bytes without the cc term), on a
+    scratch copy: SURVIVED before the test, killed after; with the history_bytes assertion removed, the no_foreign count
+    alone still kills it.
+  Tests (Mac CPU, ~/.venvs/planck): data_prep 59 passed; experiments/screens/tests 238 passed; data_prep
+    mutation_check.py 53 of 53 killed (52 earlier + hd_history_no_cc).
+  ORDER 0 "one smoke run per new flag": MET (eager, per C1-b), each logged in its notes.txt. With VERIFICATION OF
+    ORDER 0's table every ORDER 0 item is now MET or CLOSED. LAUNCH: stage 1 (plans/CURRENT = stage1_select) is OK to
+    start once this entry is committed, the kit is sent from that commit, and a person records
+    SCREENS_PRECONDITIONS_OK. Stage 2 waits for its own mark, SCREENS_STAGE_2_SMOKES_RECORDED (a person's); what BUILT
+    listed for it besides the smokes: the CUDA tests (run 2026-10-03, VERIFICATION OF ORDER 0 (3)) and S005's micro 8 x
+    2 row-order loader test (still open; S005's FIXED line before its g-check).

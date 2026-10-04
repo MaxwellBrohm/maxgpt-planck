@@ -224,3 +224,26 @@ AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this
   the eager smoke; the C1-a parity's eager arms on synthetic data at micro 8 x 2 ran 85.5k to 85.8k tok/s (forget)
   against 194k (own BASE), so the arm may cost about twice the assumed hours. Configs rebuilt; each carries the C6
   eval.induction hook.
+
+EAGER SMOKE (2026-10-04, the PC 5070 under gpu.lock; Claude; labelled smoke, never read; the method, the scratch tree
+and the batch table in SCREENS.txt "SMOKES RECORDED"; no S005 run queued, no config changed)
+  Both arms, mask engine, micro 8 x accum 2 (the registered plan), eager (train.compile false resolved, no compile key
+  in the start record), 300 of 7,630 steps, each config with only name and out_dir changed (scratch planck_root):
+  own BASE  smoke_s005_base = s005_base_s101.yaml, 11:03:27 to 11:04:28: rc 0, 5,010,133 params, loss 8.881 at step
+            10 to 4.736 at step 300 (all finite); 192,092 tok/s median; peak reserved 4.80 GiB, 5.96 GiB left at the
+            peak, mem_fit ok; leak self-test passed, largest ratio 0.0095 (12 checks, tolerance 3e-2).
+  forget    smoke_s005_forget = s005_forget_g1_s1.yaml, 11:58:39 to 12:00:38: rc 0, 5,014,765 params, loss 8.814 to
+            4.682 (all finite); 85,113 tok/s median; peak reserved 6.13 GiB, 4.63 GiB left, mem_fit ok; leak self-test
+            passed, largest ratio 0.0083.
+  Memory: mem_fit ok at micro 8 in both arms, so micro 8 x accum 2 stands and the micro 4 x accum 4 fallback is not
+    needed. The bias path at micro 8 costs 1.33 GiB of peak reservation over its own BASE (6.13 vs 4.80).
+  Speed: the forget arm runs at x2.257 of its own BASE's time (assumed x1.1; the C1-a parity's eager arms on synthetic
+    data, 85.5k to 85.8k tok/s, agree). Against the shared BASE smoke (253,691 tok/s, same session) the own BASE is
+    x1.321 and the forget arm x2.981. Hours per run by GPU HOURS' method with these factors: own BASE 0.413 h
+    (registered 0.490 h, the micro-16 bench figure), forget arm 0.931 h (registered 0.539 h). One forget run trains
+    about 49 minutes at the smoke rate (250.0M slots / 85,113), about 56 minutes with the +15%, under one gpu.lock
+    hold per run (the queue's rule, not changed here).
+  The IND hook ran on CUDA in both (one reading at step 153, 0.26 s and 0.16 s, 8 x 3 GATE values). Readings not read.
+  This settles this file's smoke line (mem_fit at micro 8, tok/s, leak self-test, both arms in the mask engine).
+  Still open before S005's g-check (BUILT): the micro 8 x 2 row-order loader test and its FIXED line. screens_lib.py's
+  S005 "mult" still holds the assumed 1.1 (not edited here).

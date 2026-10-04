@@ -184,3 +184,18 @@ AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this
   paired with the shared eager BASE per seed; no S004 run compiles, and the compiled-Canon deterministic defect
   above stays a finding for the flag's owner. Configs rebuilt; each carries the C6 eval.induction hook. Before
   stage 2: the eager smoke (mem_fit, tok/s to replace the assumed x1.1) and this flag's CUDA tests.
+
+EAGER SMOKE (2026-10-04 12:00:38 to 12:01:34 EDT, the PC 5070 under gpu.lock; Claude; labelled smoke, never read; the
+method, the scratch tree and the batch table in SCREENS.txt "SMOKES RECORDED"; no S004 run queued, no config changed)
+  smoke_s004_canonac = s004_canonac_g1_s1.yaml with only name and out_dir changed (scratch planck_root), eager
+  (train.compile false resolved, no compile key in the start record), varlen, micro 16 x accum 1, 300 of 7,630 steps.
+  Passed: 300 steps, rc 0; 5,022,421 params; loss 8.814 at step 10 to 4.698 at step 300, all 30 logged losses finite.
+  mem_fit ok at micro 16: peak reserved 9.82 GiB, 0.94 GiB left at the peak (free before 10.76 of 11.94 GiB). The
+    smallest margin of the six smokes: it holds on an otherwise idle card, and another process holding about 0.5 GiB
+    more would make it "edge".
+  tok/s: 184,569 median, against the shared BASE smoke's 253,691 in the same session: x1.375 (assumed x1.1; the C1-a
+    parity's eager estimate x1.36). Hours per run by GPU HOURS' method with this factor: 0.429 h (0.344 h assumed).
+  Leak self-test (train.py startup, 12 checks, bf16 tolerance 3e-2): passed, largest ratio 0.0071.
+  The IND hook ran on CUDA (one reading at step 153, 0.19 s, 8 x 3 GATE values). Readings not read.
+  This settles this file's smoke line (mem_fit at micro 16, tok/s, leak self-test). screens_lib.py's S004 "mult"
+  still holds the assumed 1.1 (not edited here), so screens.py hours prints the assumed figure.
