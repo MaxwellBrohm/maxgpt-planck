@@ -57,7 +57,7 @@ def r_offtopic(skel, texts, built):
     if u:
         tw = topic_set(skel["topic_text"][u["intent"].split(":")[1]])
         far = _far(skel, tw | {stem("patience"), stem("routine"), stem("steady")}, 1)
-        base = _copy(texts, u["i"] - 1, f"{_topic_w(skel)} takes some patience and a steady routine.")
+        base = _copy(texts, u["i"] - 1, f"{_topic_w(skel).capitalize()} takes some patience and a steady routine.")
         if far and not {stem("patience"), stem("routine")} & tw:
             out.append(("offtopic_prev_assist_one_fire", skel,
                         _copy(base, u["i"], _sty(skel, f"Speaking of patience, my {far[0]} is acting up again.")),

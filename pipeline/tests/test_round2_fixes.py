@@ -162,15 +162,15 @@ class TestGuidance(unittest.TestCase):
             if "ask for rule " in it:
                 self.assertIn(RI.RULE_HEAD, g)
                 self.assertNotIn("drop the earlier rule", g)
-            if it == "ask about the entity":
-                self.assertIn("look up", g)
+            if it == "ask about the entity":      # 10-03 (round 3): "look up the X and report its Y" was copied
+                self.assertTrue(g.startswith("ask about the ") and "report its" not in g, g)
             base = it.split(";")[0]
             if base in ("answer with the value first", "answer with the value after a short lead in"):
-                self.assertTrue(re.search(r"going on|leading in with what you were told|then a few words", g), g)
+                self.assertTrue(re.search(r"going on|pointing back to when the user said it|then a few words", g), g)
             if base == "agree and follow the rule":
                 self.assertIn("keep the rule in this reply", g)
             if base.startswith("say it was not mentioned"):
-                self.assertIn("ask them to share it", g)
+                self.assertIn("ask for it in a question", g)   # 10-03 (round 3)
 
     def test_prompt_rules_and_intent_forms(self):
         self.assertIn("no dashes (use a comma or a new sentence)", R.RULES)

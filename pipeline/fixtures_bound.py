@@ -16,6 +16,12 @@ WORDS = ("plenty of other small ordinary words keep coming along here until this
          "point").split()
 
 
+def _cap(w):
+    """sentence case for a fixture's assistant line (ASSIST_CASE, 2026-10-03); the shares the line pins are read on
+    lowercased words, so they do not move."""
+    return w[:1].upper() + w[1:]
+
+
 def _free_of_req(skel, text):
     rw = skel["required_words"]
     return not any(word_forms_re(rw[k], k).search(text) for k in ("noun", "verb", "adj"))
@@ -37,8 +43,10 @@ def b_len(skel, texts, built):
     f = _fillers(skel, texts)
     if f and f[0]["max_w"] < len(WORDS):
         t = f[0]
-        out += [("len_max_fire", skel, _copy(texts, t["i"], w + " " + " ".join(WORDS[:t["max_w"]]) + "."), {"LEN_ASSIST"}, {}),
-                ("len_max_pass", skel, _copy(texts, t["i"], w + " " + " ".join(WORDS[:t["max_w"] - 1]) + "."), "ok", {})]
+        out += [("len_max_fire", skel, _copy(texts, t["i"], _cap(w) + " " + " ".join(WORDS[:t["max_w"]]) + "."),
+                 {"LEN_ASSIST"}, {}),
+                ("len_max_pass", skel, _copy(texts, t["i"], _cap(w) + " " + " ".join(WORDS[:t["max_w"] - 1]) + "."),
+                 "ok", {})]
     u = [t for t in filler_user(skel) if t["min_w"] == 3]
     if u:
         uw = _topic_w(skel, u[0])
@@ -53,7 +61,7 @@ def b_repeat(skel, texts, built):
         return []
     three = f"With {w}, go slow and steady at first, then go slow and steady later, and go slow and steady at the end."
     two = f"With {w}, go slow and steady at first, then go slow and steady later, and rest at the end."
-    c8, c8b = f"{w} {w} helps, so so we start now.", f"{w} truly helps, so so we start now."
+    c8, c8b = f"{_cap(w)} {w} helps, so so we start now.", f"{_cap(w)} truly helps, so so we start now."
     i = f[0]["i"]
     return [("repeat_fire", skel, _copy(texts, i, three), {"REPEAT_4GRAM"}, {}),
             ("repeat_pass", skel, _copy(texts, i, two), "ok", {}),
@@ -69,9 +77,10 @@ def b_self_copy(skel, texts, built):
         if t["role"] != "assistant" or t.get("lookup_call"):
             continue
         if prev in ok and t["i"] in ok:
-            base = _copy(texts, prev, f"{w} needs a calm plan every day.")
-            return [("self_copy_fire", skel, _copy(base, t["i"], f"{w} needs a calm plan, not luck."), {"SELF_COPY"}, {}),
-                    ("self_copy_pass", skel, _copy(base, t["i"], f"{w} needs a calm mind and rest."), "ok", {})]
+            base = _copy(texts, prev, f"{_cap(w)} needs a calm plan every day.")
+            return [("self_copy_fire", skel, _copy(base, t["i"], f"{_cap(w)} needs a calm plan, not luck."), {"SELF_COPY"},
+                     {}),
+                    ("self_copy_pass", skel, _copy(base, t["i"], f"{_cap(w)} needs a calm mind and rest."), "ok", {})]
         prev = t["i"]
     return []
 
@@ -110,14 +119,14 @@ def b_fine(skel, texts, built):
     out, w = [], _topic_w(skel)
     f = [t for t in _fillers(skel, texts) if t["max_w"] >= 28]
     if f:
-        rep = [w, "we", "we", "can", "can", "start", "start", "small", "small", "and", "and", "then", "then"] + FILL[6:18]
+        rep = [_cap(w), "we", "we", "can", "can", "start", "start", "small", "small", "and", "and", "then", "then"] + FILL[6:18]
         out.append(("consec_024_pass", skel, _copy(texts, f[0]["i"], " ".join(rep) + "."), "ok", {}))
     prev = None
     for t in skel["turns"]:
         if t["role"] != "assistant" or t.get("lookup_call"):
             continue
         if prev is not None and prev in f and t in f:
-            p = [w] + FILL[:27]
+            p = [_cap(w)] + FILL[:27]
             c = p[:15] + ["then", "rest", "well"]
             base = _copy(texts, prev["i"], " ".join(p) + ".")
             out.append(("self_copy_048_pass", skel, _copy(base, t["i"], " ".join(c) + "."), "ok", {}))
@@ -129,7 +138,8 @@ def b_fine(skel, texts, built):
             uw = _topic_w(skel, u)
             ut = [uw] + FILL[:24]
             base = _copy(texts, u["i"], " ".join(ut) + ".")
-            out.append(("echo_059_pass", skel, _copy(base, a[0]["i"], " ".join(ut[:16] + ["then", "rest"]) + "."), "ok", {}))
+            out.append(("echo_059_pass", skel, _copy(base, a[0]["i"], " ".join([_cap(uw)] + ut[1:16] + ["then", "rest"])
+                                                       + "."), "ok", {}))
             break
     return out
 

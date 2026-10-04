@@ -16,14 +16,16 @@ import check_behav
 import check_events
 import check_lines
 import check_lookup
+import check_r3
 import check_text
 import checker
 import lexicons
 import parse
 import stemmer  # noqa: F401  (a mutant target)
 from checker_mutants_r2 import SRC_R2
+from checker_mutants_r3 import SRC_R3
 
-MODULES = [checker, check_text, check_lines, check_lookup, check_events, check_behav, check_base, parse]
+MODULES = [checker, check_text, check_lines, check_lookup, check_events, check_behav, check_base, parse, check_r3]
 
 # lower values are the nearest shares a turn of legal length can reach below the threshold (fixtures_bound pins them)
 CONSTS = [("REPEAT_MIN", 2, 4), ("CONSEC_MAX", 0.24, 0.26), ("SELF_COPY_MAX", 0.48, 0.51), ("ECHO_MAX", 0.59, 0.61),
@@ -95,7 +97,7 @@ SRC = [  # (name, module, old, new)
      'if "one" in others and len(ONE_RE.findall(s)) == len(PRONOUN_ONE.findall(s)):', 'if "one" in others:'),
     # 2026-09-28 round 2: checker_mutants_r2.SRC_R2 (appended below)
 ]
-SRC += SRC_R2
+SRC += SRC_R2 + SRC_R3   # 2026-10-03 round 3: checker_mutants_r3.SRC_R3
 
 
 def _read(path):

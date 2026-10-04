@@ -38,7 +38,14 @@ AI_ISM_RE = _alt([r"as an ai", r"language model", r"great question", r"feel free
 ASSIST_ISM_RE = _alt([r"how (?:can|may) i ?(?:help|assist)", r"what can i (?:help you with|do for you)",
                       r"(?:i'm|i am) (?:just |always |only )?here to (?:help|assist|chat|support)",
                       r"happy to (?:assist|and help)", r"anything else i can (?:help|do|assist)",
-                      r"help with (?:something|anything) else", r"helpful assistant"])
+                      r"help with (?:something|anything) else", r"helpful assistant",
+                      # 10-03 (dry pilot 3 v1 review, MEDIUM 6): the substitutes that replaced the banned ones, "I can
+                      # certainly help you ..." (Gemma, 95 accepted chats) and the "anything else" closers (50 lines)
+                      r"i can (?:certainly |definitely |surely |absolutely |also )?help",
+                      r"(?:is there|would you like(?: me)?(?: to (?:know|discuss|talk about|add|share|ask|find))?|"
+                      r"do you (?:want|need|have)(?: to (?:know|add|ask))?|need|(?:can|may) i (?:help|assist)(?: you)?"
+                      r"(?: with)?) anything else",
+                      r"anything else (?:to (?:add|adjust|know|discuss|ask)|you(?:'d| would)? (?:like|want|need))"])
 
 # ---- deflection on a given item (DEFLECT) -------------------------------------------------------------------------
 DEFLECT_RE = _alt([r"i don't have access", r"i do not have access", r"as an ai,? i can't know", r"i can't remember",
@@ -89,7 +96,9 @@ GUIDE_META_RE = _alt([r"without (?:saying|telling|giving|revealing|stating)(?: m
                       r"has not named a topic", r"a few words (?:before|around) the answer", r"the answer itself",
                       r"leading in with what", r"in one short sentence", r"give no guess", r"offer to note it",
                       r"without inventing one", r"no new topic", r"said before the detour",
-                      r"keep the rule in this reply"])
+                      r"keep the rule in this reply",
+                      # 10-03 (round 3 wording, render_intents): the lead-in and the abstain guidance
+                      r"pointing back to (?:when|what)", r"ask(?:s|ing)? for it in a question"])
 # on an event's query line any withholding clause is the old guidance paraphrased (round 2 recheck: accepted recall
 # questions asked to be reminded "without telling me directly", "without telling it", "without telling me the city")
 WITHHOLD_RE = _alt([r"without (?:saying|telling|giving|revealing|stating|mentioning)"])
@@ -137,7 +146,14 @@ SELF_CLAIM = {
                     # 09-28 (v1 review: a denial that goes on to claim, "..., but I do love falconry")
                     r"i (?:do|really|also|still|truly|just|absolutely) (?:love|like|enjoy|adore|prefer)",
                     r"i spend (?:my|most|a lot|time)", r"my (?:evenings|mornings|weekends|free time|spare time|days off)",
-                    r"like my own"],   # a garbled denial; "a place to call my own", "I don't have my own" deny
+                    r"like my own",    # a garbled denial; "a place to call my own", "I don't have my own" deny
+                    # 10-03 (dry pilot 3 v1 review, MEDIUM 5): "I'd love to catch up with old friends" passed "i love";
+                    # wanting to hear, know, help or see the user's thing is not a claim. "myself" after an act or a
+                    # liking, not negated ("I'd try a stack of them myself"; "I do not eat food myself" denies)
+                    r"i(?:'d| would) (?:really |also |just |absolutely )?(?:love|enjoy) to(?! (?:help|hear|know|learn|"
+                    r"chat|talk|see (?:how|what|it|that|them|your|you)|read (?:about|it|that|your))(?![a-z]))",
+                    r"(?<!not )(?<!n't )(?<!never )(?:try|tried|eat|ate|cook|bake|make|watch|read|play|do|did|like|"
+                    r"love|enjoy|prefer|partial to)(?: (?!(?:not|never|no)(?![\w'])|\w*n't(?![\w']))[\w']+){0,5} myself"],
     "places": [r"i live", r"i'm from", r"i am from", r"my (?:home|house|city|town|flat|apartment|garden|kitchen)",
                r"where i live", r"near me"],
 }
@@ -173,3 +189,39 @@ def self_claims(text):
     for cat, rx in SELF_CLAIM_RE.items():
         out += [(cat, m.group(0)) for m in rx.finditer(text)]
     return out
+
+
+# ---- round 3 (2026-10-03, dry pilot 3 v1 review; SPEC 15; check_r3.py) -------------------------------------------
+# PERSPECTIVE: the assistant says it told the user what the user told it ("As you were told before, your shift is in
+# December": 22 Qwen accepts after the round 2 lead-in wording; "As told before my name is Ember", never said; "I told
+# you, he's based in Perth"). check_r3 lets the frame stand when an earlier assistant turn named a value it names.
+TOLD_FRAME_RE = _alt([r"you(?: were|'ve been| have been| had been) told", r"as told(?! by you)",
+                      r"(?:as|like) i (?:said|mentioned|told you)", r"i(?:'ve| have)? (?:already )?told you",
+                      r"i (?:said|mentioned)(?: (?:it|that|this))? (?:earlier|before)", r"the one i mentioned"])
+# FALSE_MEMORY: a claim about the chat's own history that the chat contradicts (v1 review HIGH 4): forgetting on a
+# turn that is not an abstain answer ("Sounds like fun, but I've forgotten", an acknowledgement); the assistant's own
+# error when the user corrected themselves ("Thank you for correcting me", "Of course, I meant Osaka"); "earlier" for
+# a value said in the line just before ("You mentioned a beekeeper earlier", one turn after the user said it)
+FORGOT_RE = _alt([r"i(?:'ve| have)? forgot(?:ten)?", r"(?:it )?slipped my mind", r"i(?:'ve| have) lost track",
+                  r"i (?:can't|cannot|can not|don't|do not) (?:remember|recall)"])
+SELF_ERR_RE = _alt([r"correct(?:ing|ed) me", r"my (?:mistake|error|bad)", r"i stand corrected", r"i was wrong",
+                    r"i (?:got|had) (?:it|that|this) wrong", r"i meant(?! to)", r"i misspoke", r"i misheard",
+                    r"(?:sorry|apologi[sz]e) (?:for|about) (?:the|my|that) (?:mistake|error|mix ?up|confusion)"])
+EARLIER_RE = _alt([r"(?:mentioned|said|told me|shared|brought up|talked about)(?: [\w']+){0,6} (?:earlier|before|"
+                   r"previously)", r"(?:earlier|before|previously),? you (?:mentioned|said|told|shared)"])
+# LIVE_DATA: the assistant reports current weather it cannot observe ("It is quite cold outside with snow falling",
+# "the weather is so sunny today"); a hedge in or just before the match ("I hope", "if", "sounds") lets it pass
+_WX = r"(?:cold|warm|hot|sunny|rainy|raining|snowy|snowing|windy|cloudy|chilly|freezing|stormy|humid|wet|foggy)"
+_NOW = r"(?:outside|out there|today|tonight|right now|now|this (?:morning|afternoon|evening|week)|at the moment)"
+LIVE_RE = re.compile(r"(?<![a-z])(?:(?:it is|it's|it has been|it's been)\b[^.!?]{0,25}?\b" + _WX + r"\b[^.!?]{0,40}?\b"
+                     + _NOW + r"|the weather (?:is|has been|looks)\b[^.!?]{0,40}?\b" + _NOW + r"|(?:the|this) " + _WX +
+                     r" weather " + _NOW + r"|(?:snow|rain) (?:is )?(?:falling|coming down|pouring)|(?:the|that|this) "
+                     r"(?:snow|rain|sun|sky|fog) (?:looks|is)\b[^.!?]{0,25}?\b(?:outside|out there)|the forecast "
+                     r"(?:says|shows|calls for|is|predicts))(?![a-z])", re.I)
+LIVE_HEDGE_RE = _alt([r"hope", r"if", r"might", r"may", r"could", r"maybe", r"perhaps", r"sound(?:s|ing)?",
+                      r"must be", r"i bet", r"probably", r"wish", r"when(?:ever)?"])   # "when it is wet outside"
+# RUN_ON: a request glued to the line before it with no stop or joining word ("You have not told me the start time
+# yet please share it", Qwen abstains, LOW 10); "..., please", "so please" and "would you please" are joined
+RUN_ON_RE = re.compile(r"(?<![A-Za-z'])please\s+(?:share|tell|let|give|send)(?![a-z])", re.I)
+RUN_ON_JOIN = {"so", "and", "but", "then", "or", "you", "would", "could", "can", "will", "kindly", "just", "yes", "oh",
+               "okay", "ok", "sure"}   # dp3 re-check: "Hello Lola, yes please tell me about the offer"

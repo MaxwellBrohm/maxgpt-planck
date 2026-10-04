@@ -245,3 +245,7 @@ pilot 2), teachers/hf_pins.json, oodh/DESIGN.txt, corpus/make_common_words.py, c
      the public repo is his call.
   3. The D8 reading: banks co-authored and cross-judged by the three Apache-2.0 teachers; human examples from core v0
      in prompts.   4. VOCAB_OOL gating after the pilot, and p_exact scaling for banks short of target (2g).
+
+STATUS 2026-10-04: W0 code is in pipeline/bankpass/ (tests/test_bankpass_*.py) and the W1 word list and mined
+examples are on the PC under ~/planck/runs/bankpass/ (not runs/banks/; notes.txt "BANK PASS W0 + W1" lists this and
+the other deviations). W2 onward waits for Max: pipeline/DECISIONS_BANKPASS_FOR_MAX.md.

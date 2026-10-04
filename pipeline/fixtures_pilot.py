@@ -93,7 +93,7 @@ def p_offtopic(skel, texts, built):
         if u["i"] - 1 not in fill or u["max_w"] < 8 or stem("patience") in cw | {stem(w) for w in vw}:
             continue
         # 2026-09-28: two shared content words with the assistant's reply (one echoed word no longer passes)
-        base = _copy(texts, u["i"] - 1, f"{_topic_w(skel)} takes some patience and practice.")
+        base = _copy(texts, u["i"] - 1, f"{_topic_w(skel).capitalize()} takes some patience and practice.")
         line = "Patience and practice are hard for me, honestly."
         out.append(("offtopic_prev_assist_pass", skel, _copy(base, u["i"], line.lower() if lower else line), "ok", {}))
         break

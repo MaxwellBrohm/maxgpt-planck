@@ -139,6 +139,9 @@ tools/gemma_chat.py, experiments/E004_general_updating/code (read-only). No mode
   AI_ISM ("as an AI", "great question", "feel free to", "Certainly!"; assistant turns: "how can I help" etc., 14)
   TOPIC_RETURN S5 gold fails              IDENTITY S8 name mismatch or other name       LIST_STATE S2 gold fails
   LOOKUP_FORMAT / LOOKUP_UNNEEDED / LOOKUP_MISSING / LOOKUP_COPY / LOOKUP_EMPTY (S9 golds)
+  ASSIST_CASE assistant turn starts lowercase or has a lone "i" (15)   RUN_ON a request glued on with no stop (15)
+  FALSE_MEMORY forgetting, an own error or "earlier" that the chat contradicts (15)   LIVE_DATA current weather (15)
+  Round 3 (15) also widens PERSPECTIVE (told frames), SELF_CLAIM, AI_ISM and PROMPT_ECHO (copied guidance frames).
   REPEAT_4GRAM a 4-gram 3+ times in a turn   CONSEC_REP coverage >= 0.25   SELF_COPY >= 50% of the previous
   assistant turn's 4-grams                   ECHO_USER assistant copies >= 60% of the user turn's 4-grams
   NON_ENGLISH                            SAFETY blocklist hit                       PERSONA_LEAK (section 4)
@@ -247,3 +250,12 @@ tools/gemma_chat.py, experiments/E004_general_updating/code (read-only). No mode
     include list); never-said queries read as recall questions; list, rule, lookup, recap and return guidance is not
     a natural line; answers go on after the value or lead in with what was said; abstains ask; rule notes follow the
     move; a 3-word rule; lowercase display. skel-v0.3: no required word on goodbyes; end_question rules close "open".
+15. ROUND 3 FIXES 2026-10-03 (dry pilot 3 v1 quality review; check_r3.py, fixtures_r3.py; notes.txt)
+  Checker: PERSPECTIVE on "you were told", "as told", "as I said", "I told you" unless the assistant or a lookup was the
+    first to name a value the turn names; PROMPT_ECHO on a user line carrying its own guidance's frame (3 required
+    words, 2 outside the stopwords; list guidance exempt); FALSE_MEMORY, LIVE_DATA, ASSIST_CASE, RUN_ON; SELF_CLAIM
+    "I'd love to" (not hear, know, help, see yours) and "myself" after an act; AI_ISM "I can (certainly) help" and
+    "anything else" closers. Prompt: lead-ins "first pointing back to when the user said it"; abstains "ask for it in
+    a question"; entities "ask about the {attribute} of the {entity}"; topic forms 0 and 5 "ask for advice on {t}",
+    "ask about next steps with {t}"; lowercase chats: the rules name the A lines' capitals and the first A bracket
+    says sentence case.

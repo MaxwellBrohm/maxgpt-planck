@@ -34,11 +34,16 @@ SOCIAL = {"greeting": "say hello", "how_are_you": "ask how the assistant is doin
 ONLY_ANSWER = "; no other value"
 # 2026-09-28: answers go on after the value (dp2: bare "Durban." under the 3-word floor) and the lead in is what the
 # user said (dp2: "Your friend is Mateo.", an E004 sentence frame: 94 of Gemma's 113 frame hits on the lead-in intent);
-# abstains ask for the fact; the rule reply keeps the rule at once
+# abstains ask for the fact; the rule reply keeps the rule at once.
+# 2026-10-03 (dry pilot 3 v1 review): "leading in with what you were told" came back as the assistant telling the user
+# ("As you were told before, your shift is in December": Qwen 22 of 140 lead-in answers, Gemma 9 of 239), so the lead
+# in names the user as the one who said it; "ask them to share it" came back as "please share it" glued on with no
+# stop ("You have not told me the start time yet please share it": Qwen, 10 chats), so the abstain asks a question
 ASSIST = {"answer with the value first": "answer, starting with the answer itself and going on" + ONLY_ANSWER,
-          "answer with the value after a short lead in": "answer, leading in with what you were told" + ONLY_ANSWER,
+          "answer with the value after a short lead in": "answer, first pointing back to when the user said it"
+                                                         + ONLY_ANSWER,
           "say it was not mentioned, give no guess, offer to note it": "say the user has not told you, give no guess, "
-                                                                       "ask them to share it",
+                                                                       "and ask for it in a question",
           "agree and follow the rule": "agree, and keep the rule in this reply",
           "answer from the list": "answer from the list as it is now" + ONLY_ANSWER,
           "answer from what the user said, without a lookup": "answer from what the user said, without a lookup"
@@ -147,8 +152,8 @@ def user_guidance(skel, t):
         return _ask_back(skel["slots"][q]) if q else it
     if it == "go back to the first topic":
         return "go back to what you talked about first"
-    if it == "ask about the entity":
-        return f"ask the assistant to look up the {p['entity']} and report its {p['attribute']}"
+    if it == "ask about the entity":   # 10-03: "look up the X and report its Y" was copied (64 of 210 dp3 lines)
+        return f"ask about the {p['attribute']} of the {p['entity']}"
     if it == "state a belief, ask to check":
         return f"say what you believe about the {p['attribute']} of the {p['entity']}, and ask the assistant to check"
     if it == "pass on a fact":

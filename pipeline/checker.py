@@ -8,11 +8,15 @@ Codes added beyond the SPEC list (see notes.txt): STAGE_DIR (bracketed stage dir
 turn that schedules it), USER_VOICE / ASSIST_VOICE (third-person narration: "the user says ..."), OPEN_END (an
 "end with an open question" turn without a question mark), SOCIAL_TOPIC (an S8 social reply that brings in a slot
 value), SKEL_INFEASIBLE (render_prompt.feasible, before any teacher call); 2026-09-28 (SPEC 14): END_IN_TURN (the END
-marker, a closing "End." or script talk inside a turn) and USER_STYLE (a lowercase-style user's own line in capitals)."""
+marker, a closing "End." or script talk inside a turn) and USER_STYLE (a lowercase-style user's own line in capitals);
+2026-10-03 (SPEC 15, check_r3.py): ASSIST_CASE (an assistant turn starting lowercase or with a lone "i"), RUN_ON (a
+request glued to the line before it), FALSE_MEMORY (forgetting, an own error or "earlier" that the chat contradicts)
+and LIVE_DATA (current weather the assistant cannot know)."""
 import check_behav
 import check_events
 import check_lines
 import check_lookup
+import check_r3
 import check_text
 import parse
 import render_prompt
@@ -22,8 +26,9 @@ ORDER = ["SKEL_INFEASIBLE", "FORMAT_LINES", "FORMAT_EXTRA", "FORMAT_WRAP", "END_
          "EMPTY_TURN", "ROLE_LABEL", "MARKDOWN", "EMOJI", "DASH", "STAGE_DIR", "LEN_USER", "LEN_ASSIST", "DIGIT",
          "EXACT_MISMATCH", "REQ_SPAN", "FORBID_SPAN", "REQ_WORD", "VOCAB_OOL", "PLANT_MISSING", "PLANT_UNBOUND",
          "CORR_MISSING", "VALUE_EARLY", "DIST_LEAK", "QUERY_RESTATES", "QUERY_NOREF", "ANSWER_WRONG", "ANSWER_STALE",
-         "ANSWER_SHOTGUN", "PERSPECTIVE", "SELF_CLAIM", "USER_VOICE", "ASSIST_VOICE", "USER_STYLE", "PERSIST_FAIL",
-         "OPEN_END", "OFFTOPIC", "ABSTAIN_MISSING", "DEFLECT", "AI_ISM", "TOPIC_RETURN", "IDENTITY", "SOCIAL_TOPIC",
+         "ANSWER_SHOTGUN", "PERSPECTIVE", "SELF_CLAIM", "USER_VOICE", "ASSIST_VOICE", "USER_STYLE", "ASSIST_CASE",
+         "RUN_ON", "PERSIST_FAIL", "OPEN_END", "OFFTOPIC", "ABSTAIN_MISSING", "DEFLECT", "FALSE_MEMORY", "LIVE_DATA",
+         "AI_ISM", "TOPIC_RETURN", "IDENTITY", "SOCIAL_TOPIC",
          "LIST_STATE", "LOOKUP_FORMAT", "LOOKUP_UNNEEDED", "LOOKUP_MISSING", "LOOKUP_COPY", "LOOKUP_EMPTY",
          "REPEAT_4GRAM", "CONSEC_REP", "SELF_COPY", "ECHO_USER", "NON_ENGLISH", "SAFETY", "PERSONA_LEAK",
          "PROMPT_ECHO", "HELDOUT_VOCAB", "HELDOUT_ECHO", "HELDOUT_STRUCT"]
@@ -34,7 +39,7 @@ RANK = {c: n for n, c in enumerate(ORDER)}
 def registry():
     """every check function, in module order; mutation_checker replaces entries to build checker mutants."""
     return (list(check_text.CHECKS) + list(check_lines.CHECKS) + list(check_events.CHECKS) + list(check_behav.CHECKS)
-            + list(check_lookup.CHECKS))
+            + list(check_lookup.CHECKS) + list(check_r3.CHECKS))
 
 
 REGISTRY = registry()

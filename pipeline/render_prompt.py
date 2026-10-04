@@ -32,6 +32,15 @@ REQ_WORD_ORDER = ("noun", "verb", "adj")
 RULES = ("Rules: no dashes (use a comma or a new sentence). No digits (numbers as words). The assistant "
          "writes normal sentence case, never answers as your X is Y. Lines not marked copy exactly say what happens: "
          "write what the person would say, in three words or more. The user calls their own things my, never your.")
+# 2026-10-03 (dry pilot 3): with the lowercase forced literals Qwen wrote its own turns in lowercase too (32 accepted
+# turns; case-only misses in 125 REQ_SPAN and 80 ANSWER_WRONG hits; lowercase chats 8.1% vs 19.3% yield). In a
+# lowercase chat the rules' sentence case clause names the A lines and what takes a capital, and the first assistant
+# line's bracket says sentence case. (A bracket on every assistant line plus a separate rules sentence was cut: the
+# stub renders of teachers/test_capacity then left less than 200 tokens under 2,048.)
+CASE_CLAUSE = "The assistant writes normal sentence case, never answers as your X is Y."
+LOWER_CLAUSE = ("The assistant writes normal sentence case in every A line, with a capital first letter, I and names, "
+                "and never answers as your X is Y.")
+LOWER_PART = "sentence case"
 EXAMPLE = ("Example, another script, a user who writes in lowercase:\n"
            "U1 [3-12 words]: ask what comes first on the packing list\n"
            "A2 [3-12 words; must include: \"maps\"]: answer from the list\n"
@@ -121,6 +130,11 @@ RULE_NOTE = {"max_words": "at most {max} words", "one_sentence": "exactly one se
              "avoid_word": "never use the word {word}", "start_name": "start with {name}"}
 
 
+def first_assistant(skel):
+    """the index of the first guided assistant turn (None if there is none)."""
+    return next((t["i"] for t in skel["turns"] if t["role"] == "assistant" and t["mode"] == "guided"), None)
+
+
 def script_line(skel, t, req_words):
     lab = parse.ROLE_LETTER[t["role"]] + str(t["i"] + 1)
     if t["mode"] == "exact":
@@ -137,6 +151,8 @@ def script_line(skel, t, req_words):
         parts.append("must not include: " + _q([low(x) for x in excl]))
     if t["i"] in req_words:
         parts.append(f'use the word "{req_words[t["i"]]}" (any form)')
+    if skel["user"].get("style") == "lowercase" and t["i"] == first_assistant(skel):
+        parts.append(LOWER_PART)
     # a rule the reply must keep is said after the move, the last thing before the line is written (2026-09-28: dp2
     # PERSIST_FAIL, e.g. 143 Qwen card hits, most on the reply that accepts the rule, with the rule inside the bracket)
     notes = [RULE_NOTE[r["verifier"]].format(**r["args"]) for r in t.get("rules", [])]
@@ -160,8 +176,9 @@ def build(skel, variant=None):
     if variant is None:
         variant = random.Random(skel["skel_id"]).randrange(len(VARIANTS))
     vid, head, tail = VARIANTS[variant]
+    rules = RULES.replace(CASE_CLAUSE, LOWER_CLAUSE) if skel["user"].get("style") == "lowercase" else RULES
     blocks = {"head": head, "card": card_block(skel), "script": script_block(skel),
-              "tail": RULES + "\n\n" + tail + "\n\n" + EXAMPLE}
+              "tail": rules + "\n\n" + tail + "\n\n" + EXAMPLE}
     prompt = "\n\n".join([blocks["head"], blocks["card"], blocks["script"], blocks["tail"]])
     return {"prompt": prompt, "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(), "variant": vid,
             "blocks": blocks, "labels": parse.plan(skel), "persona": persona_text(skel),

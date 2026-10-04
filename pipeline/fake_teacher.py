@@ -92,6 +92,8 @@ def assistant_core(skel, t, prev_user_text):
     if base == "answer with the value first":
         return FIRST[rot % 3].format(A=cap(a)), f"{cap(a)}."
     if base == "answer with the value after a short lead in":
+        if a == R.card_name(skel):   # 10-03: the user never said the card name (FALSE_MEMORY "As you said earlier")
+            return f"My name is {a}, the one I go by.", f"My name is {a}."
         return LEAD[rot % 3].format(a=a), f"It is {a}."
     if base == "answer from what the user said, without a lookup":
         return ["You mentioned {a} before.", "Earlier you said {a}.", "Going by what you said, {a}."][rot % 3] \

@@ -68,14 +68,14 @@ class TestGuidanceWording(unittest.TestCase):
     def test_abstain_names_the_hedge_and_asks(self):
         g = {RI.guidance(sk, t).split(";")[0] for sk in corpus(N) for t in sk["turns"] if t["mode"] == "guided"
              and (t["intent"] or "").startswith("say it was not mentioned")}
-        self.assertEqual(g, {"say the user has not told you, give no guess, ask them to share it"})
+        self.assertEqual(g, {"say the user has not told you, give no guess, and ask for it in a question"})  # round 3
 
     def test_lead_in_answers_start_from_what_the_user_said(self):
         g = [RI.guidance(sk, t) for sk in corpus(N) for t in sk["turns"] if t["mode"] == "guided"
              and (t["intent"] or "").startswith("answer with the value after a short lead in")]
         self.assertTrue(g)
         for x in g:
-            self.assertTrue(x.startswith("answer, leading in with what you were told; no other value"), x)
+            self.assertTrue(x.startswith("answer, first pointing back to when the user said it; no other value"), x)
             self.assertNotIn("your", x.split(";")[0])
         self.assertTrue(L.GUIDE_META_RE.search("Leading in with what you told me, it is Porto."))
 
@@ -113,8 +113,11 @@ class TestAssistantPhrases(unittest.TestCase):
                   "I am happy to assist.", "How can I be your helpful assistant?", "I'm here to chat.",
                   "I would be happy to and help you."):
             self.assertTrue(L.ASSIST_ISM_RE.search(s), s)
-        for s in ("Patience matters more than anything else I can think of.", "I can help you plan the route.",
-                  "That will help with the noise."):
+        # round 3 (10-03, dry pilot 3 MEDIUM 6): "I can (certainly) help you ..." is the substitute Gemma wrote in 95
+        # accepted chats, so the round 2 clean case "I can help you plan the route." now fires (AI_ISM is never loosened)
+        self.assertTrue(L.ASSIST_ISM_RE.search("I can help you plan the route."))
+        for s in ("Patience matters more than anything else I can think of.", "That will help with the noise.",
+                  "You can help him plan the route."):
             self.assertFalse(L.ASSIST_ISM_RE.search(s), s)
 
 
