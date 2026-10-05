@@ -65,6 +65,8 @@ Level R holds at a size when, on sealed, the 95% CI lower bound of the state sco
 
 If OOD-H's paired point estimate is worse than -5 points, the claim is worded as "clears the state bar on RC-12's format", with the OOD-H result beside it. The unqualified wording is then not used. Level R statements made in December are provisional until OOD-H is complete in January.
 
+**LOOKUP claim** (Max, 2026-10-04; prereg s10b). Reported beside Level R and Level A, never folded into them: on sealed RC-12, at the claimed size, the LOOKUP family score (answer from the table the user supplied, and abstain when the key is only in the other table) is at least 0.60 with at least 3 training seeds and T0 at least 0.90, its 95% CI reported, against every public panel model's LOOKUP rate (0.000 to 0.014 on dev, up to 2.6B). It is the direct test of the skills-in-weights, facts-outside idea on supplied facts; Planck issuing its own lookups is a post-lock diagnostic only (decision 2).
+
 **Level A** (the headline). Exact wording:
 > "Planck-{N}M passes a strict multi-turn bar that no model at or below 0.6B passed in our tests. On sealed RC-12, pooled over {k} seeds, it:
 > - applies corrections made 4 or more turns earlier (pass rate at least 0.60, with the two-slot and no-update control items also at least 0.60);

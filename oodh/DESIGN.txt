@@ -112,8 +112,8 @@ Status: BUILT to 150 threads (2026-09-26, s13) and REVIEWED (s14). The best-path
   Score per thread = mean of its probe results (strict primary, lenient twins reported). Per model: the mean over
     threads (and seeds), in points. The reported number is the paired difference Planck minus
     Qwen2.5-0.5B-Instruct on the same threads, with a 95% CI by bootstrap over threads (and seeds). {h} = threads.
-  Wording rule: if the paired point estimate is worse than -5 points, Level R is worded "non-inferior on RC-12's
-    format", with the OOD-H result beside it. Part 2 (January rater scripts) is added under the same rule; Level R
+  Wording rule: if the paired point estimate is worse than -5 points, Level R is worded "clears the state bar on
+    RC-12's format" (prereg s1, Oct 4), with the OOD-H result beside it. Part 2 (January rater scripts) is added under the same rule; Level R
     statements made in December are provisional until then.
   All OOD-H probes are knowledge-free (the gold is in a user turn), so they never pool with family K. OOD-H is
     never used for a mix, recipe or checkpoint decision (CORPUS.md).
