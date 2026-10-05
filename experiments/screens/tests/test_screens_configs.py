@@ -47,11 +47,13 @@ def test_base_is_e3_arm_a_key_for_key_eager_plus_the_ind_hook():
 
 LATER = {f"s003_adamw_e3_r{r}_{t}" for r in ("0.5", "2", "4", "8") for t in ("trunk", "b62M", "b125M", "b250M")}
 # written after a pick (SCREENS.txt STAGE 1 SELECTION A RESULT, 2026-10-05): S003 stage B at eta_A 3e-3
+LATER |= {f"s003_adamw_e{e}_r2_{t}" for e in ("1.5", "6") for t in ("trunk", "b62M", "b125M", "b250M")}
+# SCREENS.txt S003 STAGE B RESULT (2026-10-05): S003 stage C, g 0.5 and 2 at (eta_A 3e-3, r_B 2)
 
 
 def test_config_set_is_complete():
     names = sorted(os.path.basename(c)[:-5] for c in CONFIGS)
-    assert LATER <= set(names) and len(set(names) - LATER) == 48 and len(names) == 64
+    assert LATER <= set(names) and len(set(names) - LATER) == 48 and len(names) == 72
     names = sorted(set(names) - LATER)
     for sid, s in L.SCREENS.items():
         for a in s["arms"]:
@@ -195,7 +197,8 @@ def test_plans_follow_the_registered_order():
         assert len(L.find(r)) == 1
 
 
-PLAN_SEQUENCE = ["stage1_select", "stage1_s003B"]   # stage1_s003B: SCREENS.txt STAGE 1 SELECTION A RESULT
+PLAN_SEQUENCE = ["stage1_select", "stage1_s003B", "stage1_s003C"]   # stage1_s003B: SCREENS.txt STAGE 1 SELECTION A
+# RESULT; stage1_s003C: S003 STAGE B RESULT
 
 
 def cfg_for(code, name):

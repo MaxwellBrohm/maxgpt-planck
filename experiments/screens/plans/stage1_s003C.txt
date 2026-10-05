@@ -1,0 +1,11 @@
+# SCREENS stage 1 (ORDER 1): S003 stage C, g 0.5 / 2 at (eta_A 3e-3, r_B 2) = eta 1.5e-3 and 6e-3 at r 2 (E2 stage C; g 1 reuses stage B's s003_adamw_e3_r2). The seed sets need this pick: the plan stops at the mark (screens.py). train = screens check, preflight, train, score
+wait_mark SCREENS SCREENS S003 STAGE B DONE
+train s003_adamw_e1.5_r2_trunk
+train s003_adamw_e1.5_r2_b62M
+train s003_adamw_e1.5_r2_b125M
+train s003_adamw_e1.5_r2_b250M
+train s003_adamw_e6_r2_trunk
+train s003_adamw_e6_r2_b62M
+train s003_adamw_e6_r2_b125M
+train s003_adamw_e6_r2_b250M
+mark SCREENS S003 STAGE C DONE

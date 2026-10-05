@@ -150,6 +150,24 @@ MUTANTS += [   # STAGE 2 READINESS (2026-10-05): the hours count each run once, 
     ("s005_config_micro_4x4", "experiments/S005_forget_gate/configs/s005_forget_g2_s1.yaml",
      "micro_batch: 8, grad_accum: 2", "micro_batch: 4, grad_accum: 4", RO + "::16_rows"),
 ]
+CF2, S3Cp, S3Cc = ("test_screens_s003_stage_c.py", "experiments/screens/plans/stage1_s003C.txt",
+                   "experiments/S003_adamw/configs/s003_adamw_e")
+MUTANTS += [   # S003 STAGE B RESULT (2026-10-05): stage C's configs and plan from r_B 2, the entry, the measured hours
+    ("s003C_plan_drops_g2_b250M", S3Cp, "train s003_adamw_e6_r2_b250M\n", "", CF2),
+    ("s003C_plan_runs_past_its_mark", S3Cp, "mark SCREENS S003 STAGE C DONE\n",
+     "mark SCREENS S003 STAGE C DONE\ntrain base_s101\n", CF2),
+    ("s003C_plan_waits_on_the_wrong_mark", S3Cp, "wait_mark SCREENS SCREENS S003 STAGE B DONE\n",
+     "wait_mark SCREENS SCREENS STAGE 1 SELECTION A DONE\n", CF2),
+    ("s003C_config_r1", S3Cc + "6_r2_b62M.yaml", "embed_lr: 0.012, scalar_lr: 0.012", "embed_lr: 0.006, scalar_lr: 0.006", CF2),
+    ("s003C_config_g_not_applied", S3Cc + "1.5_r2_trunk.yaml", "lr: 0.0015, embed_lr", "lr: 0.003, embed_lr", CF2),
+    ("s003C_branch_off_stage_b_trunk", S3Cc + "1.5_r2_b125M.yaml", "s003_adamw_e1.5_r2_trunk/", "s003_adamw_e3_r2_trunk/", CF2),
+    ("s003_stage_c_read_at_r1", AN, 'out["C"] = e2pick.stage(runs, "C", a["pick"], b["pick"])',
+     'out["C"] = e2pick.stage(runs, "C", a["pick"], 1.0)', CF2),
+    ("s003B_entry_value_typo", "experiments/SCREENS.txt", "1.16436 / 1.39911", "1.16463 / 1.39911", CF2),
+    ("hours_stage_b_run_missing", "experiments/screens/measured_hours.tsv",
+     "run\ts003_adamw_e3_r8_b250M\t0.08528\t2026-10-05 12:56:41\t2026-10-05 13:01:48\tqueue_screens.txt\n", "", CF2),
+    ("hours_stage_b_end_time_typo", "experiments/screens/measured_hours.tsv", "2026-10-05 12:37:24", "2026-10-05 12:39:24", CF2),
+]
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")
