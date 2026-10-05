@@ -876,3 +876,109 @@ launch". Basis: the ORDER 0 verification (SCREENS.txt "VERIFICATION OF ORDER 0",
 (1ddc77c, independently verified against the raw logs): every ORDER 0 precondition MET. The mark file is written on the
 PC as ~/planck/runs/SCREENS/marks/SCREENS_PRECONDITIONS_OK after this entry is committed; stage 1 (plans/stage1_select:
 S001, S002, S003 selection) then launches from the commit holding this entry.
+
+STAGE 1 SELECTION A RESULT (2026-10-05 09:50 EDT, Claude; Mac CPU; the PC read only (queue log, status, run
+directories), its 27 bpb.jsonl copied to a Mac scratch directory; no GPU, no model, nothing committed, no mark, no
+queue started). Selection runs at seed 1: read for C3 picks only, never as verdicts (C3, E3 change 3).
+  Queue (PC ~/planck/runs/SCREENS/queue_screens.txt): plan stage1_select (sha256 8befd6b5a673f96b...), code commit
+    94bb1bb, start 2026-10-04 12:47:04 ("seen SCREENS: SCREENS PRECONDITIONS OK"), "MARK SCREENS STAGE 1 SELECTION A
+    DONE" and "plan finished" 2026-10-05 00:10:57. All 32 runs "done ... rc 0" on the first try: no crash, resume,
+    DIVERGED, GAP, heat or stop line in the log. status.jsonl: 27 "done and scored" (12 g-checks, 15 S003 branches), 5
+    "done" (S003 trunks, TRUNK_DONE, stable 1,526 / 3,052 / 6,104 kept). Run directories: no DIVERGED, GAP, HEAT or
+    rc12_eval.jsonl anywhere (find), score.err empty in all 27 scored runs, every logged loss finite, each bpb.jsonl
+    holds its final and 2 rolling checkpoints. runs/runs.jsonl: 64 SCREENS lines (32 starts, 32 ends).
+  Hours per run (lock = "gpu.lock held" to the run's status line, training plus scoring; train = "train" to "done";
+  median log.jsonl tok/s from the third record):
+    run                        lock  train  tok/s | run                        lock  train  tok/s
+    s001_nogate_g0.5_s1        0.293 0.264  263k  | s001_nogate_g1_s1          0.293 0.265  263k
+    s001_nogate_g2_s1          0.293 0.265  263k  | s002_novres_g0.5_s1        0.293 0.265  265k
+    s002_novres_g1_s1          0.293 0.265  265k  | s002_novres_g2_s1          0.293 0.265  265k
+    s002_noqknorm_g0.5_s1      0.262 0.234  302k  | s002_noqknorm_g1_s1        0.262 0.234  302k
+    s002_noqknorm_g2_s1        0.262 0.234  302k  | s002_nonormscale_g0.5_s1   0.302 0.273  256k
+    s002_nonormscale_g1_s1     0.302 0.273  256k  | s002_nonormscale_g2_s1     0.302 0.273  256k
+    s003_adamw_e0.75_r1_trunk  0.217 0.217  258k  | s003_adamw_e0.75_r1_b62M   0.046 0.017  258k
+    s003_adamw_e0.75_r1_b125M  0.057 0.028  258k  | s003_adamw_e0.75_r1_b250M  0.086 0.056  258k
+    s003_adamw_e1.5_r1_trunk   0.220 0.219  258k  | s003_adamw_e1.5_r1_b62M    0.046 0.017  258k
+    s003_adamw_e1.5_r1_b125M   0.057 0.028  258k  | s003_adamw_e1.5_r1_b250M   0.085 0.056  259k
+    s003_adamw_e3_r1_trunk     0.217 0.217  258k  | s003_adamw_e3_r1_b62M      0.046 0.017  257k
+    s003_adamw_e3_r1_b125M     0.058 0.028  258k  | s003_adamw_e3_r1_b250M     0.086 0.056  258k
+    s003_adamw_e6_r1_trunk     0.220 0.220  258k  | s003_adamw_e6_r1_b62M      0.046 0.017  258k
+    s003_adamw_e6_r1_b125M     0.057 0.028  258k  | s003_adamw_e6_r1_b250M     0.085 0.056  258k
+    s003_adamw_e12_r1_trunk    0.217 0.217  258k  | s003_adamw_e12_r1_b62M     0.046 0.017  257k
+    s003_adamw_e12_r1_b125M    0.057 0.028  258k  | s003_adamw_e12_r1_b250M    0.085 0.056  258k
+  Total 5.483 GPU hours measured (S001 0.879, S002 2.569, S003 search 2.034 = 0.406 to 0.409 per arm); 4.704 h
+  training, 0.770 h scoring; 11.4 h wall clock (the rest waiting for gpu.lock behind other jobs). Against GPU HOURS'
+  +15% rule: a full run 0.262 to 0.302 h measured vs 0.312 h; an S003 arm 0.407 h (mean of 5) vs 0.359 h (its 9
+  scorings, 0.087 h, are 21% of the arm; screens.py hours' measured-overhead column already prints 0.406).
+  PICKS (analyze.py picks on the copied bpb.jsonl, sha256 equal on both machines; E2's e2pick rules: F = final
+  checkpoint, split all; argmin F(CHAT) at 4 decimals, PROSE guard 1%, ties to the lower LR):
+    arm               g 0.5 CHAT / PROSE   g 1 CHAT / PROSE     g 2 CHAT / PROSE     pick
+    S001 nogate       1.16307 / 1.39242    1.15758 / 1.38607    1.15770 / 1.38877    g 1
+    S002 novres       1.17540 / 1.39969    1.16916 / 1.39787    1.17195 / 1.40387    g 1
+    S002 noqknorm     1.16212 / 1.39728    1.15240 / 1.38838    1.15428 / 1.38775    g 1 (PROSE 0.045% over g 2's)
+    S002 nonormscale  1.15725 / 1.38719    1.14700 / 1.38303    1.15506 / 1.39032    g 1
+    Every pick is the argmin, guard not moved, inside the grid: C3's extension rule asks for nothing and no extension
+    config is written. S001 and S002 are settled at g = 1.
+  S003 stage A (r 1, F at the 250M branch), eta x 1e-3 0.75 / 1.5 / 3 / 6 / 12: CHAT 1.18025 / 1.18648 / 1.16891 /
+    1.17724 / 1.17676, PROSE 1.40702 / 1.40493 / 1.39837 / 1.40825 / 1.40908. Pick eta_A = 3e-3 (argmin and PROSE
+    best, not at an edge, no extension, decided). Reported, no rule: the 125M argmin 3e-3 (1.23343; 6e-3 1.23369),
+    the 62.5M argmin 6e-3 (1.31513).
+  E2's "After E3" label (best minus second against E3's paired F(CHAT) MDE at k = 1, 0.00905): S001 0.00012, novres
+    0.00279, noqknorm 0.00188, nonormscale 0.00806, S003 stage A 0.00785 (3e-3 vs 12e-3): every pick "not resolved at
+    one seed". Picks stand either way (E2 RULES).
+  The stage A curve is not one bowl: 1.5e-3 lies above both neighbours at 250M (0.0062 over 0.75e-3) and at 125M
+    (0.0051), and 12e-3 is level with 6e-3 at 250M (0.0005 lower). One arm's branches share its trunk, so its 125M and
+    250M readings are not independent. No rule reads this (S003 KNOWN RISKS: one search seed per optimizer).
+  WHAT THE RULES ASK NEXT (ORDER 1: every g-check is settled and S003's search is not, so S003's stages run before the
+  seed sets, which need LR5_adamw from stage C).
+  S003 stage B (E2 stage B): r in {0.5, 2, 4, 8} at eta_A 3e-3 (optim.lr 3e-3, embed_lr = scalar_lr = r x 3e-3); r 1
+    is stage A's s003_adamw_e3_r1, reused. screens.py s003-arm --eta 3e-3 --r R for each R wrote 16 configs in
+    experiments/S003_adamw/configs (trunk 6,105 steps, branches from stable 1,526 / 3,052 / 6,104 of the same arm's
+    trunk), each equal to stage A's e3_r1 config but for header, name, out_dir, the two AdamW-group LRs and (the 12
+    branches) schedule.init_from, which names the same r's trunk.
+    screens.py check: 16 ok (64 ok over every config). sha256, first 16 hex:
+    7c01b5ac75986eaa s003_adamw_e3_r0.5_trunk 1e3ed3e7895fb467 s003_adamw_e3_r0.5_b62M
+    76387ca6254f9260 s003_adamw_e3_r0.5_b125M 48c9888300649e34 s003_adamw_e3_r0.5_b250M
+    aa13c6ce58428b6b s003_adamw_e3_r2_trunk 0060a9de018bfdea s003_adamw_e3_r2_b62M
+    414ba9c39e563d69 s003_adamw_e3_r2_b125M d6a1a87e6bd650fe s003_adamw_e3_r2_b250M
+    5e3129cfaab490f4 s003_adamw_e3_r4_trunk e77d434a95dbb878 s003_adamw_e3_r4_b62M
+    797560d55abb6ed0 s003_adamw_e3_r4_b125M db3f72e73a6d6ad0 s003_adamw_e3_r4_b250M
+    e96a87fbc2c8beb6 s003_adamw_e3_r8_trunk 8268a19ae6d7c47b s003_adamw_e3_r8_b62M
+    ae691dde93c277e0 s003_adamw_e3_r8_b125M ad6468ee3f8d3826 s003_adamw_e3_r8_b250M
+  PLAN experiments/screens/plans/stage1_s003B.txt (sha256 d3e209b4226f74a8...; written by screens.plan): "wait_mark
+    SCREENS SCREENS STAGE 1 SELECTION A DONE" (already recorded on the PC), the 4 arms in E2's order (trunk, b62M,
+    b125M, b250M each, 16 train lines), then "mark SCREENS S003 STAGE B DONE" and nothing after it: stage C needs stage
+    B's pick. Estimate 4 x 0.407 h = 1.63 h at the measured mean arm cost (1.44 h by the +15% rule). plans/CURRENT
+    should name stage1_s003B (not edited here).
+  After stage B (a later step, from its recorded results): analyze.py picks gives r_B. At an edge (0.5 or 8): one
+    factor-2 point beyond, at most 2 (s003-arm --eta 3e-3 --r 0.25 or 16). Stage C: g in {0.5, 2} at (3e-3, r_B), all
+    three LRs times g: s003-arm --eta 1.5e-3 --r r_B and --eta 6e-3 --r r_B (g 1 is stage B's pick, reused); if r_B =
+    1 both points are stage A runs and stage C adds no run (as E2's own stage C on 2026-09-28; e2pick then also reads
+    g 0.25 and 4 from stage A). Stage C extends while its pick or its 125M argmin is at an edge, at most 2. LR5_adamw
+    = (g_C x 3e-3, r_B). Then the stage 1 seed sets, after ORDER's cap check: screens.py seeds --stage 1 --pick
+    S001.nogate=1 --pick S002.novres=1 --pick S002.noqknorm=1 --pick S002.nonormscale=1 --s003 ETA,R.
+  CAP CHECK (25 h; cut order S006, S003, S007, S002). screens.py hours --measured 5.483 prints "measured 5.48 h +
+    queued 20.44 h = 25.92 h ... cut S006 -> 23.89 h". That counts stage 1's selection twice: hours() always queues
+    every registered run (S001's 3, S002's 9 and all 11 S003 search arms included) and --measured adds the same runs'
+    measured hours on top. Not changed here. Without the double count (measured plus the registered runs not yet
+    run: BASE 2, S001 2, S002 6, S003 6 search arms + 2 seeds, S004 to S007 and S005's own BASE as registered;
+    screens.py run_h and analyze_lib.cap_cut, scratch script):
+      queued estimate                               remaining  + 5.483 measured  + C1-a gate 2.011 and smokes 0.109
+      assumed factors (screens.py)                  14.89 h    20.38 h           22.50 h
+      smoke factors (SMOKES RECORDED)               16.98 h    22.46 h           24.58 h
+      smoke factors, S003 arm 0.407 h measured      17.26 h    22.74 h           24.86 h
+    Every reading fits: nothing is cut. Stage B is S003's registered search, not an extension. The tightest reading
+    leaves 0.14 h, so one queued extension (an S003 stage B or C point at 0.41 h, or a stage 2 g-check point) would
+    pass the cap under it and cut S006 first. Whether the gate and smoke hours count as measured is still open
+    (HOURS AND CAP, SMOKES RECORDED).
+  STILL NEEDS A DECISION: (1) plans/CURRENT -> stage1_s003B, committed with these files, the kit sent from that
+    commit (the queue refuses a dirty tree). (2) The cap's measured-hours reading and screens.py hours' double count.
+    (3) After stage B: r_B, any stage B extension, stage C's configs, then the stage 1 seed plan.
+  Tests (Mac CPU, ~/.venvs/planck): experiments/screens/tests 293 passed (238 before; the 16 new configs run through
+    check, full-size resolution, preflight and the 2-step CPU smoke). Changed: test_screens_configs.py (the config
+    set is the 48 built plus the 16 stage B configs; CURRENT must name a plan of ORDER's sequence so far, stage1_select
+    or stage1_s003B, each of whose runs has one config); new test_screens_stage1_next.py (7: the recorded seed-1 values
+    give these picks through analyze.picks; the plan is exactly stage B's missing points, then the mark; each stage B
+    config's LRs and trunk). mutation_screens.py, scratch copies: 6 new mutants (plan drops r 8, a run after the mark,
+    no wait line, a wrong r in one config, a branch off another arm's trunk, CURRENT out of sequence), 6 of 6 killed;
+    the whole file 73 of 73 killed (67 earlier + 6).

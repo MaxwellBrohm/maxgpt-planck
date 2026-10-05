@@ -44,9 +44,14 @@ def test_base_is_e3_arm_a_key_for_key_eager_plus_the_ind_hook():
     assert b["seed"] == 101 and b["train.doc_attn"] == "varlen" and b["optim.batched"] is True
 
 
+LATER = {f"s003_adamw_e3_r{r}_{t}" for r in ("0.5", "2", "4", "8") for t in ("trunk", "b62M", "b125M", "b250M")}
+# written after a pick (SCREENS.txt STAGE 1 SELECTION A RESULT, 2026-10-05): S003 stage B at eta_A 3e-3
+
+
 def test_config_set_is_complete():
     names = sorted(os.path.basename(c)[:-5] for c in CONFIGS)
-    assert len(names) == 48
+    assert LATER <= set(names) and len(set(names) - LATER) == 48 and len(names) == 64
+    names = sorted(set(names) - LATER)
     for sid, s in L.SCREENS.items():
         for a in s["arms"]:
             if sid != "S003":
@@ -197,7 +202,12 @@ def test_plans_follow_the_registered_order():
     assert open(os.path.join(L.HERE, "plans", "stage2_select.txt")).read().splitlines()[1] == \
         "wait_mark SCREENS SCREENS STAGE 2 SMOKES RECORDED"
     cur = [ln for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
-    assert [c.strip() for c in cur] == ["stage1_select"]
+    assert len(cur) == 1 and cur[0].strip() in PLAN_SEQUENCE    # ORDER's plans so far, in the order they run
+    for r in plan_runs(cur[0].strip()):
+        assert len(L.find(r)) == 1
+
+
+PLAN_SEQUENCE = ["stage1_select", "stage1_s003B"]   # stage1_s003B: SCREENS.txt STAGE 1 SELECTION A RESULT
 
 
 def cfg_for(code, name):

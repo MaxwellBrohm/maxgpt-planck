@@ -114,6 +114,18 @@ MUTANTS = [   # name, file, old, new, tests (file or file::-k expr)
     ("smoke_reuses_out_dir", "experiments/screens/gate_smoke.py", "if os.path.isdir(out) and os.listdir(out):",
      "if False:", PF),
 ] + ANALYZER_MUTANTS
+NF, S3B, S3C = ("test_screens_stage1_next.py", "experiments/screens/plans/stage1_s003B.txt",
+                "experiments/S003_adamw/configs/s003_adamw_e3_")
+MUTANTS += [   # STAGE 1 SELECTION A RESULT (2026-10-05): the stage B configs and plan written from the recorded picks
+    ("s003B_plan_drops_r8", S3B, "train s003_adamw_e3_r8_b250M\n", "", NF),
+    ("s003B_plan_runs_past_its_mark", S3B, "mark SCREENS S003 STAGE B DONE\n",
+     "mark SCREENS S003 STAGE B DONE\ntrain base_s101\n", NF),
+    ("s003B_plan_no_wait", S3B, "wait_mark SCREENS SCREENS STAGE 1 SELECTION A DONE\n", "", NF),
+    ("s003B_config_wrong_r", S3C + "r4_b62M.yaml", "embed_lr: 0.012, scalar_lr: 0.012", "embed_lr: 0.006, scalar_lr: 0.006", NF),
+    ("s003B_branch_off_another_trunk", S3C + "r2_b125M.yaml", "s003_adamw_e3_r2_trunk/", "s003_adamw_e3_r1_trunk/", NF),
+    ("current_plan_out_of_sequence", "experiments/screens/plans/CURRENT", "# Seed plans come from screens.py seeds.\n",
+     "# Seed plans come from screens.py seeds.\nstage2_select\n# ", CF + "::registered_order"),
+]
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")

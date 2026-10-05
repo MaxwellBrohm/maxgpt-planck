@@ -1,0 +1,19 @@
+# SCREENS stage 1 (ORDER 1): S003 stage B, r 0.5 / 2 / 4 / 8 at eta_A 3e-3 (E2 stage B; r 1 reuses stage A). Stage C needs this pick: the plan stops at the mark (screens.py). train = screens check, preflight, train, score
+wait_mark SCREENS SCREENS STAGE 1 SELECTION A DONE
+train s003_adamw_e3_r0.5_trunk
+train s003_adamw_e3_r0.5_b62M
+train s003_adamw_e3_r0.5_b125M
+train s003_adamw_e3_r0.5_b250M
+train s003_adamw_e3_r2_trunk
+train s003_adamw_e3_r2_b62M
+train s003_adamw_e3_r2_b125M
+train s003_adamw_e3_r2_b250M
+train s003_adamw_e3_r4_trunk
+train s003_adamw_e3_r4_b62M
+train s003_adamw_e3_r4_b125M
+train s003_adamw_e3_r4_b250M
+train s003_adamw_e3_r8_trunk
+train s003_adamw_e3_r8_b62M
+train s003_adamw_e3_r8_b125M
+train s003_adamw_e3_r8_b250M
+mark SCREENS S003 STAGE B DONE
