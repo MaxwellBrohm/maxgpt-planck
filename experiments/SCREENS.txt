@@ -1076,3 +1076,12 @@ since 10:01:08; no stage B run had finished at the 10:03 copy.)
     stage2_select once stage 1's plans (stage B, stage C, the seed sets) are done, per ORDER. Noted for that launch,
     not checked here: C4's BASE pairing rule across harness commits (harness/ changed since stage 1's commit 94bb1bb
     only in 84d3a8f: rc12_eval.py and its test).
+
+SCREENS_STAGE_2_SMOKES_RECORDED (2026-10-05, recorded by Claude on Max's explicit authorization). Max, 2026-10-05,
+answering "May I record that sign-off for you?" (stage 2: S004, S005, S006, S007; each flag's eager smoke run logged
+with its measured speed, the hours estimate now built from those speeds, S005's loader test built and passing, all of
+it checked by an independent agent; the whole batch at 24.86 of the 25 h cap, nothing cut, S006 first to go if one
+extra run is needed): "Yes, sign off". Basis: SMOKES RECORDED (1ddc77c) and STAGE 2 READINESS (ad5f145, verified).
+The mark file is written on the PC as ~/planck/runs/SCREENS/marks/SCREENS_STAGE_2_SMOKES_RECORDED after this entry is
+committed; stage 2 (plans/stage2_select) runs once stage 1's plans are done and plans/CURRENT names it, from a commit
+holding this entry.
