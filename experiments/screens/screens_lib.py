@@ -36,17 +36,17 @@ COMPILE = False      # AMENDMENT C1-b: every screen run eager (train.compile fal
 STEPS, SLOTS, BASE_PARAMS = 7630, 32768, 5_010_133
 ROOTREL = "../../../planck_root"
 LRK = ("optim.lr", "optim.embed_lr", "optim.scalar_lr")
-SCREENS = {   # dir, C4 class, stage, arms {arm: registered keys}, ENGINE keys (both arms + own BASE), cost mult
+SCREENS = {   # dir, C4 class, stage, arms {arm: registered keys}, ENGINE keys (both arms + own BASE); hours: screens_hours
     "S001": {"dir": "S001_attn_gate", "cls": "new init", "stage": 1, "arms": {"nogate": {"model.attn_gate": False}}},
     "S002": {"dir": "S002_block_ablations", "cls": "SIA", "stage": 1,
              "arms": {"novres": {"model.value_residual": False}, "noqknorm": {"model.qk_norm": False},
                       "nonormscale": {"model.norm_scaling": False}}},
     "S003": {"dir": "S003_adamw", "cls": "same init", "stage": 1, "arms": {"adamw": {"optim.kind": "adamw"}}},
-    "S004": {"dir": "S004_canon", "cls": "SIA", "stage": 2, "mult": 1.1,
+    "S004": {"dir": "S004_canon", "cls": "SIA", "stage": 2,
              "arms": {"canonac": {"model.canon": "AC", "model.canon_kernel": 4}}},
-    "S005": {"dir": "S005_forget_gate", "cls": "SIA", "stage": 2, "mult": 1.1, "arms": {"forget": {"model.forget_gate": True}},
+    "S005": {"dir": "S005_forget_gate", "cls": "SIA", "stage": 2, "arms": {"forget": {"model.forget_gate": True}},
              "engine": {"train.doc_attn": "mask", "train.micro_batch": 8, "train.grad_accum": 2}},
-    "S006": {"dir": "S006_mtp_aux", "cls": "SIA", "stage": 2, "mult": 1.3,
+    "S006": {"dir": "S006_mtp_aux", "cls": "SIA", "stage": 2,
              "arms": {"mtp": {"train.mtp": 1, "train.mtp_weight": 1.0}}},
     "S007": {"dir": "S007_smeared_key", "cls": "SIA", "stage": 2, "arms": {"smear": {"model.smear_key": True}}},
 }

@@ -81,9 +81,6 @@ MUTANTS = [   # name, file, old, new, tests (file or file::-k expr)
     ("s003_init_from_unchecked", LIB, "if init != want_i:", "if False:", RF),
     ("s003_branch_point_unchecked", LIB, "if init != want_i:",
      'if (init or "").rsplit("/", 1)[0] != (want_i or "").rsplit("/", 1)[0]:', RF),
-    ("hours_mask_rate_ignored", GEN, 'return MASK if sid is not None and L.engine(sid).get("train.doc_attn") == "mask" else EAGER',
-     "return EAGER", CF + "::hours"),
-    ("hours_cap_ignores_measured", GEN, "cap = AL.cap_cut(per, measured)", "cap = AL.cap_cut(per)", CF + "::hours"),
     ("ind_file_unpinned", "experiments/screens/make_ind.py", "SEED, N, L = 20261003, 64, 128", "SEED, N, L = 20261004, 64, 128",
      CF + "::ind_file"),
     ("own_dir_unchecked", LIB, "    if os.path.basename(os.path.dirname(os.path.dirname(path))) != home:",
@@ -126,6 +123,33 @@ MUTANTS += [   # STAGE 1 SELECTION A RESULT (2026-10-05): the stage B configs an
     ("current_plan_out_of_sequence", "experiments/screens/plans/CURRENT", "# Seed plans come from screens.py seeds.\n",
      "# Seed plans come from screens.py seeds.\nstage2_select\n# ", CF + "::registered_order"),
 ]
+HRS, HF, RO = "experiments/screens/screens_hours.py", "test_screens_hours.py", "test_s005_row_order.py"
+MUTANTS += [   # STAGE 2 READINESS (2026-10-05): the hours count each run once, smoke factors, S003 measured arms
+    ("hours_measured_double_counted", HRS, "        if key not in seen:   ", "        if True:   ", HF),
+    ("hours_cap_ignores_measured", HRS, 'cap = AL.cap_cut(t["queued"], mr + mo)', 'cap = AL.cap_cut(t["queued"])', HF),
+    ("hours_other_not_counted", HRS, 'cap = AL.cap_cut(t["queued"], mr + mo)', 'cap = AL.cap_cut(t["queued"], mr)', HF),
+    ("hours_assumed_factors", HRS, 'return SMOKE["BASE"] / SMOKE[(sid, arm)] if (sid, arm) in SMOKE else 1.0',
+     'return {"S004": 1.1, "S005": 1.1, "S006": 1.3}.get(sid, 1.0)', HF),
+    ("hours_smoke_value_not_logged", HRS, '("S005", "forget"): 85_113', '("S005", "forget"): 85_131', HF),
+    ("hours_own_base_unfactored", HRS, '(sid, "base", x): (sid, full(sid, "base"))', '(sid, "base", x): (sid, full(None, None))', HF),
+    ("hours_s003_plus15", HRS, '("S003", tag_h[t]) for pt in pts', '("S003", run_h(8776) / 4) for pt in pts', HF),
+    ("hours_stage_c_kept_at_rb1", HRS, 'pts += [] if r_b == 1 else [("C", g) for g in STAGE_C_G]',
+     'pts += [("C", g) for g in STAGE_C_G]', HF),
+    ("hours_extension_takes_a_slot", HRS, '(sid, m["arm"], "g", g) if g in (0.5, 1.0, 2.0) else None)',
+     '(sid, m["arm"], "g", min(max(g, 0.5), 2.0)))', HF),
+    ("hours_lock_from_wait", HRS, 'if msg.startswith("gpu.lock held"):', 'if msg.startswith("waiting for gpu.lock"):', HF),
+    # S005's micro 8 x accum 2 row-order test (S005 notes ENGINE): harness mutants on the scratch copy only
+    ("loader_window_rng_by_micro", "harness/data.py", "default_rng([self.seed, self._w, 11])",
+     "default_rng([self.seed, self._w, 11, self.B])", RO),
+    ("loader_micro_rows_reversed", "harness/data.py", "collate_rows([self._next_unit() for _ in range(self.B)])",
+     "collate_rows([self._next_unit() for _ in range(self.B)][::-1])", RO),
+    ("trainer_micro_batches_reversed", "harness/trainer.py", "[self.loader.next_batch() for _ in range(self.grad_accum)]",
+     "[self.loader.next_batch() for _ in range(self.grad_accum)][::-1]", RO + "::trainer"),
+    ("trainer_loss_per_micro_batch", "harness/trainer.py", "(obj / max(1, n_sup)).backward()",
+     '(obj / max(1, int((b["tgt"] != -100).sum()))).backward()', RO + "::trainer"),
+    ("s005_config_micro_4x4", "experiments/S005_forget_gate/configs/s005_forget_g2_s1.yaml",
+     "micro_batch: 8, grad_accum: 2", "micro_batch: 4, grad_accum: 4", RO + "::16_rows"),
+]
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")
@@ -138,6 +162,7 @@ def copy_tree(dst: str) -> None:
     for rel in ("experiments/E2_lr_transfer/results.json", "experiments/E2_lr_transfer/preflight.py",
                 "experiments/E2_lr_transfer/e2plan.py", "experiments/E2_lr_transfer/e2pick.py",
                 "experiments/E3_seed_noise/results.json", "experiments/E3_seed_noise/e3analyze.py", "tokenizer/spec.py",
+                "experiments/SCREENS.txt",
                 "tokenizer/v0/tok_v0_8k.json", "tokenizer/v0/tok_v0_manifest.json", "corpus/oodh.py", "corpus/sample_plan.py"):
         os.makedirs(os.path.dirname(os.path.join(dst, rel)), exist_ok=True)
         shutil.copy(os.path.join(ROOT, rel), os.path.join(dst, rel))

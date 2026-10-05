@@ -247,3 +247,17 @@ and the batch table in SCREENS.txt "SMOKES RECORDED"; no S005 run queued, no con
   This settles this file's smoke line (mem_fit at micro 8, tok/s, leak self-test, both arms in the mask engine).
   Still open before S005's g-check (BUILT): the micro 8 x 2 row-order loader test and its FIXED line. screens_lib.py's
   S005 "mult" still holds the assumed 1.1 (not edited here).
+
+ROW-ORDER TEST (2026-10-05, Claude; Mac CPU, tiny models and synthetic data only; the line S005's FIXED log needs before
+its g-check; nothing committed, no S005 run queued, no config changed; method and mutants in SCREENS.txt STAGE 2 READINESS)
+  Setting: micro 8 x accum 2 (the registered plan; the eager smoke's mem_fit was ok, so no 4 x 4 fallback), auto_micro_
+    on_oom false, mask engine, in all 5 S005 configs: 16 rows per step, as the shared BASE's 16 x 1, same data block.
+  Result: PASS (experiments/screens/tests/test_s005_row_order.py, 6 tests). The harness loader on S005's data block at
+    full length (seq_len 2048, windows of 131,072 tokens, pack; synthetic shards in place of the starter paths, which
+    the Mac does not hold): at seeds 1, 101 and 102, each step's two micro-8 batches, concatenated in order, equal the
+    micro-16 batch row for row (idx, tgt, doc, pos), with equal loader state after every step, over 24 steps that cross
+    window builds and a source epoch. Through train.main (tiny shape, CPU, fp32), for the forget arm and the own BASE,
+    the forward sees the same rows in the same order at 8 x 2 as at 16 x 1, with equal logged losses and weights within
+    1.7e-7 after 3 steps. Mutants on scratch copies: 5 of 5 killed. Real starter data were not read.
+  Hours: screens_hours.py now uses this file's smoke factors (own BASE x1.321, forget x2.981 against the shared BASE);
+    screens_lib.py holds no assumed "mult".

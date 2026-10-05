@@ -1,6 +1,7 @@
 """SCREENS configs, no model: E2/E3 parameters, C1 (BASE = E3 arm A) and C1-b, C2 (every arm differs from its BASE
 in exactly its registered keys, LRs g x LR5), the RC-12 GUARD, the 2% rule, harness resolution at full size,
-E2's preflight checks, the plans' ORDER, the queue's config lookup (bash 3.2), the C6 IND file and the hours.
+E2's preflight checks, the plans' ORDER, the queue's config lookup (bash 3.2) and the C6 IND file (the hours:
+test_screens_hours.py).
   ~/.venvs/planck/bin/python -m pytest -q experiments/screens/tests/test_screens_configs.py
 """
 import json
@@ -111,19 +112,6 @@ def test_stage_a_reference_is_e2s_own_config_text():
     for eta in L.S003_STAGE_A:
         for name, txt in e2plan.runs_for("5m", eta, 1.0):
             assert open(os.path.join(L.E2D, "configs", name + ".yaml")).read() == txt
-
-
-def test_hours_are_the_registered_eager_estimate_and_the_cap_fits(capsys):
-    import screens
-    out = screens.hours(P)
-    txt = capsys.readouterr().out
-    run, mask, stage = screens.run_h(L.STEPS)[1], screens.run_h(L.STEPS, 1.0, screens.MASK)[1], screens.run_h(8776, scored=3)[1]
-    assert (round(run, 2), round(mask, 2), round(stage, 2)) == (0.31, 0.49, 0.36)        # SCREENS GPU HOURS per run
-    assert screens.rate("S005") == screens.MASK and all(screens.rate(s) == screens.EAGER for s in L.SCREENS if s != "S005")
-    tot = sum(out["per_screen"].values())
-    assert abs(tot - 20.44) < 0.01 and abs(out["per_screen"]["S005"] - 3.68) < 0.01           # GPU HOURS k = 2: 20.3 h
-    assert out["cap"]["fits"] and out["cap"]["cut"] == [] and "fits, nothing cut" in txt
-    assert screens.hours(P, measured=4.6)["cap"]["cut"] == ["S006"]                          # 25.04 h: S006 goes first
 
 
 def test_ind_file_regenerates_and_is_pinned_in_base():

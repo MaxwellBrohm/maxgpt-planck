@@ -8,7 +8,9 @@
                                           the seed sets after the picks, plans/stage<N>_seeds.txt (ORDER)
   python screens.py plan NAME RUN ... [--mark TEXT] [--wait "EXP TEXT"]
   python screens.py check [RUN ...]       C2 + RC-12 GUARD + C1-b + C6 hook + 2% on every config (or named runs)
-  python screens.py hours [--measured H]  GPU HOURS estimate (eager, C1-b) and ORDER's 25 h cap with its cut order
+  python screens.py hours [--measured-file TSV] [--s003-rb R]
+                                          GPU HOURS estimate and ORDER's 25 h cap check (screens_hours.report):
+                                          measured runs count once, queued estimates only for runs not yet run
 Every config is written, then checked (screens_lib.check); a refused config is deleted and the command fails.
 An existing config is never overwritten with different content. Plans: queue_screens.sh plan lines.
 """
@@ -137,58 +139,6 @@ def seeds(stage: int, picks: dict, s003, p: dict) -> None:
                f"SCREENS STAGE {stage} SEEDS DONE"))
 
 
-EAGER, MASK = 255_660, 162_849   # SCREENS GPU HOURS: 5M docmask B16 eager (SPEED INTEGRATE 2), mask engine
-
-
-def run_h(steps: int, mult: float = 1.0, rate: float = EAGER, scored: int = 1) -> tuple:
-    """(h at measured overheads, h by SCREENS GPU HOURS' +15% rule). Every run is eager (AMENDMENT C1-b), so no
-    compile time. Overheads: x1.02 real trainer vs bench and 105 s of scoring per scored run (E3 Part 1 queue log:
-    997 s train vs 978 s at the bench rate; three bpb scorings ~35 s each)."""
-    t = steps * L.SLOTS / rate * mult
-    return (t * 1.02 + 105 * scored) / 3600, t * 1.15 / 3600
-
-
-def rate(sid: str | None) -> float:
-    """Slots/s for a screen's engine, eager (C1-b): the GPU HOURS figures. S005's micro 8 x accum 2 is unmeasured,
-    so its rate is the mask engine's micro-16 figure until its smoke run (GPU HOURS)."""
-    return MASK if sid is not None and L.engine(sid).get("train.doc_attn") == "mask" else EAGER
-
-
-def hours(p: dict, measured: float = 0.0) -> dict:
-    """The registered estimate (GPU HOURS at E3's k per class; extensions and matched-LR IND runs only as they are
-    queued) and ORDER's 25 h cap check with its cut order (analyze_lib.cap_cut)."""
-    import analyze_lib as AL
-    full = lambda sid: run_h(L.STEPS, L.SCREENS[sid].get("mult", 1.0), rate(sid))  # noqa: E731
-    k_base = len(max(p["seeds"].values(), key=len))
-    rows = [("BASE", "BASE (shared, default engine)", 0, k_base, run_h(L.STEPS))]
-    for sid, s in L.SCREENS.items():
-        k, n = len(p["seeds"][s["cls"]]), len(s["arms"])
-        if sid == "S003":
-            rows.append((sid, "S003 AdamW search (11 E2 stage arms, 8,776 steps)", 11, 0, run_h(8776, scored=3)))
-            rows.append((sid, "S003 seed runs", 0, k, full(sid)))
-            continue
-        rows.append((sid, f"{sid} arms ({n}), g-check 3 each, {s['cls']}", 3 * n, k * n, full(sid)))
-        if L.engine(sid):
-            rows.append((sid, f"{sid} own BASE (mask engine)", 0, k, run_h(L.STEPS, 1.0, rate(sid))))
-    tot, per = [0, 0, 0.0, 0.0], {}
-    print(f"{'item':<52}{'sel runs':>9}{'seed runs':>10}{'h/run':>7}{'h(+15%)':>8}{'total h':>9}{'(+15%)':>8}")
-    for sid, item, sel, sd, (h, h15) in rows:
-        tot = [tot[0] + sel, tot[1] + sd, tot[2] + (sel + sd) * h, tot[3] + (sel + sd) * h15]
-        per[sid] = per.get(sid, 0.0) + (sel + sd) * h15
-        print(f"{item:<52}{sel:>9}{sd:>10}{h:>7.3f}{h15:>8.3f}{(sel + sd) * h:>9.2f}{(sel + sd) * h15:>8.2f}")
-    print(f"{'total (k per class: ' + str(p['k']) + ')':<52}{tot[0]:>9}{tot[1]:>10}{'':>15}{tot[2]:>9.2f}{tot[3]:>8.2f}")
-    ext = 16 * full("S001")[1] + 6 * run_h(8776, scored=3)[1]
-    ind = 2 * (full("S006")[1] + full("S007")[1])
-    print(f"conditional, counted only once queued (ORDER): up to {ext:.2f} h of extensions (2 per g-check arm, 2 per "
-          f"S003 stage); up to {ind:.2f} h of matched-LR IND runs (S006, S007 at g = 1, k = 2)")
-    cap = AL.cap_cut(per, measured)
-    print(f"ORDER cap: measured {measured:.2f} h + queued {sum(per.values()):.2f} h (+15% rule) = "
-          f"{cap['total_before']:.2f} h against {cap['cap']:.0f} h: " +
-          ("fits, nothing cut" if not cap["cut"] else f"cut {', '.join(cap['cut'])} -> {cap['total_after']:.2f} h") +
-          ("" if cap["fits"] else " (still over: nothing left that the rule may cut)"))
-    return {"per_screen": per, "cap": cap}
-
-
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -212,7 +162,8 @@ def main(argv=None) -> int:
     ck = sub.add_parser("check")
     ck.add_argument("runs", nargs="*")
     hr = sub.add_parser("hours")
-    hr.add_argument("--measured", type=float, default=0.0, help="GPU hours of batch runs measured so far")
+    hr.add_argument("--measured-file", default=None, help="measured_hours.tsv (default: experiments/screens/)")
+    hr.add_argument("--s003-rb", type=float, default=None, help="S003 stage B pick r_B (r_B 1: stage C adds no run)")
     a = ap.parse_args(argv)
     p = L.params()
     if a.cmd == "build":
@@ -240,7 +191,8 @@ def main(argv=None) -> int:
             print(("ok      " if not b else "REFUSED ") + os.path.relpath(q, L.ROOT) + "".join(f"\n  {x}" for x in b))
         return 1 if any(bad.values()) else 0
     else:
-        hours(p, a.measured)
+        import screens_hours as H
+        H.report(p, a.measured_file or H.TSV, a.s003_rb)
     return 0
 
 

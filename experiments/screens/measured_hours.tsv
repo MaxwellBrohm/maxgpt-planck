@@ -1,0 +1,38 @@
+# SCREENS measured GPU hours (screens_hours.py measured). run: gpu.lock held to the run's status line
+# (training plus scoring), from the PC queue's queue_screens.txt and status.jsonl (sha256 f91d4b2b5de8e4dc... and 2518dece4b564e62...).
+# other: GPU hours of this batch outside its runs (OTHER in screens_hours.py).
+kind	name	hours	start	end	source
+run	s001_nogate_g0.5_s1	0.29306	2026-10-04 12:58:12	2026-10-04 13:15:47	queue_screens.txt
+run	s001_nogate_g1_s1	0.29333	2026-10-04 13:35:41	2026-10-04 13:53:17	queue_screens.txt
+run	s001_nogate_g2_s1	0.29306	2026-10-04 14:16:44	2026-10-04 14:34:19	queue_screens.txt
+run	s002_novres_g0.5_s1	0.29278	2026-10-04 15:09:10	2026-10-04 15:26:44	queue_screens.txt
+run	s002_novres_g1_s1	0.29306	2026-10-04 16:09:16	2026-10-04 16:26:51	queue_screens.txt
+run	s002_novres_g2_s1	0.29278	2026-10-04 16:58:04	2026-10-04 17:15:38	queue_screens.txt
+run	s002_noqknorm_g0.5_s1	0.26167	2026-10-04 17:33:56	2026-10-04 17:49:38	queue_screens.txt
+run	s002_noqknorm_g1_s1	0.26167	2026-10-04 18:10:58	2026-10-04 18:26:40	queue_screens.txt
+run	s002_noqknorm_g2_s1	0.26167	2026-10-04 18:48:10	2026-10-04 19:03:52	queue_screens.txt
+run	s002_nonormscale_g0.5_s1	0.30194	2026-10-04 19:25:17	2026-10-04 19:43:24	queue_screens.txt
+run	s002_nonormscale_g1_s1	0.30194	2026-10-04 20:15:55	2026-10-04 20:34:02	queue_screens.txt
+run	s002_nonormscale_g2_s1	0.30194	2026-10-04 21:06:33	2026-10-04 21:24:40	queue_screens.txt
+run	s003_adamw_e0.75_r1_trunk	0.21694	2026-10-04 21:24:41	2026-10-04 21:37:42	queue_screens.txt
+run	s003_adamw_e0.75_r1_b62M	0.04583	2026-10-04 21:37:43	2026-10-04 21:40:28	queue_screens.txt
+run	s003_adamw_e0.75_r1_b125M	0.05722	2026-10-04 21:40:29	2026-10-04 21:43:55	queue_screens.txt
+run	s003_adamw_e0.75_r1_b250M	0.08556	2026-10-04 21:43:56	2026-10-04 21:49:04	queue_screens.txt
+run	s003_adamw_e1.5_r1_trunk	0.21972	2026-10-04 21:49:05	2026-10-04 22:02:16	queue_screens.txt
+run	s003_adamw_e1.5_r1_b62M	0.04583	2026-10-04 22:02:17	2026-10-04 22:05:02	queue_screens.txt
+run	s003_adamw_e1.5_r1_b125M	0.05694	2026-10-04 22:05:03	2026-10-04 22:08:28	queue_screens.txt
+run	s003_adamw_e1.5_r1_b250M	0.08528	2026-10-04 22:08:30	2026-10-04 22:13:37	queue_screens.txt
+run	s003_adamw_e3_r1_trunk	0.21722	2026-10-04 22:13:38	2026-10-04 22:26:40	queue_screens.txt
+run	s003_adamw_e3_r1_b62M	0.04583	2026-10-04 22:26:41	2026-10-04 22:29:26	queue_screens.txt
+run	s003_adamw_e3_r1_b125M	0.05806	2026-10-04 22:29:27	2026-10-04 22:32:56	queue_screens.txt
+run	s003_adamw_e3_r1_b250M	0.08556	2026-10-04 22:42:48	2026-10-04 22:47:56	queue_screens.txt
+run	s003_adamw_e6_r1_trunk	0.22028	2026-10-04 22:50:57	2026-10-04 23:04:10	queue_screens.txt
+run	s003_adamw_e6_r1_b62M	0.04583	2026-10-04 23:05:40	2026-10-04 23:08:25	queue_screens.txt
+run	s003_adamw_e6_r1_b125M	0.05722	2026-10-04 23:25:52	2026-10-04 23:29:18	queue_screens.txt
+run	s003_adamw_e6_r1_b250M	0.08528	2026-10-04 23:29:19	2026-10-04 23:34:26	queue_screens.txt
+run	s003_adamw_e12_r1_trunk	0.21694	2026-10-04 23:34:27	2026-10-04 23:47:28	queue_screens.txt
+run	s003_adamw_e12_r1_b62M	0.04611	2026-10-04 23:57:46	2026-10-05 00:00:32	queue_screens.txt
+run	s003_adamw_e12_r1_b125M	0.05722	2026-10-05 00:00:33	2026-10-05 00:03:59	queue_screens.txt
+run	s003_adamw_e12_r1_b250M	0.08528	2026-10-05 00:05:50	2026-10-05 00:10:57	queue_screens.txt
+other	c1a_gate	2.011			SCREENS.txt VERIFICATION OF ORDER 0 (2): the C1-a gate, 31 gpu.lock holds from the PC gate logs
+other	eager_smokes	0.109			SCREENS.txt SMOKES RECORDED: the smokes' gpu.lock holds, the failed 10 s hold included

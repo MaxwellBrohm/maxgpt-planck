@@ -982,3 +982,97 @@ queue started). Selection runs at seed 1: read for C3 picks only, never as verdi
     config's LRs and trunk). mutation_screens.py, scratch copies: 6 new mutants (plan drops r 8, a run after the mark,
     no wait line, a wrong r in one config, a branch off another arm's trunk, CURRENT out of sequence), 6 of 6 killed;
     the whole file 73 of 73 killed (67 earlier + 6).
+
+STAGE 2 READINESS (2026-10-05 10:20 EDT, Claude; Mac CPU, tiny models only; the PC read only: its queue_screens.txt,
+status.jsonl and the eager smoke JSONs copied to a Mac scratch directory; no GPU, nothing committed, no mark, no queue
+started or stopped. The SCREENS queue was running S003 stage B from its own clone of 367f710, s003_adamw_e3_r0.5_trunk
+since 10:01:08; no stage B run had finished at the 10:03 copy.)
+  (a) DOUBLE COUNT, fixed. screens.py hours --measured H added H to an estimate that still queued every registered
+    run, so stage 1's measured runs counted twice (25.92 h printed for 5.483 h). The hours moved to the new
+    experiments/screens/screens_hours.py (screens.py hours calls its report()). Each registered run is a slot (GPU
+    HOURS at E3's k = 2: BASE 2, S001 3 + 2, S002 9 + 6, S003 11 search arms x 4 runs + 2 seeds, S004 3 + 2, S005 3 + 2
+    and its own BASE 2, S006 3 + 2, S007 3 + 2; 90 runs) keyed by screen, arm and g (selection) or seed. A slot whose
+    run was measured counts its measured hours and leaves the queue; a measured run with no slot (a C3 or S003
+    extension, a matched-LR IND run) counts on top. Measured runs: experiments/screens/measured_hours.tsv, written by
+    screens_hours.py measured from the PC's queue_screens.txt (sha256 f91d4b2b5de8e4dc...) and status.jsonl
+    (2518dece4b564e62...): 32 runs, "gpu.lock held" to the run's status line, 5.483 h (S001 0.879, S002 2.569, S003
+    2.034); every lock figure in STAGE 1 SELECTION A RESULT's table comes out to 3 decimals (tested). Test:
+    test_screens_hours.py test_a_measured_run_counts_once (runs measured at exactly their estimates leave the total
+    unchanged; a seed run at its pick frees one slot; extensions add on top and take no slot). The same invariant on
+    367f710's screens.hours (scratch script, not in the repo): with the 32 runs measured at their own estimates
+    (5.545 h) the total went from 20.439 h to 25.984 h, so it fails on the old code.
+  (b) FACTORS. screens_lib.py's assumed "mult" (S004 1.1, S005 1.1, S006 1.3; S007 had none, so 1.0) is removed.
+    screens_hours.SMOKE holds the eager smokes' median tok/s, each tested to stand on the line its SRC entry cites:
+    shared BASE 253,691 (SMOKES RECORDED table), canonac 184,569 (S004 EAGER SMOKE), S005 own BASE 192,092 and forget
+    85,113 (S005 EAGER SMOKE), mtp 215,563 (S006), smear 247,073 (S007); the PC's smoke JSONs (tok_per_s_median) hold
+    the same values. Factor = the BASE smoke's tok/s over the arm's, on GPU HOURS' 255,660 slots/s plus 15%: canonac
+    x1.3745 (0.429 h per run), S005 own BASE x1.3207 (0.413 h; replaces the micro-16 mask bench rate, 0.490 h), forget
+    x2.9806 (0.931 h; x2.257 of its own BASE), mtp x1.1769 (0.368 h), smear x1.0268 (0.321 h), config-only arms x1.0
+    (0.312 h). Each factor and per-run figure equals the one its notes printed (tested).
+  (d) S003 OVERHEAD. An S003 search run is now estimated at the mean measured hours of stage A's 5 runs of its tag:
+    trunk 0.2182, b62M 0.0459, b125M 0.0573, b250M 0.0854; an arm 0.4068 h, 13% over the +15% rule's 0.359 h (an arm
+    scores 9 checkpoints). Reported, not changed: every measured stage 1 full run (0.262 to 0.302 h) is under the +15%
+    rule's 0.312 h, so the 12 full-run estimates left in stage 1 lean high.
+  (c) THE CAP'S "MEASURED HOURS". ORDER: "The batch's cap is 25 GPU-hours: measured hours so far plus the queued
+    estimate (GPU HOURS below, ...)". The parenthesis defines only the queued side, and GPU HOURS estimates screen runs
+    only; "measured hours so far" is not defined. For counting the C1-a gate (2.011 h) and the eager smokes (0.109 h):
+    the cap is "the batch's"; the smokes are ORDER 0's own step and the gate ran under an amendment of this batch; and
+    GPU HOURS sizes the cap against PLAN's 30-60 h for all 5M screens ("this batch leaves 5-35 h of that range").
+    Against: "measured" reads as the realised side of GPU HOURS' screen-run estimate. The text leans to counting them
+    but does not say so: ambiguous, and the conservative reading counts them. Settled: they count. They are the
+    "other" lines of measured_hours.tsv; report() puts them in the rule input and prints the runs-only total beside
+    it, labelled reported.
+  STAGE 2 CAP CHECK (screens.py hours; measured: stage 1 selection A and the other lines; queued: S003 stage B (4 arms,
+  running) and stage C (2 arms), the stage 1 seed sets (BASE, S001, S002 x 3, S003 at seeds 101 and 102: 12 runs) and
+  all of stage 2 (12 g-checks, 8 arm seed runs, S005's own BASE x 2)):
+    screen  measured runs  h      queued runs  h      total h
+    BASE     0             0.000   2           0.625  0.625
+    S001     3             0.879   2           0.625  1.504
+    S002     9             2.569   6           1.874  4.444
+    S003    20             2.034  26           3.066  5.100
+    S004     0             0.000   5           2.147  2.147
+    S005     0             0.000   7           5.481  5.481
+    S006     0             0.000   5           1.838  1.838
+    S007     0             0.000   5           1.604  1.604
+    Measured 5.483 h of runs + 2.120 h other = 7.603 h; queued 58 of 90 registered runs, 17.260 h; total 24.863 h <=
+    25 h: nothing cut, 0.137 h of headroom (runs only, reported: 22.743 h). If stage B picks r_B = 1, stage C adds no
+    run (--s003-rb 1): 24.049 h. Counted only once queued: up to 5.73 h of extensions and up to 1.38 h of matched-LR
+    IND runs. Any one of them (an S003 stage B or C extension arm 0.41 h, a stage 2 g-check extension 0.32 to 0.93 h,
+    an IND run 0.32 or 0.37 h) passes 25 h, and the rule then cuts S006 first (1.838 h queued), after which it fits.
+    The rule's own checks come before each g-check and each seed set, with the hours measured by then (regenerate
+    measured_hours.tsv from the PC's two files first).
+  (4) S005 ROW-ORDER TEST, built: experiments/screens/tests/test_s005_row_order.py (6 tests, 1.4 s). (1) All 5 S005
+    configs run micro 8 x accum 2, auto_micro_on_oom false, mask engine: 16 rows per step, the shared BASE's 16 x 1,
+    same data block. (2) The harness loader (data.build_loader) on S005's own data block at full length (seq_len
+    2048, windows of 131,072 tokens, max_item_len 2048, pack, 7 sources; synthetic shards in place of the starter
+    paths, which the Mac does not hold): at seeds 1, 101 and 102, each step's two micro-8 batches, concatenated in
+    order, equal the micro-16 batch row for row in idx, tgt, doc and pos, with equal loader state after every step,
+    over 24 steps that cross window builds and a source epoch. (3) Through harness train.main (tiny shape, CPU, fp32;
+    the forward wrapped to record its inputs), for the forget arm and the own BASE: the rows each step's forward sees,
+    in order, at 8 x 2 equal those at 16 x 1; the logged losses are equal at log.jsonl's 5 decimals and the weights
+    after 3 steps agree within 1.7e-7 (tolerance 2e-5). Mutants (mutation_screens.py, scratch copies; the harness is
+    edited only there): 5 of 5 killed: window packing seeded by the micro size, rows reversed within a micro-batch,
+    micro-batches fed to the forward in reverse, the loss normalised per micro-batch (killed by the step-2 loss, 6e-5
+    off), one S005 config at 4 x 4. Result and setting are in S005's notes (ROW-ORDER TEST) for its FIXED log. Real
+    starter data were not read.
+  Tests (Mac CPU, ~/.venvs/planck): experiments/screens/tests 305 passed (293 before: the old hours test is replaced by
+    test_screens_hours.py's 7; test_s005_row_order.py adds 6). mutation_screens.py, scratch copies: 86 of 86 killed (73
+    before; its two screens.py hours mutants replaced by 10 on screens_hours.py; 5 for the row-order test; it now also
+    copies SCREENS.txt, which the hours tests read).
+  Changed: new screens_hours.py, measured_hours.tsv, tests/test_screens_hours.py, tests/test_s005_row_order.py;
+    screens.py (hours moved out; --measured-file, --s003-rb), screens_lib.py ("mult" removed), test_screens_configs.py
+    (its hours test removed), mutation_screens.py; one entry each in S004 to S007 notes.
+  STAGE 2, item by item:
+    each flag's eager smoke, logged in its notes     MET (SMOKES RECORDED, 1ddc77c)
+    the flags' CUDA tests                            MET (2026-10-03; VERIFICATION OF ORDER 0 (3))
+    S005's micro 8 x 2 row-order loader test         MET (this entry; uncommitted)
+    GPU HOURS factors from the smokes                MET (this entry; S005's own BASE at its smoke rate too)
+    cap check, (a) and (c) settled                   24.863 h <= 25 h, nothing cut; rerun before stage 2's first
+                                                     g-check with the hours measured by then
+    E4 gate                                          unchanged: prereg/RC-12.draft.txt still "DRAFT, NOT LOCKED"
+    P-020 toy before S005's g-check                  none to run (no .py file in the repo mentions MQRAR, 10-05)
+  WAITS ON A PERSON: (1) the commit of these files and the kit sent from it (the queue runs a committed clone); (2) the
+    mark SCREENS_STAGE_2_SMOKES_RECORDED (stage2_select's wait line), Max's to record; (3) plans/CURRENT naming
+    stage2_select once stage 1's plans (stage B, stage C, the seed sets) are done, per ORDER. Noted for that launch,
+    not checked here: C4's BASE pairing rule across harness commits (harness/ changed since stage 1's commit 94bb1bb
+    only in 84d3a8f: rc12_eval.py and its test).
