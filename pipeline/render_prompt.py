@@ -48,6 +48,12 @@ EXAMPLE = ("Example, another script, a user who writes in lowercase:\n"
            "U1: what comes first on my packing list?\n"
            "A2: The maps come first, then two sweaters.\n"
            "END")
+# 2026-10-04 (dry pilot 4, task d): Qwen keeps writing names in lowercase INSIDE its turns in lowercase chats (126 of
+# its 290 REQ_SPAN hits there are a capitalized value written lowercase; 121 of those lines have no capital but the
+# first letter). A lowercase-chat example that showed a name the user lowercased written with its capital ("the alps"
+# / "the Alps") was measured on Qwen (round 4 GPU hold, 168 lowercase dp4 skeletons, one attempt each, phrase ban on)
+# against this prompt: case-only REQ_SPAN hits 60 -> 74 and lowercase-name lines 131 -> 143, so it did not help and
+# was taken out. REQ_SPAN stays case-exact (D1); check_r4's ASSIST_CASE names the defect wherever it occurs.
 VARIANTS = [
     ("instr.fake.p3.0",
      "Write one chat between a user and an assistant. Follow the script below line by line.\n"

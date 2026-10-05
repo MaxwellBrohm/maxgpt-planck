@@ -75,7 +75,8 @@ class TestGuidanceWording(unittest.TestCase):
              and (t["intent"] or "").startswith("answer with the value after a short lead in")]
         self.assertTrue(g)
         for x in g:
-            self.assertTrue(x.startswith("answer, first pointing back to when the user said it; no other value"), x)
+            self.assertTrue(x.startswith(("answer, first pointing back to when the user said it; no other value",
+                                          RI.SELF_LEAD + "; no other value")), x)     # 10-04: self-name answers
             self.assertNotIn("your", x.split(";")[0])
         self.assertTrue(L.GUIDE_META_RE.search("Leading in with what you told me, it is Porto."))
 

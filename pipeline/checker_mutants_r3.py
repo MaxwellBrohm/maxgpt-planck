@@ -56,7 +56,7 @@ SRC_R3 = [
     ("forgot_re_dropped", lexicons, 'FORGOT_RE = _alt([r"i(?:\'ve| have)? forgot(?:ten)?", ', "FORGOT_RE = _alt(["),
     ("self_err_correct_dropped", lexicons, 'SELF_ERR_RE = _alt([r"correct(?:ing|ed) me", ', "SELF_ERR_RE = _alt(["),
     ("self_err_meant_to", lexicons, 'r"i meant(?! to)"', 'r"i meant"'),
-    ("earlier_re_dropped", lexicons, 'EARLIER_RE = _alt([r"(?:mentioned|said|', 'EARLIER_RE = _alt([r"zzqq(?:mentioned|said|'),
+    ("earlier_re_dropped", lexicons, 'EARLIER_RE = _alt([_SAYV + ', 'EARLIER_RE = _alt([r"zzqq" + _SAYV + '),   # 10-04 form
     ("live_it_is_dropped", lexicons, 'LIVE_RE = re.compile(r"(?<![a-z])(?:(?:it is|', 'LIVE_RE = re.compile(r"(?<![a-z])(?:(?:zzqq|'),
     ("live_weather_is_dropped", lexicons, '|the weather (?:is|has been|looks)\\b', '|zzqq (?:is|has been|looks)\\b'),
     ("run_on_join_empty", lexicons, 'RUN_ON_JOIN = {"so", ', 'RUN_ON_JOIN = {"zzqq", '),

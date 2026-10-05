@@ -95,7 +95,8 @@ class Ctx:
         """options: [(line_id, template)]; exact line with p_exact (or forced by exact=True/False)."""
         self.claim(k)
         usable = [(i, t) for i, t in options if B.can_fill(t, **holes)]
-        use_exact = (self.rng.random() < self.p_exact) if exact is None else exact
+        p = B.p_exact(options[0][0], self.p_exact) if options else self.p_exact     # per bank (W4), else P_EXACT
+        use_exact = (self.rng.random() < p) if exact is None else exact
         spec = {"mode": "guided", "text": None, "bank_ref": None, "intent": intent,
                 "must_include": list(must_include), "must_exclude": [], "events": [eid], "role": role}
         if use_exact:

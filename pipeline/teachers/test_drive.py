@@ -121,9 +121,10 @@ class DriveServe(unittest.TestCase):
         TC.TeacherClient = self.orig_client
         shutil.rmtree(self.tmp, ignore_errors=True)
 
-    def args(self, url, *extra):
+    def args(self, url, *extra):       # this fake server offers no phrase ban (on by default since 10-04)
         return ["--serve", "--endpoint", url, "--out", self.out, "--n", str(N), "--shard-seed", SEED,
-                "--concurrency", "4", "--timeout", "10", "--http-tries", "1", "--no-fsync", "--quiet", *extra]
+                "--concurrency", "4", "--timeout", "10", "--http-tries", "1", "--no-fsync", "--quiet",
+                "--no-ban-phrases", *extra]
 
     def test_serve_needs_allow_real_teacher(self):
         with self.assertRaises(SystemExit):

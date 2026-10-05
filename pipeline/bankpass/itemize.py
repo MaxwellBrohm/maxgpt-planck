@@ -14,7 +14,7 @@ def fill_for(call, i):
     f = call["fills"][i]
     role = call["bank"].split(".")[2]
     out = {h: f[h] for h in ROLE_HOLES[role] if f.get(h) is not None}
-    if role == "plant" and f.get("article"):
+    if role in ("plant", "corr", "twin") and f.get("article"):   # W3 fix: job corrections and twins hold {av} too
         out["article"] = f["article"]
     return out
 
@@ -66,7 +66,10 @@ def value_items(call, plan_call):
         if vtype not in ("name", "surname", "city", "assistant_name", "pet_name"):
             val = val[:1].lower() + val[1:] if not val[:2].isupper() else val
         hits = gates.pool_checks(val, vtype)
-        if vtype == "topic":
+        if vtype == "topic":       # W3 fix: topics are 4 to 8 word phrases (s3 T), not 1 to 4 word pool values
+            lo, hi = specs.pool_specs()["topic"]["min_w"], specs.pool_specs()["topic"]["max_w"]
+            hits = [h for h in hits if h[0] != "LEN_ITEM"] + ([] if lo <= len(val.split()) <= hi
+                                                              else [("LEN_ITEM", val)])
             hits += [("HELDOUT_ECHO", e) for e in heldout.echo_hits(val)]
         n = f"{call['call_id'].rsplit('.', 1)[1]}_{i}"
         out.append(store.make_item(call["class"], call["bank"], n, val, call["author"], "dropped" if hits else "kept",

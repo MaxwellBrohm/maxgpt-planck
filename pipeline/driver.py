@@ -33,7 +33,10 @@ Added 2026-09-28 (round 2):
                                     literal is not banned). Key "phrases" in run_flags; a decode.json written before
                                     it counts as phrases off. Measured 2026-09-28 (notes.txt): the teachers route
                                     around the ban ("happy to and help", "how can I" + Chinese "help", "Ihelp"),
-                                    and one such broken line passed the checker, so it is NOT for training runs.
+                                    and one such broken line passed the checker. 2026-10-04 (round 4): ON for every
+                                    served run (teachers/drive.py adds it; --no-ban-phrases there turns it off),
+                                    aiism-v4 adds the service family; the checker's AI_ISM covers the substitutes
+                                    seen so far (check_r4) and still rejects whatever gets through.
   labels_exact literals are parse.exact_text (the line the prompt shows and the record stores: lowercased for a
   lowercase-style user, D1), no longer the bank line. decode.json also pins what the server says it applies for
   the controls that are on (client.decode_pins(): label rule, phrase rule), so a resume cannot mix regex forms."""
@@ -413,8 +416,8 @@ def main(argv=None):
     ap.add_argument("--ban-dashes", dest="ban", action="store_const", const="dash", default=None,
                     help="ban dash tokens at sampling (drive.py --serve only)")
     ap.add_argument("--ban-phrases", dest="phrases", action="store_const", const="ai_ism", default=None,
-                    help="ban the AI-ism phrases at sampling, vLLM bad_words (drive.py --serve only; probe use "
-                         "only: the teachers write broken substitutes, notes.txt 2026-09-28)")
+                    help="ban the AI-ism phrases at sampling, vLLM bad_words (drive.py --serve only, where it is "
+                         "on by default since 2026-10-04; notes.txt round 4)")
     ap.add_argument("--preset", default=None, help="a D4 sampling preset of the served teacher: card, shared, ...")
     ap.add_argument("--repair", action="store_true", help="name what failed in the retry prompt after a near miss")
     for k, v in DEFAULTS.items():

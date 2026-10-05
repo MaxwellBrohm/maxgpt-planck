@@ -104,7 +104,7 @@ def read(path, expect_sha256=None):
                     raise Refused(f"{path}: columns {sorted(set(NEED) - set(cols))} missing")
                 continue
             r = dict(zip(cols, p))
-            fams[r["headword"]] = {"pos": r["pos_proxy"], "pos_status": r["pos_status"],
+            fams[r["headword"]] = {"pos": r.get("pos") or r["pos_proxy"], "pos_status": r["pos_status"],
                                    "rank": int(r["rank"]) if r["rank"] else None,
                                    "lists": set(filter(None, r["lists"].split(","))), "forms": _forms(r["forms"]),
                                    "flags": set(filter(None, r["flags"].split(","))),

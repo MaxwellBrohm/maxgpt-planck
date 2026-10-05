@@ -23,7 +23,7 @@ def _guided(pred):
 class TestGuidanceWording(unittest.TestCase):
     def test_lead_in_names_the_user_as_the_source(self):
         g = [RI.guidance(sk, t) for sk, t in _guided(lambda t: (t["intent"] or "").startswith(
-            "answer with the value after a short lead in"))]
+            "answer with the value after a short lead in")) if not RI.self_name_answer(sk, t)]   # 10-04: round 4
         self.assertTrue(g)
         for x in g:
             self.assertNotIn("were told", x)

@@ -273,8 +273,10 @@ def main(argv=None):
                     "requests that name no preset")
     ap.add_argument("--dash-ban", action="store_true", help="compute (or load from --cache-dir) the dash-token ban "
                     "before loading, so requests may ask for it")
-    ap.add_argument("--phrase-ban", action="store_true", help="offer the AI-ism phrase ban (vLLM bad_words); its "
-                    "token form is checked on the loaded engine's tokenizer before READY")
+    ap.add_argument("--phrase-ban", action="store_true", default=True, help="offer the AI-ism phrase ban (vLLM "
+                    "bad_words); its token form is checked on the loaded engine's tokenizer before READY. On by default "
+                    "since 2026-10-04 (round 4)")
+    ap.add_argument("--no-phrase-ban", dest="phrase_ban", action="store_false", help="do not offer the phrase ban")
     ap.add_argument("--cache-dir", default=serve.BAN_CACHE)
     ap.add_argument("--gpu-util", type=float, default=serve.ENGINE["gpu_memory_utilization"])
     ap.add_argument("--structured-backend", default="xgrammar", choices=["xgrammar", "none"])

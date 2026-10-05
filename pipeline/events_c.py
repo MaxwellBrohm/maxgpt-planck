@@ -133,7 +133,7 @@ def s9_place(ctx, pre):
         if not pos:
             raise Fail("S9 no positions")
         s, q = pos
-        pred = B.LOOKUP_PRED[vt].format(v=val)
+        pred = B.lookup_pred(attr, vt).format(v=val)
         ctx.user(s, eid, "context", bank_options("lookup.ctx"), {"e": ent, "pred": pred}, "pass on a fact", [val])
         ctx.reply(s, eid, "acknowledge briefly", [], [])
         ctx.user(q, eid, "query", qopts, {"e": ent}, "ask about the entity", [ent])
@@ -149,7 +149,7 @@ def s9_place(ctx, pre):
         if res == "counterfactual":
             old = ctx.extra_value(vt)
             stale = [old]
-            pred = B.LOOKUP_PRED[vt].format(v=old)
+            pred = B.lookup_pred(attr, vt).format(v=old)
             ctx.user(q, eid, "query", bank_options("lookup.cf"), {"e": ent, "pred": pred}, "state a belief, ask to "
                      "check", [ent, old])
         else:

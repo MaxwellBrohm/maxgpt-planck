@@ -54,16 +54,38 @@ def noend():
 # a space only when " phrase" has as many tokens as "phrase"; Ministral's "happy to help" and "feel free to" split
 # their bare first word, so their dp2 contexts ("I'd be happy to help" 61, "I'm happy to help", "and feel free to")
 # are listed whole (teachers/test_decode_pc.py checks the dp2 sentences are covered on every teacher's tokenizer).
-PHRASE_RULE = "aiism-v2"
+PHRASE_RULE = "aiism-v4"
+# aiism-v3 (2026-10-04, round 4): the phrase ban is ON for every served teacher run (drive.py --serve; Max, 10-04:
+# service filler stays rejected), and it adds the service family dry pilot 4 measured (assistant lines over all R3
+# attempts, Qwen / Ministral / Gemma): "I can certainly ..." 4 / 0 / 237, "I can help" 6 / 23 / 153, "anything
+# else" 10 / 54 / 166 (13 closer variants: one bare "anything else" covers them; user lines hold it 6 / 5 / 1 times
+# in about 11,000 each, "Anything else I should think about?", which the ban also moves), "here to help" 44 / 37 /
+# 10 (incl. "an assistant here to help"), "ready to help" 17 / 18 / 7, "glad I could help/assist" 13 / 3 / 1,
+# "I'd love to help" 0 / 17 / 0, "how else can I" 1 / 2 / 1, "I can certainly do that" (Gemma 64). The aiism-v2
+# whole-context forms stay for tokenizers that split a bare first word (Ministral's "happy", "feel"), and the
+# "anything else" closers are listed in context too, since Ministral's tekken splits a bare "anything" (vLLM then keeps
+# no space form of "anything else"). "here to help" (every space form kept) replaces the three "I'm / I am here to
+# help" forms. Measured on the real tokenizers (PC CPU, test_decode_pc): see notes.txt round 4. Not coverable here:
+# "glad" splits when bare on Qwen and Ministral, so "Glad I could assist" passes their ban (AI_ISM still rejects it).
+# aiism-v4 (10-04, after the GPU hold that measured aiism-v3): adds "I can definitely", Gemma's main substitute under
+# v3 (14 lines in 64 attempts, against 0 without the ban); 125 sequences on Gemma's tokenizer, under vLLM's 128.
 PHRASES = ("as an AI", "As an AI", "language model", "Language model", "great question", "Great question",
            "feel free to", "Feel free to", "and feel free to", "please feel free to", "Please feel free to",
-           "I'm here to help", "I’m here to help", "I am here to help", "certainly!", "Certainly!",
-           "happy to help", "Happy to help", "be happy to help", "am happy to help", "I'm happy to help",
-           "I’m happy to help", "I hope this helps", "as a virtual", "As a virtual", "I'm just an AI",
+           "certainly!", "Certainly!", "I hope this helps", "as a virtual", "As a virtual", "I'm just an AI",
            "I’m just an AI", "I am just an AI", "artificial intelligence", "Artificial intelligence", "large language",
-           "Large language", "how can I assist", "How can I assist", "is there anything else", "Is there anything else",
-           "how can I help", "How can I help")
-GREETING = ("how can i help", "is there anything else", "i'm here to help")   # the family added beyond AI_ISM
+           "Large language",
+           "here to help", "here to assist",
+           "happy to help", "Happy to help", "be happy to help", "am happy to help", "I'm happy to help",
+           "I’m happy to help", "happy to assist", "Happy to assist", "glad to help", "Glad to help", "glad I could help",
+           "Glad I could help",
+           "glad I could assist", "Glad I could assist", "ready to help", "Ready to help", "ready to assist",
+           "love to help",
+           "I can help", "I can assist", "I can certainly", "I can definitely",
+           "how can I help", "How can I help", "how can I assist", "How can I assist", "how may I help",
+           "How may I help", "how else can I", "How else can I", "anything else", "Anything else",
+           "is there anything else", "Is there anything else", "you need anything else", "to know anything else",
+           "to add anything else", "with anything else")
+GREETING = ("how can i help", "anything else", "here to help")   # the family added beyond AI_ISM (v2: greetings)
 BAD_WORDS_CAP = 128                          # vLLM 0.30 VLLM_MAX_NUM_BAD_WORDS: token sequences per request
 BAD_TOKENS_CAP = 1024                        # VLLM_MAX_BAD_WORDS_TOTAL_TOKENS (V2 runner)
 

@@ -135,6 +135,17 @@ def words(topic, part):
     return tuple(w for w in row[PARTS.index(part)].split() if not heldout.vocab_hits(w))
 
 
+REQ_WORDS = {}     # topic text -> {part: [families]}: a frozen set's required words (load.install, W4); empty: FAKE
+
+
+def req_words(topic, part):
+    """the words a required word for this topic may be: the frozen set's req words when installed, else words()."""
+    row = REQ_WORDS.get(topic)
+    if row is None:
+        return words(topic, part)
+    return tuple(w for w in row.get(part, ()) if not heldout.vocab_hits(w))
+
+
 def related(topic):
     """every word of a topic's set (all three parts), for the OFFTOPIC rubric."""
     return tuple(w for p in PARTS for w in words(topic, p))

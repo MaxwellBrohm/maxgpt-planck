@@ -259,3 +259,15 @@ tools/gemma_chat.py, experiments/E004_general_updating/code (read-only). No mode
     a question"; entities "ask about the {attribute} of the {entity}"; topic forms 0 and 5 "ask for advice on {t}",
     "ask about next steps with {t}"; lowercase chats: the rules name the A lines' capitals and the first A bracket
     says sentence case.
+
+16. ROUND 4 FIXES 2026-10-04 (dry pilot 4 v1 quality review; check_r4.py, lexicons_r4.py, fixtures_r4.py; notes.txt)
+  Checker (no new code): FALSE_MEMORY when the assistant says the user said or called it a value no user line holds,
+    "I remember" a value said one line before, and the pointer and time words "called me", "asked", "mentioning",
+    "saying", "noted", "at the start"; PROMPT_ECHO on a first-person copy of a guidance frame and on "Ask me ..."
+    for "ask the assistant ..."; ASSIST_CASE on a capitalized value written lowercase in an assistant turn (REQ_SPAN
+    stays case-exact, D1); ASSIST_VOICE on the user named in the third person; PERSPECTIVE on "my name is really
+    <user>" and "my <head>" of a user's two-word thing; PLANT_MISSING on a rule ask that never states its rule;
+    ANSWER_WRONG on a person given another relation or a person's job used as a person; AI_ISM on the service
+    substitutes (dp4's and the ones the sampling ban drew out). Prompt: a self-name lead-in is "answer with a short
+    lead in, then the name you go by". Decoding: the aiism-v4 phrase ban (vLLM bad_words, the service family added)
+    is on by default for every served run (drive.py --serve; --no-ban-phrases turns it off).

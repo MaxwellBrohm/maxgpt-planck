@@ -53,7 +53,7 @@ class ServerGoneStopsTheRun(unittest.TestCase):
     def args(self, url):
         return ["--serve", "--allow-real-teacher", "--endpoint", url, "--out", self.out, "--n", str(TD.N),
                 "--shard-seed", TD.SEED, "--concurrency", "4", "--timeout", "10", "--http-tries", "1", "--no-fsync",
-                "--quiet"]
+                "--quiet", "--no-ban-phrases"]          # TD.Served offers no phrase ban (on by default since 10-04)
 
     def records(self):
         acc = list(shards.read(os.path.join(self.out, "accepted"), "accepted"))

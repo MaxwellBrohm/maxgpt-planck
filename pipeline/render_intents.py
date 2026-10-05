@@ -161,11 +161,26 @@ def user_guidance(skel, t):
     return it
 
 
+# 10-04 (dry pilot 4 v1 review, HIGH 1): the lead in was given on the assistant's own name too, which the user never
+# said ("You called me Tavi earlier", "As you asked me before, my name is Pim": 12 of 12 such lead ins pointed back to
+# something the user did not do), so a self-name answer gets a lead in that points at nothing
+SELF_LEAD = "answer with a short lead in, then the name you go by"   # no "your" (the "your X is Y" frame)
+
+
+def self_name_answer(skel, t):
+    """the answer turn of an S6 user_vs_card event that asks for the assistant's own name (the card name)."""
+    e = _event(skel, t)
+    return bool(e and e["kind"] == "S6" and e["params"].get("variant") == "user_vs_card"
+                and e["params"].get("ask") == "self" and e["turns"].get("answer") == t["i"])
+
+
 def assistant_guidance(skel, t):
     it = t["intent"]
     base, _, tail = it.partition("; ")
     text = ASSIST.get(base, base)
-    if base == "answer with the value first" and any(r["verifier"] == "start_name" for r in t.get("rules", [])):
+    if base == "answer with the value after a short lead in" and self_name_answer(skel, t):
+        text = SELF_LEAD + ONLY_ANSWER
+    elif base == "answer with the value first" and any(r["verifier"] == "start_name" for r in t.get("rules", [])):
         text = "answer, with the answer right after the name the reply starts with, then a few words" + ONLY_ANSWER
     elif base == "acknowledge briefly":
         text = "acknowledge in one short sentence" + ("" if t["must_include"] else ", not repeating the value")

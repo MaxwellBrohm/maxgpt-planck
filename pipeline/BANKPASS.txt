@@ -249,3 +249,16 @@ pilot 2), teachers/hf_pins.json, oodh/DESIGN.txt, corpus/make_common_words.py, c
 STATUS 2026-10-04: W0 code is in pipeline/bankpass/ (tests/test_bankpass_*.py) and the W1 word list and mined
 examples are on the PC under ~/planck/runs/bankpass/ (not runs/banks/; notes.txt "BANK PASS W0 + W1" lists this and
 the other deviations). W2 onward waits for Max: pipeline/DECISIONS_BANKPASS_FOR_MAX.md.
+STATUS 2026-10-04 (W2): Max took all four s8 calls. Sources fetched on the PC with each licence checked at the source
+(bankpass/sources.py). SSA names are BLOCKED: www.ssa.gov answers 403 to every tool, so names.zip needs a copy saved
+by hand; pool.name stays FAKE until then. human_v0 built and admitted: pool.city 3,000 (GeoNames, installed), and as
+aux pool.surname 2,000 (Census), seed.persona 5,000 (Nemotron-Personas-USA, prompt side), rubric.safety 403 (LDNOOBW).
+Repo manifest: bankpass/manifests/human_v0.json; items stay on the PC. notes.txt "BANK PASS W2" has the details.
+STATUS 2026-10-05 (W4, W5): frozen on the PC as ~/planck/runs/bankpass/banks_v1 (manifest 77b55347a2bc, reproduced
+byte for byte; repo copy bankpass/manifests/banks_v1.json): 134 banks, 6 aux, 22 left FAKE (18 AUTHOR_SHARE where a
+teacher has no kept line, 4 labels without a 2 of 3 vote even after amendment 7's re-vote). Per-bank thirds keep 4,602
+of 15,056 targeted lines; 402 topics of 999 (amendment 5 reused topic ids, so 208 lost their word sets). s7 (1) not
+met: a 1,000-skeleton dry build still carries FAKE refs (personas, 20 FAKE banks, SSA names, pet kinds). s5 re-measure
+on the probe: no OFFTOPIC setting reaches catch >= 0.90 on both roles without flagging a quarter or more of the
+teachers' own lines; checker unchanged; prev_assist moves the user flag rate under 1 point (s5: it goes, not applied).
+notes.txt "BANK PASS W4 + W5" has the numbers and what W6 still needs.

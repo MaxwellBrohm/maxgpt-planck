@@ -3,12 +3,13 @@ kind and name, a relation and job, a topic text, a number word) and the program 
 holes afterwards. A line whose value is not found exactly once is dropped; the drop rate is reported per bank.
 
 Holes: v, av (value with its article), old, o (object noun), t (topic), items (a list join), L (list name), A
-(assistant name), N (number word), X (call-me name), W (avoid word), n (user name), lab, e, ord; p (a leading subject
-pronoun, pronoun corrections only); M (marker prefix, added in front of every correction line)."""
+(assistant name), N (number word), X (call-me name), W (avoid word), n (user name), lab, e, pred (a lookup predicate,
+W3), ord; p (a leading subject pronoun, pronoun corrections only); M (marker prefix, added in front of every
+correction line)."""
 import re
 
 PRONOUNS = ("he", "she", "it", "they")
-ORDER = ("items", "av", "old", "v", "o", "t", "L", "A", "N", "X", "W", "n", "lab", "e", "ord")
+ORDER = ("items", "av", "old", "v", "o", "t", "L", "A", "N", "X", "W", "n", "lab", "e", "pred", "ord")
 OPTIONAL = {"old"}      # a correction may leave out the value it replaces (FAKE head and pronoun forms do)
 DROP_MISSING, DROP_REPEATED, DROP_FORM, DROP_JOIN, DROP_PRONOUN = (
     "TPL_VALUE_MISSING", "TPL_VALUE_REPEATED", "TPL_FORM", "TPL_ITEMS_JOIN", "TPL_PRONOUN")

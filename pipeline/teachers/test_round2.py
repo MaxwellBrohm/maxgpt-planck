@@ -20,6 +20,7 @@ import driver  # noqa: E402
 import fake_engine as FE  # noqa: E402
 import fake_teacher  # noqa: E402
 import lexicons  # noqa: E402
+import lexicons_r4  # noqa: E402
 import parse  # noqa: E402
 import serve  # noqa: E402
 import skeleton  # noqa: E402
@@ -132,10 +133,40 @@ def ai_ism_alternatives():
     return out + [cur]
 
 
+# aiism-v3 (10-04): phrases that are prefixes or contexts, with the service line each one stands for
+SERVICE_LINES = {"I can certainly": "I can certainly help you with that.", "I can definitely": "I can definitely help.", "anything else": "Is there anything else?",
+                 "Anything else": "Anything else I can do?", "love to help": "I would love to help.",
+                 "how else can I": "So how else can I help?", "How else can I": "How else can I help?",
+                 "you need anything else": "Do you need anything else?",
+                 "to know anything else": "Would you like to know anything else?",
+                 "to add anything else": "Would you like to add anything else?",
+                 "with anything else": "Can I help with anything else?", "here to assist": "I am here to assist.",
+                 "ready to assist": "I am ready to assist.", "ready to help": "I am ready to help.",
+                 "Ready to help": "Ready to help when you are.", "I can assist": "I can assist you.",
+                 "glad to help": "So glad to help.", "Glad to help": "Glad to help!",
+                 "happy to assist": "I am happy to assist.", "Happy to assist": "Happy to assist!",
+                 "glad I could help": "I am glad I could help.", "Glad I could help": "Glad I could help.",
+                 "glad I could assist": "I am glad I could assist.", "Glad I could assist": "Glad I could assist.",
+                 "I can help": "I can help with that.", "how may I help": "So how may I help?",
+                 "How may I help": "How may I help you?"}
+MID = ("and ", "be ", "am ", "here to", "love to", "ready to assist", "you need", "to know", "to add", "with ")
+
+
 class PhraseBan(unittest.TestCase):
     def test_every_phrase_is_a_checker_ai_ism_or_the_greeting_family(self):
         for p in decode.PHRASES:
-            self.assertTrue(lexicons.AI_ISM_RE.search(fold(p)) or any(g in fold(p) for g in decode.GREETING), p)
+            self.assertTrue(lexicons.AI_ISM_RE.search(fold(p)) or any(g in fold(p) for g in decode.GREETING)
+                            or p in SERVICE_LINES, p)
+
+    def test_the_checker_still_rejects_every_banned_family(self):
+        """10-04 (round 4, aiism-v3): a service line built on each banned phrase fires the assistant-turn AI_ISM
+        patterns (lexicons.AI_ISM_RE, ASSIST_ISM_RE, lexicons_r4.SERVICE_RE): the ban moves the text, the checker
+        still gates it."""
+        rx = (lexicons.AI_ISM_RE, lexicons.ASSIST_ISM_RE, lexicons_r4.SERVICE_RE)
+        for p in decode.PHRASES:
+            line = SERVICE_LINES.get(p, p + ".")
+            self.assertIn(p, line)
+            self.assertTrue(any(r.search(fold(line)) for r in rx), line)
 
     def test_every_plain_checker_phrase_is_banned(self):
         alts = ai_ism_alternatives()
@@ -150,9 +181,9 @@ class PhraseBan(unittest.TestCase):
         for g in decode.GREETING:
             self.assertIn(g, low)
         for p in decode.PHRASES:
-            if p[0].islower() and not p.startswith(("and ", "be ", "am ")):     # those are mid-sentence contexts
+            if p[0].islower() and not p.startswith(MID):                  # those are mid-sentence contexts
                 self.assertIn(p[0].upper() + p[1:], decode.PHRASES, "a lowercase start needs its sentence start")
-        self.assertIn("I’m here to help", decode.PHRASES)           # Ministral writes the curly apostrophe
+        self.assertIn("here to help", decode.PHRASES)   # Ministral's curly "I’m here to help" (test_decode_pc)
         self.assertLessEqual(2 * len(decode.PHRASES), decode.BAD_WORDS_CAP)
 
     def test_literals_leave_a_phrase_out(self):
@@ -161,7 +192,7 @@ class PhraseBan(unittest.TestCase):
         got = decode.phrase_words(["Oh, HAPPY TO HELP, see you."])
         self.assertEqual(set(decode.PHRASES) - set(got), {"happy to help", "Happy to help"})
         got = decode.phrase_words(["well, i’m here to help now"])
-        self.assertEqual(set(decode.PHRASES) - set(got), {"I'm here to help", "I’m here to help"})
+        self.assertEqual(set(decode.PHRASES) - set(got), {"here to help"})
 
     def test_server_request_merges_constraint_literals(self):
         import serve_http

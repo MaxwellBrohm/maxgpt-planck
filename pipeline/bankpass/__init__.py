@@ -21,5 +21,9 @@ frozen bank directory passes load.py's admit checks.
   wordstats   the word list CLI: TSVs, stats, sample stability, the full read's candidate vocabulary
   wordload    the word list loader: TSV with provenance -> families, lists, features, seeds; FAKE fallback
   mine        mined human example sentences from core v0 (s0), cited by doc id
+  sources     W2: the five open sources, pinned, each licence checked at the source (evidence file), SOURCE.json
+  human       W2: human pools (SSA names by era and sex, Census surnames, GeoNames cities with countries)
+  humanseed   W2: persona seeds (Nemotron-Personas-USA, prompt side) and the LDNOOBW safety rubric list
+  humanbuild  W2: sources -> one bank directory (banks + aux), its manifest and the admit result
   fixtures    test-only fixture banks and a fake bank teacher; mutate: the scratch mutation run
 """

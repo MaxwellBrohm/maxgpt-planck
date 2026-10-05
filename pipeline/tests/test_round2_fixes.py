@@ -166,7 +166,7 @@ class TestGuidance(unittest.TestCase):
                 self.assertTrue(g.startswith("ask about the ") and "report its" not in g, g)
             base = it.split(";")[0]
             if base in ("answer with the value first", "answer with the value after a short lead in"):
-                self.assertTrue(re.search(r"going on|pointing back to when the user said it|then a few words", g), g)
+                self.assertTrue(re.search(r"going on|pointing back to when the user said it|then a few words|the name you go by", g), g)
             if base == "agree and follow the rule":
                 self.assertIn("keep the rule in this reply", g)
             if base.startswith("say it was not mentioned"):

@@ -18,7 +18,7 @@ VERBALIZED = {"M", "O"}        # s2b: verbalized sampling for openings and marke
 POOL_TYPES = ("name", "surname", "city", "assistant_name", "pet_name", "pet_kind", "job", "hobby", "food", "grocery",
               "chore", "plan", "object", "relation", "avoid_word", "entity_kind")
 HUMAN_POOLS = {"name": "SSA baby names", "surname": "Census 2010 surnames", "city": "GeoNames cities15000"}
-COMPUTED_POOLS = {"avoid_word"}
+COMPUTED_POOLS = {"avoid_word", "req_noun", "req_verb", "req_adj"}   # W4: req_* from wordlist_v1, as banks
 KEY_ROLES = ("plant", "query", "bait", "corr", "twin")
 # speech act a key line must carry (s2e); extraction gold: the fill for plant and corr, "not said" otherwise
 KEY_ACTS = {"plant": "states", "corr": "replaces", "query": "asks", "bait": "asks", "twin": "mentions_not_own"}
@@ -62,6 +62,10 @@ def line_specs():
     for bank, (lines, forms) in sorted(raw.items()):
         cls = class_of(bank)
         req, allowed = _holes(lines)
+        if cls == "K":      # W3: one or two FAKE lines made {old} and {p_obj} required; a correction may leave out
+            req -= {"old", "p_obj"}   # the value it replaces and a twin need not name the person (both stay allowed)
+            if KEYS[bank.split(".")[1]]["noun"]:      # amendment 4: any line of a noun key may name its noun
+                allowed |= {"o"}
         lo, hi = WORDS[cls]
         out[bank] = {"class": cls, "holes_required": sorted(req), "holes_allowed": sorted(allowed), "min_w": lo,
                      "max_w": hi, "verbalized": cls in VERBALIZED, "forms": forms,
@@ -86,16 +90,19 @@ def pool_specs():
 
 def loadable(bank):
     """a bank load.py can install: every line bank, label.<key>, topic, topicwords, and pool.<type> for a pool the
-    skeleton reads that is not PROGRAM (closed lists) and not req_* (the word list loads through wordload.py). Any
+    skeleton reads that is not PROGRAM (closed lists); req_* are computed banks since W4 (wordlist_v1's confirmed
+    required families, so a frozen set carries every pool the skeleton draws, hashed). Any
     other bank in a manifest is UNLOADABLE at admit: its content would be dropped while its ref claimed it."""
     import pools as P
     if bank in line_specs() or bank in ("topic", "topicwords"):
         return True
     if bank.startswith("label."):
         return bank.split(".", 1)[1] in KEYS
+    if bank.startswith("listname."):         # W4: banks.LIST_NAMES, one chosen name per list type
+        return bank.split(".", 1)[1] in B.LIST_NAMES
     if bank.startswith("pool."):
         vt = bank.split(".", 1)[1]
-        return vt in P.POOLS and P.POOLS[vt].provenance != "PROGRAM" and not vt.startswith("req_") and vt != "topic"
+        return vt in P.POOLS and P.POOLS[vt].provenance != "PROGRAM" and vt != "topic"
     return False
 
 

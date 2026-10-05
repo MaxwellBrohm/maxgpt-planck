@@ -67,6 +67,23 @@ BANKS = {
 }
 LIST_NAMES = {"grocery": "shopping list", "city": "route", "name": "guest list", "chore": "chore list"}
 LOOKUP_PRED = {"weekday": "opens on {v}", "city": "is in {v}", "month": "is in {v}", "colour": "is {v}"}
+# set in place by bankpass/load.install from a frozen bank set (W4); empty means the FAKE behaviour above
+P_EXACT_BANK = {}         # bank -> p_exact (BANKPASS s2g: 0.7 x kept / target for a bank short of its target)
+LOOKUP_PRED_ATTR = {}     # attribute label -> its teacher-written predicate ("opens on {v}")
+LIST_REFS = {vt: f"listname.{vt}@fake:FAKE" for vt in LIST_NAMES}
+
+
+def bank_of(line_id):
+    return line_id.rsplit(".", 1)[0]
+
+
+def p_exact(line_id, default):
+    """the exact-line share for the bank a line id belongs to (default: the skeleton's P_EXACT)."""
+    return P_EXACT_BANK.get(bank_of(line_id), default) if line_id else default
+
+
+def lookup_pred(attr, vtype):
+    return LOOKUP_PRED_ATTR.get(attr) or LOOKUP_PRED[vtype]
 
 
 def lines(bank):

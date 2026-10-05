@@ -90,6 +90,8 @@ def assistant_core(skel, t, prev_user_text):
         return f"So far you told me about {x}.", f"You mentioned {x}."
     a = g.get("answer")
     if base == "answer with the value first":
+        if a == R.card_name(skel):   # 10-04: nor "that is what you said" about it (check_r4 FALSE_MEMORY never said)
+            return f"{cap(a)}, that is my name.", f"{cap(a)}."
         return FIRST[rot % 3].format(A=cap(a)), f"{cap(a)}."
     if base == "answer with the value after a short lead in":
         if a == R.card_name(skel):   # 10-03: the user never said the card name (FALSE_MEMORY "As you said earlier")
@@ -140,7 +142,8 @@ def finish(skel, t, core, req_word):
     if "one_sentence" in rules:
         text = _one_sentence(text)
     if wants_q and not text.endswith("?"):
-        text = text.rstrip(".!") + (", right?" if "one_sentence" in rules else ". Anything else?")
+        # 10-04 (round 4): "Anything else?" is a service closer (check_r4 AI_ISM), so the fake asks "Sound good?"
+        text = text.rstrip(".!") + (", right?" if "one_sentence" in rules else ". Sound good?")
     return text
 
 

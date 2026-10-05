@@ -157,6 +157,9 @@ DP2_AI_ISMS = ["I'd be happy to help with that.", "I am happy to help.", "I'm ha
                "Please feel free to ask.", "I hope this helps."]
 
 
+from ban_lines import BENIGN, DP4_SERVICE, NOT_COVERABLE  # noqa: E402  (10-04, round 4)
+
+
 class RealPhraseBan(unittest.TestCase):
     def check(self, name):
         vt = vllm_tok(name)
@@ -168,6 +171,14 @@ class RealPhraseBan(unittest.TestCase):
             self.assertTrue(decode.covered(pb["seqs"], vt.encode(text=" " + sent, add_special_tokens=False)), sent)
         self.assertFalse(decode.covered(pb["seqs"], vt.encode(text=" I would be glad to see you then.",
                                                                add_special_tokens=False)))
+        cov = lambda s: decode.covered(pb["seqs"], vt.encode(text=" " + s, add_special_tokens=False))  # noqa: E731
+        for sent in DP4_SERVICE:
+            if sent not in NOT_COVERABLE[name]:
+                self.assertTrue(cov(sent), sent)
+        for sent in sorted(NOT_COVERABLE[name]):       # pins the gap the notes report; a fix shows up here
+            self.assertFalse(cov(sent), sent)
+        for sent in BENIGN:
+            self.assertFalse(cov(sent), sent)
         from vllm import SamplingParams
         t = serve.tokenizer_only(name)
         t.engine = {"max_model_len": 2048}

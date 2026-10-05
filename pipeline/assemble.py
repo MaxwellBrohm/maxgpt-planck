@@ -178,12 +178,21 @@ def finish(skel, ctx):
     mid = sum((t["min_w"] + t["max_w"]) / 2 for t in skel["turns"]) * TOKENS_PER_WORD
     skel["estimate"] = {"tokens_mid": round(mid), "tokens_max": round(est), "flag": "word count x 1.3"}
     vtypes = {s["type"] for s in skel["slots"].values()} | {"topic", "relation", "plan", "object", "pet_kind",
-                                                            "req_noun", "req_verb", "req_adj", "entity_kind"}
-    skel["provenance"] = {"banks": [B.bank_ref()], "pools": P.provenance_refs(vt for vt in vtypes if vt in P.POOLS),
-                          "personas": "FAKE", "topic_words": TW.PROVENANCE, "fake": True}
+                                                            "req_noun", "req_verb", "req_adj", "entity_kind",
+                                                            "avoid_word"}
+    prov = {"banks": [B.bank_ref()], "pools": P.provenance_refs(vt for vt in vtypes if vt in P.POOLS),
+            "personas": "FAKE", "topic_words": TW.PROVENANCE, "lists": sorted(B.LIST_REFS.values())}
+    prov["fake"] = bool(fake_refs(prov))      # W4: from the refs (personas stay FAKE until the render side has them)
+    skel["provenance"] = prov
     skel["heldout_gate"] = heldout.gate_hash()
     skel["rc12"] = heldout.RC12_STATUS
 
+
+def fake_refs(prov):
+    """the refs of a skeleton's provenance that are FAKE (a bank set, pool, list name, persona or word set ref)."""
+    refs = list(prov.get("banks", [])) + list(prov.get("pools", [])) + list(prov.get("lists", [])) \
+        + [prov.get("personas"), prov.get("topic_words")]
+    return [r for r in refs if r == "FAKE" or str(r).endswith(":FAKE")]
 
 def _turn_topic(skel, t):
     """the topic an assistant turn talks about: the topic of the user turn before it, else the first topic."""
@@ -218,7 +227,7 @@ def required_words(skel, ctx):
     taken, rw = _taken(skel, ctx), {}
     for n, part in enumerate(("noun", "verb", "adj")):
         topic = _turn_topic(skel, hint[n]) if n < len(hint) else skel["topic_text"][skel["topic_path"][0]]
-        cands = [w for w in TW.words(topic, part) if w not in taken and w not in rw.values()
+        cands = [w for w in TW.req_words(topic, part) if w not in taken and w not in rw.values()
                  and w not in TW.NOT_REQUIRED]
         cands = cands or [w for w in P.pool("req_" + part).values if w not in ctx.used and w not in rw.values()]
         rw[part] = rng.choice(cands)

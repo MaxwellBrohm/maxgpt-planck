@@ -15,7 +15,10 @@ snapshot, instead of recording TEACHER_ERROR for every remaining attempt; the sa
 Decoding controls and repair (2026-09-27, driver.py flags, all off by default and recorded in every record):
     --structured labels|labels_exact   structured output of each skeleton's planned label lines plus END
     --ban-dashes                       the dash-token ban (serve_http must run with --dash-ban)
-    --ban-phrases                      the AI-ism phrase ban, vLLM bad_words (serve_http must run with --phrase-ban)
+    --ban-phrases                      the AI-ism phrase ban, vLLM bad_words (serve_http must offer it). ON BY
+                                       DEFAULT with --serve since 2026-10-04 (round 4, aiism-v4: the service filler
+                                       family; Max: service filler stays rejected); --no-ban-phrases turns it off (a
+                                       control arm, or resuming a run dir pinned before it)
     --preset card|shared|yld0926       a D4 sampling preset (serve.TEACHERS; Gemma has no "shared")
     --repair                           after a near miss the retry prompt names what failed (attempt kind "repair")
 serve_http offers them (its GET /planck-serve lists presets, structured backend, line separator and dash ban); the
@@ -37,6 +40,10 @@ def main(argv=None):
     if "--serve" not in argv:
         return driver.main(argv)
     argv.remove("--serve")
+    if "--no-ban-phrases" in argv:               # 10-04: the phrase ban is on for every served run unless turned off
+        argv.remove("--no-ban-phrases")
+    elif "--ban-phrases" not in argv:
+        argv.append("--ban-phrases")
     if "--allow-real-teacher" not in argv:
         raise SystemExit("drive.py --serve renders with a real teacher: pass --allow-real-teacher too")
     TC.TeacherClient = serve_client.ServeClient      # driver.main builds its client through this name

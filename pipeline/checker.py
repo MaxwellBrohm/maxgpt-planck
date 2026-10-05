@@ -11,12 +11,14 @@ value), SKEL_INFEASIBLE (render_prompt.feasible, before any teacher call); 2026-
 marker, a closing "End." or script talk inside a turn) and USER_STYLE (a lowercase-style user's own line in capitals);
 2026-10-03 (SPEC 15, check_r3.py): ASSIST_CASE (an assistant turn starting lowercase or with a lone "i"), RUN_ON (a
 request glued to the line before it), FALSE_MEMORY (forgetting, an own error or "earlier" that the chat contradicts)
-and LIVE_DATA (current weather the assistant cannot know)."""
+and LIVE_DATA (current weather the assistant cannot know); 2026-10-04 (SPEC 16, check_r4.py): no new code, round 4 rules
+add hits under FALSE_MEMORY, PROMPT_ECHO, ASSIST_CASE, ASSIST_VOICE, PERSPECTIVE, PLANT_MISSING, ANSWER_WRONG and AI_ISM."""
 import check_behav
 import check_events
 import check_lines
 import check_lookup
 import check_r3
+import check_r4
 import check_text
 import parse
 import render_prompt
@@ -39,7 +41,7 @@ RANK = {c: n for n, c in enumerate(ORDER)}
 def registry():
     """every check function, in module order; mutation_checker replaces entries to build checker mutants."""
     return (list(check_text.CHECKS) + list(check_lines.CHECKS) + list(check_events.CHECKS) + list(check_behav.CHECKS)
-            + list(check_lookup.CHECKS) + list(check_r3.CHECKS))
+            + list(check_lookup.CHECKS) + list(check_r3.CHECKS) + list(check_r4.CHECKS))
 
 
 REGISTRY = registry()

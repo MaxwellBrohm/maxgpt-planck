@@ -93,7 +93,7 @@ class LLM:
 
 
 class Served:
-    def __init__(self, skels, policy, ban=True, backend="xgrammar", sampling=None, util=0.86, phrases=False):
+    def __init__(self, skels, policy, ban=True, backend="xgrammar", sampling=None, util=0.86, phrases=True):
         self.tmp = tempfile.mkdtemp(prefix="fake_engine_")
         self.patches = [S.install(), mock.patch.object(serve, "tokenizer", S.tokenizer),
                         mock.patch.object(serve, "token_bytes", lambda t: VOCAB)]

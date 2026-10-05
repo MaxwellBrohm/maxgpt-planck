@@ -15,7 +15,10 @@ bank it lists passes every check below; load.py raises on any problem. Codes:
   RECHECK       a kept line that fails the item checks when re-run now
   DUP           two kept items with the same dedup key
   EMPTY         no kept item
-  UNLOADABLE    a bank load.py cannot install (specs.loadable): refused, never silently skipped"""
+  UNLOADABLE    a bank load.py cannot install (specs.loadable): refused, never silently skipped
+A manifest's "aux" entries (prompt-side seeds, rubric lists: seed.*, rubric.*, and pools with no skeleton consumer
+yet) get every check above except UNLOADABLE; load.py never installs them. A kept pool value (pool.*) and a kept
+persona seed (seed.persona) are re-run through their gates too (RECHECK)."""
 import json
 import os
 
@@ -27,6 +30,8 @@ JUDGED_CLASSES = {"K", "M", "O", "C", "S", "R", "L", "U", "Y"}
 
 
 def expected_kind(bank):
+    if bank.startswith(("seed.", "rubric.")):
+        return "human"
     if bank.startswith("pool."):
         vt = bank.split(".", 1)[1]
         return "human" if vt in specs.HUMAN_POOLS else "computed" if vt in specs.COMPUTED_POOLS else "teacher"
@@ -74,6 +79,9 @@ def check_bank(bank_dir, bank, meta, fixture=False):
             hits = [h for h in gates.item_checks(r["text"], bank, line_spec) if h[0] != "BANK_PROMPT_ECHO"]
             if hits:
                 out.append(("RECHECK", f"{rid}: {hits[0][0]}"))
+        elif bank.startswith("pool.") or bank == "seed.persona":
+            hits = gates.pool_checks(r["text"], bank[5:]) if bank.startswith("pool.") else gates.seed_checks(r["text"])
+            out += [("RECHECK", f"{rid}: {hits[0][0]}")] if hits else []
         k = store.norm_key(r["text"])
         if k in keys:
             out.append(("DUP", f"{rid} = {keys[k]}"))
@@ -109,6 +117,8 @@ def check_dir(bank_dir, allow_fixture=False, allow_dry=False):
         probs[bank] = check_bank(bank_dir, bank, meta, fixture=bool(man.get("fixture")))
         if not specs.loadable(bank):
             probs[bank].append(("UNLOADABLE", bank))
+    for bank, meta in sorted((man.get("aux") or {}).items()):
+        probs["aux:" + bank] = check_bank(bank_dir, bank, meta, fixture=bool(man.get("fixture")))
     return man, probs
 
 

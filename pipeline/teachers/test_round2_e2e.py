@@ -90,8 +90,18 @@ class PhraseBanEndToEnd(E.Base):
 class Refusals(E.Base):
     def test_server_without_the_phrase_ban(self):
         with self.assertRaises(TC.RefuseRealTeacher):
-            self.run_served(FE.Served(SKELS, E.good), "--ban-phrases")
+            self.run_served(FE.Served(SKELS, E.good, phrases=False), "--ban-phrases")
         self.assertFalse(os.path.exists(self.out))
+
+    def test_ban_is_on_by_default_and_can_be_turned_off(self):
+        """10-04 (round 4): drive.py --serve asks for the phrase ban unless --no-ban-phrases is given."""
+        with self.assertRaises(TC.RefuseRealTeacher):
+            self.run_served(FE.Served(SKELS, E.good, phrases=False))
+        self.assertFalse(os.path.exists(self.out))
+        self.assertEqual(self.run_served(FE.Served(SKELS, E.good, phrases=False), "--no-ban-phrases", n=3), 0)
+        acc, rej = self.records()
+        self.assertTrue(acc + rej)
+        self.assertTrue(all(r["run_flags"]["phrases"] is None for r in acc + rej))
 
     def test_plain_client_refuses_ban_phrases(self):
         with self.assertRaises(SystemExit):
@@ -134,14 +144,15 @@ class Resume(E.Base):
             self.run_served(FE.Served(SKELS, E.good), "--structured", "labels_exact", n=3)
 
     def test_a_run_dir_from_before_the_phrase_flag_resumes_with_it_off(self):
-        self.assertEqual(self.run_served(FE.Served(SKELS, E.good), "--preset", "card", n=3), 0)
+        # 10-04: the ban is on by default, so a resume of a run dir pinned before it says --no-ban-phrases
+        self.assertEqual(self.run_served(FE.Served(SKELS, E.good), "--preset", "card", "--no-ban-phrases", n=3), 0)
         path = os.path.join(self.out, "decode.json")
         with open(path) as f:
             pins = json.load(f)
         self.assertEqual(pins, {**driver.FLAGS_OFF, "preset": "card"})
         with open(path, "w") as f:
             json.dump({k: v for k, v in pins.items() if k != "phrases"}, f)
-        self.assertEqual(self.run_served(FE.Served(SKELS, E.good), "--preset", "card", n=4), 0)
+        self.assertEqual(self.run_served(FE.Served(SKELS, E.good), "--preset", "card", "--no-ban-phrases", n=4), 0)
         with self.assertRaisesRegex(SystemExit, "decoding flags differ"):
             self.run_served(FE.Served(SKELS, E.good, phrases=True), "--preset", "card", "--ban-phrases", n=5)
 

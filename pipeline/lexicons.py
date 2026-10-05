@@ -98,7 +98,8 @@ GUIDE_META_RE = _alt([r"without (?:saying|telling|giving|revealing|stating)(?: m
                       r"without inventing one", r"no new topic", r"said before the detour",
                       r"keep the rule in this reply",
                       # 10-03 (round 3 wording, render_intents): the lead-in and the abstain guidance
-                      r"pointing back to (?:when|what)", r"ask(?:s|ing)? for it in a question"])
+                      r"pointing back to (?:when|what)", r"ask(?:s|ing)? for it in a question",
+                      r"(?:a|with) short lead in"])   # 10-04 (round 4): the self-name answer's wording
 # on an event's query line any withholding clause is the old guidance paraphrased (round 2 recheck: accepted recall
 # questions asked to be reminded "without telling me directly", "without telling it", "without telling me the city")
 WITHHOLD_RE = _alt([r"without (?:saying|telling|giving|revealing|stating|mentioning)"])
@@ -207,8 +208,13 @@ FORGOT_RE = _alt([r"i(?:'ve| have)? forgot(?:ten)?", r"(?:it )?slipped my mind",
 SELF_ERR_RE = _alt([r"correct(?:ing|ed) me", r"my (?:mistake|error|bad)", r"i stand corrected", r"i was wrong",
                     r"i (?:got|had) (?:it|that|this) wrong", r"i meant(?! to)", r"i misspoke", r"i misheard",
                     r"(?:sorry|apologi[sz]e) (?:for|about) (?:the|my|that) (?:mistake|error|mix ?up|confusion)"])
-EARLIER_RE = _alt([r"(?:mentioned|said|told me|shared|brought up|talked about)(?: [\w']+){0,6} (?:earlier|before|"
-                   r"previously)", r"(?:earlier|before|previously),? you (?:mentioned|said|told|shared)"])
+# 10-04 (dry pilot 4 v1 review, HIGH 1 and 5): the pointer verbs "called me", "asked", "mentioning", "saying", "noted"
+# and the time words "at the start / beginning" ("You called me Kit right at the start", "I remember you mentioning
+# Bologna earlier", "I noted Ursula earlier", each one turn after the user said it, or never said by the user)
+_SAYV = (r"(?:mention(?:ed|ing)|sa(?:id|ying)|told me|telling me|shar(?:ed|ing)|brought up|bringing up|talk(?:ed|ing) "
+         r"about|call(?:ed|ing) me|ask(?:ed|ing)|noted)")
+_EARLY = r"(?:earlier|before|previously|(?:right )?at the (?:start|beginning)|in the beginning)"
+EARLIER_RE = _alt([_SAYV + r"(?: [\w']+){0,6} " + _EARLY, _EARLY + r",? you (?:mentioned|said|told|shared|asked|called)"])
 # LIVE_DATA: the assistant reports current weather it cannot observe ("It is quite cold outside with snow falling",
 # "the weather is so sunny today"); a hedge in or just before the match ("I hope", "if", "sounds") lets it pass
 _WX = r"(?:cold|warm|hot|sunny|rainy|raining|snowy|snowing|windy|cloudy|chilly|freezing|stormy|humid|wet|foggy)"

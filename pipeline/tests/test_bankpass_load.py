@@ -148,7 +148,7 @@ class TestLoad(unittest.TestCase):
         self.assertEqual(B.PROVENANCE, "FAKE")
 
     def test_unloadable_banks_refuse(self):
-        for bank in ("intent", "pool.req_noun", "pool.weekday", "pool.topic", "label.no_such_key", "wordlist"):
+        for bank in ("intent", "pool.number_word", "pool.weekday", "pool.topic", "label.no_such_key", "wordlist"):
             with self.subTest(bank=bank), tempfile.TemporaryDirectory() as d:
                 FX.make_bank_dir(d, banks={bank: ["alpha beta", "gamma delta"], "open.greet": ["Hey there!"]})
                 probs = admit.check_dir(d, allow_fixture=True)[1]

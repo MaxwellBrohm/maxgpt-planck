@@ -10,7 +10,8 @@ import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 TESTS = ["tests/test_bankpass_core.py", "tests/test_bankpass_gen.py", "tests/test_bankpass_load.py",
-         "tests/test_bankpass_words.py", "tests/test_bankpass_wordload.py"]
+         "tests/test_bankpass_words.py", "tests/test_bankpass_wordload.py", "tests/test_bankpass_human.py",
+         "tests/test_bankpass_humanbuild.py"]
 M = [  # (file under pipeline/bankpass, old, new): each guards one rule a test claims
     ("store.py", 'if a.get("revision") != t["revision"]:', "if False:"),
     ("store.py", 'if src.get("license") not in HUMAN_LICENSES:', "if False:"),
@@ -117,6 +118,46 @@ M = [  # (file under pipeline/bankpass, old, new): each guards one rule a test c
     ("wordload.py", "            if name == rel:", "            if True:"),
     ("wordload.py", "    return read(p, expect_sha256) if p else fake()", "    return fake()"),
     ("plan.py", "list(seeds or P.pool(\"req_noun\").values)", "list(P.pool(\"req_noun\").values)"),
+    # W2 (2026-10-04): sources, human pools, persona seeds, safety list, build, aux admit, loader features
+    ("sources.py", "                if not m:\n", "                if False:\n"),
+    ("sources.py", "if pin and sha != pin:", "if False:"),
+    ("sources.py", "if pin or not os.path.exists(path):", "if pin:"),
+    ("sources.py", 'if rec.get("license") != SOURCES[name]["license"] or', "if"),
+    ("sources.py", "bad = verify_one(root, name, rec)", "bad = []"),
+    ("sources.py", 'if not rec or rec.get("status") != "ok":', "if not rec:"),
+    ("human.py", "if not FORM_RE.fullmatch(value):", "if False:"),
+    ("human.py", "if value.lower() in PROGRAM:", "if False:"),
+    ("human.py", 'return bool(fam) and "proper" not in fam["flags"]', "return bool(fam)"),
+    ("human.py", "if ctx.unsafe and ctx.unsafe.search(value):", "if False:"),
+    ("human.py", "SEX_PURE = 0.9", "SEX_PURE = 0.5"),
+    ("human.py", "key=lambda e: (rate[e], e))", "key=lambda e: (-rate[e], e))"),
+    ("human.py", 'if name.startswith("MC"):', "if False:"),
+    ("human.py", "name[len(p):] in listed for p in PREFIXES)", "True for p in PREFIXES)"),
+    ("human.py", '"DUP_NAME" if v.lower() in seen else ', ""),
+    ("human.py", "if r[7] in CITY_CODES:\n            seen.add", "if True:\n            seen.add"),
+    ("human.py", "        if kept >= target:\n", "        if False:\n"),
+    ("human.py", "for nm in cands:\n                if got[band] >= want:", "for nm in cands:\n                if False:"),
+    ("human.py", "for r in cands:\n            if got[band] >= want:", "for r in cands:\n            if False:"),
+    ("human.py", '("common", common, quota - quota // 2)', '("common", common, quota)'),
+    ("humanseed.py", "if any(_bare(w) in own for w in rest):", "if False:"),
+    ("humanseed.py", 'if not drop and int(row["age"]) < 18:', "if False:"),
+    ("humanseed.py", "while name and _tok(name[-1]).lower() in PARTICLES:", "while False:"),
+    ("humanseed.py", "return name if name and shared >= len(name) else []", "return name"),
+    ("humanseed.py", 'if t.endswith((",", "\'s")):\n            break', "if False:\n            break"),
+    ("humanseed.py", "or name[-1].endswith(\"'s\"):", ":"),
+    ("humanseed.py", '(body if name[-1].endswith(",") else "someone who " + body)', '("someone who " + body)'),
+    ("humanseed.py", '"DUP" if store.norm_key(text) in seen else None', "None"),
+    ("humanseed.py", '_LONG.sub(", ", t)', "t"),
+    ("humanseed.py", 'drop = "DUP" if t.lower() in seen else None', "drop = None"),
+    ("gates.py", 'out = [("HELDOUT_VOCAB", h) for h in heldout.vocab_hits(text)[:1]]', "out = []"),
+    ("admit.py", 'for bank, meta in sorted((man.get("aux") or {}).items()):', "for bank, meta in []:"),
+    ("admit.py", 'if bank.startswith(("seed.", "rubric.")):', "if False:"),
+    ("admit.py", 'hits = gates.pool_checks(r["text"], bank[5:]) if', 'hits = [] if False and'),
+    ("store.py", 'part = "aux" if bank in (aux or {}) else "banks"', 'part = "banks"'),
+    ("load.py", 'bs.features[vt] = {r["text"]: r.get("features") or {} for r in recs}', "pass"),
+    ("humanbuild.py", "if ctx.unsafe is None:", "if False:"),
+    ("load.py", 'meta["ref"].split(":", 1)[1]', 'meta["ref"].rsplit(":", 1)[1]'),
+    ("humanbuild.py", "{b: m for b, m in banks.items() if b in LOADED}", "{b: m for b, m in banks.items()}"),
 ]
 SWAP_ATTR = "\n\ndef _swap_attr(mod, name, new):\n    old = getattr(mod, name)\n    setattr(mod, name, new)\n" \
             "    return lambda: setattr(mod, name, old)\n"

@@ -114,18 +114,32 @@ def class_prompt(bank, n, fills=None, mined=None, seed=None):
             "After the last line write END on its own line.")
 
 
-def line_regex(literal=None, verbalized=False):
-    """one output line: a no-END line, holding `literal` once when given, then the likelihood tail if verbalized."""
-    u = f"(?:{D._UNIT})"
-    body = D.noend() if literal is None else f"{u}*{D.esc(literal)}{u}*(?:EN?)?"
+# W3 (s2b "digit and markdown tokens banned"): a bank line's characters exclude digits, markdown marks and straight
+# double quotes, in decode.noend()'s no-END form; judge answers keep decode.noend()
+_X = "\\n0-9*#`\"_"
+BANK_UNIT = f"(?:[^E{_X}]|E[^EN{_X}]|EN[^DE{_X}])"
+
+
+def bank_noend():
+    return f"(?:{BANK_UNIT}+(?:EN?)?|EN?)"
+
+
+def line_regex(literal=None, verbalized=False, question=False):
+    """one output line: a no-END line, holding `literal` once when given, then the likelihood tail if verbalized.
+    question (W3 amendment 4, key queries and baits, s3 K "end in ?"): the line ends with a question mark."""
+    u = BANK_UNIT
+    if question:
+        body = (f"{u}*{D.esc(literal)}" if literal else "") + f"{u}*(?:EN?)?\\?"
+    else:
+        body = bank_noend() if literal is None else f"{u}*{D.esc(literal)}{u}*(?:EN?)?"
     return body + (" \\| (?:" + "|".join(LIKELIHOOD) + ")" if verbalized else "")
 
 
-def decode_spec(model, literals, verbalized=False, banned=()):
+def decode_spec(model, literals, verbalized=False, banned=(), question=False):
     """the s2b decode spec for one call: the structured regex, the dash ban, digits and markdown banned by the
     regex classes left to the checker, and the values a query must not say (vLLM bad_words)."""
     sep = SEP.get(model, "\\n")
-    regex = sep.join([line_regex(lit, verbalized) for lit in literals] + ["END"])
+    regex = sep.join([line_regex(lit, verbalized, question) for lit in literals] + ["END"])
     spec = {"structured": "bank-lines-v1", "regex": regex, "ban": "dash", "bad_words": sorted(set(banned)),
             "n": len(literals), "literals": list(literals), "verbalized": verbalized, "sep": sep}
     spec["sha256"] = store.sha256_text(repr(sorted(spec.items())))

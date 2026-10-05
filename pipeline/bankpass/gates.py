@@ -55,7 +55,7 @@ def item_checks(text, bank, spec=None, prompt=None, mined=()):
         out.append(("NON_ENGLISH", "no English function word"))
     if spec["side"] == "user" and L.USER_VOICE_RE.search(plain):
         out.append(("USER_VOICE", L.USER_VOICE_RE.search(plain).group(0)))
-    if spec["side"] == "user" and re.search(r"(?<![a-z])your\s+\{(?:o|L|lab)\}", s, re.I):
+    if spec["side"] == "user" and bank != "swap.q" and re.search(r"(?<![a-z])your\s+\{(?:o|L|lab)\}", s, re.I):
         out.append(("PERSPECTIVE", "your <own thing>"))
     n_w = len(words(_HOLE.sub("x", s)))
     if not spec["min_w"] <= n_w <= spec["max_w"]:
@@ -95,7 +95,10 @@ def sample_fill(bank, spec, rng):
     """one random value per hole of the bank, drawn from the loaded pools (FAKE until real pools are installed)."""
     key = spec.get("key")
     d = BK.KEYS.get(key) if key else None
-    noun = rng.choice(P.pool(d["noun"]).values) if d and d["noun"] else rng.choice(P.pool("plan").values)
+    nouns = P.pool(d["noun"]).values if d and d["noun"] else P.pool("plan").values
+    if d and d["noun"] == "relation":      # W3 fix: a {p} template needs a relation with pronouns (KeyError 'p')
+        nouns = [x for x in nouns if BK.pronouns(key, x)[0]] or nouns
+    noun = rng.choice(nouns)
     vt = d["vtype"] if d else "name"
     v = rng.choice(P.pool(vt).values)
     old = rng.choice([x for x in P.pool(vt).values if x != v])
@@ -144,6 +147,24 @@ def pool_checks(value, vtype):
         out.append(("NON_ENGLISH", value))
     if not 1 <= len(value.split()) <= 4:
         out.append(("LEN_ITEM", value))
+    return out
+
+
+SEED_W = (4, 80)
+
+
+def seed_checks(text):
+    """a persona seed (prompt side only, s3 Q): no held-out term, honorific or digit (vocab_hits), no E004 5-gram,
+    no FAKE-list or role-label hit, plain letters only, 4 to 80 words."""
+    out = [("HELDOUT_VOCAB", h) for h in heldout.vocab_hits(text)[:1]]
+    out += [("HELDOUT_ECHO", h) for h in heldout.echo5(text)[:1]]
+    for code, rx in (("SAFETY", L.SAFETY_RE), ("ROLE_LABEL", L.ROLE_LABEL_RE), ("THOUGHT_TAG", L.THOUGHT_TAG_RE)):
+        if rx.search(text):
+            out.append((code, rx.search(text).group(0)))
+    if any(c.isalpha() and not ("A" <= c <= "Z" or "a" <= c <= "z") for c in text):
+        out.append(("NON_ENGLISH", "non-latin or accented letter"))
+    if not SEED_W[0] <= len(text.split()) <= SEED_W[1]:
+        out.append(("LEN_ITEM", f"{len(text.split())} words"))
     return out
 
 

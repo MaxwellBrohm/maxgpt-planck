@@ -70,9 +70,16 @@ def pool(vtype):
     return POOLS[vtype]
 
 
+VALUE_FEATURES = {}   # vtype -> {value: features}: article and number counted in core v0 (bankpass/load.install, W4)
+
+
 def features(vtype, value):
-    """article (a/an for common nouns, '' for names and closed lists), number, capitalized."""
+    """article (a/an for common nouns, '' for names and closed lists), number, capitalized. A frozen bank set's
+    counted article and number replace the vowel rule for its values (BANKPASS s3 P)."""
     cap = value[:1].isupper()
+    counted = VALUE_FEATURES.get(vtype, {}).get(value)
+    if counted and "article" in counted and not cap:
+        return {"article": counted["article"], "number": counted.get("number", "sg"), "cap": cap}
     if cap or vtype in ("weekday", "month", "time", "colour", "number_word", "ordinal"):
         art = ""
     else:

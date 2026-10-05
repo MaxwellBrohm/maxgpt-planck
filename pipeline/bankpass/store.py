@@ -193,11 +193,18 @@ def bank_ref(bank, sha, shares):
     return f"{bank}@{sha[:12]}:{mix_string(shares)}"
 
 
-def build_manifest(bank_dir, version, gate_hash, rc12, banks, status="frozen", code_sha256=None, fixture=False):
-    """banks: {bank: {"class", "kind", "target"}} with <bank>.jsonl present in bank_dir. Writes manifest.json."""
-    out = {"schema": "bankpass-manifest-v1", "version": version, "status": status, "fixture": bool(fixture),
-           "gate_hash": gate_hash, "rc12": rc12, "code_sha256": code_sha256, "banks": {}}
-    for bank, meta in sorted(banks.items()):
+def build_manifest(bank_dir, version, gate_hash, rc12, banks, status="frozen", code_sha256=None, fixture=False,
+                   aux=None, extra=None):
+    """banks: {bank: {"class", "kind", "target"}} with <bank>.jsonl present in bank_dir; aux: the same for files the
+    skeleton never installs (prompt-side seeds, rubric lists), checked by admit but not loaded; extra: more top-level
+    fields (sources, code hashes). Writes manifest.json."""
+    out = dict(extra or {}, schema="bankpass-manifest-v1", version=version, status=status, fixture=bool(fixture),
+               gate_hash=gate_hash, rc12=rc12, code_sha256=code_sha256, banks={})
+    if set(banks) & set(aux or {}):
+        raise ValueError(f"listed as both bank and aux: {sorted(set(banks) & set(aux))}")
+    if aux:
+        out["aux"] = {}
+    for bank, meta in sorted(list(banks.items()) + list((aux or {}).items())):
         path = os.path.join(bank_dir, bank + ".jsonl")
         recs = read_jsonl(path, tolerate_torn_tail=False)
         shares = author_shares(recs)
@@ -206,9 +213,10 @@ def build_manifest(bank_dir, version, gate_hash, rc12, banks, status="frozen", c
             if r["status"] == "dropped":
                 drops[r["drop"]] = drops.get(r["drop"], 0) + 1
         sha = sha256_file(path)
-        out["banks"][bank] = dict(meta, file=bank + ".jsonl", sha256=sha, kept=sum(r["status"] == "kept" for r in recs),
-                                  dropped=sum(r["status"] == "dropped" for r in recs), drops=drops,
-                                  authors=shares, ref=bank_ref(bank, sha, shares))
+        part = "aux" if bank in (aux or {}) else "banks"
+        out[part][bank] = dict(meta, file=bank + ".jsonl", sha256=sha, kept=sum(r["status"] == "kept" for r in recs),
+                               dropped=sum(r["status"] == "dropped" for r in recs), drops=drops,
+                               authors=shares, ref=bank_ref(bank, sha, shares))
     with open(os.path.join(bank_dir, "manifest.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1, sort_keys=True)
     return out
