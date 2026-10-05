@@ -11,9 +11,14 @@ Each check returns a list of failure strings; main() writes logs/e2e_machinery.t
   scoring    T0 / K / COMPOSE excluded from R; BIND unit = pair; nested seed means; Level A comparator and
              claimability; K gap; the LOOKUP claim (Max, 2026-10-04; s10b): its value, P / X rates and cells, its
              independence from R both ways, the 0.60 bar inclusive, claimable only with 3 training seeds, the
-             template render and sampled rows
-  stats      headroom floor / ceiling, paired bootstrap and Level R, PERSIST base rates, sensitivity row; the
-             LOOKUP claim's CI (units, training seeds and sampling seeds resampled)
+             template render, sampled rows and T0 rows (the T0 gate itself: levelr)
+  stats      headroom floor / ceiling, paired bootstrap and the -3 non-inferiority test (score_stats.noninferior,
+             reported beside Level R since 2026-10-04), PERSIST base rates, sensitivity row; the LOOKUP claim's CI
+             (units, training seeds and sampling seeds resampled)
+  levelr     Level R since 2026-10-04 (Max: decisions 1 D and 4 a of rc12/DECISIONS_LEVEL_R_FOR_MAX.md): S7 over the
+             7 state families with the gated OWN, score.level_r's bars and claimability, score_stats.level_r reads the
+             CI's lower bound, s7_ci resamples units, training and sampling seeds and refuses without the cf rows, the
+             paired S7 difference reads only STATE7, the s12 clause, the LOOKUP claim's T0 gate
   hf         hf_responder imports without torch and keeps HF_TESTED True (notes STEP 9b); runner refuses it
              without --hf-untested-ok
   owncf      the OWN counterfactual-history diagnostic (step 5 audit, own_cf.py); padded, blank-bulleted and
@@ -192,7 +197,7 @@ def c_scoring(recs):
     check(ab["P"] == want["P"] == 0 and ab["X"] == want["X"] > 0 and ab["value"] == 0,
           f"LOOKUP P / X probe rates (ABSTAIN): {ab}, counted here {want}", out)
     tmpl = [dict(r, render="template", seed=1, train_seed=t) for t in (0, 1, 2) for r in ideal
-            if r["family"] == "LOOKUP"]
+            if r["family"] in ("LOOKUP", "T0")]           # + T0 (IDEAL 1.00): the claim also asks T0 >= 0.90
     claim = {k: S.summarize(rs)["lookup_claim"]["claimable"] for k, rs in (
         ("3 seeds", tmpl), ("2 seeds", [r for r in tmpl if r["train_seed"] < 2]),
         ("plain", [dict(r, render="plain") for r in tmpl]), ("greedy", [dict(r, seed=None) for r in tmpl]))}
@@ -232,9 +237,9 @@ def c_stats(recs):
     ci = ST.bootstrap_diff(rows["FIRST"], rows["FIRST"], n=200)
     check(ci["lo"] == 0 and ci["hi"] == 0, f"bootstrap is not paired: D(FIRST, FIRST) CI {ci}", out)
     ci = ST.bootstrap_diff(rows["IDEAL"], rows["FIRST"], n=200)
-    check(ci["lo"] > 0 and ci["lo"] <= ci["D"] <= ci["hi"] and ST.level_r(ci), f"bootstrap IDEAL-FIRST {ci}", out)
+    check(ci["lo"] > 0 and ci["lo"] <= ci["D"] <= ci["hi"] and ST.noninferior(ci), f"bootstrap IDEAL-FIRST {ci}", out)
     ci = ST.bootstrap_diff(rows["FIRST"], rows["IDEAL"], n=200)
-    check(ci["hi"] < 0 and not ST.level_r(ci), f"bootstrap FIRST-IDEAL {ci}", out)
+    check(ci["hi"] < 0 and not ST.noninferior(ci), f"bootstrap FIRST-IDEAL {ci}", out)
     rates = ST.persist_base_rates(rows["IDEAL"], ST.persist_rules(recs))
     check(rates == ST.persist_base_rates(base["IDEAL"], ST.persist_rules(recs)), "cf rows in PERSIST base rates", out)
     check(rates["first_word:Greetings"] == 0 and rates["one_sentence:None"] > ST.PERSIST_DROP,
@@ -270,6 +275,109 @@ def c_stats(recs):
     except Exception as e:  # noqa: BLE001 (the refusal must be the stated assertion, not a crash)
         check(isinstance(e, AssertionError) and "['OWN']" in str(e), f"bootstrap refusal {type(e).__name__}: {e}", out)
     return out
+
+
+def c_levelr(recs):
+    """Level R since Max, 2026-10-04 (rc12/DECISIONS_LEVEL_R_FOR_MAX.md decisions 1 D and 4 a; prereg draft s9, s12,
+    s10b): S7 over exactly the 7 STATE7 families with the gated OWN; score.level_r's bars (S7 CI lower bound 40,
+    PERSIST 0.40, both inclusive) and claimability (3 training seeds, T0 0.90); score_stats.level_r reads the CI's
+    lower bound, not the point; s7_ci resamples units, training seeds and sampling seeds; the paired S7 difference
+    reads only STATE7; the s12 clause (S7 point >= 40 and PERSIST >= 0.40); the LOOKUP claim asks T0 >= 0.90.
+    An exception inside is reported as a failure, not raised (mutants_e2e #21 drops the sampled rows, which leaves
+    s7_ci nothing to resample), as c_stats does for the LOOKUP CI."""
+    out = []
+    try:
+        _levelr(recs, out)
+    except Exception as e:  # noqa: BLE001
+        out.append(f"Level R checks raised {type(e).__name__}: {e}"[:300])
+    return out
+
+
+def _levelr(recs, out):
+    own = [r for r in recs if r["family"] == "OWN"]
+    names = ["IDEAL", "ABSTAIN", "FIRST", "P_NEVER", "P_UNIVERSAL", "P_OBEYALL"]
+    rows = {n: run(recs, n) + run(own, n, own_cf=True) for n in names}
+    sm = {n: S.summarize(rows[n]) for n in names}
+    check(sm["IDEAL"]["S7"] == 100 and S.summarize(run(recs, "IDEAL"))["S7"] is None
+          and S.summarize(run(recs, "IDEAL"))["S7_ungated"] == 100, "S7 on IDEAL: 100 with the cf rows, None without "
+          f"(OD1 b), S7_ungated 100: {sm['IDEAL']['S7']}", out)
+    got = {}
+    for f in S.COMPOSITE + ["LOOKUP", "T0", "K"]:
+        got[f] = S.summarize([dict(r, unit=0.0) if r["family"] == f and not r.get("own_cf") else r
+                              for r in rows["IDEAL"]])["S7"]
+    want = {f: 600 / 7 if f in ("RECALL", "CORR", "BIND", "TWOHOP", "OWN", "TOPIC", "ROLE") else 100.0 for f in got}
+    check(all(abs(got[f] - want[f]) < 1e-9 for f in got), f"S7 is not the 7 state families: one family at 0 -> {got}",
+          out)
+    cfz = S.summarize([dict(r, unit=0.0) if r.get("own_cf") else r for r in rows["IDEAL"]])
+    check(abs(cfz["S7"] - 600 / 7) < 1e-9 and cfz["S7_ungated"] == 100, f"S7 does not read the gated OWN (cf run 0): "
+          f"S7 {cfz['S7']}, S7_ungated {cfz['S7_ungated']}", out)
+    lr = S.level_r
+    v = {k: (lr(*a)["met"], lr(*a)["claimable"]) for k, a in (
+        ("bars", (40.0, 0.40, 0.90, 3)), ("S7 39.999", (39.999, 0.40, 0.90, 3)), ("PERSIST 0.3999", (40.0, 0.3999, 0.90, 3)),
+        ("T0 0.8999", (40.0, 0.40, 0.8999, 3)), ("T0 None", (40.0, 0.40, None, 3)), ("2 seeds", (40.0, 0.40, 0.90, 2)),
+        ("S7 None", (None, 0.40, 0.90, 3)), ("PERSIST None", (40.0, None, 0.90, 3)))}
+    check(v == {"bars": (True, True), "S7 39.999": (False, False), "PERSIST 0.3999": (False, False),
+                "T0 0.8999": (True, False), "T0 None": (True, False), "2 seeds": (True, False), "S7 None": (False, False),
+                "PERSIST None": (False, False)},
+          f"score.level_r bars (S7 lo 40, PERSIST 0.40 inclusive; T0 0.90 and 3 seeds for claimable): {v}", out)
+    three = lambda srcs, key="train_seed": [dict(r, **{key: k}) for k, n in enumerate(srcs, 1 if key == "seed" else 0)  # noqa: E731
+                                            for r in rows[n]]
+    ideal3 = three(["IDEAL"] * 3)
+    r3 = ST.level_r(ideal3, n=400)
+    check(r3["met"] and r3["claimable"] and r3["ci"]["lo"] == 100, f"Level R on IDEAL x 3 training seeds: {r3}", out)
+    mix = ST.level_r(three(["IDEAL", "IDEAL", "ABSTAIN"]), n=2000)
+    check(abs(mix["S7"] - 200 / 3) < 1e-9 and mix["ci"]["lo"] == 0 and not mix["met"]
+          and mix["crit"]["S7_lo"]["value"] == mix["ci"]["lo"],
+          f"Level R reads the point, not the CI lower bound (IDEAL, IDEAL, ABSTAIN: S7 66.7, lo 0): {mix}", out)
+    pv = {n: ST.level_r(three([n] * 3), n=50)["met"] for n in ("P_NEVER", "P_UNIVERSAL", "P_OBEYALL")}
+    check(pv == {"P_NEVER": False, "P_UNIVERSAL": False, "P_OBEYALL": True}, f"Level R PERSIST bar (0.08, 0.25 miss; "
+          f"0.67 meets): {pv}", out)
+    for key in ("train_seed", "seed"):
+        ci = ST.s7_ci(three(["IDEAL", "ABSTAIN", "ABSTAIN"], key), n=2000)
+        check(abs(ci["S7"] - 100 / 3) < 1e-9 and ci["lo"] == 0 and ci["hi"] == 100,
+              f"S7 CI does not resample {key}s (IDEAL, ABSTAIN, ABSTAIN: want lo 0, hi 100): {ci}", out)
+    # the 95% level (verifier, 2026-10-05): 3 IDEAL + 3 ABSTAIN training seeds put 1.6% of resamples at 0 and 1.6%
+    # at 100, so a 98% or 99% interval reads 0 and 100 here; the IDEAL, IDEAL, ABSTAIN case above (3.7% at 0) bounds
+    # the other side (a 90% interval reads 33.3 there)
+    ci = ST.s7_ci([dict(r, train_seed=k) for k, n in enumerate(["IDEAL", "ABSTAIN"] * 3) for r in rows[n]], n=10000)
+    check(abs(ci["lo"] - 100 / 6) < 1e-9 and abs(ci["hi"] - 500 / 6) < 1e-9,
+          f"S7 CI is not the 95% percentile interval (3 IDEAL + 3 ABSTAIN seeds: want lo 16.67, hi 83.33): {ci}", out)
+    ci = ST.s7_ci(rows["FIRST"], n=2000)
+    check(ci["lo"] < ci["S7"] - 1 < ci["S7"] + 1 < ci["hi"], f"S7 CI does not resample units (FIRST): {ci}", out)
+    rz = [dict(r, unit=0.0) if r["family"] == "ROLE" else r for r in rows["IDEAL"]]
+    ci = ST.s7_ci(rz, n=200)
+    check(abs(ci["lo"] - 600 / 7) < 1e-9 and abs(ci["hi"] - 600 / 7) < 1e-9 and sum(ci["units"].values()) > 0,
+          f"S7 CI is not over the 7 state families (ROLE at 0: want lo = hi = 85.71): {ci}", out)
+    try:
+        ST.s7_ci(run(recs, "IDEAL"), n=10)
+        out.append("S7 CI ran without the --own-cf rows (OD1 b)")
+    except Exception as e:  # noqa: BLE001
+        check(isinstance(e, AssertionError) and "['OWN']" in str(e), f"S7 CI refusal {type(e).__name__}: {e}", out)
+    d = ST.bootstrap_diff(rows["P_NEVER"], rows["IDEAL"], n=200, fams=S.STATE7)
+    dr = ST.bootstrap_diff(rows["P_NEVER"], rows["IDEAL"], n=200)
+    check(d["D"] == d["lo"] == d["hi"] == 0 and dr["D"] < 0, f"paired S7 difference reads more than STATE7 "
+          f"(P_NEVER vs IDEAL: S7 {d}, R {dr})", out)
+    d = ST.bootstrap_diff(rows["IDEAL"], rows["FIRST"], n=200, fams=S.STATE7)
+    check(abs(d["D"] - (sm["IDEAL"]["S7"] - sm["FIRST"]["S7"])) < 1e-9 and d["lo"] <= d["D"] <= d["hi"],
+          f"paired S7 difference IDEAL - FIRST {d}", out)
+    cl = {k: S.s12_clause(dict(S7=a, R=r, families=dict(PERSIST=b)))["passes"] for k, a, b, r in (   # R opposite
+        ("bars", 40.0, 0.40, 0.0), ("S7", 39.999, 0.40, 100.0), ("PERSIST", 40.0, 0.3999, 100.0), ("None", None, 1.0, 100.0),
+        ("PERSIST None", 40.0, None, 100.0))}
+    cl.update({n: sm[n]["s12_clause"]["passes"] for n in ("IDEAL", "P_NEVER", "FIRST")})
+    check(cl == {"bars": True, "S7": False, "PERSIST": False, "None": False, "PERSIST None": False, "IDEAL": True,
+                 "P_NEVER": False, "FIRST": False} and sm["P_NEVER"]["s12_clause"] == S.s12_clause(sm["P_NEVER"]),
+          f"s12 clause (S7 point >= 40 and PERSIST >= 0.40): {cl}", out)
+    ideal = run(recs, "IDEAL")
+    lk = [dict(r, render="template", seed=1, train_seed=t) for t in (0, 1, 2) for r in ideal if r["family"] == "LOOKUP"]
+    t0 = {n: [dict(r, render="template", seed=1, train_seed=t) for t in (0, 1, 2) for r in run(recs, n)
+              if r["family"] == "T0"] for n in ("IDEAL", "ECHO")}
+    lc = {k: S.summarize(rs)["lookup_claim"] for k, rs in (("no T0", lk), ("T0 1", lk + t0["IDEAL"]),
+                                                          ("T0 0", lk + t0["ECHO"]))}
+    bar = {x: S.lookup_claim({"LOOKUP": 1.0, "T0": x}, lk, 3)["claimable"] for x in (0.90, 0.8999)}
+    check({k: v["claimable"] for k, v in lc.items()} == {"no T0": False, "T0 1": True, "T0 0": False}
+          and all(v["met"] for v in lc.values()) and bar == {0.90: True, 0.8999: False},
+          f"LOOKUP claim without T0 >= 0.90 (decision 4): {[(k, v['claimable'], v['why_not']) for k, v in lc.items()]}, "
+          f"bar {bar}", out)
 
 
 def c_hf(recs):
@@ -474,7 +582,8 @@ def c_ackrep(recs):
 ACK_KEYS = ("ack_repeat", "ack_repeat_of_statements", "ack_repeat_of_answers", "equality_only")
 
 
-CHECKS = [c_render, c_history, c_stops, c_trunc, c_seeds, c_scoring, c_stats, c_hf, c_owncf, c_owngate, c_ackrep]
+CHECKS = [c_render, c_history, c_stops, c_trunc, c_seeds, c_scoring, c_stats, c_levelr, c_hf, c_owncf, c_owngate,
+          c_ackrep]
 
 
 def checks(recs=None):

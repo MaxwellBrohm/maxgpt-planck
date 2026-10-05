@@ -16,7 +16,10 @@ generate(est, fams, n, rng, rt, eta): a split of n conversations (family f has r
 draws(nfs, B, rng) + boot(...): score_stats.bootstrap_diff vectorised (one unit draw per family shared by both
   models, training seeds resampled per model, sampling seeds inside each drawn training seed, percentile CI with
   lo = sorted[int(0.025 B)]); test_sizing.py checks it against bootstrap_diff on the same random draws.
-power(...): share of simulated splits whose CI passes score_stats.level_r (lower bound >= -3)."""
+power(...): share of simulated splits whose CI passes score_stats.noninferior (lower bound >= -3), PLAN's original
+  Level R test. Since 2026-10-04 Level R reads S7's one-model CI lower bound >= 40 instead (Max, 2026-10-04: took all
+  recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision 1, D)) and the -3 test is reported beside; the
+  sealed size this rule gave, 600, stands (that bar barely depends on n; prereg draft s9)."""
 import math
 from statistics import NormalDist
 
@@ -203,7 +206,7 @@ def tau_for(est, fams, sigma_r):
 
 
 def power(est, fams, n, sims, B, seed, rt="x", sigma_r=0.0, base=DEV_RECORDS):
-    """simulate the s9 analysis on `sims` splits of n conversations; power = share with level_r(ci) true."""
+    """simulate the s9 analysis on `sims` splits of n conversations; power = share with noninferior(ci) true."""
     rng = np.random.default_rng([seed, n, int(round(1000 * sigma_r)), {"x": 1, "s": 2}.get(rt, 3), base])
     tau = tau_for(est, fams, sigma_r)
     nfs = [n_units(f, n, base) for f in fams]
@@ -216,7 +219,7 @@ def power(est, fams, n, sims, B, seed, rt="x", sigma_r=0.0, base=DEV_RECORDS):
         los.append(c["lo"])
         ds.append(point)
         ses.append(float(np.std(diffs)))
-    passed = [ST.level_r(dict(lo=x)) for x in los]
+    passed = [ST.noninferior(dict(lo=x)) for x in los]
     return dict(n=n, units=dict(zip(fams, nfs)), sims=sims, B=B, seed=seed, rt=rt, sigma_r=sigma_r, tau=tau,
                 base=base, power=sum(passed) / sims, mean_lo=float(np.mean(los)), sd_D=float(np.std(ds)),
                 mean_D=float(np.mean(ds)), mean_boot_se=float(np.mean(ses)))

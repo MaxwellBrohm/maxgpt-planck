@@ -52,5 +52,5 @@ KILLED   #48 lik_run.py: lik_run defaults to bf16  [FAIL lik_run hf defaults {'h
 KILLED   #49 lik_run.py: Planck precision auto (bf16 off cpu)  [FAIL lik_run planck precision default ('x.pt', None, None, 'cpu', 'auto')]
 KILLED   #50 lik_run.py: engine info (attention, dtype) not in summary.json  [FAIL lik_run hf defaults {'hf': ('x/y', 'float32', 'cuda', None), 'planck': ('x.pt', None, None, 'cpu', 'fp32')} {'kind': 'stub', 'tok': 'chunk'}]
 KILLED   #51 lik_run.py: console line without n_nonfinite / n_ties  [FAIL the console line lacks n_nonfinite / n_ties]
-51 mutants, 0 problems, 0 not run, 195 s
+51 mutants, 0 problems, 0 not run, 185 s
 ALL MUTANTS KILLED

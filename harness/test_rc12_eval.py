@@ -229,5 +229,7 @@ def test_e2e_scores_through_score_py(e2e):
     s = json.loads(rc.stdout)
     assert s["R"] is None, s["R"]              # OD1 b: no --own-cf run here, so the gated OWN (and R) is missing
     assert s["R_ungated"] is not None and 0 <= s["R_ungated"] <= 15, s["R_ungated"]
-    assert set(s["families"]) == {"RECALL", "CORR", "BIND", "TWOHOP", "PERSIST", "OWN", "TOPIC", "ROLE", "LOOKUP",
-                                  "LOOP"}
+    # 9 composite families: LOOKUP left R on 2026-10-02 (rc12/DECISIONS_FOR_MAX.md item 1) and is its own claim
+    assert set(s["families"]) == {"RECALL", "CORR", "BIND", "TWOHOP", "PERSIST", "OWN", "TOPIC", "ROLE", "LOOP"}
+    # Level R's S7 (Max, 2026-10-04): None without the --own-cf run (OD1 b), as R; the own-history S7 beside it
+    assert s["S7"] is None and s["S7_ungated"] is not None and 0 <= s["S7_ungated"] <= 100, (s["S7"], s["S7_ungated"])

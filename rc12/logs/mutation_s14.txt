@@ -14,14 +14,14 @@ KILLED   #12 runner.py: runner ignores engines.json's token_budget  <- test_chat
 KILLED   #13 dev_batch.py: dev_batch drops token_budget  <- test_chat_template.py: FAIL hfb ['chat_template', 'engine', 'token_budget']: built 0 [('HFBatched', "<x>{% for m in messages %}{{ m['content'] 
 KILLED   #14 dev_batch.py: dev_batch drops chat_template  <- test_chat_template.py: FAIL hfb ['chat_template', 'engine', 'token_budget']: built 0 [('HFBatched', "{% for m in messages %}{{ m['role'] }}: {{
 KILLED   #15 dev_batch.py: token_budget not validated  <- test_chat_template.py: FAIL tb_hf refused: 0 [('tok', 'org/M', False), ('model', 'org/M', False)]
-KILLED   #16 dev_batch.py: chat_template and nan_guard not validated  <- test_chat_template.py: 79/rc12/hf_responder.py", line 45, in set_template
+KILLED   #16 dev_batch.py: chat_template and nan_guard not validated  <- test_chat_template.py: pa/rc12/hf_responder.py", line 45, in set_template
     raise ValueError(f"chat_template must be a non-empty string, not 
-KILLED   #17 parity_hf_vllm.py: parity ignores engines.json's template  <- test_chat_template.py: FAIL parity hfb /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_wf4b4kn0/engines.json: [('HFResponder', "
-KILLED   #18 parity_hf_vllm.py: parity: vLLM stage without the template  <- test_chat_template.py: FAIL parity vllm /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_wibl5uwl/engines.json: [('VLLMResponder'
-KILLED   #19 parity_hf_vllm.py: parity: hfb stage without max_batch / token_budget  <- test_chat_template.py: FAIL parity hfb /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_i4j0o05b/engines.json: [('HFResponder', "
-KILLED   #20 parity_hf_vllm.py: parity: HF stage without the template  <- test_chat_template.py: FAIL parity hfb /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_pdfb_onz/engines.json: [('HFResponder', "
-KILLED   #21 parity_hf_vllm.py: parity all drops --engines  <- test_chat_template.py: FAIL parity all forwards --engines ['--engines', '/var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_em9l3my
-KILLED   #22 parity_hf_vllm.py: parity meta lacks the template  <- test_chat_template.py: FAIL parity meta template hfb /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par__14nj95r/engines.json
+KILLED   #17 parity_hf_vllm.py: parity ignores engines.json's template  <- test_chat_template.py: FAIL parity hfb /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_vd3vygzl/engines.json: [('HFResponder', "
+KILLED   #18 parity_hf_vllm.py: parity: vLLM stage without the template  <- test_chat_template.py: FAIL parity vllm /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_begaz_be/engines.json: [('VLLMResponder'
+KILLED   #19 parity_hf_vllm.py: parity: hfb stage without max_batch / token_budget  <- test_chat_template.py: FAIL parity hfb /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_2wj2rmzg/engines.json: [('HFResponder', "
+KILLED   #20 parity_hf_vllm.py: parity: HF stage without the template  <- test_chat_template.py: FAIL parity hfb /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_e09s0gvz/engines.json: [('HFResponder', "
+KILLED   #21 parity_hf_vllm.py: parity all drops --engines  <- test_chat_template.py: FAIL parity all forwards --engines ['--engines', '/var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_ctnh0i3
+KILLED   #22 parity_hf_vllm.py: parity meta lacks the template  <- test_chat_template.py: FAIL parity meta template hfb /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_8oz1bayo/engines.json
 KILLED   #23 verify_dev_runs.py: verify C1 ignores the template  <- test_chat_template.py: FAIL C1 template check org/M None: []
 KILLED   #24 verify_dev_runs.py: verify C5 without trust  <- test_chat_template.py: FAIL C5 load options trust True: [('tok', 'org/M', False), ('config', 'org/M', False)]
 KILLED   #25 verify_dev_runs.py: verify C5 without the template  <- test_chat_template.py: FAIL C5 prompt with the run's template (llama): "C5 org/M template r-1 turn 3, qwen3 False rule_differs False:\n'user: u
@@ -34,9 +34,9 @@ KILLED   #31 engines.json: Loom with tools on  <- test_loom_template.py: FAIL rc
 KILLED   #32 dev_batch.py: apply_decode does not set DECODE  <- test_decode_variant.py: FAIL card run: rc 0 decode {'temperature': 0.6, 'top_p': 1.0, 'top_k': 0, 'repetition_penalty': 1.0, 'max_new_tokens': 2
 KILLED   #33 dev_batch.py: decode allowed on hf / hfb  <- test_decode_variant.py: FAIL decode hfb on hfb refused: rc 0 calls [('tok', 'org/M', False), ('model', 'org/M', False)] after {'temperature': 0.
 KILLED   #34 dev_batch.py: decode takes any key  <- test_decode_variant.py: FAIL decode key on vllm refused: rc 0 calls [('tok', 'org/M', False), ('config', 'org/M', False), ('llm', 'org/M', False
-KILLED   #35 dev_batch.py: decode takes a non-dict  <- test_decode_variant.py: /6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmp_q51vnnp/rc12/dev_batch.py", line 91, in decode_override
+KILLED   #35 dev_batch.py: decode takes a non-dict  <- test_decode_variant.py: /6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmpja7ref4z/rc12/dev_batch.py", line 91, in decode_override
     for k, v in d.items():
-KILLED   #36 dev_batch.py: decode takes bools and strings  <- test_decode_variant.py: p14pa2kz5/rc12/dev_batch.py", line 92, in decode_override
+KILLED   #36 dev_batch.py: decode takes bools and strings  <- test_decode_variant.py: p4npa67vo/rc12/dev_batch.py", line 92, in decode_override
     if not (0 < v <= 1 if k == "top_p" else v >= 1):
          
 KILLED   #37 dev_batch.py: repetition_penalty below 1 accepted  <- test_decode_variant.py: FAIL decode rp_low on vllm refused: rc 0 calls [('tok', 'org/M', False), ('config', 'org/M', False), ('llm', 'org/M', Fa
@@ -53,7 +53,7 @@ KILLED   #47 engines.json: the main engines.json carries a decode  <- test_decod
 KILLED   #48 hf_responder.py: guard_nans hooks nothing  <- test_engine_patches.py: FAIL toy: NaN with the guard
 KILLED   #49 hf_responder.py: the guard zeroes inf, not NaN  <- test_engine_patches.py: FAIL toy: NaN with the guard
 KILLED   #50 hf_responder.py: guard_nans accepts an unknown class  <- test_engine_patches.py: FAIL toy: guard_nans accepted 'Nope'
-KILLED   #51 hf_responder.py: guard_nans(None) raises  <- test_chat_template.py: /tmpc5or4fi3/rc12/hf_responder.py", line 64, in guard_nans
+KILLED   #51 hf_responder.py: guard_nans(None) raises  <- test_chat_template.py: /tmpsx35jvia/rc12/hf_responder.py", line 64, in guard_nans
     raise ValueError(f"nan_guard must be a module class name,
 KILLED   #52 hf_responder.py: HFResponder never hooks  <- test_engine_patches.py: FAIL nan_guard hfb: called [None] rc 0 meta Attention
 KILLED   #53 hf_responder.py: set_use_cache sets nothing  <- test_engine_patches.py: FAIL set_use_cache True: as shipped

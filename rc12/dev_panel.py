@@ -13,7 +13,11 @@ LOOKUP's family score is a reported column (F_LOOKUP, from the keys) with its he
 and the near-duplicate rate sits beside the loop rate. Since 2026-10-04 (Max: LOOKUP is its own pre-registered
 headline claim, prereg draft s10b): its P and X probe rates and score.lookup_claim's verdict are columns, and
 rules.json lookup_claim holds every panel model's LOOKUP rate with score_stats.lookup_ci (template, seeds 1-3,
-10,000 resamples), the comparison s10b reports (a dev reading of public models, never a claim)."""
+10,000 resamples), the comparison s10b reports (a dev reading of public models, never a claim). Since 2026-10-04 (Max:
+took all recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md, decision 1 D): S7, S7_ungated and the s12 clause's
+verdict (S7 point >= 40 and PERSIST >= 0.40) are columns, and rules.json level_r holds every panel model's S7 with
+score_stats.s7_ci and score.level_r's verdict (template, seeds 1-3, 10,000 resamples; one training seed, so never
+claimable: a dev reading, never a claim)."""
 import argparse
 import json
 import os
@@ -29,7 +33,8 @@ EXTRAS = ["Qwen3-0.6B", "gemma-3-270m-it", "LFM2-700M", "LFM2-1.2B"]
 RENDERS = ["template", "plain"]
 SEEDS = ["greedy", "1", "2", "3"]
 LA = list(S.LEVEL_A)
-COLS = (["R", "R_ungated"] + [f"F_{f}" for f in S.COMPOSITE + S.REPORTED] + ["LOOKUP_P", "LOOKUP_X"] +
+COLS = (["R", "R_ungated", "S7", "S7_ungated", "s12_clause"] + [f"F_{f}" for f in S.COMPOSITE + S.REPORTED] +
+        ["LOOKUP_P", "LOOKUP_X"] +
         ["OWN_ungated", "OWN_CF"] + LA +
         ["T0", "loop", "near_duplicate", "ack_repeat", "ack_repeat_of_statements", "ack_repeat_of_answers", "RUNAWAY", "EMPTY", "LEAK",
          "cf_unswapped", "replies", "level_a_met", "lookup_claim_met"])
@@ -49,7 +54,8 @@ def run_rows(root, model, render, seed):
 def flat(summ):
     """the panel columns of one score.summarize result."""
     ks, deg = summ["keys"], summ["degenerate_rates"]
-    out = dict(R=summ["R"], R_ungated=summ["R_ungated"])
+    out = dict(R=summ["R"], R_ungated=summ["R_ungated"], S7=summ["S7"], S7_ungated=summ["S7_ungated"],
+               s12_clause=summ["s12_clause"]["passes"])
     out.update({f"F_{f}": summ["families"][f] for f in S.COMPOSITE})
     out.update({f"F_{f}": ks.get(f) for f in S.REPORTED})
     out.update(LOOKUP_P=summ["lookup_claim"]["P"], LOOKUP_X=summ["lookup_claim"]["X"],
@@ -133,6 +139,13 @@ def main():
     lookup = {m: dict(ST.lookup_ci(pooled_rows[(m, "template")], n=10000), P=summ3[(m, "template")]["lookup_claim"]["P"],
                       X=summ3[(m, "template")]["lookup_claim"]["X"], met=summ3[(m, "template")]["lookup_claim"]["met"])
               for m in models}
+    # Level R since 2026-10-04: S7, its one-model CI and score.level_r's verdict per model (template, seeds 1-3)
+    level = {}
+    for m in models:
+        st, ci = summ3[(m, "template")], ST.s7_ci(pooled_rows[(m, "template")], n=10000)
+        level[m] = dict(S7=st["S7"], ci=ci, PERSIST=st["families"]["PERSIST"], T0=st["t0"]["score"],
+                        s12_clause=st["s12_clause"]["passes"],
+                        verdict=S.level_r(ci["lo"], st["families"]["PERSIST"], st["t0"]["score"], st["n_train_seeds"]))
     extra = {f"{m}|{r}": dict(k=summ3[(m, r)]["k"], t0_failures=summ3[(m, r)]["t0"]["failures"],
                               own_source_fail=summ3[(m, r)]["own_source_fail"],
                               capture_rate=summ3[(m, r)]["capture_rate"], lenient=summ3[(m, r)]["lenient"])
@@ -150,7 +163,7 @@ def main():
         json.dump(dict(headroom=head, headroom_reported=head_reported, persist_rules=[f"{a}:{b}" for a, b in rules], persist_rates_core=prates,
                        persist_rates_extras=prates_x, persist_drops_core=drops, sensitivity=sens,
                        reanchor_input={k: mean3[("LFM2-2.6B", "template")][k] for k in LA},
-                       equality_only=eq_only, reported_beside=extra, lookup_claim=lookup), f, indent=0)
+                       equality_only=eq_only, reported_beside=extra, lookup_claim=lookup, level_r=level), f, indent=0)
     with open(os.path.join(args.out, "checks.json"), "w") as f:
         json.dump(checks, f, indent=0)
     bad = [c for c in checks if c.get("scores_jsonl_dev") is False or c.get("scores_jsonl_cf") is False
@@ -162,6 +175,9 @@ def main():
     print("persist drops (core, > 0.30):", drops)
     print("LOOKUP claim (template, mean of 3, 95% CI):", {m: f"{v['value']:.3f} [{v['lo']:.3f}, {v['hi']:.3f}]"
                                                          for m, v in lookup.items()})
+    print("Level R (template, mean of 3; S7 [95% CI], PERSIST, T0, s12 clause, met):",
+          {m: f"{v['S7']:.2f} [{v['ci']['lo']:.2f}, {v['ci']['hi']:.2f}] {v['PERSIST']:.3f} {v['T0']:.3f} "
+              f"{v['s12_clause']} {v['verdict']['met']}" for m, v in level.items()})
     return 1 if bad else 0
 
 

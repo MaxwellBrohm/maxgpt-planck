@@ -18,6 +18,11 @@ runs/fakes/<NAME>/transcripts.jsonl + scores.jsonl, READ BACK from disk and scor
      own headline claim, prereg draft s10b): no LOOKUP cheater (the generic cheaters, the audit value rules and
      ORDER_ABS, which OD3 allows 0.50 at the cell bar) meets it, neither by score.lookup_claim nor against BAR lookup
      here; the family fakes are IDEAL on LOOKUP by construction. G1 also asks IDEAL and IDEAL_ALT to meet it.
+     Level R (Max, 2026-10-04: took all recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision 1, D)): no
+     generic cheater or audit value rule reaches BAR s7 (40, Level R's S7 bar) on S7_ungated (the own-history OWN, an
+     upper bound of the gated S7); and the shortcut ceiling (shortcut_ceiling: per STATE7 family the best of the
+     SHORTCUT fakes, OWN gated by each fake's own --own-cf OWN run) stays below BAR s7. The ceiling is reported beside
+     Level R (dev here; the sealed one is the same function on the sealed records), never a gate on a model.
   G4 per gated-family unit (FAMS), the number of the generic cheaters that pass it (unit score 1.0) is <= 3; histogram.
      OVERLAP_A and OVERLAP_B are the two variants of ONE cheater (SPEC s5), so 11 cheaters are counted (D14).
   Step 5 audit cheaters (fakes_audit.py): the value rules get G2 and G3 exactly like the generic cheaters;
@@ -44,10 +49,11 @@ OUT = os.path.join(HERE, "runs", "fakes")
 VALUE_FAMS = ["RECALL", "CORR", "BIND", "TWOHOP", "OWN", "TOPIC", "ROLE", "LOOKUP"]
 ZERO_ON_VALUE = ["USERVOICE", "ECHO", "DEFLECT", "SHOTGUN", "ABSTAIN", "ROLECAP"]
 A_CONTENT = ["CORR:U", "CORR:C_noupd", "CORR:C_twoslot", "BIND"]
-BAR = dict(family=0.40, cell=0.50, item=3, level_a=0.60, lookup=0.60)
+BAR = dict(family=0.40, cell=0.50, item=3, level_a=0.60, s7=40.0, lookup=0.60)
 FAMS = S.COMPOSITE + S.REPORTED                     # the families the s8 gates cover (LOOKUP kept, item 1)
 NAMES = ["IDEAL", "IDEAL_ALT"] + F.GENERIC + list(FF.FAMILY) + FA.AUDIT
 GATED = F.GENERIC + FA.VALUE_RULES                 # G2 on every composite family and cell, and G3
+SHORTCUT = GATED + FA.REFERENCE + ["ORDER_ABS", "CONSIST"]   # fixed-rule fakes not IDEAL on any family by design
 
 
 def play(recs, name, render="plain", write=True):
@@ -122,16 +128,36 @@ def g3(name, s):
     lk = s["keys"].get("LOOKUP")
     if (name in GATED or name == "ORDER_ABS") and (s["lookup_claim"]["met"] or lk is None or lk >= BAR["lookup"]):
         bad.append(f"LOOKUP={lk} meets the LOOKUP claim bar (s10b)")
+    if name in GATED and (s["S7_ungated"] is None or s["S7_ungated"] >= BAR["s7"]):
+        bad.append(f"S7_ungated={s['S7_ungated']} reaches the Level R S7 bar")
     return [f"G3 {name}: {b}" for b in bad]
+
+
+def shortcut_ceiling(recs, rows):
+    """the Level R shortcut ceiling: per STATE7 family the best SHORTCUT fake (OWN: its OD1 b gated score, from an
+    --own-cf OWN run of the same fake on recs), S7 of that mix, and beside it the same with OWN at the best
+    own-history OWN of the fakes not built to repeat their own pick (CONSIST is: 1.00 on its own history, 0 gated)."""
+    own = [r for r in recs if r["family"] == "OWN"]
+    best, slip = {}, (0.0, None)
+    for n in SHORTCUT:
+        s = S.summarize(rows[n] + RN.run(own, FF.make(n), "plain", [None], None, None, n, 0, True))
+        for f in S.STATE7:
+            if s["families"][f] is not None and s["families"][f] > best.get(f, (-1.0, None))[0]:
+                best[f] = (s["families"][f], n)
+        if n != "CONSIST" and s["keys"]["OWN"] > slip[0]:
+            slip = (s["keys"]["OWN"], n)
+    s7 = 100 * sum(best[f][0] for f in S.STATE7) / len(S.STATE7)
+    s7_slip = s7 + 100 * (slip[0] - best["OWN"][0]) / len(S.STATE7)
+    return dict(best=best, S7=s7, own_slipped=slip, S7_own_slipped=s7_slip)
 
 
 def table(summ):
     keys = FAMS + ["CORR:U", "CORR:C_noupd", "CORR:C_twoslot", "T0", "K:followup"]
-    lines = [f"{'fake':11s}" + "".join(f"{k.replace('CORR:', '')[:8]:>9s}" for k in keys) + "   loop    ack  R_ug"]
+    lines = [f"{'fake':11s}" + "".join(f"{k.replace('CORR:', '')[:8]:>9s}" for k in keys) + "   loop    ack  R_ug S7_ug"]
     for n, s in summ.items():
         vals = "".join(f"{s['keys'].get(k, float('nan')):9.2f}" for k in keys)
         ack = "  None" if s["ack_repeat"] is None else f"{s['ack_repeat']:.3f}"
-        lines.append(f"{n:11s}{vals}  {s['loop_rate']:.3f}  {ack} {s['R_ungated']:5.1f}")
+        lines.append(f"{n:11s}{vals}  {s['loop_rate']:.3f}  {ack} {s['R_ungated']:5.1f} {s['S7_ungated']:5.1f}")
     return lines
 
 
@@ -157,9 +183,13 @@ def gates(write=True):
     for n in NAMES:
         us, cells = cells_units(rows[n])
         core += g1(n, summ[n]) if n.startswith("IDEAL") else g2(n, summ[n], us, cells) + g3(n, summ[n])
+    ceil = shortcut_ceiling(recs, rows)
+    if ceil["S7"] >= BAR["s7"]:
+        core.append(f"G3 shortcut ceiling S7 {ceil['S7']:.2f} reaches the Level R S7 bar {BAR['s7']}")
     hist, items = g4(rows)
     hist_x, items_x = g4(rows, F.GENERIC + FA.VALUE_RULES)
-    return dict(recs=recs, rows=rows, summ=summ, core=core, items=items, hist=hist, hist_x=hist_x, items_x=items_x)
+    return dict(recs=recs, rows=rows, summ=summ, core=core, items=items, hist=hist, hist_x=hist_x, items_x=items_x,
+                ceiling=ceil)
 
 
 def main():
@@ -176,7 +206,12 @@ def main():
                   ("MYONLY", "RECALL"), ("MYONLY", "ROLE"), ("MARKER_OBJ", "CORR:U-same"), ("CONSIST", "OWN"),
                   ("VARIED", "LOOP"), ("ORDER_ABS", "LOOKUP"), ("ORDER_ABS", "RECALL"))),
               "OBEYALL on PERSIST:hold (IDEAL by construction, not gated): "
-              f"{cells_units(g['rows']['P_OBEYALL'])[1][('PERSIST', 'hold')]:.2f}", ""]
+              f"{cells_units(g['rows']['P_OBEYALL'])[1][('PERSIST', 'hold')]:.2f}",
+              "Level R shortcut ceiling (best SHORTCUT fake per state family, OWN gated by its --own-cf run): S7 "
+              f"{g['ceiling']['S7']:.2f} ("
+              + ", ".join(f"{f} {v:.3f} {n}" for f, (v, n) in g["ceiling"]["best"].items()) + "); with OWN at the "
+              f"best own-history OWN ({g['ceiling']['own_slipped'][1]} {g['ceiling']['own_slipped'][0]:.3f}): "
+              f"{g['ceiling']['S7_own_slipped']:.2f}; bar {BAR['s7']}", ""]
     lines += [f"FAIL {f}" for f in g["core"]] or ["G1-G3 PASS"]
     lines += [f"FAIL {f}" for f in g["items"]] or ["G4 PASS"]
     text = "\n".join(lines) + "\n"

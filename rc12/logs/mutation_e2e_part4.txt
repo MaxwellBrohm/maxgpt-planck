@@ -1,4 +1,4 @@
-RC-12 mutation_e2e.py part 4/8: 13 of 104 mutants, fresh process each, 81 s. No model.
+RC-12 mutation_e2e.py part 4/8: 17 of 132 mutants, fresh process each, 122 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #03 runner: role cut not recorded as the stop reason  <- stops: CONTINUER plain: fake user turn not cut
@@ -13,6 +13,10 @@ KILLED    #67 score: OD1 b: product of rates (own-history unit x the cf run's ra
 KILLED    #75 own_cf: OD1 b: a pick rewrite that did not take passes as swapped  <- owngate: unswapped cf rows not scored 0 in OWN_GATED ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0}, pick 1.0)
 KILLED    #83 grade_loop: F2: small-talk fillers ask again (SMALLTALK loops)  <- ackrep: ACKER ack-repeat 0.17712882096069868 / 0.6956055734190782, want 0.17712882096069868 / 0.46859205776173285
 KILLED    #91 score: item 1: LOOKUP listed as an R family  <- scoring: LOOKUP out of R / 9 families: R with LOOKUP 0 100.0, with CORR 0 88.88888888888889 (want 100, 88.89)
-KILLED    #99 score: LOOKUP claim reads the composite instead of the LOOKUP family  <- scoring: LOOKUP claim claimable only with 3 training seeds, template, sampled: {'3 seeds': False, '2 seeds': False, 'plain': False, 'greedy': False}
-killed 13 | survived 0 | crashed 0 | malformed 0
+KILLED    #99 score: LOOKUP claim reads the composite instead of the LOOKUP family  <- levelr: LOOKUP claim without T0 >= 0.90 (decision 4): [('no T0', False, ['T0 None < 0.9 (decision 4)']), ('T0 1', False, []), ('T0 0', False, ['T0 0.0
+KILLED    #107 score: Level R S7 bar at 36 (the shortcut mix is 36.7)  <- levelr: s12 clause (S7 point >= 40 and PERSIST >= 0.40): {'bars': True, 'S7': True, 'PERSIST': False, 'None': False, 'PERSIST None': False, 'IDEAL': T
+KILLED    #115 score: summarize reports a fixed s12 verdict  <- levelr: s12 clause (S7 point >= 40 and PERSIST >= 0.40): {'bars': True, 'S7': False, 'PERSIST': False, 'None': False, 'PERSIST None': False, 'IDEAL': 
+KILLED    #123 score_stats: paired S7 difference reads the 9 composite families  <- levelr: paired S7 difference IDEAL - FIRST {'D': 84.76851851851852, 'lo': 82.2337962962963, 'hi': 87.15277777777777, 'n': 200, 'fams': ['RECALL', 'COR
+KILLED    #131 score: the s12 clause passes a missing PERSIST  <- levelr: s12 clause (S7 point >= 40 and PERSIST >= 0.40): {'bars': True, 'S7': False, 'PERSIST': False, 'None': False, 'PERSIST None': True, 'IDEAL': T
+killed 17 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

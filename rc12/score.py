@@ -6,15 +6,25 @@ Unit: a conversation's unit score (runner/graders: mean of its probes, or all-ri
   LOOKUP), except BIND, whose unit is the PAIR (both twins right; twins joined by pair_id within one run).
 Run: one (train_seed, seed) combination. Family score = mean over its units in a run, then over sampling seeds,
   then over training seeds (nested means). Seeds: sampling seeds when any are present, else greedy (--seeds).
-Level R composite R = 100 x unweighted mean of the 9 COMPOSITE family scores (T0 is a gate, K is reported
-  separately, TWOHOP:COMPOSE is diagnostic and never enters TWOHOP). LOOKUP is graded and reported (REPORTED: its
-  family and cell keys, its s8 cheater gates) but not in R (Max, 2026-10-02: took all recommendations in
-  rc12/DECISIONS_FOR_MAX.md (item 1); prereg draft s11: every core baseline at the floor on dev).
+Composite R = 100 x unweighted mean of the 9 COMPOSITE family scores (T0 is a gate, K is reported
+  separately, TWOHOP:COMPOSE is diagnostic and never enters TWOHOP). Since 2026-10-04 R is reported beside Level R,
+  never claimed (with PLAN's original non-inferiority CI against Qwen2.5, score_stats.noninferior). LOOKUP is graded
+  and reported (REPORTED: its family and cell keys, its s8 cheater gates) but not in R (Max, 2026-10-02: took all
+  recommendations in rc12/DECISIONS_FOR_MAX.md (item 1); prereg draft s11: every core baseline at the floor on dev).
 LOOKUP claim (Max, 2026-10-04: LOOKUP is its own pre-registered headline claim, reported beside R and never folded
   into it; prereg draft s1, s10b): lookup_claim() reads the LOOKUP family score (every cell; a unit is right only if
   its P probe AND its abstain X probe are right) against BARS lookup 0.60 (proposal), inclusive. Claimable only with
-  >= 3 training seeds, every own-history row in the template render and sampled (no greedy row). The P and X probe
+  >= 3 training seeds, every own-history row in the template render and sampled (no greedy row), and T0 >= 0.90
+  (Max, 2026-10-04: DECISIONS_LEVEL_R_FOR_MAX.md decision 4 (a); T0 None counts as unmet). The P and X probe
   rates and the cells are reported beside it; its 95% CI is score_stats.lookup_ci (bootstrap as for R).
+S7 and Level R (Max, 2026-10-04: took all recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision 1, D);
+  prereg draft s1, s9): S7 = 100 x unweighted mean of the 7 STATE7 family scores (RECALL CORR BIND TWOHOP OWN TOPIC
+  ROLE; OWN = OWN_GATED, so S7 is None without the --own-cf rows, as R is; S7_ungated is reported beside). level_r():
+  the 95% CI lower bound of S7 (score_stats.s7_ci) >= BARS s7 (40 points: the G2 cheater bar, 0.40 per family,
+  committed in SPEC v0.1 on 2026-09-25) and PERSIST (point) >= BARS persist (0.40), both inclusive; claimable only
+  with >= 3 training seeds and T0 >= 0.90 (why_not lists what is missing). The OOD-H wording rule (oodh_wording)
+  words the claim and is not part of the verdict. s12_clause(): a public panel model passes the Level R bar if its
+  S7 point estimate >= 40 and its PERSIST >= 0.40 (no CI, no T0, no training-seed count).
 Level A (SPEC s6; thresholds re-anchored by the s10 rule, prereg draft s10, notes STEP 10c): CORR:U (U-diff + U-same
   units pooled) >= 0.60, CORR:C_noupd >= 0.60, CORR:C_twoslot >= 0.60, BIND pair rate >= 0.60 (each was 0.80; Max,
   2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item D)), LOOP rate over every reply of every
@@ -51,10 +61,12 @@ import grade_text as T
 
 COMPOSITE = ["RECALL", "CORR", "BIND", "TWOHOP", "PERSIST", "OWN", "TOPIC", "ROLE", "LOOP"]
 REPORTED = ["LOOKUP"]               # graded, reported, cheater-gated (s8); out of R (item 1, 2026-10-02)
+STATE7 = ["RECALL", "CORR", "BIND", "TWOHOP", "OWN", "TOPIC", "ROLE"]  # S7, the Level R state score (Max, 2026-10-04)
 DIAG = {("TWOHOP", "COMPOSE")}
 LEVEL_A = {"CORR:U": ("CORR", ("U-diff", "U-same")), "CORR:C_noupd": ("CORR", ("C_noupd",)),
            "CORR:C_twoslot": ("CORR", ("C_twoslot",)), "BIND": ("BIND", None)}
 BARS = dict(level_a=0.60, loop=0.02, t0=0.90, min_train_seeds=3,     # level_a: the s10 re-anchor (item D)
+            s7=40.0, persist=0.40,                                    # Level R (Max, 2026-10-04: decision 1, D)
             lookup=0.60)                                              # the LOOKUP claim (Max, 2026-10-04; s10b)
 LOOKUP_CLAIM = "LOOKUP"             # its key: the family score, never a COMPOSITE family
 DEGEN = ("LOOP", "RUNAWAY", "EMPTY", "LEAK")
@@ -214,11 +226,32 @@ def near_duplicate_stats(rows):
     return hits / n if n else None
 
 
-def composite(fam):
-    missing = [f for f in COMPOSITE if fam.get(f) is None]
+def composite(fam, fams=None):
+    """100 x the unweighted mean of fam over fams (default COMPOSITE: R; STATE7: S7); None if any is missing."""
+    fams = COMPOSITE if fams is None else fams
+    missing = [f for f in fams if fam.get(f) is None]
     if missing:
         return None
-    return 100 * mean(fam[f] for f in COMPOSITE)
+    return 100 * mean(fam[f] for f in fams)
+
+
+def level_r(s7_lo, persist, t0=None, n_train=1):
+    """Level R (module docstring; prereg draft s9). s7_lo: the lower bound of S7's 95% CI (score_stats.s7_ci);
+    persist: the PERSIST family score (point). met reads the two bars; claimable also needs the seeds and T0."""
+    crit = dict(S7_lo=dict(value=s7_lo, bar=BARS["s7"], met=s7_lo is not None and s7_lo >= BARS["s7"]),
+                PERSIST=dict(value=persist, bar=BARS["persist"], met=persist is not None and persist >= BARS["persist"]))
+    met = all(c["met"] for c in crit.values())
+    why = [f"{n_train} training seed(s), < {BARS['min_train_seeds']}"] if n_train < BARS["min_train_seeds"] else []
+    if t0 is None or t0 < BARS["t0"]:
+        why.append(f"T0 {t0} < {BARS['t0']}")
+    return dict(crit=crit, met=met, claimable=not why and met, why_not=why, n_train_seeds=n_train)
+
+
+def s12_clause(summ):
+    """the s12 baseline clause for Level R (Max, 2026-10-04): a public panel model passes if its S7 point estimate
+    >= BARS s7 and its PERSIST >= BARS persist (summ: its score.summarize over its sampling seeds). S7 None fails."""
+    s7, p = summ["S7"], summ["families"]["PERSIST"]
+    return dict(S7=s7, PERSIST=p, passes=s7 is not None and s7 >= BARS["s7"] and p is not None and p >= BARS["persist"])
 
 
 def level_a(ks, loop_rate, comparator_loop=None, n_train=1, t0=None):
@@ -244,10 +277,14 @@ def probe_rate(rows, family, kind):
 
 def lookup_claim(ks, rows, n_train):
     """the LOOKUP headline claim (module docstring; prereg draft s10b). rows: the selected own-history rows. Never in
-    R: it reads only the LOOKUP keys and probes. why lists what keeps a met bar from being claimable."""
+    R: it reads only the LOOKUP keys and probes, and T0 (the shared sanity gate, decision 4). why lists what keeps a
+    met bar from being claimable."""
     v = ks.get(LOOKUP_CLAIM)
     met = v is not None and v >= BARS["lookup"]
     why = [] if n_train >= BARS["min_train_seeds"] else [f"{n_train} training seed(s), < {BARS['min_train_seeds']}"]
+    t0 = ks.get("T0")
+    if t0 is None or t0 < BARS["t0"]:
+        why.append(f"T0 {t0} < {BARS['t0']} (decision 4)")
     renders = sorted({str(r.get("render")) for r in rows if r["family"] == LOOKUP_CLAIM})
     if renders != ["template"]:
         why.append(f"render {renders} (s10b: the template render)")
@@ -277,8 +314,9 @@ def summarize(rows, comparator=None, seeds=None):
         for p in r["probes"]:
             lenient[r["family"]].append(bool(p.get("lenient")))
     k_follow, k_control = ks.get("K:followup"), ks.get("K:control")
-    return dict(
+    out = dict(
         R=composite(fam), R_ungated=composite({f: ks.get(f) for f in COMPOSITE}), families=fam, keys=ks,
+        S7=composite(fam, STATE7), S7_ungated=composite({f: ks.get(f) for f in STATE7}, STATE7),
         loop_rate=degen.get("LOOP"), degenerate_rates=degen,
         ack_repeat=ack_all, ack_repeat_of_statements=ack_stated, ack_repeat_of_answers=answer_repeat_stats(rows),
         equality_only=equality_only_stats(rows), near_duplicate=near_duplicate_stats(rows),
@@ -294,6 +332,8 @@ def summarize(rows, comparator=None, seeds=None):
         own_source_fail=mean(p["source_fail"] for p in own) if own else None,
         capture_rate=mean(bool(r["leaks"]) for r in rows) if rows else None,
         lenient={f: mean(v) for f, v in lenient.items()})
+    out["s12_clause"] = s12_clause(out)          # the Level R bar as a public panel model is read (s12)
+    return out
 
 
 def score_lines(rows):

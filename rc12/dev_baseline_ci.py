@@ -2,7 +2,9 @@
 Level R CI part (paired 95% CI lower bound >= -3 vs Qwen2.5-0.5B-Instruct) on DEV, template, seeds 1-3? With the
 composite (9 families since LOOKUP left it; Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md
 (item 1)) and, beside it, the old 10-family list with LOOKUP. The baselines have 1 training seed and T0 far below
-0.90, so none meets Level R in full; this only reads the CI part, which is how s12's baseline clause reads (item 7).
+0.90, so none meets Level R in full; this only reads the CI part, which is how s12's baseline clause read (item 7)
+until Max, 2026-10-04 (rc12/DECISIONS_LEVEL_R_FOR_MAX.md decision 1, D): Level R and the clause now read S7 (score.py
+s12_clause), and this -3 test (score_stats.noninferior) is reported beside, never claimed.
 The 10-family variant rebinds S.COMPOSITE in this process only. No model, no GPU.
   python -B dev_baseline_ci.py <a copy of the PC's ~/planck/runs/rc12_dev> 10000 [out.json]"""
 import json
@@ -34,9 +36,9 @@ for m in MODELS:
         S.COMPOSITE[:] = fams
         ci = ST.bootstrap_diff(rows, comp, n=N, seed=0)
         ra, rb = S.summarize(rows)["R"], S.summarize(comp)["R"]
-        out[f"{m}|{label}"] = dict(R=ra, R_qwen=rb, D=ra - rb, ci=ci, ci_part_met=ST.level_r(ci))
+        out[f"{m}|{label}"] = dict(R=ra, R_qwen=rb, D=ra - rb, ci=ci, ci_part_met=ST.noninferior(ci))
         print(m, label, f"R {ra:.2f} vs {rb:.2f} D {ra - rb:+.2f} CI {ci['lo']:+.2f} to {ci['hi']:+.2f}",
-              "CI part met" if ST.level_r(ci) else "CI part not met", flush=True)
+              "CI part met" if ST.noninferior(ci) else "CI part not met", flush=True)
     S.COMPOSITE[:] = full
 OUT = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "runs",
                                                          "dev_panel", "baseline_ci.json")

@@ -1,4 +1,4 @@
-RC-12 mutation_e2e.py part 7/8: 13 of 104 mutants, fresh process each, 73 s. No model.
+RC-12 mutation_e2e.py part 7/8: 16 of 132 mutants, fresh process each, 103 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #06 runner: dropped-turn off by one  <- trunc: ctx 556: verdict, runner's lost turns and the fake's history disagree [('rc12-dev-t0-008', 12), ('rc12-dev-t0-022', 12), ('rc12-dev-t0-029', 12
@@ -7,12 +7,15 @@ KILLED    #22 score: loop rate counts runaways  <- ackrep: PARROT loop 0.0 (want
 KILLED    #30 score_stats: headroom ceiling bar  <- stats: headroom ceiling
 KILLED    #38 fakes: IDEAL answers OWN from the annotation, not its own reply  <- G1 IDEAL_ALT: OWN:list=0.00
 KILLED    #46 fakes_audit: ORDER_ABS abstains where it should  <- G2 ORDER_ABS: cell LOOKUP:menu=1.00
-KILLED    #54 score: OD1 b: cf rows counted as own-history units  <- owngate: CONSIST: --own-cf rows counted outside the gate (replies 576 vs 576, OWN 0.5 vs 1.0)
+KILLED    #54 score: OD1 b: cf rows counted as own-history units  <- levelr: S7 does not read the gated OWN (cf run 0): S7 85.71428571428571, S7_ungated 92.85714285714286
 KILLED    #62 score: OD6 iii: ack-repeat-of-statements rate over every reply  <- ackrep: ACKER ack-repeat 0.17712882096069868 / 0.17712882096069868, want 0.17712882096069868 / 0.46859205776173285
 KILLED    #70 score: OD1 b: a cf run of another responder is a twin  <- owngate: cf run of another responder: gated OWN not missing ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0})
 KILLED    #78 score: OD6 iii: --own-cf rows counted in the answer-repeat rate  <- ackrep: PARROT: --own-cf rows moved the ack-repeat or equality-only reports: [0.023471615720524017, 0.06209386281588448, 0.06980684513724161, {'T0': [
 KILLED    #86 score: F3 report: --own-cf rows counted  <- ackrep: ACKER: --own-cf rows moved the ack-repeat or equality-only reports: [0.17712882096069868, 0.46859205776173285, 0.0, {'T0': [0, 96], 'RECALL': 
-KILLED    #94 score: LOOKUP claim claimable with 1 seed, plain or greedy  <- scoring: LOOKUP claim claimable only with 3 training seeds, template, sampled: {'3 seeds': True, '2 seeds': True, 'plain': True, 'greedy': True}
+KILLED    #94 score: LOOKUP claim claimable with 1 seed, plain or greedy  <- levelr: LOOKUP claim without T0 >= 0.90 (decision 4): [('no T0', True, ['T0 None < 0.9 (decision 4)']), ('T0 1', True, []), ('T0 0', True, ['T0 0.0 < 
 KILLED    #102 validate_e2e: G3 LOOKUP bar at 0.40: ORDER_ABS's 0.50 must trip the gate  <- G3 ORDER_ABS: LOOKUP=0.5 meets the LOOKUP claim bar (s10b)
-killed 13 | survived 0 | crashed 0 | malformed 0
+KILLED    #110 score: Level R without the PERSIST bar  <- levelr: Level R PERSIST bar (0.08, 0.25 miss; 0.67 meets): {'P_NEVER': True, 'P_UNIVERSAL': True, 'P_OBEYALL': True}
+KILLED    #118 score_stats: Level R reads S7's point, not the CI lower bound  <- levelr: Level R reads the point, not the CI lower bound (IDEAL, IDEAL, ABSTAIN: S7 66.7, lo 0): {'S7': 66.66666666666666, 'ci': {'S7': 66.666666666666
+KILLED    #126 score: S7 with LOOP  <- levelr: Level R reads the point, not the CI lower bound (IDEAL, IDEAL, ABSTAIN: S7 66.7, lo 0): {'S7': 67.01388888888889, 'ci': {'S7': 67.013888888888
+killed 16 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

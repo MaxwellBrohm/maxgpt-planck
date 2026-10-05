@@ -1,4 +1,4 @@
-RC-12 mutation_e2e.py part 5/8: 13 of 104 mutants, fresh process each, 80 s. No model.
+RC-12 mutation_e2e.py part 5/8: 16 of 132 mutants, fresh process each, 116 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #04 runner: truncated probes not failed  <- trunc: ctx 556: only 0 truncated probes
@@ -14,5 +14,8 @@ KILLED    #76 own_cf: OD1 b: own_cf finds list lines with a looser rule than G-D
 KILLED    #84 fakes_family: F2: the machinery checks read every D turn as asking (their expected counts ignore the annotation)  <- ackrep: ACKER ack-repeat 0.17712882096069868 / 0.46859205776173285, want 0.17712882096069868 / 0.6956055734190782
 KILLED    #92 score: LOOKUP claim bar at 0.50 (ORDER_ABS's 0.50 meets it)  <- G3 ORDER_ABS: LOOKUP=0.5 meets the LOOKUP claim bar (s10b)
 KILLED    #100 score_stats: LOOKUP CI: units not resampled  <- stats: LOOKUP CI does not resample units (ORDER_ABS, 24 of 48 right; want about 0.36 to 0.64): {'value': 0.5, 'lo': 0.5, 'hi': 0.5, 'n': 2000, 'units'
-killed 13 | survived 0 | crashed 0 | malformed 0
+KILLED    #108 score: Level R PERSIST bar at 0.25 (no-skill PERSIST)  <- levelr: Level R PERSIST bar (0.08, 0.25 miss; 0.67 meets): {'P_NEVER': False, 'P_UNIVERSAL': True, 'P_OBEYALL': True}
+KILLED    #116 score: decision 4: the LOOKUP claim claimable with T0 below 0.90  <- levelr: LOOKUP claim without T0 >= 0.90 (decision 4): [('no T0', True, []), ('T0 1', True, []), ('T0 0', True, [])], bar {0.9: True, 0.8999: True}
+KILLED    #124 validate_e2e: G3 Level R bar at 36: the shortcut ceiling (36.7) must trip it  <- G3 shortcut ceiling S7 36.73 reaches the Level R S7 bar 36.0
+killed 16 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

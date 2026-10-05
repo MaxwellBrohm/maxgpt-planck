@@ -57,6 +57,15 @@ MUTANTS = [
     (T, 'ok = st in ("eos", "eot") and stop is not None', "ok = stop is not None", "item 2: a capped prefix gets one"),
     (T, 'return msgs[2 * row["turns"][k]["dropped"]:]', "return msgs", "item 2: the fitted-out pairs kept"),
     (T, "identical=same, divergences=out)", "identical=0, divergences=out)", "item 2: the identical share not reported"),
+    # Max, 2026-10-04: took all recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision 3, a): R2 gates, R1 is
+    # reported (identical share, first divergence, shared prefix, margin)
+    (T, 'if c["tag"].startswith("R1"):', "if False:", "decision 3: R1 gates again"),
+    (T, 'if c["tag"].startswith("R1"):', 'if c["tag"].startswith("R"):', "decision 3: R2 reported, not gated"),
+    (T, "shared {len(os.path.commonprefix([d['a'], d['b']]))} chars", "shared 0 chars",
+     "decision 3: R1's shared prefix not reported"),
+    (T, "{'-' if m is None else f'{m:.3f}'}", "-", "decision 3: R1's margins not reported"),
+    (T, 'f"identical, {len(ms)} first divergences" + (f": {each}" if each else ""))', 'f"identical")',
+     "decision 3: R1's first divergences not reported"),
 ]
 
 

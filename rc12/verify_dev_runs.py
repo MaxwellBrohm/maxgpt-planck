@@ -13,8 +13,10 @@ tokenizer (printed; no system turn passed; Qwen3-family prompts end in an empty 
 --rerun N (rerun_tie.py; Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 2)): R1 the
 first N conversations of the first sampled run, replayed in lockstep, vs the stored rows; R2 the same N greedy in
 lockstep vs the same N played sequentially (runner.play, one request per engine call), and vs the stored greedy rows.
-Each passes when every conversation's first differing turn differs at a near-tie (margin <= 0.5 nats under one HF
-forward, the parity rule's NEAR_TIE), for every engine; the identical share is printed. The replay and the margins
+R2 passes when every conversation's first differing turn differs at a near-tie (margin <= 0.5 nats under one HF
+forward, the parity rule's NEAR_TIE), for every engine; the identical share is printed. R1 is reported on an INFO line
+(identical share, first divergences, shared prefixes, margins), never a FAIL (Max, 2026-10-04: took all
+recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision 3, a); rerun_tie.judge). The replay and the margins
 run as separate processes (one model on the GPU at a time). --tie-margin-stub X: fake engines only (tests).
 Prints PASS / FAIL / INFO lines; exit 1 on any FAIL."""
 import argparse

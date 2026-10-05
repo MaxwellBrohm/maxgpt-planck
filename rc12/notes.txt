@@ -2876,3 +2876,205 @@ NOT CHANGED, OPEN: s1's Level A wording still says 0.80 (s10 and score.py 0.60; 
 FILES (this step): prereg/RC-12.draft.txt (s6 G-ABS heading and v2 wrap, s10b wording), rc12/validate_machinery.py
   (c_stats sampling-seed check), rc12/mutants_e2e.py (#103), rc12/notes.txt (this entry and the STEP 11b scratch
   path shortened), rc12/logs/mutation_e2e_part*.txt (re-run).
+
+STEP 12 (2026-10-04 22:45 to 2026-10-05 about 05:10 EDT): Level R and the last lock decisions. Max, 2026-10-04: took
+all recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision 1 D, 2 a, 3 a, 4 a, 5 b) and every mechanical
+fix it lists. Applied by one workflow agent in five attempts: the first four were interrupted; the first wrote the
+code (22:45 to 01:10), the next three only inspected it and read the PC; the fifth read their transcripts, kept that
+code, checked it, and wrote everything else. No model loaded (except the harness test's random ~0.5M CPU network), no
+GPU, PC read-only (manifests, logs, verify_dev_runs without --rerun, GPU hidden), nothing under sealed/ read or
+searched, nothing committed, no agent messaged. Scratch: the session scratchpad, s12/ (first agent) and s12r/.
+DECISION 1 (D): Level R holds at a size when, on sealed, the lower bound of S7's 95% CI is >= 40, PERSIST (point)
+  >= 0.40, T0 >= 0.90, with >= 3 training seeds; the OOD-H wording rule unchanged; the s12 clause reads a public
+  model's S7 point >= 40 and PERSIST >= 0.40; R, the old non-inferiority CI against Qwen2.5, S7 per family, the
+  paired S7 difference against LFM2-2.6B, the sealed shortcut ceiling, the loop rate and the 30M control's S7 are
+  reported beside, never claimed; sealed size stays 600.
+  score.py: STATE7 (RECALL CORR BIND TWOHOP OWN TOPIC ROLE), composite(fam, fams), summarize's S7 (the OD1 b gated
+    OWN, None without the cf rows) and S7_ungated, BARS s7 40.0 and persist 0.40, level_r(s7_lo, persist, t0,
+    n_train) (met reads the two bars, both inclusive; claimable also needs >= 3 training seeds and T0 >= 0.90,
+    why_not lists what is missing), s12_clause(summ) and summarize's s12_clause.
+  score_stats.py: unit_table, _arrays, _r and _uids take the family list; bootstrap_diff(fams) (R by default, STATE7
+    for the paired S7 difference); noninferior(ci) with NONINF_MARGIN -3 (the old test, reported beside; was
+    level_r / LEVEL_R_MARGIN); s7_ci(rows) (one model: units within each state family, training seeds and sampling
+    seeds inside them resampled; refuses without the cf rows); level_r(rows) (score.level_r on s7_ci's lower bound).
+  oodh_wording.py: the new s1 claim text (LEVEL_R; the test checks it equals s1's quote), the OOD-H sentence now
+    names Qwen2.5-0.5B-Instruct, UNQUALIFIED "on RC-12," and QUALIFIED "on RC-12's format,", the refusal matcher
+    ON_RC12 (any "on RC-12", any case, hyphen, Unicode dash, space or none, that does not start the qualified
+    phrase). The rule (paired against Qwen2.5, D < -5 after rounding, provisional note) is unchanged.
+  Callers: dev_panel.py (S7, S7_ungated, s12_clause columns; rules.json level_r per model with s7_ci and the
+    verdict), dev_extras14.py (S7, s7_ci, the verdict and the clause per extra), dev_baseline_ci.py and sizing.py
+    (noninferior; sizing's docstring says the 600 it gave stands).
+  validate_machinery: new group c_levelr (12 groups now): S7 is exactly the 7 families with the gated OWN, the
+    bars and claimability at their edges, score_stats.level_r reads the CI's lower bound (IDEAL, IDEAL, ABSTAIN: S7
+    66.7, lower bound 0, not met), the PERSIST bar on P_NEVER / P_UNIVERSAL / P_OBEYALL (0.08, 0.25 miss, 0.67
+    meets), s7_ci resamples units, training seeds and sampling seeds and refuses without the cf rows, the paired S7
+    difference reads only STATE7, the s12 clause, the LOOKUP claim's T0 condition. c_stats uses noninferior.
+  validate_e2e: BAR s7 40; G3 asks every generic cheater and audit value rule to stay below 40 on S7_ungated (the
+    own-history OWN, an upper bound of the gated S7; dev maximum LONGEST 25.3); shortcut_ceiling() (per state family
+    the best of the 30 SHORTCUT fakes, OWN gated by each fake's own --own-cf OWN run) must stay below 40 and is
+    written to logs/e2e_fakes.txt.
+DECISION 2 (a): no Planck-issued lookup claim; at most a post-lock diagnostic "Planck-{N}M + lookup store". No code;
+  prereg s17 L2.
+DECISION 3 (a): R2 gates; R1 is reported. rerun_tie.judge prints R1 as an INFO line (identical share; per
+  conversation the first divergence id and turn, the shared prefix of the two replies in characters, the margin),
+  never PASS or FAIL; verify_dev_runs docstring. test_verify_dev_runs: R1 at margins 0.3, 0.5 and 0.8 gives the
+  INFO line and no PASS / FAIL R1; R2 still passes at 0.5 and fails at 0.8; c_r1_report checks the INFO line's id,
+  turn, shared prefix and margin. mutation_verify: 5 new mutants (R1 gating again, R2 reported instead of gated,
+  shared prefix, margins or first divergences dropped from the report).
+DECISION 4 (a): score.lookup_claim adds "T0 {t0} < 0.9 (decision 4)" to why_not when T0 is below 0.90 or missing.
+  c_scoring's claimable cases now carry T0 rows; c_levelr checks no T0, T0 0, 0.8999 and 0.90.
+DECISION 5 (b): every claim worded "on our panel" (s1 Level R new wording, s10b already); s12 lists the known
+  unscored small models (MiniMind2-Small, spark-13m, flame-27m, Pebble-25M, Supra2-Medium-Instruct, Loom-Spark-3,
+  Weave-3, Tapestry-3, ShallowSeek-mini, RxT-Alpha) and cRia as on the panel but not run.
+RED ON THE OLD CODE (HEAD rc12 copy in s12r/red with the new test files): validate_machinery and validate_e2e crash
+  (the old code has no noninferior, no S7_ungated); test_verify_dev_runs 7 failures (every R1 INFO case, c_r1_report,
+  and its baseline); test_oodh_wording 3 failures (sentence, fill, the paraphrase) and test_oodh_pairing 6 (every
+  new paraphrase head) against HEAD's oodh_wording; harness/test_rc12_eval.py's old line 232 (LOOKUP among the
+  families) fails on the tree (mutant below). All green on the tree.
+MUTANTS (each red, then green): mutants_e2e #31 and #32 retargeted (bootstrap not paired; the -3 margin now
+  noninferior's), #104-#125 new (22): S7 without ROLE, with PERSIST, with the ungated OWN; the S7 bar at 36; the
+  PERSIST bar at 0.25; 40 exclusive; Level R without the PERSIST bar, claimable without T0, with < 3 training seeds;
+  the s12 clause without PERSIST, passing a missing S7, a fixed s12 verdict; decision 4: claimable with T0 below
+  0.90, a missing T0 passing; Level R reading S7's point; s7_ci without unit, training-seed or sampling-seed
+  resampling; s7_ci over 6 families; the paired S7 difference over the 9 composite families; validate_e2e's S7 bar at
+  36 (the ceiling 36.73 must trip G3); the ceiling with the ungated OWN (51.01 must trip G3). Run alone first on a
+  scratch copy (s12r/cur, some_e2e.py, fresh process each): 24 of 24 killed, baseline failures none, each by the
+  check aimed at it. Two more by the fifth agent, #126 S7 with LOOP and #127 the s12 clause reading R: on a scratch
+  copy #127 first CRASHED (c_levelr's synthetic clause cases had no R key), so those cases now carry an R on the
+  other side of the bar (validate_machinery c_levelr); then both killed (s12r/extra_mut.py: #126 by the CI-reading
+  check, S7 67.0 instead of 66.7; #127 by the s12 clause check). mutation_oodh_wording: the two matcher mutants
+  retargeted to ON_RC12, 44 of 44 killed. harness (scratch copy s12r/hx, pytest -k e2e_scores): S7 with the ungated
+  OWN, S7_ungated missing, LOOKUP back in COMPOSITE, the old line 232: 4 of 4 killed, baseline passes.
+DEV PANEL UNDER THE NEW DEFINITIONS (dev_panel.py on the STEP 11b regraded copy -> runs/dev_panel_12, 143 s, check
+  failures 0, headroom fails none, PERSIST drops none; template, mean of 3 seeds, one training seed so never
+  claimable). S7 (95% CI, s7_ci 10,000), PERSIST, T0; Level R met and s12 clause False for every model:
+    LFM2-2.6B 18.15 (14.73 to 21.75) 0.812 0.517 | LFM2.5-350M 12.10 (9.18 to 15.25) 0.559 0.368 | Qwen3-0.6B 9.22
+    (6.67 to 12.04) 0.352 0.271 | LFM2-1.2B 7.55 (5.11 to 10.20) 0.362 0.333 | LFM2-700M 6.29 (4.33 to 8.65) 0.196
+    0.229 | Qwen3.5-0.8B 4.98 (3.37 to 6.65) 0.282 0.142 | SmolLM2-360M 4.32 (2.61 to 6.24) 0.137 0.153 | gemma-3-270m
+    4.19 (2.48 to 6.09) 0.017 0.125 | Falcon-H1-Tiny-90M 3.56 (1.90 to 5.47) 0.031 0.167 | LFM2.5-230M 3.39 (1.87 to
+    5.14) 0.323 0.184 | Qwen2.5-0.5B 2.30 (1.06 to 3.74) 0.113 0.181 | SmolLM2-135M 1.04 (0.00 to 2.53) 0.018 0.056 |
+    Doge-160M 0.25 (0.00 to 0.81) 0.018 0.017. R unchanged from STEP 11b (LFM2-2.6B 24.22, Qwen2.5 5.68). S7
+    recomputed from the TSV's family columns equals the S7 column within 0.01 (4-decimal rounding).
+  The decision's table re-derived: Blueberry-5M R 5.01, R from LOOP 4.46, S7 0.25, PERSIST 0.032; Loom-Spark-3.2
+    9.55, 8.66, 0.25, 0.063; Qwen2.5 5.68, 2.64, 2.30, 0.113; LFM2.5-350M 17.65, 2.02, 12.10, 0.559; LFM2-2.6B 24.22,
+    1.08, 18.15, 0.812: equal.
+SHORTCUT CEILING: own parse of logs/e2e_fakes.txt's two-decimal table (s12r/ceiling.py, not score.py), best of the
+  30 shortcut fakes per state family, OWN gated 0: 36.57; OWN slipped (best own-history OWN outside CONSIST, POS2
+  0.23): 39.86; with CONSIST's 1.00: 50.86 (= the decision's 36.6 and 39.9). Full precision (validate_e2e
+  shortcut_ceiling on the same fakes): 36.726 (RECALL 0.650, BIND 0.233, TOPIC 0.417, ROLE 0.604 MYONLY; CORR 0.3125
+  WORDING; TWOHOP 0.354 ANTI_WORDING; OWN 0), and with OWN slipped (POS2 0.229) exactly 40.0. FLAGGED: the
+  decision's 39.9 is a rounding; at full precision the gate-slipped mix sits at the bar. The CI rule keeps such a
+  point from passing Level R, and the s12 clause would also need PERSIST >= 0.40 (no-skill PERSIST fakes reach 0.25).
+ITEM 14 ROWS: ~/planck/logs/rc12_s14b_chain.DONE exists (2026-10-04 21:06). Swen-28M plain 8 / 8 and
+  BananaMind-2-Mini-Chat 16 / 16 runs; md5 manifest of both run dirs on the PC equal to the Mac copy (s12/raw, 137
+  files, 2026-10-05 04:04 EDT); verify_dev_runs C1-C5 (no --rerun, GPU hidden, HF offline, ~/planck/dev/rc12_s14c)
+  PASS for Swen-28M plain, Mini template and Mini plain. cRia-LM-75M-Instruct: not run (its queue log: template greedy
+  and plain greedy each exit 124 after 1,951 s under the lock, the 1,950 s cap; 0 of 16 runs). dev_extras14.py (root
+  s12/root, every extra; card root s14b/raw_card; -> runs/dev_panel_12/extras14, 201 s; stored scores.jsonl equal to
+  score_lines for 75 of 75 runs): earlier rows unchanged; Mini R 0.37 (CI vs Qwen2.5 -6.66 to -4.00), S7 0.00, LOOKUP
+  0.000, PERSIST 0.001; Swen-28M plain R 4.53, S7 0.00. S7 of every scored extra at most 2.09 (Vertex-15M); no extra
+  meets Level A, the LOOKUP bar or the s12 clause; cRia "incomplete: not scored".
+TEXT. prereg/RC-12.draft.txt: header (fourth round); s1 (Level R wording, its provenance note, the qualified phrase,
+  the OOD-H status lines, Level A at 0.60, the thresholds list); s4 (decision 3); s8 (G3 Level R and the ceiling, the
+  cheater table row); s9 (S7, the rule, the CI, why, reported beside, the old test as reported, the dev reading, the
+  sealed size kept at 600 and the trio question moot); s10b (decision 4); s11 (Level R reads S7, the rule still fixes
+  R); s12 (extras' S7, Mini, Swen plain, cRia not run, the clause, known and unscored); s15, s16, s17 (L1-L5), s18
+  (the deviation with the dev table), s19. The decision's draft wording was changed in four places, each said in s1:
+  PLAN's parameter phrase, RC-12's description and "on its own conversation history" added; "at or above" for
+  "above" (the bar is inclusive); "the best public model on our panel" (decision 5); the OOD-H sentence kept and
+  naming Qwen2.5-0.5B-Instruct. PLAN.md (Level R/A wording and odds lines only): s1 Level R wording, rule, why and
+  reported-beside list; Level A at 0.60; the thresholds line; the odds line (not re-estimated; lower than 40-60%);
+  the Phase 0 Level R analysis note (S7 CI, size 600); the public-model-passes line; the Level R table line; the
+  Level R gate; the risk table's Level R row. README.md: intro (the 9 small public models), Status (RC-12 scored on
+  dev, three pre-registered claims including LOOKUP, none met on dev), Next. harness/test_rc12_eval.py (9 families,
+  S7 None and S7_ungated in 0-100) and harness/rc12_eval.py's docstring (9 families) were edited by the first agent.
+CHECK ORDER (2026-10-05 04:13 to 04:50 EDT, each step alone, sequential, ~/.venvs/planck/bin/python -B,
+  LIK_TORCH_PY set; STEP 11c's order plus the harness test at the end; script and logs s12r/check_order.sh, s12r/co/)
+  49 of 50 steps exit 0: build_dev --stdout byte-identical to dev/rc12_dev.jsonl (3e543f8d); test_gens 0 failures
+  over 640; audit_rules GATE PASS; audit_graders 0 wrong of 36,764; validate_e2e G1-G3 PASS, G4 PASS;
+  validate_machinery 12 groups PASS; test_lik, test_lik_more, test_lik_adapters, test_oodh_wording,
+  test_oodh_pairing, test_lockstep, test_vllm_responder, test_parity, test_dev_batch, test_hf_trust, test_hf_batched
+  --split-only, test_queue, test_queue_sessions, test_verify_dev_runs, test_sizing, test_near_dup,
+  test_chat_template, test_loom_template, test_decode_variant, test_engine_patches, test_dev_batch_durable: exit 0.
+  mutation_graders 226 / 226; mutation_gens 33 / 33; mutation_audit 7 / 7 + 6 / 6; mutation_oodh_wording 44 / 44;
+  mutation_lik 51 / 51 (0 not run); mutation_step9 16 + 16 + 15; mutation_hf_batched --chunk-only 23 / 23;
+  mutation_verify 34 / 34 (29 + the 5 of decision 3); test_near_dup --mutate 10 / 10; mutation_queue 51 / 51;
+  mutation_s14 75 / 75; harness/test_rc12_eval.py 10 passed. mutation_e2e (128 mutants, 8 parts): parts 1-5, 7, 8
+  exit 0, 16 killed each; part 6 exit 1: #21 (greedy scored when sampling seeds exist) CRASHED with StopIteration
+  in c_levelr (the mutant drops the sampled rows, so s7_ci had nothing to resample; STEP 11d met the same crash in
+  c_stats). FIXED: c_levelr runs its checks in _levelr and reports an exception as a failure; #21, #126 and #127 on a
+  scratch copy: all killed (#21 by that line and by owngate, as before).
+  Edits during the order (so its tree was not one fixed tree): validate_machinery.py at 04:17 (c_levelr's clause cases
+  carry R) and 04:32 (the wrapper, after mutation_e2e part 8); mutants_e2e.py at 04:19 (#126, #127, before part 1);
+  prereg s11 and line wraps after test_oodh_wording (s1's quote untouched). RE-RUN AFTER THE FIX, each alone
+  (s12r/co2/, 04:50 to 05:03 EDT): validate_e2e G1-G4 PASS; validate_machinery 12 groups PASS; mutation_e2e 8 parts
+  128 / 128 killed (16 per part), baseline failures none in every part, 0 crashed, 0 malformed; test_oodh_wording 0
+  failures.
+NOT DONE, OPEN: PLAN.md still does not mention the LOOKUP claim (this step's commit rule allows only PLAN's Level R
+  / A wording and odds lines). The new Level R odds are not estimated. The decision's power and sizing figures
+  (shortcut pass rates, true S7 45.7 / 45.1 / 44.6, PERSIST 91% to 99%) are quoted, not re-run. The optional
+  wrong-seed replay (decision 3) was not run. OOD-H Part 1 review (item 13) is Max's. The 30M generic-recipe
+  control does not exist yet; its S7 is a later report. oodh/DESIGN.txt s7 (line 115) still quotes the old
+  qualified phrase "non-inferior on RC-12's format" (outside this step's commit paths; prereg s1 and oodh_wording.py
+  hold the rule).
+FILES (this step): rc12/score.py, score_stats.py, oodh_wording.py, rerun_tie.py, verify_dev_runs.py, dev_panel.py,
+  dev_extras14.py, dev_baseline_ci.py, sizing.py, validate_machinery.py, validate_e2e.py, mutants_e2e.py,
+  mutation_verify.py, mutation_oodh_wording.py, test_verify_dev_runs.py, test_oodh_wording.py, test_oodh_pairing.py,
+  rc12/logs/* (rewritten by the check order), rc12/notes.txt (this entry); prereg/RC-12.draft.txt; PLAN.md;
+  README.md (its item 15 edits of 2026-10-02 were also still uncommitted); harness/test_rc12_eval.py,
+  harness/rc12_eval.py. rc12/DECISIONS_LEVEL_R_FOR_MAX.md (untracked, the decision file).
+
+STEP 12 VERIFY (2026-10-05, 05:05 to about 07:45 EDT): adversarial verification and the commit of STEP 12 (Max,
+2026-10-04: took all recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md). No model, no GPU, PC read only (the
+item 14 DONE marker and cRia's run dir), nothing under sealed/ read or searched, no agent messaged. Scratch: the
+session scratchpad, verify12/.
+TEXT AGAINST THE DECISIONS: every hunk of prereg/RC-12.draft.txt, PLAN.md and README.md read against the decision
+  file. They carry decision 1 D (the rule, the s12 clause, the reported-beside list, the pre-lock deviation with the
+  dev table, sealed size 600), 2 a (s17 L2), 3 a (s4), 4 a (s10b), 5 b (s12; its list adds ShallowSeek-mini and
+  RxT-Alpha from STEP 11c's NOT ADDED list) and the mechanical fixes; the draft wording's four changes are stated in
+  s1. PLAN's hunks are all Level R / A wording, thresholds, odds, gate and risk lines. README also carries the
+  2026-10-02 item 15 edits (STEP 11, ITEM 15), committed here. ON PC: rc12_s14b_chain.DONE 2026-10-04 21:06:33;
+  cRia's run dir holds only parity files (0 runs), as s12 says.
+RECOMPUTED (own code, verify12/my_s7.py, from the STEP 11b regraded transcripts, no rc12 import; S7 (95% CI),
+  PERSIST, T0): LFM2-2.6B 18.15 (14.76 to 21.67) 0.812 0.517; LFM2.5-350M 12.10 (9.23 to 15.21) 0.559 0.368;
+  Qwen2.5-0.5B-Instruct 2.30 (1.05 to 3.74) 0.113 0.181; Doge-160M-Instruct 0.25 (0.00 to 0.82) 0.018 0.017. Points
+  equal rules.json; CI ends within 0.1 of it (another RNG); Level R met and the s12 clause false for all four.
+  Shortcut ceiling (verify12/my_ceiling.py: own per-family scoring of runs/fakes, the cf twins made with runner.run
+  and gated by my own rule): 36.726, with OWN slipped exactly 40.000 (POS2 0.229); no fake's gated OWN is above 0.
+SIMULATION (own, verify12/my_sim.py; n 600, units per family round(dev x 600 / 640); the implemented rule: lower bound
+  sorted[int(0.025 B)] of B 2,000, one unit draw per family, training seeds and sampling seeds inside them
+  resampled; probit unit model, rs = latent agreement of two sampling seeds on a unit, rt of two training seeds; on
+  dev the panel's median rs is 0.41, range 0 to 0.86, over 26 family x model cells):
+  Shortcut mix, fixed rules so every run identical, 4,000 splits: at 36.73 the S7 CI part passes 0.08% and a point
+    bar of 40 9.6%; with OWN slipped (40.00) 2.3% and 50.5%; with the PERSIST bar (no-skill PERSIST resampled from
+    P_UNIVERSAL's dev units, 0.25) the whole rule passes 0.00% and 0.03%. The decision has at most 1.7% for the CI
+    rule and 0.4% to 6% (46% slipped) for a point bar: mine are higher on the S7 part alone, and the PERSIST bar
+    stops the mix either way.
+  Planck, all seven state families at the true rate, PERSIST 0.50 (unit sd 0.40), 3 training x 3 sampling seeds,
+    2,000 splits; CI part pass rate for (rs, rt) = (1, 1) / (0.86, 0.86) / (0.86, 0) / (0.41, 0.41) / (0.41, 0):
+    true S7 45: 43 / 53 / 67 / 71 / 82%; 46: 59 / 68 / 86 / 87 / 96%; 48: 81 / 90 / 99 / 99 / 100%. The whole rule is
+    2 to 5 points lower (PERSIST at a true 0.50 passes about 95%). So 80% needs about 45 to 48: about 45.6 at the
+    dev median agreement (the decision's 45.7 holds there), about 48 if every run gives the same answers. PLAN's odds
+    line and prereg s9 now say so.
+MUTANTS (own, verify12/my_mut.py; fresh process each on a scratch copy, judged as mutation_e2e judges): 11 written.
+  Before any fix 4 SURVIVED: s7_ci's lower bound at the 1% quantile (a 98% CI), its upper bound at the 99%
+  quantile, a missing PERSIST meeting score.level_r's PERSIST bar, the s12 clause passing a missing PERSIST. FIXED in
+  validate_machinery c_levelr: a 95%-level check (3 IDEAL + 3 ABSTAIN training seeds put 1.6% of resamples at 0 and
+  at 100: want lo 16.67 and hi 83.33; the IDEAL, IDEAL, ABSTAIN case already catches a 90% CI) and PERSIST None cases
+  for score.level_r and score.s12_clause. Then all 11 killed: those four, Level R reading the point, met ignoring
+  PERSIST, LOOKUP's T0 condition at 0.60, PERSIST in S7 for ROLE, the s12 clause reading R, the clause reading
+  S7_ungated (killed only by a KeyError in c_levelr's synthetic cases), a 90% CI; baseline failures none. The four
+  survivors are mutants_e2e #128-#131.
+CHECK ORDER (verify12/check_order.sh, s12r's order, each step alone, 06:15 to 07:26 EDT; one fixed tree: the edits
+  to validate_machinery.py and mutants_e2e.py were made before it, the prereg s9 / s19 text after
+  mutation_oodh_wording ran, so test_oodh_wording and mutation_oodh_wording were re-run after it): 50 of 50 steps exit 0.
+  build_dev --stdout byte-identical (3e543f8d); test_gens 0 failures over 640; audit_graders 0 wrong of 36,764;
+  validate_e2e G1-G4 PASS; validate_machinery 12 groups PASS; every test_* exit 0 (test_oodh_wording and
+  test_oodh_pairing 0 failures, test_verify_dev_runs and test_sizing PASS); mutation_graders 226 / 226;
+  mutation_gens all killed; mutation_audit 7 / 7 + 6 / 6; mutation_e2e 8 parts 132 / 132 killed, baseline failures
+  none in every part, 0 crashed (#128-#131 each killed by a new c_levelr line); mutation_oodh_wording 44 / 44;
+  mutation_lik 51 / 51; mutation_step9 16 + 16 + 15; mutation_hf_batched 23 / 23; mutation_verify 34 / 34;
+  test_near_dup --mutate 10 / 10; mutation_queue 51 / 51; mutation_s14 75 / 75; harness/test_rc12_eval.py 10
+  passed. After the prereg edit: test_oodh_wording 0 failures, mutation_oodh_wording 44 / 44.
+FILES (this entry): rc12/validate_machinery.py (c_levelr), rc12/mutants_e2e.py (#128-#131), rc12/logs/* (re-run),
+  prereg s9 and s19, PLAN.md's Level R odds line, rc12/notes.txt. Committed in one commit with every STEP 12 file.

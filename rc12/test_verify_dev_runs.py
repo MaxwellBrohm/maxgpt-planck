@@ -5,8 +5,11 @@ fails only C3 (SAMPLER's sampled replies ignore the seed value, which is exactly
 whose seed-2 turn-1 replies differ passes. meta: every run records decode = hf_responder.DECODE, an audit, and the
 dtype engines.json names for the model (it overrides --dtype).
 Rerun standard (rerun_tie.py; Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 2)): a
-stored reply changed at turn 2 is a first divergence; with a stub margin of 0.3 or 0.5 R1 / R2 PASS (near-tie <= 0.5),
-with 0.8 or none they FAIL; a stub is refused for a vLLM run before anything loads, and by the margins stage itself;
+stored reply changed at turn 2 is a first divergence; with a stub margin of 0.3 or 0.5 R2 PASSES (near-tie <= 0.5),
+with 0.8 or none it FAILS. R1 is reported, never a gate (Max, 2026-10-04: took all recommendations in
+rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision 3, a)): at 0.3, 0.5 or 0.8 it prints an INFO line, never PASS or FAIL,
+with the identical share and, for the changed conversation, its id, turn, shared prefix and margin (c_r1_report);
+a stub is refused for a vLLM run before anything loads, and by the margins stage itself;
 hf_margins on a stub tokenizer: the first differing token, abs of the margin, a stopped prefix against the stop id,
 none for a capped prefix or equal ids; history() drops the fitted-out pairs.
 Run: python3 -B test_verify_dev_runs.py   (exit 1 on any failure)"""
@@ -80,7 +83,8 @@ CASES = [  # (name, run dir, corruption, text the verifier must print, --rerun?)
     ("twin ids", P + "1_owncf", lambda d: edit_rows(d, lambda r: r.pop()), "FAIL C2 1: twin ids", False),
     ("row seed", P + "2", lambda d: edit_rows(d, lambda r: r[0].update(seed=9)), "FAIL C3 2: 1 rows", False),
     ("row count", P + "2", lambda d: edit_rows(d, lambda r: r.pop()), "FAIL C1 2: 639 rows", False),
-    ("stored sampled reply", P + "1", lambda d: edit_rows(d, m_reply), "FAIL R1 seed 1", True),
+    ("stored sampled reply", P + "1", lambda d: edit_rows(d, m_reply),
+     "INFO R1 seed 1 lockstep replay vs stored (reported, not gated): 2 / 3", True),
     ("stored greedy reply", P + "greedy", lambda d: edit_rows(d, m_reply),
      "FAIL R2 greedy lockstep replay vs stored", True),
     ("vllm defaults leak", P + "1", lambda d: edit_meta(d, vllm_meta(dict(vllm_default_sampling={"top_k": 20}))),
@@ -95,12 +99,18 @@ CASES = [  # (name, run dir, corruption, text the verifier must print, --rerun?)
 ]
 
 
+R1_INFO = "INFO R1 seed 1 lockstep replay vs stored (reported, not gated): 2 / 3 conversations identical"
 TIE_CASES = [  # (name, run dir, corruption, --tie-margin-stub, text that must appear, text that must not)
-    ("near-tie sampled", P + "1", m_reply, 0.3, "PASS R1 seed 1 lockstep replay vs stored: 2 / 3", "FAIL R1"),
-    ("near-tie boundary", P + "1", m_reply, 0.5, "PASS R1 seed 1 lockstep replay vs stored: 2 / 3", "FAIL R1"),
-    ("past the tie", P + "1", m_reply, 0.8, "FAIL R1 seed 1 lockstep replay vs stored: 2 / 3", "PASS R1"),
+    ("near-tie sampled", P + "1", m_reply, 0.3, R1_INFO, "FAIL R1"),
+    ("near-tie boundary", P + "1", m_reply, 0.5, R1_INFO, "FAIL R1"),
+    ("past the tie, R1 reported", P + "1", m_reply, 0.8, R1_INFO, "FAIL R1"),
+    ("R1 never PASS", P + "1", m_reply, 0.3, R1_INFO, "PASS R1"),
     ("near-tie greedy", P + "greedy", m_reply, 0.3, "PASS R2 greedy lockstep replay vs stored greedy run: 2 / 3",
      "FAIL R2"),
+    ("near-tie greedy boundary", P + "greedy", m_reply, 0.5,
+     "PASS R2 greedy lockstep replay vs stored greedy run: 2 / 3", "FAIL R2"),
+    ("past the tie, R2 gates", P + "greedy", m_reply, 0.8,
+     "FAIL R2 greedy lockstep replay vs stored greedy run: 2 / 3", "PASS R2 greedy lockstep replay vs stored"),
     ("stub on vLLM", P + "1", None, 0.3, "FAIL R: --tie-margin-stub is for fake engines only", "R replay stage"),
 ]
 
@@ -110,6 +120,25 @@ def verify(root, rerun=False, extra=()):
            "--no-prompt", "--engines", os.path.join(root, "engines.json")] + (["--rerun", "3"] if rerun else [])
     cmd += list(extra)
     return subprocess.run(cmd, cwd=HERE, capture_output=True, text=True, timeout=300)
+
+
+def c_r1_report(src, base):
+    """decision 3 (a): the R1 INFO line names the changed conversation's id, turn, shared prefix (characters of the
+    two generations, raw when stored) and its margin; R1 never adds a FAIL line."""
+    root = os.path.join(base, "r1")
+    shutil.rmtree(root, ignore_errors=True)
+    shutil.copytree(src, root)
+    row = jl(os.path.join(root, P + "1", "transcripts.jsonl"))[0]
+    a = RT.gen(row["turns"][1])
+    t = dict(row["turns"][1])
+    t["reply"] += " changed"
+    want = f"{row['id']} t2 shared {len(os.path.commonprefix([a, RT.gen(t)]))} chars margin 0.800"
+    edit_rows(os.path.join(root, P + "1"), m_reply)
+    p = verify(root, True, ["--tie-margin-stub", "0.8"])
+    fails = [x for x in p.stdout.splitlines() if x.startswith("FAIL")]
+    ok = any(x.startswith("INFO R1 ") and x.endswith(want) for x in p.stdout.splitlines()) and len(fails) == 1 \
+        and "C3 turn-1 replies identical" in fails[0]
+    return [] if ok else [f"R1 report: want an INFO R1 line ending {want!r} and only the C3 FAIL\n{p.stdout[-700:]}"]
 
 
 def c_stage_refusal(base):
@@ -173,7 +202,8 @@ def main():
     p = verify(src, True)
     lines = [x for x in p.stdout.splitlines() if x.startswith("FAIL")]
     if p.returncode != 1 or len(lines) != 1 or "C3 turn-1 replies identical, 1 vs 2" not in lines[0] \
-            or p.stdout.count("PASS R") != 3:
+            or p.stdout.count("PASS R") != 2 or "INFO R1 seed 1 lockstep replay vs stored (reported, not gated): 3 / 3" \
+            not in p.stdout:
         fails.append(f"baseline: exit {p.returncode}, fails {lines}")
     for name, d, act, want, rr in CASES:
         root = os.path.join(base, "case")
@@ -202,7 +232,7 @@ def main():
         p = verify(root, True, ["--tie-margin-stub", str(stub)])
         if want not in p.stdout or never in p.stdout:
             fails.append(f"{name}: {want!r} missing or {never!r} printed\n{p.stdout[-700:]}{p.stderr[-300:]}")
-    fails += c_stage_refusal(base) + c_margins()
+    fails += c_r1_report(src, base) + c_stage_refusal(base) + c_margins()
     shutil.rmtree(base, ignore_errors=True)
     for f in fails:
         print("FAIL", f)

@@ -1,4 +1,4 @@
-RC-12 mutation_e2e.py part 2/8: 13 of 104 mutants, fresh process each, 80 s. No model.
+RC-12 mutation_e2e.py part 2/8: 17 of 132 mutants, fresh process each, 119 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #01 runner: fed-back reply not stripped  <- history: HISTCHECK plain ctx=556: 6688 bad histories [('rc12-dev-t0-001', 2), ('rc12-dev-t0-001', 3), ('rc12-dev-t0-001', 4)]
@@ -7,12 +7,16 @@ KILLED    #17 score: BIND scored per conversation, not per pair  <- G2 ANTI_OVER
 KILLED    #25 score: loop-vs-comparator always met  <- scoring: Level A met without a comparator
 KILLED    #33 score_stats: PERSIST replies counted in base rates  <- stats: PERSIST base rates {'brackets:None': 0.006277292576419214, 'caps:None': 0.008187772925764192, 'closing:over and out': 0.0049126637554585155, 'c
 KILLED    #41 fakes_family: P_NEVER obeys  <- G2 P_NEVER: cell PERSIST:hold=1.00
-KILLED    #49 runner: runner ignores --own-cf  <- owncf: CONSIST OWN under --own-cf = 1.00, want 0.0
-KILLED    #57 score_stats: OD1 b: bootstrap runs without the cf rows  <- stats: bootstrap refusal ZeroDivisionError: division by zero
+KILLED    #49 runner: runner ignores --own-cf  <- G3 shortcut ceiling S7 51.01 reaches the Level R S7 bar 40.0
+KILLED    #57 score_stats: OD1 b: bootstrap runs without the cf rows  <- levelr: S7 CI refusal ZeroDivisionError: division by zero
 KILLED    #65 fakes_family: OD6 iii: ACKER also acks D questions (those repeats are LOOPs)  <- ackrep: ACKER ack-repeat 0.3310589519650655 / 0.8758122743682311, want 0.17712882096069868 / 0.46859205776173285
 KILLED    #73 runner: OD1 b: runner does not mark a cf rewrite that did not take  <- owngate: unswapped cf rows not scored 0 in OWN_GATED ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0}, pick 1.0)
 KILLED    #81 grade_loop: F1: parroted answers exempt again (PARROT meets the Level A loop criterion)  <- ackrep: PARROT loop 0.0 (want 0.023471615720524017), Level A loop criterion met True, R 100.0, answer-repeat 0.06209386281588448, want 0.0620938628158
 KILLED    #89 score: item D: the pre-re-anchor 0.80 bar  <- scoring: Level A content bar is not 0.60 inclusive: {0.6: False, 0.5999: False}
 KILLED    #97 score: LOOKUP claim claimable on greedy rows  <- scoring: LOOKUP claim claimable only with 3 training seeds, template, sampled: {'3 seeds': True, '2 seeds': False, 'plain': False, 'greedy': True}
-killed 13 | survived 0 | crashed 0 | malformed 0
+KILLED    #105 score: S7 with PERSIST  <- levelr: S7 CI is not over the 7 state families (ROLE at 0: want lo = hi = 85.71): {'S7': 87.5, 'lo': 87.5, 'hi': 87.5, 'n': 200, 'units': {'PERSIST': 
+KILLED    #113 score: s12 clause without the PERSIST bar  <- levelr: s12 clause (S7 point >= 40 and PERSIST >= 0.40): {'bars': True, 'S7': False, 'PERSIST': True, 'None': False, 'PERSIST None': True, 'IDEAL': Tr
+KILLED    #121 score_stats: S7 CI and bootstrap: sampling seeds not resampled  <- levelr: S7 CI does not resample seeds (IDEAL, ABSTAIN, ABSTAIN: want lo 0, hi 100): {'S7': 33.33333333333333, 'lo': 33.33333333333333, 'hi': 33.333333
+KILLED    #129 score_stats: S7 CI upper bound at the 99% quantile  <- levelr: S7 CI is not the 95% percentile interval (3 IDEAL + 3 ABSTAIN seeds: want lo 16.67, hi 83.33): {'S7': 50.0, 'lo': 16.666666666666664, 'hi': 10
+killed 17 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

@@ -12,7 +12,10 @@ change made after the runs (e.g. item 3) is applied, and the count says whether 
 1-3: score_stats.bootstrap_diff against Qwen2.5 (the s12 clause as item 7 reads it: the CI part only, at every size),
 the s9 sensitivity row (families where Qwen2.5 > 0.05), the PERSIST base rates (s11; reported, the extras never drop
 a rule), and the LOOKUP claim (score.lookup_claim, prereg draft s10b; Max, 2026-10-04): its value, P and X probe
-rates, cells and score_stats.lookup_ci. The card row has seeds 1-3 only (the card asks for sampling).
+rates, cells and score_stats.lookup_ci. Level R since 2026-10-04 (Max: took all recommendations in
+rc12/DECISIONS_LEVEL_R_FOR_MAX.md, decision 1 D): S7 with score_stats.s7_ci, score.level_r's verdict and the s12
+clause (S7 point >= 40 and PERSIST >= 0.40); the CI vs Qwen2.5 above is the -3 non-inferiority test, reported beside
+(score_stats.noninferior). The card row has seeds 1-3 only (the card asks for sampling).
 Writes extras14.json and extras14.tsv."""
 import argparse
 import json
@@ -77,9 +80,13 @@ def score_one(root, model, label, render, seeds, recs, comp, comp_rows, boot, ou
     if render == "template":
         c = ST.bootstrap_diff(rows3, comp_rows["template"], n=boot, seed=0)
         out["ci"][label] = dict(R=s3["R"], R_qwen=comp["template"]["R"], D=s3["R"] - comp["template"]["R"], ci=c,
-                                ci_part_met=ST.level_r(c), sensitivity=ST.sensitivity(s3, comp["template"]),
+                                ci_part_met=ST.noninferior(c), sensitivity=ST.sensitivity(s3, comp["template"]),
                                 sensitivity_qwen=ST.sensitivity(comp["template"], comp["template"]),
                                 lookup=dict(s3["lookup_claim"], ci=ST.lookup_ci(rows3, n=boot, seed=0)))
+        c7 = ST.s7_ci(rows3, n=boot, seed=0)
+        out["ci"][label].update(S7=s3["S7"], s7_ci=c7, s12_clause=s3["s12_clause"],
+                                level_r=S.level_r(c7["lo"], s3["families"]["PERSIST"], s3["t0"]["score"],
+                                                  s3["n_train_seeds"]))
         out["persist"][label] = ST.persist_base_rates(rows3, out["rules"])
 
 
@@ -128,7 +135,9 @@ def main():
         print(f"{m}: R {c['R']:.2f} vs Qwen2.5 {c['R_qwen']:.2f}, D {c['D']:+.2f}, CI {c['ci']['lo']:+.2f} to "
               f"{c['ci']['hi']:+.2f}, CI part {'met' if c['ci_part_met'] else 'not met'}; sensitivity row "
               f"({'+'.join(sv['kept'] or [])}) {sv['R']:.2f} vs {sq['R']:.2f}; LOOKUP {lk['value']:.3f} "
-              f"(CI {lk['ci']['lo']:.3f} to {lk['ci']['hi']:.3f}, P {lk['P']:.3f}, X {lk['X']:.3f})")
+              f"(CI {lk['ci']['lo']:.3f} to {lk['ci']['hi']:.3f}, P {lk['P']:.3f}, X {lk['X']:.3f}); S7 {c['S7']:.2f} "
+              f"(CI {c['s7_ci']['lo']:.2f} to {c['s7_ci']['hi']:.2f}), PERSIST {c['s12_clause']['PERSIST']:.3f}, "
+              f"s12 clause {'passes' if c['s12_clause']['passes'] else 'fails'}, Level R met {c['level_r']['met']}")
     bad = [r for r in out["per_seed"] if r["scores_jsonl_ok"] is False]
     print("stored scores.jsonl == score_lines(rows) under this tree: "
           f"{len(out['per_seed']) - len(bad)} of {len(out['per_seed'])} (differences are expected only if the scorer "

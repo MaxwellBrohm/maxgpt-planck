@@ -93,17 +93,18 @@ def test_refusal_matcher():
     q = OW.decide(OW.paired_diff(sampled(LOW), sampled(HIGH, Q), n=20))
     tail = " " + q["oodh_sentence"] + " " + OW.PROVISIONAL
     check(q["decision"] == "qualified" and OW.refusals(q["text"], q) == [], "own qualified text refused")
-    for head in ("Planck-30M is Non-inferior to Qwen2.5-0.5B-Instruct on RC-12.",
-                 "Planck-30M is noninferior to Qwen2.5-0.5B-Instruct on RC-12.",
-                 "Planck-30M is non-inferior to Qwen2.5-0.5B-Instruct on RC-12, which uses RC-12's format.",
-                 "Planck-30M is NON INFERIOR to Qwen2.5-0.5B-Instruct on RC-12.",
-                 "Planck-30M is non‑inferior to Qwen2.5-0.5B-Instruct on RC-12.",
-                 "Planck-30M shows non-inferiority to Qwen2.5-0.5B-Instruct on RC-12."):
+    # the Level R text since Max, 2026-10-04 (DECISIONS_LEVEL_R_FOR_MAX.md decision 1, D): the matcher reads "on RC-12"
+    for head in ("Planck-30M clears the state bar On RC-12.",
+                 "Planck-30M clears the state bar on RC12.",
+                 "Planck-30M clears the state bar on RC-12, which uses RC-12's format.",
+                 "Planck-30M clears the state bar ON RC 12.",
+                 "Planck-30M clears the state bar on RC‑12.",
+                 "Planck-30M's state score on RC-12 is above 40."):
         check(any("unqualified" in x for x in OW.refusals(head + tail, q)), f"accepted while qualified: {head}")
     u = OW.decide(OW.paired_diff(sampled(HIGH), sampled(HIGH, Q), n=20))
     tail_u = " " + u["oodh_sentence"] + " " + OW.PROVISIONAL
     check(u["decision"] == "unqualified" and
-          OW.refusals("Planck-30M is Non-inferior to Qwen2.5-0.5B-Instruct on RC-12." + tail_u, u) == [],
+          OW.refusals("Planck-30M clears the state bar On RC-12." + tail_u, u) == [],
           "an unqualified wording refused while unqualified")
 
 

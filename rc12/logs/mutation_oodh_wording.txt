@@ -20,7 +20,7 @@ KILLED   #18 oodh_wording.py: two renders in one model accepted  [FAIL two rende
 KILLED   #19 oodh_wording.py: renders differing between the models accepted  [FAIL render]
 KILLED   #20 oodh_wording.py: never provisional  [FAIL not provisional while Part 2 is incomplete]
 KILLED   #21 oodh_wording.py: qualified text keeps the unqualified wording  [FAIL qualified text keeps the unqualified phrase]
-KILLED   #22 oodh_wording.py: shown D on the other side of the bar  [FAIL -5.005 shown as On OOD-H, 20 conversations with human-written user turns, the paired difference is -5.00 points (95% CI -20.00 to 0.00).]
+KILLED   #22 oodh_wording.py: shown D on the other side of the bar  [FAIL -5.005 shown as On OOD-H, 20 conversations with human-written user turns, the paired difference against Qwen2.5-0.5B-Instruct is -5.00 points (95% CI -20.0]
 KILLED   #23 oodh_wording.py: unqualified wording never refused  [FAIL unqualified wording accepted while qualified]
 KILLED   #24 oodh_wording.py: claim without the OOD-H result accepted  [FAIL claim without the OOD-H result accepted]
 KILLED   #25 oodh_wording.py: provisional note never required  [FAIL provisional note missing accepted]
@@ -38,10 +38,10 @@ KILLED   #36 oodh_wording.py: greedy pair not labeled  [FAIL greedy pair not lab
 KILLED   #37 oodh_wording.py: a claim worded from a diagnostic CI  [FAIL a claim worded from greedy rows]
 KILLED   #38 oodh_wording.py: Part 2 complete without Part 2 threads  [FAIL cli --part2-complete with Part 1 threads only]
 KILLED   #39 oodh_wording.py: Part 1 threads counted as Part 2  [FAIL cli --part2-complete 0 ]
-KILLED   #40 oodh_wording.py: only the hyphenated form matched  [FAIL accepted while qualified: Planck-30M is noninferior to Qwen2.5-0.5B-Instruct on RC-12.]
-KILLED   #41 oodh_wording.py: case-sensitive match  [FAIL accepted while qualified: Planck-30M is Non-inferior to Qwen2.5-0.5B-Instruct on RC-12.]
-KILLED   #42 oodh_wording.py: the old sentence rule  [FAIL accepted while qualified: Planck-30M is non-inferior to Qwen2.5-0.5B-Instruct on RC-12, which uses RC-12's format.]
+KILLED   #40 oodh_wording.py: only the hyphenated form matched  [FAIL accepted while qualified: Planck-30M clears the state bar on RC12.]
+KILLED   #41 oodh_wording.py: case-sensitive match  [FAIL accepted while qualified: Planck-30M clears the state bar On RC-12.]
+KILLED   #42 oodh_wording.py: the old sentence rule  [FAIL accepted while qualified: Planck-30M clears the state bar on RC-12, which uses RC-12's format.]
 KILLED   #43 oodh_wording.py: --part2-complete without --data  [FAIL cli --part2-complete without --data not refused]
 KILLED   #44 oodh_wording.py: CLI words a claim from a diagnostic CI  [FAIL cli plain 0]
-44 mutants, 0 problems (baseline included), 32 s. No model.
+44 mutants, 0 problems (baseline included), 21 s. No model.
 ALL MUTANTS KILLED

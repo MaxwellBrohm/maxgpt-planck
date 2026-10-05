@@ -1,6 +1,10 @@
 """OOD-H paired difference and the Level R wording rule (prereg draft s1, s9, s14; oodh/DESIGN.txt s7). Pure
 Python, no model. score_stats imports it as ST.OW. It says how Level R is worded IF Level R holds on sealed RC-12
-(s9: CI lower bound >= -3, T0 >= 0.90, >= 3 training seeds); it never decides that Level R holds.
+(s9: S7's 95% CI lower bound >= 40, PERSIST >= 0.40, T0 >= 0.90, >= 3 training seeds); it never decides that Level R
+holds. The rule is unchanged by the Level R redesign (Max, 2026-10-04: took all recommendations in
+rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision 1, D): OOD-H still paired against Qwen2.5-0.5B-Instruct, worse than -5
+points means the qualified wording); only the claim text it words changed with s1 (LEVEL_R, the two phrases, the
+matcher's target, and the comparator named in the OOD-H sentence).
 
 Input: each model's OOD-H transcript rows (rc12 runner rows played through oodh/play.FixedHistory and graded by the
 RC-12 graders; family OODH; unit = the thread's mean probe result, strict). score.select keeps the sampling seeds
@@ -19,17 +23,17 @@ RC-12 graders; family OODH; unit = the thread's mean probe result, strict). scor
       words no claim from it. part1 (the Part 1 item ids) gives ci["part2_threads"], the scored threads outside it.
   decide(ci, part2_complete=False, fill=None)  the s1 rule; refused (ValueError) for a diagnostic ci, and for
       part2_complete unless ci["part2_threads"] > 0 (Part 2 threads were scored). D worse than -5 points (D < -5;
-      exactly -5 is not worse) -> "qualified": the claim says "non-inferior ... on RC-12's format", the OOD-H
+      exactly -5 is not worse) -> "qualified": the claim says "... on RC-12's format", the OOD-H
       sentence stays beside it, and the unqualified wording is refused. Otherwise "unqualified" (the qualified
       wording is then allowed too). D is compared after rounding to 1e-6 points, so float noise cannot cross the bar (a real nonzero
       difference is about 0.004 points or more: 150 threads of 1 to 3 probes, up to 10 x 3 seeds). provisional =
       not part2_complete (s1: provisional until OOD-H is complete, Part 2 in January); the note is then in the text.
-      fill: the other s1 numbers {N, B, k, c, n}; a missing one stays a placeholder.
-  refusals(text, dec)  why a claim text breaks the rule: while qualified, any "non-inferior" (any case, with or
+      fill: the other s1 numbers {N, B, s7lo, y, k, c}; a missing one stays a placeholder.
+  refusals(text, dec)  why a claim text breaks the rule: while qualified, any "on RC-12" (any case, with or
       without the hyphen, a Unicode dash or a space) that does not start the exact QUALIFIED phrase; the OOD-H
       sentence (with these numbers) missing; the provisional note missing.
 CLI: python3 -B oodh_wording.py --planck T.jsonl [...] --comparator T.jsonl [...] [--data ITEMS.jsonl]
-     [--part2-complete] [--part1 PART1.jsonl] [--n 10000] [--fill N=30,B=18,k=3,c=900,n=5400]
+     [--part2-complete] [--part1 PART1.jsonl] [--n 10000] [--fill N=30,B=18,s7lo=45.10,y=18.15,k=3,c=600]
      prints the CI and the decision as JSON (exit 0; decision null for a diagnostic CI); a refused input exits 2.
      --part2-complete needs --data (the scored thread set) and the Part 1 item file (default
      sealed/oodh/oodh_part1.jsonl): --data must hold threads outside Part 1, and the rows must cover them."""
@@ -47,16 +51,17 @@ PART1 = os.path.join(REPO, "sealed", "oodh", "oodh_part1.jsonl")
 COMPARATOR = "Qwen/Qwen2.5-0.5B-Instruct"   # s1 and s9 name it; runner rows carry the bare model id as responder
 OODH_MARGIN = -5.0             # s1: "worse than -5 points"
 DECIMALS = 6                   # D is compared after rounding to this many decimals (float noise only)
-LEVEL_R = ("Planck-{N}M ({N}M total parameters, {B}M non-embedding) is non-inferior to Qwen2.5-0.5B-Instruct on "
-           "RC-12, a pre-registered, sealed 12-turn conversation test. On its own conversation history, the lower "
-           "bound of the paired 95% confidence interval on the RC-12 composite (bootstrap over conversations and "
-           "seeds) is no worse than -3 points ({k} training seeds, {c} conversations, {n} scored turns). {oodh} It "
-           "is the smallest model on our curve that does this.")
-OODH_SENTENCE = ("On OOD-H, {h} conversations with human-written user turns, the paired difference is {d} points "
-                 "(95% CI {lo} to {hi}).")
-UNQUALIFIED = "non-inferior to Qwen2.5-0.5B-Instruct on RC-12,"
-QUALIFIED = "non-inferior to Qwen2.5-0.5B-Instruct on RC-12's format,"
-NON_INFERIOR = r"non[\s\-\u2010-\u2015]?inferior"   # any case; hyphen, Unicode dash, space or none
+LEVEL_R = ("Planck-{N}M ({N}M total parameters, {B}M non-embedding) clears the state bar on RC-12, a "
+           "pre-registered, sealed 12-turn conversation test. On its own conversation history over sealed RC-12's "
+           "seven state families, the lower bound of the 95% CI on Planck-{N}M's state score (bootstrap over "
+           "conversations and seeds) is {s7lo} of 100, at or above the pre-registered bar of 40 set by the "
+           "shortcut-rule ceiling; the best public model on our panel scored {y} ({k} training seeds, {c} "
+           "conversations). {oodh} It is the smallest model on our curve that does this.")
+OODH_SENTENCE = ("On OOD-H, {h} conversations with human-written user turns, the paired difference against "
+                 "Qwen2.5-0.5B-Instruct is {d} points (95% CI {lo} to {hi}).")
+UNQUALIFIED = "on RC-12,"
+QUALIFIED = "on RC-12's format,"
+ON_RC12 = r"\bon\s+RC[\s\-\u2010-\u2015]?12\b"   # any case; hyphen, Unicode dash, space or none
 PROVISIONAL = "Provisional until OOD-H is complete: Part 2 (the raters' scripts, collected in January) is not scored."
 
 
@@ -202,10 +207,10 @@ def decide(ci, part2_complete=False, fill=None):
 
 def refusals(text, dec):
     out = []
-    bare = [m.start() for m in re.finditer(NON_INFERIOR, text, re.I)
+    bare = [m.start() for m in re.finditer(ON_RC12, text, re.I)
             if text[m.start():m.start() + len(QUALIFIED)] != QUALIFIED]
     if dec["decision"] == "qualified" and bare:
-        out.append(f"unqualified 'non-inferior' at {bare}: OOD-H's D is worse than -5 points (s1)")
+        out.append(f"unqualified 'on RC-12' at {bare}: OOD-H's D is worse than -5 points (s1)")
     if dec["oodh_sentence"] not in text:
         out.append("the OOD-H result is not beside the claim")
     if dec["provisional"] and PROVISIONAL not in text:
@@ -226,7 +231,7 @@ def main(argv=None):
     ap.add_argument("--part1", default=PART1, help="the OOD-H Part 1 item file (its ids are Part 1)")
     ap.add_argument("--n", type=int, default=10000)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--fill", default="", help="the other s1 numbers, e.g. N=30,B=18,k=3,c=900,n=5400")
+    ap.add_argument("--fill", default="", help="the other s1 numbers, e.g. N=30,B=18,s7lo=45.10,y=18.15,k=3,c=600")
     a = ap.parse_args(argv)
     fill = dict(kv.split("=", 1) for kv in a.fill.split(",")) if a.fill else {}
     try:

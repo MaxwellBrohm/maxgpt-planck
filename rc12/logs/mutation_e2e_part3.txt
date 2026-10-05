@@ -1,4 +1,4 @@
-RC-12 mutation_e2e.py part 3/8: 13 of 104 mutants, fresh process each, 89 s. No model.
+RC-12 mutation_e2e.py part 3/8: 17 of 132 mutants, fresh process each, 127 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #02 runner: plain stop rule not applied  <- stops: CONTINUER plain: fake user turn not cut
@@ -7,12 +7,16 @@ KILLED    #18 score: COMPOSE counted in TWOHOP  <- G2 LONGEST: family TWOHOP=0.4
 KILLED    #26 score: claimable with one training seed  <- scoring: claimable needs 3 training seeds
 KILLED    #34 score_stats: PERSIST drop bar  <- stats: PERSIST base rates {'brackets:None': 0.0, 'caps:None': 0.0, 'closing:over and out': 0.0, 'closing:stay curious': 0.0, 'closing:that is all': 0.
 KILLED    #42 fakes_family: L_REPEAT does not loop  <- G2 L_REPEAT: cell LOOP:story=1.00
-KILLED    #50 score: OD1 b: the AND replaced by the own-history result alone  <- owngate: CONSIST: bootstrap OWN slot not gated
+KILLED    #50 score: OD1 b: the AND replaced by the own-history result alone  <- G3 shortcut ceiling S7 51.01 reaches the Level R S7 bar 40.0
 KILLED    #58 score_stats: OD1 b: headroom judges the ungated OWN  <- owngate: headroom OWN not gated {'scores': {'IDEAL': 1.0, 'CONSIST': 1.0}, 'fail': True, 'reason': 'ceiling'}
-KILLED    #66 score: OD1 b: the gate takes the cf result alone (NEXT passes)  <- owngate: NEXT: bootstrap OWN slot not gated
+KILLED    #66 score: OD1 b: the gate takes the cf result alone (NEXT passes)  <- G3 shortcut ceiling S7 40.00 reaches the Level R S7 bar 40.0
 KILLED    #74 runner: OD1 b: the row drops the cf_unswapped mark  <- owngate: unswapped cf rows not scored 0 in OWN_GATED ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0}, pick 1.0)
 KILLED    #82 grade_loop: F1: ack after ack charged again (ACKER loops)  <- ackrep: ACKER: R 100.0, loop 0.17712882096069868, degenerate {'LOOP': 0.17712882096069868, 'RUNAWAY': 0.0, 'EMPTY': 0.0, 'LEAK': 0.0}, Level A loop cr
 KILLED    #90 score: item D: a key at exactly 0.60 misses  <- scoring: Level A content bar is not 0.60 inclusive: {0.6: False, 0.5999: False}
-KILLED    #98 score: LOOKUP claim: P and X probe rates swapped  <- scoring: LOOKUP P / X probe rates (ABSTAIN): {'value': 0.0, 'bar': 0.6, 'met': False, 'claimable': False, 'why_not': ['1 training seed(s), < 3', "rend
-killed 13 | survived 0 | crashed 0 | malformed 0
+KILLED    #98 score: LOOKUP claim: P and X probe rates swapped  <- scoring: LOOKUP P / X probe rates (ABSTAIN): {'value': 0.0, 'bar': 0.6, 'met': False, 'claimable': False, 'why_not': ['1 training seed(s), < 3', 'T0 N
+KILLED    #106 score: S7 reads the ungated OWN (OD1 b)  <- levelr: S7 does not read the gated OWN (cf run 0): S7 100.0, S7_ungated 100.0
+KILLED    #114 score: s12 clause passes a model whose S7 is missing  <- levelr: s12 clause (S7 point >= 40 and PERSIST >= 0.40): {'bars': True, 'S7': False, 'PERSIST': False, 'None': True, 'PERSIST None': False, 'IDEAL': T
+KILLED    #122 score_stats: S7 CI averages 6 families  <- levelr: S7 CI is not over the 7 state families (ROLE at 0: want lo = hi = 85.71): {'S7': 85.71428571428571, 'lo': 100.0, 'hi': 100.0, 'n': 200, 'units
+KILLED    #130 score: a missing PERSIST meets Level R's PERSIST bar  <- levelr: score.level_r bars (S7 lo 40, PERSIST 0.40 inclusive; T0 0.90 and 3 seeds for claimable): {'bars': (True, True), 'S7 39.999': (False, False), 
+killed 17 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

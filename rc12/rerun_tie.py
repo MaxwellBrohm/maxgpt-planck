@@ -16,9 +16,13 @@ Stages, each its own process so one model is on the GPU at a time (as in parity)
            |log p(a_j) - log p(b_j)| on prompt + a[:j]. A strict prefix whose turn stopped on eos / eot competes with
            HF's first stop id; equal token ids or a capped prefix give no margin (None). No divergence: no model is
            loaded. A fake engine (tests, no model) takes --tie-margin-stub X as every margin; a real engine refuses it.
-judge(): PASS when every first divergence has a margin <= NEAR_TIE; a missing margin fails, as in parity.
-Caveat for the GPU run: under sampling (R1) one seed's draw can flip between two tokens that are not near-tied when
-the logits move slightly, so R1 can FAIL on drift alone; its margins are printed. R2 (greedy) is the parity case."""
+judge(): an R2 (greedy) comparison PASSES when every first divergence has a margin <= NEAR_TIE; a missing margin
+  fails, as in parity. R1 (sampled) is reported, never a gate (Max, 2026-10-04: took all recommendations in
+  rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision 3, a)): an INFO line with its identical share and, per conversation, the
+  first divergence (id, turn), the shared prefix of the two replies (characters) and the margin. Why: the GPU rerun of
+  2026-10-04 (notes STEP 11c) failed R1 on both engine families with margins of 0.25 to 2.625 nats, because both
+  samplers draw from seeded noise and a small drift in p can flip a sampled pick between tokens far apart in log p;
+  the margin bounds a greedy flip, not a sampled one. verify_dev_runs C3 already checks that seeds are carried."""
 import argparse
 import json
 import os
@@ -153,6 +157,11 @@ def judge(c, ms, say):
     ok = all(m is not None and m <= NEAR_TIE for m in ms)
     known = [m for m in ms if m is not None]
     first = c["divergences"][0] if c["divergences"] else None
+    if c["tag"].startswith("R1"):      # decision 3 (a): reported, never a gate
+        each = "; ".join(f"{d['id']} t{d['turn']} shared {len(os.path.commonprefix([d['a'], d['b']]))} chars margin "
+                         f"{'-' if m is None else f'{m:.3f}'}" for d, m in zip(c["divergences"], ms))
+        return say("INFO", f"{c['tag']} (reported, not gated): {c['identical']} / {c['conversations']} conversations "
+                   f"identical, {len(ms)} first divergences" + (f": {each}" if each else ""))
     say("PASS" if ok else "FAIL", f"{c['tag']}: {c['identical']} / {c['conversations']} conversations identical, "
         f"{len(ms)} first divergences, {len(ms) - len(known)} without a margin, max margin "
         f"{f'{max(known):.3f}' if known else '-'} (near-tie <= {NEAR_TIE})"

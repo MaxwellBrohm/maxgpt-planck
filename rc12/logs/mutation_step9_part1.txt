@@ -15,6 +15,6 @@ KILLED    #33 parity_hf_vllm [parity]: --pick spread repeats records  <- pick: f
 KILLED    #36 dev_batch [batch]: the engines.json decision is ignored  <- gate: engines.json names vllm, a DIFFERS verdict still refused (parity gate: org/NoModel has parity verdict DIFFERS; run parity_hf_vllm.py f
 KILLED    #39 dev_batch [batch]: hfb runs without parity  <- checks raised ModuleNotFoundError: No module named 'transformers'
 KILLED    #42 hf_batched [hfb]: the stop token is cut off a batched reply  <- split [4, 5, 7, 2, 2]: ([4, 5], 'eos') != ([4, 5, 7], 'eot')
-KILLED    #45 dev_batch [batch]: the cf twin runs every family  <- rows: /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmpom7jkfbh/IDEAL_ALT/plain/greedy_owncf differs from runner.run
+KILLED    #45 dev_batch [batch]: the cf twin runs every family  <- rows: /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmpv2hoaowc/IDEAL_ALT/plain/greedy_owncf differs from runner.run
 killed 16 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

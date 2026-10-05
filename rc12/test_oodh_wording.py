@@ -62,12 +62,12 @@ def test_boundary():
         d = OW.decide(ci)
         check(d["decision"] == "unqualified" and d["refused"] == [], f"D exactly -5 ({ci['D']!r}) is not worse")
         check(OW.UNQUALIFIED in d["text"] and OW.QUALIFIED not in d["text"], "exactly -5: unqualified text")
-        check("difference is -5.00 points" in d["oodh_sentence"], f"exactly -5 shown as {d['oodh_sentence']}")
+        check("Qwen2.5-0.5B-Instruct is -5.00 points" in d["oodh_sentence"], f"exactly -5 shown as {d['oodh_sentence']}")
     ci = pd(rows([1.0] * 8 + [0.999] + [0.0] * 11), rows(ones(10)), n=50)     # D = -5.005
     d = OW.decide(ci)
     check(d["decision"] == "qualified" and d["refused"] == [OW.UNQUALIFIED], f"D {ci['D']:.4f}: {d['decision']}")
     check(OW.QUALIFIED in d["text"] and OW.UNQUALIFIED not in d["text"], "qualified text keeps the unqualified phrase")
-    check("difference is -5.005 points" in d["oodh_sentence"], f"-5.005 shown as {d['oodh_sentence']}")
+    check("Qwen2.5-0.5B-Instruct is -5.005 points" in d["oodh_sentence"], f"-5.005 shown as {d['oodh_sentence']}")
     for k_a, k_b, want in ((12, 20, "qualified"), (20, 20, "unqualified"), (16, 20, "qualified"),
                            (17, 20, "qualified"), (18, 20, "unqualified"), (20, 12, "unqualified"),
                            (4, 10, "qualified")):
@@ -84,12 +84,13 @@ def test_provisional_and_text():
     d2 = OW.decide(ci, part2_complete=True)
     check(not d2["provisional"] and OW.PROVISIONAL not in d2["text"] and d2["note"] is None, "Part 2 complete")
     check(d["oodh_sentence"] in d["text"] and d2["oodh_sentence"] in d2["text"], "OOD-H sentence not beside the claim")
-    check(d["oodh_sentence"] == f"On OOD-H, 20 conversations with human-written user turns, the paired difference is "
-          f"-20.00 points (95% CI {ci['lo']:.2f} to {ci['hi']:.2f}).", f"sentence {d['oodh_sentence']}")
-    f = OW.decide(ci, fill=dict(N=30, B=18, k=3))
-    check(f["text"].startswith("Planck-30M (30M total parameters, 18M non-embedding) is non-inferior to "
-                               "Qwen2.5-0.5B-Instruct on RC-12's format, a pre-registered") and
-          "(3 training seeds, {c} conversations, {n} scored turns)" in f["text"], "fill")
+    check(d["oodh_sentence"] == f"On OOD-H, 20 conversations with human-written user turns, the paired difference "
+          f"against Qwen2.5-0.5B-Instruct is -20.00 points (95% CI {ci['lo']:.2f} to {ci['hi']:.2f}).",
+          f"sentence {d['oodh_sentence']}")
+    f = OW.decide(ci, fill=dict(N=30, B=18, k=3, s7lo="45.10"))
+    check(f["text"].startswith("Planck-30M (30M total parameters, 18M non-embedding) clears the state bar on "
+                               "RC-12's format, a pre-registered") and "is 45.10 of 100" in f["text"] and
+          "scored {y} (3 training seeds, {c} conversations)" in f["text"], "fill")
     quote = []                                   # s1 Level R quote, placeholders as written there
     lines = open(PREREG).read().split("\n")
     i = next(j for j, ln in enumerate(lines) if ln.startswith('  Level R: "'))
@@ -106,7 +107,7 @@ def test_refusals():
     check(OW.refusals(q["text"], q) == [] and OW.refusals(u["text"], u) == [], "own texts refused")
     bad = q["text"].replace(OW.QUALIFIED, OW.UNQUALIFIED)
     check(any("unqualified" in x for x in OW.refusals(bad, q)), "unqualified wording accepted while qualified")
-    para = "Planck-30M is non-inferior to Qwen2.5-0.5B-Instruct on RC-12. {} " + OW.PROVISIONAL
+    para = "Planck-30M clears the state bar on RC-12. {} " + OW.PROVISIONAL
     check(any("unqualified" in x for x in OW.refusals(para.format(q["oodh_sentence"]), q)),
           "a paraphrase without 'RC-12's format' accepted")
     check(OW.refusals(para.format(u["oodh_sentence"]), u) == [], "the unqualified paraphrase refused while unqualified")

@@ -61,9 +61,10 @@ MUTANTS = [
     (O, 'if ci.get("diagnostic"):', "if False:", "a claim worded from a diagnostic CI"),
     (O, 'if part2_complete and not ci.get("part2_threads"):', "if False:", "Part 2 complete without Part 2 threads"),
     (O, "else len(set(ids) - set(part1)))", "else len(ids))", "Part 1 threads counted as Part 2"),
-    (O, r'NON_INFERIOR = r"non[\s\-\u2010-\u2015]?inferior"', 'NON_INFERIOR = r"non-inferior"',
+    # the matcher's target since Max, 2026-10-04 (DECISIONS_LEVEL_R_FOR_MAX.md decision 1, D: the new s1 wording)
+    (O, r'ON_RC12 = r"\bon\s+RC[\s\-\u2010-\u2015]?12\b"', 'ON_RC12 = r"on RC-12"',
      "only the hyphenated form matched"),
-    (O, "re.finditer(NON_INFERIOR, text, re.I)", "re.finditer(NON_INFERIOR, text)", "case-sensitive match"),
+    (O, "re.finditer(ON_RC12, text, re.I)", "re.finditer(ON_RC12, text)", "case-sensitive match"),
     (O, "if text[m.start():m.start() + len(QUALIFIED)] != QUALIFIED]",
      "if \"RC-12's format\" not in text[m.start():].split(\". \")[0]]", "the old sentence rule"),
     (O, "if a.part2_complete and not a.data:", "if False:", "--part2-complete without --data"),

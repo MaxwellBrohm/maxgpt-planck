@@ -1,18 +1,22 @@
-RC-12 mutation_e2e.py part 1/8: 13 of 104 mutants, fresh process each, 81 s. No model.
+RC-12 mutation_e2e.py part 1/8: 17 of 132 mutants, fresh process each, 117 s. No model.
 baseline failures (expected: only the G4 item lines):
   none
 KILLED    #00 runner: history gets the IDEAL reply instead of the model's own  <- G1 IDEAL_ALT: OWN:list=0.00
 KILLED    #08 runner: history truncated but the drop not recorded  <- trunc: ctx 556: only 0 truncated probes
 KILLED    #16 render: own_reply off by one  <- G1 IDEAL: OWN:list=0.00
 KILLED    #24 score: loop bar raised  <- G3 L_REPEAT: loop rate 0.060 meets the loop bar
-KILLED    #32 score_stats: Level R margin  <- stats: bootstrap FIRST-IDEAL {'D': -84.76851851851852, 'lo': -87.12962962962963, 'hi': -82.06018518518519, 'n': 200}
+KILLED    #32 score_stats: the -3 non-inferiority margin (PLAN's original Level R test, reported beside since 2026-10-04)  <- stats: bootstrap FIRST-IDEAL {'D': -84.76851851851852, 'lo': -87.12962962962963, 'hi': -82.06018518518519, 'n': 200, 'fams': ['RECALL', 'CORR', 'BIND'
 KILLED    #40 fakes: ABSTAIN answers right  <- G2 ABSTAIN: 394 value-graded units above 0 (e.g. ['rc12-dev-recall-001', 'rc12-dev-recall-002', 'rc12-dev-recall-003'])
-KILLED    #48 own_cf: OWN-CF list not swapped  <- owncf: CONSIST OWN under --own-cf = 0.33, want 0.0
-KILLED    #56 score_stats: OD1 b: bootstrap OWN slot takes the ungated units  <- owngate: CONSIST: bootstrap OWN slot not gated
+KILLED    #48 own_cf: OWN-CF list not swapped  <- G3 shortcut ceiling S7 41.49 reaches the Level R S7 bar 40.0
+KILLED    #56 score_stats: OD1 b: bootstrap OWN slot takes the ungated units  <- levelr: S7 CI ran without the --own-cf rows (OD1 b)
 KILLED    #64 runner: OD6 iii: runner drops the ack-repeat record  <- ackrep: ACKER ack-repeat None / None, want 0.17712882096069868 / 0.46859205776173285
 KILLED    #72 score: OD1 b: cf rows choose the seeds  <- owngate: greedy history + sampled cf rows: seeds taken from the cf rows (replies 0, {'OWN': None, 'OWN_CF': 1.0, 'OWN_GATED': None, 'cf_unswapped': 0}
 KILLED    #80 runner: OD6 iii: runner drops the answer-repeat record  <- ackrep: ACKER answer-repeat None, want 0
 KILLED    #88 score: item 1: LOOKUP back in the composite  <- scoring: LOOKUP claim reads R, or R reads LOOKUP: only LOOKUP right -> R 10.0, claim 1.0; LOOKUP 0 -> claim 0.0
 KILLED    #96 score: LOOKUP claim claimable on the plain render  <- scoring: LOOKUP claim claimable only with 3 training seeds, template, sampled: {'3 seeds': True, '2 seeds': False, 'plain': True, 'greedy': False}
-killed 13 | survived 0 | crashed 0 | malformed 0
+KILLED    #104 score: S7 without ROLE  <- levelr: S7 CI is not over the 7 state families (ROLE at 0: want lo = hi = 85.71): {'S7': 100.0, 'lo': 100.0, 'hi': 100.0, 'n': 200, 'units': {'RECALL'
+KILLED    #112 score: Level R claimable with fewer than 3 training seeds  <- levelr: score.level_r bars (S7 lo 40, PERSIST 0.40 inclusive; T0 0.90 and 3 seeds for claimable): {'bars': (True, True), 'S7 39.999': (False, False), 
+KILLED    #120 score_stats: S7 CI and bootstrap: training seeds not resampled  <- levelr: Level R reads the point, not the CI lower bound (IDEAL, IDEAL, ABSTAIN: S7 66.7, lo 0): {'S7': 66.66666666666666, 'ci': {'S7': 66.666666666666
+KILLED    #128 score_stats: S7 CI lower bound at the 1% quantile (98%)  <- levelr: S7 CI is not the 95% percentile interval (3 IDEAL + 3 ABSTAIN seeds: want lo 16.67, hi 83.33): {'S7': 50.0, 'lo': 0.0, 'hi': 83.33333333333333
+killed 17 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

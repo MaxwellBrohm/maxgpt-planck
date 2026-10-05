@@ -58,15 +58,17 @@ We want a capability-per-parameter result that holds across the curve, not one l
 
 **What is new, and what is not** (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 15); evidence in `research/NOVELTY_2026-10.md`, related work in `research/REPORT.md` s2.1). Planck does not claim to be the first to ask how small a chat model can be (SmallTalkLLM), the first from-scratch chat model under 30M (BananaMind-2, Loom, Veyra2, Vertex, Micro Language Models, MiniMind), the first to train tiny models on synthetic multi-turn dialogue (RxT, Micro Language Models), or the first to keep facts outside the weights (LMLM, Co-LMLM, KLLM, Loom). The claim we are trying to earn is the first measured floor for strict multi-turn state skills: the smallest from-scratch model that passes a sealed, mutation-tested 12-turn test on its own conversation history (corrections, binding, rule persistence, own-answer consistency, role, loops), with seeds, against a public panel in one harness. As of 2026-10-02 no published work shows a model under 150M passing such a test or a measured minimum-size curve for these skills. The lock's dated push is the priority claim, so it stays on schedule.
 
-**Level R** (reported along the way). Exact wording:
-> "Planck-{N}M ({N}M total parameters, {B}M non-embedding) is non-inferior to Qwen2.5-0.5B-Instruct on RC-12, a pre-registered, sealed 12-turn conversation test. On its own conversation history, the lower bound of the paired 95% confidence interval on the RC-12 composite (bootstrap over conversations and seeds) is no worse than -3 points ({k} training seeds, {c} conversations, {n} scored turns). On OOD-H, {h} conversations with human-written user turns, the paired difference is {d} points (95% CI {lo} to {hi}). It is the smallest model on our curve that does this."
+**Level R** (reported along the way). Exact wording (Max, 2026-10-04: took all recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md, decision 1 D; it replaces the original non-inferiority wording, a pre-lock change made after seeing dev, disclosed in the pre-registration with the dev table as its evidence):
+> "Planck-{N}M ({N}M total parameters, {B}M non-embedding) clears the state bar on RC-12, a pre-registered, sealed 12-turn conversation test. On its own conversation history over sealed RC-12's seven state families, the lower bound of the 95% CI on Planck-{N}M's state score (bootstrap over conversations and seeds) is {s7lo} of 100, at or above the pre-registered bar of 40 set by the shortcut-rule ceiling; the best public model on our panel scored {y} ({k} training seeds, {c} conversations). On OOD-H, {h} conversations with human-written user turns, the paired difference against Qwen2.5-0.5B-Instruct is {d} points (95% CI {lo} to {hi}). It is the smallest model on our curve that does this."
 
-If OOD-H's paired point estimate is worse than -5 points, the claim is worded as "non-inferior on RC-12's format", with the OOD-H result beside it. The unqualified wording is then not used. Level R statements made in December are provisional until OOD-H is complete in January.
+Level R holds at a size when, on sealed, the 95% CI lower bound of the state score S7 (RECALL, CORR, BIND, TWOHOP, OWN gated, TOPIC, ROLE; 0-100) is at least 40, PERSIST is at least 0.40 (point), T0 is at least 0.90, with at least 3 training seeds. Why: Qwen2.5-0.5B-Instruct scores 2.30 of 100 on the seven state families on dev, so non-inferiority to it at -3 could not tell it from a floor model (a public 5M model met it, mostly by not looping), and every public model sits below a fixed-rule shortcut mix (S7 36.7 on dev); 40 is the cheater bar committed on 2026-09-25, before any baseline was scored. Reported beside, never claimed: R, the original non-inferiority CI against Qwen2.5-0.5B-Instruct, S7 per family, the paired S7 difference against LFM2-2.6B, the sealed shortcut ceiling, the loop rate, and S7 of the generic-recipe 30M control.
+
+If OOD-H's paired point estimate is worse than -5 points, the claim is worded as "clears the state bar on RC-12's format", with the OOD-H result beside it. The unqualified wording is then not used. Level R statements made in December are provisional until OOD-H is complete in January.
 
 **Level A** (the headline). Exact wording:
 > "Planck-{N}M passes a strict multi-turn bar that no model at or below 0.6B passed in our tests. On sealed RC-12, pooled over {k} seeds, it:
-> - applies corrections made 4 or more turns earlier (pass rate at least 0.80, with the two-slot and no-update control items also at least 0.80);
-> - keeps same-type facts and speakers apart in both mention orders (paired pass rate at least 0.80; chance is 0.25);
+> - applies corrections made 4 or more turns earlier (pass rate at least 0.60, with the two-slot and no-update control items also at least 0.60);
+> - keeps same-type facts and speakers apart in both mention orders (paired pass rate at least 0.60; chance is 0.25);
 > - loops in at most 2% of turns, and no more often than Qwen2.5-0.5B-Instruct.
 >
 > In a blind pairwise test ({r} raters, 150 conversations, 3 ratings each), raters judged it as good as or better than Qwen2.5-0.5B-Instruct in {w}% of judgments (95% CI {lo} to {hi}), meeting the pre-registered 50%. To our knowledge it is the smallest model shown to pass this bar."
@@ -74,7 +76,7 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 **Rules for both levels**
 
 *Thresholds*
-- The thresholds (0.80, 2%, 50%, -3, -5) are proposals. They become final when the pre-registration is pushed (Oct 11-14) and never change after that.
+- The thresholds (0.60, 2%, 50%, 40 and 0.40 for Level R, -5) are proposals. (Level A's four content bars were 0.80 until the re-anchor rule below set them to 0.60 on dev, Oct 2; Level R's -3 margin became the S7 bar of 40, Oct 4.) They become final when the pre-registration is pushed (Oct 11-14) and never change after that.
 - **Re-anchor rule**, applied mechanically before the lock. LFM2-2.6B is the reference model that should clear the bar. If it scores below 0.80 on dev for a Level A family, first check that family and its grader. If the score is still below 0.80, that family's threshold becomes LFM2-2.6B's dev rate rounded down to 0.05, and never goes below 0.60. If LFM2-2.6B is below 0.60, the threshold stays at 0.60 and the pre-registration says no tested model reached it.
 
 *Seeds*
@@ -90,7 +92,7 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 - Any later recipe change is labeled post hoc.
 
 *Odds* (judgment, from REPORT s1.4)
-- Level R: 40-60%.
+- Level R: not re-estimated since the Oct 4 change; lower than the 40-60% judged for the old non-inferiority bar (both analysts' judgment, rc12/DECISIONS_LEVEL_R_FOR_MAX.md). It now needs a true S7 of about 45-46, an average state family of 0.45, for 80% power (about 47-48 if its runs agree closely unit by unit: the verifier's own simulation, 2026-10-05, rc12/notes.txt STEP 12 VERIFY); the best public model on our panel, LFM2-2.6B, averages 0.18 on dev.
 - Level A: 10-25%, or about 30-40% if the repaired `ft_test.py` (P-001) passes with its controls.
 
 ---
@@ -203,6 +205,7 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 - The unit is the paired per-conversation difference.
 - 10,000 bootstrap resamples over conversations and training seeds, with sampling seeds nested inside.
 - Percentile 95% CI.
+- Since Oct 4 (Max, decision 1 D of rc12/DECISIONS_LEVEL_R_FOR_MAX.md), Level R reads one model's S7 CI with the same resampling (not paired); the paired analysis above is reported beside, against Qwen2.5-0.5B-Instruct on R and against LFM2-2.6B on S7. The sealed size stays 600: the S7 bar barely depends on n (a true S7 of about 45.7, 45.1 and 44.6 is needed at 600, 700 and 900).
 
 *Inference diagnostics*
 - P-143: both probes on LFM2.5-230M and Falcon-90M.
@@ -264,7 +267,7 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
   - the gated distance curriculum (P-026).
 - **P-005: corrections pass with the state card and fail without it.** The limit is access or interference, not capacity. The note and recency bets move up.
 - **LFM2-2.6B fails a Level A family on dev.** Check the family and grader, then apply the re-anchor rule with its 0.60 floor. This happens before the lock, never after.
-- **LFM2.5-230M or Falcon-90M passes Level R.** Level R is then new only below that model's size, so Planck's claim moves to the curve points under it.
+- **A public panel model passes Level R** (its S7 point estimate at least 40 and its PERSIST at least 0.40; Max, 2026-10-04). Level R is then new only below that model's size, so Planck's claim moves to the curve points under it. On dev none does at any size.
 
 ### Phase 1: teacher pilot and tokenizer (Oct 1 - Oct 18)
 
@@ -565,7 +568,7 @@ Dec 17 comes after Ultra's pretraining (ends about Dec 3-7, est.), Ultra's SFT/D
 - Each curve point is scored once its seeds finish.
 - It is scored with and without lookup on the fictional knowledge base (P-094), in the state-card condition labeled as a scaffold (P-005), and on OOD-H.
 
-**Level R table.** Every curve point vs Qwen2.5-0.5B-Instruct with the paired CI, the OOD-H column, and the public panel.
+**Level R table.** Every curve point's S7 with its 95% CI against the bar of 40, its PERSIST and T0, the public panel's S7, and beside them R with the paired CI vs Qwen2.5-0.5B-Instruct and the OOD-H column.
 
 **Level A human test (review 19)**
 
@@ -620,7 +623,7 @@ Dec 17 comes after Ultra's pretraining (ends about Dec 3-7, est.), Ultra's SFT/D
 - a remote check only if the heartbeat stops.
 
 **Gate**
-- *Level R* is claimed at the smallest size whose sealed pooled-seed lower bound is -3 or better, with 3 seeds at that size, under the OOD-H wording rule.
+- *Level R* is claimed at the smallest size whose sealed pooled-seed S7 lower bound is 40 or better, with PERSIST at least 0.40, T0 at least 0.90 and 3 seeds at that size, under the OOD-H wording rule (Max, 2026-10-04).
 - *Level A* is claimed only if every generative criterion passes on sealed, pooled over at least 3 seeds, and the human win-or-tie point estimate is at least 50%.
 - *Level A decision, Jan 31* (review 20). It uses the seeds finished by then. A Level A claim at 150M becomes final only when seeds 2-3 confirm the generative criteria.
 - *60M passes Level A.* 150M still runs, because the curve needs it, but the headline is 60M, and the 5070 adds a 20M point in Jan-Feb.
@@ -904,7 +907,7 @@ All figures are estimates, from arithmetic on REPORT s7, loop.md, compute.md and
 | risk | early sign | response or kill criterion |
 |---|---|---|
 | **The strict bar is unreachable at 150M** | P-001 flat; by Nov 22 no 30M arm lifts correction margins at 4+ turns beyond seed noise | Level A is attempted only at 60M and 150M with the best-margin arm. If nothing passes by Jan 31, no Level A claim. **Fallback claims, in order:** (1) Level R at the smallest passing curve size, plus per-skill size floors, which are new because no strict pass/fail floor for multi-turn sub-skills has been published (the published multi-turn numbers below 150M are loose and show failure: BananaMind-2, RxT, Loom; Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 15)); (2) the note arm, which counts as the model, if it passes where the plain model does not; (3) "Planck-{N}M + state card (scaffold)", clearly labeled; (4) a negative result: strict corrections not reached at 150M or below with these interventions, and where each one failed. |
-| Level R also fails | Sealed lower bound below -3 at 150M | The claim becomes per-skill floors on the curve plus the negative result (paper path in section 8). Odds: 40-60% (judgment). |
+| Level R also fails | Sealed S7 lower bound below 40 (or PERSIST below 0.40) at 150M | The claim becomes per-skill floors on the curve plus the negative result (paper path in section 8). Odds: not re-estimated since the Oct 4 change, lower than the 40-60% judged for the old bar (judgment). |
 | Someone already clears the bar | LFM2.5-230M or Falcon-90M passes Level R (or A) on RC-12 in Phase 0 | "First" moves to sizes below that model. The curve points under 90M/230M carry the claim, or the claim becomes capability per parameter. |
 | The test is invalid | Mutants survive; LFM2-2.6B fails a Level A family; families sit at floor or ceiling | No lock until fixed. The re-anchor rule applies before the lock, with a 0.60 floor, never after. |
 | The model learns RC-12's format, not the skill | Sealed scores well above OOD-H | OOD-H is pre-registered, with the -5 wording rule. Sealed banks are written before the generator and kept encrypted. 13-gram decontamination against RC-12, OOD-H and the human scripts. |

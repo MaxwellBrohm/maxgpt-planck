@@ -228,4 +228,4 @@ BASELINE fixture misses 0, conversation-test misses 0
   killed  SOURCE grade_text: 'low_alt = {f.lower() for a in altvals for f in [a]' -> 'low_alt = {a.lower() for a in '  (9 fixtures, 0 conv; e.g. inflect_alt/VAL)
   killed  SOURCE graders: 'gold_ok = any(T.asserted_hits(text, g, pool, gold=' -> 'gold_ok = any(T.asserted_hits('  (60 fixtures, 0 conv; e.g. inflect_generic/VAL)
   killed  SOURCE grade_voice: 'for m in T.value_hits(text, v):' -> 'for m in [x for x in T.value_h'  (30 fixtures, 0 conv; e.g. inflect_voice/VAL)
-MUTANTS killed 226/226, survived 0, crashed 0; 97s
+MUTANTS killed 226/226, survived 0, crashed 0; 98s

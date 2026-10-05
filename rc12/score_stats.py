@@ -1,11 +1,19 @@
-"""RC-12 statistics on top of score.py (SPEC s3, s6, s7): the paired bootstrap for Level R, the headroom rule,
-the PERSIST base-rate drop rule and the sensitivity row. Pure Python.
+"""RC-12 statistics on top of score.py (SPEC s3, s6, s7): the S7 CI and the Level R verdict, the paired bootstrap,
+the headroom rule, the PERSIST base-rate drop rule and the sensitivity row. Pure Python.
 
-bootstrap_diff(rows_a, rows_b, n)  D = R(a) - R(b). Each resample: units resampled within each family (stratified,
-    the SAME draw for both models: paired), training seeds resampled per model, sampling seeds resampled inside
-    each drawn training seed (nested); percentile 95% CI. Level R holds when the CI's lower bound is >= -3 points
-    (level_r). The OWN slot holds the OD1 b gated units (score.py), so both models need their --own-cf OWN rows;
-    without them it refuses.
+s7_ci(rows, n)  Level R's CI (Max, 2026-10-04: took all recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision
+    1, D); prereg draft s9): one model's 95% percentile CI of S7 (score.py STATE7). Each resample: units resampled
+    within each STATE7 family (stratified; one draw shared by every run of the model), training seeds resampled,
+    sampling seeds resampled inside each drawn training seed (nested), as bootstrap_diff does for one model.
+level_r(rows, n)  score.level_r on s7_ci's lower bound, the PERSIST family score, T0 and the training-seed count:
+    Level R holds when the lower bound is >= 40 and PERSIST >= 0.40, claimable with >= 3 training seeds and T0 >= 0.90.
+bootstrap_diff(rows_a, rows_b, n, fams)  D = R(a) - R(b) (fams COMPOSITE, the default) or S7(a) - S7(b) (fams
+    STATE7). Each resample: units resampled within each family (stratified, the SAME draw for both models: paired),
+    training seeds resampled per model, sampling seeds resampled inside each drawn training seed (nested); percentile
+    95% CI. Reported beside Level R, never claimed: PLAN's original non-inferiority test (noninferior: lower bound
+    >= -3 points against Qwen2.5-0.5B-Instruct on R) and the paired S7 difference against LFM2-2.6B. The OWN slot
+    holds the OD1 b gated units (score.py), so every model needs its --own-cf OWN rows; without them s7_ci and
+    bootstrap_diff refuse.
 lookup_ci(rows, n)  the LOOKUP claim's 95% CI (prereg draft s10b; Max, 2026-10-04): one model, LOOKUP units
     resampled, training and sampling seeds resampled as above; reported beside the claim, never part of R.
 OW = oodh_wording.py, the OOD-H wording rule of s1: OW.paired_diff (OOD-H paired difference, paired bootstrap over
@@ -31,16 +39,16 @@ import score as S
 
 HEADROOM_KEYS = S.COMPOSITE + [k for k in S.LEVEL_A if k not in S.COMPOSITE]
 HEADROOM = dict(floor=0.05, ceiling=0.95)
-LEVEL_R_MARGIN = -3.0
+NONINF_MARGIN = -3.0              # PLAN's original Level R margin; reported beside since 2026-10-04 (noninferior)
 PERSIST_DROP = 0.30
 
 
-def unit_table(rows):
-    """{train_seed: {seed: {family: {uid: score}}}} over the composite families (BIND = pairs; the OWN slot holds
-    the OWN_GATED units, never the ungated OWN ones: OD1 b)."""
+def unit_table(rows, fams=None):
+    """{train_seed: {seed: {family: {uid: score}}}} over fams (default the composite families; BIND = pairs; the OWN
+    slot holds the OWN_GATED units, never the ungated OWN ones: OD1 b)."""
     out = {}
     for (tr, sd), rr in S.runs(S.select(rows)).items():
-        fam = {f: {} for f in S.COMPOSITE}
+        fam = {f: {} for f in (S.COMPOSITE if fams is None else fams)}
         for u in S.units(rr):
             f = S.SLOT.get(u["family"], u["family"])
             if f in fam and u["family"] not in S.GATE and (u["family"], u["cell"]) not in S.DIAG:
@@ -49,47 +57,79 @@ def unit_table(rows):
     return out
 
 
-def _arrays(table, uids):
-    return {tr: {sd: {f: [fam[f][u] for u in uids[f]] for f in S.COMPOSITE} for sd, fam in by_seed.items()}
+def _arrays(table, uids, fams):
+    return {tr: {sd: {f: [fam[f][u] for u in uids[f]] for f in fams} for sd, fam in by_seed.items()}
             for tr, by_seed in table.items()}
 
 
-def _r(arrs, draw, rng):
+def _r(arrs, draw, rng, fams):
     trains = list(arrs)
     picks = []
     for tr in [rng.choice(trains) for _ in trains]:
         seeds = list(arrs[tr])
         picks += [arrs[tr][rng.choice(seeds)] for _ in seeds]
     tot = 0.0
-    for f in S.COMPOSITE:
+    for f in fams:
         idx = draw[f]
         tot += sum(sum(a[f][i] for i in idx) / len(idx) for a in picks) / len(picks)
-    return 100 * tot / len(S.COMPOSITE)
+    return 100 * tot / len(fams)
 
 
-def bootstrap_diff(rows_a, rows_b, n=10000, seed=0):
-    ta, tb = unit_table(rows_a), unit_table(rows_b)
-    first = next(iter(next(iter(ta.values())).values()))
-    uids = {f: sorted(first[f]) for f in S.COMPOSITE}
+def _uids(tables, fams):
+    """the unit ids per family, the same in every run of every table, or a refusal (OD1 b: OWN needs its twins)."""
+    first = next(iter(next(iter(tables[0].values())).values()))
+    uids = {f: sorted(first[f]) for f in fams}
     assert all(uids.values()), f"no units for {[f for f in uids if not uids[f]]} (OWN needs the --own-cf rows, OD1 b)"
-    for t in (ta, tb):
+    for t in tables:
         for by_seed in t.values():
             for fam in by_seed.values():
-                for f in S.COMPOSITE:
-                    assert sorted(fam[f]) == uids[f], f"unit sets differ in {f}: paired bootstrap impossible"
-    aa, ab = _arrays(ta, uids), _arrays(tb, uids)
+                for f in fams:
+                    assert sorted(fam[f]) == uids[f], f"unit sets differ in {f}: bootstrap impossible"
+    return uids
+
+
+def bootstrap_diff(rows_a, rows_b, n=10000, seed=0, fams=None):
+    fams = S.COMPOSITE if fams is None else fams
+    ta, tb = unit_table(rows_a, fams), unit_table(rows_b, fams)
+    uids = _uids((ta, tb), fams)
+    aa, ab = _arrays(ta, uids, fams), _arrays(tb, uids, fams)
     rng = random.Random(seed)
     diffs = []
     for _ in range(n):
-        draw = {f: [rng.randrange(len(uids[f])) for _ in uids[f]] for f in S.COMPOSITE}
-        diffs.append(_r(aa, draw, rng) - _r(ab, draw, rng))
+        draw = {f: [rng.randrange(len(uids[f])) for _ in uids[f]] for f in fams}
+        diffs.append(_r(aa, draw, rng, fams) - _r(ab, draw, rng, fams))
     diffs.sort()
-    point = S.summarize(rows_a)["R"] - S.summarize(rows_b)["R"]
-    return dict(D=point, lo=diffs[int(0.025 * n)], hi=diffs[min(n - 1, int(0.975 * n))], n=n)
+    sa, sb = S.summarize(rows_a), S.summarize(rows_b)
+    point = S.composite(sa["families"], fams) - S.composite(sb["families"], fams)
+    return dict(D=point, lo=diffs[int(0.025 * n)], hi=diffs[min(n - 1, int(0.975 * n))], n=n, fams=list(fams))
 
 
-def level_r(ci):
-    return ci["lo"] >= LEVEL_R_MARGIN
+def noninferior(ci):
+    """PLAN's original Level R test, reported beside since 2026-10-04 (never claimed): bootstrap_diff's lower bound
+    against Qwen2.5-0.5B-Instruct on R >= -3 points. Also the old s12 CI part and the s9 sizing rule's power."""
+    return ci["lo"] >= NONINF_MARGIN
+
+
+def s7_ci(rows, n=10000, seed=0):
+    """S7's 95% percentile CI for one model (module docstring). Refuses without the --own-cf OWN rows."""
+    t = unit_table(rows, S.STATE7)
+    uids = _uids((t,), S.STATE7)
+    arrs = _arrays(t, uids, S.STATE7)
+    rng, vals = random.Random(seed), []
+    for _ in range(n):
+        draw = {f: [rng.randrange(len(uids[f])) for _ in uids[f]] for f in S.STATE7}
+        vals.append(_r(arrs, draw, rng, S.STATE7))
+    vals.sort()
+    return dict(S7=S.summarize(rows)["S7"], lo=vals[int(0.025 * n)], hi=vals[min(n - 1, int(0.975 * n))], n=n,
+                units={f: len(uids[f]) for f in S.STATE7})
+
+
+def level_r(rows, n=10000, seed=0):
+    """the Level R verdict for one model's rows (score.level_r on s7_ci's lower bound; PERSIST, T0 and the training
+    seeds from score.summarize), with the CI beside it."""
+    summ, ci = S.summarize(rows), s7_ci(rows, n, seed)
+    return dict(S7=summ["S7"], ci=ci, **S.level_r(ci["lo"], summ["families"]["PERSIST"], summ["t0"]["score"],
+                                                  summ["n_train_seeds"]))
 
 
 def lookup_ci(rows, n=10000, seed=0):

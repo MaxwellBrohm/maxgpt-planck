@@ -7,12 +7,34 @@ corrections ("actually, his name is Pickles"), keeps track of whose dog is whose
 an instruction you gave earlier, and does not loop. Planck is named after the Planck length, the
 smallest size that still means something.
 
-Today the smallest models that feel conversational sit around 0.5B parameters, and in our own
-tests no model at or below 0.6B passes a strict multi-turn bar. Planck's bet is that
+<!-- Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 15) -->
+Tiny chat models already exist: released models from 90M to 350M work as loose chat models, and
+hobby and lab models trained from scratch go down to about 5M. What no one has shown is a model
+under 150M passing a strict multi-turn test, and on our test's dev split none of the 13 released chat
+models we scored, from 90M to 2.6B, nor the 9 public small chat models from 5M to 31M we added, reaches
+any of its bars. Planck's bet is that
 conversational skill is cheap in parameters and knowledge is what is expensive, so a model can
 keep facts outside its weights (in its context, in notes, in a lookup) and spend its parameters on
 the skill. The result we are after is a curve, not a single model: the same recipe at roughly
 10M, 30M, 60M and 150M total parameters, each compared against much larger models on the same test.
+
+## What is new here, and what is not
+
+<!-- Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 15) -->
+Planck is not the first to ask how small a chat model can be (SmallTalkLLM), to train chat models
+under 30M from scratch (BananaMind-2, Loom, Veyra2, Vertex, Micro Language Models, MiniMind), to
+train tiny models on synthetic multi-turn dialogue (RxT, Micro Language Models), or to keep facts
+outside the weights (LMLM, Co-LMLM, KLLM, Loom). Links, and what each one does and does not show,
+are in [`research/REPORT.md`](research/REPORT.md) sections 2 and 2.1.
+
+What Planck aims to add is the first measured floor for strict multi-turn state skills: the
+smallest from-scratch model that passes a sealed, mutation-tested 12-turn test on its own
+conversation history (corrections, binding, rule persistence, own-answer consistency, role,
+loops), with several training seeds, against a panel of public models in one harness. A prior-art
+search on 2026-10-02 ([`research/NOVELTY_2026-10.md`](research/NOVELTY_2026-10.md)) found no
+published model under 150M passing a test like that, and no published minimum-size curve for these
+skills. The test scores the bare model: every reply comes from the conversation's own history, with
+no retrieval, memory store, state tracker or other help from the harness.
 
 ## Status
 
@@ -31,15 +53,23 @@ Every experiment, its pre-registered rule, its result and its independent audit 
   Pythia-160M), on the laptop. No result is claimed until the queue finishes and its tables are checked;
   the five smallest stayed near chance on E004's harder test.
   E006 (three objects, and protecting general chat) is pre-registered and waits for the RTX 5070.
-- **RC-12, the 12-turn test:** Max's rulings are recorded, two loop-rule follow-ups are decided and three
-  items stay open for Max, a grader bug found while building the OOD-H set (real human conversations with
-  Claude-written probes) was fixed before any model was scored, and OOD-H Part 1 (150 held-out
-  conversations) is built as a lock candidate. No model is scored on it yet.
+- **RC-12, the 12-turn test:** built, mutation-tested and scored on dev for the public panel (13 released
+  chat models from 90M to 2.6B, plus 9 public small chat models from 5M to 31M; a 75M one did not finish
+  within its time cap). No Planck model is scored on any split. Three claims are pre-registered, each
+  worded "on our panel": Level A, a strict bar on corrections, binding and loops plus a blind human test;
+  Level R, a state score over seven state families whose 95% CI lower bound must reach 40 of 100, above
+  the 36.7 that a mix of fixed-rule shortcuts scores; and the LOOKUP claim, reading facts from old and
+  new tables supplied in the conversation (bar 0.60). Max changed Level R on Oct 4 from non-inferiority
+  to Qwen2.5-0.5B, which scores 2.3 on those families on dev, so a 5M model already met the old bar
+  mostly by not looping. No panel model reaches any of the three on dev: the best state score is 18.2
+  (LFM2-2.6B), the best LOOKUP 0.014.
+  OOD-H Part 1 (150 held-out conversations with human-written user turns) is built as a lock candidate
+  and waits for Max's review.
 - **Toolchain:** tokenizer v0 is built (its 8k cut matches a separately trained 8k; no superword tokens),
   the openly licensed starter corpus is tokenized (2.0B tokens), the learning-rate and seed-noise
   calibration runs (E2, E3) are ready, three candidate teacher models are pinned, and two training speed-ups
   are under verification.
-- **Next:** dev baselines on RC-12, then the sealed split and the lock (planned Oct 11-14) before any
+- **Next:** Max's OOD-H Part 1 review, the sealed split and the lock (planned Oct 11-14) before any
   Planck model is scored on it; E2 and E3; the teacher pilot.
 
 ## Ground rules
