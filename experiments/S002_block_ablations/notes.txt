@@ -138,3 +138,74 @@ C1-a GATE (2026-10-02, the PC 5070; Claude; method, the batch table and the find
 AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this screen is EAGER (train.compile false),
   all three arms paired with the shared eager BASE per seed; the C1-a result above decides nothing now. Configs
   rebuilt; each carries the C6 eval.induction hook (IND every 153 steps and at the last step).
+
+RESULT (2026-10-06, Claude; SCREENS.txt STAGE 1 VERDICTS. Mac CPU, no model; the PC read only: the 12 stage 1 seed
+runs' bpb.jsonl, diag.jsonl and log.jsonl copied to a Mac scratch directory, sha256 equal on both machines; nothing
+committed.) A 5M loss reading only (C8): no RC-12 split and no Tier 0 margin was scored; C8 reads them after the lock.
+  Runs: base_s101/102 and each arm's g1_s101/102 (every pick g 1; plan stage1_seeds, commit 93bc10b), each rc 0 on
+  the first try, done and scored, 763 logged steps to 7,630, every loss, gnorm and bpb finite; no DIVERGED (no arm is
+  UNSTABLE), GAP or rc12_eval.jsonl. results.json and tables.txt in this directory hold every number below.
+  Class SIA: SD_ref = u x SD_d x BASE's mean, u 1.3533: 0.00378 bpb CHAT, 0.00274 PROSE, df 7; k 2 = k_needed, so not
+  underpowered. C4 pooled SIA check (3 arms, df 3): CHAT SD 0.194% of BASE against the limit 0.529%, PROSE 0.123%
+  against 0.319%: ok. If a stage 2 SIA arm later fails the pooled check, these three are re-read at the new-init SD:
+  checked on these values, the verdicts stay (REJECT, TIE, TIE), labelled "noise check failed later", "underpowered".
+  VERDICT S002.novres: REJECT. CHAT d +0.01566 / +0.01877, dbar +0.01721 (1.49% of BASE's mean), thr 0.00632: WORSE;
+  PROSE dbar +0.01400, thr 0.00458: WORSE. Holm (family of 5 so far): holds (p 0.00036).
+  VERDICT S002.noqknorm: TIE. CHAT d +0.00199 / -0.00090, dbar +0.00054, thr 0.00632, |dbar| + thr 0.00687 < delta
+  0.01154: EQUAL; PROSE dbar +0.00149, thr 0.00458: EQUAL (gutenberg alone reads WORSE, d +0.00468 / +0.00375; the
+  guard is PROSE). Holm: does not hold (p 0.84).
+  VERDICT S002.nonormscale: TIE. CHAT d -0.00230 / +0.00119, dbar -0.00055, |dbar| + thr 0.00688 < 0.01154: EQUAL;
+  PROSE dbar -0.00088: EQUAL. Holm: does not hold (p 0.84).
+  Registered consequences (PRE-REGISTRATION, verbatim): "REJECT the switch earns its place on loss at 5M. What changes:
+  the switch stays in the baseline, and no 30M arm that removes this switch alone is queued under row 19 (row 19's 30M
+  check of the block and optimizer still runs as the ledger states it)." "TIE loss-neutral at 5M/250M: the baseline
+  keeps it (nothing is adopted on a tie); row 19's 30M check decides whether it stays."
+  Now: Value residual stays in the baseline and no 30M arm removing it alone is queued under row 19. QK-norm and norm
+  scaling stay in the baseline; row 19's 30M check decides whether they stay.
+  C6 and C5, descriptive (no E3 Part 4d SD): final IND lower than BASE at both seeds in every arm (d novres -2.582 /
+  -1.729, noqknorm -1.019 / -0.060, nonormscale -3.645 / -0.939). Onsets read (picks g 1): onset_half novres 612 / 612,
+  noqknorm 765 / 918, nonormscale 612 / 612, BASE 612 / 459; onset_abs novres 612 / 612, noqknorm 765 / 918,
+  nonormscale 1071 / 612. Training loss, steps 60-160: noqknorm above BASE at every logged step at both seeds (mean
+  +0.125 / +0.121), novres within 0.005, nonormscale lower on average (-0.028 / -0.042). Clip rate (BASE 0.66% /
+  1.18%): novres 0.66% / 1.18%, noqknorm 0.79% / 1.05%, nonormscale 0.79% / 0.92%; max gnorm noqknorm 3.33 / 2.27 and
+  nonormscale 3.04 / 3.17 against BASE 2.03 / 2.06. novres's training loss over the last 2% is +0.032 / +0.034 nats.
+  NOT computed: SINK and HD (each loads a final checkpoint; not run here).
+  What it does NOT show: anything about removing QK-norm and norm scaling together (leave-one-out cannot see
+  redundancy, both stabilisers read TIE, plain_block was not run); a per-switch effect under 1% at 5M that matters at
+  30M-150M; anything about row 19's block bundle; a behaviour or multi-turn effect (research/lanes/arch.md 1.4); any
+  RC-12 or Tier 0 reading (C8, after the lock); anything beyond 5M, 250.0M slots, the starter mix, tok_v0_8k, 2 seeds.
+
+CORRECTIONS (2026-10-06 07:30 EDT, revised 09:45 EDT, Claude; to the RESULT block above, which stays as written; where
+the two differ this block holds. From two audits of STAGE 1 VERDICTS and the stage 2 launch verification. Mac CPU, no
+model; the PC read only. results.json and tables.txt here were rebuilt with the same verdict numbers; SCREENS.txt STAGE
+1 VERDICTS.)
+  Re-read label: the RESULT says that after a later pooled-SIA failure these three are labelled "noise check failed
+  later", "underpowered". analyze.py then wrote "noise check failed (pooled SIA)" for every arm. It now writes C4's
+  text, "noise check failed later", for each contrast named by --earlier (a results.json of an earlier verdict step),
+  and "noise check failed (pooled SIA)" for an arm read for the first time; a later verdict step must pass
+  --earlier experiments/S002_block_ablations/results.json for C4's label to appear. What it writes then on these
+  values (results.json if_pooled_check_fails_later, run through the tool in test_screens_stage1_corrections.py):
+  novres REJECT, noqknorm TIE, nonormscale TIE, each labelled "noise check failed later" and "underpowered", CHAT thr
+  0.00697 at the new-init SD.
+  k: k_needed(1%) for SIA is 2 on CHAT and 1 on PROSE (u x SD_d, df 7), so the class needs 2 and k = max(2, 2) = 2:
+  "k 2 = k_needed" holds for this class (results.json k_needed_1pct).
+  Now line, with the registered parenthetical it left out: "Value residual stays in the baseline and no 30M arm
+  removing it alone is queued under row 19 (row 19's 30M check of the block and optimizer still runs as the ledger
+  states it). QK-norm and norm scaling stay in the baseline; row 19's 30M check decides whether they stay."
+  C9 outputs: out/<run>/ now holds log.jsonl, bpb.jsonl and diag.jsonl of base_s101/102 and each arm's g1_s101/102,
+  copied from the PC (read only) on 2026-10-06, each sha256 equal to results.json source.files_sha256 (24 files; a
+  run's log.jsonl is 326 kB, bpb.jsonl 18 kB, diag.jsonl 33 kB). No machine address, user name or key path in them
+  (tests/privacy.py). Checkpoints stay on the PC.
+  BASE level (reported, no rule; results.json base_level_vs_e3_part1): both BASE seeds sit above all 8 of E3 Part 1
+  arm A's seeds on F(CHAT) (gap +0.00755, +0.66%; t 3.26, p 0.014) and F(PROSE) (+0.00594, +0.43%; t 3.66, p 0.008).
+  Eval inputs, scorer, config apart from eval.induction, engine, data, software and LR were checked equal; the seed
+  draw, the eval.induction hook and what the start record does not hold (the GPU driver, drift) are not separated.
+  The verdicts read paired d, so a level shift common to arm and BASE cancels; SD_ref, thr and delta scale with
+  BASE's mean, and with them at E3 arm A's mean the verdicts stay REJECT, TIE, TIE. A cause whose effect differs
+  between an arm and BASE would move d itself; the pooled SIA check (it passed) sees it only if it varies across seeds.
+  Same seed (results.json same_seed_check_seed1): S002's three SIA arms keep BASE's draws and read the seed's stream,
+  so each seed-1 g 1 run (hook on), minus its paired dbar, estimates BASE at seed 1. Against E3 A_s1 and its two
+  replays the mean estimate sits +0.00221 CHAT (+0.19%), +0.00270 PROSE (+0.20%), 29% and 45% of the 101/102 gap;
+  1.0 and 1.9 rough se above 0, 2.4 and 2.2 below that gap, so it does not separate the candidates either.
+  tables.txt: tok/s medians skip the first two log records (steps 10 and 20), now said there; over all 763 records
+  they are the same for these eight runs. The p column prints 3 significant digits.

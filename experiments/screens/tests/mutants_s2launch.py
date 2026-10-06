@@ -1,5 +1,5 @@
 """Mutants for SCREENS.txt STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK (2026-10-06): the stage 2 plan, an S005 g-check
-config, the cut rule's reading of finished screens, the seed sets' measured hours and the entry's numbers. Read by
+config's micro batch, the cut rule's reading of finished screens, the seed sets' measured hours and the entry's numbers. Read by
 mutation_screens.py (name, file, old, new, test file); each must make test_screens_stage2_launch.py fail.
 """
 S2L, SP, SXT = ("test_screens_stage2_launch.py", "experiments/screens/plans/stage2_select.txt", "experiments/SCREENS.txt")
@@ -12,7 +12,9 @@ MUTANTS_S2LAUNCH = [
      "mark SCREENS STAGE 2 SELECTION DONE\ntrain base_s101\n", S2L),
     ("s2_plan_waits_on_its_own_mark", SP, "wait_mark SCREENS SCREENS STAGE 2 SMOKES RECORDED\n",
      "wait_mark SCREENS SCREENS STAGE 2 SELECTION DONE\n", S2L),
-    ("s2_s005_config_on_the_shared_engine", "experiments/S005_forget_gate/configs/s005_forget_g0.5_s1.yaml",
+    # S005's micro 8 x accum 2 changed to the shared BASE's 16 x 1, doc_attn mask kept (until the 2026-10-06
+    # CORRECTIONS it was named "on the shared engine", which it is not)
+    ("s2_s005_config_micro_16x1", "experiments/S005_forget_gate/configs/s005_forget_g0.5_s1.yaml",
      "train: {doc_attn: mask, micro_batch: 8, grad_accum: 2}", "train: {doc_attn: mask, micro_batch: 16, grad_accum: 1}",
      S2L),
     ("s2_cut_lists_finished_screens", "experiments/screens/analyze_lib.py",

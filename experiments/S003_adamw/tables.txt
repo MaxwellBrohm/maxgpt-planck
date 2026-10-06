@@ -1,0 +1,70 @@
+S003 STAGE 1 VERDICT TABLES (analyze.py verdicts on the copied seed runs, 2026-10-06; SCREENS.txt STAGE 1 VERDICTS)
+A 5M loss reading only (C8): bpb at 5M, 250.0M slots, starter mix, tok_v0_8k. No RC-12 or Tier 0 score.
+Class same init, k 2, seeds 101 102, pick LR5_adamw = (eta 3e-3, r 2): optim.lr 3e-3, embed_lr = scalar_lr 6e-3 (E2 stages A-C, seed 1).
+SD_ref = SD_d, times BASE's mean F; df 7. d = arm - BASE (bpb; negative = arm better).
+
+C7 READINGS
+arm          metric     d s101    d s102    dbar      thr      delta    SD_ref   df  p (two-sided, 3 significant digits)  label
+adamw        CHAT       +0.01861  +0.01680  +0.01771  0.00467  0.01154  0.00280  7   4.39e-05  WORSE
+adamw        PROSE      +0.01332  +0.01204  +0.01268  0.00339  0.01387  0.00203  7   4.75e-05  WORSE
+adamw        cccc       +0.01471  +0.01083  +0.01277  0.00385  0.01319  0.00230  7   0.000103  WORSE
+adamw        gutenberg  +0.01231  +0.01406  +0.01319  0.00283  0.01500  0.00169  7   1.12e-05  WORSE
+adamw        wikimedia  +0.01296  +0.01119  +0.01208  0.00440  0.01342  0.00263  7   0.000338  WORSE
+
+VERDICT S003.adamw: REJECT; labels none; Holm (family of 5 so far): holds (p 4.4e-05)
+ASYMMETRY (registered; it favours NorMuon; stated beside every S003 verdict): "NorMuon's LR5 can be replaced by E3's 7-seed re-check (E3 "E2 re-check", seeds 2..8; SCREENS C1), while AdamW's pick rests on E2's seed-1 search alone."
+C4 same-init check CHAT: SD 0.1110% of BASE vs limit 0.4746% (df 1): ok
+C4 same-init check PROSE: SD 0.0656% of BASE vs limit 0.2862% (df 1): ok
+
+C5 REPORTED, NO RULE (d s101, d s102; F = final checkpoint, M = mean of the last 3 checkpoints)
+adamw        CHAT assistant      +0.01685  +0.01272  mean +0.01479  BASE 1.11105 1.11742
+adamw        CHAT user           +0.03220  +0.04828  mean +0.04024  BASE 1.47237 1.45449
+adamw        F(CHAT)             +0.01861  +0.01680  mean +0.01771  BASE 1.15250 1.15609
+adamw        F(PROSE)            +0.01332  +0.01204  mean +0.01268  BASE 1.38621 1.38848
+adamw        M(CHAT)             +0.01886  +0.01800  mean +0.01843  BASE 1.15685 1.15978
+adamw        M(PROSE)            +0.01465  +0.01265  mean +0.01365  BASE 1.39089 1.39299
+adamw        PROSE cccc          +0.01471  +0.01083  mean +0.01277  BASE 1.31693 1.32074
+adamw        PROSE gutenberg     +0.01231  +0.01406  mean +0.01319  BASE 1.50080 1.49935
+adamw        PROSE wikimedia     +0.01296  +0.01119  mean +0.01208  BASE 1.33930 1.34380
+adamw        dolly               +0.01676  -0.00793  mean +0.00441  BASE 1.34102 1.35854
+adamw        irc                 +0.01530  +0.01211  mean +0.01370  BASE 1.56033 1.57182
+adamw        stackexchange       +0.01187  +0.01158  mean +0.01172  BASE 1.36194 1.36354
+adamw        train loss last 2%  +0.02965  +0.02479  mean +0.02722  BASE 3.17695 3.20989
+
+C6 DIAGNOSTICS (descriptive: no E3 Part 4d SD; paired mean and seeds per sign)
+IND onset: LR-confounded, not read (C6; the two optimizers run at different tuned LRs by design)
+IND final adamw: arm 7.366 6.496  BASE 7.546 8.825  d -0.180 -2.329  mean -1.255  seeds d<0 2, d>0 0
+IND onsets base_s101                  onset_half 612  onset_abs n/a (BASE; its L_s onset is onset_half)
+IND onsets base_s102                  onset_half 459  onset_abs n/a (BASE; its L_s onset is onset_half)
+IND onsets s003_adamw_e3_r2_s101      onset_half 459  onset_abs 612 (L_s 3.773)
+IND onsets s003_adamw_e3_r2_s102      onset_half 459  onset_abs 612 (L_s 4.412)
+clip base_s101                  5/763 logged steps over 1.0 = 0.0066; steps <= 160 0.312; max gnorm 2.03
+clip base_s102                  9/763 logged steps over 1.0 = 0.0118; steps <= 160 0.500; max gnorm 2.06
+clip s003_adamw_e3_r2_s101      1/763 logged steps over 1.0 = 0.0013; steps <= 160 0.062; max gnorm 1.07
+clip s003_adamw_e3_r2_s102      3/763 logged steps over 1.0 = 0.0039; steps <= 160 0.125; max gnorm 1.43
+loss 60-160 base_s101                  6.175 6.074 5.871 5.590 5.403 5.377 5.543 5.007 5.040 5.213 4.976
+loss 60-160 base_s102                  6.374 5.963 5.830 5.468 5.731 5.172 5.351 5.371 5.373 4.778 5.138
+loss 60-160 s003_adamw_e3_r2_s101      6.272 6.318 6.192 5.943 5.864 5.846 6.065 5.564 5.573 5.726 5.534
+loss 60-160 s003_adamw_e3_r2_s102      6.552 6.248 6.176 5.932 6.149 5.675 5.828 5.899 5.945 5.388 5.707
+NOT COMPUTED HD: not run: bpb.py --hd on each final checkpoint loads a model; the queue scores plain bpb only
+
+HOURS AND SPEED (reported; lock = gpu.lock held to the status line, train = train to done; median tok/s
+over log.jsonl records 3 to 763: the first two records (steps 10 and 20; the first holds the start-up) are skipped; tok_per_s_median_all_records gives the median over all 763)
+base_s101                  lock 0.305 h  train 0.276 h  median tok/s 254,081
+base_s102                  lock 0.305 h  train 0.276 h  median tok/s 253,648
+s003_adamw_e3_r2_s101      lock 0.299 h  train 0.271 h  median tok/s 258,089
+s003_adamw_e3_r2_s102      lock 0.300 h  train 0.270 h  median tok/s 258,551
+optimizer cost: mean train h per run NorMuon (BASE) 0.2761, AdamW 0.2704 (-2.1%), beside F(CHAT) above
+F(CHAT) per GPU-hour = F(CHAT) / train hours per run: base_s101 4.174; base_s102 4.187; s003_adamw_e3_r2_s101 4.329; s003_adamw_e3_r2_s102 4.340; mean NorMuon 4.181, AdamW 4.334 (bpb per h, no rule)
+
+k = max(2, k_needed(1%)) = 2: k_needed for class same init, CHAT 1, PROSE 1
+
+BASE LEVEL AGAINST E3 PART 1 ARM A (reported, no rule; results.json base_level_vs_e3_part1 has the checks)
+F(CHAT) E3 A seeds 1-8 mean 1.14674 (1.14038 to 1.15126); BASE 1.15250 1.15609; gap +0.00755 (+0.66%); t 3.26, p 0.014 (df 7); BASE above all 8: yes
+F(PROSE) E3 A seeds 1-8 mean 1.38141 (1.37851 to 1.38514); BASE 1.38621 1.38848; gap +0.00594 (+0.43%); t 3.66, p 0.008 (df 7); BASE above all 8: yes
+verdicts with SD_ref and delta at E3 A's mean instead of BASE's: S003.adamw REJECT
+same seed (seed 1, S002's SIA arms minus dbar, against E3 A_s1 and 2 replays): CHAT +0.00221 (+0.19%), PROSE +0.00270 (+0.20%); rough se 0.00220 / 0.00146 (results.json same_seed_check_seed1)
+cause: not separated (seed draw, the eval.induction hook, or what the start record does not hold)
+
+CONSEQUENCE: Row 19's 30M check drops its AdamW arm; its block part still runs. A later optimizer flip at larger size is then not looked for (the registered REJECT; S003 KNOWN RISKS names 30M: the price of the saving, recorded in the ledger row with the verdict; that row is not written in this step).
+REGISTERED REJECT (verbatim): "NorMuon re-validated on loss at 5M, 50 tokens per parameter. What changes: row 19's 30M check drops its AdamW arm (at least 3 runs at 30M, 1B tokens: one per LR); the block part of that check still runs. The asymmetry above could have produced a small REJECT, so the report states it. A later optimizer flip at larger size is then not looked for (KNOWN RISKS)."

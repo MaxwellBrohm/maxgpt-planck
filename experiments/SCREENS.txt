@@ -1424,3 +1424,153 @@ started. No C7 verdict is read here: S001, S002 and S003's verdicts are another 
     Holding S006's g-check until S005, S004 and S007's picks are read would avoid that at the cost of a stop; this entry
     does not change the plan.
 
+STAGE 1 VERDICTS (2026-10-06 04:35 EDT, Claude; Mac CPU, no model; the PC read only: its queue_screens.txt, status.jsonl
+and the 12 seed runs' bpb.jsonl, diag.jsonl and log.jsonl copied to a Mac scratch directory, sha256 equal on both
+machines, and every seed-1 g-check and S003 search run's bpb.jsonl, which analyze.py verdicts reads to name the picks;
+no GPU, nothing committed, no mark, no queue started or stopped, no LEDGER row written, measured_hours.tsv not touched.
+CORRECTED IN PLACE 2026-10-06 07:30 EDT and again 09:45 EDT, before any commit, after two audits and the stage 2 launch
+verification: the last two paragraphs list each change.) A 5M loss reading only (C8): bpb at 5M, 250.0M slots, the
+starter mix and tok_v0_8k; no RC-12 split and no Tier 0 margin was scored (C8 reads them after the lock). Seed-1
+selection runs only name the picks; none enters a verdict.
+  Runs: read after the mark (STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK above has the queue, the run checks and the
+    hours; checked again here from the same copies): 12 runs rc 0 on the first try, done and scored, finite; no arm
+    seed diverged (no +inf, no UNSTABLE) and no BASE seed was dropped. 12 runs 3.510 h of lock, 0.262 to 0.305 h a run.
+  VERDICTS (analyze.py verdicts --runs <copy>: C7 per metric, C4 classes and noise checks, Holm over the 5 stage 1
+  contrasts that ran; d = arm - BASE in bpb, negative = arm better; picks g 1 for S001 and S002, LR5_adamw (3e-3, r 2)):
+    arm               class      verdict Holm           CHAT d 101 / 102     dbar      thr      PROSE dbar thr      C / P
+    S001.nogate       new init   TIE     does not hold  +0.00366 / +0.00415  +0.00390  0.00697  +0.00091  0.00487  EQUAL / EQUAL
+    S002.novres       SIA        REJECT  holds          +0.01566 / +0.01877  +0.01721  0.00632  +0.01400  0.00458  WORSE / WORSE
+    S002.noqknorm     SIA        TIE     does not hold  +0.00199 / -0.00090  +0.00054  0.00632  +0.00149  0.00458  EQUAL / EQUAL
+    S002.nonormscale  SIA        TIE     does not hold  -0.00230 / +0.00119  -0.00055  0.00632  -0.00088  0.00458  EQUAL / EQUAL
+    S003.adamw        same init  REJECT  holds          +0.01861 / +0.01680  +0.01771  0.00467  +0.01268  0.00339  WORSE / WORSE
+  SD_ref (bpb; E3's relative SDs x BASE's mean F, 1.15430 CHAT / 1.38735 PROSE; df 7), CHAT / PROSE: new init sqrt(2)
+    sigma_seed 0.00417 / 0.00291; SIA u x SD_d (u 1.3533) 0.00378 / 0.00274; same init SD_d 0.00280 / 0.00203. delta
+    0.01154 / 0.01387 (1% of BASE). The TIEs: |dbar| + thr on CHAT 0.01087 (S001), 0.00687 (noqknorm), 0.00688
+    (nonormscale), each under 0.01154. The REJECTs: dbar 1.49% (novres) and 1.53% (S003) of BASE's mean.
+  C4 noise checks: pooled SIA (S002's 3 arms, df 3) CHAT SD 0.194% of BASE against the limit 0.529%, PROSE 0.123%
+    against 0.319%: ok; same init (S003, df 1) CHAT 0.111% against 0.475%, PROSE 0.066% against 0.286%: ok. No re-read.
+  Labels: k = max(2, k_needed(1%)) = 2 in every class. k_needed, CHAT / PROSE (E3 results.json; results.json
+    k_needed_1pct): new init 2 / 1 and SIA 2 / 1, so k equals the class's k_needed there; same init 1 / 1, so S003's k
+    is above it. Nothing was re-read, so no verdict is "underpowered"; none is INCONCLUSIVE, so none reads
+    "not resolved". No CCCC-ONLY (novres and S003 read WORSE on gutenberg and wikimedia too). Reported, no rule:
+    noqknorm reads WORSE on gutenberg alone (+0.00468 / +0.00375); the guard is PROSE (EQUAL).
+    If a stage 2 SIA arm later fails C4's pooled check, S002's three arms are re-read at the new-init SD: on these
+    values they stay REJECT, TIE, TIE (CHAT thr 0.00697). analyze.py verdicts labels each "noise check failed later"
+    (C4's text) and "underpowered" when it is given --earlier experiments/S002_block_ablations/results.json; without
+    --earlier it writes "noise check failed (pooled SIA)". S002 results.json if_pooled_check_fails_later holds what the
+    tool writes for them, and test_screens_stage1_corrections.py runs that case through analyze.py with a spread S007
+    seed.
+  Holm: p(CHAT) S003 4.4e-05 and novres 0.00036 hold; S001 0.23, noqknorm 0.84, nonormscale 0.84 do not. Each holding
+    p is under 0.05 / 18, so it holds in any later family up to stage 2's contrasts plus C8's Tier 0 tests.
+  Registered consequences (each notes.txt RESULT block quotes its pre-registration verbatim):
+    S001 TIE: the baseline keeps the attention gate; P-021's 30M primacy test still runs. The ledger's "loss-neutral at
+      5M" line is not written here.
+    S002 novres REJECT: value residual stays in the baseline; no 30M arm removing it alone is queued under row 19
+      (row 19's 30M check of the block and optimizer still runs as the ledger states it).
+    S002 noqknorm and nonormscale TIE: both stay; row 19's 30M check decides. Both stabilisers read TIE, and
+      leave-one-out cannot see redundancy, so nothing here speaks to removing both (plain_block was not run).
+    S003 REJECT: row 19's 30M check drops its AdamW arm; its block part still runs. The registered asymmetry (NorMuon's
+      LR could get E3's 7-seed re-check, AdamW's rests on its seed-1 search) favours NorMuon; S003's block states it.
+      No run here measures how much of the REJECT it produced. A later optimizer flip at larger size is then not
+      looked for (the registered REJECT; S003 KNOWN RISKS names 30M).
+  C6 and C5, descriptive (no E3 Part 4d SD; tables.txt per screen): GATE in BASE, 32-window in-training hook: layer 0's
+    heads 0.025 to 0.054 at step 7,630, the 24-head mean 0.80 at step 153 and 0.66 / 0.65 at 7,630; S001 registers no
+    threshold for gate openness and the 200-window final GATE was not computed, so KNOWN RISKS' "gate stays open" case
+    is not decided here. S003's registered F(CHAT) per GPU-hour, F(CHAT) / train hours per run: NorMuon 4.181, AdamW
+    4.334 bpb per GPU-hour (means of the two seeds; no rule). Final IND above BASE at both seeds with the
+    gate off (+3.651 / +1.875) and below BASE at both seeds in every S002 arm and in S003; IND onsets read for S001 and
+    S002 (picks g 1), LR-confounded and not read for S003; clip rates 0.13% to 1.18% of logged steps. NOT computed: HD
+    (all three), SINK (S001, S002) and S001's 200-window final GATE with p10 / p90: each needs bpb.py --hd or
+    attn_diag.py on a kept final checkpoint, a model load this step's rules exclude.
+  BASE LEVEL (reported, no rule; each results.json base_level_vs_e3_part1): both BASE seeds sit above all 8 of E3 Part 1
+    arm A's seeds on F(CHAT) (1.15250 / 1.15609 against 1.14038 to 1.15126; gap +0.00755, +0.66%; t 3.26 with E3's
+    sigma_seed, n 2 against 8, p 0.014 on t(7)) and on F(PROSE) (gap +0.00594, +0.43%; t 3.66, p 0.008), and above
+    E3's mean on every eval set. Checked equal between E3 arm A and BASE: every bpb.jsonl row's eval set and tokenizer
+    sha256, bytes, tokens, windows, truncation and precision; bpb.py (only --hd added, off); the config resolved through
+    runio.load_yaml (only name, out_dir, seed, the engine_fixed label and eval.induction differ); the preflight engine
+    dict, schedule, shares, n_files and n_params; the pinned shard manifest and the drawn shares at step 7,630; torch,
+    CUDA, python, numpy and platform in the start records; the LR (BASE's last-2% gnorm 0.189 / 0.196 is at arm A's
+    level, not arm B's). The run-time code lists differ on the training path only in the eval.induction hook (train.py,
+    induction.py, attn_diag.py) and fsync-before-rename I/O (runio.py, durable.py). Cause not separated: the seed draw
+    (101, 102 against 1..8), the hook (bitwise neutral on CUDA in test_order0_cuda.py only under deterministic
+    algorithms on a tiny model; the screens train without them), or what the start record does not hold (the GPU
+    driver; drift over time, E3 AUDIT.md Q4). Same seed (results.json same_seed_check_seed1): S002's three SIA arms
+    keep BASE's draws and read the seed's stream (C4), so their seed-1 g 1 runs (hook on, 94bb1bb), each minus its
+    paired dbar, put the screens' BASE at seed 1 against E3 A_s1 and its two replays at +0.00221 CHAT (+0.19%),
+    +0.00270 PROSE (+0.20%), 29% and 45% of the 101/102 gap; 1.0 and 1.9 rough se above 0, 2.4 and 2.2 below that gap
+    (the rough se's formula is in results.json): between no same-seed shift and one as large as the gap, so it does not
+    separate the candidates either. Not affected: the verdicts read paired d (arm and BASE share seed, stream, hook,
+    code and week), so a level shift common to both cancels. Not excluded by the pairing: a cause whose effect differs
+    between an arm and BASE would move d itself, and C4's noise checks (both passed) see it only if it varies across
+    seeds. Affected: SD_ref, thr and delta are E3's relative SDs times BASE's mean, 0.66% (CHAT) and 0.43% (PROSE)
+    larger in bpb than at E3's level; at E3 arm A's mean all five verdicts are unchanged. Any comparison of screen bpb
+    with E3 or E2 levels carries the gap.
+  Files written: results.json and tables.txt (new) in experiments/S001_attn_gate, S002_block_ablations and S003_adamw
+    (no machine address, user name or key path; tested); a RESULT block appended to each of their notes.txt; new
+    experiments/screens/tests/test_screens_stage1_verdicts.py, test_screens_stage1_verdicts_numbers.py, mutants_s1v.py.
+    C9's out/<run>/ (added in the correction): log.jsonl, bpb.jsonl and diag.jsonl of each screen's runs and the two
+    BASE runs, copied from the PC read only, sha256 equal to results.json source.files_sha256: 48 files, 36 distinct
+    (the BASE files sit in all three screens), 5,993,884 bytes, 4,484,100 of them distinct (a run's log.jsonl 326 kB,
+    bpb.jsonl 18 kB, diag.jsonl 33 kB, 9 kB with the gate off); no machine address, user name or key path in them
+    (tests/privacy.py). Checkpoints stay on the PC.
+  Tests (Mac CPU, ~/.venvs/planck): experiments/screens/tests 408 passed (384 before this entry, 397 before the
+    corrections). test_screens_stage1_verdicts.py (10: the recorded final bpb give these verdicts through analyze.py
+    verdicts; results.json equals the analyzer's output; at these SDs C7 reads both directions, and its delta and
+    every-seed clauses fire on nearby values; the pooled SIA and same-init checks fire on a spread seed; tables.txt
+    rows, the p column at 3 significant digits; S003's registered asymmetry beside its verdict; C5 and C6 consistent
+    with their own curves and counts; the RESULT blocks; this entry; no private identifiers, through tests/privacy.py)
+    and test_screens_stage1_verdicts_numbers.py (3: every decimal in this entry and the notes after RESULT is computed
+    from results.json; key phrases pinned to their values). Added with the corrections:
+    test_screens_stage1_corrections.py (4: C4's label read from C4 and written by analyze.py --earlier on a spread S007
+    seed, and not without it; k_needed per class from E3; the out/ copies byte-equal to the recorded sha256; the privacy
+    check's own probes and the out/ files) and test_screens_stage1_corrections_text.py (5: the BASE level recomputed
+    from E3's and this batch's out/; the same-seed check recomputed from E3 A_s1's three runs, the recorded seed-1
+    values and S002's dbar, with the pairing's limit stated; S003's F(CHAT) per GPU-hour; the registered wording; the
+    tok/s medians and the p column). tests/privacy.py holds no name: committed path and address shapes, this machine's
+    runtime values (user name, home, pc/local.env) and a git-ignored local list (tests/private/patterns.txt, ignored by
+    .gitignore "private/").
+    Mutants, scratch copies only: tests/mutants_s1v.py (27: 11 on analyze_lib.py's rules, 16 on the outputs, notes and
+    this entry) and tests/mutants_fix.py (31, at least one per correction: analyze.py's re-label, k_needed, an out/
+    byte, a private path, the privacy check blinded or without its runtime values, the level numbers, the same-seed
+    check and the pairing's limit, F(CHAT) per GPU-hour, the registered wording, the p column and tok/s, the launch
+    correction, the hours tests) are now in mutation_screens.py's list (mutants_s1v.py no longer imports
+    mutation_screens at the top, which would be circular). The whole file, 2026-10-06 09:46 to 09:51: 181 of 181 killed,
+    none INVALID. Each changed or new test was also watched failing on the state before its change: the old analyze.py
+    (it has no --earlier; with --earlier added and the old label kept, the assertion reads "noise check failed (pooled
+    SIA)" where C4 says "noise check failed later"), the old S003 tables.txt, "395" back in the launch entry (the old
+    launch test passed it), a second run absorbed into a seen hours slot (the old hours test passed it), and the
+    results.json files without the same-seed check.
+  STILL NEEDS A DECISION: (1) the commit of these files. (2) The LEDGER rows the consequences name (S001 "loss-neutral
+    at 5M"; row 19 for S002 and S003, S003's with its known risk): SCREENS.txt names no step that writes them now.
+    (3) Whether HD and SINK are computed on the kept final checkpoints (a model load on the PC). (4) Whether a run
+    separates the BASE level's causes (base_s101 with eval.induction off, or BASE at seed 1 with it on against E3 A1
+    and its two replays; about 0.3 GPU h each); no verdict waits on it. (5) A later verdict step passes --earlier with
+    the stage 1 results.json files for C4's label. Stage 2's launch is the entry above's, not this one's.
+  Corrected in place (2026-10-06 07:30 EDT, before any commit): the seed-1 copies added to what was read; the claim
+    that k equals k_needed in every class (false for same init) replaced by each class's k_needed; the re-label claim
+    marked as checked replaced by what analyze.py writes, with the --earlier option added to it; S002's registered
+    parenthetical and S003's "at larger size" restored to the consequences; S003's asymmetry line says no run measures
+    its share; the GATE line states the hook's numbers and leaves KNOWN RISKS' case undecided; S003's F(CHAT) per
+    GPU-hour formed; the BASE LEVEL paragraph; C9's out/<run>/ copies; tests and mutants as they now stand.
+  Corrected again (2026-10-06 09:45 EDT, before any commit): the same-seed check at seed 1 added to BASE LEVEL (and
+    to each results.json, tables.txt and notes CORRECTIONS block); the claim that a cause acting differently on an arm
+    shows in the spread of d replaced: such a cause moves d itself, and C4's checks see it only if it varies by seed;
+    the counts above. The 07:30 text gave "176 of 176 killed" for the whole mutation file, but the only record of a
+    run of it found (a scratch log) stops after 145 kills (none survived) with 31 mutants not run; the result above is
+    a complete run.
+
+CORRECTIONS (2026-10-06 07:30 EDT, Claude; to STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK above, which stays as committed;
+Mac CPU, from the verified copy of the PC queue log, sha256 3de087db1b1ac3e9...; nothing committed.)
+  (1) Its "lock waits 0.004 h in all" is the wall clock outside the 12 lock holds, 14 s, not time spent waiting for
+    gpu.lock: "waiting for gpu.lock" to "gpu.lock held" takes 3 s over the 12 runs (0 or 1 s each); the other 11 s run
+    from the queue start to the first lock request (2 s) and from each run's status line to the next lock request (9 s,
+    0 or 1 s each).
+  (2) The mutant it calls "an S005 config on the shared engine" changes only micro_batch and grad_accum (8 x 2 to
+    16 x 1) and keeps doc_attn mask; tests/mutants_s2launch.py now names it s2_s005_config_micro_16x1.
+  (3) tests/test_screens_stage2_launch.py: its comment "11 tests" and its uncomputed "395" (the entry lost that number
+    in the verifier's edit) are removed; the committed phrase is pinned as the time outside the holds, and this
+    paragraph's seconds are pinned to the queue log's lock request and lock held times.
+  (4) tests/test_screens_hours.py: "a measured seed run measured again takes no slot" was tested by overwriting the
+    same run name in a dict, which cannot happen (the loader refuses a run listed twice); it now tests a second run on
+    the same seed slot (s002_novres_g2_s101 beside s002_novres_g1_s101, as a matched-LR IND run would be), which counts
+    on top with no slot, and the loader's refusal of a run listed twice.

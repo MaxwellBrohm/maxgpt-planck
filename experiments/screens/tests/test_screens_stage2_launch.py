@@ -24,8 +24,16 @@ TOKS = {"base": ("254k", "254k"), "s001_nogate_g1": ("263k", "263k"), "s002_novr
         "s002_noqknorm_g1": ("301k", "302k"), "s002_nonormscale_g1": ("256k", "256k"), "s003_adamw_e3_r2": ("258k", "259k")}
 QSTART, QEND, ENTRY_TIME, MARK_SMOKES = "21:05:42", "00:36:33", "04:30", "10:59"
 PCSHA = ("3de087db1b1ac3e9", "88e03ff006879b21", "d30157a57b45e70f")   # PC queue log, status.jsonl, the seed plan
-PASSED = (377, 384)             # experiments/screens/tests before and after this entry (Mac CPU), without the
-# 11 tests of another step's two new files, test_screens_stage1_verdicts.py and test_screens_stage1_verdicts_numbers.py
+PASSED = (377, 384)             # experiments/screens/tests before and after this entry (Mac CPU), without the tests of
+# another step's two new files, test_screens_stage1_verdicts.py and test_screens_stage1_verdicts_numbers.py (STAGE 1
+# VERDICTS counts them)
+# "waiting for gpu.lock" and "gpu.lock held" per seed run, from the PC queue log (sha256 3de087db1b1ac3e9...)
+LOCKREQ = {"base_s101": ("21:05:44", "21:05:44"), "s001_nogate_g1_s101": ("21:24:04", "21:24:04"),
+           "s002_novres_g1_s101": ("21:41:41", "21:41:41"), "s002_noqknorm_g1_s101": ("21:59:18", "21:59:18"),
+           "s002_nonormscale_g1_s101": ("22:15:01", "22:15:01"), "s003_adamw_e3_r2_s101": ("22:33:09", "22:33:10"),
+           "base_s102": ("22:51:08", "22:51:09"), "s001_nogate_g1_s102": ("23:09:27", "23:09:28"),
+           "s002_novres_g1_s102": ("23:27:05", "23:27:05"), "s002_noqknorm_g1_s102": ("23:44:41", "23:44:41"),
+           "s002_nonormscale_g1_s102": ("00:00:25", "00:00:25"), "s003_adamw_e3_r2_s102": ("00:18:34", "00:18:34")}
 WHOLE, NEW = 123, 10            # mutation_screens.py: the whole file and this entry's mutants (mutants_s2launch.py)
 SEC = section("STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK")
 FLAT = " ".join(SEC.split())
@@ -52,7 +60,7 @@ def V():
         one[s] = (x["total_before"], x["total_after"], x["cut"])
     fmt = {"lock": f(sum(lock)), "s101": f(sum(lock[:6])), "s102": f(sum(lock[6:])), "train": f(train),
            "gaps": f(sum(lock) - train), "est": f(12 * run), "run": f(run), "under": f(12 * run - sum(lock)),
-           "wall": f(wall.seconds / 3600, 2), "waits": f(wall.seconds / 3600 - sum(lock)), "lmin": f(min(lock)),
+           "wall": f(wall.seconds / 3600, 2), "outside": f(wall.seconds / 3600 - sum(lock)), "lmin": f(min(lock)),
            "lmax": f(max(lock)), "total": f(sum(runs.values())), "mr": f(r["measured_runs"]), "mo": f(r["other"]),
            "mrmo": f(m), "qs": f(sum(t["queued"].values())), "tot": f(c["total_before"]), "room": f(head),
            "narrow": f(r["narrow"]["total_before"]), "g2": f(sum(g.values())),
@@ -63,7 +71,7 @@ def V():
            "own": f(full("S005", "base"))}
     fmt.update({f"p{s}": f(v) for s, v in per.items()} | {f"g{s}": f(v) for s, v in g.items()})
     fmt.update({f"o{s}": f(v[0]) for s, v in one.items()} | {f"a{s}": f(v[1]) for s, v in one.items()})
-    return {"runs": runs, "r": r, "one": one, "head": head, "cum": cum, "m": m, "fmt": fmt, "sel": {
+    return {"runs": runs, "r": r, "one": one, "head": head, "cum": cum, "m": m, "fmt": fmt, "wall_s": wall.seconds, "sel": {
         n: h for n, h in runs.items() if n not in RUNS1}}
 
 
@@ -93,7 +101,8 @@ def test_entry_health_and_hours(V):
         assert "\n" + row + "\n" in SEC, row
     assert f"Total {v['lock']} GPU hours measured for the seed sets (seed 101 {v['s101']}, seed 102 {v['s102']}; " \
            f"{v['train']} h training, {v['gaps']} h scoring and gaps), {v['under']} h under their {v['est']} h " \
-           f"estimate (12 x {v['run']} h); {v['wall']} h wall clock (lock waits {v['waits']} h in all)" in FLAT
+           f"estimate (12 x {v['run']} h); {v['wall']} h wall clock (lock waits {v['outside']} h in all)" in FLAT
+    # the committed wording; it is the wall clock outside the lock holds (CORRECTIONS 2026-10-06, pinned below)
     assert f"68 runs, {v['total']} h (stage 1 selection A 5.483 + stage B 1.622 + stage C 0.812 + seed sets " \
            f"{v['lock']})" in FLAT and f"held the lock {v['lmin']} to {v['lmax']} h" in FLAT
     for phrase in ('All 12 runs "done ... rc 0" on the first try', 'status.jsonl: 12 "done and scored"',
@@ -173,7 +182,7 @@ def test_stage2_plan_is_order_2_between_the_smokes_mark_and_its_own(V):
 
 
 def test_every_number_in_the_entry_is_pinned(V):
-    exp = set(V["fmt"].values()) | {"0.5", "101", "102", "112", "136", "763", "5.483", "1.622", "0.812", "148", "022", "020", "395"}
+    exp = set(V["fmt"].values()) | {"0.5", "101", "102", "112", "136", "763", "5.483", "1.622", "0.812", "148", "022", "020"}
     exp |= {f"{x:,}" for x in (7344, 7497, L.STEPS)} | {str(x) for x in PASSED + (WHOLE,)}
     exp |= set(re.findall(r"\d+\.\d+", "\n".join(hours_rows(V["runs"]) + cap_rows(V))))
     hexes = set(PCSHA) | {L.sha256(PLAN)[:16], "93bc10b", "620c77c"}
@@ -193,3 +202,24 @@ def test_every_number_in_the_entry_is_pinned(V):
                    f"the whole file {WHOLE} of {WHOLE} killed", "22 queued slots", "68 measured runs", "<= 25 h",
                    "k (2, E3's k in every class)", "each at g 0.5, 1, 2, seed 1", "14 ok"):
         assert phrase in FLAT, phrase
+
+
+def test_correction_the_time_outside_the_lock_holds(V):
+    """CORRECTIONS (2026-10-06): the entry's "lock waits" figure is the wall clock outside the 12 holds; the queue log
+    splits it into waiting for gpu.lock and the gaps before each lock request. LOCKREQ's held times are the
+    measured_hours.tsv starts, so the fixture is the committed data's own log."""
+    day = lambda t: ("2026-10-06 " if t < "12" else "2026-10-05 ") + t  # noqa: E731
+    sec = lambda a, b: round(H.hours_between(day(a), day(b)) * 3600)  # noqa: E731
+    rows = {ln.split("\t")[1]: ln.rstrip("\n").split("\t") for ln in open(H.TSV) if ln.startswith("run\t")}
+    assert list(LOCKREQ) == RUNS1 and all(rows[n][3] == day(h) for n, (_, h) in LOCKREQ.items())
+    waits = [sec(w, h) for w, h in LOCKREQ.values()]
+    ends = [QSTART] + [rows[n][4][11:] for n in RUNS1]
+    before = [sec(e, w) for e, (w, _) in zip(ends, LOCKREQ.values())]
+    assert sum(waits) + sum(before) + sec(ends[-1], QEND) == round(V["wall_s"] - 3600 * sum(V["runs"][n] for n in RUNS1))
+    c = " ".join(section("CORRECTIONS (2026-10-06 07:30 EDT, Claude; to STAGE 1 SEEDS DONE").split())
+    assert (f'"lock waits {V['fmt']['outside']} h in all" is the wall clock outside the 12 lock holds, '
+            f"{sum(waits) + sum(before)} s, not time spent waiting for gpu.lock: \"waiting for gpu.lock\" to \"gpu.lock "
+            f"held\" takes {sum(waits)} s over the 12 runs ({min(waits)} or {max(waits)} s each); the other "
+            f"{sum(before)} s run from the queue start to the first lock request ({before[0]} s) and from each run's "
+            f"status line to the next lock request ({sum(before[1:])} s, {min(before[1:])} or {max(before[1:])} s each)") in c
+    assert "now names it s2_s005_config_micro_16x1" in c and [m[0] for m in M.MUTANTS_S2LAUNCH].count("s2_s005_config_micro_16x1") == 1

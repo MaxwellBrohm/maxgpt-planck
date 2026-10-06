@@ -96,8 +96,12 @@ def test_a_measured_run_counts_once():
     one = H.tally(P, {**RUNS, "s007_smear_g1_s101": 0.3})           # a seed run at its g pick: one slot leaves
     assert sum(one["n_queued"].values()) == 21 and one["extra"] == {}
     assert sum(one["queued"].values()) == pytest.approx(sum(t["queued"].values()) - F * 253_691 / 247_073)
-    again = H.tally(P, {**RUNS, "s002_novres_g1_s101": 0.3})         # a measured seed run re-measured: no slot left
-    assert again["queued"] == t["queued"] and again["extra"] == {}
+    # a second run on a measured seed run's slot (the slot key has no g: a matched-LR IND run at g 1 beside a g 2 pick
+    # has this shape) takes no slot and counts on top; the same name twice cannot reach tally (next test)
+    again = H.tally(P, {**RUNS, "s002_novres_g2_s101": 0.3})
+    assert H.slot("s002_novres_g2_s101")[1] == H.slot("s002_novres_g1_s101")[1] == ("S002", "novres", "seed", 101)
+    assert again["queued"] == t["queued"] and again["extra"] == {"s002_novres_g2_s101": 0.3}
+    assert again["measured"]["S002"] == pytest.approx(t["measured"]["S002"] + 0.3)
     ext = H.tally(P, {**RUNS, "s001_nogate_g4_s1": 0.3, "s003_adamw_e3_r16_trunk": 0.2})   # extensions: on top
     assert set(ext["extra"]) == {"s001_nogate_g4_s1", "s003_adamw_e3_r16_trunk"}
     assert H.tally(P, {**RUNS, "s004_canonac_g0.25_s1": 0.4})["queued"] == t["queued"]   # takes no stage 2 slot
@@ -105,6 +109,15 @@ def test_a_measured_run_counts_once():
     no_c = {n: h for n, h in RUNS.items() if n not in STAGE_C}          # r_B 1: stage C reuses stage A runs
     assert sum(H.tally(P, no_c, r_b=1)["n_queued"].values()) == sum(H.tally(P, no_c, r_b=2)["n_queued"].values()) - 8
     assert set(H.tally(P, RUNS, r_b=1)["extra"]) == STAGE_C              # so measured r 2 points would take no slot
+
+
+def test_the_loader_refuses_a_run_listed_twice(tmp_path):
+    """A run measured twice in the file (a resumed run's two holds, say) is refused, never summed or overwritten."""
+    line = next(ln for ln in open(H.TSV) if ln.startswith("run\ts002_novres_g1_s101\t"))
+    tsv = tmp_path / "twice.tsv"
+    tsv.write_text(open(H.TSV).read() + line)
+    with pytest.raises(AssertionError, match="s002_novres_g1_s101 measured twice"):
+        H.load(str(tsv))
 
 
 def test_factors_are_the_logged_eager_smoke_tok_s():

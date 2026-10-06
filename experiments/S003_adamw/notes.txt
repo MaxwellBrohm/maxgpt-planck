@@ -113,3 +113,75 @@ C1-a GATE (2026-10-02; Claude; SCREENS.txt "C1-a GATE RESULTS"; nothing committe
 AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this screen is EAGER (train.compile false),
   the stage A-C search and the seed runs alike (C1-a had left S003 compiled); paired with the shared eager BASE.
   Configs rebuilt; each carries the C6 eval.induction hook.
+
+RESULT (2026-10-06, Claude; SCREENS.txt STAGE 1 VERDICTS. Mac CPU, no model; the PC read only: the 12 stage 1 seed
+runs' bpb.jsonl, diag.jsonl and log.jsonl copied to a Mac scratch directory, sha256 equal on both machines; nothing
+committed.) A 5M loss reading only (C8): no RC-12 split and no Tier 0 margin was scored; C8 reads them after the lock.
+  Runs: base_s101/102 (NorMuon, LR5 3e-3 r 1) and s003_adamw_e3_r2_s101/102 (LR5_adamw: optim.lr 3e-3, embed_lr =
+  scalar_lr 6e-3; plan stage1_seeds, commit 93bc10b), each rc 0 on the first try, done and scored, 763 logged steps to
+  7,630, every loss, gnorm and bpb finite; no DIVERGED, GAP or rc12_eval.jsonl. results.json and tables.txt here.
+  VERDICT S003.adamw: REJECT (raw C7). Class same init: SD_ref = SD_d x BASE's mean = 0.00280 bpb (CHAT), df 7, k 2 =
+  k_needed, so not underpowered. CHAT d +0.01861 / +0.01680 (AdamW worse at both seeds), dbar +0.01771 (1.53% of
+  BASE's mean), thr 0.00467: WORSE. PROSE d +0.01332 / +0.01204, dbar +0.01268, thr 0.00339: WORSE. Holm (family of 5
+  so far): holds (p 4.4e-05). C4 same-init check (df 1): CHAT SD 0.111% of BASE against the limit 0.475%, PROSE 0.066%
+  against 0.286%: ok, no re-read.
+  Registered consequence (PRE-REGISTRATION, verbatim): "REJECT NorMuon re-validated on loss at 5M, 50 tokens per
+  parameter. What changes: row 19's 30M check drops its AdamW arm (at least 3 runs at 30M, 1B tokens: one per LR); the
+  block part of that check still runs. The asymmetry above could have produced a small REJECT, so the report states
+  it. A later optimizer flip at larger size is then not looked for (KNOWN RISKS)."
+  The asymmetry, as registered: "NorMuon's LR5 can be replaced by E3's 7-seed re-check (E3 "E2 re-check", seeds 2..8;
+  SCREENS C1), while AdamW's pick rests on E2's seed-1 search alone." As run: E3's re-check confirmed E2's pick, so
+  NorMuon also ran at its seed-1 pick; every AdamW stage pick (A eta 3e-3, B r 2, C g 1) was "not resolved at one
+  seed" by E2's After-E3 label. This REJECT's dbar is 1.53% of BASE, above the 1% delta.
+  Now: Row 19's 30M check drops its AdamW arm; its block part still runs. A later optimizer flip at 30M would go unseen
+  (S003 KNOWN RISKS: the price of the saving, recorded in the ledger row with the verdict; that row is not written in
+  this step).
+  Reported, no rule: mean train hours per run NorMuon (BASE) 0.2761, AdamW 0.2704 (-2.1%; median tok/s 254k / 254k against
+  258k / 259k). Training loss over the last 2% of steps +0.030 / +0.025 nats; steps 60-160 AdamW above BASE at every logged
+  step (mean +0.421 / +0.450). Clip rate AdamW 0.13% / 0.39% against BASE 0.66% / 1.18% (max gnorm 1.07 / 1.43 against
+  2.03 / 2.06). Final IND AdamW 7.366 / 6.496, BASE 7.546 / 8.825 (d -0.180 / -2.329). IND onset: LR-confounded, not
+  read (printed in tables.txt). NOT computed: HD (loads a final checkpoint; not run here).
+  What it does NOT show: that NorMuon wins at larger size or longer runs (50 tokens per parameter only); a tuned weight
+  decay for either optimizer; a behaviour or multi-turn effect; any RC-12 or Tier 0 reading (C8, after the lock);
+  anything beyond 5M, 250.0M slots, the starter mix, tok_v0_8k and 2 seeds.
+
+CORRECTIONS (2026-10-06 07:30 EDT, revised 09:45 EDT, Claude; to the RESULT block above, which stays as written; where
+the two differ this block holds. From two audits of STAGE 1 VERDICTS and the stage 2 launch verification. Mac CPU, no
+model; the PC read only. results.json and tables.txt here were rebuilt with the same verdict numbers; SCREENS.txt STAGE
+1 VERDICTS.)
+  k: "k 2 = k_needed, so not underpowered" is wrong in its middle term. k_needed(1%) for same init is 1 on CHAT and 1
+  on PROSE (E3 results.json k_needed_paired), and k = max(2, 1) = 2: k is above k_needed, so "not underpowered" holds
+  (results.json k_needed_1pct).
+  As run, restated so that it does not discount the registered caveat: E3's re-check confirmed E2's pick against
+  E3's arm B only, not against 6e-3 (E3 AUDIT.md Q3), so NorMuon ran at E2's seed-1 pick; AdamW ran at its seed-1 search
+  pick, and E2's After-E3 label reads every AdamW stage pick (A eta 3e-3, B r 2, C g 1) not resolved at one seed. No
+  run here measures how much of this REJECT the asymmetry produced, so the registered caveat ("The asymmetry above
+  could have produced a small REJECT, so the report states it") applies to it as written; the 1.53% is reported, not
+  read as a bound on that share.
+  Now line, as registered ("at larger size", not "at 30M"): "Row 19's 30M check drops its AdamW arm; its block part
+  still runs. A later optimizer flip at larger size is then not looked for (the registered REJECT; S003 KNOWN RISKS
+  names 30M: the price of the saving, recorded in the ledger row with the verdict; that row is not written in this
+  step)."
+  F(CHAT) per GPU-hour (registered, reported, no rule; now formed): F(CHAT) / h_train per run, h_train = the run's
+  "train" to "done" hours in the queue log (the hours of the GPU-hour gap above). NorMuon (BASE) 4.174 / 4.187, mean
+  4.181; AdamW 4.329 / 4.340, mean 4.334 bpb per GPU-hour (results.json optimizer_cost.f_chat_per_gpu_hour).
+  results.json does_not_show: its template lines named SINK and "attention or block changes", which are not S003's;
+  they now read "this is a 5M loss reading only (C8)" and "HD: not computed".
+  C9 outputs: out/<run>/ now holds log.jsonl, bpb.jsonl and diag.jsonl of base_s101/102 and s003_adamw_e3_r2_s101/102,
+  copied from the PC (read only) on 2026-10-06, each sha256 equal to results.json source.files_sha256 (12 files; a
+  run's log.jsonl is 326 kB, bpb.jsonl 18 kB, diag.jsonl 33 kB). No machine address, user name or key path in them
+  (tests/privacy.py). Checkpoints stay on the PC.
+  BASE level (reported, no rule; results.json base_level_vs_e3_part1): both BASE seeds sit above all 8 of E3 Part 1
+  arm A's seeds on F(CHAT) (gap +0.00755, +0.66%; t 3.26, p 0.014) and F(PROSE) (+0.00594, +0.43%; t 3.66, p 0.008).
+  Eval inputs, scorer, config apart from eval.induction, engine, data, software and LR were checked equal; the seed
+  draw, the eval.induction hook and what the start record does not hold (the GPU driver, drift) are not separated.
+  The verdict reads paired d (same seed, stream, hook and code), so a common level shift cancels; SD_ref, thr and delta
+  scale with BASE's mean, and with them at E3 arm A's mean the verdict stays REJECT. A cause whose effect differs
+  between AdamW and BASE would move d itself; the same-init check (it passed) sees it only if it varies across seeds.
+  Same seed (results.json same_seed_check_seed1): S002's three SIA arms keep BASE's draws and read the seed's stream,
+  so each seed-1 g 1 run (hook on), minus its paired dbar, estimates BASE at seed 1. Against E3 A_s1 and its two
+  replays the mean estimate sits +0.00221 CHAT (+0.19%), +0.00270 PROSE (+0.20%), 29% and 45% of the 101/102 gap;
+  1.0 and 1.9 rough se above 0, 2.4 and 2.2 below that gap, so it does not separate the candidates either.
+  tables.txt: the C7 p column printed 0.0000; it now prints 3 significant digits instead. The
+  tok/s medians skip the first two log records (steps 10 and 20), now said there; over all 763 records
+  s003_adamw_e3_r2_s102's median is 7 tok/s lower (258,544 against 258,551), the other three are the same.

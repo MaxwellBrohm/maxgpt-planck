@@ -1,0 +1,12 @@
+SCREENS AUTOPILOT RECORD (experiments/SCREENS.txt C3, C4, ORDER 2, CAP AND CUT RULE)
+Written by the stage 2 autopilot (screens_autopilot.py, which runs on the Mac outside this repo), one dated block per
+step it commits. It applies the rules already in SCREENS.txt and decides nothing they leave open: an edge pick, a C3
+extension, a divergence, a missing or unscored run, a refused analysis, a cap cut, a red test suite, or any change
+it did not make in a path it would commit stops it for a person. It never reads a C7 verdict (analyze.py verdicts).
+What it does: after the mark SCREENS_STAGE_2_SELECTION_DONE, it copies the 12 stage 2 selection runs' bpb.jsonl,
+markers, the queue log and status.jsonl from the PC, checks them, runs analyze.py picks, and only if every stage 2
+arm (S005 forget, S004 canonac, S007 smear, S006 mtp) has a decided interior pick with no extension, writes the stage 2
+seed sets (screens.py seeds --stage 2, the plan rewritten by screens.plan to wait on that mark), checks every config,
+regenerates the measured hours in a scratch file for ORDER's cap (proceeding only if nothing is cut), sets
+plans/CURRENT = stage2_seeds, runs the experiments/screens suite, and commits those paths only. Each block below is
+UNVERIFIED by an independent agent until a later SCREENS.txt entry says otherwise.

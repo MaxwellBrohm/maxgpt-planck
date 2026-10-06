@@ -121,8 +121,9 @@ MUTANTS += [   # STAGE 1 SELECTION A RESULT (2026-10-05): the stage B configs an
     ("s003B_config_wrong_r", S3C + "r4_b62M.yaml", "embed_lr: 0.012, scalar_lr: 0.012", "embed_lr: 0.006, scalar_lr: 0.006", NF),
     ("s003B_branch_off_another_trunk", S3C + "r2_b125M.yaml", "s003_adamw_e3_r2_trunk/", "s003_adamw_e3_r1_trunk/", NF),
     ("current_plan_out_of_sequence", "experiments/screens/plans/CURRENT", "# Seed plans come from screens.py seeds.\n",
-     "# Seed plans come from screens.py seeds.\nstage2_seeds\n# ", CF + "::registered_order"),
-    # (until STAGE 2 LAUNCH CHECK, 2026-10-06, this mutant named stage2_select, which ORDER now reaches)
+     "# Seed plans come from screens.py seeds.\nstage3_select\n# ", CF + "::registered_order"),
+    # (until STAGE 2 LAUNCH CHECK, 2026-10-06, this mutant named stage2_select, which ORDER now reaches; then
+    # stage2_seeds, which the stage 2 autopilot's commit reaches; ORDER has no plan after stage2_seeds)
 ]
 HRS, HF, RO = "experiments/screens/screens_hours.py", "test_screens_hours.py", "test_s005_row_order.py"
 MUTANTS += [   # STAGE 2 READINESS (2026-10-05): the hours count each run once, smoke factors, S003 measured arms
@@ -169,15 +170,30 @@ MUTANTS += [   # S003 STAGE B RESULT (2026-10-05): stage C's configs and plan fr
      "run\ts003_adamw_e3_r8_b250M\t0.08528\t2026-10-05 12:56:41\t2026-10-05 13:01:48\tqueue_screens.txt\n", "", CF2),
     ("hours_stage_b_end_time_typo", "experiments/screens/measured_hours.tsv", "2026-10-05 12:37:24", "2026-10-05 12:39:24", CF2),
 ]
+S2S, CFT = "test_screens_stage2_seed_state.py", "experiments/screens/tests/test_screens_configs.py"
+MUTANTS += [   # the stage2_seeds state the stage 2 autopilot commits: what the pinning tests accept (stage2_seed_configs)
+    ("s2seeds_check_not_required", CFT, "assert len(find(r)) == 1 and check(find(r)[0]) == [], r",
+     "assert len(find(r)) == 1, r", S2S),
+    ("s2seeds_any_run_accepted", CFT, "assert set(runs) - new <= OWN_BASES and len(runs)", "assert len(runs)", S2S),
+    ("s2seeds_no_wait_line_needed", CFT, 'assert lines[1] == "wait_mark SCREENS SCREENS STAGE 2 SELECTION DONE" and ',
+     "assert ", S2S),
+    ("s2seeds_two_picks_for_any_arm", CFT, 'len(by_g) == 2 and 1.0 in by_g and sid in ("s006", "s007"))',
+     "len(by_g) == 2)", S2S),
+    ("s2seeds_one_seed_enough", CFT, "assert all(v == {101, 102} for v in by_g.values()) and", "assert", S2S),
+]
 from mutants_s003c import MUTANTS_S003C  # noqa: E402  (S003 STAGE C RESULT: seed configs and plan, entry, hours)
 MUTANTS += MUTANTS_S003C
 from mutants_s2launch import MUTANTS_S2LAUNCH  # noqa: E402  (STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK)
 MUTANTS += MUTANTS_S2LAUNCH
+from mutants_s1v import MUTANTS_S1V  # noqa: E402  (STAGE 1 VERDICTS)
+from mutants_fix import MUTANTS_FIX  # noqa: E402  (the 2026-10-06 corrections of STAGE 1 VERDICTS and the launch entry)
+MUTANTS += MUTANTS_S1V + MUTANTS_FIX
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")
     shutil.copytree(os.path.join(ROOT, "harness"), os.path.join(dst, "harness"), ignore=ign)
-    for rel in ["experiments/E2_lr_transfer/configs", "experiments/E3_seed_noise/configs", "experiments/screens"] + \
+    for rel in ["experiments/E2_lr_transfer/configs", "experiments/E3_seed_noise/configs", "experiments/screens",
+                "experiments/E3_seed_noise/out"] + \
             [os.path.relpath(p, ROOT) for p in glob.glob(os.path.join(ROOT, "experiments", "S00?_*"))]:
         shutil.copytree(os.path.join(ROOT, rel), os.path.join(dst, rel), ignore=ign)
     shutil.copytree(os.path.join(ROOT, "data_prep"), os.path.join(dst, "data_prep"),

@@ -37,8 +37,10 @@ TINY = {"vocab_size": 264, "d_model": 48, "n_layers": 2, "n_heads": 3, "n_kv_hea
 
 
 def test_s005_step_is_16_rows_at_micro_8_accum_2():
+    from test_screens_configs import stage2_seed_configs      # S005's seed configs once plans/stage2_seeds.txt exists
+    seeds = {n for n in stage2_seed_configs() if n.startswith("s005_")}
     assert {os.path.basename(p)[:-5] for p in S005} == {"s005_base_s101", "s005_base_s102", "s005_forget_g0.5_s1",
-                                                         "s005_forget_g1_s1", "s005_forget_g2_s1"}
+                                                         "s005_forget_g1_s1", "s005_forget_g2_s1"} | seeds
     assert L.engine("S005") == {"train.doc_attn": "mask", "train.micro_batch": 8, "train.grad_accum": 2}
     shared = L.resolve(L.find("base_s101")[0])
     assert (shared["train"]["micro_batch"], shared["train"]["grad_accum"]) == (16, 1)

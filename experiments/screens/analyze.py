@@ -2,7 +2,10 @@
 reading (experiments/SCREENS.txt). Reads run directories only (~/planck/runs/SCREENS or a copy); runs nothing.
 
   python analyze.py picks --runs DIR                       C3: every arm's g pick at seed 1, S003's stages A-C
-  python analyze.py verdicts --runs DIR [--out FILE]       C7 for every arm that has seed runs
+  python analyze.py verdicts --runs DIR [--out FILE] [--earlier JSON ...]   C7 for every arm that has seed runs
+--earlier: a results.json (or an earlier verdicts --out file) whose "contrasts" were read in an earlier verdict step.
+C4: if the pooled SIA check fails, every SIA arm is re-read at the new-init SD; a verdict named there is
+re-labelled "noise check failed later" (C4's text), an arm read for the first time "noise check failed (pooled SIA)".
 Before anything else the whole runs directory is refused if any run directory in it holds rc12_eval.jsonl (RC-12
 scored before the lock), and every run read is checked again. Values: the final checkpoint's bpb from
 <run>/bpb.jsonl (E2's bpb_lines.py: sets CHAT and PROSE, and the PROSE sources cccc, gutenberg, wikimedia; split
@@ -104,8 +107,17 @@ def picks(runs: str) -> dict:
     return out
 
 
-def verdicts(runs: str, p: dict, noise: dict, g_pick: dict, s003_lr: tuple | None) -> dict:
-    """C7 for every arm with seed runs at its pick, then C4's noise checks, then the Holm reading."""
+LATER, POOLED = "noise check failed later", "noise check failed (pooled SIA)"     # C4's label; this step's own
+
+
+def earlier_keys(paths: list[str]) -> set[str]:
+    """The contrasts that earlier verdict steps read: the "contrasts" keys of each results.json given."""
+    return {k for p in paths for k in json.load(open(p))["contrasts"]}
+
+
+def verdicts(runs: str, p: dict, noise: dict, g_pick: dict, s003_lr: tuple | None, earlier=frozenset()) -> dict:
+    """C7 for every arm with seed runs at its pick, then C4's noise checks, then the Holm reading. earlier: the
+    contrast keys read in an earlier verdict step (C4 re-labels those "noise check failed later")."""
     rc12_guard(runs)
     res, vals = {}, {}
     for sid, s in L.SCREENS.items():
@@ -137,12 +149,12 @@ def verdicts(runs: str, p: dict, noise: dict, g_pick: dict, s003_lr: tuple | Non
     pooled = AL.pooled_sia_check([res[k] for k in sia], noise, p["u"])
     if not all(x["ok"] for x in pooled.values()):
         for k in sia:
-            res[k] = AL.reread_new_init(res[k], *vals[k], noise, p["u"], "noise check failed (pooled SIA)")
+            res[k] = AL.reread_new_init(res[k], *vals[k], noise, p["u"], LATER if k in earlier else POOLED)
     ps = {k: c["readings"]["CHAT"]["p_two_sided"] for k, c in res.items() if c["readings"]}
     hm = AL.holm(ps)
     for k, c in res.items():
         c["holm"] = None if k not in hm else ("holds" if hm[k] else "does not hold")
-    return {"contrasts": res, "pooled_sia_check": pooled, "holm_family": sorted(ps)}
+    return {"contrasts": res, "pooled_sia_check": pooled, "holm_family": sorted(ps), "read_earlier": sorted(earlier)}
 
 
 def main(argv=None) -> int:
@@ -152,6 +164,7 @@ def main(argv=None) -> int:
         x = sub.add_parser(c)
         x.add_argument("--runs", required=True)
         x.add_argument("--out", default=None)
+        x.add_argument("--earlier", action="append", default=[])
     a = ap.parse_args(argv)
     try:
         out = picks(a.runs)
@@ -160,7 +173,7 @@ def main(argv=None) -> int:
             g = {k: v["pick"] for k, v in out.items() if k != "S003" and v.get("decided")}
             c = out["S003"].get("C", {})
             s3 = tuple(c["lrs"]["pick"]) if c.get("decided") else None
-            out = {"picks": out, **verdicts(a.runs, p, e3["noise_5M_250M"], g, s3)}
+            out = {"picks": out, **verdicts(a.runs, p, e3["noise_5M_250M"], g, s3, earlier_keys(a.earlier))}
     except Refused as e:
         print(f"refused: {e}", file=sys.stderr)
         return 3

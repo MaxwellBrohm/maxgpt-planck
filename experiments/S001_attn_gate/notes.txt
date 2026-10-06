@@ -131,3 +131,66 @@ C1-a GATE (2026-10-02, the PC 5070; Claude; method, the batch table and the find
 AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this screen is EAGER (train.compile false),
   paired with the shared eager BASE per seed; the C1-a result above decides nothing now. Configs rebuilt; each
   carries the C6 eval.induction hook, which logs GATE every 153 steps in BASE (gate on) and none in nogate.
+
+RESULT (2026-10-06, Claude; SCREENS.txt STAGE 1 VERDICTS. Mac CPU, no model; the PC read only: the 12 stage 1 seed
+runs' bpb.jsonl, diag.jsonl and log.jsonl copied to a Mac scratch directory, sha256 equal on both machines; nothing
+committed.) A 5M loss reading only (C8): no RC-12 split and no Tier 0 margin was scored; C8 reads them after the lock.
+  Runs: base_s101, base_s102, s001_nogate_g1_s101, s001_nogate_g1_s102 (pick g 1; plan stage1_seeds, commit 93bc10b),
+  each rc 0 on the first try, done and scored, 763 logged steps to 7,630, every loss, gnorm and bpb finite; no
+  DIVERGED, GAP or rc12_eval.jsonl. results.json and tables.txt in this directory hold every number below.
+  VERDICT S001.nogate: TIE (raw C7). Class new init: SD_ref = sqrt(2) sigma_seed x BASE's mean = 0.00417 bpb (CHAT),
+  df 7, k 2 = k_needed, so not underpowered. CHAT d +0.00366 / +0.00415 (gate off worse at both seeds), dbar +0.00390,
+  thr 0.00697, delta 0.01154: |dbar| + thr = 0.01087 < delta, EQUAL. PROSE d -0.00003 / +0.00184, dbar +0.00091, thr
+  0.00487: EQUAL. Holm (family of the 5 stage 1 contrasts so far): does not hold (p 0.23).
+  Registered consequence (PRE-REGISTRATION, verbatim): "TIE no measurable loss effect at 5M/250M (95% interval inside
+  +-1%): the baseline keeps the gate (no change is ever adopted on a tie), and the ledger records "loss-neutral at
+  5M"."
+  Now: The baseline keeps the attention gate. P-021's 30M primacy test still runs (must-run; its target is primacy,
+  not loss). The ledger record "loss-neutral at 5M" is not written in this step (SCREENS.txt names no step that writes
+  ledger rows now).
+  C6, descriptive (no E3 Part 4d SD): GATE in BASE (in-training hook, 32 windows) did not stay open: the 24-head mean
+  went from 0.802 / 0.801 at step 153 to 0.662 / 0.651 at 7,630; layer 0's three heads ended at 0.025 to 0.054 at both
+  seeds (lowest head under 0.1 from step 765 / 918); 4 / 5 heads ended above 1. So KNOWN RISKS' "gate stays open" case
+  did not happen here. Final IND (nats) gate off 11.198 / 10.700, BASE 7.546 / 8.825 (d +3.651 / +1.875, higher at
+  both seeds). Onset read (pick g 1): onset_half 612 / 612 against BASE 612 / 459; onset_abs 459 / 612 (readings every
+  153 steps; IND moves a lot between readings, tables.txt). Clip rate gate off 0.66% / 1.05%, BASE 0.66% / 1.18%.
+  NOT computed: SINK, HD and the 200-window final GATE with p10 / p90 (each loads a final checkpoint; not run here).
+  What it does NOT show: primacy or sink behaviour (the gate is also a per-head output scale in (0, 2), so Q1's verdict
+  is not evidence about sinks, and SINK was not computed); a behaviour or multi-turn effect (loss is not behaviour for
+  attention changes, research/lanes/arch.md 1.4); any RC-12 or Tier 0 reading (C8, after the lock); anything beyond
+  5M, 250.0M slots, the starter mix, tok_v0_8k and 2 seeds; that the gate is useless (both d are positive, inside the
+  new-init threshold).
+
+CORRECTIONS (2026-10-06 07:30 EDT, revised 09:45 EDT, Claude; to the RESULT block above, which stays as written; where
+the two differ this block holds. From two audits of STAGE 1 VERDICTS and the stage 2 launch verification. Mac CPU, no
+model; the PC read only. results.json and tables.txt here were rebuilt with the same verdict numbers; SCREENS.txt STAGE
+1 VERDICTS.)
+  k: k_needed(1%) for new init is 2 on CHAT and 1 on PROSE (E3 results.json k_needed_unpaired), so the class needs 2
+  and k = max(2, 2) = 2: "k 2 = k_needed" holds for this class (results.json k_needed_1pct).
+  GATE: "did not stay open" and "So KNOWN RISKS' "gate stays open" case did not happen here" state a judgment as a
+  finding. DIAGNOSTICS register no threshold for gate openness, and the registered final GATE (200 windows, mean with
+  p10 / p90) was not computed. What the 32-window in-training hook shows: the 24-head mean 0.802 / 0.801 at step 153
+  and 0.662 / 0.651 at step 7,630; layer 0's three heads at 0.025 to 0.054 at step 7,630; 4 / 5 heads above 1. Whether
+  the KNOWN RISKS case (an unused gate, so a TIE is the expected reading) applies is not decided here.
+  C9 outputs: out/<run>/ now holds log.jsonl, bpb.jsonl and diag.jsonl of base_s101, base_s102, s001_nogate_g1_s101
+  and s001_nogate_g1_s102, copied from the PC (read only) on 2026-10-06, each sha256 equal to results.json
+  source.files_sha256 (12 files; a run's log.jsonl is 326 kB, bpb.jsonl 18 kB, diag.jsonl 33 kB, 9 kB with the gate
+  off). No machine address, user name or key path in them (tests/privacy.py). Checkpoints stay on the PC.
+  BASE level (reported, no rule; results.json base_level_vs_e3_part1): both BASE seeds sit above all 8 of E3 Part 1
+  arm A's seeds on F(CHAT) (1.15250 / 1.15609 against 1.14038 to 1.15126; gap +0.00755, +0.66%; t 3.26 with E3's
+  sigma_seed, p 0.014 on t(7)) and on F(PROSE) (gap +0.00594, +0.43%; t 3.66, p 0.008). Checked equal: the eval inputs
+  (eval set and tokenizer sha256, bytes, tokens and windows in every bpb.jsonl row), the scorer, the resolved config
+  apart from eval.induction and labels, the engine settings, the data manifest and drawn shares, the software versions,
+  and the LR (gnorm at arm A's level, not arm B's). Not separated: the seed draw, the eval.induction hook (on in every
+  screen run, absent from E3) and what the start record does not hold (the GPU driver, drift over time). What it does
+  not change: Q1 reads paired d, and arm and BASE share seed, stream, hook and code, so a common level shift cancels;
+  a cause whose effect differs between the arm and BASE would move d itself, and C4's noise check sees it only if it
+  varies across seeds.
+  What it does change: SD_ref, thr and delta are E3's relative SDs times BASE's mean, so each is 0.66% (CHAT) larger in
+  bpb than at E3's level; with them at E3 arm A's mean the verdict stays TIE.
+  Same seed (results.json same_seed_check_seed1): S002's three SIA arms keep BASE's draws and read the seed's stream,
+  so each seed-1 g 1 run (hook on), minus its paired dbar, estimates BASE at seed 1. Against E3 A_s1 and its two
+  replays the mean estimate sits +0.00221 CHAT (+0.19%), +0.00270 PROSE (+0.20%), 29% and 45% of the 101/102 gap;
+  1.0 and 1.9 rough se above 0, 2.4 and 2.2 below that gap, so it does not separate the candidates either.
+  tables.txt: tok/s medians skip the first two log records (steps 10 and 20; the first holds the start-up), now said
+  there; over all 763 records they are the same for these four runs. The p column prints 3 significant digits.

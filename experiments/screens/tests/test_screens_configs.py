@@ -6,6 +6,7 @@ test_screens_hours.py).
 """
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -54,10 +55,43 @@ LATER |= {f"{a}_s{s}" for s in (101, 102) for a in ("s001_nogate_g1", "s002_novr
 # SCREENS.txt S003 STAGE C RESULT (2026-10-05): the stage 1 seed sets (base_s101 and base_s102 are among the 48)
 
 
+STAGE2_SEEDS = os.path.join(L.HERE, "plans", "stage2_seeds.txt")    # the stage 2 autopilot writes it after the picks
+SEED2_RE = re.compile(r"^(s00[4-7])_([a-z]+)_g([0-9.]+)_s(10[12])$")
+OWN_BASES = {"base_s101", "base_s102", "s005_base_s101", "s005_base_s102"}      # among the 48 built
+
+
+def stage2_seed_configs(plan: str = STAGE2_SEEDS, find=None, check=None) -> set:
+    """The configs plans/stage2_seeds.txt adds (ORDER 2's seed sets, screens.py seeds --stage 2): empty while that
+    plan does not exist. When it does, it must wait on the selection mark and end at its own; every other run must
+    be one of the BASE runs; each stage 2 arm runs at one g pick on seeds 101 and 102, plus g 1 for S006 or S007 when
+    the pick is not g 1 (C6's matched-LR IND runs); and every added config must pass screens.py check."""
+    if not os.path.exists(plan):
+        return set()
+    find, check = find or L.find, check or (lambda p: L.check(p, P))
+    lines = open(plan).read().splitlines()
+    assert lines[1] == "wait_mark SCREENS SCREENS STAGE 2 SELECTION DONE" and lines[-1] == "mark SCREENS STAGE 2 SEEDS DONE"
+    runs = [ln.split()[1] for ln in lines if ln.startswith("train ")]
+    new = {r for r in runs if SEED2_RE.match(r)}
+    assert set(runs) - new <= OWN_BASES and len(runs) == len(set(runs)), runs
+    gs = {}
+    for r in new:
+        sid, arm, g, seed = SEED2_RE.match(r).groups()
+        assert arm in L.SCREENS[sid.upper()]["arms"], r
+        gs.setdefault((sid, arm), {}).setdefault(float(g), set()).add(int(seed))
+    assert {(s.lower(), a) for s in L.ORDER[2] for a in L.SCREENS[s]["arms"]} == set(gs), sorted(gs)
+    for (sid, arm), by_g in gs.items():
+        assert all(v == {101, 102} for v in by_g.values()) and (len(by_g) == 1 or (
+            len(by_g) == 2 and 1.0 in by_g and sid in ("s006", "s007"))), (sid, arm, by_g)
+    for r in new:
+        assert len(find(r)) == 1 and check(find(r)[0]) == [], r
+    return new
+
+
 def test_config_set_is_complete():
     names = sorted(os.path.basename(c)[:-5] for c in CONFIGS)
-    assert LATER <= set(names) and len(set(names) - LATER) == 48 and len(names) == 82
-    names = sorted(set(names) - LATER)
+    s2 = stage2_seed_configs()                          # empty until plans/stage2_seeds.txt exists
+    assert LATER <= set(names) and s2 <= set(names) and len(set(names) - LATER - s2) == 48 and len(names) == 82 + len(s2)
+    names = sorted(set(names) - LATER - s2)
     for sid, s in L.SCREENS.items():
         for a in s["arms"]:
             if sid != "S003":
@@ -200,7 +234,8 @@ def test_plans_follow_the_registered_order():
     assert open(os.path.join(L.HERE, "plans", "stage2_select.txt")).read().splitlines()[1] == \
         "wait_mark SCREENS SCREENS STAGE 2 SMOKES RECORDED"
     cur = [ln for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
-    assert len(cur) == 1 and cur[0].strip() in PLAN_SEQUENCE    # ORDER's plans so far, in the order they run
+    later = LATER_PLANS if stage2_seed_configs() else []    # stage2_seeds only once its plan exists and checks
+    assert len(cur) == 1 and cur[0].strip() in PLAN_SEQUENCE + later    # ORDER's plans so far, in the order they run
     for r in plan_runs(cur[0].strip()):
         assert len(L.find(r)) == 1
 
@@ -208,6 +243,8 @@ def test_plans_follow_the_registered_order():
 PLAN_SEQUENCE = ["stage1_select", "stage1_s003B", "stage1_s003C", "stage1_seeds", "stage2_select"]   # stage1_s003B:
 # SCREENS.txt STAGE 1 SELECTION A RESULT; stage1_s003C: S003 STAGE B RESULT; stage1_seeds: S003 STAGE C RESULT;
 # stage2_select: STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK (cap fits, nothing cut, so the plan is not reduced)
+LATER_PLANS = ["stage2_seeds"]      # written by the stage 2 autopilot (AUTOPILOT.txt) after the stage 2 picks: ORDER 2's
+# seed sets; accepted only when plans/stage2_seeds.txt exists and stage2_seed_configs() holds
 
 
 def cfg_for(code, name):
