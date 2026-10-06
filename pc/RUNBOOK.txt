@@ -213,10 +213,16 @@ RESUME AFTER A REBOOT (boot.d, added 2026-09-27)                                
                 "Manual restart"). The code dir is read from the cut-off run's own "queue: start,
                 code ..." line (rc12_dg, rc12_dg3 or rc12_doge2); RC12_CODE overrides it. It does
                 not restart rc12_doge2/run_doge_after.sh (start that by hand after a cut).
+    40_screens.sh  SCREENS (added 2026-10-06): the cut-off run's own ~/planck/qcode/<commit12> and plan,
+                read from its last "queue start:" line (never the newest bundle or plans/CURRENT); refuses
+                when the clone, HEAD or plan sha256 differs, when a newer code_sha256_*.txt says a start
+                line was lost, or when a run dir looks damaged (0-byte or NUL checkpoints, SCORED with
+                empty scores). Details: pc/wsl/boot.d/40_screens.notes.txt.
   Stop files: touch ~/planck/boot.d/STOP        nothing resumes
-              touch ~/planck/boot.d/<name>.STOP that queue does not (names: e2, e006, rc12)
+              touch ~/planck/boot.d/<name>.STOP that queue does not (names: e2, e006, rc12, screens)
               ~/planck/STOP, ~/planck/PAUSE     also block every resume (STEP 5's update window)
               ~/planck/logs/rc12_dev_queue.STOP (RC-12's own) blocks RC-12
+              ~/planck/runs/SCREENS/NO_BOOT_RESUME (SCREENS' own) blocks SCREENS
   To retire a queue: delete its NN_ script from ~/planck/boot.d (or chmod -x it).
   Log: ~/planck/logs/boot_resume.log, one line per decision with its reason.
   Look without starting anything:  bash ~/planck/boot.d/boot_resume.sh --dry-run

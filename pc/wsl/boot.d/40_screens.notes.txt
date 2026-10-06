@@ -1,0 +1,53 @@
+40_screens.sh: SCREENS boot resume (added 2026-10-06; pc/RUNBOOK.txt RESUME AFTER A REBOOT has the other three)
+
+What it resumes
+  The SCREENS queue, when ~/planck/runs/SCREENS/queue_screens.txt shows its last run was cut off (a power cut or a
+  kill: no end line after the last "queue start: exp SCREENS" line). It reruns the command launch_screens.sh ran,
+  on the plan and the code clone that start line names:
+    bash ~/planck/qcode/<commit12>/experiments/screens/queue_screens.sh --code ~/planck/qcode/<commit12> \
+         --plan ~/planck/qcode/<commit12>/experiments/screens/plans/<plan>.txt
+  Never the kit's newest bundle and never plans/CURRENT. It refuses (boot_resume.log says why, exit 1) when the
+  clone is missing or not at that commit, or the plan is missing or not the sha256 the start line logged.
+  Before it starts the queue it appends one "boot resume:" line to queue_screens.txt (on its own line, also after
+  a NUL tail). Output of the queue before its log opens goes to ~/planck/logs/launch_screens.log.
+  Inside the queue nothing new: finished runs (SCORED, TRUNK_DONE, DIVERGED, GAP) are skipped; the run that was
+  cut resumes from its latest.json checkpoint (harness saves are fsynced since 2026-10-03, E2 DEVIATION 1), or
+  starts at step 0 if it had saved none; a run cut while scoring re-scores the checkpoints whose bpb/*.json is
+  missing or 0 bytes. The cut is not written to the run's crashes.txt (the queue counts only crashes it saw).
+
+What ends a run (never resumed): "plan finished:", "plan says stop", "queue stops at: train" (every stop inside a
+  run: STOP, disk, a refusal, heat, the RC-12 guard, a scoring failure, gpu.lock not free after 2 h), "STOP while
+  waiting for", "bad plan line:", and "refusing:" (a relaunch that refused before its own start line). Each counts
+  only right after a queue time stamp.
+
+Left for a person (not resumed, exit 1): power-cut damage the queue cannot repair by itself, found in the top level
+  of each run dir under ~/planck/runs/SCREENS:
+    a *.pt that is not a whole zip (0 bytes, NUL bytes, lost tail)    torch.load fails: crash, resume, crash = GAP
+    latest.json that does not parse or names a missing file          GAP, or a silent restart from step 0
+    SCORED with bpb.jsonl or a bpb/*.json missing, empty or not JSON  the queue skips that run for good
+    an unscored bpb/*.json that is not empty and not JSON             the queue stops at scoring
+    TRUNK_DONE with no final_*.pt                                     its branches stop at preflight
+  Repair as on 2026-10-02 (experiments/E2_lr_transfer/notes.txt CRASH RESUME): move the damaged files and the
+  markers they make false into <run>/crashed_<date>/ (subdirectories are not checked), point latest.json at the
+  last whole checkpoint, log it, then resume by hand (below). A .pt.tmp is a save the cut stopped: it is ignored.
+  Also left for a person: a later queue start whose start line the cut lost. The queue names
+  code_sha256_<time>.txt just before it logs its start line; ext4 keeps a new name after ~5 s but a log line only
+  after ~30 s, so a cut 5-30 s after a start can leave that name and NULs where the line was. A name newer than
+  the last start line means the plan and commit of that start are not in the log (launch_screens.log may have its
+  "code REF in qcode/..., plan PLAN" line); the start before it may even show an end. Resume by hand.
+
+How to block it
+  touch ~/planck/runs/SCREENS/NO_BOOT_RESUME     SCREENS only (next to the queue's log)
+  touch ~/planck/boot.d/screens.STOP             SCREENS only (bootlib's per-queue file)
+  touch ~/planck/boot.d/STOP                     no queue resumes
+  ~/planck/STOP or ~/planck/PAUSE                no queue resumes (and the running queue stops or holds)
+  chmod -x ~/planck/boot.d/40_screens.sh         retire it
+  To end a SCREENS run on purpose, use ~/planck/STOP (the queue logs its own end). A pkill leaves no end line, so
+  the next boot would resume it unless one of the files above is there.
+
+Look, or resume by hand
+  bash ~/planck/boot.d/boot_resume.sh --dry-run                 says what each script would do, starts nothing
+  boot_resume.sh --now, started DETACHED (RUNBOOK RESUME AFTER A REBOOT)
+
+Install (from the Mac, after the commit): pcsync.sh pc/wsl/boot.d bootd, then in WSL
+  cp -p ~/planck/dev/bootd/*.sh ~/planck/boot.d/   (40_screens.sh executable). Live from the next boot.
