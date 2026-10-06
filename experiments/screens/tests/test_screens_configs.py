@@ -49,11 +49,14 @@ LATER = {f"s003_adamw_e3_r{r}_{t}" for r in ("0.5", "2", "4", "8") for t in ("tr
 # written after a pick (SCREENS.txt STAGE 1 SELECTION A RESULT, 2026-10-05): S003 stage B at eta_A 3e-3
 LATER |= {f"s003_adamw_e{e}_r2_{t}" for e in ("1.5", "6") for t in ("trunk", "b62M", "b125M", "b250M")}
 # SCREENS.txt S003 STAGE B RESULT (2026-10-05): S003 stage C, g 0.5 and 2 at (eta_A 3e-3, r_B 2)
+LATER |= {f"{a}_s{s}" for s in (101, 102) for a in ("s001_nogate_g1", "s002_novres_g1", "s002_noqknorm_g1",
+                                                     "s002_nonormscale_g1", "s003_adamw_e3_r2")}
+# SCREENS.txt S003 STAGE C RESULT (2026-10-05): the stage 1 seed sets (base_s101 and base_s102 are among the 48)
 
 
 def test_config_set_is_complete():
     names = sorted(os.path.basename(c)[:-5] for c in CONFIGS)
-    assert LATER <= set(names) and len(set(names) - LATER) == 48 and len(names) == 72
+    assert LATER <= set(names) and len(set(names) - LATER) == 48 and len(names) == 82
     names = sorted(set(names) - LATER)
     for sid, s in L.SCREENS.items():
         for a in s["arms"]:
@@ -84,6 +87,11 @@ def test_every_arm_differs_from_its_base_only_in_its_registered_keys(capsys):
             want = {"optim.kind", "engine_fixed"} | HOOK | ({"schedule.init_from"} if m["tag"] != "trunk" else set())
             assert L.diff(f, ref) - FIX == want and f["optim.kind"] == "adamw"
             rows.append(("S003", f"adamw search {m['tag']}", sorted(want)))
+        elif m["e"]:                                    # S003 seed run at LR5_adamw (S003 STAGE C RESULT)
+            d = L.diff(f, own_base(None)) - FIX
+            assert d == {"optim.kind", "optim.embed_lr", "optim.scalar_lr"} and f["optim.kind"] == "adamw"
+            assert [f[k] for k in L.LRK] == [float(m["e"]) * 1e-3] + [float(m["e"]) * 1e-3 * float(m["r"])] * 2
+            rows.append(("S003", "adamw seed", sorted(d)))
         elif m["arm"] == "base":
             d = L.diff(f, own_base(None)) - FIX
             assert d == set(L.engine(sid)) and all(f[k] == v for k, v in L.engine(sid).items())
@@ -197,8 +205,8 @@ def test_plans_follow_the_registered_order():
         assert len(L.find(r)) == 1
 
 
-PLAN_SEQUENCE = ["stage1_select", "stage1_s003B", "stage1_s003C"]   # stage1_s003B: SCREENS.txt STAGE 1 SELECTION A
-# RESULT; stage1_s003C: S003 STAGE B RESULT
+PLAN_SEQUENCE = ["stage1_select", "stage1_s003B", "stage1_s003C", "stage1_seeds"]   # stage1_s003B: SCREENS.txt
+# STAGE 1 SELECTION A RESULT; stage1_s003C: S003 STAGE B RESULT; stage1_seeds: S003 STAGE C RESULT
 
 
 def cfg_for(code, name):

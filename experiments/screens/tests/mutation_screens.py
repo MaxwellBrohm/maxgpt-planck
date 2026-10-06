@@ -163,11 +163,13 @@ MUTANTS += [   # S003 STAGE B RESULT (2026-10-05): stage C's configs and plan fr
     ("s003C_branch_off_stage_b_trunk", S3Cc + "1.5_r2_b125M.yaml", "s003_adamw_e1.5_r2_trunk/", "s003_adamw_e3_r2_trunk/", CF2),
     ("s003_stage_c_read_at_r1", AN, 'out["C"] = e2pick.stage(runs, "C", a["pick"], b["pick"])',
      'out["C"] = e2pick.stage(runs, "C", a["pick"], 1.0)', CF2),
-    ("s003B_entry_value_typo", "experiments/SCREENS.txt", "1.16436 / 1.39911", "1.16463 / 1.39911", CF2),
+    ("s003B_entry_value_typo", "experiments/SCREENS.txt", "2     1.16436 / 1.39911", "2     1.16463 / 1.39911", CF2),
     ("hours_stage_b_run_missing", "experiments/screens/measured_hours.tsv",
      "run\ts003_adamw_e3_r8_b250M\t0.08528\t2026-10-05 12:56:41\t2026-10-05 13:01:48\tqueue_screens.txt\n", "", CF2),
     ("hours_stage_b_end_time_typo", "experiments/screens/measured_hours.tsv", "2026-10-05 12:37:24", "2026-10-05 12:39:24", CF2),
 ]
+from mutants_s003c import MUTANTS_S003C  # noqa: E402  (S003 STAGE C RESULT: seed configs and plan, entry, hours)
+MUTANTS += MUTANTS_S003C
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")

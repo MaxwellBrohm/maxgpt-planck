@@ -38,6 +38,7 @@ SHORT = {   # CHAT, PROSE at the 125M and 62.5M branches, r 0.5 / 1 / 2 / 4 / 8 
 }
 POINTS = [("1.5", 0.5), ("6", 2.0)]                 # stage C: (eta x 1e3, g) at r_B 2
 TAGS = (("b62M", 1526), ("b125M", 3052), ("b250M", 6104))
+STAGE_C_RUNS = {f"s003_adamw_e{e}_r2_{t}" for e, _ in POINTS for t in ("trunk", "b62M", "b125M", "b250M")}
 PLAN = os.path.join(L.HERE, "plans", "stage1_s003C.txt")
 
 
@@ -107,7 +108,8 @@ def test_entry_lock_hours_are_the_measured_file():
     assert set(table) == want and want <= set(runs)
     assert all(round(runs[n], 3) == pytest.approx(v, abs=1e-9) for n, v in table.items())
     assert round(sum(runs[n] for n in want), 3) == 1.622 and "Total 1.622 GPU hours measured for stage B" in sec
-    assert len(runs) == 48 and round(sum(runs.values()), 3) == 7.105 and "48 runs, 7.105 h" in sec
+    before = {n: h for n, h in runs.items() if n not in STAGE_C_RUNS}     # the file as of that entry (stage C: later)
+    assert len(before) == 48 and round(sum(before.values()), 3) == 7.105 and "48 runs, 7.105 h" in sec
 
 
 def plan_lines():
@@ -143,13 +145,15 @@ def test_stage_c_configs_carry_g_times_the_stage_b_lrs_and_their_own_trunk(e, g)
         assert L.check(path, P) == []
 
 
-def test_cap_check_before_stage_c_and_what_an_extension_does(capsys):
-    r = H.report(P, r_b=2)
+def test_cap_check_before_stage_c_and_what_an_extension_does(capsys, tmp_path):
+    tsv = tmp_path / "before_c.tsv"                 # measured_hours.tsv as of that entry: stage C's 8 lines not yet in
+    tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] in STAGE_C_RUNS)))
+    r = H.report(P, str(tsv), r_b=2)
     out = capsys.readouterr().out
     t, cap = r["tally"], r["cap"]
     assert sum(t["n_queued"].values()) == 42 and t["n_queued"]["S003"] == 10 and cap["cut"] == []
     assert round(cap["total_before"], 3) == 24.857 and "= 24.857 h against 25 h: fits, nothing cut" in out
-    arm = sum(H.s003_tag_hours(H.load()[0]).values())
+    arm = sum(H.s003_tag_hours(H.load(str(tsv))[0]).values())
     assert sum(1 for k in t["registered"] if k[:3] == ("S003", "search", "C") and k not in t["seen"]) == 8
     ext = AL.cap_cut({**t["queued"], "S003": t["queued"]["S003"] + arm}, r["measured_runs"] + r["other"])
     assert ext["cut"] == ["S006"] and round(ext["total_before"], 3) == 25.264 and round(ext["total_after"], 3) == 23.426

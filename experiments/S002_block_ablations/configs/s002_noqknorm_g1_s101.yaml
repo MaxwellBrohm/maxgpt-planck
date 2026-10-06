@@ -1,0 +1,7 @@
+# SCREENS S002 arm noqknorm, g 1 x LR5, seed 101: screen seed at the g pick (screens.py)
+extends: ../../screens/configs/screens_base.yaml
+name: s002_noqknorm_g1_s101
+out_dir: ../../../planck_root/runs/SCREENS/s002_noqknorm_g1_s101
+seed: 101
+optim: {lr: 0.003, embed_lr: 0.003, scalar_lr: 0.003}
+model: {qk_norm: false}
