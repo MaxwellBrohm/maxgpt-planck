@@ -1,0 +1,7 @@
+# SCREENS S006 arm mtp, g 4 x LR5, seed 1: C3 g-check extension (screens.py)
+extends: ../../screens/configs/screens_base.yaml
+name: s006_mtp_g4_s1
+out_dir: ../../../planck_root/runs/SCREENS/s006_mtp_g4_s1
+seed: 1
+optim: {lr: 0.012, embed_lr: 0.012, scalar_lr: 0.012}
+train: {mtp: 1, mtp_weight: 1.0}

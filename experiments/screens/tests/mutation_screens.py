@@ -188,6 +188,8 @@ MUTANTS += MUTANTS_S2LAUNCH
 from mutants_s1v import MUTANTS_S1V  # noqa: E402  (STAGE 1 VERDICTS)
 from mutants_fix import MUTANTS_FIX  # noqa: E402  (the 2026-10-06 corrections of STAGE 1 VERDICTS and the launch entry)
 MUTANTS += MUTANTS_S1V + MUTANTS_FIX
+from mutants_s2select import MUTANTS_S2SELECT  # noqa: E402  (STAGE 2 SELECTION RESULT: S006's extension, hours, cap)
+MUTANTS += MUTANTS_S2SELECT
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")

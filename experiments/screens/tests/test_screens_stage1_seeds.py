@@ -37,7 +37,8 @@ QSTART, QEND, ENTRY_TIME = "18:55:59", "20:20:36", "20:45"   # queue start (log)
 PLAN = os.path.join(L.HERE, "plans", "stage1_seeds.txt")
 PASSED = (338, 377)             # experiments/screens/tests before and after this entry (Mac CPU)
 WHOLE, TSV_SHA = 113, ("84585848d57aff5a", "3bc3033a40a6a910")   # mutants, measured_hours.tsv header at this entry
-SEED_RUNS = {ln.split()[1] for ln in open(PLAN) if ln.startswith("train ")}   # measured after this entry
+SEED_RUNS = {ln.split()[1] for ln in open(PLAN) if ln.startswith("train ")}   # measured after this entry, and
+SEED_RUNS |= {ln.split()[1] for ln in open(os.path.join(L.HERE, "plans", "stage2_select.txt")) if ln.startswith("train ")}
 SEC = section("S003 STAGE C RESULT")
 FLAT = " ".join(SEC.split())
 
@@ -217,8 +218,8 @@ def test_seed_configs_are_their_base_plus_the_registered_keys(seed):
         assert f["seed"] == seed and f["optim.lr"] == 0.003 and f["schedule.mode"] == "full" and L.check(path, P) == []
         assert f"{L.sha256(path)[:16]} {stem}_s{seed}" in SEC
     assert f"{L.sha256(L.find(f'base_s{seed}')[0])[:16]} base_s{seed}" in SEC
-    from test_screens_configs import stage2_seed_configs      # added later by plans/stage2_seeds.txt (none before it)
-    assert len(L.all_configs()) == 82 + len(stage2_seed_configs()) and "12 ok (82 ok over every config)" in FLAT
+    from test_screens_configs import EXT2, stage2_seed_configs      # added later: S006's extension, stage2_seeds
+    assert len(L.all_configs()) == 82 + len(EXT2) + len(stage2_seed_configs()) and "12 ok (82 ok over every config)" in FLAT
 
 
 def test_every_number_in_the_entry_is_pinned(V):

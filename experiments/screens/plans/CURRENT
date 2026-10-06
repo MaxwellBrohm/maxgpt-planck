@@ -4,5 +4,7 @@
 # preconditions and the cap check are logged in SCREENS.txt). stage2_select waits the same way for
 # SCREENS_STAGE_2_SMOKES_RECORDED (each flag's eager smoke run on the PC, labelled smoke, logged in its notes.txt:
 # mem_fit, tok/s for the GPU HOURS factors, leak self-test; AMENDMENT C1-b: every run eager, no compile gate).
+# stage2_s006x (S006's C3 extension, SCREENS.txt STAGE 2 SELECTION RESULT) waits for SCREENS_STAGE_2_SELECTION_DONE
+# and stops at SCREENS_S006_EXTENSION_DONE (the seed sets need its pick).
 # Seed plans come from screens.py seeds.
-stage2_select
+stage2_s006x

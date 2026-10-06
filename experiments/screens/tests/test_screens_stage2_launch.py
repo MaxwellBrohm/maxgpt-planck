@@ -41,10 +41,12 @@ S2 = [f"{sid.lower()}_{a}_g{g}_s1" for sid in L.ORDER[2] for a in L.SCREENS[sid]
 
 
 @pytest.fixture(scope="module")
-def V():
-    runs, _ = H.load()
+def V(tmp_path_factory):
+    tsv = tmp_path_factory.mktemp("tsv") / "m.tsv"      # measured_hours.tsv as of this entry: the 12 stage 2 g-check
+    tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] in S2)))
+    runs, _ = H.load(str(tsv))                          # lines (STAGE 2 SELECTION RESULT) taken out
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(P)
+        r = H.report(P, str(tsv))
     t, c, f = r["tally"], r["cap"], (lambda x, n=3: f"{x:.{n}f}")
     full = lambda s, a: H.run_h(L.STEPS, H.mult(s, a))  # noqa: E731
     per = {s: full(s, a) for s in L.ORDER[2] for a in L.SCREENS[s]["arms"]}
@@ -81,7 +83,9 @@ def test_seed_runs_are_measured_once_and_the_earlier_lines_unchanged(V):
     assert round(sum(V["sel"].values()), 3) == 7.917 and V["r"]["tally"]["extra"] == {}
     ends = {ln.split("\t")[1]: ln.split("\t")[4] for ln in open(H.TSV) if ln.startswith("run\t")}
     assert max(ends[n] for n in RUNS1) == "2026-10-06 " + QEND
-    assert "sha256 " + PCSHA[0] + "... and " + PCSHA[1] in open(H.TSV).read()
+    now = H.load()[0]                       # later regenerations add lines only (their header: their own test)
+    assert ("sha256 " + PCSHA[0] + "... and " + PCSHA[1] in open(H.TSV).read()) if len(now) == 68 else \
+        (set(now) - set(runs) == set(S2) and len(now) == 80)
 
 
 def hours_rows(runs):
@@ -164,7 +168,7 @@ def test_stage2_plan_is_order_2_between_the_smokes_mark_and_its_own(V):
     assert [n[:4] for n in S2[::3]] == ["s005", "s004", "s007", "s006"] and len(lines) == 15
     assert "The mark file is written on the PC as ~/planck/runs/SCREENS/marks/SCREENS_STAGE_2_SMOKES_RECORDED" in \
         " ".join(section("SCREENS_STAGE_2_SMOKES_RECORDED").split())          # the wait line's mark, signed off
-    assert PLAN_SEQUENCE[-2:] == ["stage1_seeds", "stage2_select"]
+    assert PLAN_SEQUENCE[3:5] == ["stage1_seeds", "stage2_select"]
     own, base = (L.flat(L.resolve(L.find(n)[0])) for n in ("s005_base_s101", "base_s101"))
     for n in S2:
         path = L.find(n)

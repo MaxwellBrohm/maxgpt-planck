@@ -53,6 +53,8 @@ LATER |= {f"s003_adamw_e{e}_r2_{t}" for e in ("1.5", "6") for t in ("trunk", "b6
 LATER |= {f"{a}_s{s}" for s in (101, 102) for a in ("s001_nogate_g1", "s002_novres_g1", "s002_noqknorm_g1",
                                                      "s002_nonormscale_g1", "s003_adamw_e3_r2")}
 # SCREENS.txt S003 STAGE C RESULT (2026-10-05): the stage 1 seed sets (base_s101 and base_s102 are among the 48)
+EXT2 = {"s006_mtp_g4_s1"}       # SCREENS.txt STAGE 2 SELECTION RESULT (2026-10-06): S006's C3 extension (edge pick g 2)
+LATER |= EXT2
 
 
 STAGE2_SEEDS = os.path.join(L.HERE, "plans", "stage2_seeds.txt")    # the stage 2 autopilot writes it after the picks
@@ -90,7 +92,7 @@ def stage2_seed_configs(plan: str = STAGE2_SEEDS, find=None, check=None) -> set:
 def test_config_set_is_complete():
     names = sorted(os.path.basename(c)[:-5] for c in CONFIGS)
     s2 = stage2_seed_configs()                          # empty until plans/stage2_seeds.txt exists
-    assert LATER <= set(names) and s2 <= set(names) and len(set(names) - LATER - s2) == 48 and len(names) == 82 + len(s2)
+    assert LATER <= set(names) and s2 <= set(names) and len(set(names) - LATER - s2) == 48 and len(names) == 83 + len(s2)
     names = sorted(set(names) - LATER - s2)
     for sid, s in L.SCREENS.items():
         for a in s["arms"]:
@@ -240,9 +242,10 @@ def test_plans_follow_the_registered_order():
         assert len(L.find(r)) == 1
 
 
-PLAN_SEQUENCE = ["stage1_select", "stage1_s003B", "stage1_s003C", "stage1_seeds", "stage2_select"]   # stage1_s003B:
-# SCREENS.txt STAGE 1 SELECTION A RESULT; stage1_s003C: S003 STAGE B RESULT; stage1_seeds: S003 STAGE C RESULT;
-# stage2_select: STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK (cap fits, nothing cut, so the plan is not reduced)
+PLAN_SEQUENCE = ["stage1_select", "stage1_s003B", "stage1_s003C", "stage1_seeds", "stage2_select",
+                 "stage2_s006x"]   # stage1_s003B: SCREENS.txt STAGE 1 SELECTION A RESULT; stage1_s003C: S003 STAGE B
+# RESULT; stage1_seeds: S003 STAGE C RESULT; stage2_select: STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK (cap fits,
+# nothing cut, so the plan is not reduced); stage2_s006x: STAGE 2 SELECTION RESULT (S006's C3 extension, cap fits)
 LATER_PLANS = ["stage2_seeds"]      # written by the stage 2 autopilot (AUTOPILOT.txt) after the stage 2 picks: ORDER 2's
 # seed sets; accepted only when plans/stage2_seeds.txt exists and stage2_seed_configs() holds
 
