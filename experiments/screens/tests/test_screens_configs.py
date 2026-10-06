@@ -205,8 +205,9 @@ def test_plans_follow_the_registered_order():
         assert len(L.find(r)) == 1
 
 
-PLAN_SEQUENCE = ["stage1_select", "stage1_s003B", "stage1_s003C", "stage1_seeds"]   # stage1_s003B: SCREENS.txt
-# STAGE 1 SELECTION A RESULT; stage1_s003C: S003 STAGE B RESULT; stage1_seeds: S003 STAGE C RESULT
+PLAN_SEQUENCE = ["stage1_select", "stage1_s003B", "stage1_s003C", "stage1_seeds", "stage2_select"]   # stage1_s003B:
+# SCREENS.txt STAGE 1 SELECTION A RESULT; stage1_s003C: S003 STAGE B RESULT; stage1_seeds: S003 STAGE C RESULT;
+# stage2_select: STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK (cap fits, nothing cut, so the plan is not reduced)
 
 
 def cfg_for(code, name):

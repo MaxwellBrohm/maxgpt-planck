@@ -121,7 +121,8 @@ MUTANTS += [   # STAGE 1 SELECTION A RESULT (2026-10-05): the stage B configs an
     ("s003B_config_wrong_r", S3C + "r4_b62M.yaml", "embed_lr: 0.012, scalar_lr: 0.012", "embed_lr: 0.006, scalar_lr: 0.006", NF),
     ("s003B_branch_off_another_trunk", S3C + "r2_b125M.yaml", "s003_adamw_e3_r2_trunk/", "s003_adamw_e3_r1_trunk/", NF),
     ("current_plan_out_of_sequence", "experiments/screens/plans/CURRENT", "# Seed plans come from screens.py seeds.\n",
-     "# Seed plans come from screens.py seeds.\nstage2_select\n# ", CF + "::registered_order"),
+     "# Seed plans come from screens.py seeds.\nstage2_seeds\n# ", CF + "::registered_order"),
+    # (until STAGE 2 LAUNCH CHECK, 2026-10-06, this mutant named stage2_select, which ORDER now reaches)
 ]
 HRS, HF, RO = "experiments/screens/screens_hours.py", "test_screens_hours.py", "test_s005_row_order.py"
 MUTANTS += [   # STAGE 2 READINESS (2026-10-05): the hours count each run once, smoke factors, S003 measured arms
@@ -170,6 +171,8 @@ MUTANTS += [   # S003 STAGE B RESULT (2026-10-05): stage C's configs and plan fr
 ]
 from mutants_s003c import MUTANTS_S003C  # noqa: E402  (S003 STAGE C RESULT: seed configs and plan, entry, hours)
 MUTANTS += MUTANTS_S003C
+from mutants_s2launch import MUTANTS_S2LAUNCH  # noqa: E402  (STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK)
+MUTANTS += MUTANTS_S2LAUNCH
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")

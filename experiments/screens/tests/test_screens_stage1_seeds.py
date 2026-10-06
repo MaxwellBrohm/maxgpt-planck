@@ -9,12 +9,8 @@ import contextlib, datetime as dt, io, json, os, re, sys, pytest  # noqa: E401
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.dirname(HERE), HERE]
-import analyze  # noqa: E402
-import analyze_lib as AL  # noqa: E402
-import e2plan  # noqa: E402
-import mutation_screens as M  # noqa: E402
-import screens_hours as H  # noqa: E402
-import screens_lib as L  # noqa: E402
+import analyze, analyze_lib as AL, e2plan, mutation_screens as M  # noqa: E401,E402
+import screens_hours as H, screens_lib as L  # noqa: E401,E402
 from test_screens_s003_stage_c import SHORT, STAGE_B, section  # noqa: E402
 from test_screens_stage1_next import RECORDED as STAGE_1A  # noqa: E402
 
@@ -40,6 +36,8 @@ TOKS = {"trunk": ("258k", "258k"), "b62M": ("258k", "258k"), "b125M": ("258k", "
 QSTART, QEND, ENTRY_TIME = "18:55:59", "20:20:36", "20:45"   # queue start (log), plan finished, entry written
 PLAN = os.path.join(L.HERE, "plans", "stage1_seeds.txt")
 PASSED = (338, 377)             # experiments/screens/tests before and after this entry (Mac CPU)
+WHOLE, TSV_SHA = 113, ("84585848d57aff5a", "3bc3033a40a6a910")   # mutants, measured_hours.tsv header at this entry
+SEED_RUNS = {ln.split()[1] for ln in open(PLAN) if ln.startswith("train ")}   # measured after this entry
 SEC = section("S003 STAGE C RESULT")
 FLAT = " ".join(SEC.split())
 
@@ -63,12 +61,14 @@ def bpb(g, tag):
 
 
 @pytest.fixture(scope="module")
-def V():
+def V(tmp_path_factory):
     """Every number the entry states, computed from the recorded values, measured_hours.tsv, the hours report and
     E3 results.json, formatted as the entry writes it (fmt)."""
-    runs, _ = H.load()
+    tsv = tmp_path_factory.mktemp("tsv") / "m.tsv"             # measured_hours.tsv as of this entry
+    tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] in SEED_RUNS)))
+    runs, _ = H.load(str(tsv))
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(P, r_b=2)
+        r = H.report(P, str(tsv), r_b=2)
     t, c, f = r["tally"], r["cap"], (lambda x, n=3: f"{x:.{n}f}")
     c250 = {g: bpb(g, "b250M") for g in G}
     best = min(v[1] for v in c250.values())
@@ -222,12 +222,12 @@ def test_seed_configs_are_their_base_plus_the_registered_keys(seed):
 
 def test_every_number_in_the_entry_is_pinned(V):
     exp = {f"{x:.5f}" for vals in STAGE_C.values() for x in vals[:2]} | {f"{x:.5f}" for x in bpb("1", "b250M")}
-    exp |= set(V["fmt"].values()) | {"0.5"} | {f"{e}e-3" for e in G.values()} | {"101", "102", "112", str(len(M.MUTANTS))}
+    exp |= set(V["fmt"].values()) | {"0.5"} | {f"{e}e-3" for e in G.values()} | {"101", "102", "112", str(WHOLE)}
     exp |= {str(PASSED[0]), str(PASSED[1])}
     exp |= {f"{x:,}" for x in [at for _, at in e2plan.SIZES["5m"]["branches"]] + [L.STEPS]}
     exp |= set(re.findall(r"\d+\.\d+", "\n".join(hours_rows(V["runs"]) + cap_rows(V))))
     hexes = {L.sha256(p)[:16] for p in L.all_configs()} | {L.sha256(PLAN)[:16], "03ec0d236cc72a36"}
-    hexes |= set(re.findall(r"sha256 ([0-9a-f]{16})\.\.\. and ([0-9a-f]{16})", open(H.TSV).read())[0])
+    hexes |= set(TSV_SHA)
     text = re.sub(r"\b[a-z]\w*_[\w.<>]*", " ", SEC)        # run names, file names, config keys
     found = re.findall(r"\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*\d)[0-9a-f]{16}\b", text)
     assert len(found) == 16 and set(found) <= hexes, set(found) - hexes
@@ -245,5 +245,5 @@ def test_every_number_in_the_entry_is_pinned(V):
                    " S003_adamw 2)", "{0.5, 1, 2}", "at most 2 as e2pick", "1% guard", "first 16 hex", "Its 15 lines",
                    f"tests {PASSED[1]} passed ({PASSED[0]} before", "smoke, 30; the new file, 9)", "82 configs, the seed",
                    f"{len(M.MUTANTS_S003C)} new mutants", f"{len(M.MUTANTS_S003C)} of {len(M.MUTANTS_S003C)} killed; the "
-                   f"whole file {len(M.MUTANTS)} of {len(M.MUTANTS)} killed", "56 measured runs", "34 queued slots"):
+                   f"whole file {WHOLE} of {WHOLE} killed", "56 measured runs", "34 queued slots"):
         assert phrase in FLAT, phrase

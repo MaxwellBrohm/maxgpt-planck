@@ -55,16 +55,18 @@ def test_queue_parse_is_lock_held_to_status_and_skips_a_running_run():
 
 STAGE_B = {f"s003_adamw_e3_r{r}_{t}" for r in ("0.5", "2", "4", "8") for t in ("trunk", "b62M", "b125M", "b250M")}
 STAGE_C = {f"s003_adamw_e{e}_r2_{t}" for e in ("1.5", "6") for t in ("trunk", "b62M", "b125M", "b250M")}
+SEEDS1 = {ln.split()[1] for ln in open(os.path.join(L.HERE, "plans", "stage1_seeds.txt")) if ln.startswith("train ")}
 
 
 def test_measured_file_reproduces_the_logged_lock_hours():
     """measured_hours.tsv against SCREENS.txt STAGE 1 SELECTION A RESULT: every lock figure of its table, the
     total 5.483 h and the per-screen sums; its hours column agrees with its own start and end. Since the S003 STAGE
-    B RESULT regeneration it also holds stage B's 16 runs, and since S003 STAGE C RESULT stage C's 8 (their figures:
-    test_screens_s003_stage_c.py, test_screens_stage1_seeds.py)."""
+    B RESULT regeneration it also holds stage B's 16 runs, since S003 STAGE C RESULT stage C's 8, and since STAGE 1
+    SEEDS DONE the 12 seed set runs (their figures: test_screens_s003_stage_c.py, test_screens_stage1_seeds.py,
+    test_screens_stage2_launch.py)."""
     sec = section("experiments/SCREENS.txt", "STAGE 1 SELECTION A RESULT")
     table = {m[1]: float(m[2]) for m in re.finditer(r"(s00\d_[a-z]+_[^\s|]+)\s+(\d\.\d{3}) (\d\.\d{3})\s+\d+k", sec)}
-    assert len(table) == 32 and len(RUNS) == 56 and set(RUNS) - set(table) == STAGE_B | STAGE_C
+    assert len(table) == 32 and len(RUNS) == 68 and len(SEEDS1) == 12 and set(RUNS) - set(table) == STAGE_B | STAGE_C | SEEDS1
     sel = {n: RUNS[n] for n in table}
     assert all(round(sel[n], 3) == pytest.approx(v, abs=1e-9) for n, v in table.items())
     assert round(sum(sel.values()), 3) == 5.483 and "Total 5.483 GPU hours measured" in sec
@@ -90,10 +92,12 @@ def test_a_measured_run_counts_once():
     t = H.tally(P, at_est)
     assert sum(at_est.values()) + sum(t["queued"].values()) == pytest.approx(sum(e for _, e in H.registered(P, at_est).values()))
     t = H.tally(P, RUNS)
-    assert t["extra"] == {} and len(t["seen"]) == 56 and t["n_registered"] == 90 and sum(t["n_queued"].values()) == 34
-    one = H.tally(P, {**RUNS, "s002_novres_g1_s101": 0.3})          # a seed run at its g pick: one slot leaves
-    assert sum(one["n_queued"].values()) == 33 and one["extra"] == {}
-    assert sum(one["queued"].values()) == pytest.approx(sum(t["queued"].values()) - F)
+    assert t["extra"] == {} and len(t["seen"]) == 68 and t["n_registered"] == 90 and sum(t["n_queued"].values()) == 22
+    one = H.tally(P, {**RUNS, "s007_smear_g1_s101": 0.3})           # a seed run at its g pick: one slot leaves
+    assert sum(one["n_queued"].values()) == 21 and one["extra"] == {}
+    assert sum(one["queued"].values()) == pytest.approx(sum(t["queued"].values()) - F * 253_691 / 247_073)
+    again = H.tally(P, {**RUNS, "s002_novres_g1_s101": 0.3})         # a measured seed run re-measured: no slot left
+    assert again["queued"] == t["queued"] and again["extra"] == {}
     ext = H.tally(P, {**RUNS, "s001_nogate_g4_s1": 0.3, "s003_adamw_e3_r16_trunk": 0.2})   # extensions: on top
     assert set(ext["extra"]) == {"s001_nogate_g4_s1", "s003_adamw_e3_r16_trunk"}
     assert H.tally(P, {**RUNS, "s004_canonac_g0.25_s1": 0.4})["queued"] == t["queued"]   # takes no stage 2 slot
@@ -134,25 +138,27 @@ def test_s003_search_arm_is_the_measured_stage_a_mean():
 
 
 def stage2_by_hand(other: bool) -> float:
-    """Measured stage 1 selection A, S003 stage B and stage C + every registered run not yet run (the stage 1 seed
-    sets, stage 2), from the raw figures (no module call)."""
+    """Measured stage 1 selection A, S003 stages B and C and the stage 1 seed sets + every registered run not yet run
+    (stage 2: 12 g-checks, 8 arm seed runs, S005's own BASE x 2), from the raw figures (no module call)."""
     base, fac = 253_691, {"canonac": 184_569, "own": 192_092, "forget": 85_113, "mtp": 215_563, "smear": 247_073}
-    queued = (2 + 2 + 6 + 2) * F + F * base * (5 / fac["canonac"] + 2 / fac["own"] + 5 / fac["forget"] +
+    queued = F * base * (5 / fac["canonac"] + 2 / fac["own"] + 5 / fac["forget"] +
                                                5 / fac["mtp"] + 5 / fac["smear"])
-    # stage A, stage B (5,838 s of lock), stage C (2,924 s of lock)
-    return 5.4831 + 1.62167 + 0.81222 + queued + (2.011 + 0.109 if other else 0.0)
+    # stage A, stage B (5,838 s of lock), stage C (2,924 s of lock), the seed sets (12,637 s of lock)
+    return 5.4831 + 1.62167 + 0.81222 + 12_637 / 3600 + queued + (2.011 + 0.109 if other else 0.0)
 
 
-def test_stage_2_cap_check_with_stage_1_seeds_and_stage_c(capsys, tmp_path):
+def test_stage_2_cap_check_after_the_stage_1_seed_sets(capsys, tmp_path):
     """(c): the gate and smoke hours count (the conservative reading); the old double count printed 25.92 h.
-    Numbers as of SCREENS.txt S003 STAGE C RESULT (stage C measured, the stage 1 seed sets and stage 2 queued)."""
+    Numbers as of SCREENS.txt STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK (stage 1 measured, stage 2 queued): one
+    queued S007 extension (0.321 h) still fits; one S004 extension (0.429 h) passes 25 h and cuts S006 first."""
     r = H.report(P)
     out = capsys.readouterr().out
     assert r["cap"]["total_before"] == pytest.approx(stage2_by_hand(True), abs=2e-4) and r["cap"]["cut"] == []
     assert r["narrow"]["total_before"] == pytest.approx(stage2_by_hand(False), abs=2e-4)
-    assert "= 24.856 h against 25 h: fits, nothing cut; headroom 0.144 h" in out
-    tsv = tmp_path / "m.tsv"                                        # one queued S003 stage B extension: over 25 h
-    tsv.write_text(open(H.TSV).read() + "run\ts003_adamw_e3_r16_trunk\t0.21667\t2026-10-06 10:00:00\t"
-                   "2026-10-06 10:13:00\tfixture\n")
-    r = H.report(P, str(tsv))
-    assert r["cap"]["cut"] == ["S006"] and r["cap"]["fits"]
+    assert "= 24.617 h against 25 h: fits, nothing cut; headroom 0.383 h" in out
+    for ext, sec, cut in (("s007_smear_g4_s1", 1155, []), ("s004_canonac_g4_s1", 1546, ["S006"])):  # 0.321 h, 0.429 h
+        tsv = tmp_path / f"{ext}.tsv"
+        tsv.write_text(open(H.TSV).read() + f"run\t{ext}\t{sec / 3600:.5f}\t2026-10-06 10:00:00\t2026-10-06 10:"
+                       f"{sec // 60:02d}:{sec % 60:02d}\tfixture\n")
+        r = H.report(P, str(tsv))
+        assert r["cap"]["cut"] == cut and r["cap"]["fits"] and ext in r["tally"]["extra"], ext
