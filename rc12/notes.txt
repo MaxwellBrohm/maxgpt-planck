@@ -3142,3 +3142,15 @@ NOT DONE: the runs; verify_dev_runs C1-C5 and the md5 pull; dev_extras14.py's EX
   (Saturday, with a test; Base plain only); s12's text (P-145's not-run line, P-144 and cRia rows) before the lock.
 FILES: rc12/pins.json, rc12/engines.json, rc12/test_pins_engines.py (new; 14 of 14 mutants killed, scratch),
   rc12/notes.txt.
+
+STEP 13a (2026-10-07, Claude; no run). minimind-3 ADDED as a prereg s12 extra on Max's word. Asked "minimind-3 is a
+newer small chat model that was never put to you as an RC-12 comparison model ... Want it in the comparison set before
+the lock?", Max answered, 2026-10-07: "yea add minimind-3 if you think its worth it". Claude's call: worth it. It is the
+tiny chat project reviewers are most likely to name (research/NOVELTY_2026-10.md s6.3: about 63k repo stars, ranked
+first of the sub-150M models to add), Apache-2.0, 63,912,192 parameters, standard Qwen3ForCausalLM (pins.json,
+revision f92512d4). Recorded before any minimind-3 run. Caveats reported beside its scores, not used to exclude it:
+its training data are mostly Chinese while RC-12 is English, and it ships float16 (the panel's only float16 model).
+Owed before its dev runs (Saturday, with STEP 13's extras): s12's extras text gains the row before the lock; its own
+engine parity run (families are per recipe, as Vertex and Veyra2 each got one; NOT the Qwen3 family by architecture
+alone); an engines.json entry at the shipped float16 unless parity fails there; a pins.json entry moved out of
+"skipped"; dev_extras14.py's list widened with a test. Supra2-Medium-Instruct stays out (decision 5 (b), Max's ruling).
