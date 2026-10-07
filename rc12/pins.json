@@ -3,7 +3,10 @@
  "skipped": {
   "ReactiveAI/RxT-Alpha-Nano": "licence other (raml-v1.0, non-commercial), gated (click-through); item 14: skip unless Max accepts it, and he did not",
   "ReactiveAI/RxT-Alpha-Micro-Supervised": "same as RxT-Alpha-Nano (raml-v1.0, gated)",
-  "BananaMind/BananaMind-2-Pro-Preview-Chat": "optional in research/NOVELTY_2026-10.md s3 and not in item 14's list; not added"
+  "BananaMind/BananaMind-2-Pro-Preview-Chat": "optional in research/NOVELTY_2026-10.md s3 and not in item 14's list; not added",
+  "HuggingFaceTB/smollm2-135M-SFT-Only": "P-145 (prereg s12 extras; rc12/notes.txt STEP 13): no licence at revision 79528469cd11749bac3e8e9200fd9c192fbd8979 (read 2026-10-06: card YAML has no license field, the HF API lists no license tag, no LICENSE file, the README names none; SmolLM2-135M-Instruct is apache-2.0 but this repo states nothing). Not added under the permissive-licence rule (decision 5 (b) records MiniMind2-Small as 'no licence' too); prereg s12 lists it 'not run' with this reason unless Max accepts it",
+  "jingyaogong/minimind-3": "Apache-2.0, Qwen3ForCausalLM, float16, revision f92512d4cd6142fa9acc0d6022375049a8974bf6 (read 2026-10-06); not added before Max decides (rc12/notes.txt STEP 13: not in prereg s12's list, no family parity verdict)",
+  "SupraLabs/Supra2-Medium-Instruct": "Apache-2.0, Qwen3ForCausalLM, float32, ctx 1,024, revision 7e22157fd978e2775f3591e4527fa591a93e2393 (read 2026-10-06); not added: Max ruled decision 5 (b) on 2026-10-04 with it on the known-unscored list (rc12/notes.txt STEP 13)"
  },
  "models": {
   "veyra-ai/Veyra2-Blueberry-5M-Instruct": {
@@ -195,6 +198,70 @@
    "ctx": 4096,
    "checkpoint_dtype": "float32",
    "chat_template": "chat_template.jinja at this revision"
+  },
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct-Curriculum": {
+   "step": "P-144 (prereg s12 extras; research/CUTS_AUDIT_2026-10.md step 2; rc12/notes.txt STEP 13)",
+   "revision": "c3ffb64f7d271dd1035052890083036e6629517b",
+   "license": "other (falcon-llm-license)",
+   "license_evidence": "card YAML license: other, license_name: falcon-llm-license, license_link https://falconllm.tii.ae/falcon-terms-and-conditions.html; card 'License: Falcon-LLM License'; no LICENSE file. The linked TII Falcon License (read 2026-10-06): Apache-2.0-based, perpetual royalty-free grant, commercial use allowed, not gated, plus a 4-item Acceptable Use Policy (no unlawful use, no harm to minors, no harmful disinformation, no harassment) and a publication statement for derivative works. The same licence as the core panel's Falcon-H1-Tiny-90M-Instruct (revision e6389502)",
+   "created": "2026-01-12",
+   "last_modified": "2026-01-15",
+   "params": 91131072,
+   "weights": {"file": "model.safetensors", "dtype": "BF16 (HF API safetensors metadata)", "bytes": 182304120,
+    "sha256": "ca7b5121b0639b928c0784e5acee0c577225589a801f9b43d301b573e93b94d4"},
+   "architecture": "FalconH1ForCausalLM",
+   "custom_code": false,
+   "ctx": 262144,
+   "checkpoint_dtype": "bfloat16",
+   "chat_template": "chat_template.jinja at this revision (byte-identical to the Instruct's)"
+  },
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct-pre-DPO": {
+   "step": "P-144 (prereg s12 extras; research/CUTS_AUDIT_2026-10.md step 2; rc12/notes.txt STEP 13)",
+   "revision": "6ca0e38542fb30eb5b7e9cc98546c367206e7352",
+   "license": "other (falcon-llm-license)",
+   "license_evidence": "as Falcon-H1-Tiny-90M-Instruct-Curriculum (same card YAML and link)",
+   "created": "2026-01-12",
+   "last_modified": "2026-01-15",
+   "params": 91131072,
+   "weights": {"file": "model.safetensors", "dtype": "BF16 (HF API safetensors metadata)", "bytes": 182304120,
+    "sha256": "24031c8e4180d5e554cab814391757acc7e930dd0ea057f0952bc19f182a52c7"},
+   "architecture": "FalconH1ForCausalLM",
+   "custom_code": false,
+   "ctx": 262144,
+   "checkpoint_dtype": "bfloat16",
+   "chat_template": "chat_template.jinja at this revision (its own, not the Instruct's: it writes the BOS text and stray spaces between turns; used as shipped)"
+  },
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct-Curriculum-pre-DPO": {
+   "step": "P-144 (prereg s12 extras; research/CUTS_AUDIT_2026-10.md step 2; rc12/notes.txt STEP 13)",
+   "revision": "008dc03d2adc558ffa899aa6929bd2d6ecbdb896",
+   "license": "other (falcon-llm-license)",
+   "license_evidence": "as Falcon-H1-Tiny-90M-Instruct-Curriculum (same card YAML and link)",
+   "created": "2026-01-12",
+   "last_modified": "2026-01-15",
+   "params": 91131072,
+   "weights": {"file": "model.safetensors", "dtype": "BF16 (HF API safetensors metadata)", "bytes": 182304120,
+    "sha256": "ecf30d1ed9dc9edbbc99b39821c4116adac5b0d17963f0bc3d83794f5305fee8"},
+   "architecture": "FalconH1ForCausalLM",
+   "custom_code": false,
+   "ctx": 262144,
+   "checkpoint_dtype": "bfloat16",
+   "chat_template": "chat_template.jinja at this revision (the pre-DPO one, as Falcon-H1-Tiny-90M-Instruct-pre-DPO's; used as shipped)"
+  },
+  "tiiuae/Falcon-H1-Tiny-90M-Base": {
+   "step": "P-144 (prereg s12 extras; research/CUTS_AUDIT_2026-10.md step 2; rc12/notes.txt STEP 13)",
+   "revision": "7994372e93b62822ae25f8bfb19f653649cea3a3",
+   "license": "other (falcon-llm-license)",
+   "license_evidence": "as Falcon-H1-Tiny-90M-Instruct-Curriculum (same card YAML and link)",
+   "created": "2026-01-12",
+   "last_modified": "2026-01-15",
+   "params": 91131072,
+   "weights": {"file": "model.safetensors", "dtype": "BF16 (HF API safetensors metadata)", "bytes": 182304120,
+    "sha256": "ee1d547c2d78df42a52afd55b23459301ca21126851b82e0900f1e313dbcf5ef"},
+   "architecture": "FalconH1ForCausalLM",
+   "custom_code": false,
+   "ctx": 262144,
+   "checkpoint_dtype": "bfloat16",
+   "chat_template": "none (no chat_template.jinja, none in tokenizer_config.json; its vocabulary lacks <|im_start|> and <|im_end|>): the plain render only"
   }
  }
 }

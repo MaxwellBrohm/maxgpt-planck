@@ -3078,3 +3078,67 @@ CHECK ORDER (verify12/check_order.sh, s12r's order, each step alone, 06:15 to 07
   passed. After the prereg edit: test_oodh_wording 0 failures, mutation_oodh_wording 44 / 44.
 FILES (this entry): rc12/validate_machinery.py (c_levelr), rc12/mutants_e2e.py (#128-#131), rc12/logs/* (re-run),
   prereg s9 and s19, PLAN.md's Level R odds line, rc12/notes.txt. Committed in one commit with every STEP 12 file.
+
+STEP 13 (2026-10-06, 22:30 to about 23:30 EDT; written before any run of the models below): research/CUTS_AUDIT_2026-10.md
+steps 2 and 3 (rows 36 and 99), after Max asked on 2026-10-06 whether other helpful work had been cut as S006 was (his
+words on S006 earlier that day: "if something can be helpful even a little we should give it its proper chance",
+experiments/SCREENS.txt:1836). Prepared, not run: no model loaded
+on the Mac, no GPU used, nothing under sealed/ read; on the PC only reads, plus the P-144 download below.
+P-145 (SmolLM2-135M SFT-only vs Instruct, s12 extras): NOT ADDED. HuggingFaceTB/smollm2-135M-SFT-Only at revision
+  79528469cd11 (HF API, 2026-10-06) states no licence: no license field in the card YAML, no license tag, no LICENSE
+  file, none in the README (SmolLM2-135M-Instruct is apache-2.0). Only permissive licences are added (MiniMind2-Small,
+  whose HF card also states none, is off the panel: not in item 14's list, and decision 5 (b) lists it as known and
+  unscored, "no licence"), so s12 lists it "not run: no licence at the pinned revision" unless Max
+  accepts it (then a pin, an engines entry with SmolLM2-135M-Instruct's family verdict, about 0.5 GPU h).
+P-144 (the Falcon-H1-Tiny-90M checkpoints other than Instruct, REPORT.md step 2(d)): ADDED to pins.json and
+  engines.json: -Instruct-Curriculum (c3ffb64f), -Instruct-pre-DPO (6ca0e385), -Instruct-Curriculum-pre-DPO
+  (008dc03d), -Base (7994372e); each FalconH1ForCausalLM, 91,131,072 parameters, BF16, created 2026-01-12.
+  Licence at each revision: card YAML "license: other", "license_name: falcon-llm-license", linked to TII's terms: the
+  TII Falcon License, Apache-2.0-based, perpetual royalty-free grant, commercial use allowed, not gated, plus a 4-item
+  Acceptable Use Policy (unlawful use, harm to minors, harmful disinformation, harassment) and a publication statement
+  for derivative works. Not Apache-2.0 or MIT; it is the core panel's Falcon-H1-Tiny-90M-Instruct's licence and covers
+  evaluation, so it is counted as permissive here (unlike RxT's non-commercial, gated RAML). If that call is reversed,
+  P-144 is not run and s12 says why.
+  Family verdict (s4: parity per model family; a member takes its family's verdict): Falcon-H1-Tiny-90M-Instruct's,
+  bf16 and fp32 NEAR_TIE (STEP 9b). Read on the PC 2026-10-06 (CPU, CUDA hidden, configs and tokenizers, no model):
+  configs equal the Instruct's but for embedding_multiplier (Curriculum and Curriculum-pre-DPO 0.0752, Base 0.0815,
+  Instruct 0.1108; read alike by vLLM 0.30 falcon_h1.py:432 and transformers 5.17 modeling_falcon_h1.py:1032) and, in
+  the pre-DPO pair and Base, missing mlp_expansion_factor and attn_layer_indices, which neither engine reads (grep).
+  Tokenizers, 32,768 tokens: Curriculum's byte-identical to the Instruct's; the pre-DPO pair names <think> / </think>
+  as <thinking> / </thinking>; Base also lacks <|im_start|>, <|im_end|> and <|system|> and has no bos token. Templates:
+  Curriculum's is the Instruct's; the pre-DPO pair ships its own (BOS text and stray spaces between turns), used as
+  shipped (s12: each model in its own chat format); Base ships none, so it runs the PLAIN render only, recorded here;
+  the s12 clause reads the template render, so Base is a plain diagnostic the clause never reads. Stops: eos 11,
+  <|im_end|> 228 (not Base), <|eot_id|> 16 (hf_responder's list); generation_config eos [228, 11] or 11, inside it.
+  DOWNLOAD (PC 22:47, ~/planck/logs/rc12x_dl.log): 186 GB free before, 185 after; branch main into ~/planck/hf;
+  refs/main == the pin and sha256(model.safetensors) == the hub's LFS sha256 for all four.
+minimind-3 and Supra2-Medium-Instruct: NOT ADDED; for Max on Saturday (audit S12). Both Apache-2.0, Qwen3ForCausalLM
+  (minimind-3 f92512d4, float16; Supra2 7e22157f, float32, max_position_embeddings 1,024). (1) s15 fixes the baseline
+  panel (changes only through s16, s17 or a recorded deviation) and s12's extras list is closed; Supra2 is on decision
+  5's known-unscored list, ruled (b) by Max on 2026-10-04, so adding it reverses his ruling, and minimind-3 was never
+  put to him. (2) Neither has a family verdict: families here are per recipe (Vertex and the Veyra2
+  Blueberry pair are all Qwen3ForCausalLM, yet Vertex and Veyra2-Blueberry-5M each have their own parity; likewise the
+  Veyra2 Mango pair and Loom-Spark-3.2, all LlamaForCausalLM), so each needs its own parity run first. (3) Supra2's 1,024-token
+  context is below what RC-12's later turns reach on other tokenizers (Doge about 1,700, cRia about 3,100 tokens by
+  turn 12; not measured on Supra2's), and minimind-3 would be the panel's only float16 model.
+cRia-LM-75M-Instruct, DEVIATION (2026-10-06, before any of its dev runs exists: 0 of 16, its run dir holds parity files
+  only): its per-process cap goes back to the queue's own default, 10,800 s (queue_dev_baselines.sh:32), from the
+  1,950 s that item 14's chain set (CRIA_GO: CR_TIMEOUT=1950, CR_SESSION=60), a chain setting to keep gpu.lock holds
+  near 35 min on a shared GPU, not a prereg rule. Estimate, unmeasured: the 64-conversation smoke (388.4 s plus a
+  274.8 s twin) scaled to 640 gives about 1.8 h per process, 8 processes. If a process still passes 10,800 s, cRia
+  stays "not run" with the measured time. One process holds gpu.lock up to 10,920 s (the cap plus timeout's 120 s
+  kill), longer than a SCREENS queue's 2 h lock wait, so it runs only after the SCREENS chain has ended.
+PLAN: one queue at a time, this commit's rc12/ as ~/planck/dev/rc12_cuts, the panel's queue with its default log,
+  DONE marker, gpu.lock sessions and status file. A launcher (rc12x_extras.sh, written and fake-tested in this step's
+  scratch, not in the repo) waits for the SCREENS chain's last mark with no SCREENS or RC-12 process, then runs A the
+  three siblings (template, plain), B Base (Q_RENDERS=plain), C cRia (queue defaults). P-144's sessions (1,800 s
+  plus one process; the Instruct's took 265 to 408 s under the lock) would keep a SCREENS wait under 2 h; cRia's would
+  not. GPU estimate: A and B, 28 processes, about 2.5 h; C about 14 h, at most about 24 h.
+  BOOT RESUME: boot.d/30_rc12.sh restarts a cut-off queue as "Q_CODE=CODE bash CODE/queue_dev_baselines.sh", without
+  Q_MODELS or Q_RENDERS, so after a power cut it plays the default 13-model list (all 208 runs done) and writes DONE
+  "complete 208 of 208 runs" at once (as the 2026-10-06 06:58 and 10:13 starts in rc12_dev_queue.log did): these
+  extras do not resume by themselves; the launcher is restarted by hand and skips finished runs.
+NOT DONE: the runs; verify_dev_runs C1-C5 and the md5 pull; dev_extras14.py's EXTRAS14 widened to the siblings
+  (Saturday, with a test; Base plain only); s12's text (P-145's not-run line, P-144 and cRia rows) before the lock.
+FILES: rc12/pins.json, rc12/engines.json, rc12/test_pins_engines.py (new; 14 of 14 mutants killed, scratch),
+  rc12/notes.txt.
