@@ -254,3 +254,16 @@ CUT (2026-10-06, SCREENS.txt S006 EXTENSION RESULT / STAGE 2 SEEDS LAUNCH CHECK;
   2 IND runs), leaving 23.895 h. No seed run of this screen runs: P-105's bet stays "not run" in the ledger (ORDER),
   never "failed", and nothing here reads its bpb. Its 4 seed-1 selection runs (1.416 h measured) stay on the PC and
   are never a verdict (C3).
+
+REINSTATED (2026-10-06, SCREENS.txt AMENDMENT S006-REINSTATE; Claude, under Max's delegation): Max asked whether the cut
+  was final, said a bet that may help "even a little" should get its proper chance, and left the decision to Claude.
+  Decision: this screen runs with its full registered design, its seed sets at its pick g 2 on seeds 101 and 102 (k 2,
+  SIA, paired with the shared BASE) and C6's IND-only runs at g 1 on the same seeds (never in a bpb verdict), by an
+  amendment raising the batch's cap from 25 h to 27 h, decided before any seed run of this screen exists and before
+  any stage 2 verdict is read. Why: Q2's induction onset (P-105's win condition, WHY above) is measured by no other
+  screen, and induction is the copying mechanism behind multi-turn recall; the 4 runs cost 1.471 h (0.368 h each).
+  Cap check at 27 h: 25.366 h, nothing cut, 1.634 h of headroom. The runs come after the other stage 2 seed sets, not
+  seed-major, because stage2_seeds was already running: plans/stage2_s006_seeds (s006_mtp_g2_s101, s006_mtp_g1_s101,
+  s006_mtp_g2_s102, s006_mtp_g1_s102), which experiments/screens/s006_waiter.sh starts once stage2_seeds ends cleanly
+  (the waiter is installed on the PC after the commit).
+  The CUT block above stays as the record of ORDER's rule at 25 h.

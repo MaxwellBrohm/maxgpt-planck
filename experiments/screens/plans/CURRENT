@@ -9,5 +9,8 @@
 # stage2_seeds (ORDER 2's seed sets, S006 cut by ORDER's cap rule: SCREENS.txt S006 EXTENSION RESULT / STAGE 2
 # SEEDS LAUNCH CHECK) waits for SCREENS_S006_EXTENSION_DONE and stops at SCREENS_STAGE_2_SEEDS_DONE (the stage 2
 # verdicts need a person). Its BASE lines are skipped by the queue (scored in stage 1).
+# stage2_s006_seeds (S006's seed sets at g 2 with C6's IND runs at g 1, after AMENDMENT S006-REINSTATE in SCREENS.txt)
+# waits for SCREENS_STAGE_2_SEEDS_DONE and stops at SCREENS_STAGE_2_S006_SEEDS_DONE. It runs from its own bundle,
+# planck-kit/planck_s006.bundle, started by experiments/screens/s006_waiter.sh after stage2_seeds ends cleanly.
 # Seed plans come from screens.py seeds.
-stage2_seeds
+stage2_s006_seeds

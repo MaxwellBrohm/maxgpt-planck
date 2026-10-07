@@ -191,6 +191,8 @@ from mutants_s2select import MUTANTS_S2SELECT  # noqa: E402  (STAGE 2 SELECTION 
 MUTANTS += MUTANTS_S2SELECT
 from mutants_s2seeds import MUTANTS_S2SEEDS  # noqa: E402  (S006 EXTENSION RESULT / STAGE 2 SEEDS LAUNCH CHECK)
 MUTANTS += MUTANTS_S2SEEDS
+from mutants_s006r import MUTANTS_S006R  # noqa: E402  (AMENDMENT S006-REINSTATE: the waiter, the reinstated state)
+MUTANTS += MUTANTS_S006R
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")

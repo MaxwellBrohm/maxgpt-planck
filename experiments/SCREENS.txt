@@ -1826,3 +1826,138 @@ runs at seed 1: read for C3 picks only, never as verdicts (C3, E3 change 3).
     for P-105: "not run" (cut by ORDER's cap rule); no step named in this file writes it. (3) Whether the autopilot's
     W6 watches the seed sets (above). (4) After the seeds' mark: the stage 2 verdicts (analyze.py verdicts with
     --earlier and the stage 1 results.json files; C4's pooled SIA check then spans S002, S004, S005 and S007).
+
+AMENDMENT S006-REINSTATE (2026-10-06 21:45 EDT, Claude, under Max's delegation quoted below; Mac CPU, no model; the PC
+read only (marks, the queue log's tail and start lines, processes, the kit's bundle head) except a dry run of the waiter
+below in a scratch directory; nothing committed, no mark, no queue started or stopped, measured_hours.tsv not touched.
+Decided before any S006 seed run exists and before any stage 2 verdict is read: stage2_seeds runs from d21df3d (its
+start line 20:38:01), and none of its results was read.)
+  Max (the PI), 2026-10-06, verbatim: "if it was cut does that mean you are going to add it back later or its just
+    gone? because if something can be helpful even a little we should give it its proper chance, maybe its finally
+    the big breakthrough that makes this all work! obv the final decision is by you and if you dont think theres
+    anything special with it than thats fine."
+  DECISION (Claude, under that delegation): S006 is reinstated with its full registered design: its seed sets at its
+    pick g 2 (S006 EXTENSION RESULT / STAGE 2 SEEDS LAUNCH CHECK: interior, decided) on seeds 101 and 102 (C4: k 2,
+    class SIA), paired with the shared BASE runs base_s101 and base_s102, and C6's matched-LR IND-only runs at g 1 on
+    the same seeds, never in a bpb verdict. By this amendment the batch's cap is 27 h, not 25 h. The cap's reading is
+    unchanged: "measured hours so far" still counts the C1-a gate and the eager smokes (2.120 h; STAGE 2 READINESS (c),
+    the conservative reading), the queued side is still GPU HOURS' estimate, and ORDER's cut order (S006, S003, S007,
+    S002) and never-cut list stand; only the number moves.
+  WHY: (1) P-105's registered win condition is earlier induction (LEDGER P-105: "earlier induction and better binding
+    at 5M"; S006 notes Q2), which C6 reads only at matched LR, and no other screen of this batch measures what a t+2
+    auxiliary objective does to induction (S007 reads onset for another change, P-024's smeared keys). (2) Induction
+    is the in-context copying mechanism behind multi-turn recall (S006 notes WHY; loop.md 4.2). (3) The cost is about
+    1.5 GPU h: 4 runs at 0.368 h, 1.471 h. (4) The GPU is otherwise idle until Saturday (the decision's premise as
+    given to this step, not checked here). The cut was ORDER's rule applied as written at 25 h, and it hinged on the
+    2.120 h of gate and smoke hours: without them the same input totals 23.246 h. That entry stays as committed; this
+    amendment changes the cap, not its reading.
+  CAP CHECK AT 27 H (ORDER: "before each new seed set", here S006's seed set 101; screens.py hours on measured_hours.tsv
+  as committed at d21df3d (81 runs, the last ending 19:52:00; not regenerated here, so stage2_seeds' runs count at
+  their estimates), then S006's 2 IND runs added through analyze_lib.cap_cut with cap 27):
+    Measured 17.587 h of runs + 2.120 h other = 19.707 h; queued 10 of 90 registered runs 4.923 h (stage2_seeds' 8
+    runs 4.188 h, S006's 2 seed runs 0.735 h) + S006's 2 IND runs 0.735 h = 5.658 h; total 25.366 h <= 27 h: nothing
+    cut, 1.634 h of headroom (runs only, reported: 23.246 h). The same input at 25 h cuts S006 (23.895 h), as recorded.
+  REINSTATED BY AMENDMENT S006-REINSTATE: S006 (4 runs, 1.471 h: s006_mtp_g2_s101, s006_mtp_g1_s101, s006_mtp_g2_s102,
+    s006_mtp_g1_s102). P-105 is no longer "not run" in this batch. LEDGER.md's P-105 row carries no run status (no
+    step wrote "not run" there), so nothing in it is reverted, and STILL NEEDS (2) of S006 EXTENSION RESULT / STAGE 2
+    SEEDS LAUNCH CHECK falls away.
+  ORDER CHANGE: S006 runs after the other stage 2 seed sets, not inside ORDER 2's seed-major order. stage2_seeds was
+    launched from a committed clone before this decision and the queue reads its plan once, at start, so S006 cannot
+    join it. What seed-major order protects still holds: a stopped queue leaves whole seed sets (stage2_seeds' sets
+    are whole before S006 starts, and S006's plan finishes seed 101's verdict run and IND run before seed 102's). The
+    BASE pairing is per seed and per commit, not per time (C4: at seed s every arm reads BASE's token stream): git diff
+    93bc10b..d21df3d is empty under harness/, data_prep/, tokenizer/, corpus/ and experiments/E2_lr_transfer, and this
+    step changes nothing there (the commit holding this entry must keep it so).
+  INSIDE THE PLANS: the queue does not evaluate the cap, so this check stands for the checks before S006's seed sets 101
+    and 102. Before 101 it would cut S006 only if stage2_seeds' 8 runs held the lock more than 1.634 h over their
+    4.188 h estimate (39.0%); before 102, only if the 10 runs before it held it more than 1.634 h over their 4.923 h
+    estimate (33.2%). S006 is still first in the cut order: a cut before 102 would leave it seed 101 only
+    ("underpowered"). Read at 21:23 (the PC queue log's tail): s005_base_s101 held the lock from "gpu.lock held"
+    20:38:03 to the next "waiting for gpu.lock" 21:01:38 (0.393 h; estimate 0.413 h), and s005_forget_g1_s101 was
+    training.
+  PLAN experiments/screens/plans/stage2_s006_seeds.txt (sha256 57ac8f3e5911720b...; written by screens.plan), its 7
+  lines:
+      # SCREENS stage 2 (ORDER 2), AMENDMENT S006-REINSTATE (SCREENS.txt): S006 mtp seed sets at its g 2 pick, seed 101
+        then 102, each seed's C6 matched-LR IND-only run at g 1 after its verdict run; after the other stage 2 seed sets
+        (screens.py). train = screens check, preflight, train, score   [one line in the file]
+      wait_mark SCREENS SCREENS STAGE 2 SEEDS DONE
+      train s006_mtp_g2_s101
+      train s006_mtp_g1_s101
+      train s006_mtp_g2_s102
+      train s006_mtp_g1_s102
+      mark SCREENS STAGE 2 S006 SEEDS DONE
+    (1) The 4 configs are screens.py seeds --stage 2 output with --pick S006.mtp=2 beside the other 3 picks, byte for
+    byte (run in a scratch export of the index, whose own plan puts the same 4 runs in this order, each pair after its
+    seed's S007 run); screens.py check: 4 ok, 93 ok over every config. Each differs from base_s101 or base_s102 only in
+    train.mtp 1, train.mtp_weight 1.0 and, at g 2, the three LRs, 2 x LR5 = 0.006 each (besides name and out_dir), and
+    from S006's seed-1 g-check config at the same g only in name, out_dir and seed. (2) The wait line is stage2_seeds'
+    end mark; the plan ends at its own mark with nothing after it (the stage 2 verdicts need a person). Estimate
+    1.471 h.
+  plans/CURRENT = stage2_s006_seeds (edited here; a comment names the plan's two marks and its bundle). The running
+    queue does not reread it: queue_screens.sh reads its --plan file once, launch_screens.sh reads CURRENT in its own
+    clone when it launches, and boot.d/40_screens.sh resumes the plan its start line names, never CURRENT.
+  STARTING IT UNATTENDED: experiments/screens/s006_waiter.sh (new), started on the PC by pcdetach.sh. Every 5 min it
+    reads ~/planck/runs/SCREENS (read only) and launches only when marks/SCREENS_STAGE_2_SEEDS_DONE exists, pgrep finds
+    no queue_screens.sh or launch_screens.sh, and the queue log's last "queue start" line is stage2_seeds at d21df3d
+    with its last two lines "MARK SCREENS STAGE 2 SEEDS DONE" and "plan finished: stage2_seeds.txt". It then does what
+    launch_screens.sh does (clone the bundle's main into ~/planck/qcode/<commit12>, read plans/CURRENT there, exec
+    queue_screens.sh on that plan) from its own bundle, planck-kit/planck_s006.bundle, and refuses unless that CURRENT
+    names stage2_s006_seeds. A queue that ended after a 2 h gpu.lock wait (the autopilot relaunches it) or with no end
+    line is held for at most 45 min for a new stage2_seeds start; any other end, another plan or commit in the last
+    start line, ~/planck/STOP or its cancel file make it log why and exit, launching nothing. Never twice: one waiter
+    (flock), a stamp file written before the launch, a stage2_s006_seeds start line ends any later waiter, and the
+    queue's own queue.lock refuses a second queue. A reboot kills it: boot.d/40_screens.sh then resumes a cut
+    stage2_seeds run, and a person starts the waiter again (it waits for that queue's clean end) or launches S006 by
+    hand. Log: ~/planck/logs/s006_waiter.log.
+  WHY ITS OWN BUNDLE: the autopilot (W6 since 20:38:19) relaunches stage2_seeds after a 2 h gpu.lock wait only if
+    planck.bundle's main is d21df3d or a descendant that changes nothing under its RUN_PATHS with plans/CURRENT naming
+    stage2_seeds (ap_common.equivalent); the commit holding this entry changes plans/ and S006's configs, so a new
+    planck.bundle would turn such a relaunch into STOP_NEEDS_CLAUDE. planck.bundle stays at d21df3d.
+  THE AUTOPILOT'S W6, read from its code (screens_autopilot.py tick, ap_launch.watch, ap_source.classify): classify
+    returns "done" whenever SCREENS_STAGE_2_SEEDS_DONE is among the marks, before it looks at running queues or start
+    lines, so the first tick after the mark moves W6 to DONE and the loop exits; it does not watch stage2_s006_seeds and
+    does nothing when that queue starts (in DONE, a restart by start.sh exits at its first tick). Nothing relaunches
+    S006's queue after a 2 h gpu.lock wait: that is a person's. After a reboot, boot.d/40_screens.sh resumes it from its
+    start line's plan and clone, as it does any SCREENS queue cut off mid-run.
+  Tests (Mac CPU, ~/.venvs/planck, on an export of the index plus this step's files): experiments/screens/tests 523
+    passed (460 before: the 2 new files, 32 and 19; the 4 new configs through check, full-size resolution and the
+    2-step CPU smoke, 12). New: test_s006_waiter.py (the waiter's decision on fixture logs: a clean end, a GAP run
+    inside a clean end, the mark with the queue still running, a kill, a 2 h lock wait, a run failure, STOP logged and
+    present, a refused relaunch, a clean end with no mark file or no MARK line, a line after the end, another plan or
+    commit, a double start by stamp and by start line, the cancel file, pgrep failing, a NUL tail; its loop on a fixture
+    tree and a fixture bundle whose queue_screens.sh is a stub: one launch from planck_s006.bundle, never
+    planck.bundle, then DONE; a wrong CURRENT or no bundle refused; a held lock; a hold given up after the grace and a
+    hold ended by a relaunch); test_screens_s006_reinstate.py (Max's words, the cap check generated from the data at 27
+    h and at 25 h, the configs byte for byte against screens.py seeds and their keys, the plan, CURRENT, the acceptance
+    refusing 10 bad plans, the notes block, every number in this entry); tests/reinstate_lib.py (s006_seed_configs, the
+    acceptance). Changed: test_screens_configs.py (the config count and CURRENT's sequence accept stage2_s006_seeds only
+    through s006_seed_configs), test_screens_stage2_seeds.py (CURRENT, the config count, S006 seed configs only as
+    that plan's), test_screens_stage1_seeds.py and test_screens_stage2_selection.py (config counts; the selection
+    test's plan sequence). Each changed test watched failing, scratch copies: the 4 files as committed at d21df3d fail
+    on this state (2 tests each), and pass with this step's versions; this step's versions pass on d21df3d's tree (no
+    S006 plan or configs), so what they accept there is unchanged; a valid stray config added, and the plan removed
+    with its configs kept, each fail all 4. mutation_screens.py, scratch copies: 43 new mutants
+    (tests/mutants_s006r.py: 22 on the waiter; 21 on the plan, the configs, CURRENT, the record, the acceptance, the
+    hours file, 5 entry typos and 1 notes typo), 43 of 43 killed; the whole file 273 of 273 killed (2 anchors moved
+    to the new CURRENT: s2e_current_back_to_s006x, s2x_current_back_to_select).
+  DRY RUN ON THE PC (a scratch directory in the WSL home, removed after; fixture queue logs, marks and a fixture bundle
+    whose queue_screens.sh is a stub; never ~/planck/runs, gpu.lock or the kit), the waiter byte for byte this file
+    (sha256 6393fffd95e1076b...) under the PC's own bash, flock, pgrep and git: (A) with a fake queue process running:
+    WAIT; a second waiter exited at the real flock ("another s006_waiter holds"); the clean end written while the fake
+    queue still ran: WAIT; once it ended, one LAUNCH: it cloned the S006 fixture bundle's main (not the planck.bundle
+    fixture's) into qcode/<commit12>, wrote the stamp and exec'd the stub with --code and --plan
+    .../plans/stage2_s006_seeds.txt (the stub ran under the waiter's own pid); a third waiter: DONE, no second launch.
+    (B) a scoring failure stopping the queue: GIVEUP, exit 1. (C) ~/planck/STOP present: GIVEUP. (D) a 2 h lock wait
+    with no relaunch: HOLD, then GIVEUP after the grace (4 s in the dry run). (R) read only, on the real queue with the
+    defaults: running() 1 and WAIT; decide as if nothing ran read the real last start line as stage2_seeds at d21df3d
+    and said HOLD (no end line yet); no s006_waiter file existed in ~/planck/logs.
+  INSTALL (after the commit, from the Mac): a bundle of the commit at planck-kit/planck_s006.bundle (git bundle create
+    <tmp>/planck_s006.bundle HEAD main, copied with scp and pc/local.env's host and key as send_kit.sh does; never
+    send_kit.sh itself, which writes planck.bundle), then pcdetach.sh on the committed s006_waiter.sh.
+  NOT CHANGED: analyze_lib.CAP is still 25.0 in code, so screens.py hours prints its check against 25 h; no code
+    changed here, and a later cap check of this batch (if S006 NOMINATEs: its compute-matched BASE runs, S006 notes
+    DIAGNOSTICS) passes cap 27 to analyze_lib.cap_cut.
+  STILL NEEDS A DECISION: (1) the commit, the bundle and the waiter's start (INSTALL). (2) After
+    SCREENS_STAGE_2_S006_SEEDS_DONE (or a person's launch if the waiter gives up): the stage 2 verdicts (analyze.py
+    verdicts with --earlier and the stage 1 results.json files; C4's pooled SIA check then spans S002, S004, S005,
+    S006 and S007), S006's Q2 onsets at matched LR from its g 1 IND runs (C6), and the measured hours regenerated.

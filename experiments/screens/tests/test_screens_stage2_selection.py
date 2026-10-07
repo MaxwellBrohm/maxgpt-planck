@@ -11,6 +11,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.dirname(HERE), HERE]
 import analyze, analyze_lib as AL, mutation_screens as M, screens, screens_hours as H, screens_lib as L  # noqa: E401,E402
 from test_screens_configs import EXT2, LATER_PLANS, PLAN_SEQUENCE, stage2_seed_configs  # noqa: E402
+from reinstate_lib import REINSTATED_PLANS, s006_seed_configs  # noqa: E402  (AMENDMENT S006-REINSTATE, later)
 from test_screens_s003_stage_c import section  # noqa: E402
 
 P = L.params()
@@ -164,7 +165,7 @@ def test_extension_config_is_s006_at_4_x_lr5(V, capsys):
     assert L.diff(f, b) == {"name", "out_dir", "seed", "train.mtp", "train.mtp_weight", *L.LRK}
     assert [f[k] for k in L.LRK] == pytest.approx([4 * P["lr5"][0]] * 3) and P["lr5"][1] == 1.0 and f["seed"] == 1
     assert screens.main(["check", EXT]) == 0 and capsys.readouterr().out.count("ok      ") == 1
-    assert len(L.all_configs()) == 83 + len(stage2_seed_configs()) and H.slot(EXT) == ("S006", None)
+    assert len(L.all_configs()) == 83 + len(stage2_seed_configs()) + len(s006_seed_configs()) and H.slot(EXT) == ("S006", None)
     v = V["fmt"]
     assert f"s006_mtp_g4_s1.yaml (sha256 {L.sha256(path[0])[:16]}...)" in FLAT and "1 ok (83 ok over every config)" in FLAT
     assert f"4 x LR5 = {v['lr4']} each" in FLAT and f"at its estimate, {v['pS006']} h (S006's smoke factor x{v['fac']})" in FLAT
@@ -219,7 +220,7 @@ def test_plan_waits_on_the_selection_mark_and_runs_only_the_extension(V):
     assert sel[-1] == "mark " + lines[1].split(" ", 2)[2]          # the wait line is stage2_select's own mark
     assert PLAN_SEQUENCE.index("stage2_s006x") == PLAN_SEQUENCE.index("stage2_select") + 1
     cur = [ln.strip() for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
-    seq = PLAN_SEQUENCE + LATER_PLANS
+    seq = PLAN_SEQUENCE + LATER_PLANS + (REINSTATED_PLANS if s006_seed_configs() else [])
     assert len(cur) == 1 and seq.index(cur[0]) >= seq.index("stage2_s006x")
     assert f"stage2_s006x.txt (sha256 {L.sha256(PLAN)[:16]}...; written by screens.plan), its 4 lines:" in FLAT
     assert " ".join(lines[0].split()) + " [one line in the file]" in FLAT

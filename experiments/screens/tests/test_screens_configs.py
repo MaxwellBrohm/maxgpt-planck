@@ -16,6 +16,7 @@ import pytest
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 import screens_lib as L  # noqa: E402
+from reinstate_lib import REINSTATED_PLANS, s006_seed_configs  # noqa: E402
 
 P = L.params()
 CONFIGS = L.all_configs()
@@ -113,8 +114,10 @@ def stage2_seed_configs(plan: str = STAGE2_SEEDS, find=None, check=None, cuts=No
 def test_config_set_is_complete():
     names = sorted(os.path.basename(c)[:-5] for c in CONFIGS)
     s2 = stage2_seed_configs()                          # empty until plans/stage2_seeds.txt exists
-    assert LATER <= set(names) and s2 <= set(names) and len(set(names) - LATER - s2) == 48 and len(names) == 83 + len(s2)
-    names = sorted(set(names) - LATER - s2)
+    s6 = s006_seed_configs()                            # empty until plans/stage2_s006_seeds.txt exists (S006-REINSTATE)
+    assert LATER <= set(names) and s2 | s6 <= set(names) and len(set(names) - LATER - s2 - s6) == 48
+    assert len(names) == 83 + len(s2) + len(s6)
+    names = sorted(set(names) - LATER - s2 - s6)
     for sid, s in L.SCREENS.items():
         for a in s["arms"]:
             if sid != "S003":
@@ -258,6 +261,7 @@ def test_plans_follow_the_registered_order():
         "wait_mark SCREENS SCREENS STAGE 2 SMOKES RECORDED"
     cur = [ln for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
     later = LATER_PLANS if stage2_seed_configs() else []    # stage2_seeds only once its plan exists and checks
+    later = later + (REINSTATED_PLANS if s006_seed_configs() else [])  # stage2_s006_seeds likewise (S006-REINSTATE)
     assert len(cur) == 1 and cur[0].strip() in PLAN_SEQUENCE + later    # ORDER's plans so far, in the order they run
     for r in plan_runs(cur[0].strip()):
         assert len(L.find(r)) == 1

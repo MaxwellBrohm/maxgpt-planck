@@ -15,6 +15,7 @@ from s2select_record import SETS, VALS as VALS12  # noqa: E402
 from s2seeds_record import ENTRY_TIME, EXT_VALS, LOCK, PCSHA, QEND, QSTART, TOKS, TRAIN, WAIT_S  # noqa: E402
 from test_screens_configs import (LATER_PLANS, PLAN_SEQUENCE, recorded_cuts, seeds2_wait,  # noqa: E402
                                   stage2_seed_configs)
+from reinstate_lib import REINSTATED_PLANS, S006_PLAN, s006_seed_configs  # noqa: E402  (AMENDMENT S006-REINSTATE)
 from test_screens_refusals import scratch  # noqa: E402,F401  (the scratch config tree fixture)
 from test_screens_s003_stage_c import section  # noqa: E402
 
@@ -160,7 +161,8 @@ def test_plan_is_the_generators_with_the_cut_and_current_names_it(V, scratch):
     assert lines[-1] == "mark SCREENS STAGE 2 SEEDS DONE" and len(lines) == 13
     assert stage2_seed_configs() == NEW_CFG and PLAN_SEQUENCE[-1] == "stage2_s006x" and LATER_PLANS == ["stage2_seeds"]
     cur = [ln.strip() for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
-    assert cur == ["stage2_seeds"]
+    assert cur == (REINSTATED_PLANS if os.path.exists(S006_PLAN) else ["stage2_seeds"])   # later: AMENDMENT
+    # S006-REINSTATE's plan (s006_seed_configs, which reads the repo's configs, cannot run in this scratch tree)
     v = V["fmt"]
     assert f"stage2_seeds.txt (sha256 {L.sha256(PLAN)[:16]}...; written by screens.py seeds), its 13 lines:" in FLAT
     assert " ".join(lines[0].split()) + " [one line in the file]" in FLAT
@@ -192,8 +194,9 @@ def test_new_configs_differ_from_their_base_only_in_registered_keys(capsys):
         assert L.diff(f, b) == {"name", "out_dir"} | set(reg) and all(f[k] == v for k, v in reg.items()), n
         assert [f[k] for k in L.LRK] == [P["lr5"][0]] * 3 and f["seed"] == int(n[-3:]) and L.check(L.find(n)[0], P) == []
     assert screens.main(["check", *plan_runs()]) == 0 and capsys.readouterr().out.count("ok      ") == 10
-    assert screens.main(["check"]) == 0 and capsys.readouterr().out.count("ok      ") == 89 == len(L.all_configs())
-    assert not [p for p in L.all_configs() if os.path.basename(p).startswith("s006_") and "_s10" in p]
+    s6 = s006_seed_configs()                    # later: AMENDMENT S006-REINSTATE's S006 seed configs, else none
+    assert screens.main(["check"]) == 0 and capsys.readouterr().out.count("ok      ") == 89 + len(s6) == len(L.all_configs())
+    assert {os.path.basename(p)[:-5] for p in L.all_configs() if os.path.basename(p).startswith("s006_") and "_s10" in p} == s6
     assert "10 ok on the plan's runs, 89 ok over every config" in FLAT
 
 
