@@ -221,7 +221,9 @@ def test_seed_configs_are_their_base_plus_the_registered_keys(seed):
     assert f"{L.sha256(L.find(f'base_s{seed}')[0])[:16]} base_s{seed}" in SEC
     from test_screens_configs import EXT2, stage2_seed_configs      # added later: S006's extension, stage2_seeds
     from reinstate_lib import s006_seed_configs                    # and S006's reinstated seed sets
-    assert len(L.all_configs()) == 82 + len(EXT2) + len(stage2_seed_configs()) + len(s006_seed_configs())
+    from basediag_lib import base_diag_configs                     # and AMENDMENT BASE-DIAG's BASE runs
+    assert len(L.all_configs()) == 82 + len(EXT2) + len(stage2_seed_configs()) + len(s006_seed_configs()) + \
+        len(base_diag_configs())
     assert "12 ok (82 ok over every config)" in FLAT
 
 

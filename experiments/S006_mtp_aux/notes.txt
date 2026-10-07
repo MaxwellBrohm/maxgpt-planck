@@ -267,3 +267,10 @@ REINSTATED (2026-10-06, SCREENS.txt AMENDMENT S006-REINSTATE; Claude, under Max'
   s006_mtp_g2_s102, s006_mtp_g1_s102), which experiments/screens/s006_waiter.sh starts once stage2_seeds ends cleanly
   (the waiter is installed on the PC after the commit).
   The CUT block above stays as the record of ORDER's rule at 25 h.
+
+ONSET READING (2026-10-06, SCREENS.txt AMENDMENT BASE-DIAG; decided before any stage 2 onset is read): Q2's onset_half
+  from this screen's g 1 IND-only runs (C6 MATCHED LR) against the shared BASE on seeds 101 and 102 is read with C7:
+  SD_ref = sqrt(2) x sigma_seed, sigma_seed the SD of BASE's onset_half over seeds 101 to 105 (df 4), thr = 2.776 x
+  sigma_seed; EARLIER if -dbar > thr and both d_s < 0, LATER mirrored, else UNRESOLVED, no EQUAL. onset_abs, final
+  IND, HD and SINK stay descriptive. The reading is reported beside the bpb verdict and changes no verdict. "Q2 reads
+  an earlier onset" (METRIC AND DECISION RULE) now means EARLIER here.

@@ -12,6 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.dirname(HERE), HERE]
 import analyze_lib as AL, mutation_screens as M, screens_hours as H, screens_lib as L  # noqa: E401,E402
 from reinstate_lib import END, REINSTATED_PLANS, recorded_reinstated, s006_seed_configs  # noqa: E402
+from basediag_lib import DIAG_PLANS, base_diag_configs  # noqa: E402  (AMENDMENT BASE-DIAG, later)
 from test_screens_configs import P, STAGE2_SEEDS, recorded_cuts  # noqa: E402
 from test_screens_refusals import scratch  # noqa: E402,F401  (the scratch config tree fixture)
 from test_screens_s003_stage_c import section  # noqa: E402
@@ -111,7 +112,8 @@ def test_configs_differ_only_in_registered_keys(V, capsys):
         assert [f[k] for k in L.LRK] == [float(g) * P["lr5"][0]] * 3 and L.check(L.find(r)[0], P) == []
         assert L.diff(f, L.flat(L.resolve(L.find(f"s006_mtp_g{g}_s1")[0]))) == {"name", "out_dir", "seed"}
     assert screens.main(["check", *RUNS]) == 0 and capsys.readouterr().out.count("ok      ") == 4
-    assert screens.main(["check"]) == 0 and capsys.readouterr().out.count("ok      ") == 93 == len(L.all_configs())
+    n = 93 + len(base_diag_configs())          # later: AMENDMENT BASE-DIAG's 3 BASE configs, else none
+    assert screens.main(["check"]) == 0 and capsys.readouterr().out.count("ok      ") == n == len(L.all_configs())
     assert "screens.py check: 4 ok, 93 ok over every config" in FLAT
     assert f"the three LRs, 2 x LR5 = {V['fmt']['lr']} each" in FLAT
 
@@ -124,7 +126,9 @@ def test_plan_current_and_acceptance(V):
     assert " ".join(lines[0].split()) + " [one line in the file]" in FLAT
     assert all("\n      " + ln + "\n" in SEC for ln in lines[1:]) and f"Estimate {V['fmt']['four']} h." in FLAT
     cur = [ln.strip() for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
-    assert cur == REINSTATED_PLANS == ["stage2_s006_seeds"] and s006_seed_configs() == set(RUNS)
+    later = DIAG_PLANS if base_diag_configs() else []       # AMENDMENT BASE-DIAG moved CURRENT on, later
+    assert cur == (later or REINSTATED_PLANS) and REINSTATED_PLANS == ["stage2_s006_seeds"]
+    assert s006_seed_configs() == set(RUNS)
     assert "plans/CURRENT = stage2_s006_seeds (edited here" in FLAT
 
 

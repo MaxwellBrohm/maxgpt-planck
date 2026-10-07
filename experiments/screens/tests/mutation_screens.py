@@ -193,6 +193,8 @@ from mutants_s2seeds import MUTANTS_S2SEEDS  # noqa: E402  (S006 EXTENSION RESUL
 MUTANTS += MUTANTS_S2SEEDS
 from mutants_s006r import MUTANTS_S006R  # noqa: E402  (AMENDMENT S006-REINSTATE: the waiter, the reinstated state)
 MUTANTS += MUTANTS_S006R
+from mutants_basediag import MUTANTS_BASEDIAG  # noqa: E402  (AMENDMENT BASE-DIAG: the chain waiter, the BASE runs)
+MUTANTS += MUTANTS_BASEDIAG
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")

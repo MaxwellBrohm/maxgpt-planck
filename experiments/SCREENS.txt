@@ -1961,3 +1961,151 @@ start line 20:38:01), and none of its results was read.)
     SCREENS_STAGE_2_S006_SEEDS_DONE (or a person's launch if the waiter gives up): the stage 2 verdicts (analyze.py
     verdicts with --earlier and the stage 1 results.json files; C4's pooled SIA check then spans S002, S004, S005,
     S006 and S007), S006's Q2 onsets at matched LR from its g 1 IND runs (C6), and the measured hours regenerated.
+
+AMENDMENT BASE-DIAG (2026-10-06 23:00 EDT, Claude, under Max's delegation below; Mac CPU, no model; the PC read only
+(marks, the queue log's start, end, lock, train and done lines, status.jsonl's times and outcomes, processes, the kits'
+bundle heads, run directory names, markers and file times) except a dry run of the waiter below in a scratch directory;
+nothing committed, no mark, no queue started or stopped, measured_hours.tsv not touched. Decided before any stage 2
+onset, HD or verdict is read: stage2_seeds runs from d21df3d, S006's queue has not started; VERIFIED UNREAD below.)
+  Max (the PI), 2026-10-06, verbatim as relayed to this step: "have you done that for any previous things that couldve
+    been really helpful but you decided to cut them?? if so add them back if you think they are good and diserved a
+    chance!" The cuts audit (research/CUTS_AUDIT_2026-10.md: rows 3, 12 and 29; REINSTATE NOW, step 1) put this step
+    next after S006.
+  DECISION (Claude, under that delegation): three more shared BASE runs, base_s103, base_s104 and base_s105, each
+    differing from base_s101 only in name, out_dir and seed (C4: screens_lib.check accepts seeds 101 to 105), after
+    S006's seed sets. They serve three things, fixed here: the ONSET RULE, the BASE LEVEL report, and later the shared
+    BASE at seeds 103 to 105 for any k 3 extension of this batch (C4's pairing rules apply then as now). The batch's
+    cap moves from 27 h to 28 h, only so these runs leave S006's headroom intact (CAP CHECK); its reading is unchanged.
+  WHY: (1) IND onset has no seed SD: E3 Parts 1 and 2 ran without the IND hook (E3_seed_noise/out/e3_5m_A_s1/
+    train_tail.jsonl and bpb.jsonl carry no IND field), so C6 left onset descriptive, while onset is the win condition
+    of P-105 (S006) and P-024 (S007); five BASE seeds give onset_half a sigma_seed at df 4. (2) The BASE level gap
+    (STAGE 1 VERDICTS, BASE LEVEL: +0.66% CHAT against E3 Part 1 arm A) left the seed draw among its causes; three
+    fresh seeds test that cause. (3) Cost: 3 runs at 0.312 h, 0.937 h, on a GPU otherwise idle until Saturday (the
+    audit's premise, not checked here). (4) Nothing under harness/, data_prep/, tokenizer/, corpus/ or
+    experiments/E2_lr_transfer changes (git diff 93bc10b..3227c60 is empty there, and this step changes nothing there),
+    so the runs read base_s101's and base_s102's code path (C4).
+  ONSET RULE (amends C6 and C7 for onset_half only): sigma_seed = the sample SD of BASE's onset_half
+    (analyze_lib.onsets, in steps) over seeds 101 to 105, df 4; SD_ref = sqrt(2) x sigma_seed (no paired onset SD
+    exists). C7 then reads the stage 2 onsets, none read yet: S004 canonac and S007 smear from their seed runs at g 1
+    (their picks) and S006 mtp from its g 1 IND-only runs (C6 MATCHED LR), each against base_s101 and base_s102: d_s =
+    onset_half(arm, s) - onset_half(BASE, s) in steps (negative = earlier), dbar over k 2, thr = t(0.975, 4) x SD_ref /
+    sqrt(2) = 2.776 x sigma_seed. EARLIER (C7's BETTER) if -dbar > thr and every d_s < 0; LATER (WORSE) if dbar > thr
+    and every d_s > 0; else UNRESOLVED; no EQUAL (no delta is registered for onset). Beside each, C7's Holm reading over
+    these 3 onset contrasts (two-sided p of dbar / (SD_ref / sqrt(2)) on t(4), family 0.05). Onsets are logged every 153
+    steps and at the last step, so d_s is a multiple of 153 unless an onset is the last step: when sigma_seed < 55.1
+    steps, one logged interval at both seeds in one direction reads. If a needed onset_half is undefined (final IND
+    <= 0) or one of the five BASE runs is missing, diverged or unscored, onset stays descriptive as C6 had it.
+    Unchanged: S005 pairs with its own mask-engine BASE, so its onset
+    stays descriptive; stage 1's onsets (S001, S002) stay as read; onset_abs, final IND, HD and SINK stay descriptive
+    until E3 Part 4d. The reading is reported beside each screen's bpb verdict and changes no verdict; in S006's and
+    S007's notes "Q2 reads an earlier onset" now means EARLIER here (an ONSET READING block in S004's, S006's and S007's
+    notes.txt). No analyzer code reads it yet (analyze_lib.onsets only computes onsets): that code and its tests land
+    with the stage 2 verdict step, before any stage 2 onset is read.
+  BASE LEVEL (reported, no rule; stage 1's base_level_vs_e3_part1 statistic): F(CHAT) and F(PROSE) of each BASE seed
+    against E3 Part 1 arm A's 8 seeds (F(CHAT) 1.14038 to 1.15126), the gap of the means, t = gap / (E3's sigma_seed x
+    sqrt(1/n + 1/8)) and its two-sided p on t(7), for n 5 (seeds 101 to 105) and for n 3 (seeds 103 to 105 alone,
+    drawn after the gap was seen). If each of 103, 104 and 105 sits above all 8 of E3's seeds on F(CHAT), the record
+    says the gap is not the seed draw (with the 11 runs exchangeable that happens with probability 1/165, 0.006);
+    otherwise it says the seed draw is not excluded. The hook-off and replay runs that would separate the other causes
+    need a run-name rule (code), not this step's.
+  CAP CHECK AT 28 H (ORDER: "before each new seed set", here S006's seed set 101 as in AMENDMENT S006-REINSTATE;
+  screens.py hours on measured_hours.tsv as committed at d21df3d (81 runs), then S006's 2 IND runs and the 3 BASE runs,
+  which hold no registered slot (k 2 registers BASE seeds 101 and 102), added through analyze_lib.cap_cut with cap 28):
+    Measured 17.587 h of runs + 2.120 h other = 19.707 h; queued 10 of 90 registered runs 4.923 h + S006's 2 IND runs
+    0.735 h + the 3 BASE runs 0.937 h = 6.596 h (unrounded); total 26.303 h <= 28 h: nothing cut, 1.697 h of headroom,
+    above S006-REINSTATE's 1.634 h (runs only, reported: 24.183 h). At 27 h the same input fits with 0.697 h of
+    headroom; at 25 h it cuts S006 (24.832 h). (The audit's 26.302 h and 1.698 h add the rounded 25.366 h and 0.936 h.)
+  BASE RUNS ADDED BY AMENDMENT BASE-DIAG: base_s103, base_s104, base_s105 (3 runs, 0.937 h). ORDER's rule never cuts a
+    BASE run, so they count only against the cap; the cut order, the never-cut list and the conservative reading (OTHER
+    counted) stand.
+  INSIDE THE PLANS: the queue does not evaluate the cap, so this check stands for S006's checks before its seed sets 101
+    and 102. Before 101 it would cut S006 only if stage2_seeds' 8 runs held the lock more than 1.697 h over their
+    4.188 h estimate (40.5%); before 102, only if the 10 runs before it did so over their 4.923 h estimate (34.5%).
+    Read at 22:45 (the PC queue log's lock lines, status.jsonl's times): seed set 101's 4 runs held the lock 1.975 h
+    against their 2.094 h estimate, each under its own.
+  VERIFIED UNREAD (22:45, the PC read only; the Mac): on the PC no results.json, tables.txt, verdict, onset or analysis
+    file under ~/planck newer than stage2_seeds' start (20:38:01) outside the code clones, and no analyze.py, bpb.py,
+    attn_diag.py or induction.py process; each of the 4 finished stage 2 seed runs' diag.jsonl and bpb.jsonl has an
+    access time before its last write (ext4 relatime moves it on any later read). The stage 2 autopilot (W6) reads the
+    queue log, processes and marks (ap_launch.watch) and never a C7 verdict (AUTOPILOT.txt). On the Mac no copy of a
+    stage 2 seed run exists outside pytest fixture trees. HD was never computed for any run (STAGE 1 VERDICTS); nothing
+    reads the stage 2 results before the Saturday verdict step.
+  CONFIGS: experiments/screens/configs/base_s103.yaml, base_s104.yaml and base_s105.yaml, written by screens.py's base()
+    (the generator of base_s101 and base_s102); each differs from base_s101 only in name, out_dir and seed (resolved
+    through runio.load_yaml); screens.py check: 3 ok, 96 ok over every config.
+  PLAN experiments/screens/plans/stage2_base_diag.txt (sha256 f2255fcb65aeeb72...; written by screens.plan),
+  its 6 lines:
+      # SCREENS AMENDMENT BASE-DIAG (SCREENS.txt): BASE at seeds 103, 104, 105 for the IND onset sigma_seed and the
+        BASE level, after S006's seed sets (screens.py). train = screens check, preflight, train, score   [one line in
+        the file]
+      wait_mark SCREENS SCREENS STAGE 2 S006 SEEDS DONE
+      train base_s103
+      train base_s104
+      train base_s105
+      mark SCREENS BASE DIAG DONE
+    The wait line is stage2_s006_seeds' end mark; the plan ends at its own mark with nothing after it. Estimate 0.937 h.
+  plans/CURRENT = stage2_base_diag (edited here; a comment names the plan's two marks and its bundle).
+  STARTING IT UNATTENDED: experiments/screens/chain_waiter.sh (new; sha256 920db4c14819bec8...: s006_waiter.sh with its
+    constants as arguments, a list of EARLIER plans to wait through, and the next plan's wait line checked at launch)
+    and experiments/screens/base_diag_waiter.sh (new; sha256 e1a05c60b150f27c...), the one file pcdetach.sh starts: it
+    refuses a chain_waiter.sh beside it that is not sha256 920db4c14819bec8..., then runs it as base_diag: after
+    stage2_s006_seeds at 3227c60, mark "SCREENS STAGE 2 S006 SEEDS DONE", next stage2_base_diag from
+    planck-kit/planck_diag.bundle, earlier stage2_seeds at d21df3d. Every 5 min it reads ~/planck/runs/SCREENS (read
+    only): WAIT while a SCREENS queue or launcher runs or the last start line is stage2_seeds at d21df3d (the s006
+    waiter then starts S006's queue); LAUNCH once marks/SCREENS_STAGE_2_S006_SEEDS_DONE exists, no queue runs and the
+    last start line is stage2_s006_seeds at 3227c60 with its last two lines "MARK SCREENS STAGE 2 S006 SEEDS DONE" and
+    "plan finished: stage2_s006_seeds.txt"; it then clones planck_diag.bundle's main into ~/planck/qcode/<commit12>,
+    refuses unless plans/CURRENT there names stage2_base_diag and that plan's first line waits on S006's mark, and execs
+    queue_screens.sh on it. HOLD at most 45 min after a kill or a 2 h gpu.lock wait of S006's queue (nothing relaunches
+    that queue; a person may); any other end, another plan or commit, ~/planck/STOP or the cancel file: GIVEUP,
+    launching nothing. Never twice (flock, a stamp, a stage2_base_diag start line, the queue's queue.lock). A reboot
+    kills it; a person starts it again. Log: ~/planck/logs/base_diag_waiter.log. s006_waiter.sh is not changed, and the
+    running s006 waiter's file on the PC is not touched.
+  WHY ITS OWN BUNDLE: planck.bundle stays at d21df3d until the autopilot is DONE (AMENDMENT S006-REINSTATE, WHY ITS OWN
+    BUNDLE) and planck_s006.bundle stays at 3227c60, which S006's queue clones; the commit holding this entry goes to a
+    third file, so the step-1 relaunch path of the audit (send_kit.sh, launch_screens.sh) is not needed.
+  Tests (Mac CPU, ~/.venvs/planck, on an export of the index plus this step's files): experiments/screens/tests 611
+    passed (523 before). New: test_chain_waiter.py (the arguments and their refusals; the decision on fixture logs for
+    the chain stage2_seeds, stage2_s006_seeds, stage2_base_diag: the earlier plan running, ended, failed or at another
+    commit, then the s006 waiter's cases with S006's plan, mark and commit, and a stray s006 stamp ignored),
+    test_chain_waiter_run.py (the loop on a fixture tree and fixture bundles whose queue_screens.sh is a stub: one
+    launch from planck_diag.bundle, never planck.bundle or planck_s006.bundle, then DONE; a wrong CURRENT, a plan not
+    waiting on S006's mark, no bundle, a held lock, bad arguments, a hold given up after the grace, a hold ended by a
+    relaunch, the earlier plan waited through; the wrapper's arguments against the repo's plans, CURRENT and
+    s006_waiter.sh, and its sha256 pin), test_screens_base_diag.py (Max's words; the cap check generated from the data
+    at 28, 27 and 25 h; the record; the configs as screens.py's base() writes them and their keys; the plan and CURRENT;
+    the acceptance refusing 14 bad states; the notes blocks; every number in this entry) and tests/basediag_lib.py
+    (base_diag_configs, the acceptance). Changed: test_screens_configs.py, test_screens_stage1_seeds.py,
+    test_screens_stage2_selection.py, test_screens_stage2_seeds.py and test_screens_s006_reinstate.py (the config counts
+    and CURRENT's sequence accept stage2_base_diag only through base_diag_configs). Each changed test watched failing:
+    the 5 files as committed at 3227c60 fail on this state (10 tests), and pass with this step's versions; this step's
+    versions pass on 3227c60's tree, so what they accept there is unchanged. On this state with the plan removed and its
+    configs kept, and with a valid stray config added (s004_canonac_g0.5_s103, written by screens.py config), each of
+    the 5 fails. mutation_screens.py, scratch copies: 61 new mutants (tests/mutants_basediag.py), 61 of 61 killed; the
+    whole file 334 of 334 killed (4 anchors moved to the new CURRENT). A first whole-file run stopped at its unmutated
+    check: test_s006_waiter.py (unchanged here) failed once there, its output not kept; it passed 5 of 5 reruns in that
+    copy and in the whole-file run above.
+  DRY RUN ON THE PC (22:54, a scratch directory in the WSL home, removed after; fixture queue logs, marks and fixture
+    bundles whose queue_screens.sh is a stub; never ~/planck/runs, gpu.lock or the kit's bundles), both files byte for
+    byte (sha256 above) under the PC's own bash, flock, pgrep, git and sha256sum: (A) through the wrapper, with a fake
+    queue process: WAIT; a second waiter exited at the real flock; stage2_seeds' clean end with no queue: WAIT, earlier
+    in the chain; S006's start with the fake queue: WAIT; its clean end written while the fake queue ran: WAIT, no
+    launch; once it ended, one LAUNCH: it cloned the diag fixture bundle's main (not planck.bundle's or
+    planck_s006.bundle's) into qcode/<commit12>, wrote the stamp and exec'd the stub with --code and --plan
+    .../plans/stage2_base_diag.txt under the waiter's own pid; a third waiter: DONE, no second launch. (B) a scoring
+    failure stopping S006's queue: GIVEUP, exit 1. (C) ~/planck/STOP present: GIVEUP. (D) a 2 h lock wait with no
+    relaunch: HOLD, then GIVEUP after the grace (4 s in the dry run). (E) an edited chain_waiter.sh: the wrapper
+    refused it. (R) read only, on the real queue with the defaults: running() 1 and WAIT; decide as if nothing ran read
+    the real last start line as stage2_seeds at d21df3d and said WAIT, earlier in the chain; no base_diag_waiter file
+    in ~/planck/logs before or after.
+  INSTALL (after the commit, from the Mac; the S006 commit 3227c60 and its waiter are already in place): a bundle of
+    the commit at planck-kit/planck_diag.bundle (git bundle create <tmp>/planck_diag.bundle HEAD main, copied with scp
+    and pc/local.env's host and key as send_kit.sh does; never send_kit.sh itself, which writes planck.bundle), then
+    the committed chain_waiter.sh copied the same way to planck-kit/chain_waiter.sh, then pcdetach.sh on the committed
+    base_diag_waiter.sh. Its log then says WAIT. If S006's queue has already ended cleanly by then, it launches at once.
+  NOT CHANGED: analyze_lib.CAP is still 25.0 in code (moving it is code, Saturday), so screens.py hours prints its check
+    against 25 h; no analyzer, harness or queue code changed here; measured_hours.tsv and s006_waiter.sh are unchanged.
+  STILL NEEDS A DECISION: (1) the commit, the bundle and the waiter's start (INSTALL). (2) After
+    SCREENS_BASE_DIAG_DONE (or a person's launch if the waiter gives up): the onset reading's code with tests, then the
+    stage 2 verdict step reads the onsets by the ONSET RULE and the BASE LEVEL report, and the measured hours are
+    regenerated. The RC-12 extras (the audit's step 2) wait for this plan's queue to end.

@@ -39,8 +39,9 @@ MUTANTS_S2SEEDS_STATE = [
      "{lr: 0.003, embed_lr: 0.003, scalar_lr: 0.003}", "{lr: 0.006, embed_lr: 0.006, scalar_lr: 0.006}", S2E),
     ("s2e_s005_seed_on_the_shared_engine", "experiments/S005_forget_gate/configs/s005_forget_g1_s101.yaml",
      "train: {doc_attn: mask, micro_batch: 8, grad_accum: 2}\n", "", S2E),
-    ("s2e_current_back_to_s006x", CUR, "# Seed plans come from screens.py seeds.\nstage2_s006_seeds\n",
-     "# Seed plans come from screens.py seeds.\nstage2_s006x\n", S2E),   # (stage2_seeds until AMENDMENT S006-REINSTATE)
+    ("s2e_current_back_to_s006x", CUR, "# Seed plans come from screens.py seeds.\nstage2_base_diag\n",
+     "# Seed plans come from screens.py seeds.\nstage2_s006x\n", S2E),   # (stage2_seeds until AMENDMENT S006-REINSTATE,
+    # then stage2_s006_seeds until AMENDMENT BASE-DIAG)
     ("s2e_cut_not_recorded", SXT, "  CUT BY ORDER'S CAP RULE BEFORE THE STAGE 2 SEED SETS: S006 (",
      "  CUT, BY ORDER'S CAP RULE BEFORE THE STAGE 2 SEED SETS: S006 (", CF),
     ("s2e_cut_recorded_for_s007_too", SXT, "SEED SETS: S006 (its queued", "SEED SETS: S006, S007 (its queued", CF),

@@ -48,9 +48,9 @@ MUTANTS_S006R_STATE = [
      "{lr: 0.006, embed_lr: 0.006, scalar_lr: 0.006}", RT),
     ("s6r_config_header_not_the_generators", CFG + "s006_mtp_g1_s102.yaml", "IND-only matched-LR run (C6)",
      "IND-only run (C6)", RT),
-    ("s6r_current_back_to_seeds", CUR, "# Seed plans come from screens.py seeds.\nstage2_s006_seeds\n",
-     "# Seed plans come from screens.py seeds.\nstage2_seeds\n", RT),
-    ("s6r_current_back_to_seeds_s2e", CUR, "# Seed plans come from screens.py seeds.\nstage2_s006_seeds\n",
+    ("s6r_current_back_to_seeds", CUR, "# Seed plans come from screens.py seeds.\nstage2_base_diag\n",
+     "# Seed plans come from screens.py seeds.\nstage2_seeds\n", RT),     # (stage2_s006_seeds until AMENDMENT BASE-DIAG)
+    ("s6r_current_back_to_seeds_s2e", CUR, "# Seed plans come from screens.py seeds.\nstage2_base_diag\n",
      "# Seed plans come from screens.py seeds.\nstage2_seeds\n", S2E),
     ("s6r_reinstatement_not_recorded", SXT, "  REINSTATED BY AMENDMENT S006-REINSTATE: S006 (",
      "  REINSTATED, BY AMENDMENT S006-REINSTATE: S006 (", CF),

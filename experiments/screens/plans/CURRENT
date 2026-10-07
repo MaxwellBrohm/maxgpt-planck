@@ -12,5 +12,9 @@
 # stage2_s006_seeds (S006's seed sets at g 2 with C6's IND runs at g 1, after AMENDMENT S006-REINSTATE in SCREENS.txt)
 # waits for SCREENS_STAGE_2_SEEDS_DONE and stops at SCREENS_STAGE_2_S006_SEEDS_DONE. It runs from its own bundle,
 # planck-kit/planck_s006.bundle, started by experiments/screens/s006_waiter.sh after stage2_seeds ends cleanly.
+# stage2_base_diag (BASE at seeds 103, 104, 105: AMENDMENT BASE-DIAG in SCREENS.txt) waits for
+# SCREENS_STAGE_2_S006_SEEDS_DONE and stops at SCREENS_BASE_DIAG_DONE. It runs from its own bundle,
+# planck-kit/planck_diag.bundle, started by experiments/screens/base_diag_waiter.sh (chain_waiter.sh) after
+# stage2_s006_seeds ends cleanly.
 # Seed plans come from screens.py seeds.
-stage2_s006_seeds
+stage2_base_diag

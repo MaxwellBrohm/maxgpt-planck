@@ -170,3 +170,10 @@ method, the scratch tree and the batch table in SCREENS.txt "SMOKES RECORDED"; n
 
 HOURS (2026-10-05, SCREENS.txt STAGE 2 READINESS): screens_hours.py now estimates this arm at the EAGER SMOKE
   factor above (x1.027, 0.321 h per run).
+
+ONSET READING (2026-10-06, SCREENS.txt AMENDMENT BASE-DIAG; decided before any stage 2 onset is read): Q2's onset_half
+  at this screen's pick g 1 (matched LR, C6) against the shared BASE on seeds 101 and 102 is read with C7: SD_ref =
+  sqrt(2) x sigma_seed, sigma_seed the SD of BASE's onset_half over seeds 101 to 105 (df 4), thr = 2.776 x sigma_seed;
+  EARLIER if -dbar > thr and both d_s < 0, LATER mirrored, else UNRESOLVED, no EQUAL. onset_abs, final IND, HD and
+  SINK stay descriptive. The reading is reported beside the bpb verdict and changes no verdict. "Q2 reads an earlier
+  onset" (METRIC AND DECISION RULE) now means EARLIER here.
