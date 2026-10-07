@@ -175,8 +175,7 @@ MUTANTS += [   # the stage2_seeds state the stage 2 autopilot commits: what the 
     ("s2seeds_check_not_required", CFT, "assert len(find(r)) == 1 and check(find(r)[0]) == [], r",
      "assert len(find(r)) == 1, r", S2S),
     ("s2seeds_any_run_accepted", CFT, "assert set(runs) - new <= OWN_BASES and len(runs)", "assert len(runs)", S2S),
-    ("s2seeds_no_wait_line_needed", CFT, 'assert lines[1] == "wait_mark SCREENS SCREENS STAGE 2 SELECTION DONE" and ',
-     "assert ", S2S),
+    ("s2seeds_no_wait_line_needed", CFT, 'assert lines[1] == seeds2_wait() and ', "assert ", S2S),
     ("s2seeds_two_picks_for_any_arm", CFT, 'len(by_g) == 2 and 1.0 in by_g and sid in ("s006", "s007"))',
      "len(by_g) == 2)", S2S),
     ("s2seeds_one_seed_enough", CFT, "assert all(v == {101, 102} for v in by_g.values()) and", "assert", S2S),
@@ -190,6 +189,8 @@ from mutants_fix import MUTANTS_FIX  # noqa: E402  (the 2026-10-06 corrections o
 MUTANTS += MUTANTS_S1V + MUTANTS_FIX
 from mutants_s2select import MUTANTS_S2SELECT  # noqa: E402  (STAGE 2 SELECTION RESULT: S006's extension, hours, cap)
 MUTANTS += MUTANTS_S2SELECT
+from mutants_s2seeds import MUTANTS_S2SEEDS  # noqa: E402  (S006 EXTENSION RESULT / STAGE 2 SEEDS LAUNCH CHECK)
+MUTANTS += MUTANTS_S2SEEDS
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")

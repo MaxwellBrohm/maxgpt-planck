@@ -57,21 +57,42 @@ EXT2 = {"s006_mtp_g4_s1"}       # SCREENS.txt STAGE 2 SELECTION RESULT (2026-10-
 LATER |= EXT2
 
 
-STAGE2_SEEDS = os.path.join(L.HERE, "plans", "stage2_seeds.txt")    # the stage 2 autopilot writes it after the picks
+STAGE2_SEEDS = os.path.join(L.HERE, "plans", "stage2_seeds.txt")    # screens.py seeds --stage 2, after the picks
 SEED2_RE = re.compile(r"^(s00[4-7])_([a-z]+)_g([0-9.]+)_s(10[12])$")
 OWN_BASES = {"base_s101", "base_s102", "s005_base_s101", "s005_base_s102"}      # among the 48 built
+SCREENS_TXT = os.path.join(L.EXPD, "SCREENS.txt")
+CUT_RE = re.compile(r"^  CUT BY ORDER'S CAP RULE BEFORE THE STAGE 2 SEED SETS: (S00\d(?:, S00\d)*) \(", re.M)
 
 
-def stage2_seed_configs(plan: str = STAGE2_SEEDS, find=None, check=None) -> set:
+def recorded_cuts(text: str | None = None) -> set:
+    """The screens SCREENS.txt records as cut by ORDER's cap rule before the stage 2 seed sets (the line, at the
+    entry's 2-space indent, that the entry applying the rule writes): a seed plan leaves out only these."""
+    text = open(SCREENS_TXT).read() if text is None else text
+    return {s for m in CUT_RE.finditer(text) for s in m[1].split(", ")}
+
+
+def seeds2_wait() -> str:
+    """The stage 2 seed plan's wait line: the end mark of the plan before it in PLAN_SEQUENCE (since STAGE 2
+    SELECTION RESULT, stage2_s006x's "mark SCREENS S006 EXTENSION DONE"; it was stage2_select's)."""
+    last = open(os.path.join(L.HERE, "plans", PLAN_SEQUENCE[-1] + ".txt")).read().splitlines()[-1]
+    assert last.startswith("mark "), last
+    return "wait_mark SCREENS " + last[5:]
+
+
+def stage2_seed_configs(plan: str = STAGE2_SEEDS, find=None, check=None, cuts=None) -> set:
     """The configs plans/stage2_seeds.txt adds (ORDER 2's seed sets, screens.py seeds --stage 2): empty while that
-    plan does not exist. When it does, it must wait on the selection mark and end at its own; every other run must
+    plan does not exist. When it does, it must wait on seeds2_wait() and end at its own mark; every other run must
     be one of the BASE runs; each stage 2 arm runs at one g pick on seeds 101 and 102, plus g 1 for S006 or S007 when
-    the pick is not g 1 (C6's matched-LR IND runs); and every added config must pass screens.py check."""
+    the pick is not g 1 (C6's matched-LR IND runs); a screen is left out only if ORDER's cap rule may cut it and the
+    cut is recorded (cuts: recorded_cuts() by default); and every added config must pass screens.py check."""
     if not os.path.exists(plan):
         return set()
+    import analyze_lib as AL
     find, check = find or L.find, check or (lambda p: L.check(p, P))
+    cuts = recorded_cuts() if cuts is None else set(cuts)
+    assert cuts <= set(L.ORDER[2]) & set(AL.CUT_ORDER), cuts
     lines = open(plan).read().splitlines()
-    assert lines[1] == "wait_mark SCREENS SCREENS STAGE 2 SELECTION DONE" and lines[-1] == "mark SCREENS STAGE 2 SEEDS DONE"
+    assert lines[1] == seeds2_wait() and lines[-1] == "mark SCREENS STAGE 2 SEEDS DONE"
     runs = [ln.split()[1] for ln in lines if ln.startswith("train ")]
     new = {r for r in runs if SEED2_RE.match(r)}
     assert set(runs) - new <= OWN_BASES and len(runs) == len(set(runs)), runs
@@ -80,7 +101,7 @@ def stage2_seed_configs(plan: str = STAGE2_SEEDS, find=None, check=None) -> set:
         sid, arm, g, seed = SEED2_RE.match(r).groups()
         assert arm in L.SCREENS[sid.upper()]["arms"], r
         gs.setdefault((sid, arm), {}).setdefault(float(g), set()).add(int(seed))
-    assert {(s.lower(), a) for s in L.ORDER[2] for a in L.SCREENS[s]["arms"]} == set(gs), sorted(gs)
+    assert {(s.lower(), a) for s in L.ORDER[2] if s not in cuts for a in L.SCREENS[s]["arms"]} == set(gs), sorted(gs)
     for (sid, arm), by_g in gs.items():
         assert all(v == {101, 102} for v in by_g.values()) and (len(by_g) == 1 or (
             len(by_g) == 2 and 1.0 in by_g and sid in ("s006", "s007"))), (sid, arm, by_g)
@@ -246,8 +267,9 @@ PLAN_SEQUENCE = ["stage1_select", "stage1_s003B", "stage1_s003C", "stage1_seeds"
                  "stage2_s006x"]   # stage1_s003B: SCREENS.txt STAGE 1 SELECTION A RESULT; stage1_s003C: S003 STAGE B
 # RESULT; stage1_seeds: S003 STAGE C RESULT; stage2_select: STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK (cap fits,
 # nothing cut, so the plan is not reduced); stage2_s006x: STAGE 2 SELECTION RESULT (S006's C3 extension, cap fits)
-LATER_PLANS = ["stage2_seeds"]      # written by the stage 2 autopilot (AUTOPILOT.txt) after the stage 2 picks: ORDER 2's
-# seed sets; accepted only when plans/stage2_seeds.txt exists and stage2_seed_configs() holds
+LATER_PLANS = ["stage2_seeds"]      # ORDER 2's seed sets after the stage 2 picks (the autopilot's design, AUTOPILOT.txt;
+# written by S006 EXTENSION RESULT / STAGE 2 SEEDS LAUNCH CHECK); accepted only when plans/stage2_seeds.txt exists and
+# stage2_seed_configs() holds
 
 
 def cfg_for(code, name):

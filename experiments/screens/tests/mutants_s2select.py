@@ -13,7 +13,8 @@ MUTANTS_S2SELECT = [
     ("s2x_config_at_g2_lrs", CFG, "{lr: 0.012, embed_lr: 0.012, scalar_lr: 0.012}", "{lr: 0.006, embed_lr: 0.006, "
      "scalar_lr: 0.006}", S2X),
     ("s2x_current_back_to_select", "experiments/screens/plans/CURRENT", "# Seed plans come from screens.py seeds.\n"
-     "stage2_s006x\n", "# Seed plans come from screens.py seeds.\nstage2_select\n", S2X),
+     "stage2_seeds\n", "# Seed plans come from screens.py seeds.\nstage2_select\n", S2X),   # (stage2_s006x until S006
+    # EXTENSION RESULT / STAGE 2 SEEDS LAUNCH CHECK moved plans/CURRENT on to stage2_seeds)
     ("s2x_edge_never_extended", "experiments/screens/analyze.py",
      'want = [] if not res["at_edge"] else [xs[0] / 2 if res["at_edge"] == "low" else xs[-1] * 2]', "want = []", S2X),
     ("s2x_extension_takes_a_g_slot", "experiments/screens/screens_hours.py",

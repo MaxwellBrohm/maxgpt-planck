@@ -38,13 +38,14 @@ WHOLE, NEW = 123, 10            # mutation_screens.py: the whole file and this e
 SEC = section("STAGE 1 SEEDS DONE / STAGE 2 LAUNCH CHECK")
 FLAT = " ".join(SEC.split())
 S2 = [f"{sid.lower()}_{a}_g{g}_s1" for sid in L.ORDER[2] for a in L.SCREENS[sid]["arms"] for g in ("0.5", "1", "2")]
+EXTS = {ln.split()[1] for ln in open(os.path.join(L.HERE, "plans", "stage2_s006x.txt")) if ln.startswith("train ")}
 
 
 @pytest.fixture(scope="module")
 def V(tmp_path_factory):
     tsv = tmp_path_factory.mktemp("tsv") / "m.tsv"      # measured_hours.tsv as of this entry: the 12 stage 2 g-check
-    tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] in S2)))
-    runs, _ = H.load(str(tsv))                          # lines (STAGE 2 SELECTION RESULT) taken out
+    tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] in {*S2, *EXTS})))
+    runs, _ = H.load(str(tsv))                          # lines (STAGE 2 SELECTION RESULT) and S006's extension taken out
     with contextlib.redirect_stdout(io.StringIO()):
         r = H.report(P, str(tsv))
     t, c, f = r["tally"], r["cap"], (lambda x, n=3: f"{x:.{n}f}")
@@ -85,7 +86,7 @@ def test_seed_runs_are_measured_once_and_the_earlier_lines_unchanged(V):
     assert max(ends[n] for n in RUNS1) == "2026-10-06 " + QEND
     now = H.load()[0]                       # later regenerations add lines only (their header: their own test)
     assert ("sha256 " + PCSHA[0] + "... and " + PCSHA[1] in open(H.TSV).read()) if len(now) == 68 else \
-        (set(now) - set(runs) == set(S2) and len(now) == 80)
+        (set(now) - set(runs) - EXTS == set(S2) and len(now) == 80 + len(set(now) & EXTS))
 
 
 def hours_rows(runs):

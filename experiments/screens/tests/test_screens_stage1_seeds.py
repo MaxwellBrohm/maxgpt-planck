@@ -38,7 +38,8 @@ PLAN = os.path.join(L.HERE, "plans", "stage1_seeds.txt")
 PASSED = (338, 377)             # experiments/screens/tests before and after this entry (Mac CPU)
 WHOLE, TSV_SHA = 113, ("84585848d57aff5a", "3bc3033a40a6a910")   # mutants, measured_hours.tsv header at this entry
 SEED_RUNS = {ln.split()[1] for ln in open(PLAN) if ln.startswith("train ")}   # measured after this entry, and
-SEED_RUNS |= {ln.split()[1] for ln in open(os.path.join(L.HERE, "plans", "stage2_select.txt")) if ln.startswith("train ")}
+SEED_RUNS |= {ln.split()[1] for n in ("stage2_select", "stage2_s006x") for ln in open(os.path.join(L.HERE, "plans",
+                                                                                      n + ".txt")) if ln.startswith("train ")}
 SEC = section("S003 STAGE C RESULT")
 FLAT = " ".join(SEC.split())
 

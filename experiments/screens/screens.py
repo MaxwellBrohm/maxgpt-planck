@@ -4,8 +4,9 @@
                                           g 0.5 / 1 / 2), S003 stage A; plans stage1_select, stage2_select
   python screens.py config SID.ARM --g G [--seed S]   one arm config (a C3 extension: g 0.25 / 4 / ...)
   python screens.py s003-arm --eta E --r R            S003 search point: trunk + 3 branches (stages B, C)
-  python screens.py seeds --stage N --pick SID.ARM=G ... [--s003 ETA,R]
-                                          the seed sets after the picks, plans/stage<N>_seeds.txt (ORDER)
+  python screens.py seeds --stage N --pick SID.ARM=G ... [--s003 ETA,R] [--cut SID ...] [--wait "EXP TEXT"]
+                                          the seed sets after the picks, plans/stage<N>_seeds.txt (ORDER); a
+                                          screen ORDER's cap rule cut (--cut, recorded in SCREENS.txt) gets none
   python screens.py plan NAME RUN ... [--mark TEXT] [--wait "EXP TEXT"]
   python screens.py check [RUN ...]       C2 + RC-12 GUARD + C1-b + C6 hook + 2% on every config (or named runs)
   python screens.py hours [--measured-file TSV] [--s003-rb R]
@@ -116,13 +117,14 @@ def build(p: dict) -> None:
                "SCREENS STAGE 2 SELECTION DONE", "SCREENS SCREENS STAGE 2 SMOKES RECORDED"))
 
 
-def seeds(stage: int, picks: dict, s003, p: dict) -> None:
-    runs, top = [], max(len(p["seeds"][L.SCREENS[s]["cls"]]) for s in L.ORDER[stage])
+def seeds(stage: int, picks: dict, s003, p: dict, cut: tuple = (), wait: str | None = None) -> None:
+    keep = [sid for sid in L.ORDER[stage] if sid not in cut]     # a cut screen's bet stays "not run" (ORDER)
+    runs, top = [], max(len(p["seeds"][L.SCREENS[s]["cls"]]) for s in keep)
     for i in range(top):
         s = 101 + i
-        if any(not L.engine(sid) for sid in L.ORDER[stage]):
+        if any(not L.engine(sid) for sid in keep):
             runs.append(base(s, p))
-        for sid in L.ORDER[stage]:
+        for sid in keep:
             if s not in p["seeds"][L.SCREENS[sid]["cls"]]:
                 continue
             if L.engine(sid):
@@ -135,8 +137,9 @@ def seeds(stage: int, picks: dict, s003, p: dict) -> None:
                 runs.append(arm(sid, a, g, s, p, ": screen seed at the g pick"))
                 if sid in ("S006", "S007") and g != 1.0:      # C6 MATCHED LR: IND-only run at g = 1
                     runs.append(arm(sid, a, 1.0, s, p, ": IND-only matched-LR run (C6), never in a bpb verdict"))
-    print(plan(f"stage{stage}_seeds", runs, f"SCREENS stage {stage} seed sets, seed-major (ORDER {stage})",
-               f"SCREENS STAGE {stage} SEEDS DONE"))
+    head = f"SCREENS stage {stage} seed sets, seed-major (ORDER {stage})"
+    head += f"; cut by ORDER's cap rule (SCREENS.txt), no run: {', '.join(cut)}" if cut else ""
+    print(plan(f"stage{stage}_seeds", runs, head, f"SCREENS STAGE {stage} SEEDS DONE", wait))
 
 
 def main(argv=None) -> int:
@@ -154,6 +157,8 @@ def main(argv=None) -> int:
     sd.add_argument("--stage", type=int, choices=(1, 2), required=True)
     sd.add_argument("--pick", action="append", default=[], help="SID.ARM=G, e.g. S002.novres=0.5")
     sd.add_argument("--s003", default=None, help="LR5_adamw as ETA,R (stage 1)")
+    sd.add_argument("--cut", action="append", default=[], help="a screen ORDER's cap rule cut (SCREENS.txt): no run")
+    sd.add_argument("--wait", default=None, help='the plan first waits for this mark: "EXP TEXT"')
     pl = sub.add_parser("plan")
     pl.add_argument("name")
     pl.add_argument("runs", nargs="+")
@@ -174,11 +179,15 @@ def main(argv=None) -> int:
     elif a.cmd == "s003-arm":
         print("\n".join(s003_arm(a.eta, a.r, p)))
     elif a.cmd == "seeds":
+        import analyze_lib as AL
+        if len(set(a.cut)) != len(a.cut) or any(c not in L.ORDER[a.stage] or c not in AL.CUT_ORDER for c in a.cut):
+            sys.exit(f"--cut {a.cut}: only stage {a.stage} screens in ORDER's cut order {AL.CUT_ORDER}, once each")
         picks = {k: float(v) for k, v in (x.split("=") for x in a.pick)}
-        need = {f"{sid}.{arm_}" for sid in L.ORDER[a.stage] if sid != "S003" for arm_ in L.SCREENS[sid]["arms"]}
-        if set(picks) != need or (a.stage == 1) != (a.s003 is not None):
-            sys.exit(f"stage {a.stage} needs --pick for exactly {sorted(need)}" + (" and --s003" if a.stage == 1 else ""))
-        seeds(a.stage, picks, tuple(float(x) for x in a.s003.split(",")) if a.s003 else None, p)
+        keep = [sid for sid in L.ORDER[a.stage] if sid not in a.cut]
+        need = {f"{sid}.{arm_}" for sid in keep if sid != "S003" for arm_ in L.SCREENS[sid]["arms"]}
+        if set(picks) != need or ("S003" in keep) != (a.s003 is not None):
+            sys.exit(f"stage {a.stage} needs --pick for exactly {sorted(need)}" + (" and --s003" if "S003" in keep else ""))
+        seeds(a.stage, picks, tuple(float(x) for x in a.s003.split(",")) if a.s003 else None, p, tuple(a.cut), a.wait)
     elif a.cmd == "plan":
         print(plan(a.name, a.runs, a.name, a.mark, a.wait))
     elif a.cmd == "check":

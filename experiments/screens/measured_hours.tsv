@@ -1,5 +1,5 @@
 # SCREENS measured GPU hours (screens_hours.py measured). run: gpu.lock held to the run's status line
-# (training plus scoring), from the PC queue's queue_screens.txt and status.jsonl (sha256 d52b7303da1b185e... and 750c2d71b788a8dd...).
+# (training plus scoring), from the PC queue's queue_screens.txt and status.jsonl (sha256 30ffd248ecbf43c5... and 4cb2eac7a104fbea...).
 # other: GPU hours of this batch outside its runs (OTHER in screens_hours.py).
 kind	name	hours	start	end	source
 run	s001_nogate_g0.5_s1	0.29306	2026-10-04 12:58:12	2026-10-04 13:15:47	queue_screens.txt
@@ -82,5 +82,6 @@ run	s007_smear_g2_s1	0.31389	2026-10-06 10:02:02	2026-10-06 10:20:52	queue_scree
 run	s006_mtp_g0.5_s1	0.35333	2026-10-06 10:20:53	2026-10-06 10:42:05	queue_screens.txt
 run	s006_mtp_g1_s1	0.35306	2026-10-06 10:42:06	2026-10-06 11:03:17	queue_screens.txt
 run	s006_mtp_g2_s1	0.35611	2026-10-06 11:06:44	2026-10-06 11:28:06	queue_screens.txt
+run	s006_mtp_g4_s1	0.35306	2026-10-06 19:30:49	2026-10-06 19:52:00	queue_screens.txt
 other	c1a_gate	2.011			SCREENS.txt VERIFICATION OF ORDER 0 (2): the C1-a gate, 31 gpu.lock holds from the PC gate logs
 other	eager_smokes	0.109			SCREENS.txt SMOKES RECORDED: the smokes' gpu.lock holds, the failed 10 s hold included

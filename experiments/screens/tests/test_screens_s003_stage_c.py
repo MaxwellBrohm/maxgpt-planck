@@ -39,9 +39,9 @@ SHORT = {   # CHAT, PROSE at the 125M and 62.5M branches, r 0.5 / 1 / 2 / 4 / 8 
 POINTS = [("1.5", 0.5), ("6", 2.0)]                 # stage C: (eta x 1e3, g) at r_B 2
 TAGS = (("b62M", 1526), ("b125M", 3052), ("b250M", 6104))
 STAGE_C_RUNS = {f"s003_adamw_e{e}_r2_{t}" for e, _ in POINTS for t in ("trunk", "b62M", "b125M", "b250M")}
-LATER = STAGE_C_RUNS | {ln.split()[1] for n in ("stage1_seeds", "stage2_select") for ln in open(os.path.join(
-    L.HERE, "plans", n + ".txt")) if ln.startswith("train ")}   # measured after that entry: stage C, the stage 1 seed
-# sets, the stage 2 selection runs
+LATER = STAGE_C_RUNS | {ln.split()[1] for n in ("stage1_seeds", "stage2_select", "stage2_s006x") for ln in open(
+    os.path.join(L.HERE, "plans", n + ".txt")) if ln.startswith("train ")}   # measured after that entry: stage C, the
+# stage 1 seed sets, the stage 2 selection runs, S006's extension
 PLAN = os.path.join(L.HERE, "plans", "stage1_s003C.txt")
 
 

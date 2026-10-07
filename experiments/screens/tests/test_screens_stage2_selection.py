@@ -36,9 +36,11 @@ def write_runs(root, vals):
 
 @pytest.fixture(scope="module")
 def V(tmp_path_factory):
-    runs, _ = H.load()
+    tsv = tmp_path_factory.mktemp("tsv") / "m.tsv"      # measured_hours.tsv as of this entry: S006's extension line
+    tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] == EXT)))
+    runs, _ = H.load(str(tsv))                          # (S006 EXTENSION RESULT) taken out
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(P)
+        r = H.report(P, str(tsv))
     t, f = r["tally"], (lambda x, n=3: f"{x:.{n}f}")
     q, m = t["queued"], r["measured_runs"] + r["other"]
     per = {s: H.run_h(L.STEPS, H.mult(s, a)) for s, (a, _) in ARMS.items()}
@@ -110,7 +112,9 @@ def test_the_12_runs_are_measured_once_at_their_lock_hours(V):
     rows = {ln.split("\t")[1]: ln.rstrip("\n").split("\t") for ln in open(H.TSV) if ln.startswith("run\t")}
     assert all(rows[n][3] == "2026-10-06 " + held for n, (_, held) in WAITS.items())     # the lock hours start after
     assert rows[S2[-1]][4] == "2026-10-06 " + QEND and min(rows[n][3] for n in S2) > "2026-10-06 " + QSTART
-    assert f"(sha256 {PCSHA[0]}... and {PCSHA[1]}...)" in open(H.TSV).read()
+    now = H.load()[0]                       # later regenerations add lines only (their header: their own test)
+    assert (f"(sha256 {PCSHA[0]}... and {PCSHA[1]}...)" in open(H.TSV).read()) if len(now) == 80 else \
+        (set(now) - set(runs) == {EXT} and len(now) == 81)
     waits = [round(H.hours_between("2026-10-06 " + a, "2026-10-06 " + b) * 3600) for a, b in WAITS.values()]
     assert f"waited for gpu.lock {waits[0]} s before s005_forget_g0.5_s1, {waits[1]} s before s005_forget_g1_s1 and " \
            f"{waits[2]} s before s006_mtp_g2_s1 (outside the lock hours)" in FLAT
