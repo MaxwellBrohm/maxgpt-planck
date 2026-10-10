@@ -8,6 +8,8 @@ rc12/engines.json. No model, no network: reads the two files only.
              writes NOENGINE for them
   P-144      the four Falcon-H1-Tiny-90M siblings: vLLM, family Falcon-H1, bfloat16, the Instruct's verdict; the Base
              has no chat template (plain render only) and the other three have one
+  minimind-3 (STEP 13a, 14) pinned and out of "skipped"; vLLM at its float16 with its own parity (a family of one)
+  shards     every "shards" an int >= 1; cRia's 10 with max_batch 32 (STEP 14X)
   python -B test_pins_engines.py [--pins F] [--engines F]   (exit 1 on any failure)"""
 import argparse
 import json
@@ -18,7 +20,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 LICENCES = {"apache-2.0", "mit", "other (falcon-llm-license)"}
 SIBS = ["tiiuae/Falcon-H1-Tiny-90M-Instruct-Curriculum", "tiiuae/Falcon-H1-Tiny-90M-Instruct-pre-DPO",
         "tiiuae/Falcon-H1-Tiny-90M-Instruct-Curriculum-pre-DPO", "tiiuae/Falcon-H1-Tiny-90M-Base"]
-NOT_RUN = ["HuggingFaceTB/smollm2-135M-SFT-Only", "jingyaogong/minimind-3", "SupraLabs/Supra2-Medium-Instruct"]
+NOT_RUN = ["HuggingFaceTB/smollm2-135M-SFT-Only", "SupraLabs/Supra2-Medium-Instruct"]
+MINIMIND, CRIA = "jingyaogong/minimind-3", "sz14/cRia-LM-75M-Instruct"
 
 
 def check(pins, eng):
@@ -62,6 +65,20 @@ def check(pins, eng):
         plain_only = p["chat_template"].startswith("none")
         if plain_only != m.endswith("-Base"):
             fails.append(f"P-144: {m} chat_template {p['chat_template'][:40]!r}")
+    p, e = pins["models"].get(MINIMIND), em.get(MINIMIND, {})         # STEP 13a / STEP 14X
+    if p is None or MINIMIND in pins.get("skipped", {}):
+        fails.append("minimind-3: not pinned, or still in skipped")
+    if (e.get("engine"), e.get("dtype"), e.get("parity")) != ("vllm", "float16", "fp16 NEAR_TIE") \
+            or sum(x.get("family") == e.get("family") for x in em.values()) != 1:
+        fails.append(f"minimind-3: engine/dtype/parity {e.get('engine')}/{e.get('dtype')}/{e.get('parity')} or its "
+                     f"family {e.get('family')!r} is shared (its own parity, not a family verdict)")
+    for m, x in em.items():
+        v = x.get("shards", 1)
+        if type(v) is not int or v < 1:
+            fails.append(f"shards: {m} {v!r}")
+    c = em.get(CRIA, {})
+    if (c.get("shards"), c.get("max_batch")) != (10, 32):
+        fails.append(f"shards: cRia shards {c.get('shards')} max_batch {c.get('max_batch')} (STEP 14X: 10 and 32)")
     return fails
 
 

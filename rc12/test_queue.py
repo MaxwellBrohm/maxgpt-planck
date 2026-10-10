@@ -9,7 +9,8 @@ retries on the session lock, a restart adding nothing for finished runs and leav
 half-finished seed running only its missing run, the STOP file, the DONE marker, and engines.json's per-model
 "python" (notes STEP 9c): a model with one runs under it (~ expanded), the others under Q_PY, and a model whose python
 is not executable gets NOPYTHON lines and no process; a queue killed while it waits for gpu.lock frees its queue
-lock at once and starts nothing; then the session cases (test_queue_sessions.sessions).
+lock at once and starts nothing; then the session cases (test_queue_sessions.sessions) and the shard and run-file
+cases (test_queue_shards.shards; notes STEP 14X).
   python3 -B test_queue.py        (exit 0 = pass)"""
 import fcntl
 import hashlib
@@ -21,6 +22,7 @@ import tempfile
 import time
 
 from test_queue_sessions import check, fails, held, lock_calls, procs, queue, sessions, setup, status, until
+from test_queue_shards import shards
 
 def tree_hash(root):
     h = {}
@@ -206,10 +208,13 @@ def main():
     check([x["key"] for x in status(b)] == want and not lock_calls(b), "default plan: order or content")
     done = f"{b}/logs/rc12_dev_queue.DONE"
     check(os.path.exists(done) and open(done).readline().strip() == "complete 0 of 208 runs", "default plan: DONE")
+    run = [x for x in open(f"{b}/logs/rc12_dev_queue.run") if x.startswith("Q_MODELS=")]   # notes STEP 14X
+    check(run == ["Q_MODELS=" + " ".join(PANEL) + "\n"], f"default plan: run file models {run}")
     status_unit()
     c_python()
     c_killed_waiting()
     sessions()
+    shards()
 
 
 if __name__ == "__main__":

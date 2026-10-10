@@ -16,6 +16,14 @@
 # stale .partial). One status line per run is appended to <root>/queue_status.txt (queue_status.py; note = the
 # session and the process's place in it). After a failed process the rest of that model and render is skipped (a
 # restart retries it). DONE marker at the end.
+# SHARDS (notes STEP 14X): a model whose engines.json names "shards": N > 1 runs each seed as N processes, dev_batch.py
+# --shard I/N for I = 0 .. N-1 (each plays records I, I + N, ... of the seed's run and its twin; the last part merges
+# the runs, rc12/shards.py); a shard whose two parts are DONE is skipped, except the last, which always runs while a
+# run of the seed is unmerged (it merges without loading an engine once every part is DONE). Each shard is one process
+# for the session rule, with its own log (..._<seed>_s<I>.log) and status lines (note: shard I/N).
+# RUN FILE (notes STEP 14X): before its start line the queue writes LOGS/rc12_dev_queue.run (pid, code, root and the
+# effective Q_ settings below; MODELS on one line) and names that run on the start line ("run ID"); boot.d/30_rc12.sh
+# restarts a cut-off queue with the run file's settings when its id matches the last start line's.
 # Stop between processes: touch ~/planck/logs/rc12_dev_queue.STOP (the running process finishes first).
 # Python per model: engines.json's "python" for the model (~ expanded; Doge runs in ~/planck/venv-doge with
 # transformers 4.55, notes STEP 9c), else $PY; a model whose python is not executable gets NOPYTHON lines.
@@ -49,7 +57,12 @@ export PATH="/usr/lib/wsl/lib:$PATH" HF_HOME=${HF_HOME:-$HOME/planck/hf} HF_HUB_
   TOKENIZERS_PARALLELISM=false
 cd "$CODE" || { echo "$(ts) queue: no code dir $CODE"; exit 1; }
 STATUS=$ROOT/queue_status.txt
-echo "$(ts) queue: start, code $CODE, root $ROOT, pid $$, gpu.lock sessions of $SESSION_S s (tail $SESSION_TAIL s)"
+RUNID=$(date +%Y%m%dT%H%M%S).$$
+{ echo "run=$RUNID"; echo "pid=$$"; echo "code=$CODE"; echo "Q_MODELS="$MODELS; echo "Q_RENDERS="$RENDERS
+  echo "Q_SEEDS="$SEEDS; echo "Q_ROOT=$ROOT"; echo "Q_ENGINES=$ENGINES"; echo "Q_TIMEOUT=$TMO"
+  echo "Q_SESSION_S=$SESSION_S"; echo "Q_SESSION_TAIL=$SESSION_TAIL"; echo "Q_LIMIT=$Q_LIMIT"; } > "$LOGS/$NAME.run.tmp" \
+  && mv -f "$LOGS/$NAME.run.tmp" "$LOGS/$NAME.run" || { echo "$(ts) queue: cannot write $LOGS/$NAME.run"; exit 1; }
+echo "$(ts) queue: start, code $CODE, root $ROOT, pid $$, gpu.lock sessions of $SESSION_S s (tail $SESSION_TAIL s), run $RUNID"
 
 engine_of() {
   "$PY" -c 'import json, sys; print(json.load(open(sys.argv[1]))["models"].get(sys.argv[2], {}).get("engine", ""))' \
@@ -61,6 +74,11 @@ python_of() {  # the model's python: engines.json "python" (~ expanded), else $P
 print(os.path.expanduser(json.load(open(sys.argv[1]))["models"].get(sys.argv[2], {}).get("python", "")))' \
     "$ENGINES" "$1" 2>/dev/null)
   echo "${p:-$PY}"
+}
+shards_of() {  # engines.json "shards" for the model (an int >= 1), 1 when absent; empty when not an int >= 1
+  "$PY" -c 'import json, sys
+v = json.load(open(sys.argv[1]))["models"].get(sys.argv[2], {}).get("shards", 1)
+print(v if type(v) is int and v >= 1 else "")' "$ENGINES" "$1" 2>/dev/null
 }
 status() {  # status <model> <render> <seed> <engine> <exit> <t0> <t1> <runs> [note]: one line per run in <runs>
   "$PY" -B queue_status.py --root "$ROOT" --model "$1" --render "$2" --seed "$3" --engine "$4" --exit "$5" \
@@ -110,16 +128,26 @@ for m in $MODELS; do
       fi
       extra=""; case $eng in hf|hfb) extra=--hf-untested-ok;; esac
       [ -n "$Q_LIMIT" ] && extra="$extra --limit $Q_LIMIT"
-      log=$LOGS/rc12_dev/${s}_${r}_${seed}.log; lk=$LOGS/rc12_dev/.${s}_${r}_${seed}.lockstart
+      nsh=$(shards_of "$m")
+      if [ -z "$nsh" ]; then status "$m" "$r" "$seed" "$eng" BADSHARDS "$t" "$t" "$runs" engines.json_shards; continue; fi
+      parts=-; [ "$nsh" -gt 1 ] && parts=$(seq 0 $((nsh - 1)))
+      for p in $parts; do
+      sarg=""; sfx=""; snote=""
+      if [ "$p" != - ]; then
+        if [ "$p" -lt $((nsh - 1)) ] && { [ -e "$d/DONE" ] || [ -e "$d.shards/${p}of$nsh/DONE" ]; } \
+          && { [ -e "${d}_owncf/DONE" ] || [ -e "${d}_owncf.shards/${p}of$nsh/DONE" ]; }; then continue; fi
+        sarg="--shard $p/$nsh"; sfx=_s$p; snote=" shard $p/$nsh"; t=$(now)
+      fi
+      log=$LOGS/rc12_dev/${s}_${r}_${seed}${sfx}.log; lk=$LOGS/rc12_dev/.${s}_${r}_${seed}${sfx}.lockstart
       rm -f "$lk"; note=""
       if [ $held -eq 0 ]; then take_lock "$s $r $seed ($eng$pnote)"
       elif [ -e "$LOGS/$NAME.STOP" ]; then release "STOP file"; echo "$(ts) queue: STOP file, exiting"; exit 0
       fi
       if [ $held -eq 1 ]; then
-        sk=$((sk + 1)); note="session $$.$sn process $sk"; [ -s "$lk" ] || now > "$lk"
-        echo "$(ts) queue: $s $r $seed ($eng$pnote) session $$.$sn process $sk"
+        sk=$((sk + 1)); note="session $$.$sn process $sk$snote"; [ -s "$lk" ] || now > "$lk"
+        echo "$(ts) queue: $s $r $seed$snote ($eng$pnote) session $$.$sn process $sk"
         timeout -k 120 "$TMO" bash -c 'exec 9>&-; exec "$@"' proc "$mpy" -B dev_batch.py --responder "$eng:$m" \
-          --render "$r" --seeds "$seed" --root "$ROOT" --engines "$ENGINES" $extra >> "$log" 2>&1 8>&-
+          --render "$r" --seeds "$seed" --root "$ROOT" --engines "$ENGINES" $extra $sarg >> "$log" 2>&1 8>&-
         rc=$?
       fi
       t1=$(now); [ -s "$lk" ] && t0=$(cat "$lk"); rm -f "$lk"
@@ -129,9 +157,10 @@ for m in $MODELS; do
           release "$((st0 + SESSION_S - t1)) s of $SESSION_S left, next needs $need"
         fi
       fi
-      echo "$(ts) queue: $s $r $seed ($eng) exit $rc, $((t1 - t0)) s under the lock, log $log"
+      echo "$(ts) queue: $s $r $seed$snote ($eng) exit $rc, $((t1 - t0)) s under the lock, log $log"
       status "$m" "$r" "$seed" "$eng" "$rc" "$t0" "$t1" "$runs" "$note"
-      [ $rc -ne 0 ] && failed=$seed
+      [ $rc -ne 0 ] && { failed=$seed; break; }
+      done
     done
   done
 done

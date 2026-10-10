@@ -8,7 +8,8 @@ As a program it is one of two fakes that setup() installs in <base>/shim (flock 
           held at its start and end, the queue's lock fds 8 / 9 it inherited) and every queue_status.py call (gpu.lock
           held or not). With $FAKE_DUR ("MODEL=s ...") a process is fake: it adds its seconds to the clock file $Q_CLOCK
           touches the STOP file if it is process number $FAKE_STOP_AT, leaves a grandchild (sleep $FAKE_CHILD, every
-          inherited fd kept), sleeps $FAKE_SLEEP real seconds; without it the real dev_batch.py runs. Else: real python.
+          inherited fd kept), sleeps $FAKE_SLEEP real seconds; without it the real dev_batch.py runs. A process whose
+          args contain $FAKE_FAIL exits 1 and runs nothing (test_queue_shards.py). Else: real python.
   python3 -B test_queue.py     (runs these cases too)"""
 import fcntl
 import json
@@ -126,6 +127,9 @@ def process(me, args):
             rec["child"] = subprocess.Popen(["sleep", os.environ["FAKE_CHILD"]], close_fds=False,
                                             start_new_session=True).pid
     logrec("PYLOG", dict(rec, ev="start"))
+    if os.environ.get("FAKE_FAIL") and os.environ["FAKE_FAIL"] in " ".join(args):   # this process fails, runs nothing
+        logrec("PYLOG", dict(rec, ev="end", held1=held(gl), rc=1))
+        return 1
     if fake:
         time.sleep(float(os.environ.get("FAKE_SLEEP") or 0))
         rc = 0

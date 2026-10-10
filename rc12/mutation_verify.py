@@ -36,6 +36,9 @@ MUTANTS = [
     (V, 'if a.get("gen_config_stops_not_in_hf"):', "if False:", "gen-config stop ids unchecked"),
     (V, 'if a.get("sampled") != want or', "if", "vLLM kwargs unchecked"),
     (V, "if leak:", "if False:", "HF generation_config fields unchecked"),
+    (V, 'if want_dt is not None and m.get("dtype") != want_dt:', "if False:", "STEP 14X D4: C1 dtype unchecked"),
+    (V, 'if m["engine"] == "hfb" and m.get("max_batch") !=', 'if False and m.get("max_batch") !=',
+     "STEP 14X D4: C1 max_batch unchecked"),
     (T, 'if (ta["reply"], ta["stop"]) != (tb["reply"], tb["stop"])), None)', "if False), None)",
      "replay comparison blind"),
     # Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 2): the near-tie standard

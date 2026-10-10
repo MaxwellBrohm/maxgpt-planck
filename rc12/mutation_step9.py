@@ -97,8 +97,9 @@ MUTANTS = [
      "the stop token is cut off a batched reply"),
     ("hf_batched", "    elif len(out) >= cap and", "    elif len(out) > cap and", "hfb", "a capped reply reads as eos"),
     ("dev_batch", 'open(os.path.join(tmp, "DONE"), "w").close()', "pass", "batch", "a run is never marked DONE"),
-    ("dev_batch", "own if own_cf else recs", "recs", "batch", "the cf twin runs every family"),
-    ("dev_batch", "shutil.rmtree(tmp, ignore_errors=True)", "pass", "batch", "a stale .partial is kept"),
+    ("dev_batch", "data = own if own_cf else recs", "data = recs", "batch", "the cf twin runs every family"),
+    ("dev_batch", 'tmp = final + ".partial"\n    shutil.rmtree(tmp, ignore_errors=True)', 'tmp = final + ".partial"\n    pass',
+     "batch", "a stale .partial is kept"),
 ]
 
 

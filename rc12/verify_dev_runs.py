@@ -9,7 +9,8 @@ still pick up), C2 own-cf pairing (every seed has its twin: same seed, render, r
 ids are the dev run's OWN ids; R is not None), C3 seeds (every row carries its run's seed; turn-1 replies, identical
 prompts, differ across sampling seeds), C4 stops (template: eos / eot / cap; plain adds role, and reply = strip of
 the role cut of raw), C5 the turn-3 prompt of one conversation rebuilt from its own history with the model's
-tokenizer (printed; no system turn passed; Qwen3-family prompts end in an empty think block).
+tokenizer (printed; no system turn passed; Qwen3-family prompts end in an empty think block). C1 also checks a
+sharded run's shards against engines.json (rc12/shards.py; notes STEP 14X).
 --rerun N (rerun_tie.py; Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 2)): R1 the
 first N conversations of the first sampled run, replayed in lockstep, vs the stored rows; R2 the same N greedy in
 lockstep vs the same N played sequentially (runner.play, one request per engine call), and vs the stored greedy rows.
@@ -30,6 +31,7 @@ import render as RD
 import rerun_tie as RT
 import runner as R
 import score as S
+import shards as SH
 import vllm_responder as VR
 
 OK_STOPS = {"template": {"eos", "eot", "cap"}, "plain": {"eos", "eot", "cap", "role"}}
@@ -82,6 +84,17 @@ def c1_config(name, run, engines, expect):
     for k in ("chat_template", "nan_guard", "use_cache"):                            # notes STEP 11, item 14
         if m.get(k) != DB.hf_options(m["model"], engines)[k]:
             say("FAIL", f"C1 {name}: {k} {m.get(k)!r} is not engines.json's")
+    try:                                                    # rc12/shards.py, notes STEP 14X
+        nsh = SH.of_engines(m["model"], engines)
+    except ValueError as e:
+        nsh = str(e)
+    if (m.get("shards") or 1) != nsh:
+        say("FAIL", f"C1 {name}: shards {m.get('shards')!r} is not engines.json's ({nsh})")
+    want_dt = DB.chosen_dtype(m["model"], engines)          # STEP 14X review D4: dtype and (hfb) max_batch too
+    if want_dt is not None and m.get("dtype") != want_dt:
+        say("FAIL", f"C1 {name}: dtype {m.get('dtype')!r} is not engines.json's ({want_dt})")
+    if m["engine"] == "hfb" and m.get("max_batch") != DB.hf_options(m["model"], engines)["max_batch"]:
+        say("FAIL", f"C1 {name}: max_batch {m.get('max_batch')!r} is not engines.json's")
     exp = expect[1] if m["own_cf"] else expect[0]           # (records, OWN records) of --data: 640, 48 on dev
     if len(run["rows"]) != m["conversations"] or (m.get("limit") is None and m["conversations"] != exp):
         say("FAIL", f"C1 {name}: {len(run['rows'])} rows, meta {m['conversations']} conversations, expected {exp}")

@@ -1,5 +1,6 @@
 """RC-12 item 14 extras (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 14); notes STEP 11):
-score the sub-30M public chat models' dev runs (and cRia-75M) as REPORTED extras (never headroom-panel members) with
+score the sub-30M public chat models' dev runs (and cRia-75M; since 2026-10-10 also minimind-3 and the P-144
+Falcon-H1-Tiny-90M siblings, the Base on its plain render only, notes STEP 14X) as REPORTED extras (never headroom-panel members) with
 the scorer of this tree, plus the Vertex-0.6-15M card row (its card's sampling, engines_card.json; NOVELTY_2026-10
 s6), reported beside its plain-decoding row. No model, no GPU.
   python -B dev_extras14.py --root <copy of the PC's rc12_dev holding the extras> --panel-root <regraded STEP 10a copy>
@@ -28,7 +29,11 @@ import score_stats as ST
 
 EXTRAS14 = ["Veyra2-Blueberry-5M-Instruct", "BananaMind-2-Nano-Chat", "Veyra2-Blueberry-10M-Instruct",
             "Vertex-0.6-15M-Instruct", "Veyra2-Mango-15M-Instruct", "Loom-Spark-3.2", "BananaMind-2-Mini-Chat",
-            "Swen-28M", "Veyra2-Mango-30M-Instruct", "cRia-LM-75M-Instruct"]          # by size (rc12/pins.json)
+            "Swen-28M", "Veyra2-Mango-30M-Instruct", "minimind-3", "cRia-LM-75M-Instruct",
+            "Falcon-H1-Tiny-90M-Instruct-Curriculum", "Falcon-H1-Tiny-90M-Instruct-pre-DPO",
+            "Falcon-H1-Tiny-90M-Instruct-Curriculum-pre-DPO", "Falcon-H1-Tiny-90M-Base"]   # by size (rc12/pins.json):
+# every pinned extra (test_dev_extras14.py): item 14's ten, minimind-3 (STEP 13a) and the P-144 siblings (STEP 13)
+PLAIN_ONLY = {"Falcon-H1-Tiny-90M-Base"}   # ships no chat template (notes STEP 13): its plain render only, a diagnostic
 CARD = {"Vertex-0.6-15M-Instruct": "Vertex-0.6-15M-Instruct@card"}           # model dir -> its card row's label
 SEEDS = ["greedy", "1", "2", "3"]
 LCELLS = ["menu", "rota", "tour"]
@@ -90,6 +95,15 @@ def score_one(root, model, label, render, seeds, recs, comp, comp_rows, boot, ou
         out["persist"][label] = ST.persist_base_rates(rows3, out["rules"])
 
 
+def jobs(root, card_root=None):
+    """(root, model dir, label, render, seeds) to score: every extra on both renders, a PLAIN_ONLY one on plain only,
+    then the card rows (template, seeds 1-3) when card_root is given."""
+    out = [(root, m, m, r, SEEDS) for m in EXTRAS14 for r in DP.RENDERS if r == "plain" or m not in PLAIN_ONLY]
+    if card_root:
+        out += [(card_root, m, lab, "template", ["1", "2", "3"]) for m, lab in CARD.items()]
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", required=True)
@@ -110,10 +124,9 @@ def main():
         comp_rows[render], _ = regrade(rows, recs)
         comp[render] = S.summarize(comp_rows[render])
     out = dict(per_seed=[], mean3=[], ci={}, persist={}, status={}, ids={}, rules=ST.persist_rules(list(recs.values())))
-    jobs = [(args.root, m, m, r, SEEDS) for m in EXTRAS14 for r in DP.RENDERS]
-    if args.card_root:
-        jobs += [(args.card_root, m, lab, "template", ["1", "2", "3"]) for m, lab in CARD.items()]
-    for root, model, label, render, seeds in jobs:
+    for m in sorted(PLAIN_ONLY):
+        out["status"][f"{m}|template"] = "plain render only (ships no chat template): not scored"
+    for root, model, label, render, seeds in jobs(args.root, args.card_root):
         if not complete(root, model, render, seeds):
             out["status"][f"{label}|{render}"] = "incomplete: not scored"
             continue

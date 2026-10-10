@@ -3154,3 +3154,143 @@ Owed before its dev runs (Saturday, with STEP 13's extras): s12's extras text ga
 engine parity run (families are per recipe, as Vertex and Veyra2 each got one; NOT the Qwen3 family by architecture
 alone); an engines.json entry at the shipped float16 unless parity fails there; a pins.json entry moved out of
 "skipped"; dev_extras14.py's list widened with a test. Supra2-Medium-Instruct stays out (decision 5 (b), Max's ruling).
+
+STEP 14X (2026-10-10, 16:50 to about 17:50 EDT, Claude, W4 extras; nothing committed in this step, nothing under
+sealed/ read, no Planck model scored, no model loaded on the Mac): the RC-12 extras made runnable before the lock.
+Research/CUTS_AUDIT_2026-10.md S9 to S12; STEP 13 and 13a owed these. Prereg draft changes below, dated here.
+MINIMIND-3 (STEP 13a: Max's yes of 2026-10-07)
+  Download (PC 16:57, ~/planck/logs/w4_mm3.log): 183 GB free before and after; branch main into ~/planck/hf,
+    images/ skipped; refs/main == the pin f92512d4cd6142fa9acc0d6022375049a8974bf6 (the hub's main was still that
+    commit, HF API from the Mac); sha256(model.safetensors) 3adf6940...f2162e8 == the hub's LFS sha256. Licence at the
+    revision: card YAML apache-2.0, tag license:apache-2.0, README_en's License section; not gated.
+  Parity (its own; families are per recipe): parity_hf_vllm.py --model jingyaogong/minimind-3 --n 20 --pick spread
+    --dtype float16 --engines engines.json --gpu-mem 0.85, code = git archive of 4ad2be4's rc12/ (md5-checked, in
+    ~/planck/dev/rc12_w4mm3), one gpu.lock hold 16:57:12 to 17:01:45 (273 s), out ~/planck/runs/rc12_dev/minimind-3/
+    parity. NEAR_TIE: 228/240 turns identical, 12/20 conversations, 0 prompt mismatches, 12 differing turns, every
+    first difference at margin <= 0.031 nats (margins 0.0 x 6, 0.016 x 5, 0.031), 1 stop disagreement
+    (rc12-dev-persist-001 turn 6: the texts split at token 69 at margin 0.000; then HF ran to the 256-token cap and
+    vLLM ended at eos). vLLM stop ids [2, 0] (<|im_end|>, <|endoftext|>), qwen3 True, thinking_rule_differs False
+    (the template writes the empty think block itself unless open_thinking is set). fp32 not run: float16 passed.
+  engines.json: vllm, float16 (the checkpoint's own), family minimind-3, parity "fp16 NEAR_TIE". pins.json: out of
+    "skipped" into "models" (revision, licence, F16, 127,834,168 bytes, sha256, 63,912,192 parameters, ctx 32,768).
+CRIA-LM-75M-INSTRUCT, DEVIATION (2026-10-10, before any of its dev runs exists: 0 of 16; replaces STEP 13's "cap
+  back to 10,800 s, one process per seed, after the SCREENS chain")
+  Why: the 2026-10-04 processes (one lockstep pass of 640 conversations, 512M token budget) were killed at 1,950 s
+    after 9 of 12 turns (~/planck/logs/rc12_s14b/rc12_dev/cRia-LM-75M-Instruct_template_greedy.log: turn times 45,
+    72, 101, 128, 163, 193, 219, 255, 506 s; peak 10.22 GiB at 61 rows x 2,306 tokens, where the turn time doubled:
+    the 12 GB card spilling). One unsplit process would take well over an hour under gpu.lock (rule: holds under 35
+    min; other queues give up after a 2 h wait).
+  Change: engines.json "shards": 10 and "max_batch": 32 for cRia. rc12/shards.py (new) and dev_batch.py --shard I/N:
+    process I plays records I, I + 10, ... of the seed's dev run (64 conversations) and of its own-cf twin (4 or 5),
+    publishes each part durably to <run>.shards/IofN/, and the process that finds all 10 parts DONE merges them into
+    the run dir in record order (transcripts.jsonl, scores.jsonl, meta.json as one process writes them, plus shards,
+    shard_seconds, shard_batches, shard_finished), then removes the parts. The merge refuses unless every part names
+    the same N, its index, the run's own ids and the same run config. A model with "shards" N > 1 runs only with
+    --shard I/N. What changes: only which conversations share a lockstep batch and that a generate call holds at
+    most 32 rows. Sampling draws are per conversation and turn (hf_responder.conv_seed) and cRia's parity is
+    IDENTICAL (batched vs serial HF, with use_cache), so no reply is expected to move; on the fakes a 3-shard run's
+    files are byte-identical to the one-process run's (test). queue_dev_baselines.sh runs a sharded model's seed as
+    N processes (each one process for the session rule, its own log _s<I>, status note "shard I/N"), skips a shard
+    whose two parts are DONE except the last, which always runs while a run is unmerged (it merges without an
+    engine after a cut). verify_dev_runs C1 checks meta "shards" against engines.json.
+  Smoke (scratch: the working tree's rc12 in ~/planck/dev/rc12_w4smoke, root ~/planck/runs/rc12_w4_smoke, not a
+    scored run; one gpu.lock hold 17:10:37 to 17:16:53): template greedy --shard 0/10: dev part 64 conversations
+    326.9 s (turn times 7.4 to 47.2 s, peak 7.43 GiB at 32 rows x 3,100 tokens), twin part 5 conversations 44.0 s,
+    376 s under the lock in all. Estimate, from this one shard: 80 processes, about 8.5 GPU h for cRia's 16 runs.
+  Cap: the launcher passes Q_TIMEOUT 1,020 s (2.7 times the smoke's process). A shard that still passes it fails
+    its render (the queue skips the rest of that render); then cRia stays "not run" with the measured time, or a
+    larger N is a new dated deviation before any further run.
+LAUNCHER: rc12/extras/rc12x_extras.sh (moved into the repo from the staged copy outside it; no machine paths; CODE =
+  its parent dir, i.e. the shipped code dir). Phases A (P-144 siblings, 48 runs), B (Falcon-H1-Tiny-90M-Base, plain,
+  8), D (minimind-3, 16), C (cRia, split, 16) in the order A B D C (long chains last), or the phases named on its
+  command line. Every phase passes Q_SESSION_S 1500, Q_SESSION_TAIL 600, Q_TIMEOUT 1020: a non-first process starts
+  within 900 s of the hold's start and ends within 1,140 s, so no hold passes 2,040 s. Before every phase it waits
+  for no RC-12 queue or dev_batch.py (two quiet polls; e.g. a boot-resumed queue); before C also for the SCREENS
+  chain's end (mark SCREENS_BASE_DIAG_DONE and no queue_screens, launch_screens, s006_waiter, chain_waiter,
+  base_diag_waiter or diag_queue process; --no-chain-wait skips it). A, B and D interleave with SCREENS through
+  gpu.lock. Preflight: every chosen model in engines.json and the HF cache, cRia split if C is chosen; then the
+  STEP 13 checks (stop files, 45 GB, a clean queue end with the phase's own run count).
+BOOT RESUME: queue_dev_baselines.sh writes ~/planck/logs/rc12_dev_queue.run (run id, pid, code, Q_MODELS on one
+  line, Q_RENDERS, Q_SEEDS, Q_ROOT, Q_ENGINES, Q_TIMEOUT, Q_SESSION_S, Q_SESSION_TAIL, Q_LIMIT, the values in
+  effect) before its start line, which now ends ", run ID". pc/wsl/boot.d/30_rc12.sh restarts a cut-off queue with
+  those settings when the run file's id is the last start line's; a run id without its run file, a missing key, an
+  empty value (Q_LIMIT may be empty) or text outside [A-Za-z0-9._/: -] is not resumed; an older start line without
+  an id restarts with the defaults as before. The launcher is not restarted by boot: the cut phase finishes, a
+  person starts the launcher again for the later phases (it waits for that queue; runs and parts are skipped).
+DEV_EXTRAS14: EXTRAS14 widened to every pinned extra in size order (item 14's ten, minimind-3, the four P-144
+  checkpoints); the Base is scored on plain only (PLAIN_ONLY; its template row says why it is not scored).
+PREREG (draft s12, dated here): after the 2026-10-04 cRia lines, "Added before the lock": P-144 (four checkpoints,
+  the Base plain only), minimind-3 (its parity and the Chinese-data caveat), the cRia deviation, P-145 "not run: no
+  licence at the pinned revision", and the rule that an unfinished extra gets "not run" with its reason; the
+  known-and-unscored paragraph says cRia's split rerun is pending. Dev numbers: not yet run for all of them.
+TESTS (2026-10-10; Mac ~/.venvs/planck, and on the PC from working-tree tars in scratch dirs ~/planck/dev/w4_*,
+  CPU only, with GNU grep 3.12, bash 5.3, util-linux flock 2.41.3, procps pgrep 4.0.4)
+  New: test_dev_batch_shards.py (equal, merge, refuse, verify), test_queue_shards.py (S1 to S4, S3b; run from
+    test_queue.py), test_dev_extras14.py, extras/test_rc12x_extras.py (fakes; 42 runs of the script), pc/tests/test_boot_rc12.py
+    (+4 tests, 8 cases). Changed: test_pins_engines.py (minimind-3, shards), test_queue.py (run file models line),
+    test_queue_sessions.py (FAKE_FAIL hook).
+  PC: test_dev_batch, _shards, _durable, test_verify_dev_runs, test_pins_engines, test_dev_extras14, test_parity,
+    test_chat_template, test_loom_template, test_decode_variant, test_engine_patches, test_hf_trust,
+    test_vllm_responder, test_lockstep, test_queue, extras/test_rc12x_extras: exit 0. pc/tests test_boot_rc12 +
+    test_boot_resume 51 passed.
+  Mutants: mutation_queue.py 67 / 67 killed (51 before, 2 retargeted to the new text, 16 new; Mac, 1,420 s;
+    logs/mutation_queue.txt, its 16 labels renamed STEP 14 to STEP 14X after the run, temp paths scrubbed);
+    mutation_step14x.py (new) 26 / 26 (Mac and PC; logs/mutation_step14x.txt); pc/tests/mutation_check.py rc12_ boot
+    mutants 16 / 16 on the PC (8 new, 1 retargeted; the NUL-tail one dies under GNU grep); regression on the PC:
+    mutation_verify ALL KILLED, mutation_s14 ALL KILLED. mutation_step9: first 45 killed, 2 MALFORMED (#45, #46:
+    their dev_batch texts now occur twice, in run_one and the shard path); retargeted to the unsharded lines, then
+    47 / 47 killed (PC). extras/mut_rc12x.py 35 / 35 killed on the PC (a first run had 34: bad_phase_accepted was an
+    equivalent mutant, the exit 2 still ran; retargeted to drop the exit).
+  The full pc/tests suite on the PC: 171 passed, 1 failed, twice; the failure is the flaky test below.
+  Integration (Mac): the real queue on fakes wrote its run file; 30_rc12.sh --dry-run on that log (end line removed)
+    printed the restart with exactly those settings.
+  PC dry run of the launcher (~/planck/logs/w4_rc12x_dry.log): working-tree code, queue replaced by a fake, scratch
+    RX_HOME, real pgrep / df / flock / md5sum: phases A B D C in order with Q_SESSION_S 1500, Q_SESSION_TAIL 600,
+    Q_TIMEOUT 1020 (Base with Q_RENDERS plain), the chain wait passed (no SCREENS process on the PC then), end marker
+    48 / 8 / 16 / 16; a rerun of A ended at once; a bad phase name exit 2. It printed a "No such file" warning for
+    the missing queue log, fixed (the count of log lines now starts at 0 when there is no log).
+  Not related to this step: pc/tests/test_runner_start.py::test_low_disk_during_a_job_checkpoints_and_requeues is
+    flaky at HEAD too (an export of HEAD's pc/: 2 of 6 runs fail on the Mac; 1 failure in the PC's full pc run).
+NOT DONE: no extra's dev run (A, B, C, D wait for the commit and its archive); verify_dev_runs C1 to C5 and the md5
+  pull per phase; dev_extras14.py on the results and the s12 numbers; KeyLM-75M and petitgpt in s12's known-unscored
+  list (cuts audit row 76); P-147's line; the boot.d install of the new 30_rc12.sh on the PC. No independent review
+  of this step yet.
+FILES: rc12/shards.py, dev_batch.py, verify_dev_runs.py, queue_dev_baselines.sh, engines.json, pins.json,
+  dev_extras14.py, extras/ (rc12x_extras.sh, test_rc12x_extras.py, mut_rc12x.py), test_dev_batch_shards.py,
+  test_queue_shards.py, test_dev_extras14.py, test_pins_engines.py, test_queue.py, test_queue_sessions.py,
+  mutation_queue.py, mutation_step14x.py, mutation_step9.py, logs/mutation_queue.txt, logs/mutation_step14x.txt,
+  notes.txt; pc/wsl/boot.d/30_rc12.sh, pc/tests/test_boot_rc12.py, pc/tests/mutation_check.py, pc/RUNBOOK.txt;
+  prereg/RC-12.draft.txt (s12 hunk only).
+REVIEW AND FIXES (2026-10-10, 19:00 to 20:00 EDT, Claude, W4 commit agent; nothing under sealed/ read, no model
+  loaded on the Mac, the GPU not used). The independent review of this step found 2 medium and 4 low defects; all
+  six are fixed before the commit, each with a test watched failing on its mutant:
+  D1 (medium) pc/tests/mutation_check.py's boot mutant rc12_fixed_code_dir used $HOME/planck/dev/rc12_dg, and the boot
+    tests passed the real HOME, so this step's PC mutant run started the REAL queue (rc12_dev_queue.log
+    2026-10-10T17:22:18, rc12_dg, "complete 208 of 208 runs" at once: harmless only because all 208 were done). Now
+    the mutant uses the test's PLANCK_HOME and test_boot_resume.py's box (and test_runner_start_sh.py) set HOME to a
+    temp dir. Committed in pc/ first (06bc24c) with the flaky-test fix below.
+  D2 (medium) phase C's chain wait read SCREENS_BASE_DIAG_DONE, on the PC since 10-07, while W1's chain continues
+    (SCREENS.txt AMENDMENT C6-DIAG, BASE-REPLAY, INTEGRATION 2026-10-10): C would have waited only for no SCREENS
+    process at two polls. Now C waits for every file of MARKS, runs/SCREENS/marks/SCREENS_BASE_REPLAY_DONE (the end
+    mark of plans/stage2_replay.txt) and c6diag/DONE (diag_queue.sh's end), and SPAT adds replay_waiter.sh,
+    diag_start.sh, diag_runner.py and c1a_gate.sh. Tests: either mark alone, the old mark alone and each new
+    process name hold C. If W1's chain stops for a person before its marks, C waits; it starts then only by a
+    dated entry here (--no-chain-wait C), never silently.
+  D3 (low) the launcher's "new queue-log lines only" rule had no test (a whole-log read survived): new fake queue
+    mode "silent" (writes nothing, as a missing script would) after A B D: C must stop, exit 1, no C.DONE.
+  D4 (low) verify_dev_runs C1 now fails a run whose dtype is not engines.json's (when it names one) or, on hfb, whose
+    max_batch is not; test_verify_dev_runs cases "dtype" and "hfb max_batch"; test_dev_batch_shards requires every
+    key of a one-process meta in the merged meta (the review's M13, max_batch dropped by the merge, now dies).
+    Every stored dev run on the PC agrees (read 19:35: 23 models' meta dtype equal to engines.json's; Doge 32 = 32,
+    the other hfb runs None = None), so no stored run starts failing C1.
+  D5 (low) the prereg s12 change is two hunks (the extras block and the known-unscored paragraph); its STEP citation
+    now reads 14X. Added there too: KeyLM-75M-Instruct and petitgpt on the known-unscored list (cuts audit row 76).
+  D6 (low) ship into a directory named for the commit, ~/planck/dev/rc12x_<commit8>, never reused (the queue's start
+    line and the run file record the code dir, so the dir name records the commit); launcher header says so.
+  FLAKY pc/tests/test_runner_start.py low-disk test: the trip could reach fake_job before its SIGTERM handler was set
+    (killed with no checkpoint, about 1 run in 3); proven with a slow-start fake (old test fails every time, new
+    passes) and fixed in the test (trip once "started" exists). 15 of 15 runs pass.
+  Mac, after the fixes: extras/mut_rc12x.py 43 / 43 killed (35 before, 1 retargeted; new: 4 SPAT names, 4 mark
+    rules, the whole-log read; the old mark mutant dropped); mutation_step14x.py 27 / 27 (+M13); mutation_verify.py
+    36 / 36 (+2: C1 dtype, C1 max_batch); pc/tests/mutation_check.py --group boot 72 / 72, --group start 10 / 10;
+    pc/tests 172 passed on an export of the pc commit's index.

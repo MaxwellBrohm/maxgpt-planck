@@ -96,6 +96,10 @@ CASES = [  # (name, run dir, corruption, text the verifier must print, --rerun?)
     ("hf gen-config field", P + "1", lambda d: edit_meta(d, lambda m: m.update(
         engine="hf", audit=dict(hf_generation_config={"no_repeat_ngram_size": 3}))),
      "FAIL C1 1: generation_config fields", False),
+    ("dtype", P + "1", lambda d: edit_meta(d, lambda m: m.update(dtype="bfloat16")),   # notes STEP 14X review D4
+     "FAIL C1 1: dtype 'bfloat16' is not engines.json's (float32)", False),
+    ("hfb max_batch", P + "1", lambda d: edit_meta(d, lambda m: m.update(engine="hfb", max_batch=32)),
+     "FAIL C1 1: max_batch 32 is not engines.json's", False),
 ]
 
 

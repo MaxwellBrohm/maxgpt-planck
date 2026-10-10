@@ -941,7 +941,32 @@ becomes training text). The two share the label D8 by accident.
     PC, the run dirs pulled with an md5 manifest equal on both sides, 137 files; STEP 12): BananaMind-2-Mini-Chat,
     both renders, and Swen-28M's plain render (R 4.53, S7 0.00; a diagnostic). cRia-LM-75M-Instruct: not run. Its
     first two processes (template and plain greedy) were each killed at the 1,950 s process cap (exit 124, 1,951 s
-    under the GPU lock) before finishing a run, so 0 of its 16 runs exist and the clause does not read it.
+    under the GPU lock) before finishing a run, so 0 of its 16 runs exist and the clause does not read it. It is run
+    again, split, under the deviation below (rc12/notes.txt STEP 14X).
+    Added before the lock (rc12/notes.txt STEP 13, 13a and 14X; research/CUTS_AUDIT_2026-10.md S9 to S12), each at the
+    revision pinned in rc12/pins.json, with the s4 decoding, template render primary and plain diagnostic:
+    P-144, the Falcon-H1-Tiny-90M checkpoints other than Instruct: -Instruct-Curriculum, -Instruct-pre-DPO,
+      -Instruct-Curriculum-pre-DPO and -Base (91,131,072 parameters each; the TII Falcon License, the core panel's
+      Falcon-H1-Tiny-90M-Instruct's, Apache-2.0-based, commercial use allowed, not gated; bf16, the checkpoint's own;
+      vLLM with Falcon-H1-Tiny-90M-Instruct's family verdict). Each runs in its own chat template; the pre-DPO pair's
+      ships with its release and is used as shipped. The Base ships no chat template and lacks the chat tokens, so it
+      runs the plain render only, a diagnostic the clause never reads. Dev: not yet run.
+    minimind-3 (jingyaogong/minimind-3; Max, 2026-10-07): Apache-2.0, 63,912,192 parameters, Qwen3ForCausalLM with
+      its own 6,400-token tokenizer, float16 (the checkpoint's own; the panel's only float16 model), on vLLM after its
+      own parity (NEAR_TIE: 228 of 240 turns identical, 0 prompt mismatches, every first difference at margin <= 0.031
+      nats). Its training data are mostly Chinese while RC-12 is English; that is reported beside its scores, not
+      used to exclude it. Dev: not yet run.
+    cRia-LM-75M-Instruct, deviation recorded 2026-10-10 before any of its runs exists: each run is played by 10
+      processes, process i taking conversations i, i + 10, ... of the run (the seed's dev run and its own-cf twin),
+      and merged into one run in the record order (rc12/shards.py); a generate call holds at most 32 rows. Only
+      which conversations share a lockstep batch changes: sampling draws are per conversation and turn, and its
+      parity is IDENTICAL (batched vs serial HF). A process of 64 conversations took 326.9 s in a smoke (peak 7.43
+      GiB), against the whole run's 1,951 s and 9 of 12 turns before. Dev: not yet run.
+    P-145 (SmolLM2-135M SFT-only vs Instruct): not run: no licence at the pinned revision
+      (HuggingFaceTB/smollm2-135M-SFT-Only at 79528469cd11, read 2026-10-06: no licence in the card, the tags, a
+      LICENSE file or the README; SmolLM2-135M-Instruct is Apache-2.0).
+    An extra in this list whose dev runs do not finish before the lock is listed with "not run" and the reason, as
+    above; its row here is then rewritten with its numbers or that line before the lock.
   Generation on the 5070 only (the Mac runs likelihood rows only). Every model: template render primary, plain render
   diagnostic, 3 sampling seeds, greedy secondary.
   Baseline clause (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 7): widened to every
@@ -972,9 +997,12 @@ becomes training text). The two share the label D8 by accident.
     b)): every claim is worded "on our panel" (s1, s10b), and these public small chat models are known and not on it:
     MiniMind2-Small (25.8M; no licence on its card), spark-13m, flame-27m and Pebble-25M (Apache-2.0, remote code),
     Supra2-Medium-Instruct (Apache-2.0), the newer Loom releases (Loom-Spark-3 12.2M, Weave-3 31.5M, Tapestry-3
-    69.2M), ShallowSeek-mini (no HF model class) and RxT-Alpha (RAML non-commercial licence, gated); and
-    cRia-LM-75M-Instruct is on the panel but not run (above). Every sub-30M model scored so far has an S7 of at most
-    2.09, so one of these reaching 40 is unlikely (the decision's judgment); none of them is read by the clause.
+    69.2M), ShallowSeek-mini (no HF model class) and RxT-Alpha (RAML non-commercial licence, gated); KeyLM-75M-Instruct
+    (75.3M, Apache-2.0, remote code) and petitgpt (124.6M, Apache-2.0, its own inference code), found by the novelty
+    check (research/NOVELTY_2026-10.md s6.3) and kept off for the engine work each needs (research/CUTS_AUDIT_2026-10.md
+    row 76); and cRia-LM-75M-Instruct is on the panel, its first run not finished and its split rerun pending
+    (above). Every sub-30M model scored so far has an S7 of at most 2.09, so one of these reaching 40 is unlikely (the
+    decision's judgment); none of them is read by the clause.
 
 13. SEALED SPLIT PROCEDURE (built later, in a separate session; PLAN Phase 0, P-049)
   S1 Author. One dedicated Claude session (the sealed session) writes NEW templates, value frames, fillers, paraphrase

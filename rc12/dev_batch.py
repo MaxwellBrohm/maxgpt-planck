@@ -21,6 +21,9 @@ hf_batched.TOKEN_BUDGET) and "chat_template" (any engine: a Jinja chat template 
 prompt is built, for a checkpoint that ships none; Loom-Spark-3.2's card format); meta.json records both.
 hf: responders need --hf-untested-ok (runner.py rule) and go through lockstep.Serial (no batching); hfb: (hf_batched.py,
 batched, same flag) is gated on its parity.json like vllm: (parity_hf_vllm.py --engine hfb).
+Shards (rc12/shards.py; notes STEP 14X): a model whose engines.json names "shards": N > 1 runs only with --shard I/N;
+the process plays records I, I + N, ... of each requested run into <run>.shards/IofN/ and merges a run once all N
+parts are DONE (the process that finds them all merges; a cut after the last part is merged by the next call).
 Run on the PC under the GPU lock (pc_jobs.py writes the job):
   python -B dev_batch.py --responder vllm:Qwen/Qwen2.5-0.5B-Instruct --render template --seeds greedy,1,2,3 \\
       --root ~/planck/runs/rc12_dev"""
@@ -35,6 +38,7 @@ import time
 import hf_responder as HR
 import runner as R
 import score as S
+import shards as SH
 
 PASSING = ("IDENTICAL", "NEAR_TIE")
 ENGINES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "engines.json")
@@ -199,6 +203,24 @@ def run_one(eng, name, data, render, seed, own_cf, final, ctx, extra):
     print(f"{final}: {len(rows)} conversations, {meta['seconds']} s, R_ungated {meta['R_ungated']}", flush=True)
 
 
+def run_part(eng, name, data, render, seed, own_cf, final, ctx, extra, i, n):
+    """shard i of n of one run (rc12/shards.py): records i, i + n, ... played, published as <final>.shards/<i>of<n>."""
+    part = SH.part_dir(final, i, n)
+    tmp = part + ".partial"
+    shutil.rmtree(tmp, ignore_errors=True)
+    os.makedirs(os.path.dirname(part), exist_ok=True)
+    before = len(getattr(eng, "batches", []))
+    t0 = time.time()
+    recs = SH.take(data, i, n)
+    rows = R.run(recs, eng, render, [seed], ctx, None, name, extra["train_seed"], own_cf, lockstep=True)
+    SH.write_part(tmp, rows, dict(shard=[i, n], ids=[r["id"] for r in recs], config=extra, model=name, render=render,
+                                  seed=seed, own_cf=own_cf, ctx=ctx, seconds=round(time.time() - t0, 1),
+                                  batches=getattr(eng, "batches", [])[before:], versions=versions(),
+                                  finished=time.strftime("%Y-%m-%d %H:%M:%S")))
+    publish_run(tmp, part)
+    print(f"{part}: {len(rows)} conversations, {round(time.time() - t0, 1)} s", flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--responder", required=True, help="vllm:<id>, hfb:<id> or hf:<id>")
@@ -216,6 +238,7 @@ def main():
     ap.add_argument("--gpu-mem", type=float, default=0.85)
     ap.add_argument("--max-model-len", type=int, default=None)
     ap.add_argument("--batch-invariant", action="store_true")
+    ap.add_argument("--shard", default=None, help="I/N: shard I of every requested run (engines.json shards N)")
     args = ap.parse_args()
     kind, _, model_id = args.responder.partition(":")
     root = os.path.expanduser(args.root)
@@ -243,9 +266,23 @@ def main():
         sys.exit(str(e))
     if gated and verdict not in PASSING and chosen != kind and not args.no_parity_gate:
         sys.exit(f"parity gate: {model_id} has parity verdict {verdict}; run parity_hf_vllm.py first")
-    todo = plan(root, model_id, args.render, R.parse_seeds(args.seeds))
+    try:
+        nsh = SH.of_engines(model_id, args.engines)
+        shard = SH.parse(args.shard) if args.shard is not None else None
+    except ValueError as e:
+        sys.exit(str(e))
+    if (nsh > 1 or shard is not None) and (shard is None or shard[1] != nsh):
+        sys.exit(f"engines.json names {nsh} shards for {model_id}: --shard {args.shard} does not fit")
+    seeds = R.parse_seeds(args.seeds)
+    todo = plan(root, model_id, args.render, seeds)
+    recs, own = R.load(args.data, None, args.limit), R.load(args.data, ["OWN"], args.limit)
+    if shard is not None:
+        for seed, own_cf, final in todo:          # every part DONE but no merge (a cut right after the last part)
+            if SH.all_done(final, nsh):
+                SH.merge(final, nsh, own if own_cf else recs, publish_run)
+        todo = [t for t in plan(root, model_id, args.render, seeds) if not SH.part_done(t[2], shard[0], nsh)]
     if not todo:
-        print("nothing to run: every requested run is DONE")
+        print("nothing to run: every requested run is DONE" + (f" (shard {args.shard})" if shard else ""))
         return 0
     ns = argparse.Namespace(render=args.render, dtype=dtype, device=args.device, gpu_mem=args.gpu_mem,
                             max_model_len=args.max_model_len, batch_invariant=args.batch_invariant, lockstep=True,
@@ -253,14 +290,19 @@ def main():
                             **hfo)
     eng, name = R.make_responder(args.responder, ns)
     ctx = getattr(eng, "ctx", None)
-    recs, own = R.load(args.data, None, args.limit), R.load(args.data, ["OWN"], args.limit)
     extra = dict(engine=kind, parity=verdict, engine_decision=chosen,
                  parity_gate_skipped=args.no_parity_gate and verdict not in PASSING and chosen != kind,
                  limit=args.limit, train_seed=args.train_seed, gpu_mem=args.gpu_mem, data=os.path.basename(args.data),
                  dtype=dtype, max_model_len=args.max_model_len, batch_invariant=args.batch_invariant,
                  decode=HR.DECODE, audit=engine_audit(eng), executable=sys.executable, **hfo)
     for seed, own_cf, final in todo:
-        run_one(eng, name, own if own_cf else recs, args.render, seed, own_cf, final, ctx, extra)
+        data = own if own_cf else recs
+        if shard is None:
+            run_one(eng, name, data, args.render, seed, own_cf, final, ctx, extra)
+            continue
+        run_part(eng, name, data, args.render, seed, own_cf, final, ctx, extra, shard[0], nsh)
+        if SH.all_done(final, nsh):
+            SH.merge(final, nsh, data, publish_run)
     return 0
 
 
