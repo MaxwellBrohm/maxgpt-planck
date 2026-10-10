@@ -20,7 +20,7 @@ def setup_home(tmp_path):
 
 
 def run(home):
-    env = {**os.environ, "PLANCK_HOME": str(home)}
+    env = {**os.environ, "PLANCK_HOME": str(home), "HOME": str(home.parent)}   # never the real home
     return subprocess.run(["bash", SCRIPT], env=env, capture_output=True, text=True, timeout=60)
 
 

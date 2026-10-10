@@ -88,12 +88,15 @@ def test_start_waits_for_disk_and_gpu(tmp_path, smi):
 
 def test_low_disk_during_a_job_checkpoints_and_requeues(tmp_path, smi, monkeypatch):
     calls = []
-
-    def free_gb(_path):                        # 100 GB at the start check, then 10 GB
-        calls.append(1)
-        return 100.0 if len(calls) == 1 else 10.0
-    monkeypatch.setattr(queue_runner.sysinfo, "free_gb", free_gb)
     out = add_job(tmp_path, "d", "--steps", "400")
+
+    # 100 GB at the start check, then 10 GB once the job is up. fake_job writes "started" after it sets its SIGTERM
+    # handler; a trip before that killed it with no checkpoint, so the test failed about 1 run in 3 (2026-10-10).
+    def free_gb(_path):
+        calls.append(1)
+        up = os.path.exists(os.path.join(out, "started"))
+        return 100.0 if len(calls) == 1 or not up else 10.0
+    monkeypatch.setattr(queue_runner.sysinfo, "free_gb", free_gb)
     make_runner(tmp_path, min_start_gb=25, stop_gb=15).loop()
     assert [r["trip"] for r in records(tmp_path)] == ["disk"]    # and no restart at 10 GB
     assert os.path.exists(os.path.join(out, "checkpointed"))

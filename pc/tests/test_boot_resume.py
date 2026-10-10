@@ -48,7 +48,10 @@ def box(tmp_path):
     shutil.copytree(BOOTD, str(home / "boot.d"))
     b["env"] = {**os.environ, "PLANCK_HOME": str(home), "PLANCK_KIT": str(b["kit"]), "E006_ROOT": str(b["e006"]),
                 "E006_LOGS": str(b["el"]), "RC12_CODE": str(b["rc12"]), "BOOT_VERIFY_S": "6",
-                "PATH": f"{tmp_path}/bin:{os.environ['PATH']}"}
+                "PATH": f"{tmp_path}/bin:{os.environ['PATH']}", "HOME": str(tmp_path / "userhome")}
+    # HOME too: a script (or a mutant of one) that falls back to $HOME/planck must land in tmp_path, never start
+    # the machine's real queues (rc12/notes.txt STEP 14X review D1: a mutant did, on the PC, 2026-10-10)
+    os.makedirs(b["env"]["HOME"])
     yield b
     subprocess.run(["pkill", "-f", str(tmp_path)], capture_output=True)
     time.sleep(0.3)
