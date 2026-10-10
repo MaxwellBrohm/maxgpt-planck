@@ -448,3 +448,26 @@ through prep_common, import only).
   reads bpb only).
   Scope: every E2 or E3 run started at or after this commit (E3 Part 2 and Part 3, E2 D1 and D2). Runs inside one
   comparison share one commit, so arms compare like for like; across commits they differ in this I/O path only.
+
+AFTER-E3 LABELS (2026-10-10, Claude; Mac CPU, no model; the PC read only, for stage B's four 250M F(CHAT) values,
+which results.json does not hold. Written under the cuts audit's S14, research/CUTS_AUDIT_2026-10.md row 88: E3's
+analysts left this label to E2's notes, outside their write scope.) The rule, from RULES above: "After E3: each stage
+decision is labelled 'resolved at one seed' when its best-vs-second difference exceeds E3's paired MDE at k = 1 (for
+F(CHAT)), else 'not resolved'. Picks stand either way, except by the E3 override above."
+  Inputs. MDE: E3 Part 1's paired k = 1 MDE on F(CHAT) at 5M, 0.790% of A's mean 1.1467 = 0.0091 bpb (E3 notes, PART 1
+    RESULT); at 20M, E3 Part 2's own k = 1 paired MDE 0.0102 bpb, with rule 4's reference 0.0077 beside it (E3 notes,
+    reading f). Differences: F(CHAT) of the final checkpoint at 250M slots (5M) or 500M slots (20M), seed 1, at the 4
+    decimals the stage rule compares.
+  Stage A (eta at r 1): best 3e-3 1.1479, second 1.5e-3 1.1487. Difference 0.0008 < 0.0091: NOT RESOLVED.
+  Stage B (r at eta 3e-3): best r 1 1.1479, second r 0.5 1.1484 (r 2 1.1533, r 4 1.1534, r 8 1.1555; read from
+    runs/E2/5m_e3_r{0.5,1,2,4,8}_b250M/bpb.jsonl on the PC, set CHAT at final_00007630.pt). Difference 0.0005 < 0.0091:
+    NOT RESOLVED.
+  Stage C (g at (3e-3, r 1), stage A's runs reused): best g 1 1.1479, second g 0.5 1.1487. Difference 0.0008 < 0.0091:
+    NOT RESOLVED. E3's later readings do not change this label, which the rule defines on seed 1's difference: the
+    registered seeds 2..8 re-check CONFIRMED the pick against g 0.5 (E3 arm B; p 0.0006), and E3 left the pick
+    unresolved against g 2 (6e-3, a seed-1 gap of 0.0032 bpb).
+  20M grid (g at 500M): best g 1 0.9726, second g 0.5 0.9749. Difference 0.0023 < 0.0102 (and < 0.0077): NOT RESOLVED.
+    E3 Part 2's registered re-check (seeds 2..3, df 1) moved nothing.
+  Q2 (transfer) is not a best-vs-second decision, so this rule gives it no label; its s values rest on seed-1 vertices.
+  Consequence: none. Every pick stands as RULES says: the 5M LR is (3e-3, r 1), confirmed by E3 against its runner-up;
+    20M and larger runs use A20 = (3e-3, r 1).

@@ -14,12 +14,12 @@ Version 2, 2026-09-24. It is built from the draft plan and its 28-item review, `
 
 **Changes requested by Max (Sep 24)**
 - **Vocabulary: measure the optimum instead of assuming 8,192.** E7 (P-158) grows from one size to three: 5M, 20M and 60M total parameters, each on a vocabulary grid of 2k, 3k, 4k, 6k, 8k, 12k, 16k, 24k and 32k at equal total parameters (depth adjusted by the budget solver), 2 seeds each, from one nested BPE family trained on the chat mix so every vocabulary is a truncation of the same merges. The grid is centered by the Tao et al. vocabulary law's estimate, then refined around the best point. Each arm is scored on bits per byte, the RC-12 dev battery and rare-name recall (P-096). From the three sizes we fit how the optimal vocabulary moves with model size, and each curve point uses its own measured optimum when it beats 8,192 by at least 1% bits per byte with no battery regression. The result is reported as a valley with its width, since the optimum is a range, not a single exact number.
-- **Token budget: measure how much more data buys before spending it.** New experiment E-tok (P-186): one long WSD run each at 5M and 10M, with decay branches taken at 500, 2,000, 5,000 and 20,000 tokens per parameter (one stable phase, several short decays, so the sweep costs little more than the longest run). Every branch is scored on the RC-12 dev battery. The curve's token budgets are then set from where multi-turn skills stop improving: the small sizes get thousands of tokens per parameter if skills are still rising (cheap on the 5070), and the 150M budget is set from the measured slope and the Titan time available.
+- **Token budget: measure how much more data buys before spending it.** New experiment E-tok (P-186). As asked (Sep 24): one long WSD run each at 5M and 10M, with decay branches at 500, 2,000, 5,000 and 20,000 tokens per parameter, every branch scored on the RC-12 dev battery. As costed, that is about 1,150-2,380 5070-hours, not the 40-80 first written (CORPUS 5.5), so the design that runs before the freeze is CORPUS 5.5's: a 5M trunk at 2 seeds to 2,000 tok/param with branches at 250 / 500 / 1,000 / 2,000 (35-75 h, est.), each branch scored as a base model and after one identical short SFT, on bits per byte and RC-12 dev margins (after the lock); its freeze rules (flat by 1,000, still rising at 2,000, rising faster than the web fits) set the curve budgets; the 10M curve runs take branches at 500 / 1,000 / 2,000 (and 5,000 on extension), a 3-seed token curve at about 14% overhead. The 20,000 tok/param point (amended 2026-10-10, cuts audit row 45): one 5M seed continues to 20,000 on the 5070 when the spare hours allow (about 109 GPU h eager by arithmetic, not measured), with its branch points fixed in P-186's pre-registration before the trunk starts; the Titan run after the 150M seeds (CORPUS 5.5 step 4) stays as the fallback. Still cut for budget and on Max's list (Appendix B, "for Max"), not dropped: the 10M trunk to 20,000 (about 315 h eager per seed by arithmetic: 199B tokens at bench_micro's 1.58 h per 1B, a full-row lower bound) and a second seed at 20,000. The curve's token budgets follow where multi-turn skills stop improving.
 - **No reused data, a corpus built for Planck.** Nothing from the MaxGPT-Ultra build is reused (it was made for a 1.1B general model and spends about 18% on code and math that Planck does not need). Planck gets its own corpus built from scratch: selected for conversation skill and plain language, deliberately light on facts, deduplicated and filtered by classifiers trained for this model, with verified synthetic dialogue from an Apache-2.0 teacher, as large as the token budget requires. The design is in progress (corpus design v1).
 - **Final models train as long as the calendar allows.** Short runs are for decisions; every curve model then gets the longest run the machines can give it, because at this size even small gains matter. P-186 decides how the time is split across sizes, and WSD lets the best model keep training and be re-decayed whenever GPU time frees up.
 - **Priority: how small can it go (Max, Sep 24).** Models of 30M total parameters and under are now the main target and get most of the GPU time, seeds and experiments; 60M and 150M stay on the curve as upper anchors, with the 150M still on the Titans after mid-December. The curve extends downward (for example 3M, 5M, 10M, 20M, 30M) until the multi-turn skills break, and finding that floor is itself a headline result. Small sizes also make the token budget cheap: tens of thousands of tokens per parameter fit on the 5070.
 - **The 360M block of E002 was skipped.** The repaired correction test passed at 135M on 5 of 5 seeds (its later audit found a wording shortcut, so general updating was not shown; see `docs/EXPERIMENTS.md`, E002), which makes the 360M arm unnecessary under its own reading rule. That GPU time goes to E003, the same correction test on much smaller public models (Pythia 14M to 160M, TinyStories 1M to 33M) to find where learning corrections breaks down.
-- **Corpus design v1 is in `CORPUS.md`.** Its data-rule defaults are adopted, and its token budgets are rebalanced toward 30M and under (addendum): about 5,000 tokens per parameter at 5-10M and 1,000-2,000 at 20-30M on the 5070, with 60M and 150M on the Titans.
+- **Corpus design v1 is in `CORPUS.md`.** Its data-rule defaults are adopted, and its token budgets are rebalanced toward 30M and under (addendum): about 5,000 tokens per parameter at 5-10M and 1,000-2,000 at 20-30M on the 5070, with 60M and 150M on the Titans. (Until 2026-10-10 the Phase 4 and section 5 tables still showed the older 10/30/60M at about 500 tok/param; they now carry these budgets, and CORPUS 7.4's edits are applied. See the 2026-10-10 block below.)
 
 
 **Status and schedule changes, 2026-09-26** (details and sources in `docs/EXPERIMENTS.md`)
@@ -37,11 +37,21 @@ Version 2, 2026-09-24. It is built from the draft plan and its 28-item review, `
   4. Alongside, on the 5070 (one job at a time under the GPU lock): E2 then E3, E006, and the teacher pilot. On the Mac, E003 finishes (running).
 - **Dates.** E2 and E3 can start as soon as the 5070 is free, before Oct 19: they need no RC-12, and their estimates are about 6 h for E2's 5M stages and 9 h for its 20M grid (from the bench before the speed-ups). Not moved: the lock (Oct 11-14; only step 1 of its nine-step checklist is done) and tokenizer v1 (Oct 18).
 
+
+**Changes from the cuts audit, 2026-10-10** (`research/CUTS_AUDIT_2026-10.md` item S8, rows 17, 18, 43-46, 73, 84, 85, and rows 35, 37, 53-58 for Appendix B). Text only. No result is involved: nothing here was written after reading a result it could change.
+- **No budget or usage rule cuts a bet silently** (Max, 2026-10-06: "if something can be helpful even a little we should give it its proper chance"; his quality-over-usage rule). Every standing rule below that says cut, drop or "only the must-run list" (the E4 no-signal branch, the Nov 22 checkpoint, the bench re-plan rule, the Phase 2 rate check, the generation cap, the Titan seed queue, "too many bets", and the Claude-usage row of section 7) now works one way: when it fires, it slows or defers work, and the list of bets it would cut goes to Max first, each with its cost and what it would decide. Nothing on that list is dropped before he answers. A bet that never runs stays "not run", never "failed".
+- **Phase 4 and section 5 carry the adopted budgets:** 5M, 10M, 20M and 30M on the 5070 at the CORPUS addendum's tokens per parameter, 3M conditional, 60M and 150M on the Titans; hours from bench_micro's measured rates where they exist.
+- **CORPUS 7.4's eight edits applied:** the strict-open core replaces readability-filtered FineWeb-Edu (mix v0, the recipe, the tokenizer sample, the Lambda prep); FineWeb-Edu moves to excluded (Q5) in the D8 table; the teacher gate measures at realistic request lengths, with the extra arms; the chat pool is R0/R1/R2/RH with a growth rule, P-187 and a 350-hour generation cap; P-186's cost fix (above); new LEDGER rows E-sel-0 to E-sel-6, E-src and P-187, with P-083, P-161, P-164 and P-165 marked absorbed; the 5M and 20M curve points; the PC disk at 250-300 GB.
+- **Data bets:** the 30-60 h of 5M screening in Phase 3's compute is an estimate, never a cap on a must-run data bet; P-051's 0.5% density point is restored; the dose-response arm (P-188) is a LEDGER row and has a 3b slot; on an E4 no-signal reading, E8-E10 move to 20M under new pre-registrations instead of dropping.
+- **Seeds at 60M and 150M:** 3 seeds each, queued on the Titans; the claim rules (3 seeds at the claimed size) are unchanged.
+- **Sealed split:** 600 conversations (Max, Oct 2-4), not the 1,000-1,200 first expected.
+- **Appendix B:** every one of the 106 ranked LEDGER bets that PLAN never placed gets a slot, a gate with its trigger, or a stated reason.
+
 ---
 
 ## 1. The goal and the claim we are trying to earn
 
-MaxGPT-Planck is a size curve of small chat models: Planck-10M, 30M, 60M and 150M. Sizes count total parameters, and the non-embedding body is always reported beside them. The aim is to find the smallest model that passes a strict, pre-registered multi-turn conversation test. The target is conversational mechanics over the conversation's own context:
+MaxGPT-Planck is a size curve of small chat models: Planck-5M, 10M, 20M, 30M, 60M and 150M, with a 3M point if 5M passes a Level A family on dev (the curve as written here until 2026-10-10 was 10M, 30M, 60M and 150M). Sizes count total parameters, and the non-embedding body is always reported beside them. The aim is to find the smallest model that passes a strict, pre-registered multi-turn conversation test. The target is conversational mechanics over the conversation's own context:
 - recalling what the user said many turns ago
 - resolving references
 - updating after a correction
@@ -107,7 +117,7 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 | 1 Teacher pilot and tokenizer | Oct 1 - Oct 18 | 5070 (pilot); CPU (tokenizer) | which teacher; tokenizer v1 |
 | 2 Data pipeline and chat pool | Oct 9 - Nov 22 | 5070 | whether skill-dense data teaches the skills; the 300M pool |
 | 3 Screens and confirmations | Oct 19 - Dec 3 (freeze Dec 4; Dec 14 for 150M) | 5070 | the recipe |
-| 4 The curve | Dec 4 - Feb 21, 2027 (150M seeds to about Mar 2) | 5070 (10/30/60M); Titans (150M) | Level R, then Level A with the human test |
+| 4 The curve | Dec 4 - Feb 21, 2027 (Titan seeds to about Mar 2-24) | 5070 (5/10/20/30M, 3M conditional); Titans (60M, 150M) | Level R, then Level A with the human test |
 | 5 Writeup and release | Feb 1 - Apr 5, 2027 | little compute | paper, weights, data, arXiv |
 
 **Critical path**
@@ -155,7 +165,7 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
   - Loop, role-leak, self-copy and runaway diagnostics on every turn, with the loop detector's exact rule pre-registered.
   - Conversations designed to stay at or under about 1,800 Planck tokens at typical reply lengths.
   - A skeleton of the lookup battery LK1-LK10 (P-082).
-- **Sealed split size** is set by the sizing rule below: likely 1,000-1,200 conversations, minimum 600, cap 1,500.
+- **Sealed split size**: 600 conversations (Max, 2026-10-02, rc12/DECISIONS_FOR_MAX.md; kept when Level R moved to the S7 bar on Oct 4, because that bar barely depends on n: a true S7 of about 45.7, 45.1 and 44.6 is needed at 600, 700 and 900). The sizing rule below, which first expected 1,000-1,200, is kept as the record of how the number was first planned.
 
 *Sealed-split isolation (P-049, review 8)*
 - The sealed split is built from Claude-written templates and paraphrase banks. D8 allows Claude for gold sets, and no training teacher ever renders them.
@@ -322,9 +332,10 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 - My reading, which Max confirms in one line on Fri 9/25: human-written open-licensed text is allowed, and every model-written token must come from an Apache-2.0 model.
 - Baselines only: WildChat, UltraChat, SODA, TinyStories, SimpleStories, TinyDialogues, TinyChat, smol-magpie-ultra.
 - Everyday-Conversations is also out. It is Llama-3.1-written, and that license would put "Llama" in the model's name.
+- Excluded (Q5, CORPUS 1.4; moved here 2026-10-10 under CORPUS 7.4 edit 2): FineWeb-Edu, because its selector was trained on Llama-3-70B labels. The FineWeb (not -Edu) bucket W stays conditional on Q1, which Max answered no for the headline core (CORPUS addendum, Sep 24).
 - Allowed:
   - OASST2 (human, Apache-2.0);
-  - FineWeb-Edu (human web, ODC-BY);
+  - the strict-open core: openly licensed Common Pile v0.1 general-language sources after the date gate and Planck's own selection (CORPUS 2.1-3.7);
   - Wikipedia (CC-BY-SA; release rule in section 8);
   - Cosmopedia v2 (Mixtral-written, Apache-2.0);
   - public-domain name lists;
@@ -333,7 +344,7 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 
 *Tokenizer family v0 (needs the D8 confirmation)*
 - One byte-level BPE with byte fallback, digits and punctuation split, a minimal role-token template, and reserved `<note>`, `<think>`, `<lookup>` and `<result>` tokens.
-- Trained on the pilot output, OASST2 (with the OOD-H threads removed) and a FineWeb-Edu slice, then truncated to 2k/4k/8k/16k/32k (P-098).
+- Trained on the pilot output, OASST2 (with the OOD-H threads removed) and a strict-open-core sample (CORPUS 7.4 edit 1; FineWeb-Edu is excluded), then truncated to 2k/4k/8k/16k/32k (P-098). v0 was in fact trained on the starter corpus sample (Status, Sep 26); this is v1's sample.
 - CPU checks: P-097, P-100 (teacher-vocab subset) and P-101 (superword tokens, kept only if they give at least 5% compression).
 - Stage-0 health checks: round trip, no glitch tokens, bytes per token on held-out chat.
 
@@ -350,6 +361,7 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 
 **Gate**
 - *Move on* (about Oct 9): pick the teacher with the most accepted tokens per hour on the 5070 whose naturalness is within 10% of the best (chatdata L12). I expect Gemma 4 12B or Qwen3.5-9B, since batching may reverse the single-stream ranking.
+  - CORPUS 7.4 edit 3 (applied 2026-10-10): the gate counts accepted Planck tokens per 5070-hour at realistic request lengths, and the pilot adds the Gemma 4 E4B GGUF, llama.cpp Gemma, an 8B paraphraser and MTP (speculative decoding) arms. Status: fp8 KV, which 7.4 named, was tried and abandoned (no capacity gain, pipeline/notes.txt:398-405); the extra arms have no record of running or of being dropped, so they are named in the real teacher pilot's pre-registration (cuts audit row 116).
 - *Change course:*
   - **Every teacher accepts under about 30% on the correction or long-distance cells.** Render those cells from teacher-written templates (P-065) and keep the teacher for naturalness.
   - **No teacher runs under vLLM on the 5070.** Use a llama.cpp server with parallel slots on the PC, then recompute the pool size and chat shares from the measured rate. The Mac is not a bulk fallback: 200M tokens at 20-55 tok/s would take 42-116 days.
@@ -390,16 +402,19 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 
 *Mix v0 manifest and general text*
 - The manifest lists shard hashes.
-- General text for 10-60M is streamed and tokenized on the PC, so raw parquet is never stored: a readability-filtered FineWeb-Edu slice, OASST2 and a Wikipedia slice, 5-15B unique tokens, by Nov 1.
+- General text for 3-30M (and 60M) is streamed and tokenized on the PC, so raw parquet is never stored: the strict-open core plus Planck selection (CORPUS 7.4 edit 1; core v0 build started Sep 26), simple narrative and human dialogue (OASST2 with the OOD-H threads removed), about 15-25B unique tokens after selection (est.), by Nov 1. FineWeb-Edu and bulk Wikipedia are out (CORPUS 0, item 3).
 
-*Chat pool (reviews 1 and 17)*
-- Target: 300M accepted unique tokens, all generated on the 5070, at least 100M by Nov 8 and all 300M by Nov 22.
-- Sizing: every model reads the pool at most 25 times, and each size's chat share follows from that (table in section 5).
+*Chat pool (reviews 1 and 17; CORPUS 4.1-4.8, applied 2026-10-10 under 7.4 edit 4)*
+- Layers: R0, teacher renders of program-written skeletons, 150-300M accepted; R1, 2 re-verified paraphrases per render; R2, slot values re-drawn at load time (CPU); RH, 100-150M grounded rephrasings of open human text by the freeze. That is about 0.5-0.9B surface-unique chat tokens at Dec 4 (est.).
+- Target for R0: 300M accepted unique tokens, all generated on the 5070, at least 100M by Nov 8 and all 300M by Nov 22.
+- Sizing: every model reads the R0+R1 surface at most 25 times (50 with R2 and spacing if P-187 shows no loss; up to 100 only if P-187 says so), and each size's chat share follows from that (table in section 5).
+- Growth after the freeze: only under a growth rule pre-registered at the freeze; new shards from the frozen pipeline become pool v2, v3, each hashed.
+- Generation cap: about 350 5070-hours through Nov 22 (CORPUS 7.2). If R0 + R1 + RH would pass it, the cap flags it and the list of what would shrink (R0 first, never below 150M) goes to Max before anything is cut (2026-10-10 rule above).
 - Planning rate: 250-500 accepted tok/s in Planck tokens, so 300M takes 170-330 h (est.).
 
 *Rate check*
 - After the first full week of bulk generation (about Oct 27 - Nov 1), the measured rate sets the final pool size.
-- If it projects under 300M by Nov 22, decide by Nov 8 to shrink the pool, lower the 60M and 150M chat shares under the pass cap, and lean on P-162 paraphrases.
+- If it projects under 300M by Nov 22, decide by Nov 8 to shrink the pool, lower the capped chat shares under the pass cap (60M and 150M in the old table; section 5's table since 2026-10-10), and lean on P-162 paraphrases. Anything this would cut (a pool layer, a share, a bet that needs the pool) goes to Max as a list first (2026-10-10 rule).
 
 *Paraphraser for P-162*
 - A small Apache-2.0 model, for example Qwen3-1.7B at about 2,300 tok/s on the 5070 (compute.md, est.).
@@ -449,10 +464,12 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 - A torch 2.7.1 + fp16 + loss-scaling API check. The real Titan test is Dec 7-10 (Phase 4).
 
 **3b. Data bets (Oct 26 - Nov 22; 5M screen, then 30M confirm)**
+- Every must-run data bet here (P-053, P-052, P-009, P-007, P-008, P-162) runs at its screening size (5M, or 20M if E4 finds no signal at 5M; P-053 at the smallest size E4 validates, as in 3a) under its own pre-registration once the first pool mix exists, whatever the 5M screening hours already spent. The 30-60 h in Compute below is an estimate, not a cap (2026-10-10, cuts audit row 17); if the bets overrun it, that is a flag to Max, never a cut.
 - P-053: skill-dense vs small talk (from 3a).
 - P-052: chat share (25/50/75%) and placement, with the 0.1x-LR check P-139. At curve scale the chosen share is capped by the pass rule.
 - P-009 from scratch: 0% vs 2-3% correction dialogues.
-- P-051: density sweep, reduced to 0/2/8% at 30M.
+- P-051: density sweep at 0/0.5/2/8% (the 0.5% point restored 2026-10-10; it had been narrowed to 0/2/8% at 30M with no stated reason, cuts audit row 46).
+- P-188: the dose-response arm (NOVELTY_2026-10.md s6.1 (b)): at one size, the smallest that E4 and the first 3b screens leave with signal, 4 increasing doses of verified skill dialogue at 2-3 seeds, so the curve can say whether a skill is missing at a size for lack of capacity or for lack of data (2605.29548 argues data frequency at 4M-4B; mine:o2 argues a capacity ceiling at 124M). Trigger: the first pool mix; its own pre-registration, which fixes the doses and the reading before any run. It can share P-051's runs where the size and doses coincide.
 - P-026: accuracy-gated distance curriculum. Report the lock-in rate.
 - P-007 and P-008 from scratch.
 - P-056: loss mask on user turns. P-015: template.
@@ -469,26 +486,26 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 - P-020 recency path.
 - P-021 gated attention vs primacy, logging gate openness and sink mass.
 - P-022 delta-rule layer, P-148 Canon layers, P-023 role embeddings.
-- E8/E9/E10 (P-152, P-151, P-150) run at 5M, and only if E4 finds signal at 5M.
+- E8/E9/E10 (P-152, P-151, P-150), Max's skill-over-storage idea: at 5M if E4 finds signal at 5M; if it does not, at 20M under new pre-registrations written before any of their runs (2026-10-10, cuts audit row 18), instead of not running. A 5M bpb screen cannot judge them without signal, which is why they move up a size rather than out.
 
 **3e. Post-training at 30M (Nov 16 - Nov 28)**
 - Whole-conversation SFT is the baseline.
 - P-014: one epoch of multi-turn DPO.
 - P-066 and P-153: anti-loop. P-067: own-history SFT.
-- P-068: an on-policy distillation (OPD) pilot on public SmolLM2 models, if there is time.
+- P-068: an on-policy distillation (OPD) pilot on public SmolLM2 models, pre-registered and scheduled before 3e starts (Nov 16), not "if there is time" (2026-10-10, cuts audit row 49): P-069, P-070, P-168 and D6's only revisit trigger wait on it.
 
 **3f. Combined recipe (Nov 26 - Dec 3; must-run; review 11)**
 - All adopted winners together vs the baseline at 30M, 3 seeds, 20-30 h.
 - If the combination fails its pre-registered rule, drop changes one at a time, weakest evidence first. These are leave-one-out arms, 1 seed each, 10-15 h.
 - Freeze the best set that survives.
 
-**Must-run list** (19): E1-E4, P-004, P-158, P-053, P-052, P-009, P-007, P-008, the four-arm test, P-020, P-021, P-022 or P-148 (whichever the toy favors), P-014, P-162, the combined-recipe test. Everything else runs if time allows. A bet that never runs stays in the ledger as "not run", never as "failed".
+**Must-run list** (19): E1-E4, P-004, P-158, P-053, P-052, P-009, P-007, P-008, the four-arm test, P-020, P-021, P-022 or P-148 (whichever the toy favors), P-014, P-162, the combined-recipe test. Every other ranked bet has a slot, a gate with its trigger, or a stated reason in Appendix B (2026-10-10; this replaces "everything else runs if time allows"). When time runs short, the must-run list goes first and the rest is deferred, never cut: the list of what would not run goes to Max first. A bet that never runs stays in the ledger as "not run", never as "failed".
 
 **Machine.** 5070 for everything, with 2-3 small jobs at once where E1 shows it pays. The Mac scores small checkpoints on RC-12 dev (batched, minutes each) and runs 5M screens only if the 5070 is down.
 
 **Compute (est.).**
 - 5070 400-640 h:
-  - 5M screens 30-60 h;
+  - 5M screens 30-60 h (est.; not a cap on any must-run data bet, see 3b);
   - 20-30M confirmations, memory, architecture and post-training 350-550 h;
   - combined recipe 20-30 h.
 - Mac 20-60 h.
@@ -511,9 +528,9 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 - If not, Level A is attempted only at 60M and 150M with the arm that has the best margin, and STATUS says the odds are low.
 
 *Other decision points*
-- **The note wins by 5 points or more.** It joins the recipe. If N at 10M matches B at 30M, add a 5M curve point.
-- **E4 finds no multi-turn signal at 5M.** All screening moves to 20M, and only the must-run list runs.
-- **Nov 22 checkpoint.** If Phase 3 is behind, cut to the must-run list.
+- **The note wins by 5 points or more.** It joins the recipe. If N at 10M matches B at 30M, the 5M curve point (on the curve since 2026-10-10) also gets the N arm.
+- **E4 finds no multi-turn signal at 5M.** All screening moves to 20M. The must-run list goes first; E8-E10 and the other bets follow at 20M under their own pre-registrations. If they cannot all fit before the freeze, the list of what would not run goes to Max first (2026-10-10 rule); nothing is dropped silently.
+- **Nov 22 checkpoint.** If Phase 3 is behind, the must-run list takes the GPU first and everything else is deferred; the list of deferred bets, with costs, goes to Max before any is dropped.
 
 ### Phase 4: the curve (Dec 4 - Feb 21, 2027)
 
@@ -521,25 +538,27 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
 
 **5070 runs, from the Dec 4 freeze (review 4)**
 
-In priority order:
+In priority order. Rewritten 2026-10-10 (cuts audit rows 43-44) to carry the budgets adopted on Sep 24 (CORPUS addendum; Changes requested by Max above), which the old table (10M 5B, 30M 15B, 60M 30B, all at about 500 tok/param) never did. P-186's freeze rules (CORPUS 5.5) may still move a budget before launch. Hours are bench_micro's eager docmask rates on the Planck harness (harness/notes.txt: 1.06, 1.58, 2.86 and 3.87 h per 1B tokens at 5M, 10M, 20M and 30M), which are lower bounds: they assume full rows, and the curve's larger batches are unmeasured. Dates assume a Dec 4 start and 90% uptime.
 
-| order | model | tokens | seeds | 5070 h (est.) | done by (est.) |
-|---|---|---|---|---|---|
-| 1 | Planck-10M | 5B | 3 | 30-63 | Dec 5-7 |
-| 2 | Planck-30M seed 1 | 15B | 1 | 56-99 | Dec 8-11 |
-| 3 | Planck-60M seed 1 | 30B | 1 | 154-245 | Dec 14-21 |
-| 4 | Planck-30M seeds 2-3 | 15B | 2 | 112-198 | Dec 19-29 |
-| 5 | Planck-60M seeds 2-3 | 30B | 2 | 308-490 | Jan 1-19 |
-| 6 | generic-recipe control, 30M (same size and tokens, baseline data only) | 15B | 1 | 56-99 | Jan 3-23 |
-| | post-training and dev eval, interleaved | | | 20-40 | |
-| | **total** | | | **736-1,234** | **Jan 4-24** |
+| order | model | tok/param | tokens per seed | seeds | 5070 h (lower bound) | done by (est.) |
+|---|---|---|---|---|---|---|
+| 1 | Planck-5M (5.11M) | 5,000 | 25.6B | 3 | 81 | Dec 8 |
+| 2 | Planck-10M (9.96M), with P-186's 500 / 1,000 / 2,000 branches | 5,000 | 49.8B | 3 | 236 (about 270 with branches) | Dec 20 |
+| 3 | Planck-20M (19.8M) | 2,000 | 39.6B | 3 | 340 | Jan 5 |
+| 4 | Planck-30M (29.7M) seed 1 | 1,000-2,000 | 29.7-59.4B | 1 | 115-230 | Jan 10-15 |
+| 5 | Planck-30M seeds 2-3 | 1,000-2,000 | 29.7-59.4B | 2 | 230-460 | Jan 21 - Feb 6 |
+| 6 | generic-recipe control, 30M (same size and tokens, baseline data only) | as row 4 | | 1 | 115-230 | Jan 27 - Feb 17 |
+| 7 | Planck-3M, only if 5M passes a Level A family on dev (CORPUS 5.3) | 10,000-20,000 | 30-60B | 1-3 | unmeasured | after row 6 |
+| | post-training and dev eval, interleaved | | | | 20-40 | |
+| | **total, rows 1-6 (with row 2's branches) and post-training** | | | | **about 1,170-1,650** | **Jan 27 - Feb 19** |
 
-All three 60M seeds stay on the 5070, so no size mixes bf16 and fp16 numerics.
+Every size also takes a decay branch at 500 tok/param, so an equal-ratio curve is reported beside the budget curve (CORPUS 5.3). The 5070 window (Dec 4 - Feb 21) is about 1,706 h at 90% uptime, so by these lower bounds 50-530 h remain for row 7, CORPUS 5.4's extension queue or lock-in seeds; padding will eat some of it.
 
-**Re-plan rule**, applied after `bench_micro` and again after the Planck-harness re-bench:
-- If the 5070 measures below about 60% of the estimate, the generic control drops to 5B tokens.
-- 60M seed 3 then moves to the Titans in January, labeled as the fp16 platform.
-- If the load is still over, Phase 3 cuts to the must-run list.
+60M and 150M run on the Titans (below), each with all of its seeds on one platform, so no size mixes bf16 and fp16 numerics.
+
+**Re-plan rule**, applied after the first curve run measures its real rate (rewritten 2026-10-10 under the rule that no budget rule cuts silently):
+- If the measured rate projects rows 1-6 past Feb 21, Claude writes the options with their hours, for example a shorter generic control, 30M at 1,000 instead of 2,000, 20M at 2 seeds unless it is the claimed size (CORPUS 5.3 step 3), or a 30M seed moving to the Titans labeled as the fp16 platform, and Max picks before any is applied.
+- No re-plan reaches back into Phase 3: the freeze has passed by then.
 
 **Titans, from about Dec 17**
 
@@ -556,14 +575,14 @@ Dec 17 comes after Ultra's pretraining (ends about Dec 3-7, est.), Ultra's SFT/D
 - 100B if the measured rate gives 18 days or less per 100B on 4 cards. Otherwise 75B, the default.
 - The final 10% of tokens run at T=4096.
 
-*Seeds*
-- Seed 1 starts about Dec 17 and finishes Dec 31 - Jan 11 (est.).
-- Seeds 2 and 3 queue automatically after it, with no new Max session. At worst they finish about Feb 5 and Mar 2.
-- Max can reclaim the Titans for Ultra at any time. The 150M claim then states its seed count.
+*Seeds* (60M added 2026-10-10: PLAN.md:22 and the CORPUS addendum put 60M on the Titans; the addendum's "1 seed each unless time allows more" and this plan's 3 are reconciled as 3 queued, with any shortfall going to Max)
+- 150M seed 1 starts about Dec 17 and finishes Dec 31 - Jan 11 (est.).
+- Then the three 60M seeds (60.8M, 500 tok/param, 30B tokens each; about 4.0 Titan-days per seed, 2.5-7.3, CORPUS 5.3, unmeasured), then 150M seeds 2 and 3, all queued with no new Max session. At worst, by these estimates, the last 150M seed ends about Mar 24, past the Titans' free window (to about Mar 15): before the queue would run past it, the choice (which seed waits or does not run) goes to Max.
+- Max can reclaim the Titans for Ultra at any time. Each size's claim then states its seed count; a Level claim at 60M or 150M still needs 3 seeds there.
 
 *Setup*
 - fp16 with loss scaling, torch 2.7.1 cu118. The Titans need no driver upgrade for training.
-- The 50-80B-token general-text slice is built beforehand on the box's idle CPUs at nice 19, with Ultra's thermal log watched. Max kicks it off remotely on Nov 21-22. If Ultra's raw FineWeb-Edu text is still on the box, it is re-tokenized instead of downloaded again.
+- The general-text mix for 60M and 150M (about 5B and 15-20B unique tokens, read at most 4 times, CORPUS 5.3) is built beforehand on the box's idle CPUs at nice 19 from the strict-open core plus Planck selection, streamed from Common Pile (CORPUS 7.3 and 7.4 edit 1), with Ultra's thermal log watched. Max kicks it off remotely on Nov 21-22. Ultra's FineWeb-Edu text is not used (Q5).
 - Heartbeats every 30 minutes go to the private status repo through a repo-scoped deploy key.
 
 **Sealed scoring at milestones**
@@ -610,8 +629,8 @@ Dec 17 comes after Ultra's pretraining (ends about Dec 3-7, est.), Ultra's SFT/D
 **Ledger ids.** P-055 (the curve), P-094, P-005, and the baseline blind-human-test item.
 
 **Compute (est.).**
-- 5070 740-1,240 h.
-- Titans 3,900-7,200 card-hours: 1,300-2,400 per 150M seed at 75B, plus the smoke test.
+- 5070 about 1,170-1,650 h (2026-10-10 table, lower bounds; was 740-1,240 for the old 10/30/60M table).
+- Titans about 4,620-9,300 card-hours: 1,300-2,400 per 150M seed at 75B, 240-700 per 60M seed (2.5-7.3 Titan-days, est.), plus the smoke test. The top of that range is above the roughly 8,450 free card-hours, which is why the seed queue above ends in a question to Max, not a cut.
 - Mac 20-50 h (eval).
 
 **Max-hours.** About 5 h:
@@ -628,7 +647,7 @@ Dec 17 comes after Ultra's pretraining (ends about Dec 3-7, est.), Ultra's SFT/D
 - *Level R* is claimed at the smallest size whose sealed pooled-seed S7 lower bound is 40 or better, with PERSIST at least 0.40, T0 at least 0.90 and 3 seeds at that size, under the OOD-H wording rule (Max, 2026-10-04).
 - *Level A* is claimed only if every generative criterion passes on sealed, pooled over at least 3 seeds, and the human win-or-tie point estimate is at least 50%.
 - *Level A decision, Jan 31* (review 20). It uses the seeds finished by then. A Level A claim at 150M becomes final only when seeds 2-3 confirm the generative criteria.
-- *60M passes Level A.* 150M still runs, because the curve needs it, but the headline is 60M, and the 5070 adds a 20M point in Jan-Feb.
+- *60M passes Level A.* 150M still runs, because the curve needs it, but the headline is 60M (the 20M point is already on the 5070 curve since 2026-10-10).
 - *Nothing passes Level A by Jan 31.* Move to the fallback claims in section 7.
 
 ### Phase 5: writeup and release (Feb 1 - Apr 5, 2027)
@@ -660,9 +679,9 @@ Dec 17 comes after Ultra's pretraining (ends about Dec 3-7, est.), Ultra's SFT/D
 
 | machine | job | not used for |
 |---|---|---|
-| RTX 5070 (PC, WSL2) | all training at 5M and up; scoring every model's generations over RC-12; the teacher pilot; all bulk generation; tokenizing general text for 10-60M; the 10/30/60M curve | nothing that fits in 12 GB is excluded |
+| RTX 5070 (PC, WSL2) | all training at 5M and up; scoring every model's generations over RC-12; the teacher pilot; all bulk generation; tokenizing general text for 3-30M (and 60M); the 5/10/20/30M curve (3M conditional; 10/30/60M before 2026-10-10) | nothing that fits in 12 GB is excluded |
 | M5 Mac | harness and generator development; likelihood tiers; tokenizer CPU work; smoke tests; scoring small Planck checkpoints on RC-12 dev; 5M screens only when the 5070 is down | bulk generation; anything that needs the laptop at home and awake for days |
-| Titans (Lambda, 4 edge cards) | 150M seeds (Dec 17 - early Mar); smoke test Dec 7-10; 150M general-text prep on idle CPUs from late Nov | anything before Ultra finishes |
+| Titans (Lambda, 4 edge cards) | 150M and, since 2026-10-10, 60M seeds (Dec 17 - early Mar, worst case about Mar 24); smoke test Dec 7-10; 150M general-text prep on idle CPUs from late Nov | anything before Ultra finishes |
 
 ### Unattended running (review 14)
 
@@ -736,7 +755,7 @@ Dec 17 comes after Ultra's pretraining (ends about Dec 3-7, est.), Ultra's SFT/D
 - **Mac today.** About 43 GiB free at 00:55 (LM Studio models 120 GB, HF cache 21 GB).
 - **Where the data lives.** General-text mixes live on the PC, streamed and tokenized without keeping raw parquet, and on Lambda for the 150M. The Mac keeps at most a 1 GB screening shard.
 - **Downloads.** Teachers and baselines download to the PC, not the Mac.
-- **PC needs.** About 150 GB free (est.): teachers 20 GB, baselines 17 GB, 10-60M general text 10-30 GB, chat pool under 5 GB, checkpoints 30-60 GB. Checked on the first SSH.
+- **PC needs.** About 250-300 GB free (est.; CORPUS 7.3 and 7.4 edit 8, up from the 150 GB first planned): teachers and paraphrasers about 45 GB, human dialogue under 5 GB, the strict-open core as zstd text about 30-35 GB, tokenized shards for up to 2 vocabularies about 50 GB each, the chat pool with slot spans and provenance 10-20 GB, checkpoints 30-60 GB, streaming scratch about 50 GB.
 
 ---
 
@@ -768,38 +787,48 @@ Shapes (depth over width). E9 and E7 may change them:
 - 8,192 for every size, so the curve measures the model and not the tokenizer. A size moves to a different nested truncation (P-098) only if E7/P-158 shows a gain of at least 1% bits per byte there.
 
 **Data mix**
-- **Chat share rule.** Chat share = min(the P-052 winner, the share at which the model reads the 300M pool 25 times). The rule, not a fixed number, is the recipe at every size.
+- **Chat share rule.** Chat share = min(the P-052 winner, the share at which the model reads the R0+R1 chat surface 25 times; 50 with R2 and spacing if P-187 allows). The rule, not a fixed number, is the recipe at every size. (Until 2026-10-10 the cap read "the 300M pool 25 times"; CORPUS 4.1 and 4.5, applied under 7.4 edit 4, count passes over the R0+R1 surface, about 0.5-0.9B tokens at the freeze, est.)
 
-  | size | tokens | chat share | chat token-passes | passes over the 300M pool |
+  At a 25% share and the 2026-10-10 budgets (est.; the surface size is unmeasured until the rate check):
+
+  | size | tokens per seed | chat token-passes at 25% | passes over a 0.5-0.9B surface | share at the 25-pass cap |
   |---|---|---|---|---|
-  | 10M | 5B | 25% | 1.25B | about 4 |
-  | 30M | 15B | 25% | 3.75B | about 12.5 |
-  | 60M | 30B | 25% | 7.5B | 25 (at the cap) |
-  | 150M | 75B (100B) | 10% (7.5%) | 7.5B | 25 (at the cap) |
+  | 5M | 25.6B | 6.4B | 7-13 | 25% |
+  | 10M | 49.8B | 12.5B | 14-25 | 25% (at the cap with a 0.5B surface) |
+  | 20M | 39.6B | 9.9B | 11-20 | 25% |
+  | 30M | 29.7-59.4B | 7.4-14.9B | 8-30 | 21-25% |
+  | 60M | 30.4B | 7.6B | 8-15 | 25% |
+  | 150M | 75B (100B) | 18.8B (25B) | 21-38 (28-50) | 17-25% (13-23%) |
 
-  - If P-052 picks 50%, 10M reads the pool about 8 times and 30M 25 times.
-  - If the pool ends smaller, the 60M and 150M shares drop to stay under the cap.
-  - If P-162 wins, paraphrases count as new text and raise the 150M share.
+  - If P-052 picks 50%, every size passes 25 reads at the low end of the surface estimate (5M 14-26, 10M 28-50, 150M 42-75), so there the cap, not P-052, sets the share unless R2 and P-187 allow 50 passes.
+  - If the pool ends smaller, the capped shares drop to stay under the cap; the share never goes below the critical share P-051 measures (CORPUS 5.4).
+  - If P-162 wins, paraphrases count as new surface and raise the capped shares.
 - **Chat content**, in the same template as SFT, from step 0:
   - Skill-dense skeleton renders: S1-S9, 2-4 events per conversation, answers mentioned second as often as first, nonce and real slot values, stale traps and twins.
   - Social basics and OASST2, with the OOD-H threads removed.
   - Grounded lookup dialogues on a fictional knowledge base: 0-5% of chat at 10-30M, 10-20% at 60-150M. BM25 lookup with zero parameters.
-- **General text** fills the rest. It is knowledge-light, with 0% code by default (P-060 tests 15%):
-  - readability-filtered FineWeb-Edu;
-  - a small Wikipedia slice;
-  - optionally Cosmopedia v2.
-  - Note (review 27): FineWeb-Edu was selected for knowledge-dense educational text, which is in tension with "knowledge-light". The readability filter keeps it simple. P-083 (entity anonymization) and P-161 (source tags) test the mitigation.
+- **General text** fills the rest. It is knowledge-light, with 0% code by default (P-060 tests 15%). Since 2026-10-10 (CORPUS 7.4 edits 1-2, applied; the components are CORPUS 2.1's):
+  - plain prose, strictly open: Common Pile CCCC, Gutenberg, LoC books, non-encyclopedic Wikimedia, non-technical StackExchange and CC YouTube transcripts, all after the date gate and selected by Planck's own classifiers;
+  - simple narrative (Cosmopedia v1 stories, plain public-domain fiction);
+  - grounded rephrasings (RH) and human dialogue (OASST2 and other D8-clean sets);
+  - not FineWeb-Edu (Q5), not bulk Wikipedia, no code, math, science or law.
+  - Note (review 27, now moot): the tension between FineWeb-Edu's knowledge-dense selection and "knowledge-light" ended with its exclusion. Fact density is now set by E-sel-3 (which absorbs P-083), and source tags by E-sel-6 (P-161).
 - **Provenance.** Every training string follows D8 and the Phase 1 provenance rule.
 - **Hygiene.** Dedup, 8-gram caps, 13-gram decontamination against RC-12, OOD-H and the human-test scripts, and a mutation-tested checker. The chat pool repeats on a spaced schedule, outside the memorization window.
 
 **Tokens per size**
 
-| size | tokens | tok/param |
-|---|---|---|
-| 10M | 5B | ~500 |
-| 30M | 15B | ~500 |
-| 60M | 30B | ~500 |
-| 150M | 75B default, 100B if the Titan smoke-test rate allows | 500-670 |
+Rewritten 2026-10-10 to the adopted budgets (CORPUS addendum, Sep 24; CORPUS 7.4 edit 7); P-186's freeze rules can still move them (CORPUS 5.5).
+
+| size | tokens per seed | tok/param | where |
+|---|---|---|---|
+| 3M (only if 5M passes a Level A family on dev) | 30-60B | 10,000-20,000 | 5070 |
+| 5M | 25.6B | 5,000 | 5070 |
+| 10M | 49.8B | 5,000 | 5070 |
+| 20M | 39.6B | 2,000 | 5070 |
+| 30M | 29.7-59.4B | 1,000-2,000 | 5070 |
+| 60M | 30.4B | 500 | Titans |
+| 150M | 75B default, 100B if the Titan smoke-test rate allows | 500-670 | Titans |
 
 - Screening budgets: 5M at 0.25B tokens; 20-30M at 0.4-1.5B.
 - Honest note: every chat model that works well at this size used 2,900-83,000 tokens per parameter. The bet is that data density substitutes for token count. The 150M goes to 300B only if Phase 3 or 4 shows skills are token-limited and the Titans are free.
@@ -849,13 +878,13 @@ All figures are estimates, from arithmetic on REPORT s7, loop.md, compute.md and
 | 1 | Oct 1 - Oct 18 | 0 (10-20 if vLLM fails), +2-4 CPU | 10-25 | 0 | ~0.3 |
 | 2 | Oct 9 - Nov 22 | 5-15 | 180-350 | 0 | ~0.2 |
 | 3 | Oct 19 - Dec 3 | 20-60 | 400-640 | 0 | ~2.5 |
-| 4 | Dec 4 - Feb 21 | 20-50 | 740-1,240 | 3,900-7,200 | ~5 |
+| 4 | Dec 4 - Feb 21 | 20-50 | 1,170-1,650 (lower bounds, 2026-10-10) | 4,620-9,300 | ~5 |
 | 5 | Feb 1 - Apr 5 | 10-20 | 50-100 | (last 150M seeds, counted in 4) | 10-15 |
-| **total** | | **~70-175** | **~1,400-2,400** | **3,900-7,200** | **~19-27** |
+| **total** | | **~70-175** | **~1,840-2,830** (was ~1,400-2,400 before 2026-10-10) | **4,620-9,300** | **~19-27** |
 
 **Capacity checks**
-- 5070: about 580-990 h of roughly 1,270 from Oct 12 to Dec 3, and 740-1,240 h of roughly 1,200 from Dec 4 to Jan 24.
-- Titans: about 8,450 card-hours free Dec 17 - Mar 15. The plan uses 46-85% of that.
+- 5070: about 580-990 h of roughly 1,270 from Oct 12 to Dec 3, and about 1,170-1,650 h (lower bounds) of roughly 1,706 from Dec 4 to Feb 21 (2026-10-10 table; was 740-1,240 of about 1,200 to Jan 24 for the old one).
+- Titans: about 8,450 card-hours free Dec 17 - Mar 15. The plan uses 55-110% of that (46-85% before the 60M seeds moved there on 2026-10-10); above 100%, the seed choice goes to Max (Phase 4, Seeds).
 
 **Max-hours**, including the recurring asks (review 26):
 
@@ -883,22 +912,24 @@ All figures are estimates, from arithmetic on REPORT s7, loop.md, compute.md and
 | data | amount | source | ready by |
 |---|---|---|---|
 | RC-12 dev | ~600 conversations | Claude-written templates (D8 gold set) | Oct 2 |
-| RC-12 sealed | 600-1,500 conversations by the sizing rule (likely 1,000-1,200) | Claude-written banks, separate session, encrypted | Oct 11-14 |
+| RC-12 sealed | 600 conversations (Max, Oct 2-4; the sizing rule's first expectation was 1,000-1,200) | Claude-written banks, separate session, encrypted | Oct 11-14 |
 | OOD-H | 150 held-out OASST2 threads + 50-60 rater-written scripts | human-written user turns | lock / Jan 17 |
 | Human-test scripts | 150 | Claude-written (D8 gold set) | Jan 10 |
 | Teacher pilot | 600 conversations, ~0.2M tokens | 3 Apache-2.0 teachers on the 5070 | Oct 8 |
 | Chat pilot | 20-30M accepted tokens | pilot winner, 5070 | ~Oct 18 |
 | Chat pool, all sizes | 300M accepted unique (about 500M generated at ~60% yield, est.; at least 100M by Nov 8) | teacher on the 5070 | Nov 22 |
-| General text, 10-60M | 5-15B unique | FineWeb-Edu slice, Wikipedia, OASST2, streamed on the PC | Nov 1 |
-| General text, 150M | 50-80B unique | FineWeb-Edu on the Lambda box's CPUs | Dec 14 |
+| General text, 3-30M | about 15-25B unique after selection (est.) | strict-open core plus Planck selection, simple narrative, human dialogue, streamed on the PC (CORPUS 7.4 edit 1) | Nov 1 |
+| General text, 60M and 150M | about 5B and 15-20B unique, at most 4 reads | strict-open core streamed from Common Pile on the Lambda box's CPUs (CORPUS 7.3) | Dec 14 |
 
 **Training token-passes**
 - Phase 3: about 100B, across 50-80 runs at 5M and 40-60 at 20-30M.
-- Curve:
-  - 15B (10M, 3 seeds)
-  - 60B (30M, 3 seeds plus the control)
-  - 90B (60M, 3 seeds)
-  - 225-300B (150M, 3 seeds)
+- Curve (2026-10-10 budgets):
+  - 77B (5M, 3 seeds)
+  - 149B (10M, 3 seeds)
+  - 119B (20M, 3 seeds)
+  - 119-238B (30M, 3 seeds plus the control)
+  - 91B (60M, 3 seeds, Titans)
+  - 225-300B (150M, 3 seeds, Titans)
 
 **Generation-rate note (review 21).** 170-330 h of generation at 250-500 accepted tok/s yields 150-600M tokens. 300M is the midpoint, so the pool target and the hours now agree. Rates are counted in Planck's tokenizer.
 
@@ -914,19 +945,19 @@ All figures are estimates, from arithmetic on REPORT s7, loop.md, compute.md and
 | The test is invalid | Mutants survive; LFM2-2.6B fails a Level A family; families sit at floor or ceiling | No lock until fixed. The re-anchor rule applies before the lock, with a 0.60 floor, never after. |
 | The model learns RC-12's format, not the skill | Sealed scores well above OOD-H | OOD-H is pre-registered, with the -5 wording rule. Sealed banks are written before the generator and kept encrypted. 13-gram decontamination against RC-12, OOD-H and the human scripts. |
 | The data hypothesis fails (as ufakzeka-1 found at 151M) | P-012 and P-053 both under +5, with the CI excluding +5 | Stop at the pilot. Phase 3 weight moves to the note, the recency and delta layers, and the curriculum. Middle zone: continue to 100M and re-test at 20M. |
-| Generation is slower than planned | Measured accepted tok/s after the first bulk week | Decide by Nov 8: shrink the pool, lower the 60M/150M shares under the pass cap, use the P-162 paraphraser. The Mac is not a fallback. |
-| No multi-turn signal in 5M proxies | E4 | Screen at 20M; run only the must-run list. |
-| Seed lock-in lottery on pass-or-fail skills | E3 and P-026 lock-in rates vary | 5 seeds at 10M and 30M on the 5070 (cheap). 60M and 150M stay at 3, with lock-in rates reported. |
-| 5070 unavailable (video-editor or IseMedia use, reboots, WSL issues) | Missed heartbeats; GPU throttling | Boot-time runner, update windows, resumable jobs. If it is out for more than 2 weeks: the Mac runs 5M screens and 20M at 0.4B on the must-run list, and 60M seeds move to the Titans in January, labeled fp16. |
-| Titans late (Ultra overrun, thermal pauses, break access) | Ultra ETA past Dec 14; smoke test fails Dec 7-10 | The smoke test exists so the first Titan failure is not the launch. 150M at 75B. If not started by Jan 10: 150M at 50B on the 5070 after the 60M seeds (about 18-24 days, est.), or pausing Ultra (Max's call). |
+| Generation is slower than planned | Measured accepted tok/s after the first bulk week | Decide by Nov 8: shrink the pool, lower the capped shares under the pass cap, use the P-162 paraphraser; anything this would cut goes to Max as a list first (2026-10-10). The Mac is not a fallback. |
+| No multi-turn signal in 5M proxies | E4 | Screen at 20M: the must-run list first, then E8-E10 and the rest at 20M under new pre-registrations; what cannot fit goes to Max as a list first (2026-10-10). |
+| Seed lock-in lottery on pass-or-fail skills | E3 and P-026 lock-in rates vary | 5 seeds at 10M and 30M on the 5070 (cheap). 60M and 150M stay at 3 on the Titans, with lock-in rates reported. |
+| 5070 unavailable (video-editor or IseMedia use, reboots, WSL issues) | Missed heartbeats; GPU throttling | Boot-time runner, update windows, resumable jobs. If it is out for more than 2 weeks: the Mac runs 5M screens and 20M at 0.4B on the must-run list first, and the 5070's curve list is re-planned with Max (the 60M seeds are already on the Titans since 2026-10-10). |
+| Titans late (Ultra overrun, thermal pauses, break access) | Ultra ETA past Dec 14; smoke test fails Dec 7-10 | The smoke test exists so the first Titan failure is not the launch. 150M at 75B. If not started by Jan 10: 150M at 50B on the 5070 after the 60M seeds (about 18-24 days, est.), or pausing Ultra (Max's call). (Written when the 60M seeds ran on the 5070; since 2026-10-10 they queue on the Titans too, so a late Titan start delays both sizes, and the options for each go to Max as a list first.) |
 | Another Mac kernel panic | Swap above 2 GB, or a panic log | The runner halts; no retries until the cause is found. The Mac now carries little GPU work. |
 | Disk fills | Free space under 25 GB | Disk guards stop jobs; big data lives on the PC and Lambda. |
 | Unattended plumbing fails | Two missed heartbeats | STATUS flag; checklist line if Max is needed; queues hold 1-3 days of work. |
-| Claude usage caps (weeks 1-3 are mostly Claude-written code) | Weekly cap reached before the lock | Order work by the critical path (RC-12 dev and graders, prereg, generator, harness) and keep GPU queues full. Cut to the must-run list; never cut the pre-registration. |
+| Claude usage caps (weeks 1-3 are mostly Claude-written code) | Weekly cap reached before the lock | Order work by the critical path (RC-12 dev and graders, prereg, generator, harness) and keep GPU queues full. A usage cap slows or defers work; it never cuts a bet, a review, an audit or a test (Max's quality-over-usage rule; rewritten 2026-10-10, cuts audit row 85: this row used to say "Cut to the must-run list"). If deferral would push a bet past its window, the list goes to Max first. Never cut the pre-registration. |
 | Contamination or a D8 slip | Decontamination hits; audit gaps | Provenance column, teacher-written templates, 13-gram checks, audit table in the repo. |
 | Personal information in public files | Scrub check before each push | Trimmed public PLAN.md; `private/` gitignored; no names of Max's school, professors, colleges or campus access in the repo. |
 | Max's time runs over | Missed Max tasks | Claude pauses Max-dependent items, never the compute. No Max tasks Oct 8-17, Oct 26 - Nov 1, Nov 9-15, or during finals. |
-| Too many bets | Phase 3 behind at Nov 22 | Freeze on the must-run list plus the combined-recipe test; unrun bets stay "not run". |
+| Too many bets | Phase 3 behind at Nov 22 | The must-run list and the combined-recipe test take the GPU first; the list of bets that would miss the freeze goes to Max, with costs, before any is dropped (2026-10-10); unrun bets stay "not run". |
 
 ---
 
@@ -987,10 +1018,72 @@ All figures are estimates, from arithmetic on REPORT s7, loop.md, compute.md and
 All 28 review items were applied, except as noted here.
 
 - **3 (partly):** deleting the ~90 GB of unused LM Studio models is optional, not a gate. Teachers and baselines now land on the PC, and the disk guard stops jobs before the Mac fills. Deletion stays Max's own action.
-- **4 and 5 (modified):** all three 60M seeds stay on the 5070 by default, so one size never mixes bf16 and fp16. A 60M seed moves to the Titans only under the bench re-plan rule, and is then labeled. The Titans take 150M seeds 2-3 as the review asked.
+- **4 and 5 (modified):** all three 60M seeds stay on the 5070 by default, so one size never mixes bf16 and fp16. A 60M seed moves to the Titans only under the bench re-plan rule, and is then labeled. The Titans take 150M seeds 2-3 as the review asked. (Superseded 2026-10-10: all three 60M seeds now run on the Titans, per PLAN.md's Sep 24 budgets, so 60M still never mixes bf16 and fp16.)
 - **8 (modified):** the rater-written half of OOD-H is collected in January, not before the lock. Only its protocol is pre-registered, which is enough because those scripts cannot have leaked into training.
 - **15 (modified):** update windows move to Oct 24-25, Nov 28-29, Jan 2-3 and Feb 6-7. Oct 26 - Nov 1 is a no-Max week, and the first 5-week pause ends Oct 30.
 - **16 and 26 (modified):** the Titan smoke test, the data-prep kickoff and the launch all run remotely (Nov 21-22, Dec 7-10, Dec 17-18), so no campus trip is needed.
 - **19 (left open):** whether to pay raters is Max's call. The plan budgets the 25-40 rater-hours either way.
 - **23 (modified):** torch is pinned to one exact version that passes both leak self-tests (2.14.0 if released), not to 2.14.0 unconditionally. The loop track only establishes the fix in 2.13.0.
 - **28 (superseded):** E001 has started. Its logs appear from 00:48, and at 00:55 a Falcon-90M dry chat run on CPU was in progress. STATUS records the actual times.
+
+## Appendix B: triage of the ranked bets PLAN never placed (2026-10-10)
+
+Written 2026-10-10 by Claude for the cuts audit (`research/CUTS_AUDIT_2026-10.md` rows 35, 37, 53-58), before any result of these bets exists. 106 of the ledger's 185 ranked bets were never named in this plan (a script over LEDGER.md's rank table against every P-number in PLAN.md, run 2026-10-10), so "everything else runs if time allows" was their only home, including 10 of the 14 untested-at-this-size bets. Each now has a **slot** (where and when it runs), a **gate** (the result that triggers it, and what happens if the gate does not fire), or a **reason** it does not run. Every bet that runs gets its own pre-registration first, written before any of its results. Max's ledger rule (test as much as possible that is untested at this size) puts the untested bets first inside each group: they are marked (U). Hours are the ledger's estimates.
+
+| bets | decision | trigger or reason | source |
+|---|---|---|---|
+| P-024 smeared keys | slot: SCREENS batch 1 S007 (stage 2 run); its one-layer-fewer half and 1-vs-2-layer toy: gate | S007's Q2 and the PLAN 3d toy; new pre-registration, about 1.5 GPU h | SCREENS.txt:40; audit row 10 |
+| P-105 MTP auxiliary loss | slot: S006, reinstated 2026-10-06, its 4 runs done, verdict pending; curriculum, 2-head and 20M arms: gate | S006's follow-up trigger (written before its verdict, audit S2) | SCREENS.txt:1830-1863; audit row 2 |
+| P-110 shared W_q/W_k | slot: the 8-layer sharing contrast in SCREENS batch 2 (S009+); the 9-layer arm and the K = V tie: reason | batch 2 is pre-registered after the stage 2 verdicts; the 9-layer arm moves four things at once, and K = V's one measured cost (3.1% perplexity) points against it | audit rows 4-6 |
+| P-112 hyper-connections (non-looped), P-172 ReLU-squared, P-173 multipliers, P-174 TOP, P-175 meta tokens, P-113 output-head rank, P-108 sequence-length curriculum | slot: SCREENS batch 2 at 5M (bpb decides; P-113 also reports its repetition rate, P-108 its wall time), each a default-off flag with tests and mutants | stage 2 verdicts read; about 1.5 GPU h per screen; a NOMINATE goes to the post-lock Tier 0 reading and a 20-30M confirmation | SCREENS.txt:53-54; audit row 23 |
+| P-106 small batches and induction | slot: E2 D1 redesigned as a g in {0.5, 1, 2} check at batch 32 x 2048 with the IND hook | before any curve run changes batch size; dated E2 addendum, 3 runs, about 1 GPU h | audit row 20 |
+| P-104 partial RoPE / NoPE | gate | a long-context eval past 2k exists; then 30M, 15-25 h | audit row 22 |
+| P-109 attention-only SAN | reason | SAN reached parity only at about 105B tokens at 24M, so any screen Planck can afford would reject it for the wrong reason | SCREENS.txt:52; audit row 21 |
+| P-137 sharded-vs-full ratio | slot: its own post-lock measurement (F6 left RC-12 to run as P-137) | after the lock, before any Planck score; 3-6 h | audit row 98 |
+| P-036, P-037 (U), P-038, P-039, P-040, P-041, P-156 (think variants) | gate | P-034's T arm beats B in the 3c four-arm test; then T variants at 10-30M, 2 seeds each, P-037 first. If T does not win, each is "not run: parent did not win" | LEDGER caveat 3 |
+| P-031, P-157, P-043, P-042 (note variants and the split writer) | gate | N wins in 3c; they join P-030, P-029 and P-019 in 3c's Nov 9-22 N-variant slot. P-043 is reported as a scaffold (D4) | LEDGER caveat 3 |
+| P-027 errors plus corrections, P-028 belief-state auxiliary loss | slot: 3b after the first pool mix (5M proxy, then 30M for P-028) | both need skeleton data with planted slots; P-028 5 seeds at 30M, 25-40 h | LEDGER |
+| P-057 span upweighting, P-059 template subsampling, P-062 narrow register, P-063 vocabulary-breadth knee | slot: 3b after the must-run data bets (5M, then 10-20M for P-063) | the first pool mix; P-062 and P-063 read the register knobs that P-048 pre-registers | LEDGER |
+| P-058 chat-shaped anneal | slot: decay branches off a 30M trunk in 3b (part absorbed by E-sel-4) | the first pool mix; 6-10 h | CORPUS 6.3 |
+| P-160 BPE-dropout on repeated chat | slot: an arm of P-187, the pool-pass curve | P-187 runs Oct 19 - Nov 1 at 5M | CORPUS 4.5 |
+| P-163 instruction-response conversion | reason: absorbed by CORPUS 6.3 row 7 (P-162 + P-165), whose QA-rephrase arm is this bet (this triage's reading: CORPUS 6.3 does not name P-163) | none | CORPUS 6.3 |
+| P-164 DCLM in the backbone | reason: excluded by Max's rulings, not budget: DCLM is a web crawl (Q1, Reading B) and its selector's positives are GPT-4-written (Q5) | reopens only if Q1 changes | CORPUS 1.4 |
+| P-165 rephrase the backbone | slot: CORPUS 6.3 row 7 (absorbed) | the first pool mix | CORPUS 6.3 |
+| P-166 SYNTH reasoning data | gate | a D8 provenance check of SYNTH (every model-written token from an Apache-2.0 model); if it passes, a 10% candidate in E-sel-4's decay branches; if not, reason: D8 | CORPUS 6.3 |
+| P-169 MiniPLM selection | gate | E-sel-2 shows selection pays and a reference pair passes D8; then an extra E-sel-2-style arm at 20-30M | CORPUS 6.3 |
+| P-054 pure skill floor at 1-10M | slot: the 5070's Phase 4 spare hours (row 7 / CORPUS 5.4 queue); earlier if E4 finds no signal at 5M | its own pre-registration; 30-60 h | audit row 57 |
+| P-050 token curve from public checkpoints | slot: once RC-12's likelihood rows run on real models (audit S10), score SmolLM2-135M's public intermediate checkpoints, before P-186's freeze reading | minutes per checkpoint; no training | audit row 56; CORPUS 5.5 |
+| P-086 lookup dialogues in pretraining vs SFT | slot: 3b after the first pool mix (5M/20M, about 5% grounded tokens) | the pool's grounded lookup dialogues | LEDGER |
+| P-087 (U) lookup placement, P-088 chunk count, P-091 verbatim turns beyond the window, P-092 no own replies, P-093 compressed chunks | slot: eval-only sweeps on the first 20-30M Phase 3 checkpoint trained with lookup data, after the lock and before the freeze, so P-094's curve condition uses the winning placement | P-087 first (untested, 3 h) | LEDGER |
+| P-089 retrieval queries | slot: retrieval-only recall@3 on CPU with P-087's sweep; its SFT half at 60M+: gate | the CPU half shows a gain; the SFT half then runs on a 60M checkpoint after the curve | LEDGER |
+| P-090 (U) harness retrieval vs model-invoked lookup | slot: the post-lock diagnostic that Max's decision 2 allows for Planck-issued lookups, on one 20-30M checkpoint, report only | after the lock; 10 h; never in a claim | PLAN s1 LOOKUP claim; audit row 58 |
+| P-095 lookup-tool traces, P-170 single-call tool traces | gate | P-090 picks the tool route; then P-170 (single calls, SmolLM2-135M, 6-12 h) before P-095 (multi-turn); else "not run: parent picked harness retrieval" (the recipe has no tool calling, LEDGER baseline row 32) | audit row 58 |
+| P-107 in-context-learning transience | slot: watched on P-186's 5M trunk (the IND hook and the branch scores; a late fall reads as transience); its L2 arm: gate | a fall is seen; then a 5M L2 arm, 15-30 h | CORPUS 5.2 |
+| P-171 RETRO-style retrieval | gate | P-086 shows lookup data in pretraining helps; then the 30M in-context-chunks arm before the freeze; the 60M CCA pair after the curve, report only | LEDGER |
+| P-069, P-070, P-168 (OPD arms) | slot: arms inside P-068, now scheduled before Nov 16 | P-068's pre-registration | 3e; audit row 49 |
+| P-074 (U) cross-tokenizer distillation | gate | P-068 shows OPD beats SFT on own-history families; then byte-prefix OPD into Planck's tokenizer at 30M, 20-40 h (the only route D6 leaves open, audit row 50) | LEDGER |
+| P-075 interactive teacher feedback | gate | P-068 has run (it reuses its rollout code); SmolLM2-135M, 10-20 h | LEDGER |
+| P-073 (U) SDFT, P-071 self-distillation | slot: the Phase 2 public-model SFT block on the 5070 (SmolLM2-135M, 3 seeds), after P-012 decides, before Nov 16 | P-073 first (untested); 6-12 h each | LEDGER |
+| P-072 persona distillation | gate | P-006 shows persistence decays with distance from the system prompt; else "not run": Planck trains with no fixed system prompt (P-016) and keeps a persona per conversation, so a distilled persona has no use | LEDGER |
+| P-167 sequence-level distillation | reason: absorbed by P-053 (teacher-written vs generic text at equal tokens is the same comparison; this triage's reading, not stated in LEDGER or CORPUS) | none | this triage |
+| P-076 self-contrast decoding, P-077 best-of-N, P-078 contrastive search and min-p, P-181 MMI rerank | slot: decoding diagnostics on dev, public models any time, Planck checkpoints after the lock; report only, never the pre-registered decoding (T 0.6, no penalty); P-077 labelled a scaffold (D4) | 2-4 h each | audit row 55; NOVELTY s6.1 DRY caveat |
+| P-079 answerability probe, P-081 context reliance through SFT, P-136 mechanistic diagnostics | slot: P-079 and P-136 on the first post-lock 20-30M checkpoint (P-136 beside P-021's 30M test); P-081 on every 3e SFT checkpoint | after the lock; minutes to 6 h | LEDGER |
+| P-138 correction probes at deployed precision | slot: the release's int8/int4 step (Phase 4, microcontroller stretch), which already reports quantization loss | a size passes | LEDGER |
+| P-140 re-score TinyStories and SimpleStories checkpoints | slot: a 5070 gap, with its own short pre-registration and rubric | a GPU gap; 3 h | LEDGER |
+| P-099 byte-composition embedding, P-102 hashed-bigram table | slot: E7 arms at 20M (E7 owns embedding-form questions; pre-registered before Oct 24) | E7's pre-registration | LEDGER; PLAN 3a |
+| P-103 embedding table as entity store, P-182 sparse lookup memory, P-183 low-bit from scratch | reason: closed by D1 (total parameters); under that count they store per FLOP, not per parameter | reopen only if D1 changes | audit row 51 |
+| P-184 SpaceByte byte-level control | slot: Phase 5 (writeup control, one seed on the 5070) | after the curve; 5-10 h | LEDGER |
+| P-111 looped wide core with hyper-connections | gate | E10 (P-150) shows looping helps at 5M or 20M; then candidate C at 10M, 40-60 h | LEDGER |
+| P-177 MoEUT shared-layer MoE | gate | E10 shows layer sharing helps; then 10M, 20-40 h | LEDGER |
+| P-149 hybrid mixer vs pure attention | gate | P-022 or P-148 wins in 3d; then 30M, 20-35 h | LEDGER |
+| P-176 progressive growth (G_stack) | gate | the Phase 4 re-plan rule fires (the curve would not fit); G_stack is then the first speed option measured at 30M, before any budget option goes to Max | LEDGER |
+| P-185 MoE at fixed total | slot: the Titans after the 150M and 60M seeds, report only (expected negative) | Titan time left; 20-40 h | LEDGER |
+| P-114 (U), P-115 (U), P-116 (U), P-117 (U), P-118, P-119 (its bits half; S003 ran only its 5M loss reading, no skill or tail-item measure), P-120, P-121, P-122, P-123, P-124, P-125, P-178, P-179 (the bits-per-parameter rig, Max's idea 3) | slot: after the lock push, on the Mac or 5070 gaps, calibrated first (LEDGER baseline row 45); P-114 first (it decides whether to strip facts from the data), then the untested probes; report only, since stored knowledge is outside the claim (PLAN s1) | 1-20 h per probe at about 1M | audit rows 30, 53 |
+| P-126 bleed battery, P-127 per-user LoRA, P-131 (U) sparse per-user update | slot: a 5070 gap on public SmolLM2-135M-Instruct (no RC-12 needed); P-131 runs as an arm of P-127's design because it is untested and costs 1-2 h | P-127 under 1 GPU h; Max's idea 10, outside the within-conversation claim, report only | audit row 54 |
+| P-128, P-129, P-132, P-133, P-134, P-180 (per-user stages) | gate | P-127 meets its win line; else "not run: parent missed its line" | LEDGER caveat 3 |
+| P-130 per-user delta-rule state | gate | P-127 meets its line and the P-022 delta-rule layer exists (3d); then 5-20M | LEDGER |
+| P-135 per-user memory table | gate | P-127 meets its line; 60-150M only, so Titan time after the seeds | LEDGER |
+
+**Placed in Phase 0 but never run (audit row 37):** P-142, the counterfactual open-book probe (likelihood only, 1-3 h), gets a slot with RC-12's first real-model likelihood rows (audit S10), on public models, before the lock.
+
+**For Max (budget cuts still standing, put to him, not dropped):** P-186's 10M trunk to 20,000 tok/param (about 315 h eager per seed by arithmetic) and a second 5M seed at 20,000 (about 109 h); and, if the Titan window cannot hold three seeds at both 60M and 150M, which seed waits.

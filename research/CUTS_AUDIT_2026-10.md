@@ -468,3 +468,12 @@ Later, each with its trigger and honest path:
 ## Already done
 
 Rows 1 (decision; step 0 installs it), 40, 74, 91, 92, 93, 101, 108, 115, 123, 136, 141, 142.
+
+## Status, 2026-10-10 (appended; the text above is unchanged)
+
+- S8 (rows 17, 18, 43, 44, 45, 46, 73, 84, 85): applied as text in PLAN.md (a dated "Changes from the cuts audit, 2026-10-10" block after the status section, then each place it names) and LEDGER.md (P-186 rewritten; P-188, P-187, E-sel-0 to E-sel-6 and E-src added; P-083, P-161, P-164, P-165 marked absorbed). Not edited: CORPUS.md's own cut order (CORPUS 7.2, row 84's D-C07); PLAN's generation-cap line now routes a firing cap to Max, and CORPUS's text is left for its owner.
+- S14 (row 88): written as AFTER-E3 LABELS at the end of experiments/E2_lr_transfer/notes.txt. Stages A, B, C and the 20M grid all read "not resolved at one seed"; every pick stands.
+- S17, related-work part (row 144): REPORT.md s2.1 lines added; NOVELTY_2026-10.md s6.5 records follow-ups (a) and (c) as done and (b), panel decoding, as handed to the RC-12 lock workflow.
+- Rows 35, 37, 53-58: PLAN.md Appendix B gives each of the 106 unplaced ranked bets a slot, a gate or a reason (checked by a script against LEDGER's rank table), and P-142 a slot with RC-12's likelihood rows.
+- LEDGER "Results so far" now carries the stage 1 SCREENS verdicts (S001 TIE, S002 value residual REJECT and two TIEs, S003 REJECT) and P-105's status (S006 reinstated, its 4 runs done and scored on the PC, verdict pending).
+- Still for Max (budget cuts that stand, not dropped): P-186's 10M trunk to 20,000 tok/param and a second seed at 20,000; and which Titan seed waits if three seeds at both 60M and 150M do not fit by about Mar 15.

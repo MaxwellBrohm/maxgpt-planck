@@ -156,3 +156,10 @@ If only a few: minimind-3 and MiniMind2-Small first (most likely to be named), t
 - Chinese platforms: Bilibili search is bot-protected; Zhihu and WeChat seen only through search snippets; Gitee, Douyin, Xiaohongshu, QQ and Discord not searched.
 - Pending venues: BabyLM 2026 papers (after 2026-10-29); EMNLP 5160-MAIN on whether pragmatic sensitivity emerges with parameters, data or conversations (no preprint; recheck Oct 24-29); the Micro LMs camera-ready; Insights 2026 (list TBA); EMNLP SRW (not checked); about 55 accepted EMNLP papers missing from the sheet.
 - The HF sweep was not re-run for repos created after 2026-10-02 (TOAM-100M v0.2 appeared that day). Not read: the thought-vectors RESEARCH_LOG.md and BASELINE_ABLATIONS.md, the mine:o1-nano image-only tech report, the FineInstructions 300M/7B appendix. G1/G2-nano are still unverified. BananaMind bench items and bananamind-bunny-alpha are still gated.
+
+### 6.5 Follow-ups applied (2026-10-10)
+
+Status lines for the three follow-ups above (the cuts audit's S17 and row 46; nothing in sections 1-6.4 is changed). The letters here are the cuts audit's (its T19 a, b, c), not s6.1's own: s6.1's (a) is 2608.18083 and its (b) is the dose-response arm, which LEDGER P-188 cites as s6.1 (b):
+- (a) The dose-response arm ("capacity floor or data floor?", 2605.29548 against mine:o2): LEDGER P-188 and a PLAN 3b slot, triggered by the first pool mix and pre-registered before any run; P-051's 0.5% point is restored beside it.
+- (b) Panel decoding (plain, with no DRY and no repetition penalty, or such rows reported separately; Vertex also at its card's sampling as an extra row): belongs to the RC-12 pre-registration, which another workflow owns today; handed to it, not written here.
+- (c) Related-work lines: added to REPORT.md s2.1 for Codecs / thought-vectors, 2605.29548, FB-Bench, StructFlowBench, Evolve 2604.23424, Karpathy's cognitive core and Fractale, plus the one sentence that sets 2608.18083 (log-probability entity tracking at Pythia-410M) apart from RC-12's generation on the model's own history.
