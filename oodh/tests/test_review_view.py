@@ -1,29 +1,24 @@
 """oodh/review_view.py on the synthetic fixture (tests/fixture.py: made-up threads, no sealed file). Loads no model.
   python3 -B oodh/tests/test_review_view.py            the tests
   python3 -B oodh/tests/test_review_view.py --mutants  every mutant in M must turn the tests red (else exit 1)"""
-import os
-import sys
-
+import os, sys  # noqa: E401
 sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
 OODH, REPO = os.path.dirname(HERE), os.path.dirname(os.path.dirname(HERE))
 sys.path[:] = [p for p in sys.path if os.path.abspath(p or ".") != OODH]
 import select  # noqa: E402,F401  the stdlib module first: oodh/ holds a select.py of its own
 sys.path[:0] = [OODH, HERE]
-
 import glob, hashlib, json, re, shutil, subprocess, tempfile  # noqa: E401,E402
 from html.parser import HTMLParser  # noqa: E402
 from pathlib import Path  # noqa: E402
-
 import build as B, fixture as FX, hashes as H, review_view as RV  # noqa: E401,E402
 
-SALT = "planck-oodh-maxreview-v1:"     # written out here, not read from review_view
-TESTS = []
+SALT, TESTS, ABS = "planck-oodh-maxreview-v1:", [], "neither from the person nor from the assistant"  # not from RV
+KIND = {"H-FACT": "fact the person gave", "H-ASK": "person asked for", "H-CORR": "correction", "H-ABS": "not know"}
 
 
 def test(f):
-    TESTS.append(f)
-    return f
+    return TESTS.append(f) or f
 
 
 def records(n=9):
@@ -75,18 +70,23 @@ def page_of(recs):
 def every_thread_turn_and_probe_appears():
     recs = records()
     assert {len([t for t in r["turns"] if "history_reply" in t]) for r in recs} == {2, 3}    # both fixture types
-    pg = Page(page_of(recs))
+    pg = Page(page := page_of(recs))
     assert list(pg.sections) == [r["id"] for r in recs], pg.sections
-    for r in recs:
+    for r, sec in zip(recs, page.split("<section ")[1:]):
         got = pg.by[r["id"]]
         thread = [t for t in r["turns"] if "history_reply" in t]
         assert got["say"] == [x for t in thread for x in (t["text"], t["history_reply"])], (r["id"], got["say"])
         assert got["q"][1:] == [p["question"] for p in r["probes"]], (r["id"], got["q"])
         assert got["gold"] == [p["gold"] for p in r["probes"] if p["grader"] == "VAL"], (r["id"], got["gold"])
         assert got["ideal"] == [p["ideal"] for p in r["probes"]], (r["id"], got["ideal"])
+        words = [w for p in r["probes"] for w in (     # per question, in page order: export ids, kind, stale, source
+            [f'data-tree="{r["tree_id"]}" data-p="q{p["turn"]}" data-k="{p["probe_kind"]}"', KIND[p["probe_kind"]]]
+            + [f'changed: {", ".join(p["stale"])}<'] * bool(p["stale"])
+            + [ABS if p["grader"] == "ABS" else f'said it in message {" and ".join(map(str, p["src"]))}.<'])]
+        assert re.search(".*?".join(map(re.escape, words)), sec, re.S), (r["id"], [w for w in words if w not in sec])
     want = [(r["id"], pid) for r in recs for pid in ["conversation"] + [f"q{p['turn']}" for p in r["probes"]]]
     assert pg.checks == want, pg.checks
-    assert sum(1 for r in recs for p in r["probes"] if p["grader"] == "ABS") > 0      # the ABS branch is exercised
+    assert {p["probe_kind"] for r in recs for p in r["probes"]} == set(KIND)       # every kind is exercised, ABS too
 
 
 @test
@@ -111,8 +111,10 @@ def turn_with_script_and_ampersand_renders_as_text():
     nasty = '<script>alert("x")</script> & <b>bold</b> &amp; \'q\' "dq"'
     r = recs[0]
     r["turns"][0].update(text=nasty, history_reply=nasty + " reply")
-    r["probes"][0].update(question=nasty + "?", gold="A & B <i>", ideal="</span></p></div><script>x()</script>")
+    r["probes"][0].update(question=nasty + "?", gold="A & B <i>", ideal="</span></p></div><script>x()</script>",
+                          accepted=["A & B <i>", "alt & <u>"])        # fixture accepted lists hold only the gold
     pg = Page(page := page_of(recs))
+    assert "Also counts as right: alt &amp; &lt;u&gt;</p>" in page, "the other accepted answers are not shown"
     assert pg.tags.count("script") == 1 and "b" not in pg.tags and "i" not in pg.tags, pg.tags.count("script")
     got = pg.by[r["id"]]
     assert got["say"][:2] == [nasty, nasty + " reply"], got["say"][:2]
@@ -121,18 +123,13 @@ def turn_with_script_and_ampersand_renders_as_text():
     assert "&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt; &amp; &lt;b&gt;" in page and "&amp;amp;" in page
 
 
-def sealed_world():
-    recs = records()
-    os.makedirs(root := os.path.join(tempfile.mkdtemp(prefix="oodh_rv_"), "sealed", "oodh"))
-    path, hp = os.path.join(root, "oodh_part1.jsonl"), os.path.join(root, "HASHES.txt")
-    Path(path).write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in recs), encoding="utf-8")
-    H.write_hashes(recs, False, len(recs), path, hp, [])
-    return root, path, hp, os.path.join(root, "REVIEW.html")
-
-
 @test
 def sha256_check_refuses_a_changed_file():
-    root, path, hp, out = sealed_world()
+    os.makedirs(root := os.path.join(tempfile.mkdtemp(prefix="oodh_rv_"), "sealed", "oodh"))
+    path, hp, out = (os.path.join(root, f) for f in ("oodh_part1.jsonl", "HASHES.txt", "REVIEW.html"))
+    recs = records()
+    Path(path).write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in recs), encoding="utf-8")
+    H.write_hashes(recs, False, len(recs), path, hp, [])
     args = ["--sealed", root, "--hashes", hp]
     assert RV.main(args) == 0 and os.path.getsize(out) > 0
     os.remove(out)
@@ -165,10 +162,9 @@ def page_has_no_external_urls():
 
 @test
 def time_estimate_counts_the_words_on_the_page():
-    recs = records(45)
-    pg = Page((out := RV.render(recs, "oodh_part1.jsonl", "ab" * 32))[0])
-    page, st = out
-    on = [pg.by[rid] for rid, s in pg.sections.items() if s == "1"]
+    page, st = RV.render(records(45), "oodh_part1.jsonl", "ab" * 32)
+    pg = Page(page)
+    on =[pg.by[rid] for rid, s in pg.sections.items() if s == "1"]
     words = sum(len(x.split()) for g in on for x in g["say"] + g["q"][1:] + g["ideal"])
     checks = sum(len(g["q"]) for g in on)
     assert (st["words"], st["sample"], st["sample_probes"]) == (words, 30, checks - 30), (st, words, checks)
@@ -193,7 +189,12 @@ M = [('if "history_reply" in t]', 'if "history_reply" in t][:-1]', "last thread 
       '<title>OOD-H review</title>', "external font"),
      ("default-src \\'none\\'; ", "", "no CSP default-src"),
      ('(p["question"], p.get("ideal"))', '(p["question"],)', "estimate skips IDEAL words"),
-     ('round(words / WPM + checks', 'round(words / WPM + 0 * checks', "estimate skips check time")]
+     ('round(words / WPM + checks', 'round(words / WPM + 0 * checks', "estimate skips check time"),
+     ('neither from the person nor from the assistant', 'from the person', "ABS rule skips the assistant turns"),
+     ('if alts else []', 'if 0 else []', "no other accepted answers"), ('if p.get("stale")', 'if 0', "no stale line"),
+     ('if p.get("src")', 'if 0', "no source message"), ('data-k="{E(kind)}"', 'data-k=""', "export loses the kind"),
+     ('data-tree="{E(r["tree_id"])}"', 'data-tree=""', "export loses the tree id"),
+     ('E(KIND_WORDS.get(p["probe_kind"], p["probe_kind"]))', 'E(KIND_WORDS["H-FACT"])', "every question a fact")]
 
 
 def run_copy(old, new):
@@ -204,8 +205,7 @@ def run_copy(old, new):
         os.makedirs(os.path.join(dst, sub))
         for f in [f for pat in pats for f in glob.glob(os.path.join(REPO, sub, pat))]:
             shutil.copy(f, os.path.join(dst, sub))
-    rv = os.path.join(dst, "oodh", "review_view.py")
-    text = open(rv).read()
+    text = open(rv := os.path.join(dst, "oodh", "review_view.py")).read()
     if text.count(old) != 1:
         return None, ""
     Path(rv).write_text(text.replace(old, new))

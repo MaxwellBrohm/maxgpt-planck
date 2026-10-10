@@ -25,7 +25,7 @@ import hashes as H  # noqa: E402  (sha, ids_sha)
 SAMPLE_SALT, SAMPLE_N, WPM, SEC_PER_CHECK = "planck-oodh-maxreview-v1:", 30, 200, 30
 KIND_WORDS = {"H-FACT": "asks for a fact the person gave", "H-ASK": "asks what the person asked for",
               "H-CORR": "a correction: asks for the value the person changed it to",
-              "H-ABS": "should say it does not know (the person never said it)"}
+              "H-ABS": "should say it does not know (nobody in the chat said it)"}
 
 
 BUTTONS = [("looks_right", "Looks right"), ("problem", "Problem"), ("not_sure", "Not sure")]
@@ -93,8 +93,8 @@ def check_html(r, pid, kind, title, body):
 def probe_html(r, p, j, m):
     out = [f'<p class="q">{E(p["question"])}</p>']
     if p["grader"] == "ABS":
-        out.append('<p class="exp">Expected: the assistant says it was never told this. Check that the person really '
-                   'never said it anywhere above.</p>')
+        out.append('<p class="exp">Expected: the assistant says it was never told this. Check that the answer is '
+                   'nowhere above, neither from the person nor from the assistant.</p>')
     else:
         out.append(f'<p class="exp">Expected answer: <span class="gold">{E(p["gold"])}</span></p>')
         alts = [a for a in p.get("accepted") or [] if a != p["gold"]]
