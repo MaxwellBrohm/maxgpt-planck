@@ -382,3 +382,86 @@ Status: BUILT to 150 threads (2026-09-26, s13) and REVIEWED (s14). The best-path
              unless listed; handled here per item through accepted forms.
   Note: build_b4.py (the batch 4 authoring script, scratch) would rewrite batch_4.jsonl from the pre-review item
     files; the review patch is the record of every later change, as for batches 1-3.
+
+15. HUMAN REVIEW AND THIRD REVIEW (2026-10-10; no model loaded; item text only in sealed/)
+  Max's review (the PI, by hand): oodh/review_view.py page, sample = the 30 lowest sha256("planck-oodh-maxreview-v1:"
+    + tree id), 30 threads and 85 probes of the s14 file (f6163981...). Marks: sealed/oodh/max_review_marks_2026-10-10
+    .json (115 marks, every one in the sample). Result: 85 of 85 probes "looks right"; 27 of 30 conversations "looks
+    right", 3 "not sure". His 3 notes, all about original OASST2 wording: a stray character where a period seems meant
+    in an assistant line; unusual spelling and an interjection in the user's own turns; an assistant turn that
+    describes itself oddly. None touches a gold, a question or a source turn, and each probe of the 3 threads passes.
+    The history stays verbatim (s4): the later human turns answer those exact words, OOD-H's point is real human
+    text, and no KL2 reason covers odd wording. No change.
+  Third review (agents): 5 slices of 30 threads (all 150, every turn and probe) and a blind re-read of Max's 30
+    without his marks: 180 thread reads, 502 probe reads, 103 raw findings. Each finding went to 2 skeptics who tried
+    to refute it against the rubric and DESIGN (gold right and the only fair answer, accepted forms cover every fair
+    answer, natural question, kind rules of s5, no leak, no private content, a latest-turn parrot cannot pass;
+    conversation usable under s2 and KL2), most of them grading hand-written replies with rc12 graders unchanged.
+    After merging: 45 confirmed by both skeptics (6 of them the same probe from two slices), 56 refuted by both or
+    split (15 split, 41 refuted; not fixed, recorded in sealed/oodh/review_c3/). Confirmed as filed: 1 HIGH, 23
+    MEDIUM, 21 LOW; the skeptics put most at LOW.
+  Agreement with Max: the blind re-read differed from his marks on 9 of 85 probes (76 agree); 7 of the 9 were
+    confirmed. Over all slices, fixes touch 12 of his 85 probes in 11 threads (below); his 3 notes are confirmed as
+    harmless.
+  HIGH: under the current rc12 graders (a closing quote after "?" ends a sentence, 2026-10-04) one H-ASK probe whose
+    gold is itself a question failed G1: its IDEAL and every natural quote of the request were read as a question,
+    not an assertion. The s14 gate predates that grader change; gate.py on the s14 file with today's graders: G1 FAIL
+    1 (that probe only). The probe is dropped (the thread keeps its 2 H-FACT probes).
+  Fixed by sealed/oodh/review_patch_c3_2026-10-10.py (reruns the two 2026-09-26 patches, which rebuild the batch files
+    FROM the untouched copies in sealed/oodh/pre_review/, then applies its edits asserting every old value; a rerun
+    gives the same files; 5 of its assertions were each broken once on purpose and fired):
+    wording   6 questions said "my last message" after earlier probes, where that literally means the previous probe
+              question: now name the thread turn by its ordinal (4 confirmed, plus the 2 siblings with the same
+              wording whose own findings were refuted or split, so the 6 change together). 2 questions planted a hedge
+              word the strict grader reads as "not asserted", so the faithful echo failed (1 confirmed, 1 found by the
+              same check, which the skeptics asked for). 1 question presupposed a
+              detail the user never gave. 1 question matched two required words: it now names one by the other's
+              role.
+    guessable 7 probes carried a cue that world knowledge or a stock phrase completes to the gold (s14's class): 4
+              questions reworded (1 also gets the stock same-surname guess added to its pool). 3 could not be
+              reworded, the asked object itself being the cue: 2 replaced by another value the user stated in the same
+              turn, 1 dropped (the stated value is the conventional default of the thread's own topic).
+    ABS       2 abstain probes asked for a value the user had given vaguely (s14's "vague amount"): each replaced by an
+              unanswerable question on a personal value that appears nowhere in the thread, with a fresh pool.
+    accepted  16 probes got fair forms of the user's own value that failed v2_gold: hyphenated and plural spellings,
+              spelled-out units and expansions, common abbreviations, ordinary synonyms, other written date forms, and
+              on 1 probe the user's own second clause of the same explanation. Forms taken only from the assistant's
+              wording, looser paraphrases and anything that let a wrong or pool value pass were left out (s11, s14).
+              1 probe also lost a generic hypernym of its gold from its pool.
+    VAL       1 gold was missing from pool_values (s6): added. gate.py does not check candidates within pool_values.
+    kinds     2 probe kinds relabelled to s5 (a request recall labelled H-FACT; a stated decision labelled H-ASK).
+              The H-FACT/H-ASK line is loose set-wide (want/need statements inside requests); per-kind rates carry
+              that noise.
+    asks      1 D turn that is a direct question carried asks=false (s6): set true. No scoring effect.
+  Not changed, recorded: a request word left out of a candidate list on purpose (adding it as s6 says makes a correct
+    reply that names both required words fail v3_shotgun); the LATEST_USER passes at d=1 (9 VAL probes, the same 9
+    before and after; structural, s11, s12); the KL2 borderlines already recorded at authoring.
+  Field diff, old file to new (same 150 trees, same ids): 36 records; probes: question 18, accepted 18, pool 7, ideal
+    5, object words 5, gold 2, candidates 2, prefix 2, kind 2, 2 dropped; 1 asks label; 4 cells change. Every changed
+    probe was re-graded on the built file with hand-written replies (198: 129 pass; the 69 fails are wrong values,
+    non-answers and the grader limits below; verdicts equal those on the in-memory edits apart from the forms not
+    adopted), IDEAL passes every changed probe, and a per-probe cheater check (echo of the question, bare abstain and an
+    outside pool value on VAL, a pool guess on ABS) passes 0 of 114.
+  Sample threads Max should re-check (they changed after his marks): oodh-017, 019, 021, 025, 061, 075, 076, 084,
+    105, 114, 149 (061 and 084 accepted forms only; 114 a kind label only; 075 a kind label and a replaced probe).
+  Grader findings for the rc12 workflow (counts only; on the new file; not fixed here):
+    ABS cue   "You never picked one." and "You haven't chosen one yet." fail 92 of 92 ABS probes (no pick or choose
+              forms); "No, you didn't." fails 92 of 92 (a bare yes-no denial).
+    hedge     "You said it should be <gold>." and "You said it seems to be <gold>." fail 323 of 323 VAL probes: a
+              hedge or modal word inside a report of the user's value is read as the reply's own hedge.
+    quote     a gold inside a quoted question ending in "?" is read as not asserted (the HIGH above).
+    loop      the self-copy and equality clauses compare a probe reply with the fixed OASST2 history replies, so a
+              restatement that overlaps a volunteer's assistant turn can be scored degenerate (1 probe seen).
+    shotgun   with v3_shotgun on (s6 CLOSED note), a contrastive "new X instead of old Y" reply fails on 2-candidate
+              probes (seen on 2 probes; policy cost, as STEP 14S states).
+    s14 open  "You asked if <gold>." passes 0 of 323 VAL probes (s14 "if"); the s14 ABS cue gaps are still open.
+  Gate (gate.py, run 2026-10-10 on the new file, current graders with v3_shotgun on): PASS on every gating check
+    (ids, struct, G1, L2, G8, ABS, VAL, G7). Reported, not gating (s12): G2 129 findings, G4 45 threads; type matchers
+    0.72-0.75 family, SHOTGUN 0.59, USERVOICE and ROLECAP 0.01, ECHO, DEFLECT, ABSTAIN 0.00, LATEST_USER 0.03
+    (9 VAL probes), LATEST_USER_SWAP 0.05; the 2+-value subset 44 of 323 VAL probes, top cheater passes OVERLAP_A 32,
+    MARKER_OBJ 31, WORDING 30. sealed/oodh/REVIEW.html regenerated (sample now 84 probes). oodh/tests pass.
+  Whole set: 150 threads, 415 probes (H-FACT 226, H-ASK 96, H-CORR 1, H-ABS 92; 135 threads with 2 user turns, 15
+    with 3; 115 with 3 probes, 35 with 2). s14's counts and file hash are superseded.
+  Hashes (oodh/HASHES.txt): oodh_part1.jsonl sha256 40d2a76d1315d3cbfaf5e7b899183b7b04fe2561ab2717396782a316e4b268e7;
+    sorted tree-id list sha256 4c3f60e3c1c79121982326ca430f9e26b37f4f2037ab17c501903dd179a69eb7 (unchanged).
+  Status: Part 1 is reviewed by a human and three agent reviews and is the LOCK CANDIDATE for the RC-12 lock.
