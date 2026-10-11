@@ -666,3 +666,40 @@ results.json and results_part2.json report Part 3 "not run (data_seed patch not 
     survivors (7>&-, one clone per waiter, .started kept) stay unpinned: queue.lock blocks a second queue whatever the
     waiter's fd, and the verify ran the real-flock behaviour in WSL. configs/prereg.yaml stays unchanged (it does not
     list e3_5m_A_s1_P3; this file governs). The CUDA flag-off run (default_parity.py --device cuda) was not run.
+
+PART 3 ANALYZER (2026-10-11 13:35 EDT, Claude, W1's commit step; Mac CPU, no model. Written and committed before any Part 3
+value exists: the Part 3 queue started at 4962426 on 2026-10-11 13:12:28 and was waiting for gpu.lock, no Part 3 run had
+begun training, and no Part 3 record has been copied or opened.)
+  CODE: e3analyze_p3.py (tables: e3analyze_p3_tables.py, formatting only) imports e3analyze.py unchanged (load, value,
+    METRICS, FIXED, FIXED_D4, the quantiles) and writes results_part3.json and tables_part3.txt (D5: results.json,
+    results_part2.json and results_part4d.json stay as they are; a check pins their sha256s). Statistics as PART 3
+    REOPENED STATISTICS: per metric, each family's SD (df n - 1) as a fraction of its mean, its 95% chi-square interval and
+    80% upper bound; rule 1's reference sqrt(2) x that SD with MDE_u(k) for k = 1, 2, 3, 5, k_needed for 0.5%, 1%, 2% and
+    rule 2's k = max(2, k_needed) (above 5 "underpowered"); descriptive: each family against Part 1's relative
+    sigma_seed with a 95% F interval (df n - 1 and 7) and sqrt(sigma_init^2 + sigma_data^2) against it; e3_5m_A_s1_P3
+    beside A1, R2 and R3 in units of Part 1's sigma_rep, and whether it drew A1's stream (counts).
+  CHECKS: e3analyze.py's at Part 3's commit and schedule (7,630 steps, decay from 6,104, bpb at 7,344, 7,497 and 7,630,
+    16 tail records 7,480..7,630), Part 2's additions (bpb steps, tail steps, tail end = end record), and: the start
+    record's data_seed equals the config's; config bytes equal the registered sha256s and carry the seed and data_seed
+    lines; every Part 3 queue start names part3.txt (07018f0f) and 4962426, and each has its code list, equal to commit
+    4962426's files (386 rows; harness/ + data_prep/ .py digest aced7148 over 111 files); the queue log continues Part
+    2's copy byte for byte; the registered order (a relaunch's repeated train line of a cut run counted once) and one
+    MARK E3 PART 3 DONE; the split (each INIT run's counts equal e3_5m_A_s1_P3's at all 16 tail steps and the end; the
+    5 DATA runs' end counts pairwise different). Expected failures, five: D2's FIXED 2 digest, train.py, trainer.py and
+    model.py, and data_prep/bpb.py (7367071e, the --hd change since Part 2); one check requires each of the four files to
+    equal commit 4962426's (train.py aa07b64c with data_seed; trainer.py 15d1a971 and model.py f4e61556 as in Part 2).
+    runio.py passes as D4. Any other failure is reported and handled under DEVIATIONS POLICY before a value is read.
+  COPY-BACK (registered here): out/<run>/bpb.jsonl (as on the PC), preflight.json (runs/E3/preflight/<run>.json),
+    train_tail.jsonl (log.jsonl records with step > 7,477.4), run_records.json (the run's start and end lines of
+    runs.jsonl without config, out_dir, time, checkpoint and env.host; a resumed_from kept as a file name), and a GAP or
+    DIVERGED mark if one exists; logs/part3/: queue_e3.txt, status.jsonl, every Part 3 code_sha256_*.txt and
+    e3p3_waiter.log. sha256 of each copied PC file compared on both machines. No machine address or user name.
+  TESTS (this commit): tests/test_e3analyze_p3.py, 9 tests on tests/p3fixture.py (a synthetic record set built from Part
+    1's copied records and commit 4962426's code list; no Part 3 value): the checks fail on exactly the five; every
+    statistic recomputed from the fixture files by another route (statistics.stdev, closed-form k_needed, scipy 1.18.1
+    quantiles typed in: factor 3.7174 at df 4, chi-square x0.5991 to x2.8736, x1.5576, F(4, 7) 0.1102 and 5.5226); GAP
+    handling (df 3; two GAPs leave no SD). e3analyze_p3_mutants.py: 31 of 31 DATA mutants killed on the fixture (rerun on
+    the real copies before PART 3 RESULT) and 14 of 14 CODE mutants of the statistics killed by the test file.
+  INDEPENDENT CHECK (before PART 3 RESULT is committed): a separate script, not importing e3analyze*, reads the raw
+    copied files and recomputes the family SDs, the rule 1 references and MDEs for F(CHAT) and F(PROSE) and the split;
+    its numbers must equal results_part3.json's.
