@@ -2637,3 +2637,7 @@ none in a number a run reads. Each is fixed or recorded here, before the step it
     tests/mutants_sat.py's onset_partial_curve_accepted and onset_first_reading_kept, whose anchors were the replaced
     ind_curve lines; re-anchored to the new code (the missing-grid-step check; the last reading of a step) and run on
     a fresh tree: 2 of 2 killed, so mutation_screens.py 565 of 565 killed, mutants_vfix.py's 24 among them.
+  AMENDED 20:58 EDT (W1's commit step; after 2aa3787): test_the_entry_results_sentence_matches_the_suite_and_the_
+    mutant_list compared the RUNS sentence with the live collected count, so the next test added to the suite broke
+    it (tests/test_registry_c6_inputs.py, with E3 Part 2's six registry lines: models/MODELS.md section 11). It now
+    pins the counts the sentence reports, 806 tests and 565 mutants, and wants the live counts at least those.

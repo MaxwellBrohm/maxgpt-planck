@@ -218,3 +218,14 @@ Superseded: E002 notes, POST-HOC ADDITION 2 ("deleted when E002 is done"). Those
 - **16 smokes, not_saved**: the C1-a gate's 10 compiled smokes (2026-10-02) and the 6 eager smokes (2026-10-04),
   300 steps on real starter data in scratch trees, checkpoints deleted after by design. The gate's flag_parity runs
   (200 steps on synthetic batches, compile-parity probes) are not registered, as no compile-parity probe is.
+
+## 11. E3 Part 2 registration (2026-10-10)
+
+6 lines, `E3/20m_<A|B>/s<seed>/final`: E3 Part 2's 20M finals (500M slots, full WSD, 15,259 steps), which had none
+(the W1 verify's note; the SCREENS C6 diagnostics queue scores them, group e3p2). Built from the PC's records, as
+E3 Part 1's: runs.jsonl start and end events (n_params, config_sha256, times), the final checkpoints' bytes, sha256
+and mtimes, and the queue's code list (one queue start at 3c102f7); params_body is the E2 20M entries' (the same
+model section in the config); results are results_part2.json's F(CHAT) and F(PROSE). Location: the run folder only.
+Not yet archived: the D: drive did not answer on 2026-10-10; add the archive location once copied.
+`experiments/screens/tests/test_registry_c6_inputs.py` checks that every checkpoint the C6 runner scores is a
+registered final.

@@ -105,9 +105,13 @@ def test_the_entry_counts():
     assert f"tests/mutants_vfix.py ({len(MUTANTS_VFIX)} mutants" in f
 
 
+SUITE_AT_ENTRY, MUT_AT_ENTRY = 806, 565      # the suite's tests and mutation_screens.py's list when RUNS was written
+
+
 def test_the_entry_results_sentence_matches_the_suite_and_the_mutant_list():
-    """Written after its runs (F5): passed + failed is the suite's collected count, the one failure is the test that
-    wants that sentence, and the mutation count is mutation_screens.py's whole list."""
+    """Written after its runs (F5): passed + failed is the suite's size then (774 at INTEGRATION + this entry's 32), the
+    one failure is the test that wants that sentence, and the mutation count is the whole list then. Later steps add
+    tests and mutants (2026-10-10: test_registry_c6_inputs.py), so the live counts may only be larger."""
     import mutation_screens as M
     f = flat(HEAD)
     out = subprocess.run([sys.executable, "-m", "pytest", "-q", "--collect-only", "-p", "no:cacheprovider", HERE],
@@ -115,5 +119,6 @@ def test_the_entry_results_sentence_matches_the_suite_and_the_mutant_list():
     total = sum(1 for ln in out.splitlines() if "::" in ln)
     m = re.search(r"experiments/screens/tests (\d+) passed and (\d+) failed, the failure being "
                   r"test_the_entry_results_sentence_matches_the_suite_and_the_mutant_list", f)
-    assert m and int(m[1]) + int(m[2]) == total and int(m[2]) == 1 and int(m[1]) > 774
-    assert f"mutation_screens.py {len(M.MUTANTS)} of {len(M.MUTANTS)} killed" in f
+    assert m and int(m[1]) + int(m[2]) == SUITE_AT_ENTRY == 774 + 26 + 6 and int(m[2]) == 1 and total >= SUITE_AT_ENTRY
+    assert f"mutation_screens.py {MUT_AT_ENTRY} of {MUT_AT_ENTRY} killed" in f and MUT_AT_ENTRY == 541 + 24
+    assert len(M.MUTANTS) >= MUT_AT_ENTRY
