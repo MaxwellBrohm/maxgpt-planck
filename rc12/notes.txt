@@ -3416,3 +3416,28 @@ REVIEW AND FIXES (2026-10-10, 19:50 to 20:40 EDT, Claude, W4 commit agent; nothi
     baseline failures none. Logs copied from that run: mutation_lik, mutation_graders, mutation_e2e_part1-8.
   Hygiene: logs/mutation_step9_part1.txt, _part3.txt and mutation_s14.txt held a Mac temp-dir path (committed
     earlier); now <tmp>.
+
+STEP 14L (2026-10-10, 19:55 to 21:00 EDT, Claude, W4 commit agent): COMMITS AND PC LAUNCHES of STEP 14X and 14S.
+  Commits (pushed): 06bc24c pc/ (boot resume with the run file; review D1; the low-disk test race), 5f833c7 STEP 14X
+    (extras, cRia split, launcher, review fixes), 6d8fcd8 STEP 14S (pre-lock items, review fixes).
+  Boot: ~/planck/boot.d/30_rc12.sh was md5 e0c56ffa (the old copy kept as ~/planck/dev/w4c_bak/), replaced by
+    06bc24c's (sha256 385b6a30...093c3e, executable); --dry-run: DONE present, nothing to resume. PC boot mutants
+    (GNU grep, HOME a scratch dir): 72 / 72 killed; the real queue log and DONE untouched (286 lines before and after).
+  Code: git archive 5f833c7 rc12/ into ~/planck/dev/rc12x_5f833c7 (review D6: commit-named, never reused); on the
+    PC there extras/test_rc12x_extras.py PASS and test_dev_batch_shards, test_queue, test_queue_shards,
+    test_pins_engines, test_dev_extras14, test_verify_dev_runs exit 0. git archive 6d8fcd8 rc12/ and
+    experiments/E004_general_updating/code into ~/planck/dev/rc12s_6d8fcd8; test_lik_engine, test_lik_selfcheck,
+    test_rerun_wrong_seed, test_lik exit 0 there (venv-vllm).
+  EXTRAS: rc12x_extras.sh started 20:00:01 (pcdetach; log ~/planck/logs/rc12x_extras.log), phases A B D C; phase A's
+    queue started 20:05:01 (run 20261010T200501.1486481; its run file written as STEP 14X says). First session: 3
+    processes, 965 s under gpu.lock, each about 300 s (Falcon-H1-Tiny-90M-Instruct-Curriculum template greedy, 1, 2).
+    C waits for runs/SCREENS/marks/SCREENS_BASE_REPLAY_DONE and c6diag/DONE (neither on the PC at 20:55).
+  LIKELIHOOD ROWS AND REPLAY: one detached wrapper (log ~/planck/logs/w4c_lik_go.log) ran the CPU tokcheck, then
+    rc12lik_gpu.sh (13 models, one hold each, log rc12lik_gpu.log, out ~/planck/runs/rc12_lik), then rc12ws_gpu.sh
+    (review D2 version; out ~/planck/runs/rc12_wrongseed). Both launchers are copied beside the code in
+    ~/planck/dev/rc12lik_6d8fcd8.
+  CPU TOKCHECK with 6d8fcd8's code (no lock; logs/lik_tokcheck_14s_venv_doge.json and _venv_vllm.json), matched /
+    all-equal rows of 412, first render: Doge-160M-Instruct in venv-doge (its own code, eager) 311 / 146, the same as
+    transformers 5.17's built-in read (STEP 14S); Swen-28M (venv-doge) 273 / 96; Loom-Spark-3.2 (carried template)
+    253 / 90; Falcon-H1-Tiny-90M-Base plain only (template skipped: none) 316 / 173; BananaMind-2-Nano-Chat and
+    -Mini-Chat 292 / 104 each; cRia-LM-75M-Instruct 326 / 163. Template and plain agree for every model.

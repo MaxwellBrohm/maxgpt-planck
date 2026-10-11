@@ -1,0 +1,267 @@
+{
+ "rows": {
+  "RECALL": 48,
+  "CORR": 64,
+  "BIND": 60,
+  "TWOHOP": 48,
+  "COMPOSE": 16,
+  "OWN": 32,
+  "TOPIC": 48,
+  "ROLE": 48,
+  "LOOKUP": 48
+ },
+ "renders": [
+  "template",
+  "plain"
+ ],
+ "models": {
+  "SmallDoge/Doge-160M-Instruct": {
+   "measured": true,
+   "model_type": "doge",
+   "renders": {
+    "template": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 21,
+      "n_matched": 38,
+      "chance": 0.40789473684210525
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 42,
+      "n_matched": 62,
+      "chance": 0.23863287250384022
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 22,
+      "n_matched": 22,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 34,
+      "n_matched": 43,
+      "chance": 0.3682170542635659
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 1,
+      "n_matched": 26,
+      "chance": 0.33141025641025645
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 8,
+      "n_matched": 31,
+      "chance": 0.45698924731182794
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 9,
+      "n_matched": 35,
+      "chance": 0.4238095238095238
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 0,
+      "n_matched": 45,
+      "chance": 0.25285714285714284
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 9,
+      "n_matched": 9,
+      "chance": 0.5
+     }
+    },
+    "plain": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 21,
+      "n_matched": 38,
+      "chance": 0.40789473684210525
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 42,
+      "n_matched": 62,
+      "chance": 0.23863287250384022
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 22,
+      "n_matched": 22,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 34,
+      "n_matched": 43,
+      "chance": 0.3682170542635659
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 1,
+      "n_matched": 26,
+      "chance": 0.33141025641025645
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 8,
+      "n_matched": 31,
+      "chance": 0.45698924731182794
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 9,
+      "n_matched": 35,
+      "chance": 0.4238095238095238
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 0,
+      "n_matched": 45,
+      "chance": 0.25285714285714284
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 9,
+      "n_matched": 9,
+      "chance": 0.5
+     }
+    }
+   },
+   "renders_agree": true,
+   "skipped": [],
+   "engine_opts": [
+    "attn_implementation",
+    "trust_remote_code"
+   ]
+  },
+  "Sensente/Swen-28M": {
+   "measured": true,
+   "model_type": "swen",
+   "renders": {
+    "template": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 14,
+      "n_matched": 29,
+      "chance": 0.41954022988505746
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 13,
+      "n_matched": 60,
+      "chance": 0.2999603174603174
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 24,
+      "n_matched": 24,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 19,
+      "n_matched": 38,
+      "chance": 0.41666666666666663
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 0,
+      "n_matched": 23,
+      "chance": 0.3731884057971015
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 16,
+      "n_matched": 29,
+      "chance": 0.4080459770114942
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 7,
+      "n_matched": 23,
+      "chance": 0.40217391304347827
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 0,
+      "n_matched": 44,
+      "chance": 0.3458333333333333
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 3,
+      "n_matched": 3,
+      "chance": 0.5
+     }
+    },
+    "plain": {
+     "RECALL": {
+      "n": 48,
+      "n_equal": 14,
+      "n_matched": 29,
+      "chance": 0.41954022988505746
+     },
+     "CORR": {
+      "n": 64,
+      "n_equal": 13,
+      "n_matched": 60,
+      "chance": 0.2999603174603174
+     },
+     "BIND": {
+      "n": 60,
+      "n_equal": 24,
+      "n_matched": 24,
+      "chance": 0.5
+     },
+     "TWOHOP": {
+      "n": 48,
+      "n_equal": 19,
+      "n_matched": 38,
+      "chance": 0.41666666666666663
+     },
+     "OWN": {
+      "n": 32,
+      "n_equal": 0,
+      "n_matched": 23,
+      "chance": 0.3731884057971015
+     },
+     "TOPIC": {
+      "n": 48,
+      "n_equal": 16,
+      "n_matched": 29,
+      "chance": 0.4080459770114942
+     },
+     "ROLE": {
+      "n": 48,
+      "n_equal": 7,
+      "n_matched": 23,
+      "chance": 0.40217391304347827
+     },
+     "LOOKUP": {
+      "n": 48,
+      "n_equal": 0,
+      "n_matched": 44,
+      "chance": 0.3458333333333333
+     },
+     "COMPOSE": {
+      "n": 16,
+      "n_equal": 3,
+      "n_matched": 3,
+      "chance": 0.5
+     }
+    }
+   },
+   "renders_agree": true,
+   "skipped": [],
+   "engine_opts": [
+    "trust_remote_code"
+   ]
+  }
+ },
+ "legend": "per key n_matched/n_equal/n; vs comparator n_common/n_equal_both (template)"
+}
