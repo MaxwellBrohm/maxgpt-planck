@@ -3441,3 +3441,50 @@ STEP 14L (2026-10-10, 19:55 to 21:00 EDT, Claude, W4 commit agent): COMMITS AND 
     transformers 5.17's built-in read (STEP 14S); Swen-28M (venv-doge) 273 / 96; Loom-Spark-3.2 (carried template)
     253 / 90; Falcon-H1-Tiny-90M-Base plain only (template skipped: none) 316 / 173; BananaMind-2-Nano-Chat and
     -Mini-Chat 292 / 104 each; cRia-LM-75M-Instruct 326 / 163. Template and plain agree for every model.
+  REVERSED CHANGE PHRASE (STEP 14S review D1's FOUND line), measured only (PC CPU, 20:57; not a code change): a
+    candidate fix that keeps "to" and "into" out of STALE_BEFORE's 3-word gap, run with dev_regrade.py over the stored
+    dev panel as regraded by 6d8fcd8 (352 runs, 121,088 rows): 2 probes gain v3_other (LFM2-700M template seed 1
+    corr-007 t10; Qwen3.5-0.8B template greedy corr-016 t12, which also regains v3_shotgun), both already failing on
+    v1_degen: no probe verdict, unit or score moves. So the gap costs no stored dev score; it remains a strict-grader
+    false pass for any model that says "from <gold> to <stale>", for the lock to decide (fixtures, audit and mutants
+    first).
+STEP 14L, CONTINUED (2026-10-11, from 09:00 EDT, Claude, W4 commit agent; the attempt above was cut off by the weekly
+  usage limit after fd73767 and the REVERSED CHANGE PHRASE lines, which this step commits unchanged). Nothing under
+  sealed/ read; no Planck model scored; nothing relaunched.
+  EXTRAS (rc12x_extras.sh, code ~/planck/dev/rc12x_5f833c7): phase A 48 / 48 runs (20:05 to 00:53), B 8 / 8 (to 01:35),
+    D 16 / 16 (to 02:04), each marked rc12x_<phase>.DONE. verify_dev_runs C1 to C5 on the PC (no --rerun, GPU hidden,
+    HF offline, 09:0x; log ~/planck/logs/w4c_verify_ABD.log): VERIFY PASS (0 failures) for the three P-144 siblings
+    on template and plain, Falcon-H1-Tiny-90M-Base on plain, minimind-3 on template and plain. Phase C started 02:14:32
+    (both chain marks present, no SCREENS process in 2 polls): cRia shards take 339 to 436 s each (peak 7.55 GiB),
+    3 per gpu.lock hold, holds 1,074 to 1,256 s (under the 2,040 s cap); at 09:10, 32 of its 80 shard processes done
+    (template greedy, 1 and 2 merged, each with its twin; template 3 under way). Not pulled, dev_extras14.py not run,
+    s12 numbers not filled.
+  LIKELIHOOD ROWS (rc12lik_gpu.sh, 6d8fcd8's code, log ~/planck/logs/rc12lik_gpu.log, out ~/planck/runs/rc12_lik):
+    12 of 13 models passed the self-check (48 rows, 144 scores per render; largest move 0.000016 to 0.000131 nats,
+    tolerance 0.01, 0 flips); longest hold 432 s (Qwen3.5-0.8B). LiquidAI/LFM2-2.6B in bfloat16 FAILED it: largest
+    move 0.571 nats on template and 0.348 on plain, against the bf16 tolerance 0.25, 0 flips; exit 4, kept as
+    LiquidAI__LFM2-2.6B.part, so under s4's rule its row is not reported. Not rerun: the same settings would repeat it.
+    LFM2-700M and 1.2B (the same architecture) move at most 0.000068 nats in float32, so the gap reads as bf16
+    rounding of a summed log-prob rather than the batching; that is not measured. Open for the lock (prereg s4): drop
+    the row, or change the rule before any row is read (for example a float32 run with the weights off the GPU, or a
+    bf16 tolerance measured first on a model that also runs in float32). lik_run prints each family's accuracy in
+    rc12lik_gpu.log; this step saw those lines (LFM2-2.6B's included) while checking the run, so any rule change is
+    made after that look (said in prereg s4). Rows not pulled or compared.
+  WRONG-SEED REPLAY (rc12ws_gpu.sh, out ~/planck/runs/rc12_wrongseed, INFO only, never a gate): Qwen2.5-0.5B template,
+    first-divergence shared prefix R1 (seed 1) 110, 3, 196, 874, 87 chars, R1w (seed 101) 4, 0, 5, 0, 1; Doge-160M
+    template R1 23, 62, 768, 121, 269, R1w 0, 0, 0, 0, 2. R2 PASS on both lines for both (max margin 0.125). R1's
+    shared prefix was the longer in 5 of 5 conversations on each model (the closest: Qwen's second, 3 chars to 0).
+  BOOT (09:14): every ~/planck/boot.d/*.sh has the sha256 of its HEAD file (30_rc12.sh 385b6a30..., 06bc24c's);
+    30_rc12.sh --dry-run: "running ... nothing to do"; the queue's run file names run 20261011T021432.1557357 with
+    phase C's settings.
+  FOR W1 (their handoff, 2026-10-11): pc/wsl/boot.d/40_screens.notes.txt corrected: a queue launched from 2aa3787 or
+    later counts a cut as the run's crash (QRUN, SCREENS DEVIATION 1 (3)) and repairs an unparsable unscored score
+    file itself ((2)); 40_screens.sh still refuses on that file for every queue (stricter than needed, the person
+    only moves it aside); relaxing it is open (a boot.d change wants its own tests, mutants and review).
+  CUTS AUDIT ROW 143 (rc12 part, W1's handoff): dev_regrade.py now writes each regraded run in <run>.partial, DONE
+    last, then dev_batch.publish_run (files and dir fsynced, rename, parent fsynced); on a rerun the earlier copy goes
+    aside to <run>.old.partial in one rename before the publish and is removed after it (a cut never leaves a
+    half-deleted run beside its DONE); regrade.json goes through a fsynced temp file and a rename; source dirs named
+    *.partial are skipped. New test_dev_regrade.py (fake:IDEAL_ALT, no model; fails on HEAD's dev_regrade.py in its
+    files, json, leftover and skip checks) and mutation_regrade.py: 15 / 15 killed (logs/mutation_regrade.txt). NOT
+    COMMITTED: it waits for an independent review (Max's rule); no regrade has run with it.

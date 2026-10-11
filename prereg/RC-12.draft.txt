@@ -304,7 +304,12 @@ becomes training text). The two share the label D8 by accident.
     first model runs: trust_remote_code, the attention and a carried chat_template come from engines.json (Doge: its
     own code, eager), a forward's logits are kept within 2 GiB by splitting a row's candidates (Gemma 3's 262k
     vocabulary), and lik_run --selfcheck N re-scores N rows one candidate at a time and fails the run if a score moves
-    by more than 0.01 nats in fp32 (0.25 in bf16) or a matched verdict flips.
+    by more than 0.01 nats in fp32 (0.25 in bf16) or a matched verdict flips. First model runs (2026-10-10 and 11,
+    PC, 6d8fcd8's code, --selfcheck 48; rc12/notes.txt STEP 14L): 12 of the 13 passed (largest move 0.000131 nats, 0
+    flips); LFM2-2.6B in bf16 failed (0.571 nats on template, 0.348 on plain, 0 flips), so its row is not reported
+    under this rule; dropping it or changing the rule is for the lock. lik_run prints each family's accuracy in its
+    log, and those lines (LFM2-2.6B's too) were seen when the run was checked, so a rule change now comes after that
+    look. No row pulled or compared yet.
 
 5. FAMILIES AND DEV COUNTS
   Dev seed 1212, one stream per family: Random("RC12:dev:<family>:1212"). Byte-identical across processes (tested).
