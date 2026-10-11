@@ -86,6 +86,30 @@ def check_compile(cmode: str | None, dynamic, doc_attn: str) -> None:
                          "falls back to eager at Dynamo's recompile limit; leave compile_dynamic unset")
 
 
+def data_seed_of(cfg: dict, seed: int) -> int:
+    """The loader's seed (E3 Part 3: experiments/E3_seed_noise/notes.txt, PART 3 REOPENED). Default off: a config
+    without data_seed gives the run seed, so every config written before it trains exactly as before (notes.txt
+    DATA SEED). Set, it must be a non-negative int, and it moves the token stream alone: torch's RNG, which draws the
+    init, stays seeded by seed."""
+    if "data_seed" not in cfg:
+        return seed
+    ds = cfg.get("data_seed")
+    if isinstance(ds, bool) or not isinstance(ds, int) or ds < 0:
+        raise ValueError(f"data_seed must be a non-negative integer, got {ds!r}")
+    return ds
+
+
+def check_data_seed(ck: dict, data_seed: int, cfg: dict, what: str) -> None:
+    """A resumed run or a decay branch continues its checkpoint's stream: refuse a loader seed other than the one the
+    checkpoint trained on (its data_seed, else its seed). Read only when the config or the checkpoint carries data_seed,
+    so a run without it starts, resumes and branches exactly as before."""
+    if "data_seed" not in cfg and "data_seed" not in ck:
+        return
+    was = ck.get("data_seed", ck.get("seed"))
+    if was != data_seed:
+        raise ValueError(f"{what} trained on data seed {was}; this config gives data seed {data_seed}")
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("config")
@@ -106,6 +130,7 @@ def main(argv=None) -> int:
     cfg_sha = hashlib.sha256(json.dumps(cfg, sort_keys=True, default=str).encode()).hexdigest()
     tc, sc, oc = cfg.get("train", {}), cfg.get("schedule", {}), cfg.get("optim", {})
     seed = int(cfg.get("seed", 0))
+    data_seed = data_seed_of(cfg, seed)    # E3 Part 3: the loader's seed, = seed unless the config sets data_seed
     name = cfg.get("name", os.path.basename(base))
     out_dir = _abs(cfg.get("out_dir", "out"), base)
     runs_jsonl = _abs(cfg.get("runs_jsonl", "runs.jsonl"), base)
@@ -136,7 +161,7 @@ def main(argv=None) -> int:
         print(f"[train] leak self-test passed {st}", flush=True)
 
     micro, accum = int(tc.get("micro_batch", 8)), int(tc.get("grad_accum", 1))
-    loader = build_loader(cfg["data"], mcfg.seq_len, micro, base, seed)
+    loader = build_loader(cfg["data"], mcfg.seq_len, micro, base, data_seed)
     per_micro = micro * mcfg.seq_len if dmode == "pack" else loader.tokens_per_micro
     batch_tokens = per_micro * accum
     total_steps = int(tc["total_steps"]) if "total_steps" in tc else \
@@ -149,12 +174,15 @@ def main(argv=None) -> int:
     if sc.get("init_from"):
         init_ck = runio.load_checkpoint(_abs(sc["init_from"], base))
         assert init_ck["model_cfg"] == mcfg.to_dict(), "init_from checkpoint has another model shape"
+        check_data_seed(init_ck, data_seed, cfg, "the init_from checkpoint")
     sched, stable_pts = build_schedule(sc, total_steps, n_params, batch_tokens, init_ck)
 
     meta = {"model_cfg": mcfg.to_dict(), "n_params": n_params, "prereg_sha256": prereg["sha256"],
             "config_sha256": cfg_sha, "seed": seed, "precision": precision}
     if head is not None:                   # n_params stays the deployed model's total
         meta["mtp_params"] = sum(p.numel() for p in head.parameters())
+    if "data_seed" in cfg:                 # E3 Part 3: in the checkpoints only when set
+        meta["data_seed"] = data_seed
     tr = Trainer(model=model, optimizer=opt, loader=loader, sched=sched, device=device, amp=amp,
                  cfg=cfg, out_dir=out_dir, grad_accum=accum, grad_clip=float(tc.get("grad_clip", 1.0)),
                  log_every=int(tc.get("log_every", 10)), ckpt_every=int(tc.get("ckpt_every", 500)),
@@ -182,6 +210,7 @@ def main(argv=None) -> int:
         ck = runio.load_checkpoint(last)
         assert ck["model_cfg"] == mcfg.to_dict(), f"{last} has another model shape"
         assert ck["schedule"] == sched.to_dict(), f"{last} was trained on another schedule"
+        check_data_seed(ck, data_seed, cfg, last)
         tr.load_state(ck)
         resumed_from = last
     elif init_ck is not None:           # a decay branch starts from the trunk's state
@@ -212,6 +241,8 @@ def main(argv=None) -> int:
         start["mtp"] = {"heads": mtp, "weight": mtp_weight, "training_only_params": meta["mtp_params"]}
     if ind is not None:                     # SCREENS C6: logging only, recorded when on
         start["induction"] = {"every": ind.every, "file_sha256": ind.file_sha256, "gate": ind.gate_rows is not None}
+    if "data_seed" in cfg:                  # E3 Part 3: in the start record only when set
+        start["data_seed"] = data_seed
     runio.append_jsonl(runs_jsonl, start)
     print(f"[train] {name}: {n_params:,} params, {device}/{precision}, steps {tr.step}->"
           f"{sched.total_steps} ({sched.mode}), {batch_tokens:,} tokens/step"

@@ -2837,3 +2837,30 @@ split and no Tier 0 margin was scored. Seed-1 selection runs only name the picks
     experiments/screens/tests 853 passed (SCREENS_PC_COPY set to the earlier PC copy whose queue_screens.txt the
     Saturday test pins, SCREENS_PC_COPY_1011 to copies of queue_screens.txt, status.jsonl and c6diag.log with the sha256
     AMENDMENT CAP-31 recorded; without them the three tests that need them skip) and models/tests 21 passed.
+
+BATCH 1 CLOSED (2026-10-11 11:57 EDT, Claude, W1's E3 Part 3 step (the cuts audit's S6, row 14); Mac CPU, tiny models
+only; the PC read only; nothing committed, nothing launched)
+  WHY: E3 Part 3 needs one harness change (data_seed, below). INTEGRATION 2026-10-10 registered that it lands only after
+    both of that day's queues had cloned their commit, and tests/test_screens_replay_code.py fails on any change under
+    harness/ while plans/CURRENT names stage2_replay. Read on the PC at 11:44 EDT: ~/planck/c6diag/DONE exists (the C6
+    queue's log ends "c6diag: DONE" at 2026-10-10 22:28:09), replay_waiter.log ends "DONE: stage2_replay ended cleanly
+    at its mark" at 2026-10-10 23:51:19, marks/SCREENS_BASE_REPLAY_DONE exists, and no SCREENS queue, launcher or
+    waiter runs. The stage 2 verdicts, the C6 readings and the replay readings are committed (ede95ce). No plan of this
+    batch is left and no run that pairs with stage 2 waits on a commit.
+  CLOSED: plans/CURRENT = batch1_closed (stop), after stage2_replay's mark SCREENS BASE REPLAY DONE (2026-10-10 23:51:19)
+  PLAN: plans/batch1_closed.txt, 3 lines: a comment, "wait_mark SCREENS SCREENS BASE REPLAY DONE", "stop". Launched,
+    it trains nothing and logs "plan says stop". boot.d/40_screens.sh resumes from the queue log's last start line,
+    never from plans/CURRENT, and the waiters of this batch have all ended, so nothing reads the new CURRENT on its own.
+  THE HARNESS CHANGE AND C4: harness/train.py reads an optional data_seed (the loader's seed alone; torch's RNG, which
+    draws the init, stays seeded by seed). Absent, the run is the run of 93bc10b's harness, the commit every BASE run and
+    stage 2 pair of this batch ran from: harness/test_data_seed.py::test_absent_equals_pre_patch_commit_20_steps trains
+    one config 20 CPU steps under both trees and finds the log records, every checkpoint key and value and the start
+    record identical. So a later batch may pair an arm from a commit with the change against BASE runs from 93bc10b
+    under C4's rule (every change a flag defaulting off, the flag-off equivalence test passing at the later commit).
+    CPU only: no CUDA run of it exists (by code reading the change passes the same int to the loader and adds keys only
+    when data_seed is set; harness/default_parity.py --device cuda can show it on the PC).
+  SCOPE OF E3 PART 3: sigma_init and sigma_data (E3 notes, PART 3 REOPENED) apply only to verdicts read after Part 3's
+    result is recorded, never to stage 1 or stage 2. Their new-init readings used sqrt(2) x sigma_seed because Part 3
+    had not run (C4), and every verdict, Holm reading, C6 reading and replay label of S001 to S007 stands as read; none
+    is re-read with Part 3's SDs.
+  TESTS: see the TESTS line of E3's PART 3 REOPENED entry (the same step).

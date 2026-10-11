@@ -1,3 +1,5 @@
 # The plan launch_e3.sh runs (one name from plans/, first non-comment line). Change it by commit.
 # part1 needs configs written by e3plan.py from E2 5M results; part3 needs the data_seed patch committed.
-part2
+# part3 (notes.txt PART 3 REOPENED, 2026-10-11) runs from its own bundle, planck-kit/planck_e3p3.bundle, started by
+# e3p3_waiter.sh (relaunch after a 2 h gpu.lock wait, resume after a cut); launch_e3.sh would take planck.bundle.
+part3

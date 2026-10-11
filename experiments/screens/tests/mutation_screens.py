@@ -213,6 +213,8 @@ from mutants_s2rules import MUTANTS_S2RULES  # noqa: E402  (stage 2 verdict step
 MUTANTS += MUTANTS_S2RULES
 from mutants_s2v import MUTANTS_S2V  # noqa: E402  (STAGE 2 VERDICTS: outputs, copies, writer, prose)
 MUTANTS += MUTANTS_S2V
+from mutants_closed import MUTANTS_CLOSED  # noqa: E402  (BATCH 1 CLOSED: plans/CURRENT off stage2_replay for E3 Part 3)
+MUTANTS += MUTANTS_CLOSED
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")

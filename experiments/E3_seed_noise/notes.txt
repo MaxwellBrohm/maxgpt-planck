@@ -559,3 +559,110 @@ sha256 the commit's files; each of the 25 hd JSONs' oasst2 bpb equals the run's 
   Part 2 (20M, 3 pairs, df 2), descriptive: IND mean A 9.94242, mean d +0.25322 (p 0.19); HD_asst mean A 0.08932, mean d
     +0.00292 (p 0.211); HD_user mean A 0.18846, mean d -0.00478 (p 0.341).
   Use: SCREENS.txt STAGE 2 VERDICTS reads final IND, HD_asst and HD_user with these Part 1 SDs (C6-DIAG READING RULE).
+
+PART 3 REOPENED (2026-10-11 12:02 EDT, Claude, W1's E3 Part 3 step (research/CUTS_AUDIT_2026-10.md row 14, S6); Mac CPU,
+tiny models only; the PC read only; nothing committed, nothing launched. Written before any Part 3 value exists: no Part 3
+config, run or statistic has existed, sigma_init and sigma_data have never been computed, and PART 1 RESULT, PART 2 RESULT,
+results.json and results_part2.json report Part 3 "not run (data_seed patch not committed)".)
+  WHY: Part 3 was reported "not run" by DESIGN's rule ("If the change is not in the committed harness when Part 3 is
+    reached, Part 3 is not run and the report says "not run"; nothing substitutes for it"): the 2026-09-26 patch file was
+    never committed and is gone. That rule says why it did not run; it does not drop the measurement. The cuts audit
+    (row 14) lists Part 3 for reinstatement under Max's rule that no experiment is dropped for budget alone. Its two SDs
+    are what SCREENS C4 and rule 1 below need for the "same stream, new init" and "same init, new stream" classes, which
+    the 3b data bets and later architecture screens read; until now both fell back to sqrt(2) x sigma_seed. Nothing it
+    measures has been seen: every E2, E3 and SCREENS run seeds init and data order from one seed, so no run separates them.
+  THE PATCH (harness/train.py, rewritten; harness/notes.txt DATA SEED): data_seed_of(cfg, seed) gives seed when the
+    config has no data_seed, else the data_seed (a non-negative int; anything else is refused). build_loader gets it in
+    place of seed; torch.manual_seed and np.random.seed keep seed (the init draws are torch's; nothing in the harness
+    draws from numpy's global RNG). Checkpoints and the start record carry data_seed only when the config sets it.
+    check_data_seed refuses a resume or a decay branch whose checkpoint trained on another data seed (its data_seed, else
+    its seed); it is read only when the config or the checkpoint carries data_seed. E2's preflight.py refuses a data_seed
+    the harness does not read, so a Part 3 config run at an older commit is refused, never run as a wrong Part 3.
+  TESTS OF THE PATCH (harness/test_data_seed.py, CPU fp32 tiny models): DESIGN's test (two runs with equal data_seed and
+    different seed read identical batches, every batch hashed, and start from different weights; and the converse);
+    absent equals data_seed equal to seed (20 steps, bitwise); absent equals the harness at 93bc10b (20 steps: log
+    records, every checkpoint key, start record; SCREENS C4's flag-off test); resume 20 + 20 equals 40 with data_seed 5
+    and seed 3; resumes and branches under another data seed refused. Mutants: harness/mutants_dataseed.py.
+  RUNS (e3plan.py --a5 0.003,1 --b5 0.0015,1 --a20 0.003,1 --b20 0.0015,1 --part3; the 24 configs of Parts 1 and 2 and
+    plans/part1.txt and part2.txt came out byte-identical, compared on a dry run first): 9 configs, arm A (3e-3, r 1),
+    5M, full WSD, 7,630 steps. Each is configs/e3_5m_A_s1.yaml with only its comment line, name, out_dir, seed and an
+    added data_seed line changed:
+    INIT family, data_seed 1:  e3_5m_A_s1_P3 (seed 1), e3_5m_A_init2, init3, init4, init5 (seeds 2, 3, 4, 5)
+    DATA family, seed 1:       e3_5m_A_s1_P3 (data_seed 1), e3_5m_A_data2, data3, data4, data5 (data seeds 2, 3, 4, 5)
+      b6d1d1da6025a090bfb9c7dad25dc91772398e57d6b3b2c5e7c96591b957c1cd e3_5m_A_init2.yaml
+      f240ce58e92b1a1a9eb2b44081802b93e8c2989cc3c659342f949939c140e61b e3_5m_A_data2.yaml
+      b6f5cff839d322599f0ff124db4ad5d7fa1d67ba7f098671f5596951dc09ae38 e3_5m_A_init3.yaml
+      67acf407be4ea7e4d9a9f2a410097aa6da362e9f735d4636ffd19df5d0f6795a e3_5m_A_data3.yaml
+      b364101f884e8dc33116c300950e55140978d784819c7110e29202a4a5fda403 e3_5m_A_s1_P3.yaml
+      820b4dfa17bb84fbcc830e35f025bf8b1413bd11d72f98ddded4bfb50ead10df e3_5m_A_init4.yaml
+      d50175dd620b1812abc67eac80319d07997787ae07a851c10423b0dc1080e836 e3_5m_A_data4.yaml
+      cdc2ea3c8e49ffef8273fda5a63021167ec480669811ce5f1897f8ed6e790d18 e3_5m_A_init5.yaml
+      3210030e489662e8f8c96875f1dae1e79e95ec0888e49acc3df30bf66174dca0 e3_5m_A_data5.yaml
+  SAME-COMMIT A1 (a change to DESIGN, made here before any Part 3 value): DESIGN made Part 1's A1 (run at e39112a) member
+    1 of both families. Part 3 runs at a later commit (D2's and D4's code differences, the screen flags and eval.induction
+    present but off in every E3 config, the data_seed read), so A1 runs again at Part 3's commit as e3_5m_A_s1_P3 and is
+    member 1 of both families instead: each family then compares runs of one code version. Its data_seed 1 equals its
+    seed, the same computation as no data_seed by the flag-off tests; it is written so every Part 3 config carries one.
+    Part 1's A1, R2 and R3 enter neither family. Reported beside the families, no rule: e3_5m_A_s1_P3 against A1, R2 and
+    R3 (a replay across commits, as the free extra pair was reported).
+  ORDER (plans/part3.txt, sha256 07018f0fec5729944f648b20d499d8b2d346426c81fec7cbc892fb894d1c2417): "wait_mark E3 E3 PART 2
+    DONE" (recorded 2026-10-03), then init2 data2 init3 data3 s1_P3 init4 data4 init5 data5, then "mark E3 PART 3 DONE".
+    A stopped queue leaves the families balanced, and the shared member runs fifth of nine, at the time centre of both
+    families, so a drift linear in time widens both alike and does not set member 1 apart.
+  STATISTICS (DESIGN's, unchanged; e3analyze.py's quantiles): per metric of METRICS (F(CHAT) and F(PROSE) first),
+    sigma_init = SD of the 5 INIT runs and sigma_data = SD of the 5 DATA runs, df 4, each as a fraction of its family's
+    mean; with the 95% chi-square interval (x0.599 to x2.874 at df 4) and the 80% upper bound (x1.558). In rule 1's
+    classes the reference SD is sqrt(2) x sigma_init or sqrt(2) x sigma_data with df 4: MDE_u(k) = 3.717 x sigma x
+    sqrt(2 / k) for k = 1, 2, 3, 5 (factor t(0.975, 4) + t(0.80, 4)), and k_needed for 0.5%, 1% and 2%. Descriptive, no
+    rule: sigma_init^2 + sigma_data^2 against Part 1's sigma_seed^2 (another commit), and each against sigma_seed with a
+    95% F interval (df 4 and 7). A diverged run is a GAP and leaves its family's SD (df down by one); with fewer than 4 runs
+    left a family gives no SD and that class keeps sqrt(2) x sigma_seed.
+  ANALYZER: e3analyze_p3.py, written and committed before any Part 3 bpb value or tail training loss is read, as Part 2's
+    was; it writes results_part3.json and tables_part3.txt (D5: results.json is pinned by screens_lib.E3_SHA and stays as
+    it is). Its checks are e3analyze.py's at Part 3's commit and schedule, plus the split itself: in each INIT run the
+    per-source drawn counts equal e3_5m_A_s1_P3's at every tail log step (same stream), and in each DATA run they differ.
+  USE AND SCOPE: once PART 3 RESULT is recorded, rule 1 reads sqrt(2) x sigma_init for "same stream, new init" and
+    sqrt(2) x sigma_data for "same init, new stream", with df 4, in place of sqrt(2) x sigma_seed (df 7). These SDs apply
+    only to verdicts read after PART 3 RESULT is recorded, never to stage 1 or stage 2 of SCREENS (S001 to S007): their
+    new-init readings used sqrt(2) x sigma_seed because Part 3 had not run, and every verdict there stands as read
+    (SCREENS.txt BATCH 1 CLOSED). No E2 or E3 reading already recorded is re-read with them. A later batch that reads them
+    names them in its own pre-registration, dated before its values.
+  QUEUE: E3's own. plans/CURRENT = part3. queue_e3.sh (E2's queue_e2.sh --exp E3: PAUSE, STOP, 75 C and 25 GB guards,
+    gpu.lock per run for training plus scoring, preflight --strict, train.py --require-committed, final plus two rolling
+    checkpoints scored) runs from its own bundle, planck-kit/planck_e3p3.bundle, started by e3p3_waiter.sh (pcdetach.sh;
+    the kit's planck.bundle and send_kit.sh are not used): it clones the bundle into qcode/<commit12>, checks CURRENT and
+    the plan's sha256, runs the queue, relaunches it after a 2 h gpu.lock wait or a 30 min GPU memory wait (at most 24
+    times) and gives up on any other end. GPU: Part 1's 18 5M runs held gpu.lock 0.306 to 0.314 h each (logs/queue_e3.txt),
+    under the 35 min limit; 9 runs are about 2.8 GPU h of holds. No boot.d entry resumes E3 after a power cut: starting
+    the waiter again resumes it (the queue skips scored runs; train.py resumes a cut run from latest.json).
+  FIXED: E2's FIXED block reaches every Part 3 config through base5m.yaml and engine.yaml, both unchanged since Part 1
+    (git diff e39112a..ede95ce), as are preflight.py, queue_e2.sh, queue_lib.sh, bpb_lines.py, evalwin.py and the
+    tokenizer; data_prep/bpb.py's one change since Part 2 is --hd, off by default and not passed by the queue. The config
+    sha256s, seeds and order are above. The commit and its harness/ + data_prep/ digest are recorded at the queue's start
+    (code_sha256_<time>.txt beside queue_e3.txt), the record PART 3 RESULT checks; no hand-written FIXED log (D2).
+  DEVIATIONS POLICY unchanged. A run cut by a power cut or a reboot resumes from its last checkpoint once, as a crash
+    does, and is logged with its resumed_from; it is never rerun from step 0 because its value looks odd.
+  TESTS (2026-10-11, this step, Mac CPU; on an export of ede95ce plus this step's 45 files unless marked): harness 885
+    passed, 72 skipped (in the checkout, with git: 890 passed, 67 skipped; the 5 more there are the git-show pre-flag and
+    pre-patch tests); harness/mutation_check.py, every group: 162 of 162 as expected, the 14 data_seed mutants 13 killed
+    and ds_numpy_global_seed (declared equivalent) survived; the pre-patch test, run in scratch copies with GIT_DIR set,
+    passes unmutated and fails on ds_absent_is_zero, ds_meta_always and ds_start_always. E3: tests/test_part3_plan.py 8
+    and tests/test_e3p3_waiter.py 19 passed; tests/mutation_e3.py 34 of 34 killed. e3p3_waiter.sh also ran in WSL (bash
+    5.3, real flock, sha256sum and pgrep) on a scratch tree with a stub queue: a 2 h lock wait, a relaunch, a clean end,
+    DONE; started again, DONE from the mark. SCREENS: experiments/screens/tests 860 passed, 2 skipped (both of
+    test_screens_replay_code.py: CURRENT is batch1_closed, and no git in an export); mutation_screens.py 696 of 696
+    killed (684 before, 12 new in tests/mutants_closed.py; the 7 CURRENT mutants re-anchored on batch1_closed). models/
+    tests 21 passed. E2's tests (W5's, run read only): 24 passed and the same 15 failed with and without this step's
+    files (an export of ede95ce alone gives the same 15): 14 queue tests need flock, which macOS lacks, and
+    test_strict_needs_commit_and_fixed_engine_and_no_auto expects engine_fixed null in engine.yaml.
+  VERIFY FIXES (2026-10-11 13:20 EDT, Claude, W1's commit step; still before any Part 3 value: no Part 3 run has
+    started). The independent verify confirmed the patch's behaviour (flag-off bitwise against ede95ce in six CPU
+    scenarios; data_seed acting on the loader alone) and found four train.py mutants and six waiter mutants that no test
+    killed. Added before the commit: the start record's data_seed asserted in test_data_seed.py's split test; harness/
+    test_data_seed_more.py (a config adding data_seed to a flag-off checkpoint resumes or branches only at its seed;
+    data_seed 0 recorded and resumable); six mutants in mutants_dataseed.py (group dataseed: 20 of 20 as expected); the
+    waiter's rc checks (a clean-looking end with exit 1, a lock-wait end with exit 0) and a pgrep error tested
+    (test_e3p3_waiter.py), with three mutants in tests/mutation_e3.py (37 of 37 killed). The other three waiter
+    survivors (7>&-, one clone per waiter, .started kept) stay unpinned: queue.lock blocks a second queue whatever the
+    waiter's fd, and the verify ran the real-flock behaviour in WSL. configs/prereg.yaml stays unchanged (it does not
+    list e3_5m_A_s1_P3; this file governs). The CUDA flag-off run (default_parity.py --device cuda) was not run.

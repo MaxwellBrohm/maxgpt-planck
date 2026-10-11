@@ -19,6 +19,7 @@ import screens_lib as L  # noqa: E402
 from reinstate_lib import REINSTATED_PLANS, s006_seed_configs  # noqa: E402
 from basediag_lib import DIAG_PLANS, base_diag_configs  # noqa: E402
 from replay_lib import REPLAY_PLANS, replay_configs  # noqa: E402
+from closed_lib import CLOSED_PLANS, closed_state  # noqa: E402  (BATCH 1 CLOSED, later)
 
 P = L.params()
 CONFIGS = L.all_configs()
@@ -275,6 +276,7 @@ def test_plans_follow_the_registered_order():
     later = later + (REINSTATED_PLANS if s006_seed_configs() else [])  # stage2_s006_seeds likewise (S006-REINSTATE)
     later = later + (DIAG_PLANS if base_diag_configs() else [])        # stage2_base_diag likewise (BASE-DIAG)
     later = later + (REPLAY_PLANS if replay_configs() else [])         # stage2_replay likewise (BASE-REPLAY)
+    later = later + (CLOSED_PLANS if closed_state() else [])           # batch1_closed likewise (BATCH 1 CLOSED)
     assert len(cur) == 1 and cur[0].strip() in PLAN_SEQUENCE + later    # ORDER's plans so far, in the order they run
     for r in plan_runs(cur[0].strip()):
         assert len(L.find(r)) == 1

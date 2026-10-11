@@ -12,6 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.dirname(HERE), HERE]
 import privacy, replay_lib as R, replay_record as RR, screens_lib as L  # noqa: E401,E402
 from test_chain_waiter_run import git, stubs  # noqa: E402
+from closed_lib import CLOSED_PLANS, closed_state  # noqa: E402  (BATCH 1 CLOSED, later)
 
 RW, CW = os.path.join(L.HERE, "replay_waiter.sh"), os.path.join(L.HERE, "chain_waiter.sh")
 PLANS = os.path.join(L.HERE, "plans")
@@ -96,7 +97,8 @@ def test_its_arguments_are_the_entrys_and_the_repos():
     assert (a[1], a[2]) == RR.LAST_START[:2] and f"BASE_REF={BREF}" in txt and a[4] == "stage2_replay"
     diag, rep = (open(os.path.join(PLANS, n + ".txt")).read().splitlines() for n in (a[1], a[4]))
     cur = [ln.strip() for ln in open(os.path.join(PLANS, "CURRENT")) if not ln.startswith("#")]
-    assert diag[-1] == "mark " + a[3] and rep[1] == "wait_mark SCREENS " + a[3] and rep[-1] == R.END and cur == [a[4]]
+    later = CLOSED_PLANS if closed_state() else []          # BATCH 1 CLOSED moved CURRENT on, later
+    assert diag[-1] == "mark " + a[3] and rep[1] == "wait_mark SCREENS " + a[3] and rep[-1] == R.END and cur == (later or [a[4]])
     assert a[0] == "replay" and a[5] == "planck_replay.bundle" and len(a) == 6
     assert re.search(r"^SHA=([0-9a-f]{64})$", txt, re.M)[1] == L.sha256(CW) and "MAXR=${CW_MAXR:-24}" in txt
     assert 'args replay_requeue stage2_replay "$REF" "SCREENS BASE REPLAY DONE" replay_requeue_none' in txt

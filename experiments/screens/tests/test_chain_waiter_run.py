@@ -168,7 +168,9 @@ def test_the_wrappers_arguments_are_the_repos_chain():
     cur = [ln.strip() for ln in open(os.path.join(PLANS, "CURRENT")) if not ln.startswith("#")]
     assert a[1] == "stage2_s006_seeds" and s6[-1] == "mark " + a[3] and nxt[1] == "wait_mark SCREENS " + a[3]
     from replay_lib import REPLAY_PLANS, replay_configs          # AMENDMENT BASE-REPLAY moved CURRENT on, later
-    assert cur == ((REPLAY_PLANS if replay_configs() else []) or [a[4]]) and a[4] == "stage2_base_diag" and a[0] == "base_diag"
+    from closed_lib import CLOSED_PLANS, closed_state            # and BATCH 1 CLOSED after it
+    later = (CLOSED_PLANS if closed_state() else []) or (REPLAY_PLANS if replay_configs() else [])
+    assert cur == (later or [a[4]]) and a[4] == "stage2_base_diag" and a[0] == "base_diag"
     sw = open(os.path.join(L.HERE, "s006_waiter.sh")).read()                    # stage2_seeds at the s006 waiter's ref
     assert f"WANT_PLAN=stage2_seeds; WANT_REF={REF2}; NEXT_PLAN={a[1]}" in sw and a[6] == f"stage2_seeds@{REF2}"
     assert "B=$KIT/planck_s006.bundle" in sw and a[5] == "planck_diag.bundle" and a[2] == REF6

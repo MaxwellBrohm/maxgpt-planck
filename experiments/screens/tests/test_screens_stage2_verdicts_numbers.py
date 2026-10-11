@@ -72,12 +72,13 @@ def check(txt, ok):
 
 
 def blocks():
-    out = {"entry": text("SCREENS.txt")[text("SCREENS.txt").index("\nSTAGE 2 VERDICTS (2026-10-11"):]}
+    # the entry and E3's block end at the next blank line: later entries (BATCH 1 CLOSED, E3 PART 3 REOPENED) are not theirs
+    out = {"entry": text("SCREENS.txt")[text("SCREENS.txt").index("\nSTAGE 2 VERDICTS (2026-10-11"):].split("\n\n", 1)[0]}
     for d in STAGE2.values():
         out[d] = text(f"{d}/notes.txt").split("\nRESULT (2026-10-11", 1)[1]
     for d in ("S001_attn_gate", "S002_block_ablations", "S003_adamw"):
         out[d] = text(f"{d}/notes.txt").split("\nC6 READINGS (2026-10-11", 1)[1]
-    out["E3"] = text("E3_seed_noise/notes.txt").split("\nPART 4d RESULT (2026-10-11", 1)[1]
+    out["E3"] = text("E3_seed_noise/notes.txt").split("\nPART 4d RESULT (2026-10-11", 1)[1].split("\n\n", 1)[0]
     return out
 
 

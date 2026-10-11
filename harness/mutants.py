@@ -228,3 +228,5 @@ import mutants_smear  # noqa: E402,F401
 import mutants_speed3  # noqa: E402,F401
 # ---------------- SCREENS ORDER 0 (eval.induction, attn_diag, test_model_mask on ARMS): mutants_diag.py ----------------
 import mutants_diag  # noqa: E402,F401
+# ---------------- E3 Part 3 data_seed (train.py): mutants_dataseed.py (same split) ----------------
+import mutants_dataseed  # noqa: E402,F401

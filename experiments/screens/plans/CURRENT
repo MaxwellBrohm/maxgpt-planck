@@ -21,5 +21,8 @@
 # data_prep/, tokenizer/ and corpus/ equal 93bc10b's (tests/test_screens_replay_code.py), from its own bundle,
 # planck-kit/planck_replay.bundle, started by experiments/screens/replay_waiter.sh (chain_waiter.sh, then a relaunch
 # after a 2 h gpu.lock wait: SCREENS.txt INTEGRATION 2026-10-10).
+# batch1_closed (SCREENS.txt BATCH 1 CLOSED, after stage2_replay ended at its mark on 2026-10-10 23:51:19): no plan of
+# this batch is left; it waits on SCREENS_BASE_REPLAY_DONE and stops. It moves CURRENT off stage2_replay so the E3 Part 3
+# data_seed change can land in harness/ (tests/test_screens_replay_code.py guards stage2_replay only).
 # Seed plans come from screens.py seeds.
-stage2_replay
+batch1_closed

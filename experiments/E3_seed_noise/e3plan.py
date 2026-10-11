@@ -8,9 +8,11 @@ notes, ARMS). Nothing is run. Configs go to configs/ (or --out-dir, for a dry lo
              e3_5m_A_s1_R2 and _R3 (config text identical to A1's except name and out_dir); marks "E3 PART 1 DONE"
   part2.txt  (with --a20/--b20) waits for "E2 20M DONE"; 20M A1 B1 A2 B2 A3 B3; marks "E3 PART 2 DONE"
   part3.txt  (with --part3) 5M arm A: init seeds 2..5 at data_seed 1 and data seeds 2..5 at seed 1, interleaved
-             init2 data2 init3 ... so a stopped queue leaves balanced families; marks "E3 PART 3 DONE". It needs
-             the data_seed harness change (e2e3/data_seed.patch) committed and tested: preflight.py refuses a
-             data_seed the harness does not read, so the queue stops there instead of running a wrong Part 3.
+             init2 data2 init3 data3, then e3_5m_A_s1_P3 (A1 again at Part 3's commit, seed 1 and data_seed 1: both
+             families' member 1), then init4 data4 init5 data5, so a stopped queue leaves balanced families and the
+             shared member sits mid-queue; marks "E3 PART 3 DONE" (notes.txt PART 3 REOPENED). Every Part 3 config
+             writes data_seed, which harness/train.py reads since that entry (data_seed_of): preflight.py refuses a
+             data_seed the harness does not read, so an older commit stops there instead of running a wrong Part 3.
 Schedules (E3 notes): full WSD, warmup 76, 20% linear decay; 5M 7,630 steps (decay from 6,104), 20M 15,259
 steps (decay from 12,207); ckpt_every = round(2% of total) = 153 / 305, keep_last 2 (base), plus final.
 The joint order with E2 comes from the marks: E2's 20M plan starts with "wait_mark E3 E3 PART 1 DONE".
@@ -94,6 +96,10 @@ def main(argv=None) -> int:
         p3 = ["# E3 Part 3 (e3plan.py): 5M arm A, init and data families (needs harness data_seed)",
               "wait_mark E3 E3 PART 2 DONE"]
         for k in range(2, 6):
+            if k == 4:     # A1 at Part 3's commit: the (seed 1, data_seed 1) member of both families, mid-queue
+                n = "e3_5m_A_s1_P3"
+                files[n] = config(n, "5m", "A", *arms["A"], 1, 1, ", data_seed 1, A1 again at Part 3's commit")
+                p3.append(f"train {n}")
             for fam, seed, dseed in (("init", k, 1), ("data", 1, k)):
                 n = f"e3_5m_A_{fam}{k}"
                 files[n] = config(n, "5m", "A", *arms["A"], seed, dseed, f", data_seed {dseed}")

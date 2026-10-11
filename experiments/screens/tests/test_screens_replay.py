@@ -14,6 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.dirname(HERE), HERE]
 import screens_hours as H, screens_lib as L, replay_lib as R  # noqa: E401,E402
 from basediag_lib import RUNS as DIAG_RUNS  # noqa: E402
+from closed_lib import CLOSED_PLANS, closed_state  # noqa: E402  (BATCH 1 CLOSED, later)
 from test_screens_configs import P  # noqa: E402
 from test_screens_refusals import refusals, scratch  # noqa: E402,F401  (scratch: the scratch config tree fixture)
 from test_screens_smoke import fake, run_tiny  # noqa: E402,F401  (fake: the tiny data fixture)
@@ -114,7 +115,8 @@ def test_plan_current_and_acceptance():
     diag = open(os.path.join(L.HERE, "plans", "stage2_base_diag.txt")).read().splitlines()
     assert diag[-1] == "mark SCREENS BASE DIAG DONE"
     cur = [ln.strip() for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
-    assert cur == R.REPLAY_PLANS == ["stage2_replay"] and R.replay_configs() == set(R.RUNS)
+    later = CLOSED_PLANS if closed_state() else []          # BATCH 1 CLOSED moved CURRENT on, later
+    assert cur == (later or R.REPLAY_PLANS) and R.REPLAY_PLANS == ["stage2_replay"] and R.replay_configs() == set(R.RUNS)
 
 
 def variant(tmp_path, name, edit):

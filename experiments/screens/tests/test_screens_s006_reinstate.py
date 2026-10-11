@@ -14,6 +14,7 @@ import analyze_lib as AL, mutation_screens as M, screens_hours as H, screens_lib
 from reinstate_lib import END, REINSTATED_PLANS, recorded_reinstated, s006_seed_configs  # noqa: E402
 from basediag_lib import DIAG_PLANS, base_diag_configs  # noqa: E402  (AMENDMENT BASE-DIAG, later)
 from replay_lib import REPLAY_PLANS, replay_configs  # noqa: E402  (AMENDMENT BASE-REPLAY, later)
+from closed_lib import CLOSED_PLANS, closed_state  # noqa: E402  (BATCH 1 CLOSED, later)
 from test_screens_configs import P, STAGE2_SEEDS, recorded_cuts  # noqa: E402
 from test_screens_refusals import scratch  # noqa: E402,F401  (the scratch config tree fixture)
 from test_screens_s003_stage_c import section  # noqa: E402
@@ -129,6 +130,7 @@ def test_plan_current_and_acceptance(V):
     cur = [ln.strip() for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
     later = DIAG_PLANS if base_diag_configs() else []       # AMENDMENT BASE-DIAG moved CURRENT on, later
     later = (REPLAY_PLANS if replay_configs() else []) or later      # and AMENDMENT BASE-REPLAY after it
+    later = (CLOSED_PLANS if closed_state() else []) or later        # and BATCH 1 CLOSED after it
     assert cur == (later or REINSTATED_PLANS) and REINSTATED_PLANS == ["stage2_s006_seeds"]
     assert s006_seed_configs() == set(RUNS)
     assert "plans/CURRENT = stage2_s006_seeds (edited here" in FLAT

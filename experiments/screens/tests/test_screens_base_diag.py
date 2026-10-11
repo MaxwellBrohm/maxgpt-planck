@@ -12,6 +12,7 @@ sys.path[:0] = [os.path.dirname(HERE), HERE]
 import analyze_lib as AL, mutation_screens as M, screens_hours as H, screens_lib as L  # noqa: E401,E402
 from basediag_lib import DIAG_PLAN, DIAG_PLANS, END, RUNS, base_diag_configs, recorded_diag  # noqa: E402
 from replay_lib import REPLAY_PLANS, replay_configs  # noqa: E402  (AMENDMENT BASE-REPLAY, later)
+from closed_lib import CLOSED_PLANS, closed_state  # noqa: E402  (BATCH 1 CLOSED, later)
 sys.path.insert(0, L.E3D)
 from e3analyze import t_ppf  # noqa: E402
 from test_screens_configs import P  # noqa: E402
@@ -142,6 +143,7 @@ def test_plan_current_and_acceptance():
     assert " ".join(lines[0].split()) + " [one line in the file]" in FLAT and all("\n      " + ln + "\n" in SEC for ln in lines[1:])
     cur = [ln.strip() for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
     later = REPLAY_PLANS if replay_configs() else []        # AMENDMENT BASE-REPLAY moved CURRENT on, later
+    later = (CLOSED_PLANS if closed_state() else []) or later        # and BATCH 1 CLOSED after it
     assert cur == (later or DIAG_PLANS) and DIAG_PLANS == ["stage2_base_diag"] and base_diag_configs() == set(RUNS)
     assert "plans/CURRENT = stage2_base_diag (edited here" in FLAT and "Estimate 0.937 h." in FLAT
 

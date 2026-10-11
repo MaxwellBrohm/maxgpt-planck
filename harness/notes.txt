@@ -851,3 +851,25 @@ only its CUDA check skipped); bench_micro still takes max-autotune-no-cudagraphs
     after the earlier arms had used the GPU, with no JSON written. Test:
     test_compile_parity.py::test_arms_are_checked_before_any_run. Mutants (speed3): s3_parity_arms_unchecked,
     s3_parity_accepts_autotune, both killed.
+DATA SEED (2026-10-11, Claude, W1's E3 Part 3 step; experiments/E3_seed_noise/notes.txt PART 3 REOPENED; Mac CPU, tiny
+models only; nothing committed). train.py reads an optional top-level data_seed: the loader's seed alone (build_loader
+gets it; torch.manual_seed and np.random.seed keep seed, so the init draws do not move). Default off: a config without
+data_seed gives seed, and train.py then writes what it wrote before (no data_seed key in the checkpoints or the start
+record). Set, it must be a non-negative int (data_seed_of refuses true, 3.0, "3", null, -1), it is recorded in every
+checkpoint and the start record, and a resume or decay branch whose checkpoint trained on another data seed (its
+data_seed, else its seed) is refused (check_data_seed; read only when the config or the checkpoint carries data_seed).
+E2's preflight.py finds the read (.get("data_seed")) and so no longer refuses a config that sets it.
+  Tests: test_data_seed.py (10, CPU fp32): absent == data_seed equal to seed (20 steps, every batch hashed); absent ==
+  the harness at 93bc10b, git show (20 steps: log records, the whole checkpoint, the start record; SCREENS C4's flag-off
+  test; skipped without git, run in mutation scratch copies with GIT_DIR set); seed 3 / data 3 vs seed 4 / data 3
+  identical batches and loader state, different init, and vs seed 3 / data 4 identical init, different batches; resume
+  20 + 20 == 40 with data_seed 5 != seed 3; resume and branch under another data seed refused; the check never consulted
+  without data_seed; preflight's read pattern finds data_seed in train.py only. Mutants (mutants_dataseed.py, group
+  dataseed): 13 killed, ds_numpy_global_seed equivalent and survived, as declared. Not run on CUDA: by code reading the
+  default path passes the same int to build_loader and adds no key (default_parity.py --device cuda would show it).
+  After the independent verify (2026-10-11): its four surviving mutants are now pinned. test_data_seed.py's split test
+  checks the start record's data_seed (3, 3, 4); test_data_seed_more.py (3): a config adding data_seed to a flag-off
+  checkpoint resumes or branches only at that checkpoint's seed (4 refused, 3 accepted), and data_seed 0 reaches the
+  loader, is recorded in the checkpoints and the start record, and 20 + 20 == 40 under it. Six more mutants
+  (ds_start_records_seed, ds_fallback_accepts, ds_resume_check_cfgless, ds_branch_check_cfgless, ds_meta_truthy,
+  ds_start_truthy): group dataseed 20 of 20 as expected.

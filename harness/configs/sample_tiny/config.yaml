@@ -4,6 +4,7 @@
 # Relative paths resolve against THIS file's directory. prereg.yaml must sit next to it.
 name: sample_tiny
 seed: 0
+# data_seed: 0                           # optional (E3 Part 3): the loader's seed alone; absent = seed
 out_dir: ../../runs/sample_tiny          # checkpoints, log.jsonl
 runs_jsonl: ../../runs/runs.jsonl        # append-only run index (start/pause/end/error)
 

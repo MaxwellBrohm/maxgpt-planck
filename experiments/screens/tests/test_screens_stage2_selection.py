@@ -14,6 +14,7 @@ from test_screens_configs import EXT2, LATER_PLANS, PLAN_SEQUENCE, stage2_seed_c
 from reinstate_lib import REINSTATED_PLANS, s006_seed_configs  # noqa: E402  (AMENDMENT S006-REINSTATE, later)
 from basediag_lib import DIAG_PLANS, base_diag_configs  # noqa: E402  (AMENDMENT BASE-DIAG, later)
 from replay_lib import REPLAY_PLANS, replay_configs  # noqa: E402  (AMENDMENT BASE-REPLAY, later)
+from closed_lib import CLOSED_PLANS, closed_state  # noqa: E402  (BATCH 1 CLOSED, later)
 from test_screens_s003_stage_c import section  # noqa: E402
 
 P = L.params()
@@ -227,6 +228,7 @@ def test_plan_waits_on_the_selection_mark_and_runs_only_the_extension(V):
     seq = PLAN_SEQUENCE + LATER_PLANS + (REINSTATED_PLANS if s006_seed_configs() else [])
     seq += DIAG_PLANS if base_diag_configs() else []
     seq += REPLAY_PLANS if replay_configs() else []
+    seq += CLOSED_PLANS if closed_state() else []
     assert len(cur) == 1 and seq.index(cur[0]) >= seq.index("stage2_s006x")
     assert f"stage2_s006x.txt (sha256 {L.sha256(PLAN)[:16]}...; written by screens.plan), its 4 lines:" in FLAT
     assert " ".join(lines[0].split()) + " [one line in the file]" in FLAT
