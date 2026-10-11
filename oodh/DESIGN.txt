@@ -471,3 +471,9 @@ Status: BUILT to 150 threads (2026-09-26, s13) and REVIEWED (s14). The best-path
   Hashes (oodh/HASHES.txt): oodh_part1.jsonl sha256 40d2a76d1315d3cbfaf5e7b899183b7b04fe2561ab2717396782a316e4b268e7;
     sorted tree-id list sha256 4c3f60e3c1c79121982326ca430f9e26b37f4f2037ab17c501903dd179a69eb7 (unchanged).
   Status: Part 1 is reviewed by a human and three agent reviews and is the LOCK CANDIDATE for the RC-12 lock.
+  Human re-check (2026-10-10, after the third review): Max re-checked the 11 sample threads the third review changed
+    (oodh-017, 019, 021, 025, 061, 075, 076, 084, 105, 114, 149) on sealed/oodh/REVIEW_RECHECK.html (oodh/review_view.py
+    --only ... --changes), against oodh_part1.jsonl sha256 40d2a76d1315d3cb...: 11 of 11 conversations and 32 of 32
+    probes "looks right", no notes. Marks kept privately (sealed/oodh/max_recheck_marks_2026-10-10.json). With this,
+    every probe in the 30-thread human sample has been read by Max in its final form; Max's review (DECISIONS_FOR_MAX
+    item 13) is DONE and Part 1 is fixed for the lock at the hashes above.
