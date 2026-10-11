@@ -17,6 +17,7 @@ TORCH_PY = os.environ.get("LIK_TORCH_PY")
 S, R, P, U, A = "lik_score.py", "lik_rows.py", "pools_lik_prefix.py", "lik_run.py", "lik_adapters.py"
 CM = "lik_compare.py"
 T, T2, TA = "test_lik.py", "test_lik_more.py", "test_lik_adapters.py"
+TE, TC, TS = "test_lik_engine.py", "lik_tokcheck.py", "test_lik_selfcheck.py"
 MUTANTS = [
     (S, "return all(scores[gold] > v for", "return all(scores[gold] >= v for", T, "a tie counts as right"),
     (S, "return scores[gold] - max(v for", "return scores[gold] - min(v for", T, "margin against the worst other"),
@@ -62,7 +63,8 @@ MUTANTS = [
      "PlanckTok template without <|assistant|>"),
     (A, "lp = torch.log_softmax(logits[npre - 1:npre + nc - 1].float(), -1)",
      "lp = torch.log_softmax(logits[npre:npre + nc].float(), -1)", TA, "log-prob positions off by one"),
-    (A, "logits[i], seqs[i], len(pre), len(c))", "logits[i], seqs[i], len(pre), len(conts[0]))", TA,
+    (A, "logits[i], seqs[i], npre, nc) for i, nc in enumerate(ncs)]",
+     "logits[i], seqs[i], npre, ncs[0]) for i, nc in enumerate(ncs)]", TA,
      "batched rows use the first continuation's length"),
     (A, "if self.ctx is not None and len(seq) > self.ctx:", "if False:", TA, "Planck ctx not enforced"),
     # STEP 11 FIX ROUND
@@ -87,8 +89,9 @@ MUTANTS = [
     (A, 'if str(model_type or "").startswith("gemma3"):', "if False:", T2, "Gemma 3 on the default sdpa path"),
     (A, 'if requested not in (None, "eager"):', "if False:", T2, "sdpa accepted for Gemma 3"),
     (A, 'kw["attn_implementation"] = attn', "pass", T2, "attention not passed to from_pretrained"),
-    (A, 'def load(cls, model_id, dtype="float32", device="cuda", attn=None):',
-     'def load(cls, model_id, dtype="bfloat16", device="cuda", attn=None):', T2, "HFLik.load defaults to bf16"),
+    (A, 'def load(cls, model_id, dtype="float32", device="cuda", attn=None, trust_remote_code',
+     'def load(cls, model_id, dtype="bfloat16", device="cuda", attn=None, trust_remote_code', T2,
+     "HFLik.load defaults to bf16"),
     (U, 'ap.add_argument("--dtype", default="float32")', 'ap.add_argument("--dtype", default="bfloat16")', T2,
      "lik_run defaults to bf16"),
     (U, 'ap.add_argument("--planck-precision", default="fp32")',
@@ -96,6 +99,45 @@ MUTANTS = [
     (U, 'engine = getattr(logprob, "info", None) or dict(kind="stub", tok=args.tok)',
      'engine = dict(kind="stub", tok=args.tok)', T2, "engine info (attention, dtype) not in summary.json"),
     (U, " nonfinite {s['n_nonfinite']} ties {s['n_ties']}", "", T2, "console line without n_nonfinite / n_ties"),
+    # STEP 14S (2026-10-10): engines.json options and the real-model self-check
+    (A, 'trc = {"trust_remote_code": True} if trust_remote_code is True else {}', "trc = {}", TE,
+     "HFLik.load never trusts remote code"),
+    (A, "HR.set_template(tok, chat_template)", "pass", TE, "HFLik.load ignores engines.json's chat_template"),
+    (A, "return {k: m[k] for k in ENGINE_KEYS if m.get(k) is not None}", "return {}", TE, "engine_opts empty"),
+    (A, 'ENGINE_KEYS = ("trust_remote_code", "attn_implementation", "chat_template")',
+     'ENGINE_KEYS = ("trust_remote_code", "chat_template")', TE, "engines.json's attention not read"),
+    (U, "if args.attn is not None and want is not None and args.attn != want:", "if False:", TE,
+     "an --attn against the entry's accepted"),
+    (U, "args.attn or want,", "args.attn,", TE, "lik_run drops the entry's attention (Doge on sdpa)"),
+    (U, 'opts.get("trust_remote_code", False), opts.get("chat_template"))', "False, None)", TE,
+     "lik_run drops trust_remote_code and chat_template"),
+    (U, 'again = LS.score_row(by[r["id"]], Single(logprob), tok, render, ctx)',
+     'again = LS.score_row(by[r["id"]], logprob, tok, render, ctx)', TS, "selfcheck re-uses the batched path"),
+    (U, "ok = bool(todo) and worst is not None and worst <= tol and flips == 0",
+     "ok = bool(todo) and worst is not None and worst <= tol", TS, "selfcheck ignores verdict flips"),
+    (U, "ok = bool(todo) and worst is not None and worst <= tol and flips == 0", "ok = True", TS,
+     "selfcheck always ok"),
+    (U, 'flips += again["right_m"] != r["right_m"]', "pass", TS, "flips never counted"),
+    (U, 'flips += again["right_m"] != r["right_m"]', 'flips += again["right"] != r["right"]', TS,
+     "review D4: flips read on the all-candidate verdict, not the matched one"),
+    (U, 'SELFCHECK_TOL = {"float32": 0.01,', 'SELFCHECK_TOL = {"float32": 0.05,', TS, "fp32 tol 0.05"),
+    (U, '"bfloat16": 0.25,', '"bfloat16": 0.01,', TS, "bf16 held to the fp32 tol"),
+    (U, "bad.append(render)", "pass", TS, "a failed selfcheck exits 0"),
+    (U, 'todo = [r for r in scored if r["scores"] is not None][:n]', "todo = list(scored)[:n]", TS,
+     "rows without scores (over ctx) entered"),
+    (TC, 'trc = {"trust_remote_code": True} if opts.get("trust_remote_code") is True else {}', "trc = {}", TE,
+     "tokcheck never trusts remote code (Doge, BananaMind, Swen, cRia)"),
+    (TC, 'HR.set_template(hf, opts.get("chat_template"))', "pass", TE, "tokcheck ignores the carried template"),
+    (TC, 'if r != "template" or has_template}', "}", TE, "template render of a model without one"),
+    (A, "if cur and vocab and (len(cur) + 1) * wide * vocab * 4 > budget:", "if False:", TA, "logit budget ignored"),
+    (A, "wide = max([widths[j] for j in cur] + [w])", "wide = w", TA, "budget read on the new row's width only"),
+    (A, "out[k] = v", "out[k] = v if k == 0 else 0.0", TA, "grouped scores misplaced"),
+    (A, "for k, v in zip(g, self._forward([seqs[k] for k in g], len(pre), [len(conts[k]) for k in g])):",
+     "for k, v in zip(g, self._forward([seqs[k] for k in g], len(pre), [len(conts[0]) for k in g])):", TA,
+     "grouped rows use the first continuation's length"),
+    (A, 'vocab = getattr(model.config, "vocab_size", None)', "vocab = None", TE,
+     "HFLik.load never sets the vocabulary (no budget)"),
+    (A, "LOGIT_BUDGET = 2 * 2 ** 30", "LOGIT_BUDGET = 2 * 2 ** 40", TS, "review D4: the logit budget 2 TiB (no guard)"),
 ]
 
 
@@ -104,6 +146,7 @@ def copy_tree(dst):
         if f.endswith(".py"):
             shutil.copy(os.path.join(HERE, f), dst)
     shutil.copytree(os.path.join(HERE, "dev"), os.path.join(dst, "dev"))
+    shutil.copy(os.path.join(HERE, "engines.json"), dst)
 
 
 def run(test, src=None, old=None, new=None):
@@ -129,7 +172,7 @@ def run(test, src=None, old=None, new=None):
 
 def main():
     t0, lines, bad, not_run = time.time(), [], 0, 0
-    for test in (T, T2, TA):
+    for test in (T, T2, TA, TE, TS):
         rc, tail = run(test)
         lines.append(f"baseline {test}: {rc}" + ("" if rc == 0 else f"  {tail}"))
         bad += rc not in (0, "not run")

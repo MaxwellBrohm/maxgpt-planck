@@ -3294,3 +3294,125 @@ REVIEW AND FIXES (2026-10-10, 19:00 to 20:00 EDT, Claude, W4 commit agent; nothi
     rules, the whole-log read; the old mark mutant dropped); mutation_step14x.py 27 / 27 (+M13); mutation_verify.py
     36 / 36 (+2: C1 dtype, C1 max_batch); pc/tests/mutation_check.py --group boot 72 / 72, --group start 10 / 10;
     pc/tests 172 passed on an export of the pc commit's index.
+
+STEP 14S (2026-10-10, 16:55 to 18:10 EDT, Claude; cuts audit S9, S10, S11, S13 and the novelty items, before
+the lock; prereg still DRAFT, NOT LOCKED). Nothing under sealed/ read or built. No model loaded on the Mac (tests use
+stub scorers, a random bigram table and synthetic ids). On the PC: one CPU-only tokenizer run (HEAD 4ad2be43's rc12
+from git archive, HF_HUB_OFFLINE, tokenizer and config.json only), and launcher tests on fake code with a fake lock
+file. No GPU used, gpu.lock never taken.
+S11 OOD-H SHOTGUN: DECIDED by the prereg's text (s14: OOD-H is graded with "the same graders as RC-12"; its item (c)
+  lifts only the item gates G2 and G4): the clause is ON for OOD-H. graders.g_val skipped v3_shotgun on any probe
+  carrying pool_values, a field only COMPOSE carries on dev (16 probes, pool compose_*) and every OOD-H probe
+  carries (oodh/build.norm_probe), so the 2026-09-26 OOD-H gate ran without it (SHOTGUN 0.59, HASHES.txt). New
+  graders.shotgun_applies: every probe but COMPOSE. On all 1,404 dev probes the new scope equals the old, so no dev
+  verdict moves (audit_graders after the change: 0 wrong verdicts over 36,764, as STEP 12). As on RC-12, a reply
+  naming every candidate of a 2-candidate probe fails ("X, not Y" included; RC-12 has no 2-candidate stale probe:
+  every dev CORR probe has 3 to 7 candidates). Test oodh/tests/test_shotgun.py (synthetic OOD-H world, dev records):
+  7 of 7; oodh/tests/mutation_shotgun.py 7 of 7 mutants killed (the old rule, COMPOSE not exempt, all exempt, the
+  exemption matching nothing, one candidate, any candidate, the clause never recorded), baseline clean. oodh tests
+  test_build 8/8, test_gate 8/8, test_select 10, test_leaks 1/1 after the change. Written in prereg s14 (d) and
+  oodh/DESIGN.txt s6 (the OPEN line closed). OWED TO THE SEALED SESSION: re-run oodh/gate.py on the item file
+  (reads sealed/oodh): G1 must still pass with the clause on; an IDEAL probe reply failing only through it is
+  reworded there and the item hash recomputed; the new cheater table replaces HASHES.txt's GATE section; all before
+  Max's OOD-H review (DECISIONS item 13).
+S10 LIKELIHOOD ROWS: the 4 missing tokenizers MEASURED (PC, CPU, 53 s; HEAD 4ad2be43's lik_tokcheck.py, transformers
+  5.17, venv-vllm; logs/lik_tokcheck_pc.json): matched / all-equal rows of 412, template, plain identical:
+  Qwen3.5-0.8B 344 / 232, LFM2-700M and LFM2-1.2B 328 / 196, Doge-160M-Instruct 311 / 146 (model_type doge, read by
+  5.17 natively; its generation runs use venv-doge's own code); common-foil rows with Qwen2.5-0.5B 340, 298, 298,
+  267. The 9 tokenizers measured on 2026-09-26 gave byte-identical per-key counts. Also measured: the item 14 vLLM
+  extras and 3 P-144 siblings; not measured with HEAD's code: Loom-Spark-3.2 and Falcon-H1-Tiny-90M-Base (no
+  tokenizer chat template) and BananaMind-2, Swen-28M, cRia (remote code).
+  NEW CODE for the first model runs (none has run on a model; LIK_MODEL_TESTED stays False):
+  (1) lik_adapters.engine_opts: trust_remote_code, attn_implementation and chat_template from the model's engines.json
+      entry; HFLik.load takes them (trust passed only when True; the template set with hf_responder.set_template);
+      lik_run passes them and refuses an --attn that differs from the entry's (Doge: eager, STEP 9c). lik_tokcheck
+      uses the same options and measures a model with no chat template on the plain render alone ("skipped").
+  (2) Logit budget: HFLik.many splits a row's candidates so rows x widest x vocab x 4 bytes <= 2 GiB per forward
+      (5 Qwen2.5 candidates at 1,700 tokens are 5.2 GB of fp32 logits, Gemma 3's 262k vocabulary 8.9 GB, on a shared
+      12 GB card); scores do not depend on the grouping (test_lik_adapters, bigram table).
+  (3) lik_run --selfcheck N: the first N scored rows per render are scored again one candidate at a time (no padded
+      batch) through lik_score.score_row; summary.json selfcheck {n_rows, n_scores, max_abs_diff, flips, tol, ok};
+      exit 4 if a score moves more than 0.01 nats (fp32; 0.25 bf16 / fp16) or a matched verdict flips, or no row
+      was checked.
+  Tests: test_lik_engine.py (new, python3, fake transformers / torch): 0 failures; test_lik, test_lik_more,
+  test_lik_adapters (torch 2.13): 0 failures. mutation_lik.py: 23 mutants added (STEP 14S block; 2 old target texts
+  rewritten for the new signatures; test_lik_engine joins the baselines; engines.json copied into the scratch tree).
+  First full run: 72 of 74 killed; 2 survived (selfcheck entering rows without scores; the group cost read on the
+  new row's width only), each because no test had the case. Added: an over-ctx selfcheck case and a
+  widest-row grouping case. Second full run (418 s): 74 of 74 killed, 4 baselines clean.
+  NOT RUN: the first real-model run (GPU). Planned: rc12lik_gpu.sh (scratch, outside the repo), the 13-model panel
+  one model per gpu.lock hold under 25 min, fp32 except LFM2-2.6B (bf16), --selfcheck 48, after this step's commit
+  is shipped by git archive. If it has not run by the lock, prereg s4 says so; the rows stay diagnostic either way.
+S9 P-147 MaxGPT-3: NOT RUN before the lock (Claude's call; reversible by Max). Read (Max's local project, not in this
+  repo): a 235M GPT-2-style PyTorch module (learned positions, context 1,024, untied head), a pure-Python byte-level
+  BPE (16,000 ids, merges across spaces, no special tokens), SFT format "USER: ...\nASSISTANT:" with no end-of-turn
+  token; checkpoints final.pt and final_sft.pt (2.9 GB each, optimizer state included). Reasons: (a) no hub revision
+  and no licence, so the s12 extras rule (pinned revision, licence read there, permissive only) cannot be met and
+  readers cannot rerun the row; (b) no Hugging Face form: running it needs a weight conversion (GPT2LMHeadModel
+  layout) and a tokenizers port, each proven exact on a real forward, plus its own parity, and this Mac has no
+  transformers to test the conversion before a commit; (c) with no end-of-turn token the harness can only run a
+  plain-render row (render.cut_plain cuts at role tags in the plain render only), so its own-format row needs a
+  runner change. Measured (its tokenizer on the dev records, no model): golden-history plain prompts of the final
+  turn have median 372 tokens, max 804; 2 of 640 exceed 768 (1,024 minus 256 new tokens), so context is not a
+  reason. s12 (owned by the extras agent today) gets the not-run line; a later run is a labelled diagnostic, never
+  read by the clause. If Max wants it scored before the lock: publish the weights under a licence, convert to GPT-2
+  layout plus a tokenizers BPE, test both against the original on the PC CPU, run plain only.
+S13 WRONG-SEED REPLAY (optional, DECISIONS_LEVEL_R decision 3 (a)): BUILT, NOT RUN. rerun_tie.py --wrong-seed (stage
+  replay) adds "R1w": the R1 conversations at seed + 100 (already played for the turn-1 INFO line) compared with the
+  stored rows and reported like R1 (identical share, first divergences, shared prefix in characters, margins), never
+  a gate; --stage report prints a finished directory's verdict lines. verify_dev_runs --rerun is unchanged (no flag
+  there). fakes_family SEEDED (new fake: sampled replies depend on the seed). test_rerun_wrong_seed.py 0 failures;
+  mutation_rerun_ws.py 9 of 9 killed (one survivor in the first round, "report hides a FAIL", killed after a
+  failing-R2 report case was added). test_verify_dev_runs and test_hf_trust pass after the change. GPU job:
+  rc12ws_gpu.sh (scratch), Qwen2.5-0.5B-Instruct and Doge-160M-Instruct template, one hold each.
+NOVELTY ITEMS (research/NOVELTY_2026-10.md s4, s6.5): no rc12 or prereg change needed. The bare-model sentence is in
+  s1 (item 8); panel decoding (plain, no DRY, no repetition penalty, Vertex's card row apart; s6.5 (b)) is in s12;
+  the sub-30M extras are in s12 (cRia-75M and minimind-3 are the extras agent's runs today). The novelty sentence
+  (item 1) is a PLAN / README line, not a prereg claim.
+CHECKS after every edit of this step (Mac, 17:35 to 18:05 EDT; the tree also held other agents' uncommitted rc12
+  edits): validate_e2e G1-G4 PASS; mutation_graders 226 / 226 (IDEAL on all 640 records 0 failing probes);
+  mutation_e2e 8 parts 132 / 132 killed, baseline failures none in every part; audit_graders 0 wrong of 36,764.
+  Not independently reviewed yet.
+FILES: rc12/graders.py, lik_adapters.py, lik_run.py, lik_tokcheck.py, test_lik_adapters.py, mutation_lik.py,
+  rerun_tie.py, fakes_family.py, logs/mutation_lik.txt, logs/lik_tokcheck_pc.json; new rc12/test_lik_engine.py,
+  test_rerun_wrong_seed.py, mutation_rerun_ws.py, oodh/tests/test_shotgun.py, oodh/tests/mutation_shotgun.py;
+  oodh/DESIGN.txt s6; prereg s4, s14 (d), s16; rc12/notes.txt.
+REVIEW AND FIXES (2026-10-10, 19:50 to 20:40 EDT, Claude, W4 commit agent; nothing under sealed/ read, no model
+  loaded on the Mac). The independent review of this step found 2 medium and 3 low defects; all five are fixed:
+  D1 (medium) with v3_shotgun on, the right OOD-H H-CORR answer "You changed it from Porto to Seville" failed (2
+    candidates, the gold and the stale value, both named; 5 of 5 fixture stale probes), while the same shape passes
+    every RC-12 CORR probe (3 to 7 candidates). New graders.shotgun_named: a stale value named only in change phrases
+    (stale_ok) while the gold is asserted is not counted, the v3_other exemption applied to the count. Tests
+    (oodh/tests/test_shotgun.py): the two change-phrase shapes pass every fixture stale probe; still a shotgun when the
+    stale value is also named bare, when the gold is not asserted, and when only the gold sits in a change phrase.
+    mutation_shotgun.py 12 / 12 (5 new). Stored dev panel (PC, CPU, read only; dev_regrade.py from 5f833c7 onto a
+    scratch copy, then this tree's graders on that copy): 352 runs, 121,088 rows: 5 rows change, each a probe that
+    loses v3_shotgun only (Qwen3.5-0.8B template CORR: seed 1 corr-027 t9 and corr-054 t12, seed 2 corr-032 t11, seed
+    3 corr-027 t9, greedy corr-016 t12), every one still failing on other clauses (v3_other or v1_degen): no probe
+    verdict, unit or score moves. Prereg s14 (d) and oodh/DESIGN.txt s6 say so. OOD-H's gate was re-run with the
+    clause on before this (DESIGN s15: PASS); the new rule only relaxes it, so no gating check can fail by it.
+    FOUND, NOT FIXED (for the lock, a grader decision): the change-phrase window accepts a REVERSED change. STALE_BEFORE
+    allows up to 3 words between "from" and the value, so in "You changed it from <gold> to <stale>" the stale value
+    is stale_ok and the reply passes: rc12-dev-corr-001 "You changed it from Saturday to Thursday." (gold Saturday)
+    is ok on RC-12, and on OOD-H with this fix too. Not measured on the panel's stored replies.
+  D2 (medium) rc12ws_gpu.sh (outside the repo) gave replay and margins 1,500 s each inside one hold (up to 52 min):
+    now margins gets only what replay left of HOLD_S, so a hold is at most HOLD_S + 60 s (26 min); 45 GB free is
+    checked before each hold. PC fake-code test (GNU flock, scratch lock): HOLD_S 70, replay 2 s, margins 200 s: the
+    new script released at 70 s, the old at 73 s (replay plus a full second timeout); replay 69 s: margins not started.
+  D3 (low) prereg s4 names the bf16 exception: LFM2-2.6B (10.4 GB of fp32 weights on the 12 GB card; self-check tol
+    0.25 nats).
+  D4 (low) test_lik_selfcheck.py: LOGIT_BUDGET pinned at 2 GiB (a 2 TiB budget now dies), and a stored row with only
+    `right` flipped passes the self-check while one with `right_m` flipped fails (a flip read on `right` now dies).
+  D5 (low) test_lik_engine.py was 261 lines: the self-check tests moved to test_lik_selfcheck.py (189 and 134 lines);
+    mutation_lik.py retargets the 8 self-check mutants to it, adds the 2 D4 mutants and runs it as a baseline.
+  Also: prereg s12 gets P-147's not-run line (this step's S9 text); KeyLM-75M and petitgpt went in with STEP 14X.
+  mutants_graders.py: 2 targets retargeted to the changed text ("v in stale and gold_ok:" now names the v3_other line
+    alone; the shotgun all() now reads shotgun_named); the first run had flagged both as CRASH (text found 2 / 0 times).
+  Checks on an export of this commit's index (Mac, 20:11 to 20:53 EDT, at most 4 worker processes; mutation_e2e's
+    pool capped at 4 in that copy only): every rc12 test file (33, incl. extras/) exit 0; oodh/tests 6 files pass
+    (test_shotgun 9 / 9); pc/tests 172 passed; validate_e2e G1-G4 PASS; audit_graders 0 wrong of 36,764;
+    mutation_shotgun 12 / 12; mutation_rerun_ws 9 / 9; mutation_lik 76 / 76 (5 baselines, 0 not run, torch 2.13);
+    mutation_verify 36 / 36; mutation_graders 226 / 226 (IDEAL on 640 records: 0); mutation_e2e 132 / 132 in 8 parts,
+    baseline failures none. Logs copied from that run: mutation_lik, mutation_graders, mutation_e2e_part1-8.
+  Hygiene: logs/mutation_step9_part1.txt, _part3.txt and mutation_s14.txt held a Mac temp-dir path (committed
+    earlier); now <tmp>.

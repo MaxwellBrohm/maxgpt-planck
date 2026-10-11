@@ -22,7 +22,8 @@ G-VAL clauses (a reply is right only if none fails):
               in a change phrase ("moved from Monday", "Monday was the old day", and since 2026-10-02 a recap:
               "Initially scheduled for Monday", "Previous: Monday") when the gold is asserted
   v3_guess    a value of the probe's pool that is NOT in the conversation is mentioned at all (a guess)
-  v3_shotgun  every candidate (2+) is mentioned (not COMPOSE, whose answer compares the two holders)
+  v3_shotgun  every candidate (2+) is mentioned (not COMPOSE, whose answer compares the two holders; shotgun_applies);
+              a stale value named only in a change phrase, the gold asserted, is not counted (shotgun_named)
   v4_voice    user voice: the gold bound to the first person (E001 captures) or "my" + an object/holder word
               (E004 clause 7); for assistant-held facts (OWN, "What did I call you?") the reverse: the value
               given to the user ("You picked Quizzards", "Your name is Kestrel"). Report frames (grade_voice.py,
@@ -87,6 +88,26 @@ def stale_ok(text, m):
                 STALE_AFTER.search(text[m.end():m.end() + 30]))
 
 
+def shotgun_applies(probe):
+    """v3_shotgun's scope (notes STEP 14S, 2026-10-10): every probe but COMPOSE (pool compose_*), whose right answer
+    names both holders ("Your cat is older than your dog"). Until 2026-10-10 the exemption read pool_values, which
+    only COMPOSE carries on dev but every OOD-H probe carries too (oodh/build.py), so OOD-H ran with the clause off;
+    prereg s14 grades OOD-H with "the same graders as RC-12". On every dev probe both rules agree."""
+    return not str(probe.get("pool") or "").startswith("compose_")
+
+
+def shotgun_named(text, v, stale, gold_ok):
+    """v counts toward v3_shotgun unless it is a stale value named only in change phrases while the gold is asserted,
+    the v3_other exemption (stale_ok) applied to the count too (notes STEP 14S review D1, 2026-10-10): on a
+    two-candidate OOD-H H-CORR probe "You changed it from Porto to Seville" is the right answer, not a list of every
+    candidate. On RC-12 (CORR: 3 to 7 candidates) it moves only a reply naming every candidate, each stale one in a
+    change phrase; what it moved on the stored dev panel is in the notes."""
+    hits = T.value_hits(text, v)
+    if hits and "stale" not in T.OFF and v in stale and gold_ok and all(stale_ok(text, m) for m in hits):
+        return False
+    return bool(hits)
+
+
 def g_val(reply, stop, prior, rec, probe, gold=None):
     text = T.norm(reply)
     gs = golds(probe, gold)
@@ -113,7 +134,8 @@ def g_val(reply, stop, prior, rec, probe, gold=None):
             break
     if "guess" not in T.OFF and any(T.mentioned(text, v) for v in outside):
         fails.append("v3_guess")
-    if "shotgun" not in T.OFF and not probe.get("pool_values") and len(cands) >= 2 and all(T.mentioned(text, v) for v in cands):
+    if "shotgun" not in T.OFF and shotgun_applies(probe) and len(cands) >= 2 and \
+            all(shotgun_named(text, v, stale, gold_ok) for v in cands):
         fails.append("v3_shotgun")
     mode = GV.mode_of(probe)
     voice = any(GV.voice_error(g, text, mode) for g in gs)

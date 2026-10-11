@@ -1,6 +1,8 @@
 baseline test_lik.py: 0
 baseline test_lik_more.py: 0
 baseline test_lik_adapters.py: 0
+baseline test_lik_engine.py: 0
+baseline test_lik_selfcheck.py: 0
 KILLED   #1 lik_score.py: a tie counts as right  [FAIL rc12-dev-recall-001:12: LENGTH right True {'orange': 2, 'green': 2, 'black': 2}]
 KILLED   #2 lik_score.py: margin against the worst other  [FAIL rc12-dev-recall-001:12: recency]
 KILLED   #3 lik_score.py: Tier 0 margin from the full candidate set on every row  [FAIL IDEAL chunk plain RECALL: {'n': 48, 'n_over_ctx': 0, 'n_matched': 41, 'n_unmatched': 7, 'acc_matched': 1.0, 'chance_matched': 0.3902439024390244, 'n_equal']
@@ -48,9 +50,34 @@ KILLED   #44 lik_adapters.py: Gemma 3 on the default sdpa path  [FAIL Gemma 3 no
 KILLED   #45 lik_adapters.py: sdpa accepted for Gemma 3  [FAIL Gemma 3 with sdpa not refused]
 KILLED   #46 lik_adapters.py: attention not passed to from_pretrained  [FAIL Gemma 3 not loaded eager in float32: ('g', {'torch_dtype': 'F32'}) {'model_type': 'gemma3_text', 'dtype': 'float32', 'device': 'cuda', 'attn_requested': 'e]
 KILLED   #47 lik_adapters.py: HFLik.load defaults to bf16  [FAIL Gemma 3 not loaded eager in float32: ('g', {'torch_dtype': 'BF16', 'attn_implementation': 'eager'}) {'model_type': 'gemma3_text', 'dtype': 'bfloat16', 'dev]
-KILLED   #48 lik_run.py: lik_run defaults to bf16  [FAIL lik_run hf defaults {'hf': ('x/y', 'bfloat16', 'cuda', None), 'planck': ('x.pt', None, None, 'cpu', 'fp32')} {'model_type': 'fake', 'attn': 'eager'}]
+KILLED   #48 lik_run.py: lik_run defaults to bf16  [FAIL lik_run hf defaults {'hf': ('x/y', 'bfloat16', 'cuda', None, False, None), 'planck': ('x.pt', None, None, 'cpu', 'fp32')} {'model_type': 'fake', 'attn': 'e]
 KILLED   #49 lik_run.py: Planck precision auto (bf16 off cpu)  [FAIL lik_run planck precision default ('x.pt', None, None, 'cpu', 'auto')]
-KILLED   #50 lik_run.py: engine info (attention, dtype) not in summary.json  [FAIL lik_run hf defaults {'hf': ('x/y', 'float32', 'cuda', None), 'planck': ('x.pt', None, None, 'cpu', 'fp32')} {'kind': 'stub', 'tok': 'chunk'}]
+KILLED   #50 lik_run.py: engine info (attention, dtype) not in summary.json  [FAIL lik_run hf defaults {'hf': ('x/y', 'float32', 'cuda', None, False, None), 'planck': ('x.pt', None, None, 'cpu', 'fp32')} {'kind': 'stub', 'tok': 'chunk'}]
 KILLED   #51 lik_run.py: console line without n_nonfinite / n_ties  [FAIL the console line lacks n_nonfinite / n_ties]
-51 mutants, 0 problems, 0 not run, 185 s
+KILLED   #52 lik_adapters.py: HFLik.load never trusts remote code  [FAIL trust not everywhere [('config', 'd/Doge', {}), ('tok', 'd/Doge', {}), ('model', 'd/Doge', {'torch_dtype': 'F32', 'attn_implementation': 'eager'})]]
+KILLED   #53 lik_adapters.py: HFLik.load ignores engines.json's chat_template  [FAIL chat_template not set]
+KILLED   #54 lik_adapters.py: engine_opts empty  [FAIL Doge opts {}]
+KILLED   #55 lik_adapters.py: engines.json's attention not read  [FAIL Doge opts {'trust_remote_code': True}]
+KILLED   #56 lik_run.py: an --attn against the entry's accepted  [FAIL --attn sdpa against the entry's eager not refused]
+KILLED   #57 lik_run.py: lik_run drops the entry's attention (Doge on sdpa)  [FAIL lik_run Doge args ('d/Doge', 'float32', 'cuda', None, True, None)]
+KILLED   #58 lik_run.py: lik_run drops trust_remote_code and chat_template  [FAIL lik_run Doge args ('d/Doge', 'float32', 'cuda', 'eager', False, None)]
+KILLED   #59 lik_run.py: selfcheck re-uses the batched path  [FAIL bias {'n_rows': 20, 'n_scores': 60, 'max_abs_diff': 0.0, 'flips': 0, 'tol': 0.01, 'ok': True}]
+KILLED   #60 lik_run.py: selfcheck ignores verdict flips  [FAIL a flip under the tol {'n_rows': 20, 'n_scores': 60, 'max_abs_diff': 0.001, 'flips': 7, 'tol': 0.01, 'ok': True}]
+KILLED   #61 lik_run.py: selfcheck always ok  [FAIL bias {'n_rows': 20, 'n_scores': 60, 'max_abs_diff': 1.0, 'flips': 0, 'tol': 0.01, 'ok': True}]
+KILLED   #62 lik_run.py: flips never counted  [FAIL flips counted {'n_rows': 20, 'n_scores': 60, 'max_abs_diff': 10000.0, 'flips': 0, 'tol': 0.25, 'ok': False}]
+KILLED   #63 lik_run.py: review D4: flips read on the all-candidate verdict, not the matched one  [FAIL right flipped in a stored row: {'n_rows': 40, 'n_scores': 120, 'max_abs_diff': 0.0, 'flips': 1, 'tol': 0.01, 'ok': False}]
+KILLED   #64 lik_run.py: fp32 tol 0.05  [FAIL a gap under the fp32 tol {'n_rows': 20, 'n_scores': 60, 'max_abs_diff': 0.008000000000038199, 'flips': 0, 'tol': 0.05, 'ok': True}]
+KILLED   #65 lik_run.py: bf16 held to the fp32 tol  [FAIL bf16 tol {'n_rows': 20, 'n_scores': 60, 'max_abs_diff': 0.040000000000020464, 'flips': 0, 'tol': 0.01, 'ok': False}]
+KILLED   #66 lik_run.py: a failed selfcheck exits 0  [FAIL bias {'n_rows': 20, 'n_scores': 60, 'max_abs_diff': 1.0, 'flips': 0, 'tol': 0.01, 'ok': False}]
+KILLED   #67 lik_run.py: rows without scores (over ctx) entered  [FAIL test_selfcheck raised TypeError: 'NoneType' object is not subscriptable]
+KILLED   #68 lik_tokcheck.py: tokcheck never trusts remote code (Doge, BananaMind, Swen, cRia)  [FAIL tokcheck trust [('config', 'd/Doge', {}), ('tok', 'd/Doge', {})]]
+KILLED   #69 lik_tokcheck.py: tokcheck ignores the carried template  [FAIL Loom ['template']]
+KILLED   #70 lik_tokcheck.py: template render of a model without one  [FAIL test_tokcheck_opts raised ValueError: Cannot use chat template functions because tokenizer.chat_template is not set]
+KILLED   #71 lik_adapters.py: logit budget ignored  [FAIL groups at 792: [[0, 1, 2, 3]]]
+KILLED   #72 lik_adapters.py: budget read on the new row's width only  [FAIL a group's cost uses its widest row]
+KILLED   #73 lik_adapters.py: grouped scores misplaced  [FAIL HFLik.many (padded) [-3.9170138835906982, 0.0, 0.0, 0.0]]
+KILLED   #74 lik_adapters.py: grouped rows use the first continuation's length  [FAIL HFLik.many (padded) [-3.9170138835906982, -2.1541354656219482, -0.6390693783760071, -2.9332258701324463]]
+KILLED   #75 lik_adapters.py: HFLik.load never sets the vocabulary (no budget)  [FAIL logit budget not wired: None 2147483648]
+KILLED   #76 lik_adapters.py: review D4: the logit budget 2 TiB (no guard)  [FAIL LOGIT_BUDGET 2199023255552, not 2 GiB]
+76 mutants, 0 problems, 0 not run, 206 s
 ALL MUTANTS KILLED

@@ -14,6 +14,6 @@ KILLED    #32 parity_hf_vllm [parity]: --pick first skips the first record  <- p
 KILLED    #35 dev_batch [batch]: parity gate off  <- checks raised ModuleNotFoundError: No module named 'transformers'
 KILLED    #38 dev_batch [batch]: engines.json never read  <- gate: engines.json names vllm, a DIFFERS verdict still refused (parity gate: org/NoModel has parity verdict DIFFERS; run parity_hf_vllm.py f
 KILLED    #41 parity_hf_vllm [parity]: --engine hfb loads vLLM anyway  <- c_stages raised AssertionError
-KILLED    #44 dev_batch [batch]: a run is never marked DONE  <- checks raised FileNotFoundError: [Errno 2] No such file or directory: '/var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmpbmww17_l/IDEAL_AL
+KILLED    #44 dev_batch [batch]: a run is never marked DONE  <- checks raised FileNotFoundError: [Errno 2] No such file or directory: '<tmp>/tmpbmww17_l/IDEAL_AL
 killed 15 | survived 0 | crashed 0 | malformed 0
 ALL MUTANTS KILLED

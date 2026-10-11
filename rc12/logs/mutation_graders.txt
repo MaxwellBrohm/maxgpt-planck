@@ -143,13 +143,13 @@ BASELINE fixture misses 0, conversation-test misses 0
   killed  SOURCE graders: 'return flags == ["LOOP"] and why == ["equal"]' -> 'return flags == ["LOOP"]'  (0 fixtures, 1 conv; e.g. eq_only_stutter:rc12-dev-t0-001)
   killed  SOURCE graders: 'if len(res["fails"]) != 1 or res["fails"][0] not i' -> 'if not res["fails"] or res["fa'  (0 fixtures, 1 conv; e.g. eq_only_wrong:rc12-dev-t0-001)
   killed  SOURCE graders: 'eq_only=eq_only(res, *args))' -> 'eq_only=False)'  (0 fixtures, 1 conv; e.g. eq_only_restate:rc12-dev-t0-001)
-  killed  SOURCE graders: 'v in stale and gold_ok' -> 'v in stale and not gold_ok'  (72 fixtures, 0 conv; e.g. stale_change_ok/VAL)
+  killed  SOURCE graders: 'v in stale and gold_ok:' -> 'v in stale and not gold_ok:'  (72 fixtures, 0 conv; e.g. stale_change_ok/VAL)
   killed  SOURCE graders: '|\\binitially|' -> '|'  (12 fixtures, 0 conv; e.g. stale_initially_ok/VAL)
   killed  SOURCE graders: '|\\binitial|' -> '|'  (12 fixtures, 0 conv; e.g. stale_initial_ok/VAL)
   killed  SOURCE graders: '|\\bprevious|' -> '|'  (12 fixtures, 0 conv; e.g. stale_previous_ok/VAL)
   killed  SOURCE graders: '|\\bprior)' -> ')'  (12 fixtures, 0 conv; e.g. stale_prior_ok/VAL)
   killed  SOURCE graders: 'r"\\W+(?:[\\w\']+\\W+){0,3}$")' -> 'r"\\W+(?:[\\w\']+\\W+){0,3}")'  (12 fixtures, 0 conv; e.g. stale_recap_planted/VAL)
-  killed  SOURCE graders: 'all(T.mentioned(text, v) for v in cands)' -> 'any(T.mentioned(text, v) for v'  (2052 fixtures, 84 conv; e.g. ideal/VAL)
+  killed  SOURCE graders: 'all(shotgun_named(text, v, stale, gold_ok) for v i' -> 'any(shotgun_named(text, v, sta'  (2052 fixtures, 84 conv; e.g. ideal/VAL)
   killed  SOURCE graders: 'for v in outside)' -> 'for v in outside[1:])'  (135 fixtures, 0 conv; e.g. guess_outside/VAL)
   killed  SOURCE graders: 'ws |= set(T.lwords(h))' -> 'ws |= set()'  (20 fixtures, 0 conv; e.g. voice_myholder/VAL)
   killed  SOURCE graders: 'float(all(r["ok"] for r in results))' -> 'float(any(r["ok"] for r in res'  (0 fixtures, 1 conv; e.g. all_one_wrong)
@@ -228,4 +228,4 @@ BASELINE fixture misses 0, conversation-test misses 0
   killed  SOURCE grade_text: 'low_alt = {f.lower() for a in altvals for f in [a]' -> 'low_alt = {a.lower() for a in '  (9 fixtures, 0 conv; e.g. inflect_alt/VAL)
   killed  SOURCE graders: 'gold_ok = any(T.asserted_hits(text, g, pool, gold=' -> 'gold_ok = any(T.asserted_hits('  (60 fixtures, 0 conv; e.g. inflect_generic/VAL)
   killed  SOURCE grade_voice: 'for m in T.value_hits(text, v):' -> 'for m in [x for x in T.value_h'  (30 fixtures, 0 conv; e.g. inflect_voice/VAL)
-MUTANTS killed 226/226, survived 0, crashed 0; 98s
+MUTANTS killed 226/226, survived 0, crashed 0; 94s

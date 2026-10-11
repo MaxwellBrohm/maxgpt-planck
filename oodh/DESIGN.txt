@@ -105,8 +105,14 @@ Status: BUILT to 150 threads (2026-09-26, s13) and REVIEWED (s14). The best-path
     whole-word in its src user turn), G7 (budget above), G1 (IDEAL probe replies score 1.00, 0 degenerate, 0 leaks
     at probe turns), G2 on the generic cheaters that apply to free-text golds (FIRST, LAST, WORDING, OVERLAP,
     ECHO, DEFLECT, SHOTGUN, USERVOICE, ABSTAIN) with the RC-12 bars, and a never-abstain cheater fails every ABS.
-  OPEN for the build: graders.g_val turns v3_shotgun OFF whenever pool_values is set. Either OOD-H runs without the
-    shotgun clause (stated in s14), or, once the rc12 workflow is done with graders.py, a probe flag re-enables it.
+  CLOSED 2026-10-10 (rc12/notes.txt STEP 14S; cuts audit S11): graders.g_val turned v3_shotgun OFF whenever
+    pool_values was set, so the 2026-09-26 gate ran OOD-H without it (SHOTGUN 0.59 in HASHES.txt). Prereg s14 says
+    "the same graders as RC-12", so the clause is ON: graders.shotgun_applies exempts COMPOSE only (no dev verdict
+    moves; oodh/tests/test_shotgun.py, mutation_shotgun.py). The gate is re-run with it in the sealed session.
+    Review D1 (same day): with the clause on, the right H-CORR answer "You changed it from Porto to Seville" failed
+    (2 candidates, both named), where RC-12's 3- to 7-candidate CORR probes pass it; graders.shotgun_named now does
+    not count a stale value named only in a change phrase while the gold is asserted (the v3_other exemption).
+    It only relaxes the clause, so s15's gate PASS stands; the G2 rates are re-reported at the next gate run.
 
 7. HOW LEVEL R USES IT (s1)
   Score per thread = mean of its probe results (strict primary, lenient twins reported). Per model: the mean over

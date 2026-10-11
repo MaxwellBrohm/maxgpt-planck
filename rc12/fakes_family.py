@@ -44,6 +44,7 @@ Each is IDEAL outside its own family, so it isolates one failure mode.
     LISTPAD    CONSIST, its list Q reply ends with a marker line G-DYN drops ("4. (or mix them)")
     LISTBLANK  CONSIST, a blank bullet line ("- ") between list items 1 and 2
     LISTLS     CONSIST, the list lines joined by U+2028 (str.splitlines splits there, split("\n") does not)"""
+import hashlib
 import re
 
 import common as C
@@ -161,6 +162,20 @@ class Sampler(F.Fake):
         if self.seed is None:
             return super().respond(history, t, p)
         return self.first.respond(history, t, p)
+
+
+class Seeded(F.Fake):
+    """greedy: IDEAL; sampled: IDEAL plus, on about half the turns (md5 of seed, conversation, turn), a tail that
+    names the draw, so two sampling seeds share each reply's IDEAL prefix and differ after it (rerun_tie --wrong-seed
+    test, notes STEP 14S)."""
+    name = "SEEDED"
+
+    def respond(self, history, t, p):
+        out = super().respond(history, t, p)
+        if self.seed is None:
+            return out
+        h = int(hashlib.md5(f"{self.seed}:{self.rec['id']}:{t['i']}".encode()).hexdigest()[:8], 16)
+        return out + (f" Draw {h % 997}." if h % 2 else "")
 
 
 class Forgetful(F.Fake):
@@ -308,5 +323,5 @@ def make(name):
         return Restate(name)
     extra = {"CONTINUER": Continuer, "HISTCHECK": HistCheck, "CAPPER": Capper, "SAMPLER": Sampler,
              "FORGETFUL": Forgetful, "T0WRONG": T0Wrong, "BINDHALF": BindHalf, "ACKER": Acker, "PARROT": Parrot,
-             "SMALLTALK": SmallTalk, "NEXT": Next}
+             "SMALLTALK": SmallTalk, "NEXT": Next, "SEEDED": Seeded}
     return extra[name]() if name in extra else F.make(name)

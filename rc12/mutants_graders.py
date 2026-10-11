@@ -107,7 +107,7 @@ SOURCE = [
     ("graders", 'if len(res["fails"]) != 1 or res["fails"][0] not in DEGEN_CLAUSES:',
      'if not res["fails"] or res["fails"][0] not in DEGEN_CLAUSES:'),
     ("graders", "eq_only=eq_only(res, *args))", "eq_only=False)"),
-    ("graders", "v in stale and gold_ok", "v in stale and not gold_ok"),
+    ("graders", "v in stale and gold_ok:", "v in stale and not gold_ok:"),   # the v3_other line (STEP 14S review D1)
     # recap frames (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 3)): each frame word
     # removed is killed by its clean fixture (stale_initially_ok, stale_initial_ok, stale_previous_ok,
     # stale_prior_ok); the window unanchored (any frame word within 40 characters) by stale_recap_planted
@@ -116,7 +116,8 @@ SOURCE = [
     ("graders", r"|\bprevious|", "|"),
     ("graders", r"|\bprior)", ")"),
     ("graders", r'r"\W+(?:[\w' + "'" + r']+\W+){0,3}$")', r'r"\W+(?:[\w' + "'" + r']+\W+){0,3}")'),
-    ("graders", "all(T.mentioned(text, v) for v in cands)", "any(T.mentioned(text, v) for v in cands)"),
+    ("graders", "all(shotgun_named(text, v, stale, gold_ok) for v in cands)",
+     "any(shotgun_named(text, v, stale, gold_ok) for v in cands)"),
     ("graders", "for v in outside)", "for v in outside[1:])"),
     ("graders", "ws |= set(T.lwords(h))", "ws |= set()"),
     ("graders", 'float(all(r["ok"] for r in results))', 'float(any(r["ok"] for r in results))'),

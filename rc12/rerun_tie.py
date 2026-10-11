@@ -22,7 +22,13 @@ judge(): an R2 (greedy) comparison PASSES when every first divergence has a marg
   first divergence (id, turn), the shared prefix of the two replies (characters) and the margin. Why: the GPU rerun of
   2026-10-04 (notes STEP 11c) failed R1 on both engine families with margins of 0.25 to 2.625 nats, because both
   samplers draw from seeded noise and a small drift in p can flip a sampled pick between tokens far apart in log p;
-  the margin bounds a greedy flip, not a sampled one. verify_dev_runs C3 already checks that seeds are carried."""
+  the margin bounds a greedy flip, not a sampled one. verify_dev_runs C3 already checks that seeds are carried.
+Wrong-seed replay (--wrong-seed, stage replay; optional, DECISIONS_LEVEL_R decision 3 (a); rc12/notes.txt STEP 14S):
+  the R1 conversations are also played at seed + 100 (the run already plays them for its turn-1 INFO line), and that
+  replay is compared with the stored rows as "R1w", reported like R1 (identical share, first divergences, shared
+  prefixes, margins), so the shared-prefix lengths of right-seed and wrong-seed replays can be read side by side.
+  Never a gate. Stage report prints the verdict lines of a finished replay / margins directory, so the replay can
+  run without verify_dev_runs: rerun_tie.py --stage replay --wrong-seed ..., --stage margins, --stage report."""
 import argparse
 import json
 import os
@@ -101,6 +107,9 @@ def replay_runs(a, runs, recs):
         other = R.run([recs[r["id"]] for r in stored], eng, a.render, [seed + 100], ctx, None, name, 0, False, True)
         same = sum(x["turns"][0]["reply"] == y["turns"][0]["reply"] for x, y in zip(other, stored))
         info.append(f"R1 seed {seed + 100} vs seed {seed}: turn-1 replies identical {same} / {len(stored)}")
+        if getattr(a, "wrong_seed", False):
+            comps.append(dict(tag=f"R1w seed {seed + 100} (wrong seed) replay vs stored seed {seed}",
+                              **divergences(other, stored)))
     ids = [r["id"] for r in (greedy or ref)["rows"][:a.rerun]]
     lock = R.run([recs[i] for i in ids], eng, a.render, [None], ctx, None, name, 0, False, True)
     serial = R.run([recs[i] for i in ids], seq, a.render, [None], ctx, None, name, 0, False, False)
@@ -176,13 +185,20 @@ def check(args, say, engine):
     d = tempfile.mkdtemp(prefix="rc12_rerun_")
     base = [sys.executable, "-B", os.path.join(HERE, "rerun_tie.py"), "--dir", d, "--model", args.model, "--render",
             args.render]
-    p = subprocess.run(base + ["--stage", "replay", "--root", args.root, "--data", args.data, "--rerun", str(args.rerun)])
+    ws = ["--wrong-seed"] if getattr(args, "wrong_seed", False) else []
+    p = subprocess.run(base + ["--stage", "replay", "--root", args.root, "--data", args.data, "--rerun", str(args.rerun)]
+                       + ws)
     if p.returncode:
         return say("FAIL", f"R replay stage exit {p.returncode} (work dir {d})")
     stub = [] if args.tie_margin_stub is None else ["--tie-margin-stub", repr(args.tie_margin_stub)]
     p = subprocess.run(base + ["--stage", "margins"] + stub, capture_output=True, text=True)
     if p.returncode:
         return say("FAIL", f"R margins stage exit {p.returncode}: {(p.stdout + p.stderr).strip()[-200:]}")
+    report(d, say)
+
+
+def report(d, say):
+    """the verdict lines of a replay / margins directory: judge per comparison, then the replay's INFO lines."""
     rep = json.load(open(os.path.join(d, "replay.json")))
     ms = json.load(open(os.path.join(d, "margins.json")))
     i = 0
@@ -195,7 +211,7 @@ def check(args, say, engine):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", choices=["replay", "margins"], required=True)
+    ap.add_argument("--stage", choices=["replay", "margins", "report"], required=True)
     ap.add_argument("--dir", required=True)
     ap.add_argument("--model", required=True)
     ap.add_argument("--render", choices=["template", "plain"], required=True)
@@ -203,7 +219,12 @@ def main():
     ap.add_argument("--data", default=R.DEV)
     ap.add_argument("--rerun", type=int, default=5)
     ap.add_argument("--tie-margin-stub", type=float, default=None)
+    ap.add_argument("--wrong-seed", action="store_true", help="stage replay: also compare seed + 100 (R1w)")
     a = ap.parse_args()
+    if a.stage == "report":
+        bad = []
+        report(a.dir, lambda kind, text: (bad.append(text) if kind == "FAIL" else None, print(f"{kind} {text}")))
+        return 1 if bad else 0
     return (replay if a.stage == "replay" else margins)(a)
 
 

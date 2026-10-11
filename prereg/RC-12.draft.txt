@@ -287,17 +287,24 @@ becomes training text). The two share the label D8 by accident.
     0 margin per family: mean and nearest-rank 10th percentile of the matched rows' margins (gold minus the best
     foil, nats); a row with a non-finite score enters as -inf and is counted (n_nonfinite), exact ties are counted
     (n_ties). Two models are compared on the foils both tokenizers share (rc12/lik_compare.py). Scored in float32
-    (E004's default; Planck fp32); Gemma 3 with eager attention (engines.json: HF's sdpa path is wrong on long
+    (E004's default; Planck fp32), except LFM2-2.6B in bfloat16 (its float32 weights alone are 10.4 GB of the 12 GB
+    card; its self-check tolerance is then the bf16 one, 0.25 nats; recorded 2026-10-10 before any model run, notes
+    STEP 14S review D3); Gemma 3 with eager attention (engines.json: HF's sdpa path is wrong on long
     prompts), recorded in summary.json. OWN rows are a copying diagnostic only: the gold is the one candidate named
     twice on golden history, and a most-mentioned heuristic is right on all 32 (a swapped-pick twin keeps that cue).
     Measured with the panel's own tokenizers (rc12/lik_tokcheck.py, tokenizer and config.json only, no weights;
     logs/lik_tokcheck.json), matched / all-equal rows of 412, template (plain gives the same counts): Qwen2.5-0.5B
     and Qwen3-0.6B 343 / 233 (OWN 26 of 32, ROLE 35 of 48, TOPIC 35, LOOKUP 46); LFM2.5-230M, LFM2.5-350M and
     LFM2-2.6B 328 / 196; SmolLM2-135M and 360M 326 / 163; Falcon-H1-Tiny-90M 316 / 173; gemma-3-270m-it 372 / 276.
-    Rows with a foil common to the model and Qwen2.5-0.5B: 257 (Falcon-H1) to 315 (gemma). Not measured (tokenizer
-    not in the Mac's cache, PC offline): Qwen3.5-0.8B, LFM2-700M, LFM2-1.2B, Doge-160M. Tested with stub tokenizers
-    and scorers only (test_lik, test_lik_more; 51 of 51 mutants killed); the HF and Planck adapters have never run on a
-    model.
+    Rows with a foil common to the model and Qwen2.5-0.5B: 257 (Falcon-H1) to 315 (gemma). The other 4, measured
+    2026-10-10 on the PC (rc12/notes.txt STEP 14S; logs/lik_tokcheck_pc.json, which also repeats the 9 above
+    exactly): Qwen3.5-0.8B 344 / 232 (common-foil rows with Qwen2.5-0.5B 340), LFM2-700M and LFM2-1.2B 328 / 196
+    (298), Doge-160M-Instruct 311 / 146 (267). Tested with stub tokenizers and scorers only (test_lik, test_lik_more,
+    test_lik_engine, test_lik_selfcheck); the HF and Planck adapters have never run on a model. STEP 14S, for the
+    first model runs: trust_remote_code, the attention and a carried chat_template come from engines.json (Doge: its
+    own code, eager), a forward's logits are kept within 2 GiB by splitting a row's candidates (Gemma 3's 262k
+    vocabulary), and lik_run --selfcheck N re-scores N rows one candidate at a time and fails the run if a score moves
+    by more than 0.01 nats in fp32 (0.25 in bf16) or a matched verdict flips.
 
 5. FAMILIES AND DEV COUNTS
   Dev seed 1212, one stream per family: Random("RC12:dev:<family>:1212"). Byte-identical across processes (tested).
@@ -965,6 +972,10 @@ becomes training text). The two share the label D8 by accident.
     P-145 (SmolLM2-135M SFT-only vs Instruct): not run: no licence at the pinned revision
       (HuggingFaceTB/smollm2-135M-SFT-Only at 79528469cd11, read 2026-10-06: no licence in the card, the tags, a
       LICENSE file or the README; SmolLM2-135M-Instruct is Apache-2.0).
+    MaxGPT-3 (P-147): not run before the lock (rc12/notes.txt STEP 14S): Max's unpublished 235M model has no hub
+      revision or licence to pin, no Hugging Face form (it needs a weight conversion and a tokenizer port, each
+      proven exact, plus its own parity), and its USER:/ASSISTANT: format has no end-of-turn token, so only a plain
+      row could run without a runner change. Not read by the clause; a later run is a labelled diagnostic.
     An extra in this list whose dev runs do not finish before the lock is listed with "not run" and the reason, as
     above; its row here is then rewritten with its numbers or that line before the lock.
   Generation on the 5070 only (the Mac runs likelihood rows only). Every model: template render primary, plain render
@@ -1067,6 +1078,19 @@ becomes training text). The two share the label D8 by accident.
   structurally, and OOD-H is a paired Planck-versus-comparator check, where that helps both sides. Reported beside
   the OOD-H score: the full cheater table, and the score on the subset of probes where the user gave 2+ values of
   the asked kind.
+  DECIDED 2026-10-10 (rc12/notes.txt STEP 14S; cuts audit S11): (d) the shotgun clause v3_shotgun (s6) applies on
+  OOD-H as on RC-12, because this section grades OOD-H with "the same graders as RC-12" and (c) lifts only the item
+  gates. The graders had skipped it on every probe carrying pool_values, a field meant for COMPOSE that every OOD-H
+  probe also carries, so the Part 1 gate of 2026-09-26 ran without it (SHOTGUN 0.59). graders.shotgun_applies now
+  exempts COMPOSE only. As on RC-12, a reply naming every candidate of a two-candidate probe fails ("X, not Y"
+  included), except that a stale value named only in a change phrase while the gold is asserted is not counted, the
+  v3_other exemption applied to the count (graders.shotgun_named, notes STEP 14S review D1): without it the right
+  OOD-H H-CORR answer "You changed it from Porto to Seville" failed, where RC-12's 3- to 7-candidate CORR probes pass
+  it. On the stored dev panel (352 runs, 121,088 rows) both changes together drop v3_shotgun from 5 probes of
+  Qwen3.5-0.8B (template CORR), each still failing on other clauses: no probe verdict, unit or score moves. The
+  OOD-H gate was re-run with the clause on (oodh/DESIGN.txt s15, 2026-10-10, before shotgun_named): PASS on every
+  gating check. shotgun_named only relaxes the clause, so no gating check can fail by it (G1 needs the IDEAL and
+  accepted replies to pass); a sealed session re-runs gate.py once more for the record and re-reports the G2 rates.
   Part 1 BUILT (2026-09-26, F1; oodh/DESIGN.txt s13, reviewed in s14; hashes in oodh/HASHES.txt; not committed,
   not locked). 150 threads: the 107 best-path threads plus 43 F1 threads (deepest usable path per reserved tree,
   sealed/oodh/batch_4.jsonl); the batch-4 pool was read in order until the 43rd usable thread, 8 dropped under KL2
@@ -1141,8 +1165,10 @@ becomes training text). The two share the label D8 by accident.
     by hash in its run config and published with every scored run. The s3 token budget is then measured, not proxied.
   Likelihood rows (s4): BUILT 2026-09-26 (rc12/notes.txt STEP 11, stubs only; fix round the same day: matched
     foils, BIND lead-ins per pair, fp32, Gemma 3 eager, the Tier 0 guard's non-finite and tie counts, lik_compare,
-    token counts measured with 9 of the 13 panel tokenizers); the first model run and the 4 missing tokenizers
-    (Qwen3.5-0.8B, LFM2-700M, LFM2-1.2B, Doge-160M) are open.
+    token counts measured with 9 of the 13 panel tokenizers); the 4 missing tokenizers (Qwen3.5-0.8B, LFM2-700M,
+    LFM2-1.2B, Doge-160M) measured 2026-10-10 (s4; notes STEP 14S). The first model run is open: planned on the PC
+    GPU under gpu.lock, one model per hold, before the lock (notes STEP 14S); if it has not run by the lock, s4 says
+    so and the rows stay a post-lock diagnostic.
   OOD-H Part 1: BUILT 2026-09-26 (s14; not locked). The OOD-H wording rule (s1): BUILT 2026-09-26
     (rc12/oodh_wording.py, imported by score_stats as OW; rc12/notes.txt STEP 11, OOD-H WORDING RULE; synthetic
     per-thread scores only; fix round the same day: comparator, decoding, render and Part 2 checks, the refusal

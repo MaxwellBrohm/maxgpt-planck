@@ -18,10 +18,33 @@ attention (attn_for): engines.json records that transformers' default sdpa path 
 token 0 on long gemma-3-270m-it prompts, where eager and vLLM agree; asking for another attention on Gemma 3 is
 refused. Other models keep the library default (the attention their HF parity ran with). dtype defaults to float32
 (E004 lik.load's default; bf16 logits tie and quantize margins); scorer.info records model_type, dtype, attention
-and device, and lik_run.py writes it into summary.json."""
+and device, and lik_run.py writes it into summary.json.
+Engine options (STEP 14S, 2026-10-10): engine_opts reads a model's engines.json entry for the three options the
+likelihood rows must share with its generation runs: trust_remote_code (the checkpoint's own code: Doge, BananaMind,
+Swen, cRia), attn_implementation (Doge-160M: eager; its sdpa path lets a prompt token see later tokens, notes STEP
+9c) and chat_template (Loom-Spark-3.2, which ships none). lik_run.py passes them to HFLik.load; a conflicting --attn
+is refused there.
+Logit memory (STEP 14S): a forward over r rows of width w returns r x w x vocab logits, 5.2 GB in fp32 for 5
+Qwen2.5 candidates at 1,700 tokens and 8.9 GB for Gemma 3's 262k vocabulary, over a shared 12 GB card. many()
+therefore splits a row's candidates into groups whose rows x width x vocab x 4 bytes stays within LOGIT_BUDGET (at
+least one row each); the scores do not depend on the grouping (test_lik_adapters)."""
+import json
+
+import hf_responder as HR
 import render as RD
 
 LIK_MODEL_TESTED = False
+LOGIT_BUDGET = 2 * 2 ** 30   # bytes of fp32 logits per forward
+ENGINE_KEYS = ("trust_remote_code", "attn_implementation", "chat_template")
+
+
+def engine_opts(model_id, engines):
+    """{option: value} from engines.json (a dict or a path) for model_id; {} for a model it does not list."""
+    if isinstance(engines, str):
+        with open(engines) as fh:
+            engines = json.load(fh)
+    m = ((engines or {}).get("models") or {}).get(model_id) or {}
+    return {k: m[k] for k in ENGINE_KEYS if m.get(k) is not None}
 
 
 def attn_for(model_type, requested=None):
@@ -59,28 +82,46 @@ class HFTok:
         return RD.template(self.tok, messages, self.qwen3)
 
 
+def groups(widths, vocab, budget=LOGIT_BUDGET):
+    """[[row index, ...], ...] in order: as many rows per forward as keep rows x widest x vocab x 4 bytes within
+    budget, at least one; vocab None = one group."""
+    out, cur = [], []
+    for k, w in enumerate(widths):
+        wide = max([widths[j] for j in cur] + [w])
+        if cur and vocab and (len(cur) + 1) * wide * vocab * 4 > budget:
+            out.append(cur)
+            cur = []
+        cur.append(k)
+    return out + ([cur] if cur else [])
+
+
 class HFLik:
-    def __init__(self, torch, model, device="cpu", ctx=None, pad=0, info=None):
+    def __init__(self, torch, model, device="cpu", ctx=None, pad=0, info=None, vocab=None, budget=LOGIT_BUDGET):
         self.torch, self.model, self.device, self.ctx, self.pad = torch, model, device, ctx, pad
         self.info = info or {}
+        self.vocab, self.budget, self.forwards = vocab, budget, []
 
     @classmethod
-    def load(cls, model_id, dtype="float32", device="cuda", attn=None):
+    def load(cls, model_id, dtype="float32", device="cuda", attn=None, trust_remote_code=False, chat_template=None):
         import torch
         from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
-        model_type = getattr(AutoConfig.from_pretrained(model_id), "model_type", "")
+        trc = {"trust_remote_code": True} if trust_remote_code is True else {}
+        model_type = getattr(AutoConfig.from_pretrained(model_id, **trc), "model_type", "")
         attn = attn_for(model_type, attn)
         kw = dict(torch_dtype=getattr(torch, dtype))
         if attn is not None:
             kw["attn_implementation"] = attn
-        tok = AutoTokenizer.from_pretrained(model_id)
-        model = AutoModelForCausalLM.from_pretrained(model_id, **kw).to(device).eval()
+        tok = AutoTokenizer.from_pretrained(model_id, **trc)
+        HR.set_template(tok, chat_template)
+        model = AutoModelForCausalLM.from_pretrained(model_id, **kw, **trc).to(device).eval()
         qwen3 = str(getattr(model.config, "model_type", "")).startswith("qwen3")
         pad = tok.pad_token_id if tok.pad_token_id is not None else (tok.eos_token_id or 0)
         ctx = getattr(model.config, "max_position_embeddings", None)
         info = dict(model_type=model_type, dtype=dtype, device=device, attn_requested=attn,
-                    attn=getattr(model.config, "_attn_implementation", None))
-        return cls(torch, model, device, ctx, pad, info), HFTok(tok, qwen3)
+                    attn=getattr(model.config, "_attn_implementation", None), trust_remote_code=bool(trc),
+                    chat_template_set=chat_template is not None)
+        vocab = getattr(model.config, "vocab_size", None)
+        return cls(torch, model, device, ctx, pad, info, vocab), HFTok(tok, qwen3)
 
     def check(self, n):
         if self.ctx is not None and n > self.ctx:
@@ -90,18 +131,27 @@ class HFLik:
         return self.many(pre, [cont])[0]
 
     def many(self, pre, conts):
-        torch = self.torch
         seqs = [list(pre) + list(c) for c in conts]
+        self.check(max(len(s) for s in seqs))
+        out = [None] * len(seqs)
+        for g in groups([len(s) for s in seqs], self.vocab, self.budget):
+            for k, v in zip(g, self._forward([seqs[k] for k in g], len(pre), [len(conts[k]) for k in g])):
+                out[k] = v
+        return out
+
+    def _forward(self, seqs, npre, ncs):
+        """one right-padded forward over seqs (one row each) -> their continuations' summed log-probs."""
+        torch = self.torch
         n = max(len(s) for s in seqs)
-        self.check(n)
         ids = torch.full((len(seqs), n), self.pad, dtype=torch.long)
         att = torch.zeros((len(seqs), n), dtype=torch.long)
         for i, s in enumerate(seqs):
             ids[i, :len(s)] = torch.tensor(s)
             att[i, :len(s)] = 1
+        self.forwards.append(len(seqs))
         with torch.no_grad():
             logits = self.model(input_ids=ids.to(self.device), attention_mask=att.to(self.device)).logits
-        return [seq_logprob(torch, logits[i], seqs[i], len(pre), len(c)) for i, c in enumerate(conts)]
+        return [seq_logprob(torch, logits[i], seqs[i], npre, nc) for i, nc in enumerate(ncs)]
 
 
 class PlanckTok:

@@ -16,12 +16,12 @@ KILLED   #14 dev_batch.py: dev_batch drops chat_template  <- test_chat_template.
 KILLED   #15 dev_batch.py: token_budget not validated  <- test_chat_template.py: FAIL tb_hf refused: 0 [('tok', 'org/M', False), ('model', 'org/M', False)]
 KILLED   #16 dev_batch.py: chat_template and nan_guard not validated  <- test_chat_template.py: pa/rc12/hf_responder.py", line 45, in set_template
     raise ValueError(f"chat_template must be a non-empty string, not 
-KILLED   #17 parity_hf_vllm.py: parity ignores engines.json's template  <- test_chat_template.py: FAIL parity hfb /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_vd3vygzl/engines.json: [('HFResponder', "
-KILLED   #18 parity_hf_vllm.py: parity: vLLM stage without the template  <- test_chat_template.py: FAIL parity vllm /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_begaz_be/engines.json: [('VLLMResponder'
-KILLED   #19 parity_hf_vllm.py: parity: hfb stage without max_batch / token_budget  <- test_chat_template.py: FAIL parity hfb /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_2wj2rmzg/engines.json: [('HFResponder', "
-KILLED   #20 parity_hf_vllm.py: parity: HF stage without the template  <- test_chat_template.py: FAIL parity hfb /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_e09s0gvz/engines.json: [('HFResponder', "
-KILLED   #21 parity_hf_vllm.py: parity all drops --engines  <- test_chat_template.py: FAIL parity all forwards --engines ['--engines', '/var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_ctnh0i3
-KILLED   #22 parity_hf_vllm.py: parity meta lacks the template  <- test_chat_template.py: FAIL parity meta template hfb /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_tmpl_par_8oz1bayo/engines.json
+KILLED   #17 parity_hf_vllm.py: parity ignores engines.json's template  <- test_chat_template.py: FAIL parity hfb <tmp>/rc12_tmpl_par_vd3vygzl/engines.json: [('HFResponder', "
+KILLED   #18 parity_hf_vllm.py: parity: vLLM stage without the template  <- test_chat_template.py: FAIL parity vllm <tmp>/rc12_tmpl_par_begaz_be/engines.json: [('VLLMResponder'
+KILLED   #19 parity_hf_vllm.py: parity: hfb stage without max_batch / token_budget  <- test_chat_template.py: FAIL parity hfb <tmp>/rc12_tmpl_par_2wj2rmzg/engines.json: [('HFResponder', "
+KILLED   #20 parity_hf_vllm.py: parity: HF stage without the template  <- test_chat_template.py: FAIL parity hfb <tmp>/rc12_tmpl_par_e09s0gvz/engines.json: [('HFResponder', "
+KILLED   #21 parity_hf_vllm.py: parity all drops --engines  <- test_chat_template.py: FAIL parity all forwards --engines ['--engines', '<tmp>/rc12_tmpl_par_ctnh0i3
+KILLED   #22 parity_hf_vllm.py: parity meta lacks the template  <- test_chat_template.py: FAIL parity meta template hfb <tmp>/rc12_tmpl_par_8oz1bayo/engines.json
 KILLED   #23 verify_dev_runs.py: verify C1 ignores the template  <- test_chat_template.py: FAIL C1 template check org/M None: []
 KILLED   #24 verify_dev_runs.py: verify C5 without trust  <- test_chat_template.py: FAIL C5 load options trust True: [('tok', 'org/M', False), ('config', 'org/M', False)]
 KILLED   #25 verify_dev_runs.py: verify C5 without the template  <- test_chat_template.py: FAIL C5 prompt with the run's template (llama): "C5 org/M template r-1 turn 3, qwen3 False rule_differs False:\n'user: u
