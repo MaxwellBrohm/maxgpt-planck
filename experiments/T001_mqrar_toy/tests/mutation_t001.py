@@ -20,6 +20,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 T001 = os.path.dirname(HERE)
 TT, TL, TL2, TM, TR, TTR = (f"tests/{f}.py" for f in ("test_task", "test_layers", "test_layers2", "test_metrics",
                                                        "test_runplan", "test_train"))
+TRS = "tests/test_results.py"  # results.py and the independent rederive.py (2026-10-11)
 ALL = "tests"                  # the whole suite (the critique's mutants and amendment A1's, 2026-10-10)
 MUTANTS = [   # name, file, old, new, test file
     ("ask_writes_first_value", "task.py", "toks += [ASK, KEY0 + k, VAL0 + cur[k]]", "toks += [ASK, KEY0 + k, VAL0 + hist[k][0]]", TT),
@@ -154,6 +155,38 @@ MUTANTS = [   # name, file, old, new, test file
     ("lr_pick_acc_only", "metrics.py", '+ ((d.get(n) or {}).get("acc_ov") or 0.0)', '+ ((d.get(n) or {}).get("acc") or 0.0)'),
     ("c0b_acc_only", "runplan.py", ' and _get(d, n, "acc_ov") >= C0_B_ACC', ""),
     ("dev_acc_ov_from_acc", "runplan.py", 'acc_ov=r["acc_ov"]', 'acc_ov=r["acc"]'),
+]] + [(n, f, o, w, TRS) for n, f, o, w in [
+    # rederive.py (the independent reading) must disagree with the module on some fake; results.py prints the picks
+    ("rd_guard_0p10", "rederive.py", "/ 5 >= -0.05 - TOL", "/ 5 >= -0.10 - TOL"),
+    ("rd_ov_from_upd", "rederive.py", 'ov = {n: rate(t["mqrar"][str(n)]["ov_ok"], t["mqrar"][str(n)]["ov_q"])',
+     'ov = {n: rate(t["mqrar"][str(n)]["upd_ok"], t["mqrar"][str(n)]["upd_q"])'),
+    ("rd_c0a_threshold", "rederive.py", "[0] or 0) < 0.5:", "[0] or 0) < 0.25:"),
+    ("rd_c0b_acc_only", "rederive.py", " and (d.get(n, (0, 0))[1] or 0) >= 0.9 for n in G0)", " for n in G0)"),
+    ("rd_lr_no_ext", "rederive.py", "ext = {3e-4: 1e-4, 3e-3: 1e-2}.get(first)", "ext = None"),
+    ("rd_lr_tie_larger", "rederive.py", "return min(lr for lr in lrs if score(lr) == top)",
+     "return max(lr for lr in lrs if score(lr) == top)"),
+    ("rd_r2_order", "rederive.py", 'order = ["fg", "alibi", "sa", "sb"]', 'order = ["fg", "sb", "sa", "alibi"]'),
+    ("rd_r1_tie_to_p148", "rederive.py", 'r1 = "P-148" if w < 0 else "P-022"', 'r1 = "P-022" if w > 0 else "P-148"'),
+    ("rd_cap_floor_8", "rederive.py", "        c = 4\n", "        c = 8\n"),
+    ("rd_lwo_three_n", "rederive.py", "lwo = sum(ov[n] or 0.0 for n in (8, 16, 24, 32)) / 4",
+     "lwo = sum(ov[n] or 0.0 for n in (8, 16, 24)) / 4"),
+    ("rd_r3_gap_0p3", "rederive.py", "sum(g >= 0.2 - TOL for g in gap) >= 4", "sum(g >= 0.3 - TOL for g in gap) >= 4"),
+    ("rd_r3_margin_0p15", "rederive.py", "m1 >= m2 - 0.05 - TOL", "m1 >= m2 - 0.15 - TOL"),
+    ("rd_pass_abs_0p9", "rederive.py", 't[x][s]["lwo"] >= 0.8 - TOL', 't[x][s]["lwo"] >= 0.9 - TOL'),
+    ("rd_censored_never", "rederive.py", "censored=c == grid[-1]", "censored=False"),
+    ("rd_diverged_ar32", "rederive.py", "dict(cap=4, lwo=0.0, ar32=0.0,", "dict(cap=4, lwo=0.0, ar32=1.0,"),
+    ("rd_helps_cap_1p5", "rederive.py", 'cap_beats(t, x, "base", 1.25) == 1) and guard(t, x)',
+     'cap_beats(t, x, "base", 1.5) == 1) and guard(t, x)'),
+    ("rd_h2h_no_cap", "rederive.py", ' or cap_beats(t, "gdn", "canon", 1.25)', ""),
+    ("rd_r2_skip_helps", "rederive.py", 'r2 = choose(t, p) if p else choose(t, h) if h else "fg"',
+     'r2 = choose(t, p) if p else "fg"'),
+    ("res_stale_over_q", "results.py", "pooled(j, 'stale', 'upd_q')", "pooled(j, 'stale', 'q')"),
+    ("res_first_is_stale", "results.py", "pooled(j, 'first', 'upd_q')", "pooled(j, 'stale', 'upd_q')"),
+    ("res_r1_line_prints_r2", "results.py", 'rows.append(f"  R1 PICK: {M.r1(tab)', 'rows.append(f"  R1 PICK: {M.r2(tab)'),
+    ("res_picks_r2_fixed", "results.py", 'R2=M.r2(tab)["pick"]', 'R2="fg"'),
+    ("res_no_censor_star", "results.py", "{'*' if tab[a][s]['censored'] else ''}", ""),
+    ("res_no_distance_line", "results.py", '    rows.append("  Accuracy by distance (registered as reported only): NOT RECORDED.', '    rows.append("'),
+    ("res_write_skipped", "results.py", "            f.write(text)", "            pass"),
 ]]
 
 

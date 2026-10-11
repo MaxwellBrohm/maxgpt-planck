@@ -1,0 +1,27 @@
+T001 NOTES: dated records that are not rules (PREREG.txt holds the rules and their amendments).
+
+2026-10-11 09:05-09:40 EDT, Claude (W5's commit-and-run step, resumed after the weekly usage limit cut it on 10-10
+at about 22:55; nothing it had done was redone):
+  Queue when resumed: running on the PC 5070 since 10-10 18:22 (code of 2eed1dd, then of 097bef5 from 22:25 after
+    amendment A2; the files that train and score are byte-identical in both), 76 run files, every run rc 0, none
+    diverged. C0 (a) fired (12,000 steps); C0 (b) did not (grid 8-96). runplan.py made the LR picks. Verdict seeds 1
+    and 2 complete for all 12 arms, seed 3 for 6 of them. The queue was not stopped or restarted.
+  Analysis code, committed before any verdict-seed result is read (only run state, rc and the LR picks runplan.py
+    logs have been seen):
+    - results.py: writes RESULTS.txt's tables from the run JSONs with metrics.py's rules (R1-R3 and every number
+      PREREG METRICS names that the runs recorded).
+    - rederive.py: the independent reading. It imports nothing from this module, indexes runs by the fields inside
+      each JSON (not file names), recomputes every rate from the raw counts, and redoes C0, the LR picks and R1-R3
+      from PREREG.txt's text with amendment A1.
+    - tests/test_results.py with tests/fakeout.py: on 17 fake output directories that reach every rule branch (all
+      six R1 outcomes, the three R2 paths, YES / PARTIAL / NO, C0 (a) and (b) and a near miss of (b), an LR tie,
+      the LR extension, censored caps, diverged runs, R3's margin), rederive.py agrees with runplan.py + metrics.py
+      on every per-run metric, C0, every LR pick, every helps / passes flag and R1-R3; results.py prints the
+      module's picks and the reported-only items. tests/mutation_t001.py gained 25 mutants of the two files.
+  Two registered report items cannot be produced (found while writing results.py, before any verdict was read):
+    - Accuracy by distance (PREREG METRICS, reported only, enters no rule): train.py's score() keeps no
+      per-distance counts.
+    - Weights: train.py saves none, against Max's rule to keep every model (successes and failures). Rerunning to
+      recover them would give replays, not the same models (CUDA training here is not bit-exact), at about the
+      queue's own GPU hours; that is Max's call, so it is put to him, not done. The queue is not restarted mid-way
+      to add a save.
