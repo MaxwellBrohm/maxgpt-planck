@@ -29,9 +29,12 @@ def s007_runs(spread):
     return out
 
 
-def verdicts(root, spread, earlier):
+def verdicts(root, spread, earlier, extra=("--no-stage1-earlier",)):
+    """extra: since 2026-10-10 analyze.py reads stage 1's results.json files as earlier by default (SCREENS.txt
+    ONSET RULE CODE); these cases pass --no-stage1-earlier so --earlier alone decides, as on 2026-10-06."""
     write_runs(root, {**STAGE_1A, **STAGE_B, **STAGE_C, **SEED, **s007_runs(spread)})
     argv = ["verdicts", "--runs", str(root), "--out", str(root / "v.json")] + [x for e in earlier for x in ("--earlier", e)]
+    argv += list(extra)
     with contextlib.redirect_stdout(io.StringIO()):
         assert analyze.main(argv) == 0
     return json.load(open(root / "v.json"))
@@ -55,6 +58,13 @@ def test_a_later_pooled_failure_relabels_earlier_verdicts_with_c4s_text(tmp_path
     assert all(v["contrasts"][k]["labels"] == [analyze.POOLED, "underpowered"] for k in S002_KEYS)
     v = verdicts(tmp_path / "c", 0.0, [S002_RES])                # the check passes: nothing re-read, no label
     assert v["pooled_sia_check"]["CHAT"]["ok"] and all(v["contrasts"][k]["labels"] == [] for k in S002_KEYS)
+    v = verdicts(tmp_path / "d", 0.03, [], extra=())            # the default: stage 1's three files are earlier
+    assert v["read_earlier"] == sorted(k for sid in SIDS for k in res(sid)["contrasts"]) == \
+        ["S001.nogate", *S002_KEYS, "S003.adamw"]
+    assert all(v["contrasts"][k]["labels"] == [analyze.LATER, "underpowered"] for k in S002_KEYS)
+    assert v["contrasts"]["S007.smear"]["labels"] == [analyze.POOLED, "underpowered"]
+    assert [os.path.relpath(f, EXP) for f in analyze.STAGE1_RESULTS] == \
+        ["S001_attn_gate/results.json", "S002_block_ablations/results.json", "S003_adamw/results.json"]
     sec = flat(section("STAGE 1 VERDICTS"))
     assert "(checked)" not in sec and '"noise check failed later" (C4\'s text) and "underpowered" when it is given ' \
         "--earlier experiments/S002_block_ablations/results.json; without --earlier it writes \"noise check failed " \

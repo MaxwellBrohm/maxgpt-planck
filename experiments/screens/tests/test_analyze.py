@@ -118,19 +118,39 @@ def test_holm_step_down():
 
 
 def test_cap_and_cut_order():
+    """ORDER's cut order as arithmetic, at ORDER's registered 25 h (the entries before AMENDMENT CAP-FLAG used it so;
+    since then cap_cut is the proposal a flag carries, test_cap_overrun_is_a_flag_never_a_cut)."""
     rem = {"BASE": 2.0, "S001": 3.0, "S002": 4.0, "S003": 5.0, "S004": 3.0, "S005": 4.0, "S006": 2.0, "S007": 3.0}
-    assert AL.cap_cut(rem)["cut"] == ["S006"] and AL.cap_cut(rem)["fits"]               # 26 h: S006 off -> 24
-    assert AL.cap_cut(rem, measured=-1.5)["cut"] == []                                    # 24.5 h fits
-    r = AL.cap_cut(rem, measured=1.5)
+    c = lambda **kw: AL.cap_cut(rem, cap=25.0, **kw)  # noqa: E731
+    assert c()["cut"] == ["S006"] and c()["fits"]                                       # 26 h: S006 off -> 24
+    assert c(measured=-1.5)["cut"] == []                                                # 24.5 h fits
+    r = c(measured=1.5)
     assert r["cut"] == ["S006", "S003"] and r["fits"] and abs(r["total_after"] - 20.5) < 1e-12
-    r = AL.cap_cut(rem, measured=14.0)
+    r = c(measured=14.0)
     assert r["cut"] == ["S006", "S003", "S007", "S002"] and not r["fits"]
-    assert AL.cap_cut(rem, measured=1.5, toy_favours_p022=True)["cut"] == ["S004"]
-    assert AL.cap_cut(rem, measured=0.6)["cut"] == ["S006"]                               # 26.6 - 2 = 24.6
-    r = AL.cap_cut(rem, measured=0.6, current={"S006": 1.0})     # S006 keeps its current set: 25.6, then S003
+    assert c(measured=1.5, toy_favours_p022=True)["cut"] == ["S004"]
+    assert c(measured=0.6)["cut"] == ["S006"]                                           # 26.6 - 2 = 24.6
+    r = c(measured=0.6, current={"S006": 1.0})     # S006 keeps its current set: 25.6, then S003
     assert r["cut"] == ["S006", "S003"] and abs(r["total_after"] - 20.6) < 1e-12
-    r = AL.cap_cut({"BASE": 5.0, "S001": 5.0, "S004": 5.0, "S005": 5.0}, measured=8.0)
+    r = AL.cap_cut({"BASE": 5.0, "S001": 5.0, "S004": 5.0, "S005": 5.0}, measured=8.0, cap=25.0)
     assert r["cut"] == [] and not r["fits"]
+
+
+def test_cap_overrun_is_a_flag_never_a_cut():
+    """AMENDMENT CAP-FLAG (2026-10-10): the cap is 28 h (AMENDMENT BASE-DIAG's number); over it nothing is cut, the
+    step flags Max with the overrun and what the cut order would cut; at or under it, no flag."""
+    assert AL.CAP == 28.0 and AL.cap_cut({})["cap"] == 28.0 and AL.cap_check({})["cap"] == 28.0
+    rem = {"BASE": 2.0, "S001": 3.0, "S002": 4.0, "S003": 5.0, "S004": 3.0, "S005": 4.0, "S006": 2.0, "S007": 3.0}
+    r = AL.cap_check(rem, measured=3.5)                                                 # 29.5 h
+    assert r["flag_to_max"] and not r["fits"] and r["cut"] == [] and abs(r["over_by"] - 1.5) < 1e-12
+    assert r["proposal"]["cut"] == ["S006"] and abs(r["proposal"]["total_after"] - 27.5) < 1e-12
+    r = AL.cap_check(rem, measured=2.0)                                                 # exactly 28 h fits
+    assert not r["flag_to_max"] and r["fits"] and r["over_by"] == 0.0 and r["proposal"] is None and r["cut"] == []
+    r = AL.cap_check(rem, measured=2.0001)
+    assert r["flag_to_max"] and r["proposal"]["cut"] == ["S006"]
+    r = AL.cap_check({"BASE": 5.0, "S001": 5.0, "S004": 5.0, "S005": 5.0}, measured=9.0)   # nothing the order may cut
+    assert r["flag_to_max"] and r["proposal"]["cut"] == [] and not r["proposal"]["fits"]
+    assert AL.cap_check(rem, cap=25.0)["flag_to_max"] and AL.cap_check(rem, cap=25.0)["cut"] == []
 
 
 def test_onsets():

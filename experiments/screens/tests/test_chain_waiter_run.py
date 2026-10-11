@@ -114,7 +114,8 @@ def test_a_hold_gives_up_after_the_grace(tmp_path):
     p = tree(tmp_path, MID + LOCKWAIT, mark=False)
     t0 = time.time()
     rc, log, stub = main_run(tmp_path, p, poll="1", grace="2", timeout=30)
-    assert rc == 1 and stub == [] and 2 <= time.time() - t0 < 25
+    # GRACE counts whole seconds (date +%s): a 2 s grace can end just over 1 s after the HOLD (2026-10-10: 1.33 s)
+    assert rc == 1 and stub == [] and 1 <= time.time() - t0 < 25
     assert "HOLD stage2_s006_seeds stopped after a 2 h gpu.lock wait" in log
     assert "GIVEUP: no new stage2_s006_seeds start within 2 s" in log
 
@@ -166,7 +167,8 @@ def test_the_wrappers_arguments_are_the_repos_chain():
     nxt = open(os.path.join(PLANS, a[4] + ".txt")).read().splitlines()
     cur = [ln.strip() for ln in open(os.path.join(PLANS, "CURRENT")) if not ln.startswith("#")]
     assert a[1] == "stage2_s006_seeds" and s6[-1] == "mark " + a[3] and nxt[1] == "wait_mark SCREENS " + a[3]
-    assert cur == [a[4]] == ["stage2_base_diag"] and a[0] == "base_diag"
+    from replay_lib import REPLAY_PLANS, replay_configs          # AMENDMENT BASE-REPLAY moved CURRENT on, later
+    assert cur == ((REPLAY_PLANS if replay_configs() else []) or [a[4]]) and a[4] == "stage2_base_diag" and a[0] == "base_diag"
     sw = open(os.path.join(L.HERE, "s006_waiter.sh")).read()                    # stage2_seeds at the s006 waiter's ref
     assert f"WANT_PLAN=stage2_seeds; WANT_REF={REF2}; NEXT_PLAN={a[1]}" in sw and a[6] == f"stage2_seeds@{REF2}"
     assert "B=$KIT/planck_s006.bundle" in sw and a[5] == "planck_diag.bundle" and a[2] == REF6

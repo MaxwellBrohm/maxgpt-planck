@@ -57,9 +57,9 @@ MUTANTS_BASEDIAG_STATE = [
     ("bd_plan_runs_past_its_mark", PLD, "mark SCREENS BASE DIAG DONE\n", "mark SCREENS BASE DIAG DONE\ntrain base_s101\n", BD),
     ("bd_config_seed_103_twice", CFG + "base_s104.yaml", "seed: 104\n", "seed: 103\n", BD),
     ("bd_config_header_not_the_generators", CFG + "base_s105.yaml", "C1-b eager), LR5, seed 105", "C1-b), LR5, seed 105", BD),
-    ("bd_current_back_to_s006", CUR, "# Seed plans come from screens.py seeds.\nstage2_base_diag\n",
-     "# Seed plans come from screens.py seeds.\nstage2_s006_seeds\n", BD),
-    ("bd_current_back_to_s006_s2e", CUR, "# Seed plans come from screens.py seeds.\nstage2_base_diag\n",
+    ("bd_current_back_to_s006", CUR, "# Seed plans come from screens.py seeds.\nstage2_replay\n",
+     "# Seed plans come from screens.py seeds.\nstage2_s006_seeds\n", BD),   # (stage2_base_diag until AMENDMENT BASE-REPLAY)
+    ("bd_current_back_to_s006_s2e", CUR, "# Seed plans come from screens.py seeds.\nstage2_replay\n",
      "# Seed plans come from screens.py seeds.\nstage2_s006_seeds\n", S2E),
     ("bd_record_removed", SXT, "  BASE RUNS ADDED BY AMENDMENT BASE-DIAG: base_s103,",
      "  BASE RUNS, ADDED BY AMENDMENT BASE-DIAG: base_s103,", CF),

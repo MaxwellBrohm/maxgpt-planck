@@ -11,6 +11,10 @@
 #      keys differ from its BASE), the RC-12 GUARD, C1-b's engine values, the C6 hook and the 2% rule. A refusal stops the queue.
 #   2. After a run, an out_dir holding rc12_eval.jsonl stops the queue (C2 RC-12 GUARD, the run-directory half).
 #   3. The dirty check and the code hash list also cover experiments/screens and experiments/S00?_*.
+#   4. (SCREENS DEVIATION 1, SCREENS.txt 2026-10-10) Scoring is qlib_screens.sh score_screens: a bpb/*.json a power
+#      cut left unparsable is scored again, and SCORED is written only after bpb/*.json and bpb.jsonl are fsynced.
+#      A queue cut while a run trains (power cut, reboot, kill) leaves QRUN in its out_dir; the next queue counts the
+#      cut as that run's one crash (cut_count): a later crash, or a second cut, makes it a GAP.
 # Everything else is queue_lib.sh unchanged: PAUSE / STOP / 75 C / 25 GB guards, gpu.lock held per run (flock
 # -w 7200; training plus scoring), preflight.py --strict, train.py --require-committed, one resume after a crash,
 # a non-finite loss = DIVERGED (never resumed), scoring of every non-trunk run (final + 2 rolling checkpoints).
@@ -67,6 +71,8 @@ do_train() {   # 0 = go on with the plan, 1 = the queue stops
     if [ -e "$out/DIVERGED" ] || [ -e "$out/GAP" ] || [ -e "$out/SCORED" ] || [ -e "$out/TRUNK_DONE" ]; then
         qlog "skip $name (already $(ls "$out" | grep -E '^(DIVERGED|GAP|SCORED|TRUNK_DONE)$' | head -1))"; return 0
     fi
+    cut_count "$out"
+    [ $? = 2 ] && { status "$name" gap; return 0; }      # a cut counted as its second crash: GAP, the plan goes on
     ( cd "$SX" && $PY screens.py check "$name" ) > "$OUT/check/$name.txt" 2>&1 || {
         qlog "screens check refused $name: $(grep -v '^ok' "$OUT/check/$name.txt" | head -3 | tr '\n' ' ')"; return 1; }
     while :; do
@@ -81,7 +87,9 @@ do_train() {   # 0 = go on with the plan, 1 = the queue stops
             gpu_unlock; return 1
         fi
         mode=$(pyfield "$OUT/preflight/$name.json" 'r["schedule"]["mode"]')
+        qrun_set "$out" || { qlog "cannot write $name/QRUN"; gpu_unlock; return 1; }
         train_run "$cfg" "$out" --require-committed; rc=$?
+        qrun_clear "$out"
         if [ $rc = 14 ]; then
             gpu_unlock; heat=$((heat + 1))
             [ $heat -le 5 ] || { qlog "$name stopped for heat 6 times: queue stops"; return 1; }
@@ -95,7 +103,7 @@ do_train() {   # 0 = go on with the plan, 1 = the queue stops
     fi
     case $rc in
         0)  if [ "$mode" = trunk ]; then touch "$out/TRUNK_DONE"; status "$name" done
-            elif score_run "$out"; then touch "$out/SCORED"; status "$name" "done and scored"
+            elif score_screens "$out"; then status "$name" "done and scored"
             else gpu_unlock; return 1; fi ;;
         10) status "$name" diverged ;;
         11) status "$name" gap ;;

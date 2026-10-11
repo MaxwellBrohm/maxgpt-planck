@@ -151,14 +151,14 @@ def test_stage_c_configs_carry_g_times_the_stage_b_lrs_and_their_own_trunk(e, g)
 def test_cap_check_before_stage_c_and_what_an_extension_does(capsys, tmp_path):
     tsv = tmp_path / "before_c.tsv"                 # measured_hours.tsv as of that entry: the LATER lines not yet in
     tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] in LATER)))
-    r = H.report(P, str(tsv), r_b=2)
+    r = H.report(P, str(tsv), r_b=2, cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 28 h since AMENDMENT CAP-FLAG)
     out = capsys.readouterr().out
     t, cap = r["tally"], r["cap"]
     assert sum(t["n_queued"].values()) == 42 and t["n_queued"]["S003"] == 10 and cap["cut"] == []
     assert round(cap["total_before"], 3) == 24.857 and "= 24.857 h against 25 h: fits, nothing cut" in out
     arm = sum(H.s003_tag_hours(H.load(str(tsv))[0]).values())
     assert sum(1 for k in t["registered"] if k[:3] == ("S003", "search", "C") and k not in t["seen"]) == 8
-    ext = AL.cap_cut({**t["queued"], "S003": t["queued"]["S003"] + arm}, r["measured_runs"] + r["other"])
+    ext = AL.cap_cut({**t["queued"], "S003": t["queued"]["S003"] + arm}, r["measured_runs"] + r["other"], cap=25.0)
     assert ext["cut"] == ["S006"] and round(ext["total_before"], 3) == 25.264 and round(ext["total_after"], 3) == 23.426
     sec = section("S003 STAGE B RESULT")
     assert "total 24.857 h <= 25 h: nothing cut, 0.143 h of headroom" in sec and "25.264 h" in sec and "23.426 h" in sec

@@ -58,7 +58,8 @@ MUTANTS_FIX = [
     # the launch entry's CORRECTIONS and its tests
     ("fix_launch_wait_seconds_typo", SXT, "takes 3 s over the 12 runs", "takes 4 s over the 12 runs", S2L),
     ("fix_launch_uncomputed_395", SXT, "was in this file, they passed too.", "was in this file, they passed too (395).", S2L),
-    ("fix_hours_loader_accepts_twice", HRS, '            assert name not in runs, f"{name} measured twice"\n', "", HF),
+    ("fix_hours_loader_accepts_twice", HRS,     # anchor moved by SCREENS DEVIATION 1 (2026-10-10): load() keeps holds
+     '            assert (a, b) not in seen, f"{name} measured twice (the hold {a} to {b} is listed twice)"\n', "", HF),
     # a second run on a seen slot absorbed into the slot instead of counted on top (the old dict-overwrite check passed it)
     ("fix_hours_second_run_absorbed", HRS, "if key in reg and key not in seen:", "if key in reg:", HF),
 ]

@@ -47,7 +47,7 @@ def V(tmp_path_factory):
     tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] in {*S2, *EXTS})))
     runs, _ = H.load(str(tsv))                          # lines (STAGE 2 SELECTION RESULT) and S006's extension taken out
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(P, str(tsv))
+        r = H.report(P, str(tsv), cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 28 h since AMENDMENT CAP-FLAG)
     t, c, f = r["tally"], r["cap"], (lambda x, n=3: f"{x:.{n}f}")
     full = lambda s, a: H.run_h(L.STEPS, H.mult(s, a))  # noqa: E731
     per = {s: full(s, a) for s in L.ORDER[2] for a in L.SCREENS[s]["arms"]}
@@ -59,7 +59,7 @@ def V(tmp_path_factory):
     cum = [g["S005"], g["S005"] + g["S004"], g["S005"] + g["S004"] + g["S007"]]
     one = {}
     for s in ("S007", "S006", "S004", "S005"):
-        x = AL.cap_cut({**t["queued"], "S004": t["queued"]["S004"] + per[s]}, m)
+        x = AL.cap_cut({**t["queued"], "S004": t["queued"]["S004"] + per[s]}, m, cap=25.0)
         one[s] = (x["total_before"], x["total_after"], x["cut"])
     fmt = {"lock": f(sum(lock)), "s101": f(sum(lock[:6])), "s102": f(sum(lock[6:])), "train": f(train),
            "gaps": f(sum(lock) - train), "est": f(12 * run), "run": f(run), "under": f(12 * run - sum(lock)),
@@ -144,7 +144,7 @@ def test_the_cut_rule_reads_finished_screens_as_nothing_to_cut(V):
     for over, cut, fits in ((h - 1e-4, [], True), (h + 1e-4, ["S006"], True),
                             (h + t["queued"]["S006"] + 1e-4, ["S006", "S007"], True),
                             (h + t["queued"]["S006"] + t["queued"]["S007"] + 1e-4, ["S006", "S007"], False)):
-        x = AL.cap_cut(t["queued"], m + over)
+        x = AL.cap_cut(t["queued"], m + over, cap=25.0)
         assert (x["cut"], x["fits"]) == (cut, fits), over
     assert f"Past 25 h by up to {v['s006q']} h the rule cuts S006; by up to {v['both']} h S006 and S007" in FLAT
     assert "so for stage 2 the order S006, S003, S007, S002 acts as S006 then S007" in FLAT

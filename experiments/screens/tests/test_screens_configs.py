@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 import screens_lib as L  # noqa: E402
 from reinstate_lib import REINSTATED_PLANS, s006_seed_configs  # noqa: E402
 from basediag_lib import DIAG_PLANS, base_diag_configs  # noqa: E402
+from replay_lib import REPLAY_PLANS, replay_configs  # noqa: E402
 
 P = L.params()
 CONFIGS = L.all_configs()
@@ -117,9 +118,11 @@ def test_config_set_is_complete():
     s2 = stage2_seed_configs()                          # empty until plans/stage2_seeds.txt exists
     s6 = s006_seed_configs()                            # empty until plans/stage2_s006_seeds.txt exists (S006-REINSTATE)
     bd = base_diag_configs()                            # empty until plans/stage2_base_diag.txt exists (BASE-DIAG)
-    assert LATER <= set(names) and s2 | s6 | bd <= set(names) and len(set(names) - LATER - s2 - s6 - bd) == 48
-    assert len(names) == 83 + len(s2) + len(s6) + len(bd)
-    names = sorted(set(names) - LATER - s2 - s6 - bd)
+    rp = replay_configs()                               # empty until plans/stage2_replay.txt exists (BASE-REPLAY)
+    later = s2 | s6 | bd | rp
+    assert LATER <= set(names) and later <= set(names) and len(set(names) - LATER - later) == 48
+    assert len(names) == 83 + len(s2) + len(s6) + len(bd) + len(rp)
+    names = sorted(set(names) - LATER - later)
     for sid, s in L.SCREENS.items():
         for a in s["arms"]:
             if sid != "S003":
@@ -156,6 +159,12 @@ def test_every_arm_differs_from_its_base_only_in_its_registered_keys(capsys):
             rows.append(("S003", "adamw seed", sorted(d)))
         elif m["arm"] == "base":
             d = L.diff(f, own_base(None)) - FIX
+            if m["diag"]:                               # a registered BASE replay (AMENDMENT BASE-REPLAY)
+                off = L.BASE_REPLAYS[f["name"]] == "hook-off"
+                assert d == ({"eval.induction"} | HOOK if off else set())
+                assert ("eval.induction" in f and f["eval.induction"] is None) == off and f["seed"] == 101
+                rows.append(("BASE", f"replay ({L.BASE_REPLAYS[f['name']]})", sorted(d)))
+                continue
             assert d == set(L.engine(sid)) and all(f[k] == v for k, v in L.engine(sid).items())
             rows.append((sid or "BASE", "base", sorted(d)))
         else:
@@ -265,6 +274,7 @@ def test_plans_follow_the_registered_order():
     later = LATER_PLANS if stage2_seed_configs() else []    # stage2_seeds only once its plan exists and checks
     later = later + (REINSTATED_PLANS if s006_seed_configs() else [])  # stage2_s006_seeds likewise (S006-REINSTATE)
     later = later + (DIAG_PLANS if base_diag_configs() else [])        # stage2_base_diag likewise (BASE-DIAG)
+    later = later + (REPLAY_PLANS if replay_configs() else [])         # stage2_replay likewise (BASE-REPLAY)
     assert len(cur) == 1 and cur[0].strip() in PLAN_SEQUENCE + later    # ORDER's plans so far, in the order they run
     for r in plan_runs(cur[0].strip()):
         assert len(L.find(r)) == 1

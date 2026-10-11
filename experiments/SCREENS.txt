@@ -2109,3 +2109,531 @@ onset, HD or verdict is read: stage2_seeds runs from d21df3d, S006's queue has n
     SCREENS_BASE_DIAG_DONE (or a person's launch if the waiter gives up): the onset reading's code with tests, then the
     stage 2 verdict step reads the onsets by the ONSET RULE and the BASE LEVEL report, and the measured hours are
     regenerated. The RC-12 extras (the audit's step 2) wait for this plan's queue to end.
+
+AMENDMENT CAP-FLAG (2026-10-10 17:15 EDT, Claude, on Max's rule below; Mac CPU, no model; nothing committed, no mark, no
+queue started. Written before any stage 2 onset, HD or verdict is read and before any cap check after AMENDMENT
+BASE-DIAG's; the PC's last SCREENS queue line is 2026-10-07 03:03:58 "plan finished: stage2_base_diag.txt".)
+  Max (the PI), 2026-10-06, verbatim (AMENDMENT S006-REINSTATE): "if something can be helpful even a little we should
+    give it its proper chance". research/CUTS_AUDIT_2026-10.md row 3 and its REINSTATE SATURDAY item S1 make that rule
+    this amendment: a cap overrun goes to Max as a flag, never a silent cut.
+  ORDER'S CAP AND CUT RULE, AS AMENDED. The cap is 28 GPU-hours (AMENDMENT BASE-DIAG's number), read as before:
+    measured hours so far, OTHER counted (STAGE 2 READINESS (c)), plus the queued estimate. At each check ORDER names
+    (before any screen's g-check and before each new seed set), if the total would pass 28 h, nothing is cut and
+    nothing more is queued: the step stops and brings Max a FLAG with the total, the overrun and the proposal, which is
+    what ORDER's cut order would take (S006, S003, S007, S002; never S001, S005, the BASE runs, or S004 while P-148 is
+    the must-run pick) with each screen's queued hours. Max decides: a higher cap, the proposed cut or less, or another
+    course. His answer is quoted verbatim in the entry that acts on it, before any run it affects; a screen is cut only
+    on that answer. "A screen already in its seed sets finishes the current set" stands (a check never stops a set in
+    progress), and the E4 GATE (a scientific gate, not a budget rule) is unchanged. No earlier cut stands: the only one
+    (S006, d21df3d) was reversed by AMENDMENT S006-REINSTATE.
+  WHAT COUNTS (the existing reading, stated so a later check needs no new one): GPU hours this batch spends outside its
+    registered runs count as OTHER, so the part of the HD, SINK and GATE scoring (CUTS_AUDIT S4) that reads this
+    batch's kept checkpoints counts once measured or queued, and any later run of this batch (a BASE replay or hook-off
+    run, CUTS_AUDIT S7) counts as a run. E3 Part 3's runs are E3's, not this batch's.
+  POSITION NOW (from a copy of the PC's queue_screens.txt, sha256 93d1847aec949d30..., and status.jsonl, c8ced214b15e48d4...,
+    copied 2026-10-10 16:58; hours only, no result read; measured_hours.tsv not regenerated): 96 runs measured, 23.867 h,
+    + 2.120 h OTHER = 25.987 h; queued 0 of 90 registered runs; 2.013 h of headroom under 28 h. At their audit
+    estimates, three BASE replay or hook-off runs (3 x 0.312 h, 0.937 h) and 1 to 2 GPU h of that scoring would make
+    27.9 to 28.9 h, so the check before them may raise the flag; then Max decides.
+  CODE: analyze_lib.CAP = 28.0 (it said 25.0: AMENDMENT S006-REINSTATE and AMENDMENT BASE-DIAG moved the number in text
+    only). New analyze_lib.cap_check(): the total, the overrun, flag_to_max, and the proposal (cap_cut's list); its
+    "cut" is always empty. cap_cut() keeps the cut order's arithmetic, now the proposal. screens.py hours (screens_hours
+    report) prints "fits, nothing cut; headroom ..." at or under the cap and otherwise "OVER by ... h: FLAG TO MAX,
+    nothing is cut or queued without his decision (AMENDMENT CAP-FLAG); the cut order would take ...". The earlier
+    entries' tests now pass their own cap (25 h or 27 h) to cap_cut() and report(), so they check what those entries
+    computed. screens.py seeds --cut is unchanged: it writes a plan after Max's answer, never before.
+
+DEVIATION 1 (2026-10-10 17:17 EDT, Claude; Mac CPU, no model; nothing committed. Written before any affected run: no
+SCREENS queue has run since 2026-10-07 03:03:58, and a queue runs the code of the commit it was launched from, so only
+queues launched from a commit holding this entry run the new code. C9: deviations follow E2's policy, "numbered, logged
+before the affected run; a crash resumes once".) The SCREENS queue's scoring outputs become durable, a score file a power
+cut damaged is scored again, a cut queue counts as the run's crash, and the hours count each gpu.lock hold once.
+research/CUTS_AUDIT_2026-10.md row 143 and REINSTATE SATURDAY S17.
+  (1) SCORED AFTER ITS FILES. queue_lib.sh (E2's file, not edited) has data_prep/bpb.py write bpb/<ckpt>.json in place,
+    flattens those with bpb_lines.py through a shell redirect into bpb.jsonl, and queue_screens.sh then touched SCORED,
+    with no fsync anywhere: after a power cut ext4 can keep SCORED (the queue then skips the run for good) while
+    bpb.jsonl or a bpb/*.json is empty or NUL-filled (pc/wsl/boot.d/40_screens.notes.txt lists the case; harness/
+    durable.py tells the 2026-09-29 incident). Now queue_screens.sh scores through qlib_screens.sh score_screens: the
+    same bpb.py invocation per checkpoint (the final and the two rolling checkpoints before it), then score_sync.py
+    publish fsyncs every bpb/*.json and bpb/, writes bpb.jsonl (bpb_lines.py's output, byte for byte) through a fsynced
+    temporary file and a rename, and only then writes SCORED the same way.
+  (2) AN UNPARSABLE SCORE FILE IS SCORED AGAIN. A bpb/<ckpt>.json that is not empty and does not parse as a JSON object
+    is moved aside to <ckpt>.json.unparsable_<time> (kept, never deleted) and that checkpoint is scored again. Before, a
+    non-empty file was skipped, bpb_lines.py failed on it and the queue stopped for a person. Scoring trains nothing, so
+    scoring again only replaces a damaged file with the reading the queue would have made.
+  (3) A CUT COUNTS AS THE RUN'S ONE CRASH (the crash-count policy). E2's policy resumes a crash once and makes a second a
+    GAP, but train_run counts only the crashes it sees: a power cut, a reboot or a kill takes the queue down with the
+    run and left nothing in crashes.txt, so a run could resume after a cut and again after a crash. Now queue_screens.sh
+    writes QRUN (fsynced) in the run's out_dir before train_run and removes it when train_run returns, whatever it
+    returned (a STOP or a heat stop clears it). A queue that reaches a run whose QRUN is still there (qlib_screens.sh
+    cut_count, after the skip check) appends one line to crashes.txt: the cut is the run's one crash, and the run
+    resumes once. A crash after it, or a second cut, makes 2 lines and a GAP (logged, status "gap", the plan goes on, as
+    E2's GAP). A QRUN beside a final checkpoint is not counted (training was over; the cut hit scoring or the release).
+    The PC loses power on some mornings around 06:03 (2026-09-29 was one), so a cut is the likeliest crash.
+  (4) HOURS: EACH LOCK HOLD ONCE. screens_hours.parse_queue paired every "train" line with the run's status line, so a
+    crash resumed inside one hold listed the run twice and load() stopped on "measured twice", and a run resumed after a
+    cut would have counted the downtime too. Now parse_holds writes one line per gpu.lock hold: from "gpu.lock held" to
+    the run's status line (its last hold), to the queue's first line after gpu_unlock (an earlier hold: a heat stop's
+    cool-down is not GPU time), or, when a new queue process starts (a cut), to the cut queue's last line, a lower bound
+    named so in the source column. load() adds a run's holds and refuses the same hold twice or two holds that overlap.
+    With no resumed run the output is the old one: on the copy of the PC's queue files named in AMENDMENT CAP-FLAG, the
+    old and the new parse give the same 96 runs, and the 81 run lines of measured_hours.tsv are the first 81 the new code
+    writes. measured_hours.tsv is not regenerated here.
+  Not changed: queue_lib.sh, train.py, bpb.py, every config and plan. No line that computes a loss, a gradient, an
+    update, a data order or a score changed. Queues that already ran used the old code; nothing reruns. pc/wsl/boot.d/
+    40_screens.sh (another workflow's file) says "The cut is not written to the run's crashes.txt" and refuses to resume
+    over "an unscored bpb/*.json that is not empty and not JSON"; for a queue from a commit holding this entry, the first
+    is no longer so and the queue repairs the second itself (raised with that file's owner).
+
+ONSET RULE CODE (2026-10-10 17:17 EDT, Claude; Mac CPU, synthetic runs only; nothing committed. Written before any stage 2
+onset, HD or verdict is read: no stage 2, S006 or BASE-DIAG run's diag.jsonl, bpb.jsonl or log.jsonl was copied or read
+for it.) AMENDMENT BASE-DIAG: "No analyzer code reads it yet ...: that code and its tests land with the stage 2 verdict
+step, before any stage 2 onset is read." Landed here: analyze_lib.py (ONSET_SEEDS, onset_sigma, onset_reading,
+onset_descriptive) and analyze.py (onset_readings), whose result analyze.py verdicts writes as "onsets" beside the
+contrasts. No verdict reads it.
+  As the amendment: sigma_seed = the sample SD (n - 1) of BASE's onset_half over base_s101 to base_s105, df 4; d_s =
+    onset_half(arm, s) - onset_half(BASE, s) in steps at seeds 101 and 102; SD_ref = sqrt(2) x sigma_seed; thr = t(0.975,
+    4) x SD_ref / sqrt(k), 2.776 x sigma_seed at k 2; EARLIER if -dbar > thr and every d_s < 0, LATER mirrored, else
+    UNRESOLVED, no EQUAL; Holm over the onset contrasts the rule read (two-sided p of dbar / (SD_ref / sqrt(k)) on t(4),
+    family 0.05). Arms: S004 canonac at g 1 (its pick; any other pick reads "LR-confounded, not read", C6), S007 smear
+    at g 1, and S006 mtp from its g 1 IND-only runs (s006_mtp_g1_s101, s006_mtp_g1_s102), never its g 2 verdict runs;
+    each against base_s101 and base_s102. S005 is not read (its own BASE). Stage 1's onsets stay as read.
+  Decided here, before any reading, where the amendment is silent:
+    (a) A run is missing when analyze.py finds no final bpb (no directory, a GAP, or not scored), diverged when it holds
+      DIVERGED, and "diag incomplete" when its diag.jsonl is absent, holds a non-finite IND or has no reading at the last
+      step (7,630). Any of these in one of the five BASE runs, or an undefined BASE onset_half (final IND <= 0), leaves
+      every onset descriptive (the amendment's fallback). In an arm run, or for an undefined arm onset, only that
+      contrast is descriptive (C6: the paired mean and the seeds per sign, over the seeds that have both onsets), and
+      Holm reads the others.
+    (b) A resumed run's diag.jsonl can repeat a step: the last reading of a step is used (the one on the path the run
+      trained after its resume; DEVIATION 1 (3)).
+    (c) sigma_seed 0 (five equal onsets on the 153-step grid) gives thr 0, so one logged interval at both seeds in one
+      direction reads, as the amendment says for any sigma_seed under 55.1 steps; its p is 0 for any shift, 1 for none.
+  Also wired: analyze.py verdicts reads the three stage 1 results.json files (S001, S002, S003) as --earlier by default,
+    so if the stage 2 pooled SIA check fails, S002's three arms get C4's label "noise check failed later" without a flag
+    to remember; --no-stage1-earlier turns that off (to reproduce a first reading). STAGE 1 VERDICTS' sentence about what
+    analyze.py writes "without --earlier" held for the tool then; it now holds with --no-stage1-earlier.
+  S006's notes carry its FOLLOW-UP TRIGGER (2026-10-10), written with this entry: if Q2 reads EARLIER here, three arms are
+    pre-registered (an NTP-to-MTP curriculum, two aux heads, 20M) before any of them runs.
+
+TESTS FOR THE 2026-10-10 ENTRIES (2026-10-10 17:50 EDT, Claude; Mac CPU on scratch exports, synthetic runs and fixture
+logs; the PC for one CPU-only queue run on stubs and for read-only hashing; nothing committed). Covers AMENDMENT CAP-FLAG,
+DEVIATION 1, ONSET RULE CODE, S006's FOLLOW-UP TRIGGER and the registry lines (models/MODELS.md section 10).
+  New: tests/test_screens_onset_rule.py (13), tests/test_screens_holds.py (8; one needs SCREENS_PC_COPY, a directory
+    holding a copy of the PC's queue_screens.txt and status.jsonl), tests/test_queue_durable.py (12: qlib_screens.sh under
+    the Mac's bash 3.2 with a stub bpb.py, and score_sync.py's publish order recorded), tests/test_screens_saturday_text.py
+    (6; POSITION NOW's numbers need SCREENS_PC_COPY; every run of the nine plans that ran is registered),
+    tests/mutants_sat.py (52 mutants) and tests/qtest_pc/ (the PC run below). test_analyze.py adds the flag test.
+  Changed: the earlier entries' cap checks (test_analyze.py's cut order, test_screens_base_diag.py,
+    test_screens_s006_reinstate.py, test_screens_stage1_seeds.py, test_screens_s003_stage_c.py,
+    test_screens_stage2_launch.py, test_screens_stage2_seeds.py, test_screens_stage2_selection.py) pass the cap each
+    entry computed with (25 h or 27 h), and the two that asserted CAP == 25.0 assert 28.0; test_screens_stage1_corrections.py
+    runs its 2026-10-06 cases with --no-stage1-earlier and adds the default; test_screens_hours.py, one docstring.
+    mutation_screens.py: five anchors these changes moved (cut_order_swapped, hours_cap_ignores_measured,
+    hours_other_not_counted; fix_hours_loader_accepts_twice in mutants_fix.py, s2e_cut_order_starts_at_s007 in
+    mutants_s2seeds.py); each mutant tree also gets E2's queue_lib.sh and bpb_lines.py and models/registry.jsonl.
+  Runs (Mac, ~/.venvs/planck): experiments/screens/tests 651 passed (611 before) on an export of HEAD 4ad2be4 (no
+    change under these paths at c05d11c) with only these changes, SCREENS_PC_COPY set; models/tests 15 and 6 passed;
+    registry.py validate OK, 412 entries. mutation_screens.py on a frozen copy of that export: 381 of 383 killed and 2
+    INVALID (the two anchors above, then re-anchored: 2 of 2 killed); on the final files, the 3 mutants added after the
+    freeze and every mutant on screens_hours.py or read by test_screens_holds.py, test_screens_hours.py or
+    test_screens_saturday_text.py: 31 of 31 killed. The first run of the new mutants left holds_nul_tail_not_stripped
+    alive; the relaunch-after-NUL fixture was added and kills it. Two timing tests in files not changed here failed once
+    under load and passed alone 3 of 3: test_s006_waiter.py and test_chain_waiter_run.py, test_a_hold_gives_up_after_the_grace
+    (AMENDMENT BASE-DIAG saw the same).
+  PC, CPU only (2026-10-10 17:33:53 to 17:34:05; a scratch directory under ~/planck/dev, PLANCK_HOME a scratch directory,
+    a stub interpreter and nvidia-smi, no gpu.lock, nothing under ~/planck/runs): queue_screens.sh and qlib_screens.sh as
+    written here, under the PC's bash 5 and flock, through five queue starts and four kill -9 cuts of the queue and its
+    stub run: a cut then a clean resume (one crashes.txt line, scored), a cut then a crash (GAP), two cuts (GAP), and a
+    NUL-filled final score file scored again (moved aside; bpb.jsonl equal to bpb_lines.py's output). Its queue log and
+    status.jsonl are tests/qtest_pc/, which test_screens_holds.py parses. Also read only on the PC: the 96 runs' kept
+    files hashed for the registry, then re-hashed by registry.py verify --where pc --id 'SCREENS/*': 0 missing or
+    mismatched (129 files).
+
+AMENDMENT C6-DIAG (2026-10-10 17:15 to 17:35 EDT, Claude, workflow W1 prep B; the cuts audit's S4 and S5, rows 11 and
+13; Mac CPU on tiny models; the PC read for file names, plus three dry-run passes of the queue in a scratch directory on
+one copied seed-1 selection checkpoint; nothing committed, no mark, no queue started on a real run. Written before any
+stage 2 seed result, onset, HD or verdict is read, and before any HD, SINK, 200-window GATE, half-life, Canon weight or
+smear alpha exists for any screen or E3 run; E3_seed_noise/notes.txt PART 4d ADDENDUM, which gives final IND and HD
+their SDs, was written first, the same day. The dry run's values were never printed: its report reads keys, counts,
+times and finiteness only.)
+  WHY: C6 registers HD for every arm, SINK and S001's 200-window final GATE (mean, p10, p90), and the S004, S005 and
+    S007 notes register per-module readings (Canon weight per site, forget-gate half-life per head, smear alpha per
+    head). STAGE 1 VERDICTS left HD, SINK and the 200-window GATE NOT computed (a model load that step excluded), and no
+    tool existed for the per-module readings. This entry adds the tool, names its runs and fixes how the values are
+    read, before any of them exists. Everything it produces is report-only: no bpb verdict changes.
+  THE RUNNER: experiments/screens/diag_runner.py (registry, resume, budget, refusals, CLI) and diag_lib.py (pins and
+    readings). It opens nothing in a run directory but its one final_*.pt (never bpb.jsonl, bpb/, diag.jsonl or
+    log.jsonl: tested), refuses a run holding DIVERGED, GAP or rc12_eval.jsonl, a final checkpoint not at the registered
+    step (7,630 at 5M, 15,259 at 20M), and a checkpoint whose step, d_model or screen flags (canon, forget_gate,
+    smear_key, attn_gate, value_residual, qk_norm, norm_scaling) differ from what its name says, and writes one JSON per
+    (run, job) atomically (harness durable.py) into <run>/c6/<job>.json, with the checkpoint's sha256, the code files'
+    sha256, the eval set and tokenizer pins, the device and torch version, and no machine path (tested). Pins: IND file
+    0eafbca2... (screens_base.yaml), tok_v0_8k 078b24c4... and eval sets v0 fe1b55bb... (E3 FIXED); a different one is
+    refused. Jobs:
+      modules   CPU, from the state dict: S004 mean |w| per unique layer and site (A, C), per tap, and the max; S007
+                alpha per unique layer and KV head; S005 forget bias b and the norm of w per layer and head.
+      ind       final IND: induction.ind_score on the pinned IND file (C6 IND; the hook's own scorer).
+      hd        data_prep/bpb.py on oasst2 with --hd, otherwise E2 METRIC's invocation (fp32, batch tokens 16,384, every
+                window): own, foreign and no context on the same targets, per turn index and role and per role; turn
+                index 0 and windows with no prior-turn bytes left out and counted (C6 HD, "turn 1 is excluded").
+      attn      harness/attn_diag.py read on the 200 lowest-h oasst2 windows: SINK per effective layer and head over
+                query positions >= 64, GATE mean, p10 and p90 per layer and head on gate-on arms (BASE's is S001's
+                200-window final GATE), and the rebuilt-output check (a failed check fails the job, nothing written).
+      halflife  S005's arm: per effective layer and head over every real token of the same 200 windows: mean -log f,
+                the half-life ln 2 / mean(-log f) in tokens, and the 10th and 90th percentiles over tokens of the
+                per-token half-life ln 2 / (-log f_t) and of -log f itself (S005 DIAGNOSTICS' "its 10th and 90th
+                percentiles", read either way); f is the module's own forget_logf on the attention input the block
+                passed.
+    Groups, in queue order (49 checkpoints, 50 loads, 133 jobs; diag_runner.py list prints them):
+      e3p1      E3 Part 1's 18 (A_s, B_s for s 1..8; A1's replays R2, R3): ind, hd (PART 4d).
+      stage2    s005_base, s005_forget_g1, s004_canonac_g1, s007_smear_g1, s006_mtp_g2 at seeds 101, 102: ind, hd,
+                attn; modules on S004, S005's arm and S007; halflife on S005's arm.
+      basediag  base_s103, base_s104, base_s105: ind, hd, attn.
+      stage1    base_s101, base_s102, s001_nogate_g1, s002_novres_g1, s002_noqknorm_g1, s002_nonormscale_g1 and
+                s003_adamw_e3_r2 at seeds 101, 102: ind, hd, attn.
+      replay    e3_5m_A_s1 again, in a later runner process than its first scoring (the runner stops before it when
+                both would share a process): ind, hd, as *.replay.json (PART 4d's scorer replay).
+      e3p2      E3 Part 2's 6 (20M): ind, hd (PART 4d, descriptive).
+    Not scored: the seed-1 selection runs (C3: they select only) and S006's matched-LR runs s006_mtp_g1_s101 and _s102
+    (C6: IND-only runs; their onsets come from their diag.jsonl).
+  THE QUEUE: experiments/screens/diag_queue.sh on the PC, started detached. It clones a named bundle's main into
+    ~/planck/qcode/<commit12> (planck.bundle refused) and runs from the clone: first the CPU pass (the modules jobs, no
+    lock), then GPU holds. Each hold: ~/planck/STOP or ~/planck/c6diag/CANCEL ends the queue; PAUSE, under 40 GB free on
+    the runs disk or the GPU above 75 C waits; flock -w 7200 on ~/planck/locks/gpu.lock; with the lock, more than 3,000
+    MiB of GPU memory in use releases it and waits (each wait reason logged once per change); then diag_runner.py with a
+    soft budget of 1,500 s under a hard timeout of 1,980 s plus a 30 s kill, so no hold passes 33.5 min; the lock is
+    released after every call. A runner exit 3 (budget, or the replay waiting for its own process) takes the next hold;
+    exit 0 writes ~/planck/c6diag/DONE; a refusal or a failed job (exit 2 or 1), or a second hard timeout, stops it for
+    a person. A 2 h lock wait is logged and waited again, never an exit, so no watcher is needed for it (flock is not
+    FIFO: each hold competes like any other job). Done jobs are skipped, so the same command resumes after a kill or a
+    power cut; nothing restarts it by itself after a reboot (boot.d/40_screens.sh resumes SCREENS queues only). Log
+    ~/planck/logs/c6diag.log; one queue at a time (locks/c6diag.lock).
+  PLANNED GPU JOBS. Measured in the dry run below: one 5M checkpoint of S005's forget arm (the slowest 5M forward of
+    the batch: x2.257 of its BASE in training) held the lock 19 s for all five jobs (hd 15.7 s, attn 0.7 s, halflife
+    0.4 s, ind 0.3 s, the rest start-up, load and sha256). 20M is NOT measured: about 5x the 5M HD time is assumed
+    (about 3.4M to 17.4M non-embedding parameters).
+      group     checkpoints  jobs  est. per checkpoint      est. lock-held
+      e3p1      18           36    about 17 s               about 5 min
+      stage2    10           38    18 to 19 s               about 3 min
+      basediag   3            9    about 18 s               about 1 min
+      stage1    12           36    about 18 s               about 4 min
+      replay     1            2    about 17 s, own process  under 1 min
+      e3p2       6           12    about 85 s (assumed)     about 9 min (assumed)
+      total     50 loads    133                             about 22 min, 0.36 GPU h (0.22 h at the measured rate)
+    Expected holds: two. The runner's budget check uses floors (hd 60 s, attn 30 s, ind 5 s, halflife 15 s, load 5 s,
+    x4 at 20M) that the measured times only raise, so the first process stops at the replay (it must take a later
+    process) after about 13 min, and the second takes the replay and e3p2. Each hold is capped at 1,980 s + 30 s. The
+    cuts audit estimated 1 to 2 GPU h; the measured rate is lower.
+  READING RULE (amends C6 for final IND, HD_asst and HD_user only; read at the stage 2 verdict step beside each bpb
+  verdict, and for stage 1's contrasts once their values exist; it changes no verdict):
+    d_s = m(arm, s) - m(BASE, s) at each screen seed, from the runner's JSON for both arms (S005 against its own BASE;
+    S006 from its g 2 verdict runs; IND from c6/ind.json, the hook's last reading reported beside it); dbar over k = 2
+    seeds. SD_ref by the arm's C4 class from PART 4d's Part 1 numbers, in absolute units (nats, bpb): same init SD_d;
+    SIA u x SD_d, u = sqrt(df_ref / chi2(0.20, df_ref)) (1.3533 at df 7); new init sqrt(2) x sigma_seed; df_ref is
+    PART 4d's df (7 unless pairs were dropped); thr = t(0.975, df_ref) x SD_ref / sqrt(k).
+      HIGHER  dbar > thr and every d_s > 0          LOWER  -dbar > thr and every d_s < 0          else UNRESOLVED
+    No EQUAL: no delta is registered for a diagnostic (as the ONSET RULE). Beside each, C7's Holm reading over every
+    contrast of the batch that has the metric (at most 9: S001, S002's 3, S003, S004, S005, S006, S007), two-sided p of
+    dbar / (SD_ref / sqrt(k)) on t(df_ref). C4's noise checks run per metric with these SDs (same init; pooled SIA); a
+    failed check re-reads at the new-init SD with C4's labels. A metric PART 4d gives no SD stays descriptive (the
+    paired mean and the seeds per sign), as C6 had it. S005's flag ("BETTER on CHAT with lower HD", S005
+    DIAGNOSTICS): lower HD is LOWER on HD_asst by this rule. The analyzer code for it lands with the verdict step,
+    tested and mutated, before any of these values is read.
+  REPORTED, NO RULE: HD_none per role (beside HD), HD per turn index, the own, foreign and none bpb; SINK per layer and
+    head, and for S001 the per-seed paired difference (gate on minus off) per layer with the seeds in which it is
+    negative (S001 DIAGNOSTICS); GATE mean, p10 and p90 (S001 registers no threshold); the per-module readings.
+  NEAR ITS INIT (the trigger of the cuts audit's LATER row 8: a new pre-registration with a new-module LR multiplier
+  arm. Judgment thresholds fixed now, before any value; they decide only whether that pre-registration is written, never
+  a verdict):
+    S004  a site (A or C) whose mean |w| over every layer and tap is below 0.01 at both seeds (init 0; a tap of 0.01
+          adds 1% of a neighbouring token's normed input).
+    S007  every layer's |alpha| below 0.05 for every KV head at both seeds (init 0).
+    S005  every layer and head with a mean half-life above 1,023 tokens at both seeds (half the init's 2,046 tokens,
+          f = sigmoid(7.99)), so no head learned to forget within the 2,048-token windows.
+  CHECKS AT THE VERDICT STEP, before any value is read (a failure leaves that run's C6 readings unread, with the
+  reason): (1) c6/hd.json's oasst2 bpb equals the run's scored F(CHAT) (bpb/final_*.json, the same invocation) within
+  1e-5 relative; (2) every JSON's checkpoint_sha256 is the run's final checkpoint and its code_sha256 the launched
+  commit's files; (3) |c6/ind.json ind - the hook's step 7,630 reading| reported, no rule; (4) the scorer replay
+  (|replay - first| per metric for e3_5m_A_s1) reported beside PART 4d's sigma_rep.
+  CAP: these holds score finished runs; ORDER's cap counts runs and, in its conservative reading, other GPU hours. No
+    screen g-check or seed set remains, so no cap check is due. If one is later, these hours count as other hours, and
+    an overrun goes to Max as a flag (the cuts audit's S1), never a silent cut.
+  TESTS (Mac CPU, ~/.venvs/planck; tiny models at d_model 192, a fixture chat eval set, the real tokenizer and IND
+  file):
+    tests/test_diag_runner.py (19: the registry against the configs on disk and E3's FIXED pins; resume; the budget, one
+    pass equal to many; the replay's own process; 10 refusals; the pins; a failed job; the CPU pass; no result file
+    opened and no machine path written), test_diag_readings.py (6: each JSON equal to a direct call of bpb.score --hd,
+    attn_diag.read and induction.ind_score; the half-life against this test's own hook and a closed form with a constant
+    gate; the module readings against the parameters), test_diag_queue.py (16: the queue under bash 3.2 with stubs for
+    flock, nvidia-smi, sleep and the disk reading, the real timeout, one bundle launch, diag_start.sh, the wait log, and
+    one pass with the real runner), test_e3_part4d.py (5: experiments/E3_seed_noise/e3analyze_4d.py, PART 4d's
+    statistics, recomputed with the statistics module). 46 passed, and 347 with test_screens_configs.py and
+    test_screens_smoke.py on an export of the index plus these files. Mutants (tests/mutants_c6diag.py, on scratch
+    copies of mutation_screens.py's tree, to which it adds e3analyze_4d.py): 80 of 80 killed, 2026-10-10 17:19 to 17:32
+    EDT, each test file's unmutated copy passing first. By file: diag_runner.py 27 (the stop markers, the final
+    checkpoint's count and name, the step, d_model and flag checks, a missing run, resume, the budget both ways, the
+    replay's process, the exit precedence, the CPU pass, the pins, a result file opened, a machine path written, the
+    registry, the step record), diag_lib.py 17 (the half-life's mean, pads, -log f, percentiles and log base, the gate
+    check, the module readings, hd off or bf16, the window count, the attn check, the IND and eval set pins),
+    diag_queue.sh 24 and diag_start.sh 2 (every wait and stop, the hold limit, the lock release, the exits, the CPU
+    pass, the bundle, --only, the wait log), e3analyze_4d.py 10.
+  DRY RUN ON THE PC (17:11 to 17:21 EDT; a scratch directory in the WSL home, removed after; the last pass's logs kept
+    as ~/planck/logs/c6diag_dry.log and c6diag_dry_queue.log): one checkpoint, a byte copy (sha256 171c72101d0518ae
+    both) of s005_forget_g1_s1's final checkpoint (a seed-1 selection run, C3: never a verdict input; S005's arm runs
+    all five jobs), placed in a scratch runs root under the registered name s005_forget_g1_s101; eval sets v0 and
+    gpu.lock reached through links; --groups stage2 --only s005_forget_g1_s101. Three passes, each run twice:
+    (A) the code of 17:11 (before diag_start.sh and the -log f percentiles), --code mode: the CPU pass wrote
+        modules.json; the queue waited for gpu.lock 17:11:54 to 17:16:53 behind another workflow's job, held it 19 s
+        (818 MiB in use at the start), wrote ind, hd, attn, halflife, released it, DONE; the second invocation wrote
+        nothing (one 1 s hold).
+    (B) the code of 17:18 (the runner and readings as in this entry, but for a later docstring edit in diag_lib.py; the
+        queue's later change, a wait reason logged once per change, is Mac-tested only), through diag_start.sh in bundle
+        mode with a scratch kit: a git bundle of the same tree, cloned into the scratch home's qcode/<commit12> (never
+        ~/planck/qcode or planck-kit's bundles), run from the clone with --code; one 19 s hold, DONE; the second
+        invocation wrote nothing; the clone's list: 133 jobs.
+    (C) (B) again, then the verdict step's checks (1) and (3) against the SOURCE run's own scored files (its F(CHAT)
+        and IND curve were read for C3 in STAGE 2 SELECTION RESULT), printing differences only: hd.json's oasst2 bpb
+        minus its scored F(CHAT) 0 (bitwise equal); ind.json minus the hook's step 7,630 reading 0 (bitwise equal).
+    Read from the outputs by a script that prints no diagnostic value: every JSON parses, every number is finite, no
+    machine path; attn check_ok true, 8 layers, 200 windows, 53,826 SINK queries per layer, GATE p10 and p90 present;
+    halflife 8 layers, 64,529 tokens each; hd 3,627 oasst2 windows scored, 2,510 kept for HD (1,102 first-turn and 15
+    no-history windows left out, none without a foreign source; truncated own 3, foreign 4, none 1), 5 turn indexes,
+    both roles; step 7,630, torch 2.13.0+cu130, device cuda (modules cpu). After: no c6 directory under ~/planck/runs,
+    no ~/planck/c6diag, none of this step's files left in planck-kit.
+  INSTALL (after the commit, from the Mac; never send_kit.sh, which writes planck.bundle): git bundle create
+    <tmp>/planck_c6diag.bundle HEAD main, copied to planck-kit/ with scp and pc/local.env's host and key as send_kit.sh
+    does; the committed diag_queue.sh copied the same way to planck-kit/diag_queue.sh; then pcdetach.sh on the committed
+    experiments/screens/diag_start.sh (no arguments: every group, in queue order). diag_start.sh runs the kit's
+    diag_queue.sh in --bundle mode, which clones the bundle's main into ~/planck/qcode/<commit12> and runs that clone's
+    own diag_queue.sh with --code. ~/planck/logs/c6diag.log then says "waiting for gpu.lock" or "gpu.lock held". After a
+    reboot or a kill before ~/planck/c6diag/DONE exists: the same pcdetach.sh command (done jobs are skipped).
+
+AMENDMENT BASE-REPLAY (2026-10-10 18:04 EDT, Claude; the cuts audit's S7, row 29; Mac CPU, no model above unit-test
+size; the PC read only (marks, the SCREENS queue log's start, lock, train, done and mark lines, status.jsonl's time,
+run and outcome lines, which hold no score, processes, the GPU driver and torch); nothing committed, no mark, no queue
+started. Decided before any stage 2 seed result, onset, HD or verdict is read: no queue has run since stage2_base_diag
+ended 2026-10-07 03:03:58, and this step opened no bpb.jsonl, diag.jsonl, log.jsonl, results file or checkpoint of any
+stage 2 or BASE-DIAG run.)
+  WHY (research/CUTS_AUDIT_2026-10.md row 29, S-C32; REINSTATE SATURDAY S7): STAGE 1 VERDICTS' BASE LEVEL left the
+    causes of the +0.66% F(CHAT) gap against E3 arm A unseparated: the seed draw (AMENDMENT BASE-DIAG's seeds 103 to
+    105 test it), the eval.induction hook (on in every screen run, absent from E3) and what the start record does not
+    hold (a drift over time, the GPU driver). E3's A1 and its two replays fell in time order and could not separate
+    drift from noise (E3_seed_noise/AUDIT.md Q4). And S004, S006 and S007 pair with base_s101 and base_s102, which
+    held the lock on 2026-10-05 from 21:05:44 to 23:09:26 (stage1_seeds), while their arm runs held it from 2026-10-06
+    21:53:15 to 2026-10-07 02:03:54: C4 pairs by seed and code, not by time.
+  DECISION (Claude, under Max's delegation quoted in AMENDMENT BASE-DIAG, which left these runs for a run-name rule;
+    the cuts audit's S7): three shared BASE runs at seed 101, after BASE-DIAG, in this order: base_s101_rep1 (a
+    replay: base_s101's config under its own name and out_dir), base_s101_hookoff (the same plus eval.induction null:
+    train.py installs no hook and writes no diag.jsonl) and base_s101_rep2 (a second replay). The hook-off run sits
+    between the replays, so a drift linear in time over the three runs cancels from H below, and the replays give a
+    same-day replay difference. Report-only: no C7 verdict, C4 noise check, Holm reading or onset sigma_seed reads
+    these runs, and no arm pairs with them.
+  RUN-NAME RULE (code): screens_lib.NAME_RE takes an optional _rep<1-9> or _hookoff after a seed; check() refuses such
+    a name unless it is in screens_lib.BASE_REPLAYS (these three, nothing else), is a shared BASE run (no screen id)
+    and its suffix matches its registered kind. A replay must differ from base_s<seed> only in name and out_dir (the
+    C6 hook check unchanged); the hook-off run only in name, out_dir and eval.induction, which must be null with no
+    hook key left. eval.induction off stays refused under every other name. screens_hours.slot gives these runs no
+    registered slot (they count on top, as extensions do). screens.py replay NAME writes them.
+  SAME CODE: git diff 93bc10b..HEAD (c05d11c at 17:50) is empty under harness/, data_prep/, tokenizer/ and corpus/,
+    and under experiments/E2_lr_transfer it touches only notes.txt (an E2 labels entry, which no run reads); 93bc10b
+    equals d21df3d (stage2_seeds), 3227c60 (stage2_s006_seeds) and 27d8cb7 (stage2_base_diag's queue commit) there;
+    the working tree's one difference is an untracked file under corpus/stats (another session's, in no commit, so in
+    no queue clone). screens_base.yaml, base_s101.yaml, configs/prereg.yaml, ind_v0_8k.json, queue_screens.sh,
+    qlib_screens.sh and launch_screens.sh are unchanged since 93bc10b too (at HEAD; another step changes
+    queue_screens.sh and qlib_screens.sh today for SCREENS DEVIATION 1, durable scoring, uncommitted at this check: if
+    it lands first, the replays are scored with the same data_prep/bpb.py invocation as queue_lib.sh's score_run, with
+    fsynced writes). So the replays run base_s101's code path and the stage 2 pairs' (C4). Guard:
+    tests/test_screens_replay_code.py pins the 253 tracked files under harness/, data_prep/, tokenizer/ and corpus/
+    plus the 5 E2 files a SCREENS run reads (configs/base5m.yaml and engine.yaml, preflight.py, queue_lib.sh,
+    bpb_lines.py) by their git blob ids at 93bc10b (digest d627284410e7ecb0...) and fails while plans/CURRENT names
+    stage2_replay if any differs, so the commit this plan launches from cannot carry a change there (the E3 Part 3
+    data_seed patch lands after the launch, or this entry is re-registered). The PC at 16:53: GPU driver 596.49 (the
+    driver S001's results.json recorded on 2026-10-06), torch 2.13.0+cu130.
+  READINGS, fixed now (report-only; per reading r of F(CHAT), F(PROSE) and the PROSE sources cccc, gutenberg and
+    wikimedia, from each run's bpb.jsonl final checkpoint as C5 reads it): SD_rep(r) = E3's replay SD (E3 results.json
+    replay[r].sigma_rep_rel, df 2; F(CHAT) 0.151%, F(PROSE) 0.037%) pooled with this plan's same-day pair (|rep1 -
+    rep2| / sqrt(2) over their mean, df 1): sqrt((2 x E3^2 + pair^2) / 3) times base_s101's value, df 3. DRIFT D(r) =
+    mean(rep1, rep2) - base_s101, t = D / (SD_rep x sqrt(3/2)): "beyond replay noise" if |t| > t(0.975, 3) = 3.182
+    (two-sided p < 0.05), else "not separated from replay noise". HOOK H(r) = hookoff - mean(rep1, rep2), the same t
+    and bar. The smallest D or H that reads beyond replay noise on F(CHAT) is 0.00555 bpb (0.48% of base_s101's
+    1.15250), when the same-day pair agrees exactly; a pair that differs widens it.
+  LABEL ON THE STAGE 2 PAIRS (fixed now, report-only; every registered verdict and onset reading stands): S004
+    canonac, S007 smear and S006 mtp (its g 2 verdict runs) pair with the shared BASE runs of stage 1. Each such C7
+    verdict is read again with every d_s of every reading C7 uses (F(CHAT), F(PROSE) and CCCC-ONLY's three PROSE
+    sources) moved by -D(r), the seed 101 shift applied at both seeds (BASE at the replays' level), with the SD_ref,
+    thr and delta of its registered reading: the same verdict labels it "BASE replay: stable"; another verdict V
+    labels it "BASE replay: sensitive (V at the replay level)". Beside them, one line each for F(CHAT) and F(PROSE):
+    D, t and whether it is beyond replay noise. Onsets (AMENDMENT BASE-DIAG's ONSET RULE: S004's and S007's seed runs,
+    S006's g 1 IND-only runs): D_onset = mean(onset_half(rep1), onset_half(rep2)) - onset_half(base_s101) in steps
+    (analyze_lib.onsets); each onset reading is read again with BASE's onset_half at both seeds moved by D_onset
+    (sigma_seed unchanged, from base_s101 to base_s105): "BASE replay: stable" or "sensitive (R at the replay level)";
+    "not available" if either replay's onset_half is undefined. S005 (its own BASE ran in the same seed set) and every
+    stage 1 contrast (arms and BASE in one seed set): "not applicable". The hook-off run puts no label on any pair:
+    every arm and BASE run carries the hook, so an effect common to both sides cancels in d. A replay that diverges or
+    is unscored makes D and the labels "not available"; a hook-off run that does, H.
+  BASE LEVEL (reported, no rule): H and D for F(CHAT) and F(PROSE) in bpb and as % of base_s101's value, beside
+    BASE-DIAG's seed-draw reading and the stage 1 gap (+0.00755 CHAT, +0.00594 PROSE); the same-day difference rep1 -
+    rep2; the start records' torch, CUDA, python, numpy and platform against base_s101's (the driver is not in them).
+    Wording: "the hook moves BASE by more than replay noise" only if H is beyond it, "a shift between days beyond
+    replay noise" only if D is; otherwise "not separated from replay noise", never "no effect".
+  CAP CHECK AT 28 H (the batch's cap since AMENDMENT BASE-DIAG; these are BASE runs, which ORDER's cut order never
+    takes, so they count only against the cap; the total fits, so AMENDMENT CAP-FLAG's flag reading, if it is
+    committed first, reads the same): (a) rule input: measured_hours.tsv as committed (81 runs) with the 15 runs since
+    at their estimates. Measured 17.587 h of runs + 2.120 h other = 19.707 h; queued 10 of 90 registered runs 4.923 h
+    + S006's 2 IND runs 0.735 h + BASE-DIAG's 3 runs 0.937 h + these 3 runs 0.937 h = 7.533 h (unrounded); total
+    27.240 h <= 28 h: nothing cut, 0.760 h of headroom (runs only, reported: 25.120 h). (b) reported: those 15 runs
+    held the lock 6.280 h against their 6.596 h estimate ("gpu.lock held" to the status line; queue_screens.txt sha256
+    93d1847aec949d30..., status.jsonl c8ced214b15e48d4...), so with them measured the total is 26.924 h, 1.076 h of
+    headroom. measured_hours.tsv is not regenerated here.
+  BASE RUNS ADDED BY AMENDMENT BASE-REPLAY: base_s101_rep1, base_s101_hookoff, base_s101_rep2 (3 runs, 0.937 h).
+  CONFIGS: experiments/screens/configs/base_s101_rep1.yaml, base_s101_hookoff.yaml and base_s101_rep2.yaml, written by
+    screens.py replay; screens.py check: 3 ok, 99 ok over every config. sha256, first 16 hex: 9c6a2b46be51a412
+    base_s101_rep1, d5ae7d2f1e61fab1 base_s101_hookoff, 2b25189927f28969 base_s101_rep2.
+  PLAN experiments/screens/plans/stage2_replay.txt (sha256 86bcb6ca35296c2d...; written by screens.plan), its 6 lines:
+      # SCREENS AMENDMENT BASE-REPLAY (SCREENS.txt): base_s101 replayed twice with its hook-off run between them,
+        after BASE-DIAG (screens.py). train = screens check, preflight, train, score [one line in the file]
+      wait_mark SCREENS SCREENS BASE DIAG DONE
+      train base_s101_rep1
+      train base_s101_hookoff
+      train base_s101_rep2
+      mark SCREENS BASE REPLAY DONE
+    The wait line is stage2_base_diag's end mark (on the PC since 2026-10-07 03:03:58), so the plan starts when
+    launched; it ends at its own mark with nothing after it. Estimate 0.937 h.
+  plans/CURRENT = stage2_replay (edited here; a comment names the plan's two marks, the same-code guard and its own
+    bundle).
+  LAUNCH (the launch step's, not done here): a bundle of the commit holding this entry under its own name (git bundle
+    create <tmp>/planck_replay.bundle HEAD main, copied as send_kit.sh does; never send_kit.sh, which writes
+    planck.bundle), then chain_waiter.sh with the arguments replay stage2_base_diag
+    27d8cb7505248ff4391a1dee9a51bad617938195 "SCREENS BASE DIAG DONE" stage2_replay planck_replay.bundle
+    (stage2_base_diag at 27d8cb7 is the queue log's last start line, with its clean end, so it launches at its first
+    poll unless another SCREENS queue starts first). chain_waiter.sh does not relaunch the queue it starts: a watcher
+    that relaunches stage2_replay after a 2 h gpu.lock wait is the launch step's. Three short runs (about 0.31 h
+    each).
+  Tests (Mac CPU, ~/.venvs/planck; on HEAD c05d11c's tree plus only this step's files, since other steps edit
+    experiments/screens today; the whole mutation file ran on 4ad2be4's, which differs from it only in files no
+    mutant's scratch copy holds): experiments/screens/tests 665 passed, 1 skipped (611 before; the skip is
+    test_screens_replay_code.py's git check, which needs a checkout and passes in the working tree). New:
+    test_screens_replay.py (the name rule and registry; a replay taking no BASE slot; 14 check refusals; the registry
+    alone not opening the rule; the configs and plan as the generators write them; the plan and CURRENT; the
+    acceptance refusing 16 bad states; the hook-off run training bitwise like its replay on a tiny CPU model, with no
+    diag.jsonl), test_screens_replay_entry.py (this entry's record, labels, cap check, constants, counts and every
+    number and hash), test_screens_replay_code.py (the same-code guard; the pinned digest against git ls-tree at
+    93bc10b; the digest seeing every change), tests/replay_lib.py (the acceptance), tests/replay_record.py (what was
+    read on the PC). Changed, each accepting the BASE-REPLAY state only through replay_configs():
+    test_screens_configs.py (also the arm-diff test reads a replay's registered difference), test_screens_smoke.py
+    (the hook-off run: no diag.jsonl, no induction record), test_screens_base_diag.py, test_screens_s006_reinstate.py,
+    test_screens_stage1_seeds.py, test_screens_stage2_seeds.py, test_screens_stage2_selection.py,
+    test_chain_waiter_run.py. Each changed test watched failing: HEAD's versions of these 8 files fail on this state
+    (15 tests), and this step's versions pass on the state before its configs, plan, CURRENT and entry (387 passed);
+    the new files fail on HEAD (no BASE_REPLAYS). mutation_screens.py, scratch copies: 42 new mutants
+    (tests/mutants_replay.py), 42 of 42 killed; the whole file 376 of 376 killed (6 anchors moved to the new CURRENT).
+    The guard's own mutants, by hand on full copies of that tree (a byte in harness/, data_prep/, corpus/,
+    tok_v0_8k.json, queue_lib.sh or engine.yaml; a file added or removed; the digest; the count; each path list; the
+    blob header; caches counted): 14 of 14 killed, and the git check's digest, count and blob mutants killed in the
+    working tree; an E2 notes.txt edit and CURRENT moved off stage2_replay pass, as intended.
+  STILL NEEDS A DECISION: (1) the commit (with this entry moved into SCREENS.txt; harness/, data_prep/, tokenizer/ and
+    corpus/ equal to 93bc10b's), the bundle and the launch. (2) After SCREENS_BASE_REPLAY_DONE: the readings and
+    labels above, their code and tests (watched failing) landed before any value of the three runs is read; the
+    measured hours regenerated.
+
+INTEGRATION 2026-10-10 (18:25 EDT, Claude, W1's integration step; Mac CPU, no model; the PC not read; nothing committed,
+no mark, no queue started. Before any stage 2 seed result, onset, HD or verdict is read.)
+  MOVED: AMENDMENT C6-DIAG and AMENDMENT BASE-REPLAY above were written in experiments/screens/pending/instruments.txt
+    (last written 17:33) and pending/replay.txt (18:04) and are here byte for byte: each entry's lines hash as its file
+    did (sha256 3d91e9bffb033e01 and 8deb8466a81f8b12). The pending files are deleted; tests/replay_lib.py reads the
+    BASE-REPLAY entry from this file only, and mutation_screens.py now runs tests/mutants_c6diag.py's mutants too.
+  TWO PC QUEUES FROM ONE COMMIT, NEITHER READING THE OTHER'S OUTPUT: the C6 diagnostics queue (diag_queue.sh, started
+    by diag_start.sh from planck-kit/planck_c6diag.bundle; it scores finished checkpoints only, never base_s101_rep1,
+    base_s101_hookoff or base_s101_rep2) and the SCREENS queue on plans/stage2_replay (plans/CURRENT), started by
+    replay_waiter.sh from planck-kit/planck_replay.bundle. Both bundles hold the commit with this entry, so both use
+    one clone, qcode/<commit12> (each script checks out an existing clone at that commit rather than cloning again).
+  GPU ORDER: the C6 queue starts first (about 22 min of holds, each at most 1,980 s + 30 s), and replay_waiter.sh once
+    the C6 log shows its first gpu.lock line (3 runs, one gpu.lock hold each, about 0.31 h). After that each queue
+    takes gpu.lock as it frees, one hold at a time between other workflows' jobs; flock is not FIFO, so the order of
+    their later holds is not fixed. Neither waits for the other: no reading of either depends on the order.
+  RELAUNCH: replay_waiter.sh (new; the one file pcdetach.sh starts for the replay) runs chain_waiter.sh with
+    BASE-REPLAY's LAUNCH arguments (chain_waiter.sh's sha256 pinned), then relaunches stage2_replay's queue from the
+    same clone and plan after a 2 h gpu.lock wait, at most 24 times; any other end stops it for a person. The C6 queue
+    needs none: it waits again after a 2 h lock wait. After a reboot, boot.d/40_screens.sh resumes a cut replay run;
+    the C6 queue and replay_waiter.sh are started again by the same pcdetach.sh commands (done jobs and runs skipped).
+  CAP AT THIS LAUNCH (AMENDMENT CAP-FLAG's reading, hours only): POSITION NOW's 25.987 h (96 runs and OTHER measured,
+    0 queued) + BASE-REPLAY's 3 runs, 0.937 h, + the C6 queue's estimate, 0.36 h, counted whole as OTHER (its E3
+    checkpoints too, which CAP-FLAG does not count: the conservative side) = 27.284 h <= 28 h: nothing to flag, 0.716 h
+    of headroom. On BASE-REPLAY's rule input (a) the same addition gives 27.600 h, 0.400 h of headroom. If the measured
+    holds pass these estimates by more than that, the next cap check flags it to Max (AMENDMENT CAP-FLAG).
+  E3 PART 3: its data_seed patch (harness/, data_prep/) lands only after both queues have cloned this commit; while
+    plans/CURRENT names stage2_replay, tests/test_screens_replay_code.py fails on it by design.
+  TESTS (Mac CPU, ~/.venvs/planck, on a git checkout of HEAD 2eed1dd (no change under W1's paths or the guarded code
+    since c05d11c) plus only W1's changes, SCREENS_PC_COPY set): experiments/screens/tests 774 passed (752 with the
+    three steps' files before this step's own; 611 at c05d11c) and models/tests 21 passed. New:
+    tests/test_replay_waiter.py (15: the arguments against the entry, the plans and the PC record, the sha256 pin, and
+    the whole file run on a fixture tree whose stub queue writes a clean end, a 2 h lock wait, a scoring failure or a
+    kill) and tests/test_screens_integration.py (7: the moved entries' hashes and order; C6-DIAG's table, limits, pins,
+    floors, steps and counts against the code; this entry's cap, names and counts). tests/replay_lib.py reads
+    SCREENS.txt only; its pending-file mutant became a renamed-header one. The grace tests of test_chain_waiter_run.py
+    and test_s006_waiter.py now want at least 1 s, not 2 s: GRACE counts whole seconds (date +%s), and a 2 s grace
+    ended 1.33 s after its HOLD in this step's first suite run. mutation_screens.py on a frozen copy of that checkout:
+    541 of 541 killed, with tests/mutants_c6diag.py's 80 and tests/mutants_integ.py's 33 now in it. New:
+    tests/mutants_integ.py (33 mutants: replay_waiter.sh 14, the older waiters' grace 2, this entry 8, C6-DIAG's
+    numbers 9).
+
+CORRECTIONS AFTER THE W1 VERIFY (2026-10-10 19:51 EDT, Claude, W1's commit step; Mac CPU, synthetic runs and tiny
+models; the PC not read for this entry; nothing committed when written. Before any stage 2 seed result, onset, HD or
+verdict is read: no stage 2, S006, BASE-DIAG or replay run's diag.jsonl, bpb.jsonl or log.jsonl was opened for it, and
+no C6 diagnostics queue has run.) W1's verify step (read only; no repo edit) found six defects in the integrated tree,
+none in a number a run reads. Each is fixed or recorded here, before the step it could affect.
+  F1 (medium). ONSET RULE CODE (a) did not say how a run reads when its diag.jsonl holds the line harness/induction.py
+    writes when a reading raises ({"step", "error"}, no ind). analyze.py's ind_curve raised KeyError on it (TypeError
+    on "ind": null) out of analyze.py verdicts, so one such line in any of the 11 runs the ONSET RULE reads would have
+    stopped the whole verdict step, bpb verdicts included. And only the last step was required, so a missing middle
+    reading moved onset_half silently.
+  CORRECTION 1 TO ONSET RULE CODE (a), decided here before any reading: a run is "diag incomplete" when its diag.jsonl
+    is absent or, with NUL bytes dropped (a power cut's tail; the hook's JSON never holds one): (i) a non-empty line is
+    not a JSON object with an integer step; (ii) a step is off the hook's grid (every 153 steps below 7,630, and 7,630:
+    50 steps; screens_base.yaml eval.induction.every); (iii) a grid step has no reading; or (iv) a step's last reading
+    (rule (b)) is an error line or has no finite number as its ind (null, NaN, an infinity, absent or not a number).
+    What follows is (a)'s: in one of the five BASE runs every onset is descriptive; in an arm run, only that contrast.
+    An error line that a resumed run's later reading of the same step supersedes is no problem (rule (b)). analyze.py
+    verdicts now writes "diag_problems" beside the onsets: each run read that is diag incomplete, with its reasons. On
+    stage 1's recorded curves (S001 results.json; base_s101 and base_s102 are the only runs this rule reads that were
+    read before), both pass, with their recorded onset_half.
+  F2 (low-medium). (a)'s non-finite check was in the code but untested: a NaN at the onset step would otherwise move
+    onset_half one grid step later, and a NaN or null final reading would read "final IND <= 0". Now tested, both.
+  F3 (low). C6-DIAG's budget floors "x4 at 20M" were untested (diag_runner.py's scale at 1.0 passed the suite). Now
+    tested on a frozen clock: an E3 run needs its floors, load 5 s + ind 5 s + hd 60 s, so a 20M one 280 s; a 279 s
+    budget stops before it after a 5M run, and a 281 s budget scores it.
+  F4 (low). C6-DIAG's "(0.22 h at the measured rate)" does not reproduce from its own dry run's times (hd 15.7 s, attn
+    0.7 s, halflife 0.4 s, ind 0.3 s, and 1.9 s of start-up, load and sha256 in a 19 s hold). At that 5M rate, per
+    checkpoint, ind and hd 17.9 s, with attn 18.6 s, with halflife 19.0 s; so e3p1 322.2 s, stage2 186.8 s, basediag
+    55.8 s, stage1 223.2 s, replay 17.9 s, e3p2 107.4 s: 913.3 s, about 0.25 h (818.3 s, 0.23 h, without the start-up).
+    With e3p2 at 5x HD (80.7 s a checkpoint) the total is 1,290.1 s, 0.36 h, about 22 min: the figures C6-DIAG's table
+    and every cap check since use, so no cap number changes. The entry is not edited (INTEGRATION moved it byte for
+    byte and tests pin its hash); this line is the correction of record.
+  F5 (low, dating). INTEGRATION 2026-10-10's TESTS paragraph ("774 passed", "541 of 541 killed") was written at 19:04
+    (SCREENS.txt's modification time), before the runs it reports: the suite ran about 19:05 to 19:09 (235.65 s, 774
+    passed) and the three mutation shards 19:09:14 to 19:25:30 (100 + 221 + 220 = 541 killed). Both held when seen,
+    and the verify's own rerun gave 774 passed, but they were written before they were seen. This entry's TESTS
+    paragraph was written after its runs.
+  F6 (low, wording). C6-DIAG's header says it was written before any HD, SINK, 200-window GATE or half-life "exists for
+    any screen". Its own dry run (17:11 to 17:21) computed hd, attn, halflife and ind on a byte copy of
+    s005_forget_g1_s1's final checkpoint (a seed-1 selection run, never a verdict input), never printed them and
+    deleted them, as its DRY RUN paragraph says. Read the header as "before any of them was read for any run".
+  NOT DONE HERE: E3 Part 2's six 20M finals (e3_20m_A and _B at seeds 1 to 3, which the C6 queue scores) have no
+    models/registry.jsonl lines, a gap from before today that falls to W1 as the registry's owner.
+  TESTS (Mac CPU, ~/.venvs/planck). New: tests/test_screens_onset_diag.py (26: an error line at the onset step, the
+    last step and a BASE run, with the whole verdicts command run and its bpb contrasts unmoved; null, NaN, the
+    infinities, an absent, string or boolean ind; a NaN or null final reading; a missing middle step, a step off the
+    grid; six kinds of line that are not a reading; NUL bytes and a superseded error line; no file; stage 1's recorded
+    BASE curves) and tests/test_screens_verify_fixes.py (6: F3's two budgets, F4's arithmetic against the runner's
+    registry, this entry's place, numbers and counts, and its results sentence against the suite's collected count).
+    tests/mutants_vfix.py (24 mutants: analyze.py 16, diag_runner.py 2, SCREENS.txt 5, mutation_screens.py 1), run by
+    mutation_screens.py. test_screens_integration.py now counts INTEGRATION's 541 mutants as the list without this
+    entry's.
+  RUNS (written after them, 20:10 EDT; a git checkout of HEAD 06bc24c, which changes nothing under W1's paths or the
+    guarded code, plus W1's 69 paths, SCREENS_PC_COPY set; before this sentence existed): experiments/screens/tests
+    805 passed and 1 failed, the failure being test_the_entry_results_sentence_matches_the_suite_and_the_mutant_list,
+    which wants this sentence. mutation_screens.py on a frozen copy, 19:56 to 20:09: 563 killed and 2 INVALID,
+    tests/mutants_sat.py's onset_partial_curve_accepted and onset_first_reading_kept, whose anchors were the replaced
+    ind_curve lines; re-anchored to the new code (the missing-grid-step check; the last reading of a step) and run on
+    a fresh tree: 2 of 2 killed, so mutation_screens.py 565 of 565 killed, mutants_vfix.py's 24 among them.

@@ -116,7 +116,8 @@ def test_a_measured_run_counts_once():
 
 
 def test_the_loader_refuses_a_run_listed_twice(tmp_path):
-    """A run measured twice in the file (a resumed run's two holds, say) is refused, never summed or overwritten."""
+    """The same hold of a run listed twice is refused, never summed or overwritten. (Since SCREENS DEVIATION 1 a run
+    resumed in a later gpu.lock hold has one line per hold, and those add up: test_screens_holds.py.)"""
     line = next(ln for ln in open(H.TSV) if ln.startswith("run\ts002_novres_g1_s101\t"))
     tsv = tmp_path / "twice.tsv"
     tsv.write_text(open(H.TSV).read() + line)
@@ -172,7 +173,7 @@ def test_stage_2_cap_check_after_the_stage_1_seed_sets(capsys, tmp_path):
     (S006 EXTENSION RESULT) taken out."""
     tsv0 = tmp_path / "launch.tsv"
     tsv0.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] in SEL2 | EXTS)))
-    r = H.report(P, str(tsv0))
+    r = H.report(P, str(tsv0), cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 28 h since AMENDMENT CAP-FLAG)
     out = capsys.readouterr().out
     assert r["cap"]["total_before"] == pytest.approx(stage2_by_hand(True), abs=2e-4) and r["cap"]["cut"] == []
     assert r["narrow"]["total_before"] == pytest.approx(stage2_by_hand(False), abs=2e-4)
@@ -181,5 +182,5 @@ def test_stage_2_cap_check_after_the_stage_1_seed_sets(capsys, tmp_path):
         tsv = tmp_path / f"{ext}.tsv"
         tsv.write_text(tsv0.read_text() + f"run\t{ext}\t{sec / 3600:.5f}\t2026-10-06 10:00:00\t2026-10-06 10:"
                        f"{sec // 60:02d}:{sec % 60:02d}\tfixture\n")
-        r = H.report(P, str(tsv))
+        r = H.report(P, str(tsv), cap=25.0)
         assert r["cap"]["cut"] == cut and r["cap"]["fits"] and ext in r["tally"]["extra"], ext

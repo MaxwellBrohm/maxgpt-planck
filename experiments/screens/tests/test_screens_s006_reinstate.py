@@ -13,6 +13,7 @@ sys.path[:0] = [os.path.dirname(HERE), HERE]
 import analyze_lib as AL, mutation_screens as M, screens_hours as H, screens_lib as L  # noqa: E401,E402
 from reinstate_lib import END, REINSTATED_PLANS, recorded_reinstated, s006_seed_configs  # noqa: E402
 from basediag_lib import DIAG_PLANS, base_diag_configs  # noqa: E402  (AMENDMENT BASE-DIAG, later)
+from replay_lib import REPLAY_PLANS, replay_configs  # noqa: E402  (AMENDMENT BASE-REPLAY, later)
 from test_screens_configs import P, STAGE2_SEEDS, recorded_cuts  # noqa: E402
 from test_screens_refusals import scratch  # noqa: E402,F401  (the scratch config tree fixture)
 from test_screens_s003_stage_c import section  # noqa: E402
@@ -35,11 +36,11 @@ TIMES = {"entry": "21:45", "read": "21:23", "start": "20:38:01", "held": "20:38:
 @pytest.fixture(scope="module")
 def V():
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(P)
+        r = H.report(P, cap=27.0)        # this entry's cap (28 h since AMENDMENT BASE-DIAG)
     q, mr, mo = r["tally"]["queued"], r["measured_runs"], r["other"]
     p6 = H.run_h(L.STEPS, H.mult("S006", "mtp"))
     q2 = {**q, "S006": q["S006"] + 2 * p6}
-    c27, c25 = AL.cap_cut(q2, mr + mo, cap=27.0), AL.cap_cut(q2, mr + mo)
+    c27, c25 = AL.cap_cut(q2, mr + mo, cap=27.0), AL.cap_cut(q2, mr + mo, cap=25.0)
     narrow = AL.cap_cut(q2, mr, cap=27.0)
     s8, room = sum(q.values()) - q["S006"], 27.0 - c27["total_after"]
     own = H.run_h(L.STEPS, H.mult("S005", "base"))
@@ -66,7 +67,7 @@ def test_max_verbatim_and_the_decision():
 def test_cap_check_at_27_h(V):
     v, c27, c25 = V["fmt"], V["c27"], V["c25"]
     assert c27["cut"] == [] and c27["fits"] and c25["cut"] == ["S006"] and V["r"]["cap"]["cut"] == []
-    assert AL.CAP == 25.0 and c27["total_before"] > 25.0 and V["narrow"]["total_before"] < 25.0  # the cut hinged on OTHER
+    assert AL.CAP == 28.0 and c27["total_before"] > 25.0 and V["narrow"]["total_before"] < 25.0  # the cut hinged on OTHER
     assert f"Measured {v['mr']} h of runs + {v['mo']} h other = {v['m']} h; queued 10 of 90 registered runs {v['qs']} h " \
            f"(stage2_seeds' 8 runs {v['s8']} h, S006's 2 seed runs {v['q6']} h) + S006's 2 IND runs {v['ind']} h = " \
            f"{v['q2']} h; total {v['tot']} h <= 27 h: nothing cut, {v['room']} h of headroom (runs only, reported: " \
@@ -112,7 +113,7 @@ def test_configs_differ_only_in_registered_keys(V, capsys):
         assert [f[k] for k in L.LRK] == [float(g) * P["lr5"][0]] * 3 and L.check(L.find(r)[0], P) == []
         assert L.diff(f, L.flat(L.resolve(L.find(f"s006_mtp_g{g}_s1")[0]))) == {"name", "out_dir", "seed"}
     assert screens.main(["check", *RUNS]) == 0 and capsys.readouterr().out.count("ok      ") == 4
-    n = 93 + len(base_diag_configs())          # later: AMENDMENT BASE-DIAG's 3 BASE configs, else none
+    n = 93 + len(base_diag_configs()) + len(replay_configs())   # later: BASE-DIAG's 3 and BASE-REPLAY's 3, else none
     assert screens.main(["check"]) == 0 and capsys.readouterr().out.count("ok      ") == n == len(L.all_configs())
     assert "screens.py check: 4 ok, 93 ok over every config" in FLAT
     assert f"the three LRs, 2 x LR5 = {V['fmt']['lr']} each" in FLAT
@@ -127,6 +128,7 @@ def test_plan_current_and_acceptance(V):
     assert all("\n      " + ln + "\n" in SEC for ln in lines[1:]) and f"Estimate {V['fmt']['four']} h." in FLAT
     cur = [ln.strip() for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
     later = DIAG_PLANS if base_diag_configs() else []       # AMENDMENT BASE-DIAG moved CURRENT on, later
+    later = (REPLAY_PLANS if replay_configs() else []) or later      # and AMENDMENT BASE-REPLAY after it
     assert cur == (later or REINSTATED_PLANS) and REINSTATED_PLANS == ["stage2_s006_seeds"]
     assert s006_seed_configs() == set(RUNS)
     assert "plans/CURRENT = stage2_s006_seeds (edited here" in FLAT

@@ -16,5 +16,10 @@
 # SCREENS_STAGE_2_S006_SEEDS_DONE and stops at SCREENS_BASE_DIAG_DONE. It runs from its own bundle,
 # planck-kit/planck_diag.bundle, started by experiments/screens/base_diag_waiter.sh (chain_waiter.sh) after
 # stage2_s006_seeds ends cleanly.
+# stage2_replay (base_s101 replayed twice with its hook-off run between them: AMENDMENT BASE-REPLAY in SCREENS.txt)
+# waits for SCREENS_BASE_DIAG_DONE and stops at SCREENS_BASE_REPLAY_DONE. Launch it only from a commit whose harness/,
+# data_prep/, tokenizer/ and corpus/ equal 93bc10b's (tests/test_screens_replay_code.py), from its own bundle,
+# planck-kit/planck_replay.bundle, started by experiments/screens/replay_waiter.sh (chain_waiter.sh, then a relaunch
+# after a 2 h gpu.lock wait: SCREENS.txt INTEGRATION 2026-10-10).
 # Seed plans come from screens.py seeds.
-stage2_base_diag
+stage2_replay

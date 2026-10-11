@@ -4,6 +4,7 @@
                                           g 0.5 / 1 / 2), S003 stage A; plans stage1_select, stage2_select
   python screens.py config SID.ARM --g G [--seed S]   one arm config (a C3 extension: g 0.25 / 4 / ...)
   python screens.py s003-arm --eta E --r R            S003 search point: trunk + 3 branches (stages B, C)
+  python screens.py replay NAME ...                   a registered BASE replay or hook-off run (BASE_REPLAYS)
   python screens.py seeds --stage N --pick SID.ARM=G ... [--s003 ETA,R] [--cut SID ...] [--wait "EXP TEXT"]
                                           the seed sets after the picks, plans/stage<N>_seeds.txt (ORDER); a
                                           screen ORDER's cap rule cut (--cut, recorded in SCREENS.txt) gets none
@@ -57,6 +58,18 @@ def arm(sid: str, a: str, g: float, seed: int, p: dict, note: str = "") -> str:
     keys = {**L.lrs(*p["lr5"], g), **L.engine(sid), **L.SCREENS[sid]["arms"][a]}
     head = f"SCREENS {sid} arm {a}, g {L.num(g)} x LR5, seed {seed}{note}"
     return write(sid, name, L.config_text(name, head, extends(sid), seed, keys), p)
+
+
+def replay(name: str, p: dict) -> str:
+    """A registered shared BASE replay (screens_lib.BASE_REPLAYS, AMENDMENT BASE-REPLAY): base_s<seed>'s keys under its
+    own name and out_dir; the hook-off run also sets eval.induction null (train.py then installs no hook)."""
+    m, kind = L.NAME_RE.match(name), L.BASE_REPLAYS.get(name)
+    if not kind or not m or m["sid"] or m["arm"] != "base":
+        sys.exit(f"{name} is not a registered BASE replay {sorted(L.BASE_REPLAYS)}")
+    seed, off = int(m["seed"]), kind == "hook-off"
+    head = f"SCREENS BASE {kind} of base_s{seed} (AMENDMENT BASE-REPLAY" + ("; eval.induction off" if off else "") + ")"
+    keys = {**L.lrs(*p["lr5"]), **({"eval.induction": None} if off else {})}
+    return write(None, name, L.config_text(name, f"{head}, LR5, seed {seed}", extends(None), seed, keys), p)
 
 
 def s003_arm(eta: float, r: float, p: dict) -> list[str]:
@@ -150,6 +163,8 @@ def main(argv=None) -> int:
     c.add_argument("arm")
     c.add_argument("--g", type=float, required=True)
     c.add_argument("--seed", type=int, default=1)
+    rp = sub.add_parser("replay")
+    rp.add_argument("names", nargs="+", help="registered BASE replays (screens_lib.BASE_REPLAYS)")
     s3 = sub.add_parser("s003-arm")
     s3.add_argument("--eta", type=float, required=True)
     s3.add_argument("--r", type=float, required=True)
@@ -176,6 +191,8 @@ def main(argv=None) -> int:
     elif a.cmd == "config":
         sid, arm_ = a.arm.split(".")
         print(arm(sid, arm_, a.g, a.seed, p, ": C3 g-check extension" if a.seed == 1 else ""))
+    elif a.cmd == "replay":
+        print("\n".join(replay(n, p) for n in a.names))
     elif a.cmd == "s003-arm":
         print("\n".join(s003_arm(a.eta, a.r, p)))
     elif a.cmd == "seeds":

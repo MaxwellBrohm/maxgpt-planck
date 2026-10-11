@@ -274,3 +274,23 @@ ONSET READING (2026-10-06, SCREENS.txt AMENDMENT BASE-DIAG; decided before any s
   sigma_seed; EARLIER if -dbar > thr and both d_s < 0, LATER mirrored, else UNRESOLVED, no EQUAL. onset_abs, final
   IND, HD and SINK stay descriptive. The reading is reported beside the bpb verdict and changes no verdict. "Q2 reads
   an earlier onset" (METRIC AND DECISION RULE) now means EARLIER here.
+
+FOLLOW-UP TRIGGER (2026-10-10 17:15 EDT, Claude; written before this screen's verdict or any stage 2 onset is read;
+research/CUTS_AUDIT_2026-10.md row 2 and REINSTATE SATURDAY S2: written after the reading it would be post hoc).
+  Trigger: Q2 reads EARLIER under ONSET READING above (onset_half of the g 1 IND-only runs against the shared BASE by
+    AMENDMENT BASE-DIAG's rule; analyze.py verdicts "onsets", SCREENS.txt ONSET RULE CODE), whatever the bpb verdict
+    (NOMINATE, TIE, REJECT, GUARD-FAIL or INCONCLUSIVE). It replaces THE CHANGE's narrower condition for the curriculum
+    arm ("only if this one reads BETTER on IND at a bpb cost"). LATER, UNRESOLVED, LR-confounded or descriptive do not
+    fire it; they are reported as read, and P-105's ledger wording follows METRIC AND DECISION RULE.
+  When it fires, three arms are pre-registered, each in its own entry written and committed before any of its runs,
+    each one change against its own BASE, read by C7 on bpb and by the onset rule at matched LR:
+    (1) NTP-to-MTP CURRICULUM at 5M (arXiv 2505.22757; research/lanes/arch.md 1.10): the same t+2 head with its weight
+        rising from 0 instead of starting at 1, the ramp fixed in that entry before its g-check; against the shared BASE.
+    (2) TWO AUX HEADS at 5M (research/followup/loop.md idea 5, "MTP=0 vs 2 extra heads"): t+2 and t+3. It needs harness
+        code for train.mtp 2 (mtp_settings refuses 2 today), default off, tested and watched failing on mutants first.
+    (3) 20M (P-105's scale question: Gloeckle et al. saw the induction gain at 30M non-embedding and below, gone by
+        100M): the registered one-head form against a 20M BASE at E2's 20M LR (E2 Q2: the 5M LR transfers to 20M), with
+        five 20M BASE seeds carrying the IND hook, so its onset is read by a rule (no 20M onset SD exists today).
+  Their hours go to the cap check of the batch they join; an overrun goes to Max as a flag (SCREENS.txt AMENDMENT
+    CAP-FLAG), never a silent cut of these arms. If the trigger does not fire, none is pre-registered from here, and the
+    verdict step records that beside the reading.

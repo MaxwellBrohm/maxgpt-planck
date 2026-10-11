@@ -36,7 +36,7 @@ ANALYZER_MUTANTS = [   # C7 / C4 / ORDER / C3 / the run-directory RC-12 refusal 
      '("NOMINATE" if not worse_p else "GUARD-FAIL")', AF),
     ("cccc_only_unblocks_tie", ALIB, '("TIE" if not worse_p else "GUARD-FAIL")', '("TIE" if not worse_p or cccc_only else "GUARD-FAIL")', AF),
     ("holm_no_step_down", ALIB, "ok = ok and p <= alpha / (len(items) - i)", "ok = p <= alpha / (len(items) - i)", AF),
-    ("cut_order_swapped", ALIB, '25.0, ["S006", "S003", "S007", "S002"]', '25.0, ["S003", "S006", "S007", "S002"]', AF),
+    ("cut_order_swapped", ALIB, '28.0, ["S006", "S003", "S007", "S002"]', '28.0, ["S003", "S006", "S007", "S002"]', AF),
     ("cut_current_set_not_kept", ALIB, "total -= remaining[sid] - (current or {}).get(sid, 0.0)", "total -= remaining[sid]", AF),
     ("toy_p022_ignored", ALIB, 'order = (["S004"] if toy_favours_p022 else []) + CUT_ORDER', "order = CUT_ORDER", AF),
     ("same_init_check_blind", ALIB, 'out[key] = {"sd_rel": sd, "limit_rel": lim, "df": df, "ok": sd <= lim}',
@@ -128,8 +128,8 @@ MUTANTS += [   # STAGE 1 SELECTION A RESULT (2026-10-05): the stage B configs an
 HRS, HF, RO = "experiments/screens/screens_hours.py", "test_screens_hours.py", "test_s005_row_order.py"
 MUTANTS += [   # STAGE 2 READINESS (2026-10-05): the hours count each run once, smoke factors, S003 measured arms
     ("hours_measured_double_counted", HRS, "        if key not in seen:   ", "        if True:   ", HF),
-    ("hours_cap_ignores_measured", HRS, 'cap = AL.cap_cut(t["queued"], mr + mo)', 'cap = AL.cap_cut(t["queued"])', HF),
-    ("hours_other_not_counted", HRS, 'cap = AL.cap_cut(t["queued"], mr + mo)', 'cap = AL.cap_cut(t["queued"], mr)', HF),
+    ("hours_cap_ignores_measured", HRS, 'cap = AL.cap_cut(t["queued"], mr + mo, cap=c)', 'cap = AL.cap_cut(t["queued"], cap=c)', HF),
+    ("hours_other_not_counted", HRS, 'cap = AL.cap_cut(t["queued"], mr + mo, cap=c)', 'cap = AL.cap_cut(t["queued"], mr, cap=c)', HF),
     ("hours_assumed_factors", HRS, 'return SMOKE["BASE"] / SMOKE[(sid, arm)] if (sid, arm) in SMOKE else 1.0',
      'return {"S004": 1.1, "S005": 1.1, "S006": 1.3}.get(sid, 1.0)', HF),
     ("hours_smoke_value_not_logged", HRS, '("S005", "forget"): 85_113', '("S005", "forget"): 85_131', HF),
@@ -195,6 +195,16 @@ from mutants_s006r import MUTANTS_S006R  # noqa: E402  (AMENDMENT S006-REINSTATE
 MUTANTS += MUTANTS_S006R
 from mutants_basediag import MUTANTS_BASEDIAG  # noqa: E402  (AMENDMENT BASE-DIAG: the chain waiter, the BASE runs)
 MUTANTS += MUTANTS_BASEDIAG
+from mutants_replay import MUTANTS_REPLAY  # noqa: E402  (AMENDMENT BASE-REPLAY: the run-name rule, the replays)
+MUTANTS += MUTANTS_REPLAY
+from mutants_sat import MUTANTS_SAT  # noqa: E402  (2026-10-10: CAP-FLAG, ONSET RULE CODE, DEVIATION 1, S006 trigger)
+MUTANTS += MUTANTS_SAT
+from mutants_c6diag import MUTANTS_C6DIAG  # noqa: E402  (AMENDMENT C6-DIAG: diagnostics runner and queue, E3 Part 4d)
+MUTANTS += MUTANTS_C6DIAG
+from mutants_integ import MUTANTS_INTEG  # noqa: E402  (INTEGRATION 2026-10-10: replay_waiter.sh, the entries' numbers)
+MUTANTS += MUTANTS_INTEG
+from mutants_vfix import MUTANTS_VFIX  # noqa: E402  (CORRECTIONS AFTER THE W1 VERIFY: onset diag lines, 20M budget)
+MUTANTS += MUTANTS_VFIX
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")
@@ -207,7 +217,9 @@ def copy_tree(dst: str) -> None:
                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "tests", "stats"))
     for rel in ("experiments/E2_lr_transfer/results.json", "experiments/E2_lr_transfer/preflight.py",
                 "experiments/E2_lr_transfer/e2plan.py", "experiments/E2_lr_transfer/e2pick.py",
-                "experiments/E3_seed_noise/results.json", "experiments/E3_seed_noise/e3analyze.py", "tokenizer/spec.py",
+                "experiments/E2_lr_transfer/queue_lib.sh", "experiments/E2_lr_transfer/bpb_lines.py", "models/registry.jsonl",
+                "experiments/E3_seed_noise/results.json", "experiments/E3_seed_noise/e3analyze.py",
+                "experiments/E3_seed_noise/e3analyze_4d.py", "tokenizer/spec.py",
                 "experiments/SCREENS.txt",
                 "tokenizer/v0/tok_v0_8k.json", "tokenizer/v0/tok_v0_manifest.json", "corpus/oodh.py", "corpus/sample_plan.py"):
         os.makedirs(os.path.dirname(os.path.join(dst, rel)), exist_ok=True)

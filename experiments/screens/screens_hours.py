@@ -1,4 +1,5 @@
-"""SCREENS GPU hours and ORDER's 25 h cap (SCREENS.txt GPU HOURS, CAP AND CUT RULE; STAGE 2 READINESS 2026-10-05).
+"""SCREENS GPU hours and ORDER's cap (SCREENS.txt GPU HOURS, CAP AND CUT RULE; STAGE 2 READINESS 2026-10-05; 28 h and
+a flag to Max instead of a cut since AMENDMENT BASE-DIAG and AMENDMENT CAP-FLAG).
 
   python screens_hours.py measured QUEUE_LOG STATUS_JSONL > measured_hours.tsv   (the PC queue's own two files)
   python screens.py hours [--measured-file TSV] [--s003-rb R]                    report(): estimate and cap check
@@ -55,19 +56,65 @@ def mult(sid: str | None, arm: str | None) -> float:
     return SMOKE["BASE"] / SMOKE[(sid, arm)] if (sid, arm) in SMOKE else 1.0
 
 
-def parse_queue(queue: str, status: str) -> list[tuple[str, str, str]]:
-    """(run, lock start, end): from the "gpu.lock held" line before the run's "train" line to its status.jsonl
-    line (training plus scoring; SCREENS.txt STAGE 1 SELECTION A RESULT). A run with no status line is left out."""
+TS = re.compile(r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d ")
+UNLOCKED = ("waiting for ", "PAUSE present", "STOP present", "disk: ", "GPU temperature [", "queue stops at: ",
+            "plan finished: ", "plan says stop", "MARK ", "seen ", "skip ", "bad plan line: ")   # logged after gpu_unlock
+RESTART = ("queue start: ", "boot resume")          # a new queue process (launch, waiter, boot.d/40_screens.sh)
+SRC_EARLIER = "queue_screens.txt; an earlier hold of this run, ends at the queue's next line after gpu_unlock"
+SRC_CUT = "queue_screens.txt; an earlier hold cut off by a queue restart, ends at the cut queue's last line (a lower bound)"
+
+
+def parse_holds(queue: str, status: str) -> list[tuple[str, str, str, str]]:
+    """(run, start, end, source) per gpu.lock hold that trained a run with a status line (SCREENS DEVIATION 1).
+    A hold starts at "gpu.lock held" and ends at the first of: the run's status.jsonl line (its last hold: training
+    plus scoring, SCREENS.txt STAGE 1 SELECTION A RESULT); a line the queue logs only after gpu_unlock (UNLOCKED: a
+    heat stop's cool-down wait, a STOP); or a new queue process (RESTART: the hold was cut off by a power cut or a
+    kill), where it ends at the cut queue's last line, a lower bound. A crash inside a hold (queue_lib.sh train_run
+    resumes once under the same lock) logs a second train line in that hold: still one hold. A hold whose run had
+    saved its final checkpoint before a cut logs no train line, only its score lines, which name it. Every hold of a run
+    with a status line counts (a GAP that a restart counted, SCREENS DEVIATION 1, writes its status outside any
+    hold); a run with no status line (running, or stopped and not yet resumed) is left out. NUL bytes a power cut
+    leaves are skipped."""
     end = {r["run"]: r["time"].replace("T", " ") for r in map(json.loads, filter(str.strip, status.splitlines()))}
-    out, held = [], None
+    holds, cur, last = [], None, None
+
+    def close(t, src):
+        if cur and cur["run"]:
+            holds.append((cur["run"], cur["start"], t, src))
     for ln in queue.splitlines():
+        ln = ln.lstrip("\x00")
+        if not TS.match(ln):
+            continue
         t, msg = ln[:19], ln[20:]
-        if msg.startswith("gpu.lock held"):
-            held = t
-        m = re.match(r"train (\S+)\.yaml", msg)
-        if m and m[1] in end:
-            out.append((m[1], held, end[m[1]]))
+        if msg.startswith(RESTART):
+            close(last, SRC_CUT)
+            cur = None
+        elif msg.startswith("gpu.lock held"):
+            close(last, SRC_CUT)
+            cur = {"start": t, "run": None}
+        elif msg.startswith(UNLOCKED):
+            close(t, SRC_EARLIER)
+            cur = None
+        elif cur and (m := re.match(r"(?:train (\S+)\.yaml|score (\S+)/)", msg)):
+            cur["run"] = cur["run"] or m[1] or m[2]      # a run whose final was saved before a cut logs no train line
+        last = t
+    close(None, None)                                              # a hold still open at the log's end
+    out = []
+    for run, a, b, src in holds:
+        e = end.get(run)
+        if e is None or e < a:
+            continue
+        if b is None or e <= b:                                    # the hold the run's status line falls in
+            out.append((run, a, e, "queue_screens.txt"))
+        else:                    # an earlier hold (a GAP the restart counted has its status outside any hold)
+            out.append((run, a, b, src))
     return out
+
+
+def parse_queue(queue: str, status: str) -> list[tuple[str, str, str]]:
+    """(run, start, end) per gpu.lock hold, parse_holds without the source. Before SCREENS DEVIATION 1 (2026-10-10)
+    every train line got its own (held, status) pair, so a crash-resumed run was listed twice ("measured twice")."""
+    return [(r, a, b) for r, a, b, _ in parse_holds(queue, status)]
 
 
 def hours_between(a: str, b: str) -> float:
@@ -79,21 +126,26 @@ def tsv_text(queue: str, status: str, note: str = "") -> str:
              f"# (training plus scoring), from the PC queue's queue_screens.txt and status.jsonl{note}.",
              "# other: GPU hours of this batch outside its runs (OTHER in screens_hours.py).",
              "kind\tname\thours\tstart\tend\tsource"]
-    lines += [f"run\t{r}\t{hours_between(a, b):.5f}\t{a}\t{b}\tqueue_screens.txt" for r, a, b in parse_queue(queue, status)]
+    lines += [f"run\t{r}\t{hours_between(a, b):.5f}\t{a}\t{b}\t{src}" for r, a, b, src in parse_holds(queue, status)]
     lines += [f"other\t{n}\t{h}\t\t\t{s}" for n, h, s in OTHER]
     return "\n".join(lines) + "\n"
 
 
 def load(path: str = TSV) -> tuple[dict, dict]:
-    """({run: measured h}, {other: h}). A run's hours come from its start and end, never from the rounded column."""
-    runs, other = {}, {}
+    """({run: measured h}, {other: h}). A run's hours come from its start and end, never from the rounded column. A
+    run resumed in a later gpu.lock hold has one line per hold (parse_holds): each hold counts once and they add up;
+    the same hold listed twice, or two holds of one run that overlap, is refused."""
+    runs, other, holds = {}, {}, {}
     for ln in open(path):
         if ln.startswith("#") or ln.startswith("kind\t") or not ln.strip():
             continue
         kind, name, h, a, b, _ = ln.rstrip("\n").split("\t")
         if kind == "run":
-            assert name not in runs, f"{name} measured twice"
-            runs[name] = hours_between(a, b)
+            seen = holds.setdefault(name, [])
+            assert (a, b) not in seen, f"{name} measured twice (the hold {a} to {b} is listed twice)"
+            assert all(b <= a2 or b2 <= a for a2, b2 in seen), f"{name}: two holds overlap"
+            seen.append((a, b))
+            runs[name] = runs.get(name, 0.0) + hours_between(a, b)
         else:
             other[name] = float(h)
     return runs, other
@@ -116,6 +168,8 @@ def slot(name: str) -> tuple[str, tuple | None]:
             return "S003", None
         return "S003", ("S003", "search", *pt, m["tag"])
     seed = int(m["seed"])
+    if m["diag"]:                                      # a BASE replay or hook-off run (BASE-REPLAY): on top, no slot
+        return sid or "BASE", None
     if m["arm"] == "base":
         return sid or "BASE", (sid or "BASE", "base", seed)
     if m["e"]:
@@ -177,8 +231,12 @@ def tally(p: dict, runs: dict, r_b: float | None = None) -> dict:
             "seen": seen, "registered": reg}
 
 
-def report(p: dict, path: str = TSV, r_b: float | None = None) -> dict:
+def report(p: dict, path: str = TSV, r_b: float | None = None, cap: float | None = None) -> dict:
+    """The table, the conditional hours and ORDER's cap check. cap None = analyze_lib.CAP (28 h since AMENDMENT
+    BASE-DIAG); the earlier entries' checks pass their own cap (25 h, 27 h). Over the cap the line says FLAG TO MAX
+    (AMENDMENT CAP-FLAG): nothing is cut; "cap" keeps the cut order's arithmetic, the proposal the flag carries."""
     import analyze_lib as AL
+    c = AL.CAP if cap is None else cap
     runs, other = load(path)
     t = tally(p, runs, r_b)
     print(f"{'screen':<8}{'measured runs':>14}{'h':>8}{'queued runs':>13}{'h':>8}{'total h':>9}")
@@ -204,15 +262,21 @@ def report(p: dict, path: str = TSV, r_b: float | None = None) -> dict:
     ind = 2 * (full("S006", "mtp") + full("S007", "smear"))
     print(f"conditional, counted only once queued (ORDER): up to {ext:.2f} h of extensions (2 per g-check arm not yet "
           f"run, 2 per S003 stage B and C); up to {ind:.2f} h of matched-LR IND runs (S006, S007 at g = 1, k = 2)")
-    cap = AL.cap_cut(t["queued"], mr + mo)
-    narrow = AL.cap_cut(t["queued"], mr)
-    print(f"ORDER cap (rule input, OTHER counted): measured {mr + mo:.3f} h + queued {qs:.3f} h = "
-          f"{cap['total_before']:.3f} h against {cap['cap']:.0f} h: " +
-          ("fits, nothing cut" if not cap["cut"] else f"cut {', '.join(cap['cut'])} -> {cap['total_after']:.3f} h") +
-          ("" if cap["fits"] else " (still over: nothing left that the rule may cut)") +
-          f"; headroom {cap['cap'] - cap['total_after']:.3f} h")
-    print(f"runs only (reported, not the rule input): {narrow['total_before']:.3f} h, cut {narrow['cut'] or 'none'}")
-    return {"tally": t, "cap": cap, "narrow": narrow, "measured_runs": mr, "other": mo}
+    cap = AL.cap_cut(t["queued"], mr + mo, cap=c)
+    flag = AL.cap_check(t["queued"], mr + mo, cap=c)
+    narrow = AL.cap_cut(t["queued"], mr, cap=c)
+    head = (f"ORDER cap (rule input, OTHER counted): measured {mr + mo:.3f} h + queued {qs:.3f} h = "
+            f"{cap['total_before']:.3f} h against {cap['cap']:.0f} h: ")
+    if not flag["flag_to_max"]:
+        print(head + f"fits, nothing cut; headroom {cap['cap'] - cap['total_after']:.3f} h")
+    else:
+        print(head + f"OVER by {flag['over_by']:.3f} h: FLAG TO MAX, nothing is cut or queued without his decision "
+              f"(AMENDMENT CAP-FLAG); the cut order would take " +
+              (f"{', '.join(cap['cut'])} -> {cap['total_after']:.3f} h" if cap["cut"] else "nothing") +
+              ("" if cap["fits"] else " (still over: nothing left that the order may take)"))
+    print(f"runs only (reported, not the rule input): {narrow['total_before']:.3f} h, cut order would take "
+          f"{narrow['cut'] or 'none'}")
+    return {"tally": t, "cap": cap, "flag": flag, "narrow": narrow, "measured_runs": mr, "other": mo}
 
 
 def main(argv=None) -> int:

@@ -8,6 +8,7 @@
             micro 4 x accum 4 fallback, S006's micro 8 x accum 2 (if mem_fit fails at 16).
   arm       its BASE + the keys its notes.txt registers (ARMS) at g x LR5 (C3; r_5 kept), seeds from E3 (C4).
   S003      AdamW search: E2's trunk + branch configs (e2plan.runs_for) with optim.kind adamw; seed runs full WSD.
+  replay    base_s<seed>_rep<n> / _hookoff: only the names in BASE_REPLAYS (AMENDMENT BASE-REPLAY), shared BASE only.
 check(path) is C2 (only allowed keys differ from the reference, every registered key at its value, LRs right),
 the RC-12 GUARD (no eval.rc12 key, BASE included), C1-b's engine values (every run eager) and the 2% rule.
 """
@@ -54,7 +55,10 @@ ORDER = {1: ["S001", "S002", "S003"], 2: ["S005", "S004", "S007", "S006"]}   # S
 G_ALLOWED = [2.0 ** n for n in range(-3, 4)]     # C3 grid {0.5, 1, 2} plus at most 2 factor-2 extensions each way
 S003_STAGE_A = [0.75e-3, 1.5e-3, 3e-3, 6e-3, 12e-3]
 NAME_RE = re.compile(r"^(?:(?P<sid>s00\d)_)?(?P<arm>[a-z]+)(?:_g(?P<g>[0-9.]+))?(?:_e(?P<e>[0-9.]+)_r(?P<r>[0-9.]+))?"
-                     r"(?:_s(?P<seed>\d+)|_(?P<tag>trunk|b62M|b125M|b250M))$")
+                     r"(?:_s(?P<seed>\d+)(?:_(?P<diag>rep[1-9]|hookoff))?|_(?P<tag>trunk|b62M|b125M|b250M))$")
+# SCREENS.txt AMENDMENT BASE-REPLAY (cuts audit S7): the only names a _rep<n> / _hookoff suffix may take. A replay is
+# its shared BASE run renamed; the hook-off run also sets eval.induction null (refused under every other name).
+BASE_REPLAYS = {"base_s101_rep1": "replay", "base_s101_hookoff": "hook-off", "base_s101_rep2": "replay"}
 
 
 def num(x: float) -> str:
@@ -177,6 +181,9 @@ def check(path: str, p: dict | None = None) -> list[str]:
         return bad + [f"name {name!r}: not a SCREENS run name, or file name / out_dir do not match it"]
     sid = m["sid"].upper() if m["sid"] else None
     arm, seed = m["arm"], int(m["seed"]) if m["seed"] else None
+    off = BASE_REPLAYS.get(name) == "hook-off"
+    if m["diag"] and (sid or arm != "base" or BASE_REPLAYS.get(name) != ("hook-off" if m["diag"] == "hookoff" else "replay")):
+        return bad + [f"{name}: a _rep / _hookoff name must be a registered shared BASE replay (BASE_REPLAYS)"]
     home = SCREENS.get(sid, {}).get("dir") if sid else "screens"     # shared BASE runs: experiments/screens
     if os.path.basename(os.path.dirname(os.path.dirname(path))) != home:
         bad.append(f"{name}: not in experiments/{home}/configs")
@@ -194,7 +201,7 @@ def check(path: str, p: dict | None = None) -> list[str]:
         if sid and not engine(sid):
             return bad + [f"{name}: {sid} has no ENGINE keys, so no own BASE (it pairs with base_s<seed>)"]
         ref, regd = reference(None, lr5), engine(sid)
-        allowed |= set(regd)
+        allowed |= set(regd) | ({"eval.induction"} | set(hook_keys()) if off else set())
     else:
         if sid not in SCREENS or arm not in SCREENS[sid]["arms"]:
             return bad + [f"{name}: {sid} has no arm {arm!r}"]
@@ -221,7 +228,10 @@ def check(path: str, p: dict | None = None) -> list[str]:
     if f.get("engine_fixed") != ENGINE_FIXED:
         bad.append(f"C1-b: {name} engine_fixed {f.get('engine_fixed')!r} != {ENGINE_FIXED!r}")
     hk = hook_keys()
-    if not hk or any(f.get(k, "<absent>") != v for k, v in hk.items()):
+    if off:                 # the registered hook-off run: eval.induction null, no hook key (AMENDMENT BASE-REPLAY)
+        if "eval.induction" not in f or f["eval.induction"] is not None:   # null leaves no hook key (flat)
+            bad.append(f"C6: {name} must set eval.induction null (the registered hook-off run)")
+    elif not hk or any(f.get(k, "<absent>") != v for k, v in hk.items()):
         bad.append(f"C6: {name} does not carry BASE's eval.induction hook unchanged")
     if seed is not None and seed != 1 and seed not in range(101, 106):
         bad.append(f"C4: {name} seed {seed} is neither the g-check seed 1 nor a screen seed 101..105")

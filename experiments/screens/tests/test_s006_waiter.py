@@ -181,7 +181,8 @@ def test_a_hold_gives_up_after_the_grace(tmp_path):
     p = tree(tmp_path, MID + LOCKWAIT, mark=False)
     t0 = time.time()
     rc, log, stub = main_run(tmp_path, p, poll="1", grace="2", timeout=30)
-    assert rc == 1 and stub == [] and 2 <= time.time() - t0 < 25
+    # GRACE counts whole seconds (date +%s): a 2 s grace can end just over 1 s after the HOLD (2026-10-10: 1.33 s)
+    assert rc == 1 and stub == [] and 1 <= time.time() - t0 < 25
     assert "HOLD stage2_seeds stopped after a 2 h gpu.lock wait" in log and "GIVEUP: no new stage2_seeds start within 2 s" in log
 
 

@@ -1,6 +1,8 @@
 """SCREENS decision rules as pure functions (no file is read here; analyze.py does the I/O). Stdlib only.
 experiments/SCREENS.txt: C4 (reference SDs per class, the noise checks), C5 (CCCC-ONLY), C7 (metric readings,
-arm verdicts, DIVERGENCE, the Holm reading), C6 (IND onsets) and ORDER (the 25 h cap and its cut order).
+arm verdicts, DIVERGENCE, the Holm reading), C6 (IND onsets), AMENDMENT BASE-DIAG's ONSET RULE (onset_half read
+with C7 at sigma_seed from BASE seeds 101-105) and ORDER's cap (28 h since AMENDMENT BASE-DIAG; an overrun is a flag
+to Max, never a cut, since AMENDMENT CAP-FLAG: cap_check; cap_cut is the cut order's arithmetic, the flag's proposal).
 Quantiles: E3's own t and chi-square functions (e3analyze.py; scipy is not in Planck's venv).
 
 Run values come as {seed: {"CHAT": F, "PROSE": F, "cccc": F, "gutenberg": F, "wikimedia": F}} or
@@ -22,7 +24,9 @@ INF = float("inf")
 METRICS = {"CHAT": "F(CHAT)", "PROSE": "F(PROSE)", "cccc": "PROSE cccc", "gutenberg": "PROSE gutenberg",
            "wikimedia": "PROSE wikimedia"}             # key in run values -> E3 noise metric
 DELTA = 0.01                                           # E3's default delta_bet: 1% of BASE's mean
-CAP, CUT_ORDER, NEVER_CUT = 25.0, ["S006", "S003", "S007", "S002"], ["S001", "S004", "S005", "BASE"]
+# ORDER's cap: 25 h as registered, 27 h by AMENDMENT S006-REINSTATE, 28 h by AMENDMENT BASE-DIAG (SCREENS.txt)
+CAP, CUT_ORDER, NEVER_CUT = 28.0, ["S006", "S003", "S007", "S002"], ["S001", "S004", "S005", "BASE"]
+ONSET_SEEDS = (101, 102, 103, 104, 105)                # AMENDMENT BASE-DIAG: BASE's onset_half sigma_seed, df 4
 
 
 def sd_ref(cls: str, metric: str, base_mean: float, noise: dict, u: float) -> tuple[float, int]:
@@ -145,10 +149,11 @@ def holm(ps: dict, alpha: float = 0.05) -> dict:
 
 def cap_cut(remaining: dict, measured: float = 0.0, cap: float = CAP, current: dict | None = None,
             toy_favours_p022: bool = False) -> dict:
-    """ORDER's cap: measured hours plus the queued estimate per screen ("BASE" for the BASE runs). Whole screens
-    are cut in CUT_ORDER until the total fits (S004 first if the PLAN 3d toy favours P-022); a screen in its seed
-    sets keeps its current set's hours (current). S001, S004 (while P-148 is the pick), S005 and BASE are never
-    cut by the rule."""
+    """ORDER's cut order, as arithmetic: measured hours plus the queued estimate per screen ("BASE" for the BASE
+    runs). Whole screens come off in CUT_ORDER until the total fits (S004 first if the PLAN 3d toy favours P-022); a
+    screen in its seed sets keeps its current set's hours (current). S001, S004 (while P-148 is the pick), S005 and
+    BASE never come off. Since AMENDMENT CAP-FLAG (2026-10-10) this list is only the proposal a flag carries to Max
+    (cap_check); the earlier entries' cuts were made with it as ORDER then read."""
     order = (["S004"] if toy_favours_p022 else []) + CUT_ORDER
     total, cut = measured + sum(remaining.values()), []
     for sid in order:
@@ -159,6 +164,17 @@ def cap_cut(remaining: dict, measured: float = 0.0, cap: float = CAP, current: d
             cut.append(sid)
     return {"total_before": measured + sum(remaining.values()), "cut": cut, "total_after": total,
             "fits": total <= cap, "cap": cap}
+
+
+def cap_check(remaining: dict, measured: float = 0.0, cap: float = CAP, current: dict | None = None,
+              toy_favours_p022: bool = False) -> dict:
+    """ORDER's cap as AMENDMENT CAP-FLAG reads it (SCREENS.txt, 2026-10-10): measured plus queued against the cap.
+    Over it, nothing is cut and nothing more may be queued: the step FLAGS Max (flag_to_max) with the overrun and
+    the proposal, what the cut order would cut (cap_cut), and waits for his decision. "cut" is always empty here."""
+    prop = cap_cut(remaining, measured, cap, current, toy_favours_p022)
+    over = prop["total_before"] > cap
+    return {"total": prop["total_before"], "cap": cap, "fits": not over, "over_by": max(0.0, prop["total_before"] - cap),
+            "flag_to_max": over, "cut": [], "proposal": prop if over else None}
 
 
 def onsets(curve: list[tuple[int, float]], base_final: float | None) -> dict:
@@ -173,3 +189,38 @@ def onsets(curve: list[tuple[int, float]], base_final: float | None) -> dict:
     L = base_final / 2
     ab = next((s for s, v in curve if v >= L), "not reached")
     return {"onset_half": half, "onset_abs": ab, "level_abs": L, "final": final}
+
+
+def onset_sigma(base_half: dict) -> dict:
+    """AMENDMENT BASE-DIAG: sigma_seed = the sample SD of BASE's onset_half (steps) over ONSET_SEEDS, df 4. If a seed
+    is missing or its onset_half is undefined, sigma_seed is None and every onset stays descriptive (C6)."""
+    miss = [s for s in ONSET_SEEDS if base_half.get(s) is None]
+    if miss:
+        return {"sigma_seed": None, "df": None, "why": f"BASE onset_half missing or undefined at seeds {miss}"}
+    xs = [base_half[s] for s in ONSET_SEEDS]
+    return {"sigma_seed": st.stdev(xs), "df": len(xs) - 1, "base_onset_half": xs}
+
+
+def onset_reading(d: list, sigma: float, df: int) -> dict:
+    """AMENDMENT BASE-DIAG, C7 on onset_half: d = arm - BASE per seed in steps (negative = earlier). SD_ref =
+    sqrt(2) x sigma_seed (no paired onset SD exists); thr = t(0.975, df) x SD_ref / sqrt(k). EARLIER if -dbar > thr
+    and every d_s < 0; LATER if dbar > thr and every d_s > 0; else UNRESOLVED. No EQUAL (no delta is registered).
+    sigma_seed 0 (five equal BASE onsets on the 153-step grid) gives thr 0: one logged interval at every seed in one
+    direction reads, as the amendment says for sigma_seed < 55.1; its p is then 0 (any shift) or 1 (none)."""
+    k = len(d)
+    dbar = sum(d) / k
+    sd = math.sqrt(2) * sigma
+    se = sd / math.sqrt(k)
+    thr = t_ppf(0.975, df) * se
+    earlier = -dbar > thr and all(x < 0 for x in d)
+    later = dbar > thr and all(x > 0 for x in d)
+    label = "EARLIER" if earlier else "LATER" if later else "UNRESOLVED"
+    p = 2 * (1 - t_cdf(abs(dbar) / se, df)) if se > 0 else (0.0 if dbar else 1.0)
+    return {"label": label, "d": d, "k": k, "dbar": dbar, "thr": thr, "sd_ref": sd, "sigma_seed": sigma, "df": df,
+            "p_two_sided": p}
+
+
+def onset_descriptive(d: list) -> dict:
+    """C6's descriptive reading of the onsets that exist: the paired mean and the number of seeds per sign."""
+    return {"d": d, "dbar": sum(d) / len(d) if d else None, "earlier": sum(1 for x in d if x < 0),
+            "later": sum(1 for x in d if x > 0), "same": sum(1 for x in d if x == 0)}

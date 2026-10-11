@@ -56,8 +56,11 @@ def tiny(cfg: dict, fake: str, work: str, trunk_out: str | None = None) -> str:
     c["data"].update(window_tokens=1024, max_item_len=64, sources=[
         {"name": "text", "kind": "tokens", "eot_id": 1, "share": 0.7, "paths": [f"{fake}/text_*.bin"]},
         {"name": "chat", "kind": "chat", "share": 0.3, "paths": [f"{fake}/chat_*.jsonl"]}])
-    assert set(c["eval"]["induction"]) == set(HOOK)          # BASE's hook, every key replaced by a tiny input
-    c["eval"]["induction"] = dict(HOOK)
+    if L.BASE_REPLAYS.get(c["name"]) == "hook-off":           # AMENDMENT BASE-REPLAY's hook-off run: no hook
+        assert c["eval"]["induction"] is None
+    else:
+        assert set(c["eval"]["induction"]) == set(HOOK)      # BASE's hook, every key replaced by a tiny input
+        c["eval"]["induction"] = dict(HOOK)
     c["train"].update(device="cpu", compile=False, doc_attn="mask", micro_batch=2, total_steps=2, ckpt_every=1,
                       log_every=1)
     sc = c["schedule"]
@@ -82,7 +85,8 @@ def run_tiny(path: str, fake: str, work: str, trunk_out: str | None = None) -> d
     recs = [json.loads(x) for x in open(os.path.join(work, "runs.jsonl"))]
     log = [json.loads(x) for x in open(os.path.join(work, "out", "log.jsonl")) if '"loss"' in x]
     ck = runio.load_checkpoint(runio.latest_checkpoint(os.path.join(work, "out")))
-    diag = [json.loads(x) for x in open(os.path.join(work, "out", "diag.jsonl"))]
+    dp = os.path.join(work, "out", "diag.jsonl")
+    diag = [json.loads(x) for x in open(dp)] if os.path.exists(dp) else None
     return {"cfg": cfg, "start": recs[0], "end": recs[-1], "log": log, "ck": ck, "diag": diag}
 
 
@@ -111,6 +115,9 @@ def test_two_step_cpu_smoke(path, fake, tmp_path):
     assert start["batch_tokens"] == 2 * cfg["train"]["grad_accum"] * 64 and "compile" not in start
     assert r["end"]["event"] == "end" and r["end"]["step"] == 2
     assert all(math.isfinite(x["loss"]) for x in r["log"]) and r["log"][-1]["step"] == 2
+    if L.BASE_REPLAYS.get(cfg["name"]) == "hook-off":       # no hook installed: no diag.jsonl, no induction record
+        assert r["diag"] is None and "induction" not in start
+        return
     assert [d["step"] for d in r["diag"]] == list(range(start["step"] + 1, 3))      # a branch starts at step 1
     assert r["diag"] and all(math.isfinite(d["ind"]) for d in r["diag"])
     assert all((d["gate"] is None) == (not want_model.attn_gate) for d in r["diag"])

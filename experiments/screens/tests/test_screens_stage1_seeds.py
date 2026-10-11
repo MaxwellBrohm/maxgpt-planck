@@ -70,7 +70,7 @@ def V(tmp_path_factory):
     tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] in SEED_RUNS)))
     runs, _ = H.load(str(tsv))
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(P, str(tsv), r_b=2)
+        r = H.report(P, str(tsv), r_b=2, cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 28 h since AMENDMENT CAP-FLAG)
     t, c, f = r["tally"], r["cap"], (lambda x, n=3: f"{x:.{n}f}")
     c250 = {g: bpb(g, "b250M") for g in G}
     best = min(v[1] for v in c250.values())
@@ -186,7 +186,7 @@ def test_cap_check_before_the_seed_sets(V):
         q101[scr] -= n * V["run"]
     m = r["measured_runs"] + r["other"] + 6 * V["run"]
     for over, cut in ((V["head"] - 1e-4, []), (V["head"] + 1e-4, ["S006"]), (V["two"] - 6 * V["run"] + 1e-4, ["S006", "S003"])):
-        assert AL.cap_cut(q101, m + over)["cut"] == cut
+        assert AL.cap_cut(q101, m + over, cap=25.0)["cut"] == cut
     assert f"(6 x {v['run']} = {v['six']} h)" in FLAT and f"over {v['one']} h ({v['one6']} h a run;" in FLAT
     assert f"seed set 101 over {v['two']} h ({v['two6']} h a run)" in FLAT and f"held it {v['fmin']} to {v['fmax']} h" in FLAT
     assert f"up to {v['ext']} h of stage 2 g-check extensions and up to {v['ind']} h of matched-LR IND runs" in FLAT
@@ -222,8 +222,9 @@ def test_seed_configs_are_their_base_plus_the_registered_keys(seed):
     from test_screens_configs import EXT2, stage2_seed_configs      # added later: S006's extension, stage2_seeds
     from reinstate_lib import s006_seed_configs                    # and S006's reinstated seed sets
     from basediag_lib import base_diag_configs                     # and AMENDMENT BASE-DIAG's BASE runs
+    from replay_lib import replay_configs                          # and AMENDMENT BASE-REPLAY's BASE replays
     assert len(L.all_configs()) == 82 + len(EXT2) + len(stage2_seed_configs()) + len(s006_seed_configs()) + \
-        len(base_diag_configs())
+        len(base_diag_configs()) + len(replay_configs())
     assert "12 ok (82 ok over every config)" in FLAT
 
 

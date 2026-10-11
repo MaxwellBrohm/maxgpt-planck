@@ -13,6 +13,7 @@ import analyze, analyze_lib as AL, mutation_screens as M, screens, screens_hours
 from test_screens_configs import EXT2, LATER_PLANS, PLAN_SEQUENCE, stage2_seed_configs  # noqa: E402
 from reinstate_lib import REINSTATED_PLANS, s006_seed_configs  # noqa: E402  (AMENDMENT S006-REINSTATE, later)
 from basediag_lib import DIAG_PLANS, base_diag_configs  # noqa: E402  (AMENDMENT BASE-DIAG, later)
+from replay_lib import REPLAY_PLANS, replay_configs  # noqa: E402  (AMENDMENT BASE-REPLAY, later)
 from test_screens_s003_stage_c import section  # noqa: E402
 
 P = L.params()
@@ -42,15 +43,15 @@ def V(tmp_path_factory):
     tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] == EXT)))
     runs, _ = H.load(str(tsv))                          # (S006 EXTENSION RESULT) taken out
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(P, str(tsv))
+        r = H.report(P, str(tsv), cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 28 h since AMENDMENT CAP-FLAG)
     t, f = r["tally"], (lambda x, n=3: f"{x:.{n}f}")
     q, m = t["queued"], r["measured_runs"] + r["other"]
     per = {s: H.run_h(L.STEPS, H.mult(s, a)) for s, (a, _) in ARMS.items()}
     by = {s: [runs[n] for n in S2 if n.startswith(s.lower())] for s in ARMS}
     est, lock, train = per["S006"], sum(runs[n] for n in S2), sum(TRAIN.values()) / 3600
-    ext = AL.cap_cut({**q, "S006": q["S006"] + est}, m)
-    ind = AL.cap_cut({**q, "S006": q["S006"] + 2 * est}, m)
-    ind1 = AL.cap_cut({**q, "S006": q["S006"] + 2 * est}, m + est)
+    ext = AL.cap_cut({**q, "S006": q["S006"] + est}, m, cap=25.0)
+    ind = AL.cap_cut({**q, "S006": q["S006"] + 2 * est}, m, cap=25.0)
+    ind1 = AL.cap_cut({**q, "S006": q["S006"] + 2 * est}, m + est, cap=25.0)
     own2 = 2 * H.run_h(L.STEPS, H.mult("S005", "base"))
     chat = {n: v[0] for n, v in VALS.items()}
     marg = {s: sorted(x for n, x in chat.items() if n.startswith(s.lower()))[:2] for s in ARMS}
@@ -166,7 +167,8 @@ def test_extension_config_is_s006_at_4_x_lr5(V, capsys):
     assert L.diff(f, b) == {"name", "out_dir", "seed", "train.mtp", "train.mtp_weight", *L.LRK}
     assert [f[k] for k in L.LRK] == pytest.approx([4 * P["lr5"][0]] * 3) and P["lr5"][1] == 1.0 and f["seed"] == 1
     assert screens.main(["check", EXT]) == 0 and capsys.readouterr().out.count("ok      ") == 1
-    assert len(L.all_configs()) == 83 + len(stage2_seed_configs()) + len(s006_seed_configs()) + len(base_diag_configs())
+    assert len(L.all_configs()) == 83 + len(stage2_seed_configs()) + len(s006_seed_configs()) + len(base_diag_configs()) \
+        + len(replay_configs())
     assert H.slot(EXT) == ("S006", None)
     v = V["fmt"]
     assert f"s006_mtp_g4_s1.yaml (sha256 {L.sha256(path[0])[:16]}...)" in FLAT and "1 ok (83 ok over every config)" in FLAT
@@ -198,12 +200,12 @@ def test_what_follows_as_arithmetic(V):
     """(1) two IND runs at g 1 pass 25 h for every x >= 0 and S006 is cut first; (2) a g 8 point fits only to x = g8."""
     q, m, est, v = V["q"], V["m"], V["est"], V["fmt"]
     for x in (0.0, 0.353, est, 1.0):
-        y = AL.cap_cut({**q, "S006": q["S006"] + 2 * est}, m + x)
+        y = AL.cap_cut({**q, "S006": q["S006"] + 2 * est}, m + x, cap=25.0)
         assert y["total_before"] > 25 and y["cut"] == ["S006"] and y["fits"]
         assert y["total_after"] == pytest.approx(V["ind"]["total_after"] + x)
     lim = 25 - V["ext"]["total_before"]
     for x, cut in ((lim - 1e-4, []), (lim + 1e-4, ["S006"])):
-        assert AL.cap_cut({**q, "S006": q["S006"] + est}, m + x)["cut"] == cut
+        assert AL.cap_cut({**q, "S006": q["S006"] + est}, m + x, cap=25.0)["cut"] == cut
     assert f"s006_mtp_g1_s102, {v['pS006']} h each, {v['ind']} h), queued before its seed set" in FLAT
     assert f"{v['m']} + x + {v['qs']} + {v['ind']} = {v['ind0']} h + x, over 25 h for every x >= 0, and S006 is first " \
            f"in the cut order: its queued {v['q6']} h (2 seed runs, 2 IND runs) out gives {v['after0']} h + x " \
@@ -224,6 +226,7 @@ def test_plan_waits_on_the_selection_mark_and_runs_only_the_extension(V):
     cur = [ln.strip() for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
     seq = PLAN_SEQUENCE + LATER_PLANS + (REINSTATED_PLANS if s006_seed_configs() else [])
     seq += DIAG_PLANS if base_diag_configs() else []
+    seq += REPLAY_PLANS if replay_configs() else []
     assert len(cur) == 1 and seq.index(cur[0]) >= seq.index("stage2_s006x")
     assert f"stage2_s006x.txt (sha256 {L.sha256(PLAN)[:16]}...; written by screens.plan), its 4 lines:" in FLAT
     assert " ".join(lines[0].split()) + " [one line in the file]" in FLAT

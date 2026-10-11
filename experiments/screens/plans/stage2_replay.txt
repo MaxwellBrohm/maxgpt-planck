@@ -1,0 +1,6 @@
+# SCREENS AMENDMENT BASE-REPLAY (SCREENS.txt): base_s101 replayed twice with its hook-off run between them, after BASE-DIAG (screens.py). train = screens check, preflight, train, score
+wait_mark SCREENS SCREENS BASE DIAG DONE
+train base_s101_rep1
+train base_s101_hookoff
+train base_s101_rep2
+mark SCREENS BASE REPLAY DONE

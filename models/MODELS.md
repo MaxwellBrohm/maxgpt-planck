@@ -46,6 +46,10 @@ neither imports torch or loads weights. Tests: `python3 models/tests/test_regist
 - **The archive is the D: drive** (about 466 GB free), as `/mnt/d/planck-archive` from WSL. Layout: the
   registry id is the path, e.g. `/mnt/d/planck-archive/E005/135m/s1/model.safetensors`. Each id directory
   holds the entry's registered files under their own names (not the whole run directory).
+- **Archive status, SCREENS (2026-10-10, 16:57)**: `/mnt/d` was not mounted in WSL (`No such device`), so no
+  archive copy of a SCREENS run could be checked or made; the 129 saved SCREENS lines (96 run finals, 33 trunk
+  stables; section 10) list only their run folders. Whether archive_loop.sh copied any SCREENS run before
+  D: dropped is unknown. When D: is back: copy, hash with `verify --where pc`, then add the archive locations.
 - **Archive status (2026-10-03, 00:30)**: all 158 saved models in the registry, 419 files, 29.06 GB
   (29,058,924,614 bytes), every PC copy re-hashed by `verify --where pc` on the PC (683 files, archive and
   run areas: 0 missing or mismatched). Added 2026-10-03: E003 ts33m and p160m s1-s3 (6, uploaded from the
@@ -177,7 +181,7 @@ once it is chosen (README: "to be chosen before the first model release"). Excep
 | E005 | SmolLM2-135M-I | yes (`--save 1`) | mac (5, 2.71 GB) + pc dev copy | 1 dry | done (AL diagnostic is eval only) | none |
 | E006 | SmolLM2-135M-I arms C/P/G x 5 seeds + 2 TF32 twins | yes (`--save 1`), saved and hashed before scoring, `weights_sha256` in each guard record | `pc:~/planck/e006_run/weights` + archive | dry runs (outputs deleted by design) | done 2026-09-28 14:56, audited 2026-10-02; registered 2026-10-03: 17 trained models, C2's power-cut attempt (weights byte-identical to C2's) and the 5 dry runs | none: archive_loop.sh copies new `e<NNN>_run/weights` dirs |
 | E2, E3 | harness, from scratch, 5M and 20M | yes: `final_*.pt` and `stable_*.pt` never pruned; rolling `keep_last 2` (pre-registered) | `pc:~/planck/runs/E2`, `.../E3` + archive (scored rolling checkpoints in `data_offload/`) | rolling checkpoints beyond 2 | E2 5M and 20M done (2026-10-02 23:43; 20m_e6_r1_trunk crash-resumed once after the 09-29 power cut), E3 Part 1 done (18 runs); registered 2026-10-03 (E2 84 lines, E3 18) | none: runs need committed code and checked config sha256, and saving already meets section 1; archive_loop.sh copies finished runs |
-| S001-S007 | harness, 5M | as E2 (SCREENS.txt: keep_last 2 plus final; C8 keeps finals until post-lock scoring) | PC | as E2 | pre-registered, no config yet | none: C8's "kept until then" becomes "kept" |
+| S001-S007 | harness, 5M | as E2 (SCREENS.txt: keep_last 2 plus final; C8 keeps finals until post-lock scoring) | `pc:~/planck/runs/SCREENS` (archive not checked: D: unmounted 2026-10-10) | rolling checkpoints beyond 2; the C1-a and eager smokes' checkpoints (deleted by design) | 96 queue runs done 2026-10-04 to 10-07 03:03; registered 2026-10-10 (section 10) | none: C8's "kept until then" becomes "kept" |
 | RC-12 baselines | no (13 public models, inference) | nothing to save | n/a | n/a | PC queue | proposal: record each model's HF snapshot revision in the run records; not implemented (PC-side code, outside experiments/) |
 
 No hook was implemented on 2026-09-26: every experiment either already saves final weights (E002
@@ -198,3 +202,19 @@ Superseded: E002 notes, POST-HOC ADDITION 2 ("deleted when E002 is done"). Those
   copied to the archive (both copies hash equal).
 - **79 trained but not saved**: 47 LR-search runs (`--save 0`: E003 26, E004 21), 18 dry runs, E002's
   seed 0 (before the save code), and 13 killed attempts from the queue logs (E003 12, E004 1).
+
+## 10. SCREENS registration (2026-10-10)
+
+145 lines, `SCREENS/...`, built from the PC's own records (no model loaded, no stage 2 result read):
+- **96 queue runs**, one line each for the final checkpoint (`SCREENS/<screen>_<arm>/<g..>_s<seed>/final`, BASE as
+  `SCREENS/BASE/s<seed>/final`, S005's own BASE as `SCREENS/S005_base/...`, the S003 search as
+  `SCREENS/S003_adamw_e<eta>_r<r>/<trunk|b62M|b125M|b250M>/final`), plus **33 trunk stables** of the 11 S003 search
+  trunks (`.../trunk/stable_<step>`, kind checkpoint). Hashes and bytes from the PC run folders, re-hashed there by
+  `verify --where pc --id 'SCREENS/*'` (129 files, 0 missing or mismatched); config_sha256 is train.py's hash of
+  the resolved config and equals that of the committed config for all 96; code is the commit each queue cloned,
+  with its code_sha256 list. The two scored rolling checkpoints of each run stay in its folder, not registered one
+  by one (as E2/E3). Results: the recorded selection and stage 1 readings; the 15 runs of stage2_seeds,
+  stage2_s006_seeds and stage2_base_diag say "not read" (registered before the stage 2 verdict step).
+- **16 smokes, not_saved**: the C1-a gate's 10 compiled smokes (2026-10-02) and the 6 eager smokes (2026-10-04),
+  300 steps on real starter data in scratch trees, checkpoints deleted after by design. The gate's flag_parity runs
+  (200 steps on synthetic batches, compile-parity probes) are not registered, as no compile-parity probe is.
