@@ -13,7 +13,12 @@ What it resumes
   Inside the queue nothing new: finished runs (SCORED, TRUNK_DONE, DIVERGED, GAP) are skipped; the run that was
   cut resumes from its latest.json checkpoint (harness saves are fsynced since 2026-10-03, E2 DEVIATION 1), or
   starts at step 0 if it had saved none; a run cut while scoring re-scores the checkpoints whose bpb/*.json is
-  missing or 0 bytes. The cut is not written to the run's crashes.txt (the queue counts only crashes it saw).
+  missing or 0 bytes. Crash count: a queue launched from 2aa3787 or later (SCREENS DEVIATION 1, experiments/
+  SCREENS.txt 2026-10-10) writes QRUN in a run's dir while it trains that run and removes it after; the resumed queue
+  finds a QRUN left by the cut and appends one line to that run's crashes.txt (the cut is its one crash: it resumes
+  once, a second crash makes a GAP), unless the run had saved its final checkpoint. Leave QRUN in place: it is how
+  the cut gets counted. A queue launched from an earlier commit writes no QRUN, and its cut is not written to
+  crashes.txt (that queue counts only the crashes it saw). Corrected 2026-10-11 (rc12/notes.txt STEP 14L).
 
 What ends a run (never resumed): "plan finished:", "plan says stop", "queue stops at: train" (every stop inside a
   run: STOP, disk, a refusal, heat, the RC-12 guard, a scoring failure, gpu.lock not free after 2 h), "STOP while
@@ -24,9 +29,15 @@ Left for a person (not resumed, exit 1): power-cut damage the queue cannot repai
   of each run dir under ~/planck/runs/SCREENS:
     a *.pt that is not a whole zip (0 bytes, NUL bytes, lost tail)    torch.load fails: crash, resume, crash = GAP
     latest.json that does not parse or names a missing file          GAP, or a silent restart from step 0
-    SCORED with bpb.jsonl or a bpb/*.json missing, empty or not JSON  the queue skips that run for good
-    an unscored bpb/*.json that is not empty and not JSON             the queue stops at scoring
+    SCORED with bpb.jsonl or a bpb/*.json missing, empty or not JSON  the queue skips that run for good (1)
+    an unscored bpb/*.json that is not empty and not JSON             the queue stops at scoring (2)
     TRUNK_DONE with no final_*.pt                                     its branches stop at preflight
+  (1) and (2) for a queue launched from 2aa3787 or later (SCREENS DEVIATION 1 (1), (2)): it writes SCORED only after
+  bpb.jsonl and every bpb/*.json are fsynced, so (1) should no longer arise; and it moves an unscored bpb/*.json that
+  is not whole JSON aside to <ckpt>.json.unparsable_<time> and scores that checkpoint again, so (2) no longer stops
+  it. 40_screens.sh still refuses on both for every queue; for (2) that is stricter than such a queue needs: the
+  person only moves that file aside (to <ckpt>.json.unparsable_<time>, as the queue would; the check reads only
+  names ending in .json), then runs boot_resume.sh --now. Relaxing (2) for those queues is open (not done 2026-10-11).
   Repair as on 2026-10-02 (experiments/E2_lr_transfer/notes.txt CRASH RESUME): move the damaged files and the
   markers they make false into <run>/crashed_<date>/ (subdirectories are not checked), point latest.json at the
   last whole checkpoint, log it, then resume by hand (below). A .pt.tmp is a save the cut stopped: it is ignored.
