@@ -294,3 +294,36 @@ research/CUTS_AUDIT_2026-10.md row 2 and REINSTATE SATURDAY S2: written after th
   Their hours go to the cap check of the batch they join; an overrun goes to Max as a flag (SCREENS.txt AMENDMENT
     CAP-FLAG), never a silent cut of these arms. If the trigger does not fire, none is pre-registered from here, and the
     verdict step records that beside the reading.
+
+RESULT (2026-10-11, Claude; SCREENS.txt STAGE 2 VERDICTS. Mac CPU, no model; the PC read only: the seed runs' bpb.jsonl,
+diag.jsonl, log.jsonl and the C6 runner's JSON copied 2026-10-11 09:40 EDT, sha256 equal on both machines; nothing
+committed.) A 5M loss reading only (C8): no RC-12 split and no Tier 0 margin was scored; C8 reads them after the lock.
+  Runs: s006_mtp_g2_s101, s006_mtp_g2_s102 (pick g 2, the verdict runs) and the IND-only runs s006_mtp_g1_s101,
+  s006_mtp_g1_s102 (C6 MATCHED LR, never in a bpb verdict), plan stage2_s006_seeds, commit 3227c60, against the shared
+  base_s101, base_s102 (93bc10b; C4's pairing holds), each rc 0 on the first try, done and scored, 763 logged steps to
+  7,630, every loss, mtp_loss, gnorm and bpb finite. results.json and tables.txt here hold every number below.
+  VERDICT S006.mtp: REJECT (raw C7). Class SIA: SD_ref 0.00378 bpb (CHAT), df 7, k 2. CHAT d +0.01746 / +0.01744 (the
+  t+2 head worse at both seeds), dbar +0.01745 (+1.51% of BASE's mean), thr 0.00632: WORSE. PROSE dbar +0.02181, thr
+  0.00458: WORSE (cccc, gutenberg, wikimedia WORSE too). Holm over the 9 contrasts so far: holds (p 0.00033). C4 pooled
+  SIA check (df 7): ok. At E3 arm A's mean: REJECT. BASE replay label: stable.
+  Q2, ONSET READING (the g 1 IND-only runs at matched LR): onset_half 459 / 1,224 against BASE 612 / 459, d -153 / +765
+  steps, dbar +306.0, thr 232.7: UNRESOLVED (the seeds disagree in sign; p 0.0217, Holm over the 3 onset contrasts does
+  not hold). BASE replay label on the onset: stable. Final IND of the IND-only runs (the hook at step 7,630): 5.204 /
+  10.384 nats.
+  Registered consequence (PRE-REGISTRATION, verbatim): "REJECT higher chat bpb at 5M. If Q2 reads an earlier onset, the
+  ledger row says "earlier induction at a loss cost at 5M" and P-105 moves to the curriculum arm; otherwise the row says
+  "failed at 5M in this form (one t+2 head, weight decaying with the LR)", never "P-105 failed"."
+  Now: Q2 did not read an earlier onset (UNRESOLVED), so the ledger row says "failed at 5M in this form (one t+2 head,
+  weight decaying with the LR)", never "P-105 failed". The row is W5's to write.
+  FOLLOW-UP TRIGGER (2026-10-10, above): it fires only if Q2 reads EARLIER. Q2 read UNRESOLVED, so it does not fire: none
+  of the three arms (the NTP-to-MTP curriculum, two aux heads, 20M) is pre-registered from here.
+  Compute exposure: the arm does not beat BASE, so no equivalent-BASE-slots figure applies and no compute-matched BASE
+  runs (both registered only for a gain). tok/s 214,930 / 215,048 against BASE's 254,081 / 253,648.
+  Objective parts (log.jsonl, last 2% of steps): next-token loss 3.23158 / 3.25501 (BASE's training loss 3.17695 /
+  3.20989), t+2 loss 4.81267 / 4.84441, w_t 0.000655 at step 7,630. Clip rate 1.31% / 1.57% (BASE 0.66% / 1.18%).
+  C6 (READING RULE, the g 2 verdict runs): final IND 6.082 / 5.590 nats against 7.546 / 8.825: UNRESOLVED. HD_asst
+  UNRESOLVED (d +0.00829 / -0.01051, read at the new-init SD after the pooled SIA check failed on HD_asst; UNRESOLVED
+  at the SIA SD and at the observed pooled SD as well, c6_tables.txt). HD_user UNRESOLVED.
+  What it does NOT show: that P-105 failed (one head, one weight schedule, 5M, g 2 against BASE's g 1); any induction
+  reading beyond onset_half and final IND on these items; any RC-12 or Tier 0 reading (C8); anything beyond 5M,
+  250.0M slots, the starter mix, tok_v0_8k and 2 seeds.

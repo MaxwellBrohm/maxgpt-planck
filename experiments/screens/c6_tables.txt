@@ -1,0 +1,160 @@
+C6 READINGS, ALL CONTRASTS (SCREENS.txt AMENDMENT C6-DIAG READING RULE, read 2026-10-11 at STAGE 2 VERDICTS)
+d = arm - BASE at seeds 101, 102; IND in nats, HD in bpb; SD_ref from E3 PART 4d (results_part4d.json)
+
+HD_asst: noise checks {"S003.adamw": {"df": 1, "limit": 0.007537697766884183, "ok": true, "sd": 0.003246549811520677}, "pooled_sia": {"arms": 7, "df": 7, "limit": 0.007377851521700817, "ok": false, "sd": 0.010682293502206047}}
+  S001.nogate        d -0.01203 -0.01047  dbar -0.01125  thr 0.00559  p 0.00206  LOWER      new init  Holm holds
+  S002.nonormscale   d -0.00912 -0.01127  dbar -0.01020  thr 0.00559  p 0.0035  LOWER      new init  Holm holds  [noise check failed (pooled SIA)]
+  S002.noqknorm      d +0.02294 -0.00091  dbar +0.01101  thr 0.00559  p 0.00231  UNRESOLVED new init  Holm holds  [noise check failed (pooled SIA)]
+  S002.novres        d -0.00425 -0.01448  dbar -0.00937  thr 0.00559  p 0.00544  LOWER      new init  Holm holds  [noise check failed (pooled SIA)]
+  S003.adamw         d -0.00428 -0.00887  dbar -0.00658  thr 0.00643  p 0.0462  LOWER      same init Holm does not hold
+  S004.canonac       d -0.00817 -0.00949  dbar -0.00883  thr 0.00559  p 0.0073  LOWER      new init  Holm holds  [noise check failed (pooled SIA)]
+  S005.forget        d -0.02226 -0.00474  dbar -0.01350  thr 0.00559  p 0.000726  LOWER      new init  Holm holds  [noise check failed (pooled SIA)]
+  S006.mtp           d +0.00829 -0.01051  dbar -0.00111  thr 0.00559  p 0.652  UNRESOLVED new init  Holm does not hold  [noise check failed (pooled SIA)]
+  S007.smear         d +0.01210 -0.00395  dbar +0.00407  thr 0.00559  p 0.129  UNRESOLVED new init  Holm does not hold  [noise check failed (pooled SIA)]
+  SENSITIVITY (reported, no rule; added after the audit): re-read S002.nonormscale, S002.noqknorm, S002.novres, S004.canonac, S005.forget, S006.mtp, S007.smear; at a SMALLER SD than registered: S002.nonormscale, S002.noqknorm, S002.novres, S004.canonac, S005.forget, S006.mtp, S007.smear
+  at the registered SD:
+    S002.nonormscale   SD 0.00520 df 7  thr 0.00870  p 0.0277  LOWER      Holm does not hold
+    S002.noqknorm      SD 0.00520 df 7  thr 0.00870  p 0.0202  UNRESOLVED Holm does not hold
+    S002.novres        SD 0.00520 df 7  thr 0.00870  p 0.0384  LOWER      Holm does not hold
+    S004.canonac       SD 0.00520 df 7  thr 0.00870  p 0.0475  LOWER      Holm does not hold
+    S005.forget        SD 0.00520 df 7  thr 0.00870  p 0.00799  LOWER      Holm does not hold
+    S006.mtp           SD 0.00520 df 7  thr 0.00870  p 0.771  UNRESOLVED Holm does not hold
+    S007.smear         SD 0.00520 df 7  thr 0.00870  p 0.305  UNRESOLVED Holm does not hold
+    Holm over the 9 holds for: S001.nogate
+  at the observed pooled SD:
+    S002.nonormscale   SD 0.01068 df 7  thr 0.01786  p 0.219  UNRESOLVED Holm does not hold
+    S002.noqknorm      SD 0.01068 df 7  thr 0.01786  p 0.188  UNRESOLVED Holm does not hold
+    S002.novres        SD 0.01068 df 7  thr 0.01786  p 0.255  UNRESOLVED Holm does not hold
+    S004.canonac       SD 0.01068 df 7  thr 0.01786  p 0.281  UNRESOLVED Holm does not hold
+    S005.forget        SD 0.01068 df 7  thr 0.01786  p 0.117  UNRESOLVED Holm does not hold
+    S006.mtp           SD 0.01068 df 7  thr 0.01786  p 0.887  UNRESOLVED Holm does not hold
+    S007.smear         SD 0.01068 df 7  thr 0.01786  p 0.607  UNRESOLVED Holm does not hold
+    Holm over the 9 holds for: S001.nogate
+HD_user: noise checks {"S003.adamw": {"df": 1, "limit": 0.011955680756275842, "ok": true, "sd": 0.008277065899798236}, "pooled_sia": {"arms": 7, "df": 7, "limit": 0.011702145693368738, "ok": true, "sd": 0.005087419634810211}}
+  S001.nogate        d +0.00540 -0.00342  dbar +0.00099  thr 0.01111  p 0.84  UNRESOLVED new init  Holm does not hold
+  S002.nonormscale   d +0.00401 -0.00074  dbar +0.00163  thr 0.01380  p 0.788  UNRESOLVED SIA       Holm does not hold
+  S002.noqknorm      d +0.00548 +0.00580  dbar +0.00564  thr 0.01380  p 0.366  UNRESOLVED SIA       Holm does not hold
+  S002.novres        d +0.00763 +0.00049  dbar +0.00406  thr 0.01380  p 0.509  UNRESOLVED SIA       Holm does not hold
+  S003.adamw         d +0.00586 -0.00585  dbar +0.00000  thr 0.01020  p 0.999  UNRESOLVED same init Holm does not hold
+  S004.canonac       d +0.01155 -0.00438  dbar +0.00359  thr 0.01380  p 0.558  UNRESOLVED SIA       Holm does not hold
+  S005.forget        d -0.00457 +0.00097  dbar -0.00180  thr 0.01380  p 0.767  UNRESOLVED SIA       Holm does not hold
+  S006.mtp           d -0.00007 -0.00098  dbar -0.00052  thr 0.01380  p 0.931  UNRESOLVED SIA       Holm does not hold
+  S007.smear         d -0.00387 -0.00203  dbar -0.00295  thr 0.01380  p 0.629  UNRESOLVED SIA       Holm does not hold
+HDn_asst: noise checks null
+  S001.nogate        d -0.04834 -0.05398  dbar -0.05116  descriptive (higher 0, lower 2)
+  S002.nonormscale   d -0.04238 -0.00458  dbar -0.02348  descriptive (higher 0, lower 2)
+  S002.noqknorm      d +0.13365 -0.04495  dbar +0.04435  descriptive (higher 1, lower 1)
+  S002.novres        d -0.05022 -0.05141  dbar -0.05082  descriptive (higher 0, lower 2)
+  S003.adamw         d -0.04360 -0.04731  dbar -0.04545  descriptive (higher 0, lower 2)
+  S004.canonac       d -0.05107 -0.02772  dbar -0.03940  descriptive (higher 0, lower 2)
+  S005.forget        d -0.08019 -0.00564  dbar -0.04291  descriptive (higher 0, lower 2)
+  S006.mtp           d -0.02126 -0.05596  dbar -0.03861  descriptive (higher 0, lower 2)
+  S007.smear         d +0.03168 -0.01546  dbar +0.00811  descriptive (higher 1, lower 1)
+HDn_user: noise checks null
+  S001.nogate        d +0.04968 +0.08339  dbar +0.06653  descriptive (higher 2, lower 0)
+  S002.nonormscale   d +0.00968 +0.00421  dbar +0.00694  descriptive (higher 2, lower 0)
+  S002.noqknorm      d -0.02479 +0.02568  dbar +0.00045  descriptive (higher 1, lower 1)
+  S002.novres        d -0.00205 +0.02759  dbar +0.01277  descriptive (higher 1, lower 1)
+  S003.adamw         d +0.05377 +0.04958  dbar +0.05168  descriptive (higher 2, lower 0)
+  S004.canonac       d -0.01475 +0.05604  dbar +0.02065  descriptive (higher 1, lower 1)
+  S005.forget        d +0.04214 -0.00810  dbar +0.01702  descriptive (higher 1, lower 1)
+  S006.mtp           d -0.03251 +0.09568  dbar +0.03158  descriptive (higher 1, lower 1)
+  S007.smear         d -0.02744 +0.00640  dbar -0.01052  descriptive (higher 1, lower 1)
+IND: noise checks {"S003.adamw": {"df": 1, "limit": 3.817048301655831, "ok": true, "sd": 1.5193214866736886}, "pooled_sia": {"arms": 7, "df": 7, "limit": 3.736103050523078, "ok": true, "sd": 1.4079614016738538}}
+  S001.nogate        d +3.65144 +1.87549  dbar +2.76346  thr 3.28857  p 0.0873  UNRESOLVED new init  Holm does not hold
+  S002.nonormscale   d -3.64544 -0.93945  dbar -2.29245  thr 4.40669  p 0.258  UNRESOLVED SIA       Holm does not hold
+  S002.noqknorm      d -1.01868 -0.06035  dbar -0.53951  thr 4.40669  p 0.781  UNRESOLVED SIA       Holm does not hold
+  S002.novres        d -2.58158 -1.72909  dbar -2.15533  thr 4.40669  p 0.285  UNRESOLVED SIA       Holm does not hold
+  S003.adamw         d -0.18038 -2.32902  dbar -1.25470  thr 3.25632  p 0.393  UNRESOLVED same init Holm does not hold
+  S004.canonac       d +4.00813 +2.68361  dbar +3.34587  thr 4.40669  p 0.116  UNRESOLVED SIA       Holm does not hold
+  S005.forget        d -1.00280 -4.11688  dbar -2.55984  thr 4.40669  p 0.212  UNRESOLVED SIA       Holm does not hold
+  S006.mtp           d -1.46471 -3.23542  dbar -2.35006  thr 4.40669  p 0.248  UNRESOLVED SIA       Holm does not hold
+  S007.smear         d -0.95967 +1.08928  dbar +0.06481  thr 4.40669  p 0.973  UNRESOLVED SIA       Holm does not hold
+
+S005 flag: {"chat_label": "BETTER", "flagged": true, "hd_asst_label": "LOWER"}
+Scorer replay |second - first| (e3_5m_A_s1): {"HD_asst": 0.0, "HD_user": 0.0, "HDn_asst": 0.0, "HDn_user": 0.0, "IND": 0.0}
+
+CHECKS (1) hd.json oasst2 bpb vs scored F(CHAT), relative; (2) checkpoint and code sha256; (3) |ind - hook|
+  base_s101                  ok  (1) 0.0e+00  (3) 0.0e+00
+  base_s102                  ok  (1) 0.0e+00  (3) 0.0e+00
+  base_s103                  ok  (1) 0.0e+00  (3) 0.0e+00
+  base_s104                  ok  (1) 0.0e+00  (3) 0.0e+00
+  base_s105                  ok  (1) 0.0e+00  (3) 0.0e+00
+  s001_nogate_g1_s101        ok  (1) 0.0e+00  (3) 0.0e+00
+  s001_nogate_g1_s102        ok  (1) 0.0e+00  (3) 0.0e+00
+  s002_nonormscale_g1_s101   ok  (1) 0.0e+00  (3) 0.0e+00
+  s002_nonormscale_g1_s102   ok  (1) 0.0e+00  (3) 0.0e+00
+  s002_noqknorm_g1_s101      ok  (1) 0.0e+00  (3) 0.0e+00
+  s002_noqknorm_g1_s102      ok  (1) 0.0e+00  (3) 0.0e+00
+  s002_novres_g1_s101        ok  (1) 0.0e+00  (3) 0.0e+00
+  s002_novres_g1_s102        ok  (1) 0.0e+00  (3) 0.0e+00
+  s003_adamw_e3_r2_s101      ok  (1) 0.0e+00  (3) 0.0e+00
+  s003_adamw_e3_r2_s102      ok  (1) 0.0e+00  (3) 0.0e+00
+  s004_canonac_g1_s101       ok  (1) 0.0e+00  (3) 0.0e+00
+  s004_canonac_g1_s102       ok  (1) 0.0e+00  (3) 0.0e+00
+  s005_base_s101             ok  (1) 0.0e+00  (3) 0.0e+00
+  s005_base_s102             ok  (1) 0.0e+00  (3) 0.0e+00
+  s005_forget_g1_s101        ok  (1) 0.0e+00  (3) 0.0e+00
+  s005_forget_g1_s102        ok  (1) 0.0e+00  (3) 0.0e+00
+  s006_mtp_g2_s101           ok  (1) 0.0e+00  (3) 0.0e+00
+  s006_mtp_g2_s102           ok  (1) 0.0e+00  (3) 0.0e+00
+  s007_smear_g1_s101         ok  (1) 0.0e+00  (3) 0.0e+00
+  s007_smear_g1_s102         ok  (1) 0.0e+00  (3) 0.0e+00
+
+SINK per layer (head mean, query positions >= 64, 200 oasst2 windows) and GATE mean per layer (gate-on runs)
+  base_s101                  SINK 0.0169 0.0024 0.0002 0.0044 0.0016 0.0046 0.0019 0.0030
+                             GATE 0.037 0.468 0.700 0.511 0.805 0.937 0.902 0.900
+  base_s102                  SINK 0.0138 0.0049 0.0002 0.0021 0.0010 0.0011 0.0046 0.0051
+                             GATE 0.039 0.425 0.633 0.668 0.638 0.714 1.066 1.011
+  s001_nogate_g1_s101        SINK 0.0061 0.0035 0.0017 0.0015 0.0006 0.0017 0.0015 0.0062
+  s001_nogate_g1_s102        SINK 0.0067 0.0016 0.0029 0.0034 0.0029 0.0065 0.0010 0.0034
+  s002_nonormscale_g1_s101   SINK 0.0074 0.0294 0.0019 0.0050 0.0006 0.0153 0.0020 0.0051
+                             GATE 0.122 0.935 0.772 0.917 1.274 0.958 0.945 0.851
+  s002_nonormscale_g1_s102   SINK 0.0084 0.0368 0.0005 0.0026 0.0017 0.0004 0.0028 0.0011
+                             GATE 0.094 0.883 0.850 1.144 0.857 1.242 0.951 0.655
+  s002_noqknorm_g1_s101      SINK 0.0150 0.0029 0.0034 0.0244 0.0214 0.0013 0.0028 0.0044
+                             GATE 0.049 1.025 0.839 0.898 0.711 0.852 0.664 0.904
+  s002_noqknorm_g1_s102      SINK 0.0350 0.0002 0.0070 0.0194 0.0370 0.0035 0.0021 0.0033
+                             GATE 0.080 0.787 1.146 1.097 0.783 0.824 0.752 0.940
+  s002_novres_g1_s101        SINK 0.0178 0.0019 0.0002 0.0045 0.0037 0.0079 0.0017 0.0017
+                             GATE 0.085 0.260 0.322 0.403 0.588 0.828 0.899 1.073
+  s002_novres_g1_s102        SINK 0.0144 0.0044 0.0002 0.0007 0.0006 0.0011 0.0027 0.0036
+                             GATE 0.204 0.245 0.275 0.317 0.423 0.661 1.053 1.126
+  s003_adamw_e3_r2_s101      SINK 0.0024 0.0607 0.0038 0.0161 0.0064 0.0038 0.0005 0.0049
+                             GATE 0.369 0.721 0.770 0.986 1.189 0.826 0.739 0.791
+  s003_adamw_e3_r2_s102      SINK 0.0101 0.0001 0.0067 0.0023 0.0030 0.0025 0.0027 0.0920
+                             GATE 0.403 0.874 0.913 0.870 0.813 0.647 0.773 0.729
+  s004_canonac_g1_s101       SINK 0.0065 0.0082 0.0016 0.0071 0.0022 0.0052 0.0054 0.0040
+                             GATE 0.029 0.551 0.598 0.547 0.554 0.835 0.765 0.902
+  s004_canonac_g1_s102       SINK 0.0130 0.0022 0.0024 0.0106 0.0007 0.0010 0.0014 0.0042
+                             GATE 0.030 0.530 0.544 0.645 0.641 0.736 0.907 0.924
+  s005_base_s101             SINK 0.0111 0.0037 0.0003 0.0042 0.0010 0.0063 0.0035 0.0051
+                             GATE 0.037 0.462 0.693 0.557 0.768 0.938 0.950 0.880
+  s005_base_s102             SINK 0.0097 0.0077 0.0003 0.0032 0.0008 0.0008 0.0049 0.0040
+                             GATE 0.040 0.432 0.657 0.665 0.664 0.721 1.070 0.959
+  s005_forget_g1_s101        SINK 0.0008 0.0406 0.0000 0.0033 0.0000 0.0060 0.0019 0.0027
+                             GATE 0.050 0.650 0.598 0.565 0.905 0.952 0.938 0.820
+  s005_forget_g1_s102        SINK 0.0012 0.0150 0.0017 0.0018 0.0000 0.0000 0.0008 0.0021
+                             GATE 0.052 0.484 0.484 0.716 0.565 0.734 0.990 0.773
+  s006_mtp_g2_s101           SINK 0.0082 0.0030 0.0002 0.0038 0.0027 0.0094 0.0040 0.0056
+                             GATE 0.027 0.978 0.973 0.718 1.345 1.256 0.998 0.859
+  s006_mtp_g2_s102           SINK 0.0047 0.0308 0.0009 0.0004 0.0034 0.0013 0.0115 0.0005
+                             GATE 0.028 1.314 1.005 1.082 1.226 0.962 1.226 0.928
+  s007_smear_g1_s101         SINK 0.0116 0.0053 0.0002 0.0045 0.0007 0.0054 0.0039 0.0039
+                             GATE 0.040 0.555 0.653 0.520 0.763 0.843 0.843 0.899
+  s007_smear_g1_s102         SINK 0.0123 0.0217 0.0003 0.0030 0.0015 0.0012 0.0039 0.0036
+                             GATE 0.043 0.474 0.643 0.690 0.678 0.746 0.866 0.874
+S001 SINK gate on minus off per layer, s101 / s102 (seeds with a negative difference):
+  layer 0: +0.01077 / +0.00707  negative at none
+  layer 1: -0.00106 / +0.00329  negative at [101]
+  layer 2: -0.00153 / -0.00263  negative at [101, 102]
+  layer 3: +0.00296 / -0.00129  negative at [102]
+  layer 4: +0.00096 / -0.00194  negative at [102]
+  layer 5: +0.00294 / -0.00541  negative at [102]
+  layer 6: +0.00039 / +0.00362  negative at none
+  layer 7: -0.00321 / +0.00174  negative at [101]
+NEAR ITS INIT: {"S004.canonac": false, "S005.forget": false, "S007.smear": false}
+SHARED BASE AT SEEDS 101-105 BESIDE E3 ARM A (reported, no rule):
+  HD_asst  BASE 0.09876 0.09960 0.09350 0.09089 0.08967  E3 A 0.08760 to 0.09423 (mean 0.09044)
+  HD_user  BASE 0.18661 0.18741 0.18617 0.19667 0.19176  E3 A 0.18058 to 0.19544 (mean 0.18592)
+  IND      BASE 7.54642 8.82495 6.39087 8.16496 6.68130  E3 A 4.86794 to 7.93402 (mean 6.41210)

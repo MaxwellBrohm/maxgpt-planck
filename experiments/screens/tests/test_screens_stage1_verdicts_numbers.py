@@ -78,7 +78,8 @@ def test_every_number_in_the_notes_result_blocks_is_computed():
     ok = known()
     for sid in SIDS:
         t = text(sid, "notes.txt")
-        check(t[t.index(f"\nRESULT ({DATE}"):], ok)
+        t = t[t.index(f"\nRESULT ({DATE}"):]
+        check(t.split("\nC6 READINGS (2026-10-11", 1)[0], ok)   # the C6 block: test_screens_stage2_verdicts_numbers.py
 
 
 def test_every_number_in_the_screens_entry_is_computed():

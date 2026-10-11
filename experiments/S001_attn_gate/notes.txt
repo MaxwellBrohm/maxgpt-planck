@@ -194,3 +194,21 @@ model; the PC read only. results.json and tables.txt here were rebuilt with the 
   1.0 and 1.9 rough se above 0, 2.4 and 2.2 below that gap, so it does not separate the candidates either.
   tables.txt: tok/s medians skip the first two log records (steps 10 and 20; the first holds the start-up), now said
   there; over all 763 records they are the same for these four runs. The p column prints 3 significant digits.
+
+C6 READINGS (2026-10-11, Claude; SCREENS.txt STAGE 2 VERDICTS; the C6 runner's JSON for base_s101, base_s102,
+s001_nogate_g1_s101 and _s102 copied from the PC read only, sha256 equal on both machines; experiments/screens/
+c6_readings.json and c6_tables.txt hold every number below.) STAGE 1 VERDICTS left HD, SINK and the 200-window final
+GATE not computed; AMENDMENT C6-DIAG scored them on the kept final checkpoints and fixed how they are read. The bpb
+verdict (TIE) does not move.
+  READING RULE (E3 PART 4d SDs, class new init): final IND d +3.651 / +1.875 nats, thr 3.289: UNRESOLVED. HD_asst d
+  -0.01203 / -0.01047 bpb, thr 0.00559: LOWER (gate off reads lower history dependence on assistant turns at both
+  seeds), Holm over the 9 contrasts with the metric: holds (p 0.00206; S001 is not re-read, and it holds too when the
+  SIA arms are read at the SIA SD or at the observed pooled SD, c6_tables.txt). HD_user UNRESOLVED. As in S004's
+  block: base_s101 and base_s102 hold the two highest HD_asst of BASE's five seeds, and 6 of the 9 contrasts read
+  LOWER on HD_asst.
+  SINK (reported, no rule; head means per layer over query positions >= 64), gate on minus off per layer, seed 101 /
+  102: layer 0 +0.01077 / +0.00707 (more first-token mass with the gate on at both seeds); layers 1 to 7 differ in sign
+  between seeds except layer 2 (negative at both) and layer 6 (positive at both).
+  GATE (200-window final, BASE side; S001 registers no threshold): 24-head mean 0.658 / 0.649, heads from 0.025 to
+  1.154 / 0.032 to 1.128; layer 0's three heads mean 0.037 / 0.039; p10 down to 0.003 / 0.006, p90 up to 1.671 /
+  1.748.

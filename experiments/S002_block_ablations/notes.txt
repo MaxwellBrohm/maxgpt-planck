@@ -209,3 +209,19 @@ model; the PC read only. results.json and tables.txt here were rebuilt with the 
   1.0 and 1.9 rough se above 0, 2.4 and 2.2 below that gap, so it does not separate the candidates either.
   tables.txt: tok/s medians skip the first two log records (steps 10 and 20), now said there; over all 763 records
   they are the same for these eight runs. The p column prints 3 significant digits.
+
+C6 READINGS (2026-10-11, Claude; SCREENS.txt STAGE 2 VERDICTS; the C6 runner's JSON copied from the PC read only,
+sha256 equal on both machines; experiments/screens/c6_readings.json and c6_tables.txt hold every number below.) The bpb
+verdicts (novres REJECT, noqknorm TIE, nonormscale TIE) do not move: C4's pooled SIA check on F, now over 7 SIA arms
+(df 7), passed, so no stage 1 arm is re-labelled.
+  READING RULE (E3 PART 4d SDs): final IND UNRESOLVED for all three (d novres -2.582 / -1.729, noqknorm -1.019 / -0.060,
+  nonormscale -3.645 / -0.939 nats; thr 4.407). HD_asst: the pooled SIA check failed on this metric (SD 0.01068 against
+  the limit 0.00738, df 7), so every SIA arm is re-read at the new-init SD (thr 0.00559) and labelled "noise check
+  failed (pooled SIA)": novres LOWER (d -0.00425 / -0.01448), nonormscale LOWER (-0.00912 / -0.01127), noqknorm
+  UNRESOLVED (+0.02294 / -0.00091), Holm holding for all three. That SD (0.00334) is SMALLER than the SIA SD whose
+  check failed (0.00520), so the re-read is less cautious than the reading it replaces, and "underpowered" (C4: a
+  larger SD) is not attached (SCREENS.txt STAGE 2 VERDICTS, AUDIT CORRECTIONS). Reported, no rule: at the SIA SD (thr
+  0.00870) the labels are the same and Holm holds for none of the three (p novres 0.0384, nonormscale 0.0277,
+  noqknorm 0.0202); at the observed pooled SD (thr 0.01786) all three read UNRESOLVED. HD_user UNRESOLVED for all
+  three. base_s101 and base_s102 hold
+  the two highest HD_asst of BASE's five seeds (S004's block), so a LOWER here may be a high BASE draw.

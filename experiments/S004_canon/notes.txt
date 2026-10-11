@@ -208,3 +208,40 @@ ONSET READING (2026-10-06, SCREENS.txt AMENDMENT BASE-DIAG; decided before any s
   sqrt(2) x sigma_seed, sigma_seed the SD of BASE's onset_half over seeds 101 to 105 (df 4), thr = 2.776 x sigma_seed;
   EARLIER if -dbar > thr and both d_s < 0, LATER mirrored, else UNRESOLVED, no EQUAL. onset_abs, final IND, HD and
   SINK stay descriptive. The reading is reported beside the bpb verdict and changes no verdict.
+
+RESULT (2026-10-11, Claude; SCREENS.txt STAGE 2 VERDICTS. Mac CPU, no model; the PC read only: the seed runs' bpb.jsonl,
+diag.jsonl, log.jsonl and the C6 runner's JSON copied 2026-10-11 09:40 EDT, sha256 equal on both machines; nothing
+committed.) A 5M loss reading only (C8): no RC-12 split and no Tier 0 margin was scored; C8 reads them after the lock.
+  Runs: s004_canonac_g1_s101, s004_canonac_g1_s102 (pick g 1; plan stage2_seeds, commit d21df3d) against the shared
+  base_s101, base_s102 (stage1_seeds, 93bc10b; C4's pairing holds: no change under harness/, data_prep/, tokenizer/,
+  corpus/ or experiments/E2_lr_transfer between the commits), each rc 0 on the first try, done and scored, 763 logged
+  steps to 7,630, every loss, gnorm and bpb finite. results.json and tables.txt here hold every number below.
+  VERDICT S004.canonac: NOMINATE (raw C7). Class SIA: SD_ref = u x SD_d x BASE's mean = 0.00378 bpb (CHAT), df 7, k 2.
+  CHAT d -0.01137 / -0.00956 (Canon better at both seeds), dbar -0.01047 (-0.91% of BASE's mean), thr 0.00632: BETTER.
+  PROSE d -0.00854 / -0.01015, dbar -0.00934, thr 0.00458: BETTER (so not WORSE; cccc, gutenberg and wikimedia BETTER
+  too). Holm over the 9 contrasts of the batch so far: holds (p 0.0058). C4 pooled SIA check over the 7 SIA arms (df 7):
+  ok. At E3 arm A's mean (BASE LEVEL) the verdict is the same; BASE replay label: stable.
+  Registered consequence (PRE-REGISTRATION, verbatim): "NOMINATE Canon lowers chat bpb at 5M: a loss candidate; its
+  behaviour test is PLAN 3d at 30M (binding, LEDGER P-148's win condition), which this does not replace."
+  Now: P-148 is a 5M loss candidate. Nothing is adopted on it: PLAN 3's rule needs it to hold at 20-30M and survive 3f,
+  and its behaviour test is PLAN 3d's 30M test of binding (LEDGER P-148's same-type pair binding), not run. P-148
+  takes PLAN's must-run 30M slot only if the PLAN 3d toy favours it over P-022 (Must-run status, WHY above; cuts
+  audit S3); otherwise it ranks as an ordinary bet. The ledger row is W5's to write.
+  Q2, ONSET READING (AMENDMENT BASE-DIAG, at matched LR: pick g 1): onset_half 612 / 612 against BASE 612 / 459, d 0 /
+  +153 steps, thr 232.7 (sigma_seed 83.802 from BASE seeds 101 to 105, df 4): UNRESOLVED (p 0.413; Holm over the 3
+  onset contrasts does not hold). BASE replay label on the onset: stable.
+  C6 (AMENDMENT C6-DIAG READING RULE, E3 PART 4d SDs): final IND 11.555 / 11.509 nats against BASE 7.546 / 8.825, d
+  +4.008 / +2.684, thr 4.407: UNRESOLVED. HD_asst d -0.00817 / -0.00949 bpb: LOWER, read at the new-init SD (the pooled
+  SIA check failed on HD_asst, so every SIA arm is labelled "noise check failed (pooled SIA)"), Holm holds (p 0.0073).
+  That SD (0.00334) is SMALLER than the SIA SD whose check failed (0.00520), so the Holm reading comes only from the
+  less cautious SD: at the SIA SD (thr 0.00870) it is still LOWER but Holm does not hold (p 0.0475), and at the observed
+  pooled SD (thr 0.01786) it reads UNRESOLVED (reported, no rule; "underpowered", C4's label for a larger SD, is not
+  attached: SCREENS.txt STAGE 2 VERDICTS, AUDIT CORRECTIONS). HD_user UNRESOLVED. Read beside it (c6_tables.txt):
+  base_s101 and base_s102 have the two highest HD_asst of BASE's five seeds (0.09876, 0.09960) and sit above all 8 of E3
+  arm A's (0.08760 to 0.09423), and 6 of the 9 contrasts read LOWER on HD_asst; a high BASE draw at the screen seeds
+  would read the same way, which this rule cannot separate. Per-module: mean |w| per site over layers and taps A 0.101 /
+  0.097, C 0.110 / 0.113: NEAR ITS INIT does not fire. Clip rate 0.79% / 0.92% (BASE 0.66% / 1.18%); tok/s 184,908 /
+  185,007 against BASE's 254,081 / 253,648 (BASE's mean over Canon's, 1.37; tokens are matched, compute is not).
+  What it does NOT show: binding or any behaviour (loss is not a behaviour proxy for attention-side changes, arch.md
+  1.4); any RC-12 or Tier 0 reading (C8); anything beyond 5M, 250.0M slots, the starter mix, tok_v0_8k and 2 seeds;
+  whether the gain survives a compute-matched BASE (none is registered for S004).

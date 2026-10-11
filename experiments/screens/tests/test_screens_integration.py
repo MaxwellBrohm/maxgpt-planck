@@ -138,7 +138,10 @@ def test_integration_counts():
     assert f"tests/mutants_integ.py ({len(MUTANTS_INTEG)} mutants" in f
     from mutants_cap31 import MUTANTS_CAP31
     from mutants_regreplay import MUTANTS_REGREPLAY
-    assert len(M.MUTANTS) == MUT_ALL + len(MUTANTS_VFIX) + len(MUTANTS_CAP31) + len(MUTANTS_REGREPLAY)   # later lists
+    from mutants_s2rules import MUTANTS_S2RULES
+    from mutants_s2v import MUTANTS_S2V
+    assert len(M.MUTANTS) == MUT_ALL + len(MUTANTS_VFIX) + len(MUTANTS_CAP31) + len(MUTANTS_REGREPLAY) + \
+        len(MUTANTS_S2RULES) + len(MUTANTS_S2V)                                                     # later lists
     assert f"experiments/screens/tests {SUITE} passed" in f and f"{MUT_ALL} of {MUT_ALL} killed" in f
     assert f"{len(MUTANTS_C6DIAG)} and tests/mutants_integ.py's {len(MUTANTS_INTEG)} now in it" in f
     by = collections.Counter(m[0].split("_")[0] for m in MUTANTS_INTEG)

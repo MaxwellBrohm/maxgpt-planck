@@ -1,0 +1,164 @@
+{
+ "checkpoint": "final_00007630.pt",
+ "checkpoint_sha256": "3773786461ff061c525b18f60df5d64401d17ae065b3dded7c14e2b61630b199",
+ "code_sha256": {
+  "data_prep/bpb.py": "7367071e460e0039760b22a48091ad267746ec1341008ab87ad15bd20cfad1f2",
+  "data_prep/bpb_hd.py": "31e8514785f3d98ca01948ad525fcf13d37be8e67c8201c81084aaaa61d5534f",
+  "data_prep/evalwin.py": "e31107725df257719a5696b4125f6bef402c0d8c28d8d00dfb818c4f5af27169",
+  "experiments/screens/diag_lib.py": "b933c83aaf58d2478f64e34ef4eaa20044dad6af4faf1f0d9028c191c63341eb",
+  "experiments/screens/diag_runner.py": "cb3bfdd8928ecfbd1ef5fe0ddaa1144e3a35a260f9f41664aea97974ba66d6e6",
+  "harness/attn_diag.py": "aa9631c77b34d0722adfe4b756f3a437cf2bff2f334ef3670f2d833e7da9af55",
+  "harness/blocks.py": "f1962a5cb7ead3d307a57f4877d186e206236d208ce3ad29b44f13aa6727698f",
+  "harness/induction.py": "c15701d31417c3e24d9fec7bd48b600f078eb4c65ed31c5f31e403d9898b97e4",
+  "harness/model.py": "f4e61556ee9ece8a01a2e9f36808c8ca161c393bc1836e0a542408a911cd14b6"
+ },
+ "device": "cuda",
+ "evalset_sha256": "fe1b55bbe3612d0c968934cbad831a17fd3d73d84aa8f1b7cb2f4523cf4d505b",
+ "exp": "E3",
+ "group": "e3p1",
+ "job": "hd",
+ "result": {
+  "evalset_config": {
+   "chat_context_bytes": 3072,
+   "context_bytes": 1024,
+   "lookback": 256,
+   "offsets": "UTF-8 byte offsets, at character starts",
+   "scored_chat_roles": [
+    "user",
+    "assistant"
+   ],
+   "window_bytes": 2048
+  },
+  "evalset_sha256": "fe1b55bbe3612d0c968934cbad831a17fd3d73d84aa8f1b7cb2f4523cf4d505b",
+  "max_windows": null,
+  "precision": "fp32",
+  "seq_len": 2048,
+  "sets": {
+   "oasst2": {
+    "bits": 2483733.8841074146,
+    "bpb": 1.145064347205317,
+    "by_role": {
+     "assistant": {
+      "bits": 2118816.390882891,
+      "bpb": 1.1034295159815286,
+      "bytes": 1920210,
+      "bytes_per_token": 3.704394629215217,
+      "tokens": 518360,
+      "windows": 1938
+     },
+     "user": {
+      "bits": 364917.493224523,
+      "bpb": 1.46630942196073,
+      "bytes": 248868,
+      "bytes_per_token": 3.849347274639609,
+      "tokens": 64652,
+      "windows": 1689
+     }
+    },
+    "bytes": 2169078,
+    "bytes_per_token": 3.720468875426235,
+    "hd": {
+     "by_role": {
+      "assistant": {
+       "HD": 0.0882411361328117,
+       "HD_none": 0.09690769356682738,
+       "bytes": 1910362,
+       "foreign": 1.1920251998033355,
+       "none": 1.2006917572373512,
+       "own": 1.1037840636705238,
+       "windows": 1926
+      },
+      "user": {
+       "HD": 0.18535073238522926,
+       "HD_none": 0.14624061735967486,
+       "bytes": 74688,
+       "foreign": 1.5344455122098621,
+       "none": 1.4953353971843077,
+       "own": 1.3490947798246329,
+       "windows": 584
+      }
+     },
+     "by_turn": {
+      "1": {
+       "assistant": {
+        "HD": 0.05954404138322644,
+        "HD_none": 0.07154065341191918,
+        "bytes": 1340198,
+        "foreign": 1.186525082959341,
+        "none": 1.1985216949880337,
+        "own": 1.1269810415761146,
+        "windows": 1280
+       }
+      },
+      "2": {
+       "user": {
+        "HD": 0.18194707368651697,
+        "HD_none": 0.1431165961297456,
+        "bytes": 70971,
+        "foreign": 1.5359574196649182,
+        "none": 1.4971269421081468,
+        "own": 1.3540103459784012,
+        "windows": 559
+       }
+      },
+      "3": {
+       "assistant": {
+        "HD": 0.15430644960297957,
+        "HD_none": 0.15522118632448034,
+        "bytes": 549291,
+        "foreign": 1.205674622206343,
+        "none": 1.2065893589278438,
+        "own": 1.0513681726033635,
+        "windows": 618
+       }
+      },
+      "4": {
+       "user": {
+        "HD": 0.2503389114291654,
+        "HD_none": 0.20588950374905113,
+        "bytes": 3717,
+        "foreign": 1.5055777199061828,
+        "none": 1.4611283122260685,
+        "own": 1.2552388084770174,
+        "windows": 25
+       }
+      },
+      "5": {
+       "assistant": {
+        "HD": 0.1922370585139972,
+        "HD_none": 0.19108580553844745,
+        "bytes": 20873,
+        "foreign": 1.1859762711834612,
+        "none": 1.1848250182079114,
+        "own": 0.993739212669464,
+        "windows": 28
+       }
+      }
+     },
+     "first_turn": 1102,
+     "kept": 2510,
+     "no_foreign": 0,
+     "no_history": 15,
+     "truncated": {
+      "foreign": 4,
+      "none": 1,
+      "own": 3
+     },
+     "windows": 3627
+    },
+    "tokens": 583012,
+    "truncated": 4,
+    "windows": 3627
+   }
+  },
+  "tokenizer": {
+   "file": "tok_v0_8k.json",
+   "sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5"
+  }
+ },
+ "run": "e3_5m_A_s2",
+ "seconds": 10.7,
+ "step": 7630,
+ "tokenizer_sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5",
+ "torch": "2.13.0+cu130"
+}

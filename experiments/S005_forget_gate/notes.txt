@@ -261,3 +261,42 @@ its g-check; nothing committed, no S005 run queued, no config changed; method an
     1.7e-7 after 3 steps. Mutants on scratch copies: 5 of 5 killed. Real starter data were not read.
   Hours: screens_hours.py now uses this file's smoke factors (own BASE x1.321, forget x2.981 against the shared BASE);
     screens_lib.py holds no assumed "mult".
+
+RESULT (2026-10-11, Claude; SCREENS.txt STAGE 2 VERDICTS. Mac CPU, no model; the PC read only: the seed runs' bpb.jsonl,
+diag.jsonl, log.jsonl and the C6 runner's JSON copied 2026-10-11 09:40 EDT, sha256 equal on both machines; nothing
+committed.) A 5M loss reading only (C8): no RC-12 split and no Tier 0 margin was scored; C8 reads them after the lock.
+  Runs: s005_forget_g1_s101, s005_forget_g1_s102 (pick g 1) against this screen's own BASE s005_base_s101,
+  s005_base_s102 (mask engine, micro 8 x accum 2; all four in plan stage2_seeds, commit d21df3d, the same seed sets),
+  each rc 0 on the first try, done and scored, 763 logged steps to 7,630, every loss, gnorm and bpb finite. results.json
+  and tables.txt here hold every number below.
+  VERDICT S005.forget: NOMINATE (raw C7). Class SIA: SD_ref = u x SD_d x BASE's mean = 0.00378 bpb (CHAT), df 7, k 2.
+  CHAT d -0.01148 / -0.01627 (the forget gate better at both seeds), dbar -0.01388 (-1.20% of its BASE's mean), thr
+  0.00632: BETTER. PROSE d -0.01006 / -0.01127, dbar -0.01066, thr 0.00458: BETTER (cccc, gutenberg, wikimedia BETTER
+  too). Holm over the 9 contrasts of the batch so far: holds (p 0.0013). C4 pooled SIA check over the 7 SIA arms
+  (df 7): ok. At E3 arm A's mean the verdict is the same. BASE replay label: not applicable (its own BASE ran in the
+  same seed sets).
+  Registered consequence (PRE-REGISTRATION, verbatim): "NOMINATE lower chat bpb at 5M: a loss candidate; its behaviour
+  test is PLAN 3d at 30M (P-020's win: MQRAR capacity x1.5, +10 on corrections, latest-wins >= 0.8 on 4/5 seeds), which
+  this does not replace."
+  Now: P-020 is a 5M loss candidate. Nothing is adopted on it; its behaviour test is PLAN 3d at 30M, not run. The
+  ledger row is W5's to write.
+  FLAG (S005 DIAGNOSTICS, "an arm that is BETTER on CHAT with lower HD is flagged"): FLAGGED. HD_asst d -0.02226 /
+  -0.00474 bpb against its own BASE (0.08785 / 0.08708 against 0.11010 / 0.09182): LOWER at the new-init SD (the pooled
+  SIA check failed on HD_asst: "noise check failed (pooled SIA)"), Holm holds (p 0.000726). That SD (0.00334) is SMALLER
+  than the SIA SD whose check failed (0.00520): at the SIA SD (thr 0.00870) it is still LOWER, so the FLAG stands at
+  either registered SD, but Holm does not hold there (p 0.00799); at the observed pooled SD (thr 0.01786) it reads
+  UNRESOLVED (p 0.117) (reported, no rule; "underpowered", C4's label for a larger SD, is not attached: SCREENS.txt
+  STAGE 2 VERDICTS, AUDIT CORRECTIONS). So the loss gain comes with a lower history-dependence reading on assistant
+  turns, the recency-path case the flag was registered for. How much of it is the arm: s005_base_s101's HD_asst
+  (0.11010) is the highest of any BASE run read here, and the arm's two values sit at the low edge of E3 arm A's 8
+  (0.08760 to 0.09423), one just below it; the rule cannot separate an arm effect from a high BASE draw.
+  HD_user UNRESOLVED (d -0.00457 / +0.00097). Final IND 5.315 / 5.271 nats against 6.318 / 9.388: UNRESOLVED.
+  Onset: descriptive (C6; its own BASE, so the ONSET RULE does not read it): onset_half 459 / 612 against 459 / 459,
+  d 0 / +153 steps.
+  Per-module (c6_readings.json): mean half-life per head (ln 2 / mean(-log f), 24 heads) from 0.79 to 1,652.4 tokens at
+  seed 101 and 0.82 to 19,176.3 at seed 102, median 12.6 / 7.1; 7 / 6 heads above 100 tokens. Most heads learned to
+  forget within tens of tokens: NEAR ITS INIT (every head above 1,023 tokens) does not fire.
+  Clip rate 0.79% / 1.05% (its BASE 0.66% / 1.18%); tok/s 85,096 / 85,053 against its BASE's 191,762 / 191,422.
+  What it does NOT show: MQRAR capacity, correction or latest-wins behaviour (P-020's win is PLAN 3d's 30M test); any
+  RC-12 or Tier 0 reading (C8); anything beyond 5M, 250.0M slots, the starter mix, tok_v0_8k and 2 seeds; that history
+  use falls (HD is a loss difference on held-out turns, read with an SD from an LR contrast).

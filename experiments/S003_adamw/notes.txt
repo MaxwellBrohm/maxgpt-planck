@@ -185,3 +185,10 @@ model; the PC read only. results.json and tables.txt here were rebuilt with the 
   tables.txt: the C7 p column printed 0.0000; it now prints 3 significant digits instead. The
   tok/s medians skip the first two log records (steps 10 and 20), now said there; over all 763 records
   s003_adamw_e3_r2_s102's median is 7 tok/s lower (258,544 against 258,551), the other three are the same.
+
+C6 READINGS (2026-10-11, Claude; SCREENS.txt STAGE 2 VERDICTS; the C6 runner's JSON copied from the PC read only,
+sha256 equal on both machines; experiments/screens/c6_readings.json and c6_tables.txt hold every number below.) The bpb
+verdict (REJECT) does not move.
+  READING RULE (E3 PART 4d SDs, class same init; the same-init noise check passed on every metric): final IND d -0.180 /
+  -2.329 nats, thr 3.256: UNRESOLVED. HD_asst d -0.00428 / -0.00887 bpb, thr 0.00643: LOWER, Holm does not hold (p
+  0.0462). HD_user UNRESOLVED. base_s101 and base_s102 hold the two highest HD_asst of BASE's five seeds (S004's block).

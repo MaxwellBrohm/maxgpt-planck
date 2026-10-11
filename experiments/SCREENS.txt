@@ -2686,3 +2686,154 @@ hook-off run has no diag.jsonl; each file's access time was not after its modifi
     and tests/mutants_cap31.py (15 mutants: analyze_lib.py 2, screens_hours.py 1, SCREENS.txt 12), run by
     mutation_screens.py. The suite and mutation runs on this commit's tree are in its commit message, written after
     them.
+
+STAGE 2 VERDICTS (2026-10-11, Claude, W1's stage 2 verdict step; Mac CPU, no model; the PC read only: 596 files of the
+SCREENS and E3 run directories (bpb.jsonl, log.jsonl, diag.jsonl, score.err, SCORED, c6/*.json), the queue log,
+status.jsonl, runs.jsonl's SCREENS start records and c6diag.log, packed on the PC and copied 2026-10-11 09:40 EDT, sha256
+equal on both machines for all 596; the 49 final checkpoints the C6 runner scored hashed on the PC. Nothing committed,
+no mark, no queue started. A 5M loss reading only (C8): bpb at 5M, 250.0M slots, the starter mix and tok_v0_8k; no RC-12
+split and no Tier 0 margin was scored. Seed-1 selection runs only name the picks.)
+  DATING: the code that reads C6-DIAG's READING RULE and CHECKS (c6read_lib.py, c6read.py), BASE-REPLAY's readings and
+    labels and the BASE level over seeds 101 to 105 (basereplay.py) was written with its tests (tests/test_c6read.py,
+    tests/test_basereplay.py) and 40 mutants (tests/mutants_s2rules.py) before any stage 2, S006, BASE-DIAG, replay or
+    C6 value was read; the first value read was analyze.py verdicts at 09:47:53 EDT. The mutation run of 09:47:16
+    killed 37 of the 40 (survivors: check 3's step, HD_none read by the rule, a CHAT-only relabel). The tests were
+    strengthened at 09:47:26, before the first read, but the first logged run with all 40 killed is from 10:07, after
+    it; no run in between was logged. Written AFTER values were read: c6read.py's base_by_seed (the shared BASE's five
+    seeds beside E3 arm A, reported with no rule; the source of the high-BASE-draw sentences below) with the CHECKS on
+    base_s103 to 105 that gate it (09:51), their assertions in tests/test_c6read.py (09:52) and the 41st mutant
+    (10:08); and everything under AUDIT CORRECTIONS at the end of this entry.
+  Runs: queue_screens.txt (sha256 6c19954e97b3b35f..., status.jsonl dd76ba22c2533d4a...: the copies AMENDMENT CAP-31
+    hashed): stage2_seeds (d21df3d, mark 2026-10-07 00:35:10), stage2_s006_seeds (3227c60, 02:03:54), stage2_base_diag
+    (27d8cb7, 03:03:58), stage2_replay (2aa3787, 2026-10-10 23:51:19). All 18 runs rc 0 on the first try, done and
+    scored, score.err empty; no DIVERGED, GAP, crashes.txt, QRUN or rc12_eval.jsonl under runs/SCREENS; 763 logged steps
+    to 7,630 in each, every loss, gnorm (and S006's mtp_loss) and bpb finite; 50 finite IND readings each (none in the
+    hook-off run, as registered). No arm seed diverged and no BASE seed was dropped. C4's BASE pairing holds for S004,
+    S006 and S007 (no change under harness/, data_prep/, tokenizer/, corpus/ or experiments/E2_lr_transfer between
+    93bc10b and d21df3d or 3227c60).
+  VERDICTS (analyze.py verdicts on the copies; C7 per metric, C4 classes and noise checks, CCCC-ONLY, Holm over the 9
+  contrasts that ran; stage 1's results.json as --earlier, the default; d = arm - BASE in bpb, negative = arm better):
+    arm               class      verdict   Holm           CHAT d 101 / 102     dbar      thr      PROSE dbar thr      C / P
+    S004.canonac      SIA        NOMINATE  holds          -0.01137 / -0.00956  -0.01047  0.00632  -0.00934  0.00458  BETTER / BETTER
+    S005.forget       SIA        NOMINATE  holds          -0.01148 / -0.01627  -0.01388  0.00632  -0.01066  0.00458  BETTER / BETTER
+    S006.mtp          SIA        REJECT    holds          +0.01746 / +0.01744  +0.01745  0.00632  +0.02181  0.00458  WORSE / WORSE
+    S007.smear        SIA        TIE       does not hold  -0.00560 / -0.00312  -0.00436  0.00632  -0.00265  0.00458  EQUAL / EQUAL
+    Stage 1's five unchanged (S001 TIE, S002 novres REJECT, noqknorm TIE, nonormscale TIE, S003 REJECT), Holm readings
+    unchanged in the family of 9. S005 reads against its own BASE (BASE mean F(CHAT) 1.15408), the others against the
+    shared BASE (1.15430). Picks: g 1 for S004, S005, S007; g 2 for S006 (its verdict runs). Every reading of the four
+    arms on cccc, gutenberg and wikimedia agrees with its PROSE label, so no CCCC-ONLY.
+  Holm p(CHAT): S003 4.39e-05, S006 0.000327, novres 0.000355, S005 0.00127, S004 0.0058 hold; S007 0.147, S001 0.227,
+    nonormscale 0.842, noqknorm 0.844 do not.
+  C4 pooled SIA check (7 SIA arms, df 7): CHAT SD 0.1832% of BASE against the limit 0.4646%, PROSE 0.0984% against
+    0.2801%: ok, so no SIA arm is re-read and no stage 1 arm is re-labelled. k 2 in every class, so none underpowered.
+  Labels: at E3 arm A's mean (STAGE 1 VERDICTS' BASE LEVEL check, SD_ref, thr and delta scaled) all four verdicts are
+    the same. BASE replay label (AMENDMENT BASE-REPLAY): S004, S006, S007 "BASE replay: stable"; S005 and stage 1 "not
+    applicable".
+  ONSET READINGS (AMENDMENT BASE-DIAG's ONSET RULE): BASE onset_half at seeds 101 to 105: 612, 459, 459, 612, 459;
+    sigma_seed 83.802 steps (df 4), thr 232.7 at k 2. S004 canonac (g 1) d 0 / +153, dbar +76.5: UNRESOLVED (p 0.413).
+    S006 mtp, the g 1 IND-only runs, d -153 / +765, dbar +306.0: UNRESOLVED (p 0.0217; the seeds disagree in sign). S007
+    smear (g 1) d -153 / +153, dbar 0: UNRESOLVED (p 1). Holm over the 3: none holds. No onset reads EARLIER, so S006's
+    FOLLOW-UP TRIGGER does not fire and none of its three arms is pre-registered. S005: descriptive (its own BASE),
+    onset_half 459 / 612 against 459 / 459. BASE replay label on each onset: stable (D_onset -76.5 steps).
+  C6 (AMENDMENT C6-DIAG; screens/c6_readings.json, c6_tables.txt). CHECKS: (1) every hd.json's oasst2 bpb equals the
+    run's scored F(CHAT) (difference 0 in all 25 SCREENS runs and the 25 E3 hd files); (2) every JSON's checkpoint sha256
+    is its run's final checkpoint and its code sha256 the C6 queue's commit 2aa3787's files: 25 of 25 runs ok; (3)
+    |c6/ind.json - the hook's step 7,630 reading| 0 in every run; (4) scorer replay of e3_5m_A_s1: 0 on every metric.
+    E3 PART 4d (E3_seed_noise/notes.txt PART 4d RESULT): SD_d IND 1.94751 nats, HD_asst 0.00385 and HD_user 0.00610 bpb
+    (df 7). READING RULE over the 9 contrasts: final IND UNRESOLVED in all 9 (same-init and pooled SIA checks ok). HD_user
+    UNRESOLVED in all 9 (checks ok). HD_asst: the pooled SIA check failed (SD 0.01068 against the limit 0.00738, df 7), so
+    every SIA arm is re-read at the new-init SD (thr 0.00559) and labelled "noise check failed (pooled SIA)"; LOWER for
+    S001 (new init, p 0.00206), S002 nonormscale, S002 novres, S003 (same init, thr 0.00643, p 0.0462, Holm does not
+    hold), S004 (p 0.0073) and S005 (p 0.000726); UNRESOLVED for noqknorm, S006 and S007. THE RE-READ SD IS SMALLER:
+    the new-init SD (sqrt(2) x sigma_seed = 0.00334; PART 4d's rho on HD_asst is -0.326) is below the SIA SD whose
+    check failed (u x SD_d = 0.00520) and far below the observed pooled SD (0.01068), so on this metric the failed
+    check made the reading less cautious, not more. "underpowered" (C4: a re-read at a LARGER SD) does not apply and is
+    not attached (AUDIT CORRECTIONS). Reported beside it, no rule (c6_readings.json "sensitivity"): at the SIA SD (thr
+    0.00870) the LOWER and UNRESOLVED labels are the same, but Holm over the 9 holds only for S001 (S005 p 0.00799,
+    noqknorm 0.0202, nonormscale 0.0277, novres 0.0384, S004 0.0475); at the observed pooled SD (thr 0.01786) every
+    SIA arm reads UNRESOLVED (S005 p 0.117). So "Holm holds" for S004, S005, novres, nonormscale and noqknorm comes
+    only from the smaller SD; the readings stand as the registered rule gives them, with this beside them.
+    Beside it, reported: base_s101 and base_s102 hold the two highest HD_asst of BASE's five seeds (0.09876, 0.09960;
+    103 to 105: 0.09350, 0.09089, 0.08967) and lie above all 8 of E3 arm A's (0.08760 to 0.09423), so the five LOWER
+    readings against the shared BASE (S001, nonormscale, novres, S003, S004) fit a high BASE draw at the screen seeds
+    as well as an arm effect; the rule cannot separate them. S005 reads against its own BASE, which is high at seed 101
+    only (0.11010; seed 102's 0.09182 lies inside E3 arm A's range).
+    S005 FLAG (S005 DIAGNOSTICS): BETTER on CHAT with LOWER HD_asst: FLAGGED. It stands at the SIA SD too (LOWER, p
+    0.00799, Holm does not hold); at the observed pooled SD HD_asst would read UNRESOLVED. NEAR ITS INIT: fires for
+    none of S004, S005, S007 (no new-module LR pre-registration from the cuts audit's row 8). SINK, S001's paired
+    SINK, GATE, the per-module readings: reported in c6_tables.txt and the screens' RESULT blocks, no rule.
+  BASE REPLAY (AMENDMENT BASE-REPLAY; screens/base_replay.json, base_tables.txt): F(CHAT) D -0.00025 (t -0.11), H
+    -0.00059 (t -0.26); F(PROSE) D +0.00102 (t +0.73), H -0.00104 (t -0.74); every D and H on all five readings "not
+    separated from replay noise" (bar 3.182, df 3). Same-day difference rep1 - rep2: +0.00296 (CHAT), +0.00261 (PROSE).
+    Start records (python, torch, numpy, CUDA, platform) equal to base_s101's in all three; the hook-off run logged no
+    induction. So neither the hook nor a shift between days is shown to move BASE; "not separated", never "no effect".
+  BASE LEVEL over seeds 101 to 105 against E3 Part 1 arm A: F(CHAT) gap +0.00619 (+0.54%), t 3.71, p 0.00755 (n 5);
+    seeds 103 to 105 alone +0.00528 (+0.46%), t 2.67, p 0.0322; base_s104 (1.14322) lies inside E3 arm A's range, so the
+    record says "the seed draw is not excluded". F(PROSE): +0.00402 (n 5, p 0.0109), +0.00273 (n 3, p 0.0901).
+  CONSEQUENCES (each RESULT block quotes its registration verbatim): S004 NOMINATE: P-148 is a 5M loss candidate; its
+    behaviour test is PLAN 3d's 30M test of binding (LEDGER P-148's same-type pair binding), not run, and it holds
+    PLAN's must-run 30M slot only if the PLAN 3d toy favours it over P-022 (S004's notes; cuts audit S3); nothing
+    adopted. S005 NOMINATE: P-020 is a 5M loss candidate, FLAGGED for lower HD_asst (read at the smaller re-read SD,
+    above); its behaviour test is PLAN 3d at 30M; nothing adopted. S006 REJECT with Q2 not earlier:
+    the ledger row says "failed at 5M in this form (one t+2 head, weight decaying with the LR)", never "P-105 failed".
+    S007 TIE: loss-neutral at 5M; Q2 UNRESOLVED; Tier 0 after the lock decides whether it goes to 20M.
+  FILES: experiments/S004_canon, S005_forget_gate, S006_mtp_aux, S007_smeared_key: results.json, tables.txt, out/<run>/
+    (log.jsonl, bpb.jsonl, diag.jsonl of the screen's arm, BASE and, for S006, IND-only runs), a RESULT block in each
+    notes.txt; S001, S002, S003 notes.txt: a C6 READINGS block. experiments/screens: stage2_verdicts.json (analyze.py's
+    output), c6_readings.json, base_replay.json, c6_record.json (checkpoint and code sha256), stage2_source.json (the
+    PC's sha256 of every copied file), c6_tables.txt, base_tables.txt, c6_out/<run>/ (the C6 JSON of 25 runs),
+    base_out/<run>/ (base_s103 to 105 and the three replay runs); E3_seed_noise: out/<run>/c6/, results_part4d.json,
+    tables_part4d.txt, PART 4d RESULT in notes.txt. Code: c6read_lib.py, c6read.py, basereplay.py, report_lib.py,
+    stage2_report.py, stage2_tables.py. No machine address, user name or key path in any of them (tests/privacy.py).
+  NOT DONE: models/registry.jsonl's result fields of these 18 runs still read "not read" (registered before this step);
+    measured_hours.tsv is not regenerated (no cap check is due: no g-check or seed set remains); E3 Part 3 (the data_seed
+    patch) is a separate step; the LEDGER rows are W5's (listed for it in this step's report).
+  TESTS (Mac CPU, ~/.venvs/planck; written after the runs they report). New: tests/test_c6read.py (11) and
+    tests/test_basereplay.py (8), synthetic, written before any value was read except test_c6read.py's base_by_seed
+    assertions (09:52, DATING); tests/test_screens_stage2_verdicts.py (11: the verdicts, onsets, C6 and replay readings
+    and E3 PART 4d recomputed from the repo's copies through the analyzers; the writer reproducing every results.json
+    and table; the copies' sha256 against the PC's; the RESULT blocks quoting their registrations; this entry; no
+    private identifier) and tests/test_screens_stage2_verdicts_numbers.py (2: every decimal in this entry, the four
+    RESULT blocks, the three C6 READINGS blocks and E3's PART 4d RESULT computed from the outputs; key phrases pinned to
+    their values); tests/s2v_lib.py (the run tree rebuilt from the repo). Mutants: tests/mutants_s2rules.py (41, on the
+    rule code; 40 before the first read) and tests/mutants_s2v.py (34, on the outputs, copies, writer and prose), both
+    in mutation_screens.py, whose copy list now also holds E3's results_part4d.json and notes.txt. Changed:
+    test_screens_stage1_verdicts_numbers.py reads stage 1's RESULT blocks up to the new C6 READINGS blocks (tested
+    here); test_screens_integration.py counts the two new mutant lists; two older mutants re-anchored to unique text
+    because this entry repeats it (mutants_cap31.py c31_sha_typo, mutants_replay.py rp_entry_t3_typo; each killed
+    again). Runs: experiments/screens/tests 851 passed before this paragraph; models/tests 21 passed.
+    mutation_screens.py, 4 shards on scratch copies, 10:11 to 10:25 EDT: 660 of 662 killed and 2 INVALID (the two
+    re-anchored above), then those 2 killed; none survived.
+  AUDIT CORRECTIONS (2026-10-11 10:45 to 11:25 EDT, Claude, W1's fix step after two independent audits of this entry;
+  Mac CPU, no model, the PC not touched; every value had been read before any of this was written; nothing committed):
+    (1) HD_asst's re-read SD (both audits, MEDIUM). C6-DIAG's rule re-reads at the new-init SD after a failed check. On
+    HD_asst that SD (0.00334) is SMALLER than the SIA SD whose pooled check failed (0.00520), because PART 4d's rho is
+    negative there, so the re-read made five Holm readings hold (S004, S005, novres, nonormscale, noqknorm) that do not
+    hold at the SIA SD. The record did not say so, and it labelled every re-read "underpowered", which C4 gives only to
+    "an arm re-read with a larger SD". Changed: c6read_lib.reread attaches "underpowered" only when the re-read SD is
+    the larger and records the SD it replaced (sd_ref_registered); read_metric adds a "sensitivity" block (reported, no
+    rule): the re-read arms at their registered SD and at the observed pooled SD on its df, each with Holm over the
+    whole family; stage2_report.py and stage2_tables.py carry it into results.json, tables.txt and c6_tables.txt; the C6
+    paragraph above, S001's and S002's C6 READINGS blocks and the S004 to S007 RESULT blocks say it. Rerun on the PC
+    copies: analyze.py verdicts and basereplay.py give stage2_verdicts.json and base_replay.json unchanged; c6read.py
+    differs from the first c6_readings.json only in "underpowered" leaving the 7 HD_asst re-reads and the two added
+    fields; no label, p value or Holm reading of the rule moved. The C7 bpb re-read (analyze_lib.reread_new_init) also
+    labels "underpowered" unconditionally; with E3's committed noise its new-init SD is the larger on every C7 metric,
+    so it is right there, and a test now pins that. The rule is not changed for this batch: a later batch that wants the
+    re-read never to fall below the SD that failed needs an amendment dated before its values exist.
+    (2) DATING (both audits): rewritten above. base_by_seed, the checks on base_s103 to 105 and the 41st mutant came
+    after the first read, and the first logged run with all 40 killed is from 10:07.
+    (3) The high-BASE-draw sentence (LOW): it said six LOWER readings fit a high BASE draw; S005 pairs with its own
+    BASE, which is high at seed 101 only. Now five, and a sentence for S005.
+    (4) S004's consequence (LOW): "PLAN 3d at 30M (binding)" read as "mandatory"; now "the 30M test of binding", with
+    the toy's P-022 or P-148 pick for the must-run slot restated (S004 RESULT block and CONSEQUENCES above).
+    Tests: tests/test_c6read.py now 12 (test_reread_at_a_smaller_sd, and the sd_ref_registered and sensitivity
+    assertions), tests/test_screens_stage2_verdicts.py now 12 (the real HD_asst labels and sensitivity; the C7 guard
+    test_c7_reread_sd_is_larger_than_every_registered_sd; the corrected wording), the numbers test pins the new values.
+    Mutants: mutants_s2rules.py now 53 (11 on the new code, 1 on the C7 guard; s2r_reread_not_underpowered and
+    s2r_holm_no_step_down re-anchored), mutants_s2v.py now 46 (12 on the new outputs and prose); each new one was
+    watched killed before the full run. Runs: mutation_screens.py, 4 shards on scratch copies, 11:01 to 11:17 EDT: 684
+    of 684 killed (683 names; rc12_guard_removed names two), none survived, none INVALID; then, after this paragraph,
+    experiments/screens/tests 853 passed (SCREENS_PC_COPY set to the earlier PC copy whose queue_screens.txt the
+    Saturday test pins, SCREENS_PC_COPY_1011 to copies of queue_screens.txt, status.jsonl and c6diag.log with the sha256
+    AMENDMENT CAP-31 recorded; without them the three tests that need them skip) and models/tests 21 passed.

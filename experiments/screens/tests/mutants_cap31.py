@@ -22,7 +22,7 @@ MUTANTS_CAP31 = [
     ("c31_total_typo", TX, "counted as 0.02 h = 27.112 h", "counted as 0.02 h = 27.121 h", C31 + "::arithmetic"),
     ("c31_headroom_typo", TX, "with 3.888 h of headroom under 31 h", "with 3.388 h of headroom under 31 h",
      C31 + "::arithmetic"),
-    ("c31_sha_typo", TX, "dd76ba22c2533d4a...", "dd76ba22c2533d4b...", C31 + "::arithmetic"),
+    ("c31_sha_typo", TX, "dd76ba22c2533d4a..., and", "dd76ba22c2533d4b..., and", C31 + "::arithmetic"),
     ("c31_dating_turned", TX, "Written before any C6\ndiagnostic, BASE replay", "Written after the C6\ndiagnostic, BASE replay",
      C31 + "::place"),
     ("c31_test_count_typo", TX, "tests/test_screens_cap31.py (9: this entry's", "tests/test_screens_cap31.py (8: this entry's",

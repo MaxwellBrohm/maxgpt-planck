@@ -538,3 +538,24 @@ no DIVERGED, GAP or rc12_eval.jsonl.)
   How SCREENS reads them is SCREENS.txt AMENDMENT C6-DIAG's rule, not this file's.
   Outputs: PC <run>/c6/*.json; copied to out/<run>/c6/ (file names and hashes only: no machine address, user name or
     key path), results_part4d.json and tables_part4d.txt.
+
+PART 4d RESULT (2026-10-11, Claude, W1's stage 2 verdict step; Mac CPU, no model; the PC read only. The C6 runner's
+JSON for the 24 E3 checkpoints and A1's scorer replay (50 files) copied from the PC 2026-10-11 09:40 EDT, sha256 equal on
+both machines, to out/<run>/c6/; e3analyze_4d.py as committed at 2aa3787 wrote results_part4d.json and tables_part4d.txt.
+Scored by the C6 queue from 2aa3787 (c6diag.log DONE 2026-10-10 22:28:09). SCREENS.txt AMENDMENT C6-DIAG's CHECKS, run
+here on these files too: every JSON's checkpoint sha256 is its run's final checkpoint (hashed on the PC) and its code
+sha256 the commit's files; each of the 25 hd JSONs' oasst2 bpb equals the run's scored F(CHAT) (difference 0).) Absolute units, nats (IND) and bpb (HD, HD_none); d = B - A.
+  Part 1 (5M, 8 pairs, df 7, none dropped):
+    IND       mean A 6.41210, sigma_seed 1.39074, SD_d 1.94751, rho 0.020; mean d +2.32785 (t 3.38, p 0.0117: B's lower
+              LR gives a higher final IND here); paired MDE at k 2 4.49024 (80% bound 6.07652); sigma_rep 0.36503.
+    HD_asst   mean A 0.09044, sigma_seed 0.00236, SD_d 0.00385, rho -0.326; mean d -0.00162 (p 0.271); MDE k 2 0.00887;
+              sigma_rep 0.00099.
+    HD_user   mean A 0.18592, sigma_seed 0.00470, SD_d 0.00610, rho 0.159; mean d +0.00009 (p 0.967); MDE k 2 0.01406;
+              sigma_rep 0.00442, whose share of the paired variance is 1.048: A1's three replays spread as much as the
+              LR contrast's pairs, so HD_user's SD_d holds little beyond replay noise.
+    HDn_asst  SD_d 0.02006, HDn_user SD_d 0.03817: reported beside HD only (C6).
+  Scorer replay (e3_5m_A_s1 scored again by a later runner process): 0 on every metric (bitwise equal), so the scorer
+    adds no noise of its own; sigma_rep above is training replay noise.
+  Part 2 (20M, 3 pairs, df 2), descriptive: IND mean A 9.94242, mean d +0.25322 (p 0.19); HD_asst mean A 0.08932, mean d
+    +0.00292 (p 0.211); HD_user mean A 0.18846, mean d -0.00478 (p 0.341).
+  Use: SCREENS.txt STAGE 2 VERDICTS reads final IND, HD_asst and HD_user with these Part 1 SDs (C6-DIAG READING RULE).

@@ -177,3 +177,29 @@ ONSET READING (2026-10-06, SCREENS.txt AMENDMENT BASE-DIAG; decided before any s
   EARLIER if -dbar > thr and both d_s < 0, LATER mirrored, else UNRESOLVED, no EQUAL. onset_abs, final IND, HD and
   SINK stay descriptive. The reading is reported beside the bpb verdict and changes no verdict. "Q2 reads an earlier
   onset" (METRIC AND DECISION RULE) now means EARLIER here.
+
+RESULT (2026-10-11, Claude; SCREENS.txt STAGE 2 VERDICTS. Mac CPU, no model; the PC read only: the seed runs' bpb.jsonl,
+diag.jsonl, log.jsonl and the C6 runner's JSON copied 2026-10-11 09:40 EDT, sha256 equal on both machines; nothing
+committed.) A 5M loss reading only (C8): no RC-12 split and no Tier 0 margin was scored; C8 reads them after the lock.
+  Runs: s007_smear_g1_s101, s007_smear_g1_s102 (pick g 1; plan stage2_seeds, commit d21df3d) against the shared
+  base_s101, base_s102 (93bc10b; C4's pairing holds), each rc 0 on the first try, done and scored, 763 logged steps to
+  7,630, every loss, gnorm and bpb finite. results.json and tables.txt here hold every number below.
+  VERDICT S007.smear: TIE (raw C7). Class SIA: SD_ref 0.00378 bpb (CHAT), df 7, k 2. CHAT d -0.00560 / -0.00312, dbar
+  -0.00436 (-0.38% of BASE's mean), thr 0.00632, delta 0.01154: |dbar| + thr = 0.01069 < delta, EQUAL. PROSE dbar
+  -0.00265, thr 0.00458: EQUAL. Holm over the 9 contrasts so far: does not hold (p 0.15). C4 pooled SIA check (df 7):
+  ok. At E3 arm A's mean: TIE. BASE replay label: stable.
+  Q2, ONSET READING (pick g 1, matched LR): onset_half 459 / 612 against BASE 612 / 459, d -153 / +153 steps, dbar 0,
+  thr 232.7: UNRESOLVED (p 1; Holm over the 3 onset contrasts does not hold). BASE replay label on the onset: stable.
+  Registered consequence (PRE-REGISTRATION, verbatim): "TIE loss-neutral: Q2 and, after the lock, Tier 0 decide whether
+  it goes to 20M."
+  Now: loss-neutral at 5M; Q2 did not read an earlier onset (UNRESOLVED), so Q2 gives no reason to take it to 20M;
+  Tier 0 after the lock (C8) is the remaining reading that decides whether it goes. The ledger row is W5's to write.
+  C6 (READING RULE): final IND 6.587 / 9.914 nats against 7.546 / 8.825: UNRESOLVED. HD_asst UNRESOLVED (d +0.01210 /
+  -0.00395, at the new-init SD after the pooled SIA check failed on HD_asst; UNRESOLVED at the SIA SD and at the
+  observed pooled SD as well, c6_tables.txt). HD_user UNRESOLVED.
+  Per-module: the learned alpha per layer and KV head (c6_readings.json) is between 0.0 and 0.7 in 23 of 24 heads at
+  each seed, with one head far out (10.98 in layer 6 at seed 101, 16.04 in layer 7 at seed 102): NEAR ITS INIT (every
+  |alpha| below 0.05) does not fire. Clip rate 0.66% / 1.18% (BASE 0.66% / 1.18%); tok/s 245,933 / 246,130.
+  What it does NOT show: earlier induction (UNRESOLVED is "not resolved", never "no effect"); binding or any behaviour
+  (arch.md 1.4); any RC-12 or Tier 0 reading (C8); anything beyond 5M, 250.0M slots, the starter mix, tok_v0_8k and 2
+  seeds.

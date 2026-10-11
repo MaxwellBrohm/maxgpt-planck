@@ -209,6 +209,10 @@ from mutants_cap31 import MUTANTS_CAP31  # noqa: E402  (AMENDMENT CAP-31: the 31
 MUTANTS += MUTANTS_CAP31
 from mutants_regreplay import MUTANTS_REGREPLAY  # noqa: E402  (models/registry.jsonl: stage2_replay's 3 runs)
 MUTANTS += MUTANTS_REGREPLAY
+from mutants_s2rules import MUTANTS_S2RULES  # noqa: E402  (stage 2 verdict step: C6-DIAG reading rule, BASE-REPLAY)
+MUTANTS += MUTANTS_S2RULES
+from mutants_s2v import MUTANTS_S2V  # noqa: E402  (STAGE 2 VERDICTS: outputs, copies, writer, prose)
+MUTANTS += MUTANTS_S2V
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")
@@ -224,6 +228,7 @@ def copy_tree(dst: str) -> None:
                 "experiments/E2_lr_transfer/queue_lib.sh", "experiments/E2_lr_transfer/bpb_lines.py", "models/registry.jsonl",
                 "experiments/E3_seed_noise/results.json", "experiments/E3_seed_noise/e3analyze.py",
                 "experiments/E3_seed_noise/e3analyze_4d.py", "tokenizer/spec.py",
+                "experiments/E3_seed_noise/results_part4d.json", "experiments/E3_seed_noise/notes.txt",
                 "experiments/SCREENS.txt",
                 "tokenizer/v0/tok_v0_8k.json", "tokenizer/v0/tok_v0_manifest.json", "corpus/oodh.py", "corpus/sample_plan.py"):
         os.makedirs(os.path.dirname(os.path.join(dst, rel)), exist_ok=True)

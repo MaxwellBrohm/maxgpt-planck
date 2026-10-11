@@ -61,7 +61,7 @@ MUTANTS_REPLAY_STATE = [
      "  BASE RUNS, ADDED BY AMENDMENT BASE-REPLAY: base_s101_rep1,", CF + "::complete"),
     ("rp_entry_total_typo", PEND, "27.240", "27.204", RE),
     ("rp_entry_headroom_typo", PEND, "0.760", "0.706", RE),
-    ("rp_entry_t3_typo", PEND, "3.182", "3.128", RE),
+    ("rp_entry_t3_typo", PEND, "t(0.975, 3) = 3.182", "t(0.975, 3) = 3.128", RE),
     ("rp_entry_bar_typo", PEND, "0.00555", "0.00565", RE),
     ("rp_entry_held_typo", PEND, "6.280", "6.208", RE),
     ("rp_entry_label_reworded", PEND, 'labels it "BASE replay: stable"', 'labels it "BASE replay: robust"', RE),
