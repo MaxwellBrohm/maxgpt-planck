@@ -1,5 +1,5 @@
-"""SCREENS GPU hours and ORDER's cap (SCREENS.txt GPU HOURS, CAP AND CUT RULE; STAGE 2 READINESS 2026-10-05; 28 h and
-a flag to Max instead of a cut since AMENDMENT BASE-DIAG and AMENDMENT CAP-FLAG).
+"""SCREENS GPU hours and ORDER's cap (SCREENS.txt GPU HOURS, CAP AND CUT RULE; STAGE 2 READINESS 2026-10-05; 31 h
+since AMENDMENT CAP-31, a flag to Max instead of a cut since AMENDMENT CAP-FLAG).
 
   python screens_hours.py measured QUEUE_LOG STATUS_JSONL > measured_hours.tsv   (the PC queue's own two files)
   python screens.py hours [--measured-file TSV] [--s003-rb R]                    report(): estimate and cap check
@@ -232,8 +232,8 @@ def tally(p: dict, runs: dict, r_b: float | None = None) -> dict:
 
 
 def report(p: dict, path: str = TSV, r_b: float | None = None, cap: float | None = None) -> dict:
-    """The table, the conditional hours and ORDER's cap check. cap None = analyze_lib.CAP (28 h since AMENDMENT
-    BASE-DIAG); the earlier entries' checks pass their own cap (25 h, 27 h). Over the cap the line says FLAG TO MAX
+    """The table, the conditional hours and ORDER's cap check. cap None = analyze_lib.CAP (31 h since AMENDMENT
+    CAP-31); the earlier entries' checks pass their own cap (25 h, 27 h, 28 h). Over the cap the line says FLAG TO MAX
     (AMENDMENT CAP-FLAG): nothing is cut; "cap" keeps the cut order's arithmetic, the proposal the flag carries."""
     import analyze_lib as AL
     c = AL.CAP if cap is None else cap

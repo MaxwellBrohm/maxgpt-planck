@@ -1,7 +1,7 @@
 """SCREENS decision rules as pure functions (no file is read here; analyze.py does the I/O). Stdlib only.
 experiments/SCREENS.txt: C4 (reference SDs per class, the noise checks), C5 (CCCC-ONLY), C7 (metric readings,
 arm verdicts, DIVERGENCE, the Holm reading), C6 (IND onsets), AMENDMENT BASE-DIAG's ONSET RULE (onset_half read
-with C7 at sigma_seed from BASE seeds 101-105) and ORDER's cap (28 h since AMENDMENT BASE-DIAG; an overrun is a flag
+with C7 at sigma_seed from BASE seeds 101-105) and ORDER's cap (31 h since AMENDMENT CAP-31; an overrun is a flag
 to Max, never a cut, since AMENDMENT CAP-FLAG: cap_check; cap_cut is the cut order's arithmetic, the flag's proposal).
 Quantiles: E3's own t and chi-square functions (e3analyze.py; scipy is not in Planck's venv).
 
@@ -24,8 +24,9 @@ INF = float("inf")
 METRICS = {"CHAT": "F(CHAT)", "PROSE": "F(PROSE)", "cccc": "PROSE cccc", "gutenberg": "PROSE gutenberg",
            "wikimedia": "PROSE wikimedia"}             # key in run values -> E3 noise metric
 DELTA = 0.01                                           # E3's default delta_bet: 1% of BASE's mean
-# ORDER's cap: 25 h as registered, 27 h by AMENDMENT S006-REINSTATE, 28 h by AMENDMENT BASE-DIAG (SCREENS.txt)
-CAP, CUT_ORDER, NEVER_CUT = 28.0, ["S006", "S003", "S007", "S002"], ["S001", "S004", "S005", "BASE"]
+# ORDER's cap: 25 h as registered, 27 h by AMENDMENT S006-REINSTATE, 28 h by AMENDMENT BASE-DIAG, 31 h by AMENDMENT
+# CAP-31 (SCREENS.txt, 2026-10-11, on Max's answer)
+CAP, CUT_ORDER, NEVER_CUT = 31.0, ["S006", "S003", "S007", "S002"], ["S001", "S004", "S005", "BASE"]
 ONSET_SEEDS = (101, 102, 103, 104, 105)                # AMENDMENT BASE-DIAG: BASE's onset_half sigma_seed, df 4
 
 

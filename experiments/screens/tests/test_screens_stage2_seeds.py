@@ -48,7 +48,7 @@ def plan_runs(path=PLAN):
 def V(tmp_path_factory):
     runs, _ = H.load()
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(P, cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 28 h since AMENDMENT CAP-FLAG)
+        r = H.report(P, cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 31 h since AMENDMENT CAP-31)
     t, f = r["tally"], (lambda x, n=3: f"{x:.{n}f}")
     q, m, x = t["queued"], r["measured_runs"] + r["other"], runs[EXT]
     full = lambda s, a: H.run_h(L.STEPS, H.mult(s, a))  # noqa: E731

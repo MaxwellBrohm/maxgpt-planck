@@ -45,7 +45,8 @@ def test_cap_flag_says_flag_never_cut_and_the_code_agrees():
                    "the E4 GATE (a scientific gate, not a budget rule) is unchanged", "analyze_lib.CAP = 28.0",
                    "its \"cut\" is always empty", "OVER by ... h: FLAG TO MAX"):
         assert phrase in CAPF, phrase
-    assert AL.CAP == 28.0 and AL.cap_check({"S006": 30.0})["cut"] == [] and AL.CUT_ORDER == ["S006", "S003", "S007", "S002"]
+    r = AL.cap_check({"S006": 30.0}, cap=28.0)       # CAP-FLAG's 28 h; the code's cap is 31 h since AMENDMENT CAP-31
+    assert r["flag_to_max"] and r["cut"] == [] and AL.CUT_ORDER == ["S006", "S003", "S007", "S002"] and AL.CAP >= 28.0
 
 
 def test_deviation_names_each_change_and_what_did_not_change():
@@ -81,7 +82,7 @@ def test_position_now_is_the_queue_copy(tmp_path):
     t = tmp_path / "now.tsv"
     t.write_text(H.tsv_text(q, st))
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(L.params(), str(t))
+        r = H.report(L.params(), str(t), cap=28.0)
     runs, other = H.load(str(t))
     v = (len(runs), f"{sum(runs.values()):.3f}", f"{sum(other.values()):.3f}", f"{r['flag']['total']:.3f}",
          f"{28 - r['flag']['total']:.3f}", sum(r["tally"]["n_queued"].values()))
@@ -93,23 +94,23 @@ def test_position_now_is_the_queue_copy(tmp_path):
 
 
 RAN = ("stage1_select", "stage1_s003B", "stage1_s003C", "stage1_seeds", "stage2_select", "stage2_s006x", "stage2_seeds",
-       "stage2_s006_seeds", "stage2_base_diag")                # every SCREENS plan that ran (to 2026-10-07 03:03:58)
+       "stage2_s006_seeds", "stage2_base_diag", "stage2_replay")   # every SCREENS plan that ran (to 2026-10-10 23:51:19)
 
 
 def test_every_queue_run_is_registered():
-    """models/registry.jsonl (2026-10-10): one saved line per run of every plan that ran (its final checkpoint, in its run
-    folder), the 33 stables of the 11 S003 trunks, the 15 runs of the last three plans (BASE 101/102 aside, scored in
-    stage 1) marked not read, and the 16 smokes not_saved."""
+    """models/registry.jsonl (2026-10-10; stage2_replay's 3 runs 2026-10-11): one saved line per run of every plan that
+    ran (its final checkpoint, in its run folder), the 33 stables of the 11 S003 trunks, the 18 runs of the last four
+    plans (BASE 101/102 aside, scored in stage 1) marked not read, and the 16 smokes not_saved."""
     import json
     runs = {ln.split()[1] for p in RAN for ln in open(os.path.join(L.HERE, "plans", p + ".txt")) if ln.startswith("train ")}
     reg = [json.loads(x) for x in open(os.path.join(L.ROOT, "models", "registry.jsonl")) if x.strip()]
     sc = [e for e in reg if e["experiment"] == "SCREENS"]
     fin = {e["locations"][0].rsplit("/", 1)[1]: e for e in sc if e["kind"] == "from_scratch" and e["status"] != "not_saved"}
-    assert set(fin) == runs and len(runs) == 96 and all(e["files"][0]["path"].startswith("final_") for e in fin.values())
+    assert set(fin) == runs and len(runs) == 99 and all(e["files"][0]["path"].startswith("final_") for e in fin.values())
     st = [e for e in sc if e["kind"] == "checkpoint"]
     trunks = {r for r in runs if r.endswith("_trunk")}
     assert len(trunks) == 11 and len(st) == 33 and {e["parent"] for e in st} == {fin[t]["id"] for t in trunks}
-    late = {ln.split()[1] for p in RAN[-3:] for ln in open(os.path.join(L.HERE, "plans", p + ".txt"))
+    late = {ln.split()[1] for p in RAN[-4:] for ln in open(os.path.join(L.HERE, "plans", p + ".txt"))
             if ln.startswith("train ")} - {"base_s101", "base_s102"}
-    assert len(late) == 15 and {r for r, e in fin.items() if e["result"].startswith("not read")} == late
-    assert sum(1 for e in sc if e["status"] == "not_saved" and e["role"] == "smoke") == 16 == len(sc) - 129
+    assert len(late) == 18 and {r for r, e in fin.items() if e["result"].startswith("not read")} == late
+    assert sum(1 for e in sc if e["status"] == "not_saved" and e["role"] == "smoke") == 16 == len(sc) - 132

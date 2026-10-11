@@ -137,18 +137,19 @@ def test_cap_and_cut_order():
 
 
 def test_cap_overrun_is_a_flag_never_a_cut():
-    """AMENDMENT CAP-FLAG (2026-10-10): the cap is 28 h (AMENDMENT BASE-DIAG's number); over it nothing is cut, the
-    step flags Max with the overrun and what the cut order would cut; at or under it, no flag."""
-    assert AL.CAP == 28.0 and AL.cap_cut({})["cap"] == 28.0 and AL.cap_check({})["cap"] == 28.0
+    """AMENDMENT CAP-FLAG (2026-10-10): over the cap nothing is cut, the step flags Max with the overrun and what the
+    cut order would cut; at or under it, no flag. Checked at CAP-FLAG's 28 h; the code's cap is 31 h since AMENDMENT
+    CAP-31 (2026-10-11), and the defaults use it."""
+    assert AL.CAP == 31.0 and AL.cap_cut({})["cap"] == 31.0 and AL.cap_check({})["cap"] == 31.0
     rem = {"BASE": 2.0, "S001": 3.0, "S002": 4.0, "S003": 5.0, "S004": 3.0, "S005": 4.0, "S006": 2.0, "S007": 3.0}
-    r = AL.cap_check(rem, measured=3.5)                                                 # 29.5 h
+    r = AL.cap_check(rem, measured=3.5, cap=28.0)                                       # 29.5 h
     assert r["flag_to_max"] and not r["fits"] and r["cut"] == [] and abs(r["over_by"] - 1.5) < 1e-12
     assert r["proposal"]["cut"] == ["S006"] and abs(r["proposal"]["total_after"] - 27.5) < 1e-12
-    r = AL.cap_check(rem, measured=2.0)                                                 # exactly 28 h fits
+    r = AL.cap_check(rem, measured=2.0, cap=28.0)                                       # exactly 28 h fits
     assert not r["flag_to_max"] and r["fits"] and r["over_by"] == 0.0 and r["proposal"] is None and r["cut"] == []
-    r = AL.cap_check(rem, measured=2.0001)
+    r = AL.cap_check(rem, measured=2.0001, cap=28.0)
     assert r["flag_to_max"] and r["proposal"]["cut"] == ["S006"]
-    r = AL.cap_check({"BASE": 5.0, "S001": 5.0, "S004": 5.0, "S005": 5.0}, measured=9.0)   # nothing the order may cut
+    r = AL.cap_check({"BASE": 5.0, "S001": 5.0, "S004": 5.0, "S005": 5.0}, measured=9.0, cap=28.0)  # nothing to cut
     assert r["flag_to_max"] and r["proposal"]["cut"] == [] and not r["proposal"]["fits"]
     assert AL.cap_check(rem, cap=25.0)["flag_to_max"] and AL.cap_check(rem, cap=25.0)["cut"] == []
 

@@ -47,7 +47,7 @@ def V(tmp_path_factory):
     tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] in {*S2, *EXTS})))
     runs, _ = H.load(str(tsv))                          # lines (STAGE 2 SELECTION RESULT) and S006's extension taken out
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(P, str(tsv), cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 28 h since AMENDMENT CAP-FLAG)
+        r = H.report(P, str(tsv), cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 31 h since AMENDMENT CAP-31)
     t, c, f = r["tally"], r["cap"], (lambda x, n=3: f"{x:.{n}f}")
     full = lambda s, a: H.run_h(L.STEPS, H.mult(s, a))  # noqa: E731
     per = {s: full(s, a) for s in L.ORDER[2] for a in L.SCREENS[s]["arms"]}

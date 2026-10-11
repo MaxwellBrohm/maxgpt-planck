@@ -106,7 +106,7 @@ def test_integration_cap_position_is_generated():
     assert f"{now:.3f}" == "25.987" and "+ 2.120 h OTHER = 25.987 h; queued 0 of 90" in flat("AMENDMENT CAP-FLAG (")
     tot, tot_a = float(v["act"]) + c6, float(v["tot"]) + c6
     chk = AL.cap_check({"BASE": float(v["pb3"]) + c6}, now, cap=28.0)
-    assert chk["fits"] and not chk["flag_to_max"] and f"{chk['total']:.3f}" == f"{tot:.3f}" and AL.CAP == 28.0
+    assert chk["fits"] and not chk["flag_to_max"] and f"{chk['total']:.3f}" == f"{tot:.3f}"
     assert f"POSITION NOW's {now:.3f} h (96 runs and OTHER measured, 0 queued) + BASE-REPLAY's 3 runs, {v['pb3']} h, " \
            f"+ the C6 queue's estimate, {c6:.2f} h, counted whole as OTHER" in f
     assert f"= {tot:.3f} h <= 28 h: nothing to flag, {28 - tot:.3f} h of headroom" in f
@@ -136,7 +136,9 @@ def test_integration_counts():
     assert f"tests/test_replay_waiter.py ({n['test_replay_waiter.py']}:" in f and sum(n.values()) == NEW_TESTS
     assert f"tests/test_screens_integration.py ({n['test_screens_integration.py']}:" in f
     assert f"tests/mutants_integ.py ({len(MUTANTS_INTEG)} mutants" in f
-    assert len(M.MUTANTS) == MUT_ALL + len(MUTANTS_VFIX)        # CORRECTIONS AFTER THE W1 VERIFY adds its own
+    from mutants_cap31 import MUTANTS_CAP31
+    from mutants_regreplay import MUTANTS_REGREPLAY
+    assert len(M.MUTANTS) == MUT_ALL + len(MUTANTS_VFIX) + len(MUTANTS_CAP31) + len(MUTANTS_REGREPLAY)   # later lists
     assert f"experiments/screens/tests {SUITE} passed" in f and f"{MUT_ALL} of {MUT_ALL} killed" in f
     assert f"{len(MUTANTS_C6DIAG)} and tests/mutants_integ.py's {len(MUTANTS_INTEG)} now in it" in f
     by = collections.Counter(m[0].split("_")[0] for m in MUTANTS_INTEG)

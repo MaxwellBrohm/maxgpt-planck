@@ -36,7 +36,7 @@ ANALYZER_MUTANTS = [   # C7 / C4 / ORDER / C3 / the run-directory RC-12 refusal 
      '("NOMINATE" if not worse_p else "GUARD-FAIL")', AF),
     ("cccc_only_unblocks_tie", ALIB, '("TIE" if not worse_p else "GUARD-FAIL")', '("TIE" if not worse_p or cccc_only else "GUARD-FAIL")', AF),
     ("holm_no_step_down", ALIB, "ok = ok and p <= alpha / (len(items) - i)", "ok = p <= alpha / (len(items) - i)", AF),
-    ("cut_order_swapped", ALIB, '28.0, ["S006", "S003", "S007", "S002"]', '28.0, ["S003", "S006", "S007", "S002"]', AF),
+    ("cut_order_swapped", ALIB, '31.0, ["S006", "S003", "S007", "S002"]', '31.0, ["S003", "S006", "S007", "S002"]', AF),
     ("cut_current_set_not_kept", ALIB, "total -= remaining[sid] - (current or {}).get(sid, 0.0)", "total -= remaining[sid]", AF),
     ("toy_p022_ignored", ALIB, 'order = (["S004"] if toy_favours_p022 else []) + CUT_ORDER', "order = CUT_ORDER", AF),
     ("same_init_check_blind", ALIB, 'out[key] = {"sd_rel": sd, "limit_rel": lim, "df": df, "ok": sd <= lim}',
@@ -205,6 +205,10 @@ from mutants_integ import MUTANTS_INTEG  # noqa: E402  (INTEGRATION 2026-10-10: 
 MUTANTS += MUTANTS_INTEG
 from mutants_vfix import MUTANTS_VFIX  # noqa: E402  (CORRECTIONS AFTER THE W1 VERIFY: onset diag lines, 20M budget)
 MUTANTS += MUTANTS_VFIX
+from mutants_cap31 import MUTANTS_CAP31  # noqa: E402  (AMENDMENT CAP-31: the 31 h cap, Max's answer, the hours)
+MUTANTS += MUTANTS_CAP31
+from mutants_regreplay import MUTANTS_REGREPLAY  # noqa: E402  (models/registry.jsonl: stage2_replay's 3 runs)
+MUTANTS += MUTANTS_REGREPLAY
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")

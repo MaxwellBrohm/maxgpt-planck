@@ -11,7 +11,7 @@ NR = ("not read: registered 2026-10-10 before the stage 2 verdict step reads it 
       "CODE); the queue scored it (SCORED, bpb.jsonl on the PC); no value of it was read for this entry")
 MUTANTS_SAT = [
     # AMENDMENT CAP-FLAG: 28 h, an overrun is a flag, never a cut
-    ("cap_left_at_25", ALIB, "CAP, CUT_ORDER, NEVER_CUT = 28.0,", "CAP, CUT_ORDER, NEVER_CUT = 25.0,", AF),
+    ("cap_left_at_25", ALIB, "CAP, CUT_ORDER, NEVER_CUT = 31.0,", "CAP, CUT_ORDER, NEVER_CUT = 25.0,", AF),  # 31.0: CAP-31
     ("cap_check_cuts_silently", ALIB, '"flag_to_max": over, "cut": [],', '"flag_to_max": over, "cut": prop["cut"],', AF),
     ("cap_check_never_flags", ALIB, '"flag_to_max": over, "cut": [],', '"flag_to_max": False, "cut": [],', AF),
     ("cap_check_flags_at_the_cap", ALIB, 'over = prop["total_before"] > cap', 'over = prop["total_before"] >= cap', AF),

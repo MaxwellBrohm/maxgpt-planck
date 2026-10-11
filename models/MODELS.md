@@ -229,3 +229,14 @@ model section in the config); results are results_part2.json's F(CHAT) and F(PRO
 Not yet archived: the D: drive did not answer on 2026-10-10; add the archive location once copied.
 `experiments/screens/tests/test_registry_c6_inputs.py` checks that every checkpoint the C6 runner scores is a
 registered final.
+
+## 12. SCREENS replay registration (2026-10-11)
+
+3 lines, `SCREENS/BASE/s101_rep1/final`, `SCREENS/BASE/s101_hookoff/final` and `SCREENS/BASE/s101_rep2/final`: the
+runs of plan stage2_replay (SCREENS.txt AMENDMENT BASE-REPLAY), queued from 2aa3787 and done on 2026-10-10 (mark
+SCREENS BASE REPLAY DONE at 23:51:19). Built from the PC's records as section 10's: runs.jsonl start and end events
+(n_params, config_sha256, times), the finals' bytes and sha256, and the queue's code list. config_sha256 equals
+train.py's hash of each committed config. Results say "not read": registered before the stage 2 verdict step reads
+them. Location: the run folder only; not yet in the D: archive on 2026-10-11 09:08 (add it once a copy is hashed
+equal there). `experiments/screens/tests/test_screens_saturday_text.py` checks one saved line per run of every
+SCREENS plan that ran, stage2_replay's included.

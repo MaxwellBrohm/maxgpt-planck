@@ -67,7 +67,8 @@ def test_max_verbatim_and_the_decision():
 def test_cap_check_at_28_h(V):
     v, c = V["fmt"], V["c"]
     assert c[28.0]["cut"] == [] == c[27.0]["cut"] and c[25.0]["cut"] == ["S006"]
-    assert AL.CAP == 28.0   # the entry's "still 25.0 in code" held until AMENDMENT CAP-FLAG (2026-10-10) set 28 h
+    assert AL.CAP != 25.0   # the entry's "still 25.0 in code" held until AMENDMENT CAP-FLAG (2026-10-10) set 28 h (31 h
+    # since AMENDMENT CAP-31, 2026-10-11: test_screens_cap31.py)
     assert V["room"] >= 1.634 > 27.0 - c[27.0]["total_after"]          # 27 h would eat S006's recorded headroom
     assert f"Measured {v['mr']} h of runs + {v['mo']} h other = {v['m']} h; queued 10 of 90 registered runs {v['qs']} h " \
            f"+ S006's 2 IND runs {v['ind']} h + the 3 BASE runs {v['three']} h = {v['qall']} h (unrounded); total " \

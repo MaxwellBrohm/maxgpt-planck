@@ -67,7 +67,7 @@ def test_max_verbatim_and_the_decision():
 def test_cap_check_at_27_h(V):
     v, c27, c25 = V["fmt"], V["c27"], V["c25"]
     assert c27["cut"] == [] and c27["fits"] and c25["cut"] == ["S006"] and V["r"]["cap"]["cut"] == []
-    assert AL.CAP == 28.0 and c27["total_before"] > 25.0 and V["narrow"]["total_before"] < 25.0  # the cut hinged on OTHER
+    assert AL.CAP >= 28.0 and c27["total_before"] > 25.0 and V["narrow"]["total_before"] < 25.0  # the cut hinged on OTHER
     assert f"Measured {v['mr']} h of runs + {v['mo']} h other = {v['m']} h; queued 10 of 90 registered runs {v['qs']} h " \
            f"(stage2_seeds' 8 runs {v['s8']} h, S006's 2 seed runs {v['q6']} h) + S006's 2 IND runs {v['ind']} h = " \
            f"{v['q2']} h; total {v['tot']} h <= 27 h: nothing cut, {v['room']} h of headroom (runs only, reported: " \

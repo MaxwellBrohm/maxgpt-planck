@@ -178,11 +178,11 @@ def test_the_hours_report_flags_an_overrun_and_cuts_nothing(tmp_path):
     t.write_text(open(H.TSV).read() + "other\tpretend\t6.0\t\t\ta test line\n")
     out = io.StringIO()
     with contextlib.redirect_stdout(out):
-        r = H.report(P, str(t))
+        r = H.report(P, str(t), cap=28.0)   # AMENDMENT CAP-FLAG's 28 h (31 h since AMENDMENT CAP-31)
     line = next(ln for ln in out.getvalue().splitlines() if ln.startswith("ORDER cap"))
-    assert r["flag"]["flag_to_max"] and r["flag"]["cut"] == [] and r["cap"]["cap"] == 28.0 == AL.CAP
+    assert r["flag"]["flag_to_max"] and r["flag"]["cut"] == [] and r["cap"]["cap"] == 28.0
     assert "against 28 h: OVER by" in line and "FLAG TO MAX, nothing is cut or queued without his decision" in line
     assert f"the cut order would take {', '.join(r['cap']['cut'])} -> " in line and r["cap"]["cut"]
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(P)
+        r = H.report(P, cap=28.0)
     assert not r["flag"]["flag_to_max"] and r["flag"]["proposal"] is None and r["cap"]["cap"] == 28.0

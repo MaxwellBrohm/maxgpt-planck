@@ -151,7 +151,7 @@ def test_stage_c_configs_carry_g_times_the_stage_b_lrs_and_their_own_trunk(e, g)
 def test_cap_check_before_stage_c_and_what_an_extension_does(capsys, tmp_path):
     tsv = tmp_path / "before_c.tsv"                 # measured_hours.tsv as of that entry: the LATER lines not yet in
     tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] in LATER)))
-    r = H.report(P, str(tsv), r_b=2, cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 28 h since AMENDMENT CAP-FLAG)
+    r = H.report(P, str(tsv), r_b=2, cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 31 h since AMENDMENT CAP-31)
     out = capsys.readouterr().out
     t, cap = r["tally"], r["cap"]
     assert sum(t["n_queued"].values()) == 42 and t["n_queued"]["S003"] == 10 and cap["cut"] == []

@@ -46,8 +46,8 @@ MUTANTS_S2SEEDS_STATE = [
      "  CUT, BY ORDER'S CAP RULE BEFORE THE STAGE 2 SEED SETS: S006 (", CF),
     ("s2e_cut_recorded_for_s007_too", SXT, "SEED SETS: S006 (its queued", "SEED SETS: S006, S007 (its queued", CF),
     ("s2e_ind_runs_dropped", GEN, 'if sid in ("S006", "S007") and g != 1.0:', "if False:", S2E),
-    ("s2e_cut_order_starts_at_s007", "experiments/screens/analyze_lib.py", '28.0, ["S006", "S003", "S007", "S002"]',
-     '28.0, ["S007", "S006", "S003", "S002"]', S2E),   # anchor moved: CAP 28.0 (AMENDMENT CAP-FLAG, 2026-10-10)
+    ("s2e_cut_order_starts_at_s007", "experiments/screens/analyze_lib.py", '31.0, ["S006", "S003", "S007", "S002"]',
+     '31.0, ["S007", "S006", "S003", "S002"]', S2E),   # anchor moved: CAP 31.0 (AMENDMENT CAP-31, 2026-10-11)
     ("s2e_hours_extension_missing", TSV, EXT_LINE, "", S2E),
     ("s2e_hours_extension_end_typo", TSV, "2026-10-06 19:52:00", "2026-10-06 19:53:00", S2E),
     ("s2e_entry_cap_typo", SXT, "= 25.366 h, 0.366 h over 25 h", "= 25.336 h, 0.366 h over 25 h", S2E),

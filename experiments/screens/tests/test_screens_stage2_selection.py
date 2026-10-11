@@ -43,7 +43,7 @@ def V(tmp_path_factory):
     tsv.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] == EXT)))
     runs, _ = H.load(str(tsv))                          # (S006 EXTENSION RESULT) taken out
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(P, str(tsv), cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 28 h since AMENDMENT CAP-FLAG)
+        r = H.report(P, str(tsv), cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 31 h since AMENDMENT CAP-31)
     t, f = r["tally"], (lambda x, n=3: f"{x:.{n}f}")
     q, m = t["queued"], r["measured_runs"] + r["other"]
     per = {s: H.run_h(L.STEPS, H.mult(s, a)) for s, (a, _) in ARMS.items()}

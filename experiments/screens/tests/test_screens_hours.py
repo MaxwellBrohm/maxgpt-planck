@@ -173,7 +173,7 @@ def test_stage_2_cap_check_after_the_stage_1_seed_sets(capsys, tmp_path):
     (S006 EXTENSION RESULT) taken out."""
     tsv0 = tmp_path / "launch.tsv"
     tsv0.write_text("".join(ln for ln in open(H.TSV) if not (ln.startswith("run\t") and ln.split("\t")[1] in SEL2 | EXTS)))
-    r = H.report(P, str(tsv0), cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 28 h since AMENDMENT CAP-FLAG)
+    r = H.report(P, str(tsv0), cap=25.0)  # this entry's cap: 25 h (analyze_lib.CAP is 31 h since AMENDMENT CAP-31)
     out = capsys.readouterr().out
     assert r["cap"]["total_before"] == pytest.approx(stage2_by_hand(True), abs=2e-4) and r["cap"]["cut"] == []
     assert r["narrow"]["total_before"] == pytest.approx(stage2_by_hand(False), abs=2e-4)
