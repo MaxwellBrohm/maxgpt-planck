@@ -3,7 +3,10 @@
 # this file into planck-kit. ship_pc.sh puts the code there first as t001_code.tgz with its sha256 (never
 # planck.bundle). Code is unpacked to ~/planck/dev/t001/code_<sha12>; runs write ~/planck/dev/t001/out/<run>.json.
 # runplan.py names the next run from the files already in out/, so the queue resumes anywhere after a stop.
-# Per run, one gpu.lock hold under timeout 1800 s (-k 60). Before each hold: ~/planck/STOP ends the queue, PAUSE
+# Runs go one at a time under gpu.lock, each under timeout 1800 s (-k 60). Amendment A2 (scheduling only): after a
+# run, the same hold starts the next run if the hold is younger than HOLD_MORE s, STOP and PAUSE are absent, the GPU is
+# at or below 80 C, the plan is not DONE and at least 600 s remain before HOLD_CAP; a later run's timeout is cut to end
+# by HOLD_CAP s of hold age, so no hold passes 35 min. Before each hold: ~/planck/STOP ends the queue, PAUSE
 # waits, 45 GB free on / (40 GB kept free plus margin), the GPU at or below 75 C; with the lock held, at most 3,000 MiB
 # in use (else release, wait a minute, retry). A 2 h lock wait is not an exit: the queue logs it and waits again, so
 # no relaunch watcher is needed. A run at 87 C on 3 samples (5 s apart) is stopped and the queue ends: TERM goes to
@@ -14,6 +17,7 @@
 exec >> "$HOME/planck/logs/t001.log" 2>&1
 set -u
 P=$HOME/planck; T=$P/dev/t001; PY=$P/venv/bin/python; LOCK=$P/locks/gpu.lock
+HOLD_MORE=${T001_HOLD_MORE:-900}; HOLD_CAP=${T001_HOLD_CAP:-2040}      # overrides exist for the dry run only
 KIT=$(dirname "$(readlink -f "$0")")
 say() { echo "$(date '+%F %T') $*"; }
 gq() { nvidia-smi --query-gpu="$1" --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -dc '0-9'; }
@@ -55,31 +59,42 @@ while :; do
         say "gpu.lock held but $used MiB in use: releasing, retry in a minute"; flock -u 9; exec 9>&-; sleep 60; continue
     fi
     say "gpu.lock held ($used MiB in use): run"
-    t0=$(date +%s)
-    (cd "$CODE" && exec timeout -k 60 1800 "$PY" train.py $NEXT --device cuda) &
-    child=$!; hot=0
-    while kill -0 $child 2>/dev/null; do
-        sleep 5
-        t=$(gq temperature.gpu)
-        if [ -n "$t" ] && [ "$t" -ge 87 ]; then hot=$((hot + 1)); else hot=0; fi
-        if [ $hot -ge 3 ]; then
-            py=$(pgrep -P $child | head -1)
-            say "GPU at $t C on 3 samples: stopping this run (timeout $child, python ${py:-none})"
-            kill -TERM $child 2>/dev/null
-            for _ in $(seq 75); do
-                kill -0 $child 2>/dev/null || { [ -n "$py" ] && kill -0 "$py" 2>/dev/null; } || break; sleep 1
-            done
-            if [ -n "$py" ] && kill -0 "$py" 2>/dev/null && grep -qa train.py "/proc/$py/cmdline"; then
-                say "python $py still alive 75 s after TERM: KILL"; kill -KILL "$py"
-                for _ in $(seq 10); do kill -0 "$py" 2>/dev/null || break; sleep 1; done
+    h0=$(date +%s); nrun=0
+    while :; do
+        t0=$(date +%s); tmo=$(( HOLD_CAP - (t0 - h0) )); [ $tmo -gt 1800 ] && tmo=1800
+        (cd "$CODE" && exec timeout -k 60 $tmo "$PY" train.py $NEXT --device cuda) &
+        child=$!; hot=0; nrun=$((nrun + 1))
+        while kill -0 $child 2>/dev/null; do
+            sleep 5
+            t=$(gq temperature.gpu)
+            if [ -n "$t" ] && [ "$t" -ge 87 ]; then hot=$((hot + 1)); else hot=0; fi
+            if [ $hot -ge 3 ]; then
+                py=$(pgrep -P $child | head -1)
+                say "GPU at $t C on 3 samples: stopping this run (timeout $child, python ${py:-none})"
+                kill -TERM $child 2>/dev/null
+                for _ in $(seq 75); do
+                    kill -0 $child 2>/dev/null || { [ -n "$py" ] && kill -0 "$py" 2>/dev/null; } || break; sleep 1
+                done
+                if [ -n "$py" ] && kill -0 "$py" 2>/dev/null && grep -qa train.py "/proc/$py/cmdline"; then
+                    say "python $py still alive 75 s after TERM: KILL"; kill -KILL "$py"
+                    for _ in $(seq 10); do kill -0 "$py" 2>/dev/null || break; sleep 1; done
+                fi
+                kill -KILL $child 2>/dev/null
+                break
             fi
-            kill -KILL $child 2>/dev/null
-            break
-        fi
+        done
+        wait $child; rc=$?
+        say "run $nrun of this hold: rc $rc after $(( $(date +%s) - t0 )) s (timeout $tmo s)"
+        [ $hot -ge 3 ] || [ $rc != 0 ] && break
+        age=$(( $(date +%s) - h0 )); t=$(gq temperature.gpu)
+        [ $age -lt $HOLD_MORE ] && [ $((HOLD_CAP - age)) -ge 600 ] && [ ! -e "$P/STOP" ] && [ ! -e "$P/PAUSE" ] \
+            && [ -n "$t" ] && [ "$t" -le 80 ] || break
+        NEXT=$(cd "$CODE" && "$PY" runplan.py next --out "$T/out") || { rc=97; say "runplan failed in a hold"; break; }
+        [ "$NEXT" = DONE ] && break
+        say "same hold (age $age s, $t C): $NEXT"
     done
-    wait $child; rc=$?
     flock -u 9; exec 9>&-
-    say "gpu.lock released: rc $rc after $(( $(date +%s) - t0 )) s"
+    say "gpu.lock released after $nrun run(s), hold $(( $(date +%s) - h0 )) s"
     [ $hot -ge 3 ] && { say "queue ends after a heat stop"; exit 1; }
     [ $rc = 0 ] || { say "run failed (rc $rc): queue ends, NEEDS A PERSON"; exit 1; }
     sleep 5

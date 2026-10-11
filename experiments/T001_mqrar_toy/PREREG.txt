@@ -234,3 +234,12 @@ and the code, before any training run beyond the labelled smoke and bench above;
   HOME with a fake nvidia-smi and a stub trainer that ignores TERM: the old driver released the lock with the stub
   still running; the new one released it 61 s after the stop with the stub gone. Tests: 198 passed with -W error;
   tests/mutation_t001.py: 119 of 119 mutants killed (the first 66, the critique's 34, 4 more constants and A1's 15).
+
+AMENDMENT A2 (2026-10-10 22:21 EDT, Claude; scheduling only: no rule, metric, run, setting or code that trains or
+scores changes). Up to here 12 of about 110 runs exist (C0 and seed-0 LR runs of base, gdn and canon); C0 (a) fired.
+With five queues sharing gpu.lock, one run per hold gave T001 about one run per 30-40 min. run_pc.sh now starts the
+next run inside the same hold while the hold is under 15 min old, at least 600 s remain before a 34 min hold cap
+(a later run's timeout is cut to fit), STOP and PAUSE are absent and the GPU is at or below 80 C. Holds stay under
+the 35 min rule. PC dry run (stub trainer, scratch HOME, fake nvidia-smi): several runs per hold, rotation at the age
+limit, the cut timeouts, STOP between runs, a heat stop in a hold's second run (the stub is gone before the lock is
+released) and DONE inside a hold all behaved as written; the real gpu.lock was not taken.
