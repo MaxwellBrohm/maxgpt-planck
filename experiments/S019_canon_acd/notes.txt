@@ -1,0 +1,106 @@
+S019: Canon-ACD at 5M, against batch 2's own Canon-AC and BASE (LEDGER P-148; cuts audit row 31, "S004 tests Canon-AC
+only, not ACD"; research/lanes/arch.md 1.6 and its A/B item 1, "Canon-AC or Canon-ACD (kernel 4, residual)").
+Added to batch 2 on Max's answer of 2026-10-12 (SCREENS2.txt MAX'S ANSWERS, quoted there); not in the workflow's list.
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION, DRAFT WRITTEN 2026-10-12 (Claude, W5), before the flag, any S019 config, run or result exists, and
+before any batch 2 value; nothing queued. Run, no model: parameter arithmetic from S004's committed counts. SCREENS2.txt
+B1-B9 (with its SEQUENTIAL RULE) are part of this entry. Read before writing (all committed): S004's notes and RESULT
+(Canon-AC NOMINATE at k 2, -0.91% CHAT; 1.37x BASE's time; mean |w| per site 0.10 to 0.11); S007's RESULT; the cuts audit
+rows 8, 31 and 32; arch.md 1.6. S004's robustness seeds 103-105 (W1's workflow) were not read here: they may be running.
+
+WHY
+  Canon layers sit at four sites: A before attention, B inside it, C before the MLP, D inside the MLP (S004 WHY). S004
+  tested A and C only (its notes, "Canon-AC"), and arch.md's first A/B names "Canon-AC or Canon-ACD". P-148's binding
+  test at 30M (PLAN 3d) must carry ONE form; this screen asks, at 5M, whether site D adds anything to AC, and whether
+  ACD itself moves chat bpb. Canon-B (inside attention, on Q, K, V) is not tested here: it touches attention's inputs
+  (arch.md: Primer's Q/K/V conv is "Canon-B-like"), a different question; it stays in the audit's row 31 as not run.
+
+QUESTIONS (decided, B7; two contrasts in B7's family)
+  E1  canon_acd vs canon_ac: does site D add to Canon-AC at 5M? (one key, model.canon "ACD" against "AC"; canon_ac is
+      this contrast's BASE, paired per seed, as S018's base7 is for D2).
+  E2  canon_acd vs base2: does Canon-ACD change chat bpb at 5M? (two keys, model.canon and model.canon_kernel, as S004.)
+  Reported, no rule, not in the family: canon_ac vs base2 (batch 2's own replication of S004's contrast). S004's
+  verdict stays batch 1's (and its robustness reading W1's); no rule compares the two batches.
+
+THE ARMS
+  s019_canon_ac: model.canon "AC", model.canon_kernel 4: S004's arm key for key (flag as committed). 5,022,421 params.
+  s019_canon_acd: model.canon "ACD", model.canon_kernel 4. Site D (new): a CanonConv (S004's module: residual, causal,
+    depthwise, K 4, no bias, zero init from torch.zeros, document starts masked by the same skip masks) on the SwiGLU's
+    two pre-activation branches: g = gate_proj(h) and u = up_proj(h) become g + conv_Dg(g) and u + conv_Du(u), then
+    down_proj(silu(g) * u). Channels 2 x 488 per layer. Parameters: A and C 12,288 (S004) + D 2 x 488 x 4 x 8 = 31,232;
+    total 5,053,653 (+0.87% of BASE, inside B2's 2%; arithmetic, count_analytic must equal it, a test).
+    REGISTERED CHOICE, TO CHECK BEFORE THE FLAG LANDS: the placement of D in a gated MLP. This file registers the two
+    pre-activation branches; before any S019 code is written, the flag's author reads the Canon paper's definition of
+    site D (arXiv 2512.17351) and its released code (facebookresearch/PhysicsLM4) and records the placement they use. If
+    it differs (for example one conv on silu(g) * u, 488 channels, 15,616 params), this clause is amended to it by a
+    dated entry before any S019 config exists, and the parameter count with it. Nothing else depends on the choice.
+
+WHAT STAYS IDENTICAL  B1 otherwise. ENGINE: both arms at ONE setting, so E1 pairs within a setting: micro 16 (BASE's
+  varlen) if canon_acd's smoke fits there (mem_fit ok), else both at v8 (micro 8 x accum 2) with base2v8 for E2 and the
+  replication (B4 (4)'s registered v8 setting; S004's AC peaked at 9.82 GiB of 11.94 at micro 16, so ACD may not fit).
+  The smoke decides, logged before any S019 g-check. LRs: every Canon weight in the "scalar" group (AdamW at scalar_lr,
+  no decay) by name, as S004; each arm at its own g pick (B3).
+BUDGET  B1. LEARNING RATE  B3 (both arms run the g-check at seed 1: canon_ac too, since batch 2's harness and engine
+  setting may differ from S004's pick conditions).
+
+SEEDS AND PAIRING  Seeds 101-105 (look 1); 106-110 only by the SEQUENTIAL RULE. E1 pairs canon_acd with canon_ac at
+  each seed; E2 with base2_s<seed> (or base2v8_s<seed>). Class SIA for both contrasts if the init-isolation test passes
+  for site D (both arms then keep every BASE draw; E1's two arms share every draw too), else NEW INIT.
+
+METRIC AND DECISION RULE (B5, B7 with the SEQUENTIAL RULE, per contrast)
+  E1 ("site D added to Canon-AC"):
+    NOMINATE      D lowers chat bpb beyond AC at 5M: PLAN 3d's 30M P-148 test is PROPOSED to carry ACD (a proposal to
+                  its own pre-registration, which decides; nothing changes there on this alone).
+    REJECT        D costs loss at 5M: P-148's 30M test carries AC.
+    TIE           D is loss-neutral at 5M: AC stays the 30M form (fewer parameters and less time), unless E1's Tier 0
+                  margin after the lock reads ACD BETTER (B8's NOMINATE-MARGIN), which is then put to PLAN 3d.
+    GUARD-FAIL    D buys chat at a prose cost: AC stays; the reading goes to PLAN 3d's pre-registration with its numbers.
+    INCONCLUSIVE  only after look 2 (k 10): "not resolved at 5M, k 10"; AC stays the 30M form.
+  E2 ("Canon-ACD on"): NOMINATE a 5M loss candidate (as S004: its behaviour test is PLAN 3d's 30M binding test, which this
+    does not replace); REJECT raises chat bpb at 5M (reported to PLAN 3d; not a behavioural verdict, arch.md 1.4); TIE
+    loss-neutral; GUARD-FAIL, INCONCLUSIVE as C7 and the SEQUENTIAL RULE.
+  OWN-SIZE (B7)  P-148's own test is PLAN 3d's 30M binding test, run or not by PLAN 3d's must-run rule (the toy's pick
+    between P-022 and P-148), never by this screen: on every verdict this screen only proposes the form (AC or ACD).
+  ONSET (B6)  E2 and the replication by the ONSET RULE (batch 2's BASE sigma); E1 with canon_ac's own five seeds'
+    onset_half SD (df 4), as S018's D2; all at matched LR (IND-only g 1 runs where a pick is not 1). Reported.
+
+DIAGNOSTICS (B6; reported)  IND curves and onset; HD; SINK; mean |w| per site (A, C, Dg, Du) and layer at the final
+  checkpoint for both arms, and C6-DIAG's NEAR ITS INIT rule per site (S004: A 0.10, C 0.11, so NEAR ITS INIT did not
+  fire for AC); tok/s and F(CHAT) per GPU-hour beside each verdict (compute is not matched; S004: 1.37x).
+
+AFTER THE LOCK (B8)  Tier 0 margins on E1 and E2 (binding is Canon's target).
+
+KNOWN RISKS
+  - A conv on the MLP branches that crosses a document start or reads t+1 leaks; both get leak probes and mutants.
+  - S004's compiled Canon failed deterministic mode (S004 C1-a); batch 2 is eager (ENGINE), so it does not apply.
+  - Throughput: D's convs run on 976 channels per layer against AC's 384; the factor is assumed x1.9 of base2 until the
+    smoke measures it. Memory may force v8 for both arms (above).
+  - E1 compares two SIA arms of the same flag; if their g picks differ, E1 mixes D with an LR step (as S018's D2). The
+    report prints both picks beside E1.
+  - The D placement (above) is a registered choice to be checked against the paper before code.
+  - E1's two arms both carry trained modules, so its d_s may be noisier than an arm-vs-BASE contrast; B4 (3)'s own check
+    reads E1's SD against u x SD_d and re-reads at the larger SD if it fails (labelled underpowered).
+  - Starter mix and tok_v0_8k only.
+
+HARNESS CODE NEEDED (default off; each test watched failing on its mutant; nothing written yet)
+  - config.py: canon accepts "ACD" (and refuses "D" without A and C, and any other string); canon_sites() keeps "D"
+    only when mlp_hidden > 0; to_dict unchanged when off. blocks.py: Block.canon_dg and canon_du (CanonConv) inside
+    SwiGLU on gate_proj and up_proj outputs, with the block's skip masks, on the doc=None, mask and varlen paths; refused
+    with mlp_act relu2 (S010) and with any other batch 2 flag (one batch 2 flag per arm).
+  - budget.py count_analytic: + 2 x mlp_hidden x K per unique block for D (5,053,653 at 5M), equal to the meta build.
+  - optim.py: ".canon_" routes the D kernels to "scalar" (test; mutant: they land in "matrix").
+  - decode.py: KVDecoder keeps the last K - 1 pre-activation inputs per (effective layer, D branch); equals the full
+    forward (mutant: cache one position short).
+  - Tests: off equals absent and the pre-flag commit (20 CPU steps, bitwise); "AC" bitwise equal to the pre-flag "AC"
+    (S004's arm unchanged by the new site); conv equals a plain-loop reference; leak probes (mask, varlen, doc=None);
+    doc=None equals the packed slice; init isolation (every BASE parameter and the A and C kernels bitwise, RNG
+    untouched, step-0 logits equal to BASE's and to AC's); resume 20 + 20 = 40; gradient reaches every D tap.
+  - Mutants: D centred (non-causal); D ignores document starts; D only when doc is given (bpb.py's path); D after silu;
+    D drawn from the RNG; D built when canon is "AC"; D in "matrix"; budget omits D; decode cache short.
+  - experiments/screens: the registry's S019 (two arms, cls SIA, E1's pairing of canon_acd with canon_ac per seed, one
+    engine setting for both arms), analyze2's E1, E2 and the reported replication, OWN-SIZE rows, onset sigma for E1.
+
+COST (est., planning only)  2 arms x (3 g-check + 5 seed runs): canon_ac 0.42 h per run (S004's measured x1.375),
+  canon_acd 0.59 h (assumed x1.9): about 8.1 h registered, plus up to 10 IND-only runs (about 5.1 h) and look-2 seeds
+  if the SEQUENTIAL RULE extends a contrast (canon_acd and its reference, 5 runs each).
