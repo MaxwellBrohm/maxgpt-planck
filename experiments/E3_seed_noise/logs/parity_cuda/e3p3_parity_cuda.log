@@ -1,0 +1,44 @@
+2026-10-11 22:33:44 parity_cuda start; kit planck-kit; work e3p3_parity_20261011_223344
+p3par_ref.tgz: OK
+p3par_new.tgz: OK
+2026-10-11 22:33:44 ref commit 27d8cb7505248ff4391a1dee9a51bad617938195; new commit 77ab43f3ca836793d0cde94146c6dc18d1192fc5
+python 3.14.4 torch 2.13.0+cu130 cuda 13.0
+2026-10-11 22:33:45 tree new train.py sha256 aa07b64c7a4e3089
+2026-10-11 22:33:45 tree mut_b train.py sha256 69c6d13513c3357c
+2026-10-11 22:33:45 tree mut_c train.py sha256 9b38f53f45c896b6
+2026-10-11 22:33:45 ref train.py sha256 96a763cf45a413de
+2026-10-11 22:33:45 waiting for gpu.lock
+2026-10-11 22:33:45 gpu.lock held (GPU 39 C, 699 MiB in use)
+2026-10-11 22:33:45 run A: --ref ref/harness --new new/harness --device cuda
+[default_parity] cuda: 24 log records, final loss 3.07388 vs 3.07388; start varlen batched; work <work>/work_A
+[default_parity] log: identical
+[default_parity] checkpoint: identical
+[default_parity] start: identical
+[default_parity] new_imports: identical
+[default_parity] modules only the reference imported: []
+[default_parity] PASS
+2026-10-11 22:33:53 run A rc 0 PASS
+2026-10-11 22:33:53 run B: --ref ref/harness --new mut_b/harness --device cuda
+[default_parity] cuda: 24 log records, final loss 3.07388 vs 2.93466; start varlen batched; work <work>/work_B
+[default_parity] log: ['[0]/loss', '[0]/gnorm', '[0]/tokens', '[0]/sup_tokens', '[0]/drawn_chat', '[1]/loss', '[1]/gnorm', '[1]/tokens']
+[default_parity] checkpoint: ['/model/tok_emb.weight', '/model/blocks.0.attn_norm.weight', '/model/blocks.0.attn.q_proj.weight', '/model/blocks.0.attn.k_proj.weight', '/model/blocks.0.attn.v_proj.weight', '/model/blocks.0.attn.o_proj.weight', '/model/blocks.0.attn.q_norm.weight', '/model/blocks.0.attn.k_norm.weight']
+[default_parity] start: identical
+[default_parity] new_imports: identical
+[default_parity] modules only the reference imported: []
+[default_parity] FAIL
+2026-10-11 22:34:01 run B rc 1 FAIL
+2026-10-11 22:34:01 run C: --ref ref/harness --new mut_c/harness --device cuda
+[default_parity] cuda: 24 log records, final loss 3.07388 vs 3.07388; start varlen batched; work <work>/work_C
+[default_parity] log: identical
+[default_parity] checkpoint: identical
+[default_parity] start: [" keys ['data_seed']"]
+[default_parity] new_imports: identical
+[default_parity] modules only the reference imported: []
+[default_parity] FAIL
+2026-10-11 22:34:10 run C rc 1 FAIL
+41, 699 MiB
+2026-10-11 22:34:10 gpu.lock released
+2026-10-11 22:34:10 RESULT A rc 0 PASS
+2026-10-11 22:34:10 RESULT B rc 1 FAIL as wanted (mutant killed)
+2026-10-11 22:34:10 RESULT C rc 1 FAIL as wanted (mutant killed)
+2026-10-11 22:34:10 DONE ok

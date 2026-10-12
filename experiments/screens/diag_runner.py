@@ -7,6 +7,8 @@ log.jsonl: those are results), lists it only to find final_*.pt and the stop mar
   python diag_runner.py list
   python diag_runner.py run --runs-root R --evalset E [--groups G,..] [--only RUN,..] [--device cuda]
                             [--budget-s 1500] [--cpu-only]
+Groups: GROUPS (AMENDMENT C6-DIAG's six) are the default selection; LATER_GROUPS run only when --groups names them
+(robust: AMENDMENT SEEDS-103-105's runs at seeds 103 to 105, scored after its plan has ended).
 Jobs (diag_lib.py): modules (CPU, S004 / S005 / S007 arms), ind (every run), hd (every run), attn (SCREENS runs),
 halflife (S005's arm). A job whose JSON exists is skipped (a cut run resumes); --cpu-only runs the modules jobs alone.
 Exit: 0 every selected job done; 3 the time budget ran out, or a replay waits for a later process (call again); 1 a job
@@ -41,10 +43,14 @@ BASEDIAG = ["base_s103", "base_s104", "base_s105"]
 E3P1 = [f"e3_5m_{a}_s{s}" for s in range(1, 9) for a in "AB"] + ["e3_5m_A_s1_R2", "e3_5m_A_s1_R3"]
 E3P2 = [f"e3_20m_{a}_s{s}" for s in (1, 2, 3) for a in "AB"]
 SCREEN_JOBS = ("modules", "ind", "hd", "attn", "halflife")
+ROBUST = [f"{a}_s{s}" for s in (103, 104, 105) for a in ("s001_nogate_g1", "s002_novres_g1", "s002_noqknorm_g1",
+          "s002_nonormscale_g1", "s003_adamw_e3_r2", "s005_base", "s005_forget_g1", "s004_canonac_g1", "s007_smear_g1",
+          "s006_mtp_g2")]     # AMENDMENT SEEDS-103-105; S006's g 1 IND-only runs are not scored (C6)
 # group: (experiment directory, runs, jobs, file suffix), in queue order (C6 SDs first, then the screens)
 GROUPS = {"e3p1": ("E3", E3P1, ("ind", "hd"), ""), "stage2": ("SCREENS", STAGE2, SCREEN_JOBS, ""),
           "basediag": ("SCREENS", BASEDIAG, SCREEN_JOBS, ""), "stage1": ("SCREENS", STAGE1, SCREEN_JOBS, ""),
           "replay": ("E3", ["e3_5m_A_s1"], ("ind", "hd"), ".replay"), "e3p2": ("E3", E3P2, ("ind", "hd"), "")}
+LATER_GROUPS = {"robust": ("SCREENS", ROBUST, SCREEN_JOBS, "")}   # never in the default selection: --groups robust
 EST = {"load": 5.0, "modules": 2.0, "ind": 5.0, "hd": 60.0, "attn": 30.0, "halflife": 15.0}   # s at 5M; x4 at 20M
 STOPS = ("DIVERGED", "GAP", "rc12_eval.jsonl")
 OFF = {"canon": "", "forget_gate": False, "smear_key": False, "attn_gate": True, "value_residual": True,
@@ -85,7 +91,7 @@ def expected(run: str) -> tuple[int, int, dict]:
 def jobs(groups=None, only=None) -> list[tuple]:
     """-> [(group, exp, run, job, out file name)] in queue order."""
     out = []
-    for g, (exp, runs, js, suf) in GROUPS.items():
+    for g, (exp, runs, js, suf) in ({**GROUPS, **LATER_GROUPS} if groups else GROUPS).items():
         if groups and g not in groups:
             continue
         for r in runs:
@@ -202,8 +208,9 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     a.groups = a.groups.split(",") if a.groups else None
     a.only = a.only.split(",") if a.only else None
-    if a.groups and set(a.groups) - set(GROUPS):
-        print(f"unknown groups {sorted(set(a.groups) - set(GROUPS))}; known {list(GROUPS)}")
+    if a.groups and set(a.groups) - set(GROUPS) - set(LATER_GROUPS):
+        print(f"unknown groups {sorted(set(a.groups) - set(GROUPS) - set(LATER_GROUPS))}; known "
+              f"{list(GROUPS) + list(LATER_GROUPS)}")
         return 2
     if a.cmd == "list":
         for g, exp, r, j, fn in jobs(a.groups, a.only):

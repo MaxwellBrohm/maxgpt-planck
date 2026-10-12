@@ -1,0 +1,39 @@
+# SCREENS AMENDMENT SEEDS-103-105 (SCREENS.txt): every screen arm at its pick on seeds 103, 104, 105, seed-major (S001, S002 x 3, S003, S005 own BASE and arm, S004, S007, S006 g 2 and its g 1 IND-only run); the BASE lines are skipped by the queue (scored in BASE-DIAG) (screens.py). train = screens check, preflight, train, score
+wait_mark SCREENS SCREENS BASE REPLAY DONE
+train base_s103
+train s001_nogate_g1_s103
+train s002_novres_g1_s103
+train s002_noqknorm_g1_s103
+train s002_nonormscale_g1_s103
+train s003_adamw_e3_r2_s103
+train s005_base_s103
+train s005_forget_g1_s103
+train s004_canonac_g1_s103
+train s007_smear_g1_s103
+train s006_mtp_g2_s103
+train s006_mtp_g1_s103
+train base_s104
+train s001_nogate_g1_s104
+train s002_novres_g1_s104
+train s002_noqknorm_g1_s104
+train s002_nonormscale_g1_s104
+train s003_adamw_e3_r2_s104
+train s005_base_s104
+train s005_forget_g1_s104
+train s004_canonac_g1_s104
+train s007_smear_g1_s104
+train s006_mtp_g2_s104
+train s006_mtp_g1_s104
+train base_s105
+train s001_nogate_g1_s105
+train s002_novres_g1_s105
+train s002_noqknorm_g1_s105
+train s002_nonormscale_g1_s105
+train s003_adamw_e3_r2_s105
+train s005_base_s105
+train s005_forget_g1_s105
+train s004_canonac_g1_s105
+train s007_smear_g1_s105
+train s006_mtp_g2_s105
+train s006_mtp_g1_s105
+mark SCREENS ROBUSTNESS K5 DONE

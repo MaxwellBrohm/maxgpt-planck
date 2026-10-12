@@ -2864,3 +2864,235 @@ only; the PC read only; nothing committed, nothing launched)
     had not run (C4), and every verdict, Holm reading, C6 reading and replay label of S001 to S007 stands as read; none
     is re-read with Part 3's SDs.
   TESTS: see the TESTS line of E3's PART 3 REOPENED entry (the same step).
+
+AMENDMENT CAP-REMOVED (2026-10-11 22:50 EDT, Claude, the SCREENS robustness workflow, on Max's rule below; Mac CPU, no
+model; nothing committed when written. Written before any run it could affect: no SCREENS queue has run since
+stage2_replay's mark (2026-10-10 23:51:19), plans/CURRENT named batch1_closed, and no robustness run exists.)
+  Max (the PI), 2026-10-11, verbatim (PLAN.md, GPU and quality policy, b790d85): "so the thing is tho all the other
+    chats that needed the pc arent running anymore, so why dont we just drop that gpu hour limit?? you can use it all
+    the time no matter what unless i say otherwise and remember we prefer quality over speed 100 percent of the time
+    ok?" PLAN.md (b790d85): "Each pre-registration that carries a cap gets its own dated amendment removing it, written
+    before any result the cap could have affected." This is that amendment for SCREENS.
+  DECISION: ORDER's CAP AND CUT RULE no longer exists for any SCREENS run, of batch 1 or of any later stage of it (the
+    robustness stage of AMENDMENT SEEDS-103-105 included): no cap, no cut order, no never-cut list, no flag for hours.
+    Hour figures (GPU HOURS, HOURS AND CAP, every CAP CHECK, screens.py hours) are planning estimates and records, never
+    a reason to cut, defer or not queue a run; where a choice trades thoroughness for time, the thorough option wins
+    (PLAN.md). Unchanged: gpu.lock per run (Planck's own queues share the card), ORDER's sequence and seed-major order,
+    the E4 GATE (a scientific gate, not a budget rule), and every rule that reads a result.
+  THE EARLIER CAP ENTRIES (ORDER's CAP AND CUT RULE, S006 EXTENSION RESULT's cut, S006-REINSTATE's 27 h, BASE-DIAG's
+    28 h, CAP-FLAG, CAP-31) stay as the record of what was computed then. No cut stands from them (S006's, the only one,
+    was reversed by AMENDMENT S006-REINSTATE), so no run is restored by this entry.
+  CODE: analyze_lib.CAP = INF (was 31.0). cap_check at the default cap never flags (no total is above infinity) and
+    cap_cut at the default cuts nothing; with an explicit cap both keep their arithmetic, so the earlier entries' tests
+    pass their own cap (25, 27, 28 or 31 h) and check what those entries computed (test_analyze.py and
+    test_screens_cap31.py now pass 31 h where they read CAP-31's numbers, and assert that CAP is infinite). screens.py
+    hours (screens_hours.report) with no cap prints the per-screen table and one line, "GPU hours, reported only
+    (AMENDMENT CAP-REMOVED: no cap, cut order or flag): measured ... h (runs ... h + other ... h) + queued ... h = ...
+    h", and no cap, cut or flag line; it returns cap, flag and narrow as None. screens.py seeds --cut stays only so the
+    recorded stage2_seeds plan (written with --cut S006) regenerates byte for byte; screens.py robust has no cut.
+  TESTS (written 2026-10-11 about 23:25 EDT, after the runs it reports; Mac CPU, ~/.venvs/planck): new
+    tests/test_screens_cap_removed.py (5: the entry's place, dating and Max's words against PLAN.md; the decision; CAP
+    infinite, no flag or cut at the default for any total, an explicit 25 h or 28 h keeping its arithmetic; screens.py
+    hours printing hours only and returning no cap; screens.py robust refusing --cut) and tests/mutants_capremoved.py
+    (14: analyze_lib.py 4, screens_hours.py 4, screens.py 1, SCREENS.txt 5). Changed: test_analyze.py and
+    test_screens_cap31.py (CAP asserted infinite; CAP-31's checks pass 31 h); the re-anchored mutants cut_order_swapped,
+    cap_left_at_25, c31_code_back_to_28 and s2e_cut_order_starts_at_s007 (each now edits the INF line).
+
+AMENDMENT SEEDS-103-105 (ROBUSTNESS) (2026-10-11 23:00 EDT, Claude, the SCREENS robustness workflow, on Max's quality
+rule below; Mac CPU, no model; nothing committed when written. Written AFTER the stage 1 verdicts (STAGE 1 VERDICTS,
+2026-10-06) and the stage 2 verdicts (STAGE 2 VERDICTS, 2026-10-11, ede95ce) were read, and after the values of
+base_s103 to base_s105 were read there (their onsets, BASE level and C6 readings). Before any robustness run exists: no
+config at seeds 103 to 105 existed for any arm or for S005's own BASE before this step, and none has run.)
+  Max (the PI), 2026-10-11, verbatim (AMENDMENT CAP-REMOVED; PLAN.md b790d85): "remember we prefer quality over speed
+    100 percent of the time ok?" PLAN.md: "Where a choice trades thoroughness for time (more seeds, more checks, longer
+    runs, a rerun to settle a doubt), the thorough option wins."
+  WHY: C4 set k = 2 in every class (k = max(2, k_needed(1%)), FIXED), the fewest seeds its 1% power rule allows
+    (k_needed(1%) on CHAT is 2 for SIA and new init, 1 for same init, where 2 is the floor), under a batch cap that
+    no longer exists. Two seeds carry two NOMINATEs (S004, S005) toward 30M and a REJECT that ends a bet in its
+    form (S006); three more seeds per arm, paired with the shared BASE runs base_s103 to base_s105 that BASE-DIAG
+    already ran, test whether those readings hold. Because this is written after the verdicts were read, it cannot
+    change them: it adds a reading beside each, and nothing is adopted or dropped on that reading alone.
+  DECISION: every screen arm runs at seeds 103, 104 and 105 at its recorded pick: S001 nogate g 1; S002 novres,
+    noqknorm, nonormscale g 1; S003 adamw at LR5_adamw (eta 3e-3, r 2); S004 canonac g 1; S005 forget g 1 with its own
+    BASE s005_base at the same seeds (mask engine, micro 8 x accum 2); S006 mtp g 2 plus its C6 matched-LR IND-only runs
+    at g 1 (never in a bpb verdict); S007 smear g 1. Every other arm pairs with the shared BASE base_s103 to base_s105
+    (BASE-DIAG, run at 27d8cb7); no new shared BASE run.
+  WHAT STANDS: the registered k = 2 verdicts (S001 TIE, S002 novres REJECT, noqknorm TIE, nonormscale TIE, S003 REJECT,
+    S004 NOMINATE, S005 NOMINATE flagged, S006 REJECT, S007 TIE), their Holm readings, onset readings, C6 readings, BASE
+    replay labels and consequences are the record, unchanged by anything below.
+  THE ROBUSTNESS READING (k = 5, seeds 101 to 105; beside each registered verdict, never in place of it):
+    C7 as registered with k = 5: d_s = F_arm,s - F_BASE,s at s = 101..105; dbar their mean; SD_ref by the arm's C4 class
+      (E3 Part 1, df_ref 7: same init SD_d; SIA u x SD_d, u = 1.3533; new init sqrt(2) x sigma_seed, which departs from
+      C4's text: see NEW-INIT SD below), as a fraction times BASE's mean F_m over the five seeds; thr_m = t(0.975, 7) x
+      SD_ref / sqrt(5) = 1.0575 x SD_ref (t(0.975, 7) = 2.3646); delta_m = 1% of BASE's five-seed mean. Relative
+      thresholds, CHAT / PROSE: same init 0.256% / 0.154%, SIA 0.347% / 0.209%, new init 0.382% / 0.222% (at k = 2:
+      0.405% / 0.244%, 0.548% / 0.330%, 0.603% / 0.351%). BETTER, WORSE and EQUAL with every clause as C7 (every d_s of
+      the five in one direction), the arm verdicts, DIVERGENCE, CCCC-ONLY and the BASE level labels as registered. S005
+      against its own BASE at the five seeds; S006 from its g 2 runs.
+    C4 at k = 5: same init (S003) per arm, df 4, limit sqrt(chi2(0.95, 4) / 4) = 1.540 x SD_d; pooled SIA over the 7 SIA
+      arms (S002's 3, S004, S005, S006, S007), df 28, limit sqrt(chi2(0.95, 28) / 28) = 1.215 x u x SD_d. A failed check
+      re-reads at the new-init SD with C4's labels ("underpowered" only when that SD is the larger, AUDIT CORRECTIONS
+      (1)). Holm over the 9 contrasts at k = 5 (two-sided p of dbar_CHAT / (SD_ref / sqrt(5)) on t(7), family 0.05).
+      k = 5 is at or above every class's k_needed(1%) (FIXED: 1 or 2), so k gives no "underpowered" label.
+    THE NEW SEEDS ALONE (k = 3, seeds 103 to 105), reported beside it with the same rule at k = 3 (thr = t(0.975, 7) x
+      SD_ref / sqrt(3); C4's checks at df 2 and 14), no Holm: the k = 5 reading reuses the two seeds of the registered
+      verdict, so it is not an independent replication; this part is.
+    S001 (new init) also beside it, reported, no rule: the same reading at sqrt(2) x sigma_init from E3 Part 3
+      (results_part3.json sha256 17b1614d0e0f2633..., df 4). E3 PART 3 RESULT's scope keeps Part 3's SDs out of stage 1
+      and stage 2 verdicts, so it is not the rule's SD here.
+    NEW-INIT SD (S001's reference SD, and the SD a failed C4 check re-reads at, below; reworded 2026-10-12 after the
+      independent check, which found the first draft's "as registered" wrong): this is a departure from C4, not C4 as
+      registered. C4's new-init row reads sqrt(2) x sigma_init once E3 Part 3 has run, and it has (E3 PART 3 RESULT:
+      rule 1 reads sqrt(2) x sigma_init, df 4, for verdicts read after it). The rule here keeps sqrt(2) x sigma_seed (df
+      7) because the k = 5 reading reuses S001's seed 101 and 102 runs, whose verdict that entry's scope keeps on
+      sigma_seed. The choice was made after the k = 2 verdicts were read and before any robustness value exists. The two
+      references, F(CHAT) / F(PROSE): sqrt(2) x sigma_seed 0.361% / 0.210%, sqrt(2) x sigma_init 0.287% / 0.210%; k = 5
+      thresholds 0.382% / 0.222% against 0.356% / 0.261% (t(0.975, 4) for sigma_init). Both readings are reported
+      wherever this SD is used. Which one carries the k = 5 labels is Max's call, flagged to him, and is fixed before
+      the reading code is written.
+    ONSET at k = 5 (AMENDMENT BASE-DIAG's ONSET RULE with k = 5): S004 canonac and S007 smear from their g 1 runs, S006
+      from its g 1 IND-only runs, each against base_s101..105; d_s = onset_half(arm, s) - onset_half(BASE, s) in steps;
+      sigma_seed the sample SD of BASE's onset_half over base_s101..105 (df 4; 83.802 steps as recorded); SD_ref =
+      sqrt(2) x sigma_seed; thr = t(0.975, 4) x SD_ref / sqrt(5) = 1.756 x sigma_seed (147.2 steps at the recorded
+      sigma_seed, under one logged interval of 153: a one-interval shift at all five seeds in one direction reads);
+      EARLIER, LATER or UNRESOLVED; Holm over the 3. The sigma comes from the same five BASE runs the contrasts pair
+      with, as at k = 2. S005 descriptive (its own BASE); undefined onsets and incomplete curves as ONSET RULE CODE (a)
+      and its CORRECTION 1. S006's FOLLOW-UP TRIGGER reads the registered k = 2 onset (UNRESOLVED; it did not fire); a
+      k = 5 EARLIER goes to Max as a flag and does not fire it alone.
+    C6 at k = 5 (AMENDMENT C6-DIAG's READING RULE with k = 5, final IND, HD_asst, HD_user; E3 PART 4d's SDs, df 7, by
+      class): thr = t(0.975, df_ref) x SD_ref / sqrt(5); HIGHER, LOWER or UNRESOLVED; C4's checks per metric (df 4 same
+      init, df 28 pooled SIA); Holm over the 9; beside any re-read, AUDIT CORRECTIONS (1)'s sensitivity block (the
+      registered SD and the observed pooled SD). C6-DIAG's CHECKS (1) to (4) on every new run first. Reported, no rule:
+      SINK per layer and head; S001's per-seed paired SINK difference over the five seeds with the seeds per sign; GATE
+      mean, p10 and p90; HD_none and HD per turn; the per-module readings, and NEAR ITS INIT read "at every seed" of the
+      five. S005's FLAG (BETTER on CHAT with LOWER HD_asst) read again at k = 5.
+    BASE REPLAY at k = 5: base_s103 to base_s105 ran on 2026-10-07 and these arms run later, so every shared-BASE arm
+      pairs across days at the new seeds, as S004, S006 and S007 did at 101 and 102. BASE-REPLAY's D was not separated
+      from replay noise; its LABEL is applied to every shared-BASE arm's k = 5 reading (every d_s moved by -D(r) at all
+      five seeds), reported; S005 "not applicable".
+  DISAGREEMENT, REPORTED PLAINLY IN BOTH DIRECTIONS: for each arm the registered k = 2 verdict, the k = 5 reading and
+    the k = 3 reading side by side, each labelled AGREE or DISAGREE. A k = 2 NOMINATE that reads TIE, INCONCLUSIVE,
+    GUARD-FAIL or REJECT at k = 5 is "not confirmed at k = 5"; a k = 2 TIE, INCONCLUSIVE or REJECT that reads NOMINATE
+    at k = 5 is "nominated only at k = 5"; a REJECT that is not WORSE_CHAT at k = 5, and a TIE that reads INCONCLUSIVE,
+    are said the same way. The same for each onset and C6 label. Nothing is adopted or dropped on the robustness reading
+    alone: the k = 2 verdicts and their consequences stand, and each disagreement goes to Max as a flag with what it
+    would change (a 20 to 30M confirmation queued or not); he decides.
+  CODE PATH AND C4's PAIRING: base_s101, base_s102 ran at 93bc10b and base_s103 to base_s105 at 27d8cb7 (equal under
+    harness/, data_prep/, tokenizer/ and corpus/). The robustness runs must launch from a commit whose harness/,
+    data_prep/, tokenizer/, corpus/ and the 5 E2 files a SCREENS run reads equal 77ab43f's: the tree whose only change
+    against 27d8cb7 there is harness/train.py's data_seed flag (default off), with E3 notes PART 3 CUDA PARITY (CUDA,
+    2026-10-11: PASS) and harness/test_data_seed.py's pre-patch test (CPU) as C4's flag-off equivalence test.
+    tests/test_screens_robust_code.py pins those files by git blob id at 77ab43f and fails while plans/CURRENT names
+    robustness_k5 if any differs.
+  RUNS AND PLAN: screens.py robust (new) wrote 33 configs, each passing screens.py check and differing from the same run
+    at seed 101 only in name, out_dir and seed: s001_nogate_g1, s002_novres_g1, s002_noqknorm_g1, s002_nonormscale_g1,
+    s003_adamw_e3_r2, s005_base, s005_forget_g1, s004_canonac_g1, s007_smear_g1, s006_mtp_g2 and s006_mtp_g1 at
+    s103, s104 and s105; base_s103 to base_s105 are BASE-DIAG's, unchanged.
+  ROBUSTNESS PLAN: plans/robustness_k5.txt, 36 train lines, 3 seed sets, 33 new runs (BASE lines skipped)
+    The 3 shared BASE lines are BASE-DIAG's runs, which the queue skips (scored). Seed-major (a stopped queue leaves
+    whole seed sets); in each set: base_s<seed>, S001, S002 x 3, S003, S005's own BASE then its arm, S004, S007, S006 g
+    2 then its g 1 IND-only run (ORDER: stage 1, then stage 2 by priority). First line "wait_mark SCREENS SCREENS BASE
+    REPLAY DONE" (on the PC since 2026-10-10 23:51:19); last line "mark SCREENS ROBUSTNESS K5 DONE". plans/CURRENT =
+    robustness_k5 (a comment names its marks, bundle and waiter).
+  C6 RUNNER: diag_runner.py group robust (--groups robust; not in the default selection, so batch 1's six groups and a
+    plain diag_start.sh call are unchanged): the 30 new runs other than S006's three g 1 IND-only runs (C6: IND-only
+    runs are not scored); ind, hd and attn on each, modules on S004, S005's arm and S007, halflife on S005's arm: 102
+    jobs. robust_waiter.sh starts it from the queue's clone after the plan's clean end.
+  STARTING IT UNATTENDED: experiments/screens/robust_waiter.sh (new), the one file pcdetach.sh starts; chain_waiter.sh
+    (its sha256 pinned, as replay_waiter.sh pins it) beside it in planck-kit and the commit holding this entry as
+    planck-kit/planck_robust.bundle. Step 0: while an E3 queue, launcher or waiter runs it waits; once none runs, E3's
+    queue log must end cleanly (its last start line followed by a MARK line and "plan finished"), else GIVEUP. Step 1:
+    chain_waiter.sh robust stage2_replay 2aa3787... "SCREENS BASE REPLAY DONE" robustness_k5 planck_robust.bundle: it
+    waits while a SCREENS queue runs and launches once stage2_replay's clean end is the queue log's last (the log's
+    state since 2026-10-10 23:51:19; batch1_closed was never launched). Step 2: replay_waiter.sh's relaunch, from the
+    same clone and plan, after a 2 h gpu.lock wait (at most 24). Step 3: after "MARK SCREENS ROBUSTNESS K5 DONE" and
+    "plan finished: robustness_k5.txt", that clone's diag_queue.sh --code <clone> --groups robust, in the foreground (it
+    waits out lock waits itself). Any other end: GIVEUP, for a person. Log ~/planck/logs/robust_waiter.log; cancel
+    ~/planck/logs/robust_waiter.CANCEL.
+  HOURS (planning estimates only; AMENDMENT CAP-REMOVED): at measured_hours.tsv's lock hours for the same configurations
+    (stage 1's seed 101 runs; stage 2's seed-1 g-checks at the picks, g 1 and g 2 for S006) and s005_base_s101's 0.393 h
+    (AMENDMENT S006-REINSTATE), a seed set holds about 4.1 GPU h (S005's arm 0.86 h the longest), the plan about 12.4 h,
+    and the C6 group about 10 min.
+  NOT YET BUILT, before any robustness value is read: the reading code (analyze.py verdicts at seeds 101..105 and
+    103..105, the onset rule at k = 5, c6read.py and basereplay.py at five seeds, the AGREE / DISAGREE table), with its
+    tests watched failing on mutants, committed before the first value is opened. The 33 runs' models/registry.jsonl
+    lines are written when their finals exist (keep every model).
+  TESTS (written 2026-10-11 about 23:25 EDT, after the runs it reports; Mac CPU, ~/.venvs/planck; the PC only for the
+    dry run below). New: tests/robust_lib.py (the acceptance robust_configs, the plan SEQUENCE, the same-code pins),
+    tests/test_screens_robust.py (16: the entry; WHAT STANDS and the picks against stage2_verdicts.json; screens.py
+    robust run again changing no file; CURRENT; the acceptance refusing 9 bad plans, a config at another LR, another
+    seed, the wrong directory, a refused check, no BATCH 1 CLOSED state and no record line; every threshold, factor,
+    count and hour in this entry (not the C6 group's 10 min) computed from E3's results, the code and
+    measured_hours.tsv: the first draft's 0.604% was caught here and is 0.603%), tests/test_robust_waiter.py (22: the
+    arguments and the pin; on a fixture tree with stub queue and diag scripts, a clean end then the C6 group, two 2 h
+    lock waits, MAXR, a failure and a kill with no relaunch and no C6 group, a failed C6 group, E3 running, four unclean
+    E3 ends, no E3 log, step 1 launching nothing four ways, the cancel file, a missing or edited chain_waiter.sh, a
+    restart; every git call without git's location variables), tests/test_diag_robust.py (5: the robust group's 30 runs
+    and 102 jobs, each checkpoint's flags against the run's config, never in the default selection, the CLI, a missing
+    run refused) and tests/test_screens_robust_code.py (2: the code paths equal 77ab43f's while CURRENT names
+    robustness_k5; the pinned digest by git, and 77ab43f differing from 93bc10b there only in the 7 harness/ files of
+    the data_seed change). Changed, each accepting the robustness state only through robust_configs():
+    test_screens_configs.py, test_screens_closed.py, test_s005_row_order.py, test_screens_replay_entry.py,
+    test_screens_stage1_seeds.py, test_screens_stage2_seeds.py, test_screens_s006_reinstate.py,
+    test_screens_base_diag.py, test_screens_stage2_selection.py, test_screens_integration.py, test_replay_waiter.py,
+    test_chain_waiter_run.py and test_screens_replay.py. Watched failing: the first suite run after the configs, plan
+    and CURRENT were written (before robust_lib.py existed) failed 19 tests in these files (config counts and CURRENT's
+    sequence), and they pass once they read robust_configs(); with HEAD's tree (no robustness plan, configs or entry;
+    CURRENT batch1_closed) and only this step's versions of 12 of them and robust_lib.py, 369 passed, so what they
+    accept there is unchanged (test_screens_integration.py, the 13th, counts the new mutant lists, which that tree
+    lacks). tests/mutants_robust.py (47: robust_waiter.sh 15, SCREENS.txt 10, screens.py 7, robust_lib.py 6,
+    diag_runner.py 4, the plan 3, CURRENT 1, one config 1). Re-anchored: the 9 CURRENT mutants on robustness_k5 and
+    c6_unknown_group_accepted (diag_runner.py's known groups now include LATER_GROUPS).
+  RUNS: experiments/screens/tests, 22:56 to 22:59: 1009 passed, 1 failed (test_screens_integration.py's mutant count,
+    which did not yet count the two new lists; fixed, 7 passed), 1 skipped (test_screens_replay_code.py: CURRENT is not
+    stage2_replay). mutation_screens.py on a frozen copy of this tree, 4 shards, 23:01:44 to 23:20:53: 756 of 757
+    killed, none INVALID; the survivor rb_acc_configs_not_diffed showed a vacuous case in test_screens_robust.py (the
+    variant config's extra optim line was a duplicate YAML key, so the earlier one was read and nothing differed); the
+    case now edits the LR in place and isolates the key check (the directory check patched to pass), and
+    rb_config_other_lr was re-anchored the same way; then every mutant whose test file is test_screens_robust.py, 28,
+    on the frozen copy with the fixed files: 28 of 28 killed. The same-code guard's mutants by hand (not in
+    mutation_screens.py, whose copies hold only part of the code trees): on a full copy, a byte in harness/train.py, a
+    file added under data_prep/, corpus/oodh.py removed, engine.yaml and the tokenizer manifest edited, the digest and
+    the count pins edited: 7 of 7 fail it (CURRENT moved off robustness_k5 makes it skip, as designed); in the checkout,
+    the git test with the changed-file list short of train.py, the 27d8cb7 diff against 77ab43f, and the digest and the
+    count taken from 93bc10b's rows: 4 of 4 fail it.
+  DRY RUN ON THE PC (22:59, a scratch directory under ~/planck/dev, removed after; fixture queue logs and marks, a
+    fixture bundle whose queue_screens.sh and diag_queue.sh are stubs; never ~/planck/runs, gpu.lock or the kit's
+    bundles), robust_waiter.sh as written here (sha256 35de5d3d0ca963ff...) and chain_waiter.sh (920db4c1...) under the
+    PC's own bash 5.3.9, flock (util-linux 2.41.3), pgrep and git 2.53.0: (A) a clean end: one launch from the fixture
+    bundle, then diag_queue.sh --code <clone> --groups robust, DONE; (C) a 2 h lock wait: relaunched once from the same
+    clone, then the C6 group, DONE; (B) a process matching the E3 pattern: step 0 WAIT for 6 s, then on as (A); (D) two
+    waiters at once: the second exited at the real flock on robust_waiter_all.lock, the first went to DONE; (R) the PC's
+    real SCREENS queue log and marks and E3 queue log, copied, with the default pgrep patterns: step 0 read E3's last
+    queue (part3.txt) as ended cleanly and step 1 read stage2_replay at 2aa3787 as ended cleanly at its mark, so the
+    real waiter would launch at its first poll.
+  NOT DONE HERE (the task's limits): nothing committed, so no bundle, no kit copy and no launch; INSTALL after the
+    commit: git bundle create <tmp>/planck_robust.bundle HEAD main, copied to planck-kit/ with scp as send_kit.sh does
+    (never send_kit.sh), chain_waiter.sh already there byte for byte (920db4c1...), then pcdetach.sh on the committed
+    experiments/screens/robust_waiter.sh.
+  FINAL RUN (written 23:33 EDT, after it): experiments/screens/tests on this tree, 23:27:17 to 23:31:54: 1010 passed, 1
+    skipped (test_screens_replay_code.py: CURRENT names robustness_k5). E3 and models suites (with E3 notes PART 3 CUDA
+    PARITY and tests/test_parity_cuda.py): 90 passed; E3's mutation_e3.py: 38 of 38 killed.
+  AFTER IT (written 23:41 EDT): this entry's over-long lines were rewrapped (the flattened text checked unchanged). The
+    15 SCREENS.txt mutants of the two new lists, rerun: rb_entry_jobs survived, because the TESTS paragraph above also
+    says "102 jobs"; test_screens_robust.py now pins C6 RUNNER's own phrase with that count, and the 28 mutants read by
+    test_screens_robust.py, rerun on a frozen copy: 28 of 28 killed (the other 14 of the 15 were killed in the first
+    rerun). experiments/screens/tests again, 23:36:14 to 23:40:28: 1010 passed, 1 skipped (the same).
+  AFTER THE INDEPENDENT CHECK (written 2026-10-12 about 00:50 EDT, after the runs it reports; Claude, the commit step of
+    the SCREENS robustness workflow; Mac CPU, ~/.venvs/planck): the check found four wrong statements, which the checker
+    corrected in the text (the job-count pin met by a quote in AFTER IT, "HEAD when run" in E3's parity entry, WHY's
+    "chosen against the batch's cap", and a "10 min" the TESTS paragraph called tested), the new-init SD described as C4
+    as registered (reworded here: the C7 line and NEW-INIT SD), and three test gaps. New:
+    tests/test_screens_robust_verify.py (4: C4's new-init row and Part 3's scope as quoted, the C7 line, NEW-INIT SD's
+    words, and its references and thresholds computed from results.json and results_part3.json),
+    tests/test_robust_waiter_locks.py (9: with a flock stub that has real flock(2) semantics on the descriptor it
+    inherits, a second waiter refused at robust_waiter_all.lock, a second watcher refused at robust_requeue.lock before
+    the C6 group, and the free locks letting it run; the default E3 pattern, read from the file, finding each of the
+    four E3 command lines through pgrep -f and no other queue; the waiter with that default waiting while an
+    e3p3_waiter.sh process runs) and tests/mutants_rbverify.py (17: SCREENS.txt 10, robust_waiter.sh 7); E3's
+    test_parity_cuda.py as E3 notes AFTER THE CHECK says. RUNS: experiments/screens/tests with SCREENS_PC_COPY and
+    SCREENS_PC_COPY_1011 naming the scratch copies of the PC's queue files (the FINAL RUN above was run the same way;
+    without them test_screens_cap31.py, test_screens_saturday_text.py and test_screens_holds.py skip the cases that read
+    the copies), 00:17:07 to 00:21:19: 1023 passed, 1 skipped (test_screens_replay_code.py, as designed).
+    mutation_screens.py, the 17 new mutants alone first: 17 of 17 killed; then on a frozen copy of this tree, 4 shards,
+    00:22 to 00:41:34: 774 of 774 killed, none INVALID. The robustness runs were not launched before these.

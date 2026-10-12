@@ -24,5 +24,11 @@
 # batch1_closed (SCREENS.txt BATCH 1 CLOSED, after stage2_replay ended at its mark on 2026-10-10 23:51:19): no plan of
 # this batch is left; it waits on SCREENS_BASE_REPLAY_DONE and stops. It moves CURRENT off stage2_replay so the E3 Part 3
 # data_seed change can land in harness/ (tests/test_screens_replay_code.py guards stage2_replay only).
+# robustness_k5 (SCREENS.txt AMENDMENT SEEDS-103-105, after AMENDMENT CAP-REMOVED and E3 notes PART 3 CUDA PARITY):
+# every screen arm at its pick on seeds 103, 104, 105, seed-major; it waits on SCREENS_BASE_REPLAY_DONE and stops at
+# SCREENS_ROBUSTNESS_K5_DONE. Launch it only from a commit whose harness/, data_prep/, tokenizer/ and corpus/ equal
+# 77ab43f's (tests/test_screens_robust_code.py), from its own bundle, planck-kit/planck_robust.bundle, started by
+# experiments/screens/robust_waiter.sh (after any running E3 or SCREENS queue has ended cleanly; chain_waiter.sh; a
+# relaunch after a 2 h gpu.lock wait; then the C6 runner's robust group from the same clone).
 # Seed plans come from screens.py seeds.
-batch1_closed
+robustness_k5

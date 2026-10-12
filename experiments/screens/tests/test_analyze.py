@@ -138,9 +138,9 @@ def test_cap_and_cut_order():
 
 def test_cap_overrun_is_a_flag_never_a_cut():
     """AMENDMENT CAP-FLAG (2026-10-10): over the cap nothing is cut, the step flags Max with the overrun and what the
-    cut order would cut; at or under it, no flag. Checked at CAP-FLAG's 28 h; the code's cap is 31 h since AMENDMENT
-    CAP-31 (2026-10-11), and the defaults use it."""
-    assert AL.CAP == 31.0 and AL.cap_cut({})["cap"] == 31.0 and AL.cap_check({})["cap"] == 31.0
+    cut order would cut; at or under it, no flag. Checked at CAP-FLAG's 28 h; the code's cap was 31 h by AMENDMENT
+    CAP-31 and is infinite since AMENDMENT CAP-REMOVED (2026-10-11), and the defaults use it (never a flag)."""
+    assert AL.CAP == math.inf and AL.cap_cut({})["cap"] == math.inf and AL.cap_check({})["cap"] == math.inf
     rem = {"BASE": 2.0, "S001": 3.0, "S002": 4.0, "S003": 5.0, "S004": 3.0, "S005": 4.0, "S006": 2.0, "S007": 3.0}
     r = AL.cap_check(rem, measured=3.5, cap=28.0)                                       # 29.5 h
     assert r["flag_to_max"] and not r["fits"] and r["cut"] == [] and abs(r["over_by"] - 1.5) < 1e-12

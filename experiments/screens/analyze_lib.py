@@ -1,8 +1,9 @@
 """SCREENS decision rules as pure functions (no file is read here; analyze.py does the I/O). Stdlib only.
 experiments/SCREENS.txt: C4 (reference SDs per class, the noise checks), C5 (CCCC-ONLY), C7 (metric readings,
 arm verdicts, DIVERGENCE, the Holm reading), C6 (IND onsets), AMENDMENT BASE-DIAG's ONSET RULE (onset_half read
-with C7 at sigma_seed from BASE seeds 101-105) and ORDER's cap (31 h since AMENDMENT CAP-31; an overrun is a flag
-to Max, never a cut, since AMENDMENT CAP-FLAG: cap_check; cap_cut is the cut order's arithmetic, the flag's proposal).
+with C7 at sigma_seed from BASE seeds 101-105) and ORDER's cap, which no longer exists since AMENDMENT CAP-REMOVED
+(2026-10-11, Max: no GPU-hour cap): CAP is infinite, so cap_check never flags and cap_cut never cuts at the default; the
+earlier entries' checks pass their own cap (25, 27, 28 or 31 h) to reproduce what they computed.
 Quantiles: E3's own t and chi-square functions (e3analyze.py; scipy is not in Planck's venv).
 
 Run values come as {seed: {"CHAT": F, "PROSE": F, "cccc": F, "gutenberg": F, "wikimedia": F}} or
@@ -25,8 +26,8 @@ METRICS = {"CHAT": "F(CHAT)", "PROSE": "F(PROSE)", "cccc": "PROSE cccc", "gutenb
            "wikimedia": "PROSE wikimedia"}             # key in run values -> E3 noise metric
 DELTA = 0.01                                           # E3's default delta_bet: 1% of BASE's mean
 # ORDER's cap: 25 h as registered, 27 h by AMENDMENT S006-REINSTATE, 28 h by AMENDMENT BASE-DIAG, 31 h by AMENDMENT
-# CAP-31 (SCREENS.txt, 2026-10-11, on Max's answer)
-CAP, CUT_ORDER, NEVER_CUT = 31.0, ["S006", "S003", "S007", "S002"], ["S001", "S004", "S005", "BASE"]
+# CAP-31, none by AMENDMENT CAP-REMOVED (SCREENS.txt, 2026-10-11: infinite, so nothing is ever flagged or cut by it)
+CAP, CUT_ORDER, NEVER_CUT = INF, ["S006", "S003", "S007", "S002"], ["S001", "S004", "S005", "BASE"]
 ONSET_SEEDS = (101, 102, 103, 104, 105)                # AMENDMENT BASE-DIAG: BASE's onset_half sigma_seed, df 4
 
 
@@ -171,7 +172,8 @@ def cap_check(remaining: dict, measured: float = 0.0, cap: float = CAP, current:
               toy_favours_p022: bool = False) -> dict:
     """ORDER's cap as AMENDMENT CAP-FLAG reads it (SCREENS.txt, 2026-10-10): measured plus queued against the cap.
     Over it, nothing is cut and nothing more may be queued: the step FLAGS Max (flag_to_max) with the overrun and
-    the proposal, what the cut order would cut (cap_cut), and waits for his decision. "cut" is always empty here."""
+    the proposal, what the cut order would cut (cap_cut), and waits for his decision. "cut" is always empty here.
+    Since AMENDMENT CAP-REMOVED the default cap is infinite, so it never flags; an earlier entry's cap is passed."""
     prop = cap_cut(remaining, measured, cap, current, toy_favours_p022)
     over = prop["total_before"] > cap
     return {"total": prop["total_before"], "cap": cap, "fits": not over, "over_by": max(0.0, prop["total_before"] - cap),

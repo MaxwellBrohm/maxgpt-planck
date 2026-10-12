@@ -59,7 +59,8 @@ MUTANTS_C6DIAG_RUNNER = [
     ("c6_halflife_on_s005_base", DRP, 'return run.startswith("s005_forget")', 'return run.startswith("s005_")', RN),
     ("c6_stops_gap_dropped", DRP, 'STOPS = ("DIVERGED", "GAP", "rc12_eval.jsonl")', 'STOPS = ("DIVERGED", "rc12_eval.jsonl")', RN),
     ("c6_missing_dir_unchecked", DRP, "    if not os.path.isdir(rdir):\n", "    if False:\n", RN),
-    ("c6_unknown_group_accepted", DRP, "if a.groups and set(a.groups) - set(GROUPS):", "if False:", RN),
+    ("c6_unknown_group_accepted", DRP, "if a.groups and set(a.groups) - set(GROUPS) - set(LATER_GROUPS):", "if False:", RN),
+    # (anchor moved by AMENDMENT SEEDS-103-105, 2026-10-11: the robust group is a known group outside the default)
     ("c6_step_not_recorded", DRP, '"step": ck.get("step"),', '"step": None,', RD),
     ("c6_hl_no_gate_check", DLP, "        if not mod.forget_gate:\n            return\n", "", RD),
 ]

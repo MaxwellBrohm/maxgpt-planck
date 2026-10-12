@@ -15,6 +15,7 @@ from reinstate_lib import REINSTATED_PLANS, s006_seed_configs  # noqa: E402  (AM
 from basediag_lib import DIAG_PLANS, base_diag_configs  # noqa: E402  (AMENDMENT BASE-DIAG, later)
 from replay_lib import REPLAY_PLANS, replay_configs  # noqa: E402  (AMENDMENT BASE-REPLAY, later)
 from closed_lib import CLOSED_PLANS, closed_state  # noqa: E402  (BATCH 1 CLOSED, later)
+from robust_lib import ROBUST_PLANS, robust_configs  # noqa: E402  (AMENDMENT SEEDS-103-105, later)
 from test_screens_s003_stage_c import section  # noqa: E402
 
 P = L.params()
@@ -169,7 +170,7 @@ def test_extension_config_is_s006_at_4_x_lr5(V, capsys):
     assert [f[k] for k in L.LRK] == pytest.approx([4 * P["lr5"][0]] * 3) and P["lr5"][1] == 1.0 and f["seed"] == 1
     assert screens.main(["check", EXT]) == 0 and capsys.readouterr().out.count("ok      ") == 1
     assert len(L.all_configs()) == 83 + len(stage2_seed_configs()) + len(s006_seed_configs()) + len(base_diag_configs()) \
-        + len(replay_configs())
+        + len(replay_configs()) + len(robust_configs())
     assert H.slot(EXT) == ("S006", None)
     v = V["fmt"]
     assert f"s006_mtp_g4_s1.yaml (sha256 {L.sha256(path[0])[:16]}...)" in FLAT and "1 ok (83 ok over every config)" in FLAT
@@ -229,6 +230,7 @@ def test_plan_waits_on_the_selection_mark_and_runs_only_the_extension(V):
     seq += DIAG_PLANS if base_diag_configs() else []
     seq += REPLAY_PLANS if replay_configs() else []
     seq += CLOSED_PLANS if closed_state() else []
+    seq += ROBUST_PLANS if robust_configs() else []
     assert len(cur) == 1 and seq.index(cur[0]) >= seq.index("stage2_s006x")
     assert f"stage2_s006x.txt (sha256 {L.sha256(PLAN)[:16]}...; written by screens.plan), its 4 lines:" in FLAT
     assert " ".join(lines[0].split()) + " [one line in the file]" in FLAT

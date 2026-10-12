@@ -15,6 +15,7 @@ from reinstate_lib import END, REINSTATED_PLANS, recorded_reinstated, s006_seed_
 from basediag_lib import DIAG_PLANS, base_diag_configs  # noqa: E402  (AMENDMENT BASE-DIAG, later)
 from replay_lib import REPLAY_PLANS, replay_configs  # noqa: E402  (AMENDMENT BASE-REPLAY, later)
 from closed_lib import CLOSED_PLANS, closed_state  # noqa: E402  (BATCH 1 CLOSED, later)
+from robust_lib import ROBUST_PLANS, robust_configs  # noqa: E402  (AMENDMENT SEEDS-103-105, later)
 from test_screens_configs import P, STAGE2_SEEDS, recorded_cuts  # noqa: E402
 from test_screens_refusals import scratch  # noqa: E402,F401  (the scratch config tree fixture)
 from test_screens_s003_stage_c import section  # noqa: E402
@@ -114,7 +115,8 @@ def test_configs_differ_only_in_registered_keys(V, capsys):
         assert [f[k] for k in L.LRK] == [float(g) * P["lr5"][0]] * 3 and L.check(L.find(r)[0], P) == []
         assert L.diff(f, L.flat(L.resolve(L.find(f"s006_mtp_g{g}_s1")[0]))) == {"name", "out_dir", "seed"}
     assert screens.main(["check", *RUNS]) == 0 and capsys.readouterr().out.count("ok      ") == 4
-    n = 93 + len(base_diag_configs()) + len(replay_configs())   # later: BASE-DIAG's 3 and BASE-REPLAY's 3, else none
+    n = 93 + len(base_diag_configs()) + len(replay_configs()) + len(robust_configs())   # later: BASE-DIAG's 3,
+    # BASE-REPLAY's 3 and SEEDS-103-105's 33, else none
     assert screens.main(["check"]) == 0 and capsys.readouterr().out.count("ok      ") == n == len(L.all_configs())
     assert "screens.py check: 4 ok, 93 ok over every config" in FLAT
     assert f"the three LRs, 2 x LR5 = {V['fmt']['lr']} each" in FLAT
@@ -131,6 +133,7 @@ def test_plan_current_and_acceptance(V):
     later = DIAG_PLANS if base_diag_configs() else []       # AMENDMENT BASE-DIAG moved CURRENT on, later
     later = (REPLAY_PLANS if replay_configs() else []) or later      # and AMENDMENT BASE-REPLAY after it
     later = (CLOSED_PLANS if closed_state() else []) or later        # and BATCH 1 CLOSED after it
+    later = (ROBUST_PLANS if robust_configs() else []) or later      # and AMENDMENT SEEDS-103-105 after it
     assert cur == (later or REINSTATED_PLANS) and REINSTATED_PLANS == ["stage2_s006_seeds"]
     assert s006_seed_configs() == set(RUNS)
     assert "plans/CURRENT = stage2_s006_seeds (edited here" in FLAT

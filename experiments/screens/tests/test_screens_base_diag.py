@@ -13,6 +13,7 @@ import analyze_lib as AL, mutation_screens as M, screens_hours as H, screens_lib
 from basediag_lib import DIAG_PLAN, DIAG_PLANS, END, RUNS, base_diag_configs, recorded_diag  # noqa: E402
 from replay_lib import REPLAY_PLANS, replay_configs  # noqa: E402  (AMENDMENT BASE-REPLAY, later)
 from closed_lib import CLOSED_PLANS, closed_state  # noqa: E402  (BATCH 1 CLOSED, later)
+from robust_lib import ROBUST_PLANS, robust_configs  # noqa: E402  (AMENDMENT SEEDS-103-105, later)
 sys.path.insert(0, L.E3D)
 from e3analyze import t_ppf  # noqa: E402
 from test_screens_configs import P  # noqa: E402
@@ -128,7 +129,7 @@ def test_configs_check_and_differ_only_in_seed(capsys):
         f = L.flat(L.resolve(L.find(r)[0]))
         assert L.diff(f, ref) == {"name", "out_dir", "seed"} and f["seed"] == int(r[-3:]) and L.check(L.find(r)[0], P) == []
     assert screens.main(["check", *RUNS]) == 0 and capsys.readouterr().out.count("ok      ") == 3
-    n = 96 + len(replay_configs())            # later: AMENDMENT BASE-REPLAY's 3 BASE replays, else none
+    n = 96 + len(replay_configs()) + len(robust_configs())   # later: BASE-REPLAY's 3, SEEDS-103-105's 33, else none
     assert screens.main(["check"]) == 0 and capsys.readouterr().out.count("ok      ") == n == len(L.all_configs())
     assert "screens.py check: 3 ok, 96 ok over every config" in FLAT
 
@@ -144,6 +145,7 @@ def test_plan_current_and_acceptance():
     cur = [ln.strip() for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
     later = REPLAY_PLANS if replay_configs() else []        # AMENDMENT BASE-REPLAY moved CURRENT on, later
     later = (CLOSED_PLANS if closed_state() else []) or later        # and BATCH 1 CLOSED after it
+    later = (ROBUST_PLANS if robust_configs() else []) or later      # and AMENDMENT SEEDS-103-105 after it
     assert cur == (later or DIAG_PLANS) and DIAG_PLANS == ["stage2_base_diag"] and base_diag_configs() == set(RUNS)
     assert "plans/CURRENT = stage2_base_diag (edited here" in FLAT and "Estimate 0.937 h." in FLAT
 

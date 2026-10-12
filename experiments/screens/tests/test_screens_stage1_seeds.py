@@ -223,8 +223,9 @@ def test_seed_configs_are_their_base_plus_the_registered_keys(seed):
     from reinstate_lib import s006_seed_configs                    # and S006's reinstated seed sets
     from basediag_lib import base_diag_configs                     # and AMENDMENT BASE-DIAG's BASE runs
     from replay_lib import replay_configs                          # and AMENDMENT BASE-REPLAY's BASE replays
+    from robust_lib import robust_configs                          # and AMENDMENT SEEDS-103-105's robustness runs
     assert len(L.all_configs()) == 82 + len(EXT2) + len(stage2_seed_configs()) + len(s006_seed_configs()) + \
-        len(base_diag_configs()) + len(replay_configs())
+        len(base_diag_configs()) + len(replay_configs()) + len(robust_configs())
     assert "12 ok (82 ok over every config)" in FLAT
 
 

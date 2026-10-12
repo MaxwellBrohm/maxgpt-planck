@@ -20,6 +20,7 @@ from reinstate_lib import REINSTATED_PLANS, s006_seed_configs  # noqa: E402
 from basediag_lib import DIAG_PLANS, base_diag_configs  # noqa: E402
 from replay_lib import REPLAY_PLANS, replay_configs  # noqa: E402
 from closed_lib import CLOSED_PLANS, closed_state  # noqa: E402  (BATCH 1 CLOSED, later)
+from robust_lib import ROBUST_PLANS, robust_configs  # noqa: E402  (AMENDMENT SEEDS-103-105, later)
 
 P = L.params()
 CONFIGS = L.all_configs()
@@ -120,9 +121,10 @@ def test_config_set_is_complete():
     s6 = s006_seed_configs()                            # empty until plans/stage2_s006_seeds.txt exists (S006-REINSTATE)
     bd = base_diag_configs()                            # empty until plans/stage2_base_diag.txt exists (BASE-DIAG)
     rp = replay_configs()                               # empty until plans/stage2_replay.txt exists (BASE-REPLAY)
-    later = s2 | s6 | bd | rp
+    rb = robust_configs()                               # empty until plans/robustness_k5.txt exists (SEEDS-103-105)
+    later = s2 | s6 | bd | rp | rb
     assert LATER <= set(names) and later <= set(names) and len(set(names) - LATER - later) == 48
-    assert len(names) == 83 + len(s2) + len(s6) + len(bd) + len(rp)
+    assert len(names) == 83 + len(s2) + len(s6) + len(bd) + len(rp) + len(rb)
     names = sorted(set(names) - LATER - later)
     for sid, s in L.SCREENS.items():
         for a in s["arms"]:
@@ -277,6 +279,7 @@ def test_plans_follow_the_registered_order():
     later = later + (DIAG_PLANS if base_diag_configs() else [])        # stage2_base_diag likewise (BASE-DIAG)
     later = later + (REPLAY_PLANS if replay_configs() else [])         # stage2_replay likewise (BASE-REPLAY)
     later = later + (CLOSED_PLANS if closed_state() else [])           # batch1_closed likewise (BATCH 1 CLOSED)
+    later = later + (ROBUST_PLANS if robust_configs() else [])         # robustness_k5 likewise (SEEDS-103-105)
     assert len(cur) == 1 and cur[0].strip() in PLAN_SEQUENCE + later    # ORDER's plans so far, in the order they run
     for r in plan_runs(cur[0].strip()):
         assert len(L.find(r)) == 1

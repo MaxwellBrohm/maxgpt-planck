@@ -790,3 +790,53 @@ interim reading was written before it. 5M arm A (3e-3, r 1), 250M slots, full WS
     from every git and waiter call (test_an_inherited_git_dir_is_never_written; its mutant in tests/mutation_e3.py is
     killed), and tests/p3fixture.py takes the repository for git archive from E3P3_GIT_DIR as an argument, never from the
     environment.
+
+PART 3 CUDA PARITY (2026-10-11, written 22:40 EDT after the run it reports, Claude, the SCREENS robustness workflow's
+parity step; the PC 5070 for one gpu.lock hold; nothing committed when written)
+  WHY: PART 3 RESULT lists "Not run: the CUDA flag-off parity run (default_parity.py --device cuda)". SCREENS.txt C4: a
+    BASE run pairs with an arm from a later harness commit only if every change between the commits is a flag defaulting
+    off and the flag-off equivalence test passes at the later commit. The SCREENS robustness stage (SCREENS.txt
+    AMENDMENT SEEDS-103-105) pairs new arm runs with base_s101 and base_s102 (run at 93bc10b) and base_s103 to base_s105
+    (run at 27d8cb7), so this run is its precondition. harness/, data_prep/, tokenizer/ and corpus/ are equal at 93bc10b
+    and 27d8cb7 (git diff empty).
+  TREES: ref = git archive of 27d8cb7 (stage2_base_diag's queue commit), new = git archive of 77ab43f (archived by
+    id at 22:32; HEAD was then a69c325, which changes none of these paths; harness/, data_prep/, tokenizer/ and corpus/
+    equal to 4962426's, Part 3's commit). Between ref and new only
+    harness/train.py (data_seed), its two test files, mutants.py, mutants_dataseed.py, notes.txt and
+    configs/sample_tiny/config.yaml differ; data_prep/, tokenizer/ and corpus/ do not. harness/train.py sha256 ref
+    96a763cf45a413de, new aa07b64c7a4e3089 (PART 3 ANALYZER's train.py). Tarballs (harness, data_prep, tokenizer,
+    corpus and a COMMIT file): p3par_ref.tgz 877a7f97bd837491..., p3par_new.tgz 19a91afc66e4fadb...
+    (logs/parity_cuda/p3par.sha256), checked by sha256sum -c on the PC before the lock.
+  RUN: parity_cuda.sh (this folder), started by pcdetach.sh; one gpu.lock hold 22:33:45 to 22:34:10 (GPU 39 C, 699 MiB in
+    use at the start; 41 C after), Python 3.14.4, torch 2.13.0+cu130, CUDA 13.0. Each invocation is harness/
+    default_parity.py of the new tree, --device cuda: bf16, deterministic algorithms, 24 steps, its tiny CUDA model,
+    varlen and batched; the log records, the final checkpoint (model, optimizer, data_state, torch and CUDA RNG, step,
+    token counts), the start record and the imported modules compared with no tolerance.
+  RESULT:
+    A  ref vs new (registered):                                 PASS: 24 log records, log, checkpoint, start record
+                                                                and imports identical; final loss 3.07388 in both.
+    B  mutant of new, data_seed absent gives seed + 1:          FAIL as wanted (log and checkpoint differ; final loss
+                                                                2.93466).
+    C  mutant of new, data_seed always in the start record:     FAIL as wanted (start keys ['data_seed']).
+    So on CUDA the default path at 77ab43f trains bitwise as at 27d8cb7, and the comparison sees both a loader seed
+    change and a start-record key. Log: logs/parity_cuda/e3p3_parity_cuda.log, sha256 c2049729f8075af5..., equal on both
+    machines ("DONE ok").
+  REHEARSED before the run: the same three on the Mac CPU (A PASS, B FAIL, C FAIL) and the driver on the PC with a
+    scratch lock file and --device cpu (same; its scratch directory removed after).
+  LIMIT FOUND: default_parity.py does not compare every checkpoint key, only those listed under RUN. A first mutant C
+    (data_seed always written to the checkpoint meta) PASSED it on the Mac CPU, so C was moved to the start record before
+    the run. harness/test_data_seed.py's pre-patch test compares every checkpoint key on CPU, which covers the meta.
+  CONSEQUENCE: C4's flag-off condition holds for a commit whose harness/, data_prep/, tokenizer/ and corpus/ equal
+    77ab43f's, paired with BASE runs from 93bc10b or 27d8cb7. A later change there needs its own check before a pairing
+    across it. Nothing here re-reads any E3 or SCREENS value.
+  TEST: tests/test_parity_cuda.py (24: the log's lines against this entry, the commits, train.py hashes and tree
+    equalities against git, and each check failing on an edited copy of the log or of this entry that targets it). 18
+    hand mutants of its checks (each check removed or blinded), run on scratch copies after it passed: 18 killed.
+  AFTER THE CHECK (2026-10-12, written 00:50 EDT after the runs it reports; Claude, the commit step of the SCREENS
+    robustness workflow; Mac CPU): the independent check found "HEAD when run" wrong in TREES (reworded by the checker)
+    and three claims of this entry that no test pinned. tests/test_parity_cuda.py now also checks that A's record count
+    is the one this entry quotes, that B's log and checkpoint lines both list differences as the entry says, and that
+    the checkpoint keys named under RUN are, in order, the keys harness/default_parity.py compares (read from that file;
+    torch and CUDA RNG together only while both are compared): 8 more cases, 32 tests in all. Seven hand mutants of the
+    new checks (each removed or blinded), on scratch copies: 7 of 7 killed. E3 and models suites: 98 passed;
+    mutation_e3.py: 38 of 38 killed.

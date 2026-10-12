@@ -4,7 +4,7 @@ entry's hours generated from the hours code and the logged hold times; with SCRE
 PC's queue_screens.txt, status.jsonl and c6diag.log of 2026-10-11, also from that copy. No model, nothing on the PC.
   ~/.venvs/planck/bin/python -m pytest -q experiments/screens/tests/test_screens_cap31.py
 """
-import collections, contextlib, io, os, re, subprocess, sys  # noqa: E401
+import collections, contextlib, io, math, os, re, subprocess, sys  # noqa: E401
 
 import pytest
 
@@ -79,21 +79,28 @@ def test_the_decision_and_what_did_not_change():
 
 
 def test_the_code_cap_is_31_and_a_flag_never_a_cut():
-    assert AL.CAP == 31.0 and AL.cap_cut({})["cap"] == 31.0 == AL.cap_check({})["cap"]
+    """This entry's 31 h, passed explicitly since AMENDMENT CAP-REMOVED (2026-10-11) made the code's cap infinite."""
+    assert AL.CAP == math.inf and AL.cap_cut({})["cap"] == math.inf == AL.cap_check({})["cap"]   # CAP-REMOVED
     rem = {"BASE": 1.0, "S006": 2.0, "S003": 1.0}
-    r = AL.cap_check(rem, measured=27.0)                                                  # exactly 31 h fits
+    r = AL.cap_check(rem, measured=27.0, cap=31.0)                                        # exactly 31 h fits
     assert r["fits"] and not r["flag_to_max"] and r["proposal"] is None and r["cut"] == []
-    r = AL.cap_check(rem, measured=27.0001)
+    r = AL.cap_check(rem, measured=27.0001, cap=31.0)
     assert r["flag_to_max"] and r["cut"] == [] and r["proposal"]["cut"] == ["S006"] and r["over_by"] > 0
     assert AL.cap_check(rem, measured=26.0, cap=28.0)["flag_to_max"]                     # over the old cap: a flag
 
 
 def test_the_hours_report_reads_31_by_default():
+    """This entry's default report read 31 h; since AMENDMENT CAP-REMOVED the default prints hours only (no cap line)
+    and 31 h is passed explicitly to reproduce this entry's line."""
     out = io.StringIO()
     with contextlib.redirect_stdout(out):
-        r = H.report(L.params())
+        r = H.report(L.params(), cap=31.0)
     line = next(ln for ln in out.getvalue().splitlines() if ln.startswith("ORDER cap"))
     assert r["cap"]["cap"] == 31.0 == r["flag"]["cap"] and " h against 31 h: " in line
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        d = H.report(L.params())
+    assert d["cap"] is None is d["flag"] and not any(ln.startswith("ORDER cap") for ln in out.getvalue().splitlines())
 
 
 def test_what_the_question_had_wrong_is_generated():
@@ -115,10 +122,10 @@ def test_position_now_arithmetic():
            "(screens_hours.py's rule input)" in f
     assert f"+ the C6 queue's {f3(h['c6s'] / 3600)} h as OTHER" in f and f"counted as {DRY:.2f} h = {f3(h['total'])} h; " \
            "queued 0 of 90 registered runs." in f
-    old, new = AL.cap_check({}, h["total"], cap=28.0), AL.cap_check({}, h["total"])
+    old, new = AL.cap_check({}, h["total"], cap=28.0), AL.cap_check({}, h["total"], cap=31.0)
     assert old["fits"] and new["fits"] and not old["flag_to_max"]
     assert f"under 28 h too, with {f3(28.0 - h['total'])} h of headroom" in f
-    assert f"with {f3(AL.CAP - h['total'])} h of headroom under 31 h" in f
+    assert f"with {f3(31.0 - h['total'])} h of headroom under 31 h" in f      # 31 h: this entry's cap (CAP-REMOVED)
     assert (f3(h["rule"]), f3(h["total"]), f3(28.0 - h["total"]), f3(31.0 - h["total"])) == \
         ("26.905", "27.112", "0.888", "3.888")
     for k, v in SHA.items():
@@ -136,7 +143,7 @@ def test_position_now_is_the_1011_copy(tmp_path):
     t = tmp_path / "now.tsv"
     t.write_text(H.tsv_text(q, st))
     with contextlib.redirect_stdout(io.StringIO()):
-        r = H.report(L.params(), str(t))
+        r = H.report(L.params(), str(t), cap=31.0)        # this entry's cap (none since AMENDMENT CAP-REMOVED)
     runs, other = H.load(str(t))
     assert (len(runs), sum(runs.values()), sum(r["tally"]["n_queued"].values())) == (RUNS_N, pytest.approx(RUNS_H), 0)
     assert f3(r["flag"]["total"]) == f3(hours()["rule"]) and not r["flag"]["flag_to_max"]

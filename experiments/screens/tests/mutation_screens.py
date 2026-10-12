@@ -36,7 +36,7 @@ ANALYZER_MUTANTS = [   # C7 / C4 / ORDER / C3 / the run-directory RC-12 refusal 
      '("NOMINATE" if not worse_p else "GUARD-FAIL")', AF),
     ("cccc_only_unblocks_tie", ALIB, '("TIE" if not worse_p else "GUARD-FAIL")', '("TIE" if not worse_p or cccc_only else "GUARD-FAIL")', AF),
     ("holm_no_step_down", ALIB, "ok = ok and p <= alpha / (len(items) - i)", "ok = p <= alpha / (len(items) - i)", AF),
-    ("cut_order_swapped", ALIB, '31.0, ["S006", "S003", "S007", "S002"]', '31.0, ["S003", "S006", "S007", "S002"]', AF),
+    ("cut_order_swapped", ALIB, 'INF, ["S006", "S003", "S007", "S002"]', 'INF, ["S003", "S006", "S007", "S002"]', AF),
     ("cut_current_set_not_kept", ALIB, "total -= remaining[sid] - (current or {}).get(sid, 0.0)", "total -= remaining[sid]", AF),
     ("toy_p022_ignored", ALIB, 'order = (["S004"] if toy_favours_p022 else []) + CUT_ORDER', "order = CUT_ORDER", AF),
     ("same_init_check_blind", ALIB, 'out[key] = {"sd_rel": sd, "limit_rel": lim, "df": df, "ok": sd <= lim}',
@@ -215,6 +215,12 @@ from mutants_s2v import MUTANTS_S2V  # noqa: E402  (STAGE 2 VERDICTS: outputs, c
 MUTANTS += MUTANTS_S2V
 from mutants_closed import MUTANTS_CLOSED  # noqa: E402  (BATCH 1 CLOSED: plans/CURRENT off stage2_replay for E3 Part 3)
 MUTANTS += MUTANTS_CLOSED
+from mutants_capremoved import MUTANTS_CAPREMOVED  # noqa: E402  (AMENDMENT CAP-REMOVED: no cap, hours only)
+MUTANTS += MUTANTS_CAPREMOVED
+from mutants_robust import MUTANTS_ROBUST  # noqa: E402  (AMENDMENT SEEDS-103-105: robustness configs, plan, C6, waiter)
+MUTANTS += MUTANTS_ROBUST
+from mutants_rbverify import MUTANTS_RBVERIFY  # noqa: E402  (SEEDS-103-105 after its check: NEW-INIT SD, locks)
+MUTANTS += MUTANTS_RBVERIFY
 
 def copy_tree(dst: str) -> None:
     ign = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache")
@@ -231,6 +237,7 @@ def copy_tree(dst: str) -> None:
                 "experiments/E3_seed_noise/results.json", "experiments/E3_seed_noise/e3analyze.py",
                 "experiments/E3_seed_noise/e3analyze_4d.py", "tokenizer/spec.py",
                 "experiments/E3_seed_noise/results_part4d.json", "experiments/E3_seed_noise/notes.txt",
+                "experiments/E3_seed_noise/results_part3.json", "PLAN.md",
                 "experiments/SCREENS.txt",
                 "tokenizer/v0/tok_v0_8k.json", "tokenizer/v0/tok_v0_manifest.json", "corpus/oodh.py", "corpus/sample_plan.py"):
         os.makedirs(os.path.dirname(os.path.join(dst, rel)), exist_ok=True)

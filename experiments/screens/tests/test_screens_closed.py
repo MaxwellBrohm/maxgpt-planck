@@ -11,6 +11,7 @@ import pytest
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.dirname(HERE), HERE]
 import closed_lib as C  # noqa: E402
+import robust_lib as RB  # noqa: E402  (AMENDMENT SEEDS-103-105 moved CURRENT on, later)
 import privacy  # noqa: E402
 import replay_lib as R  # noqa: E402
 import screens_lib as L  # noqa: E402
@@ -22,7 +23,8 @@ def flat(s: str) -> str:
 
 
 def test_current_is_the_closed_plan_and_it_trains_nothing():
-    assert current() == "batch1_closed" and C.CLOSED_PLANS == [current()] and C.closed_state()
+    later = RB.ROBUST_PLANS if RB.robust_configs() else []      # AMENDMENT SEEDS-103-105 moved CURRENT on, later
+    assert [current()] == (later or C.CLOSED_PLANS) and C.CLOSED_PLANS == ["batch1_closed"] and C.closed_state()
     lines = [ln.strip() for ln in open(C.CLOSED_PLAN) if ln.strip() and not ln.startswith("#")]
     assert lines == ["wait_mark SCREENS SCREENS BASE REPLAY DONE", "stop"]
     assert not [ln for ln in lines if ln.split()[0] in ("train", "mark")]

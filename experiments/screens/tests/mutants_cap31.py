@@ -5,7 +5,7 @@ each must make the named tests fail.
 ALIB, SH, TX = "experiments/screens/analyze_lib.py", "experiments/screens/screens_hours.py", "experiments/SCREENS.txt"
 C31 = "test_screens_cap31.py"
 MUTANTS_CAP31 = [
-    ("c31_code_back_to_28", ALIB, "CAP, CUT_ORDER, NEVER_CUT = 31.0,", "CAP, CUT_ORDER, NEVER_CUT = 28.0,", C31),
+    ("c31_code_back_to_28", ALIB, "CAP, CUT_ORDER, NEVER_CUT = INF,", "CAP, CUT_ORDER, NEVER_CUT = 28.0,", C31),  # INF since CAP-REMOVED
     ("c31_flag_at_the_cap", ALIB, 'over = prop["total_before"] > cap', 'over = prop["total_before"] >= cap',
      C31 + "::code_cap"),
     ("c31_report_default_not_the_code_cap", SH, "c = AL.CAP if cap is None else cap", "c = 28.0 if cap is None else cap",

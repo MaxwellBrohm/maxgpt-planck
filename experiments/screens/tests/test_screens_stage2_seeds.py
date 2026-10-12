@@ -19,6 +19,7 @@ from reinstate_lib import REINSTATED_PLANS, S006_PLAN, s006_seed_configs  # noqa
 from basediag_lib import DIAG_PLAN, DIAG_PLANS, base_diag_configs  # noqa: E402  (AMENDMENT BASE-DIAG)
 from replay_lib import REPLAY_PLAN, REPLAY_PLANS, replay_configs  # noqa: E402  (AMENDMENT BASE-REPLAY)
 from closed_lib import CLOSED_PLAN, CLOSED_PLANS  # noqa: E402  (BATCH 1 CLOSED)
+from robust_lib import ROBUST_PLAN, ROBUST_PLANS, robust_configs  # noqa: E402  (AMENDMENT SEEDS-103-105)
 from test_screens_refusals import scratch  # noqa: E402,F401  (the scratch config tree fixture)
 from test_screens_s003_stage_c import section  # noqa: E402
 
@@ -164,10 +165,11 @@ def test_plan_is_the_generators_with_the_cut_and_current_names_it(V, scratch):
     assert lines[-1] == "mark SCREENS STAGE 2 SEEDS DONE" and len(lines) == 13
     assert stage2_seed_configs() == NEW_CFG and PLAN_SEQUENCE[-1] == "stage2_s006x" and LATER_PLANS == ["stage2_seeds"]
     cur = [ln.strip() for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")]
-    assert cur == (CLOSED_PLANS if os.path.exists(CLOSED_PLAN) else
+    assert cur == (ROBUST_PLANS if os.path.exists(ROBUST_PLAN) else CLOSED_PLANS if os.path.exists(CLOSED_PLAN) else
                    REPLAY_PLANS if os.path.exists(REPLAY_PLAN) else DIAG_PLANS if os.path.exists(DIAG_PLAN) else
                    REINSTATED_PLANS if os.path.exists(S006_PLAN) else ["stage2_seeds"])
-    # later: AMENDMENT S006-REINSTATE's plan, then AMENDMENT BASE-DIAG's, then AMENDMENT BASE-REPLAY's, then BATCH 1 CLOSED's
+    # later: AMENDMENT S006-REINSTATE's plan, then AMENDMENT BASE-DIAG's, then AMENDMENT BASE-REPLAY's, then BATCH 1 CLOSED's,
+    # then AMENDMENT SEEDS-103-105's
     # (s006_seed_configs, base_diag_configs and replay_configs read the repo's configs: not in this scratch tree)
     v = V["fmt"]
     assert f"stage2_seeds.txt (sha256 {L.sha256(PLAN)[:16]}...; written by screens.py seeds), its 13 lines:" in FLAT
@@ -203,11 +205,13 @@ def test_new_configs_differ_from_their_base_only_in_registered_keys(capsys):
     s6 = s006_seed_configs()                    # later: AMENDMENT S006-REINSTATE's S006 seed configs, else none
     bd = base_diag_configs()                    # later: AMENDMENT BASE-DIAG's BASE configs, else none
     rp = replay_configs()                       # later: AMENDMENT BASE-REPLAY's BASE replays, else none
-    n = 89 + len(s6) + len(bd) + len(rp)
+    rb = robust_configs()                       # later: AMENDMENT SEEDS-103-105's robustness runs, else none
+    n = 89 + len(s6) + len(bd) + len(rp) + len(rb)
     assert screens.main(["check"]) == 0 and capsys.readouterr().out.count("ok      ") == n == len(L.all_configs())
     assert {os.path.basename(p)[:-5] for p in L.all_configs() if re.match(r"base_s10[3-5]\.yaml$", os.path.basename(p))} == bd
     assert {os.path.basename(p)[:-5] for p in L.all_configs() if re.match(r"base_s\d+_", os.path.basename(p))} == rp
-    assert {os.path.basename(p)[:-5] for p in L.all_configs() if os.path.basename(p).startswith("s006_") and "_s10" in p} == s6
+    assert {os.path.basename(p)[:-5] for p in L.all_configs() if os.path.basename(p).startswith("s006_") and "_s10" in p} \
+        - rb == s6
     assert "10 ok on the plan's runs, 89 ok over every config" in FLAT
 
 

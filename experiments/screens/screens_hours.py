@@ -1,5 +1,6 @@
 """SCREENS GPU hours and ORDER's cap (SCREENS.txt GPU HOURS, CAP AND CUT RULE; STAGE 2 READINESS 2026-10-05; 31 h
-since AMENDMENT CAP-31, a flag to Max instead of a cut since AMENDMENT CAP-FLAG).
+since AMENDMENT CAP-31, a flag to Max instead of a cut since AMENDMENT CAP-FLAG; no cap since AMENDMENT CAP-REMOVED, so
+the default report prints hours only).
 
   python screens_hours.py measured QUEUE_LOG STATUS_JSONL > measured_hours.tsv   (the PC queue's own two files)
   python screens.py hours [--measured-file TSV] [--s003-rb R]                    report(): estimate and cap check
@@ -232,9 +233,11 @@ def tally(p: dict, runs: dict, r_b: float | None = None) -> dict:
 
 
 def report(p: dict, path: str = TSV, r_b: float | None = None, cap: float | None = None) -> dict:
-    """The table, the conditional hours and ORDER's cap check. cap None = analyze_lib.CAP (31 h since AMENDMENT
-    CAP-31); the earlier entries' checks pass their own cap (25 h, 27 h, 28 h). Over the cap the line says FLAG TO MAX
-    (AMENDMENT CAP-FLAG): nothing is cut; "cap" keeps the cut order's arithmetic, the proposal the flag carries."""
+    """The table, the conditional hours and ORDER's cap check. cap None = analyze_lib.CAP, infinite since AMENDMENT
+    CAP-REMOVED (2026-10-11): the report then prints the hours only, with no cap, cut or flag line, and returns cap,
+    flag and narrow as None. The earlier entries' checks pass their own cap (25 h, 27 h, 28 h, 31 h), which prints and
+    returns what they computed: over the cap the line says FLAG TO MAX (AMENDMENT CAP-FLAG), nothing is cut; "cap"
+    keeps the cut order's arithmetic, the proposal the flag carries."""
     import analyze_lib as AL
     c = AL.CAP if cap is None else cap
     runs, other = load(path)
@@ -262,6 +265,11 @@ def report(p: dict, path: str = TSV, r_b: float | None = None, cap: float | None
     ind = 2 * (full("S006", "mtp") + full("S007", "smear"))
     print(f"conditional, counted only once queued (ORDER): up to {ext:.2f} h of extensions (2 per g-check arm not yet "
           f"run, 2 per S003 stage B and C); up to {ind:.2f} h of matched-LR IND runs (S006, S007 at g = 1, k = 2)")
+    if c == AL.INF:                                    # AMENDMENT CAP-REMOVED: hours only
+        tot = mr + mo + qs
+        print(f"GPU hours, reported only (AMENDMENT CAP-REMOVED: no cap, cut order or flag): measured {mr + mo:.3f} h "
+              f"(runs {mr:.3f} h + other {mo:.3f} h) + queued {qs:.3f} h = {tot:.3f} h")
+        return {"tally": t, "cap": None, "flag": None, "narrow": None, "measured_runs": mr, "other": mo, "total": tot}
     cap = AL.cap_cut(t["queued"], mr + mo, cap=c)
     flag = AL.cap_check(t["queued"], mr + mo, cap=c)
     narrow = AL.cap_cut(t["queued"], mr, cap=c)

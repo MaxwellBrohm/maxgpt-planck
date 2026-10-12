@@ -123,8 +123,9 @@ def test_integration_launch_names_are_the_scripts():
     assert "each at most 1,980 s + 30 s" in f and "3 runs, one gpu.lock hold each, about 0.31 h" in f
     assert "about 22 min of holds" in f and "about 22 min, 0.36 GPU h" in flat("AMENDMENT C6-DIAG (")
     from closed_lib import CLOSED_PLANS, closed_state            # BATCH 1 CLOSED moved CURRENT on, later
+    from robust_lib import ROBUST_PLANS, robust_configs          # and AMENDMENT SEEDS-103-105 after it
     assert [ln.strip() for ln in open(os.path.join(L.HERE, "plans", "CURRENT")) if not ln.startswith("#")] == \
-        ((CLOSED_PLANS if closed_state() else []) or ["stage2_replay"])
+        ((ROBUST_PLANS if robust_configs() else []) or (CLOSED_PLANS if closed_state() else []) or ["stage2_replay"])
     assert "(last written 17:33)" in f and "pending/replay.txt (18:04)" in f
 
 
@@ -142,8 +143,12 @@ def test_integration_counts():
     from mutants_s2rules import MUTANTS_S2RULES
     from mutants_s2v import MUTANTS_S2V
     from mutants_closed import MUTANTS_CLOSED
+    from mutants_capremoved import MUTANTS_CAPREMOVED
+    from mutants_robust import MUTANTS_ROBUST
+    from mutants_rbverify import MUTANTS_RBVERIFY
     assert len(M.MUTANTS) == MUT_ALL + len(MUTANTS_VFIX) + len(MUTANTS_CAP31) + len(MUTANTS_REGREPLAY) + \
-        len(MUTANTS_S2RULES) + len(MUTANTS_S2V) + len(MUTANTS_CLOSED)                               # later lists
+        len(MUTANTS_S2RULES) + len(MUTANTS_S2V) + len(MUTANTS_CLOSED) + len(MUTANTS_CAPREMOVED) + \
+        len(MUTANTS_ROBUST) + len(MUTANTS_RBVERIFY)                                                  # later lists
     assert f"experiments/screens/tests {SUITE} passed" in f and f"{MUT_ALL} of {MUT_ALL} killed" in f
     assert f"{len(MUTANTS_C6DIAG)} and tests/mutants_integ.py's {len(MUTANTS_INTEG)} now in it" in f
     by = collections.Counter(m[0].split("_")[0] for m in MUTANTS_INTEG)

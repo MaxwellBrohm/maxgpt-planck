@@ -8,11 +8,15 @@
   python screens.py seeds --stage N --pick SID.ARM=G ... [--s003 ETA,R] [--cut SID ...] [--wait "EXP TEXT"]
                                           the seed sets after the picks, plans/stage<N>_seeds.txt (ORDER); a
                                           screen ORDER's cap rule cut (--cut, recorded in SCREENS.txt) gets none
+  python screens.py robust                 AMENDMENT SEEDS-103-105: every screen arm at its recorded pick on seeds
+                                          103, 104, 105 (S005 with its own BASE, S006 with its g 1 IND-only runs),
+                                          seed-major, plans/robustness_k5.txt; no cut (AMENDMENT CAP-REMOVED)
   python screens.py plan NAME RUN ... [--mark TEXT] [--wait "EXP TEXT"]
   python screens.py check [RUN ...]       C2 + RC-12 GUARD + C1-b + C6 hook + 2% on every config (or named runs)
   python screens.py hours [--measured-file TSV] [--s003-rb R]
-                                          GPU HOURS estimate and ORDER's 25 h cap check (screens_hours.report):
-                                          measured runs count once, queued estimates only for runs not yet run
+                                          GPU HOURS (screens_hours.report): measured runs count once, queued
+                                          estimates only for runs not yet run; hours only, no cap or cut since
+                                          AMENDMENT CAP-REMOVED
 Every config is written, then checked (screens_lib.check); a refused config is deleted and the command fails.
 An existing config is never overwritten with different content. Plans: queue_screens.sh plan lines.
 """
@@ -155,6 +159,40 @@ def seeds(stage: int, picks: dict, s003, p: dict, cut: tuple = (), wait: str | N
     print(plan(f"stage{stage}_seeds", runs, head, f"SCREENS STAGE {stage} SEEDS DONE", wait))
 
 
+# AMENDMENT SEEDS-103-105 (SCREENS.txt, 2026-10-11): the recorded picks (STAGE 1 VERDICTS, STAGE 2 VERDICTS), the seeds,
+# the plan's wait (stage2_replay's end mark, the last SCREENS plan that trained) and its own end mark
+ROBUST_SEEDS = (103, 104, 105)
+ROBUST_PICKS = {"S001.nogate": 1.0, "S002.novres": 1.0, "S002.noqknorm": 1.0, "S002.nonormscale": 1.0,
+                "S004.canonac": 1.0, "S005.forget": 1.0, "S006.mtp": 2.0, "S007.smear": 1.0}
+ROBUST_S003 = (3e-3, 2.0)                                # LR5_adamw (S003 STAGE C RESULT)
+ROBUST_WAIT, ROBUST_MARK = "SCREENS SCREENS BASE REPLAY DONE", "SCREENS ROBUSTNESS K5 DONE"
+
+
+def robust(p: dict) -> str:
+    """The robustness stage: seeds 103 to 105, seed-major; in each seed set ORDER's screens in order (stage 1, then
+    stage 2 by priority), each at its recorded pick, a screen with ENGINE keys after its own BASE, S006 (pick g 2) with
+    its C6 matched-LR IND-only run at g 1 after its verdict run. The shared BASE lines are written (base_s103..105 exist,
+    byte-identical) and the queue skips them (scored in BASE-DIAG). Batch 1's plans and configs are not touched."""
+    runs = []
+    for s in ROBUST_SEEDS:
+        runs.append(base(s, p))
+        for sid in L.ORDER[1] + L.ORDER[2]:
+            if L.engine(sid):
+                runs.append(base(s, p, sid))
+            for a in L.SCREENS[sid]["arms"]:
+                if sid == "S003":
+                    runs.append(s003_seed(*ROBUST_S003, s, p))
+                    continue
+                g = ROBUST_PICKS[f"{sid}.{a}"]
+                runs.append(arm(sid, a, g, s, p, ": robustness seed at the g pick (AMENDMENT SEEDS-103-105)"))
+                if g != 1.0 and sid in ("S006", "S007"):      # C6 MATCHED LR: IND-only run at g = 1
+                    runs.append(arm(sid, a, 1.0, s, p, ": IND-only matched-LR run (C6), never in a bpb verdict"))
+    head = ("SCREENS AMENDMENT SEEDS-103-105 (SCREENS.txt): every screen arm at its pick on seeds 103, 104, 105, "
+            "seed-major (S001, S002 x 3, S003, S005 own BASE and arm, S004, S007, S006 g 2 and its g 1 IND-only run); the "
+            "BASE lines are skipped by the queue (scored in BASE-DIAG)")
+    return plan("robustness_k5", runs, head, ROBUST_MARK, ROBUST_WAIT)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -174,6 +212,7 @@ def main(argv=None) -> int:
     sd.add_argument("--s003", default=None, help="LR5_adamw as ETA,R (stage 1)")
     sd.add_argument("--cut", action="append", default=[], help="a screen ORDER's cap rule cut (SCREENS.txt): no run")
     sd.add_argument("--wait", default=None, help='the plan first waits for this mark: "EXP TEXT"')
+    sub.add_parser("robust")
     pl = sub.add_parser("plan")
     pl.add_argument("name")
     pl.add_argument("runs", nargs="+")
@@ -205,6 +244,8 @@ def main(argv=None) -> int:
         if set(picks) != need or ("S003" in keep) != (a.s003 is not None):
             sys.exit(f"stage {a.stage} needs --pick for exactly {sorted(need)}" + (" and --s003" if "S003" in keep else ""))
         seeds(a.stage, picks, tuple(float(x) for x in a.s003.split(",")) if a.s003 else None, p, tuple(a.cut), a.wait)
+    elif a.cmd == "robust":
+        print(robust(p))
     elif a.cmd == "plan":
         print(plan(a.name, a.runs, a.name, a.mark, a.wait))
     elif a.cmd == "check":

@@ -55,7 +55,7 @@ MUTANTS_REPLAY_STATE = [
     ("rp_cfg_rep2_seed", CFG + "base_s101_rep2.yaml", "seed: 101\n", "seed: 102\n", RP),
     ("rp_cfg_hookoff_hook_on", CFG + "base_s101_hookoff.yaml", "eval: {induction: null}\n", "", RP),
     ("rp_cfg_rep1_lr", CFG + "base_s101_rep1.yaml", "{lr: 0.003,", "{lr: 0.006,", CF + "::passes_check"),
-    ("rp_current_back_to_diag", CUR, "# Seed plans come from screens.py seeds.\nbatch1_closed\n",
+    ("rp_current_back_to_diag", CUR, "# Seed plans come from screens.py seeds.\nrobustness_k5\n",
      "# Seed plans come from screens.py seeds.\nstage2_base_diag\n", RP),   # (stage2_replay until BATCH 1 CLOSED)
     ("rp_record_removed", PEND, "  BASE RUNS ADDED BY AMENDMENT BASE-REPLAY: base_s101_rep1,",
      "  BASE RUNS, ADDED BY AMENDMENT BASE-REPLAY: base_s101_rep1,", CF + "::complete"),

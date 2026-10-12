@@ -80,7 +80,8 @@ def test_cap_check_constants_and_every_number():
                                                      str(PASSED[1]), str(PRE), str(WHOLE)}
     nums = {n for n in re.findall(r"(?<![\w.])(\d[\d,]*\d(?:\.\d+)*|\d\.\d+)(?![\w])", text) if "." in n or len(n) >= 3}
     assert nums <= exp and len(nums) > 20, sorted(nums - exp)
-    assert len(L.all_configs()) == 99 and "3 ok, 99 ok over every config" in sec
+    from robust_lib import robust_configs                     # later: AMENDMENT SEEDS-103-105's 33, else none
+    assert len(L.all_configs()) == 99 + len(robust_configs()) and "3 ok, 99 ok over every config" in sec
     import mutation_screens as M
     from mutants_replay import MUTANTS_REPLAY
     assert len(M.MUTANTS) >= WHOLE and len(MUTANTS_REPLAY) == NEW   # later steps add mutants and all(m in M.MUTANTS for m in MUTANTS_REPLAY)
