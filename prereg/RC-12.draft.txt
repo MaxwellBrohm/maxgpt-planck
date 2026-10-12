@@ -309,7 +309,14 @@ becomes training text). The two share the label D8 by accident.
     flips); LFM2-2.6B in bf16 failed (0.571 nats on template, 0.348 on plain, 0 flips), so its row is not reported
     under this rule; dropping it or changing the rule is for the lock. lik_run prints each family's accuracy in its
     log, and those lines (LFM2-2.6B's too) were seen when the run was checked, so a rule change now comes after that
-    look. No row pulled or compared yet.
+    look. Pulled 2026-10-11 (rc12/notes.txt STEP 14N; md5 manifest equal on both sides; logs/lik_rows_20261011.jsonl):
+    each of the 24 stored summaries (12 models x 2 renders) equals lik_score.summarize recomputed on the Mac and an
+    independent re-derivation from the rows (rc12/rederive14.py), and every model's matched, all-equal and
+    common-foil counts equal the tokenizer-only measurement above (rc12/test_numbers14.py). Read as a diagnostic
+    (template, acc_matched against its chance): LOOKUP is far above chance for models whose generated LOOKUP is at
+    most 0.014 (Qwen3-0.6B 0.74 against 0.22, Qwen3.5-0.8B 0.72 against 0.23, LFM2-1.2B 0.72 against 0.19), CORR
+    stays near chance for every model (0.11 to 0.29 against 0.18 to 0.24), and OWN is high, as its copying cue
+    predicts (0.50 to 0.96). LFM2-2.6B has no row (above).
 
 5. FAMILIES AND DEV COUNTS
   Dev seed 1212, one stream per family: Random("RC12:dev:<family>:1212"). Byte-identical across processes (tested).
@@ -855,7 +862,9 @@ becomes training text). The two share the label D8 by accident.
     (Qwen3-0.6B 0.694, LFM2-2.6B 0.542, LFM2-700M 0.340, Qwen3.5-0.8B 0.333), X almost never (at most 0.097,
     Qwen2.5-0.5B-Instruct; 0.007 LFM2-2.6B), because the models give the other table's value for the absent key
     (LFM2-2.6B 83%, s11). The item 14 extras (s12; 5M to 31M) sit at the same floor: LOOKUP 0.000 on every one
-    scored and on the Vertex card row (CI 0.000 to 0.000; P at most 0.007, X at most 0.069).
+    scored and on the Vertex card row (CI 0.000 to 0.000; P at most 0.007, X at most 0.069). So do the extras added
+    before the lock (s12: minimind-3, cRia-LM-75M-Instruct and the three P-144 chat checkpoints; rc12/notes.txt STEP
+    14N): LOOKUP 0.000 on each (CI 0.000 to 0.000; P at most 0.049, X at most 0.007).
 
 11. HEADROOM RULE AND THE PERSIST BASE-RATE RULE (score_stats.headroom, persist_base_rates)
   After the dev baselines (core panel only, template render, mean of 3 seeds): a composite family or Level A key fails
@@ -948,13 +957,15 @@ becomes training text). The two share the label D8 by accident.
     script): Blueberry-5M 0.25 (0.00 to 0.81), 0.032; Nano 0.00 (0.00 to 0.00), 0.003; Blueberry-10M 0.18 (0.00 to
     0.60), 0.023; Vertex-15M 2.09 (0.87 to 3.62), 0.029 (card row 0.93, 0.22 to 1.89, 0.010); Mango-15M 0.30 (0.00 to
     0.89), 0.009; Loom-Spark-3.2 0.25 (0.00 to 0.83), 0.063; Mini 0.00 (0.00 to 0.00), 0.001; Swen-28M 1.17 (0.30 to
-    2.38), 0.032; Mango-30M 0.36 (0.00 to 1.07), 0.005. None passes the clause below.
+    2.38), 0.032; Mango-30M 0.36 (0.00 to 1.07), 0.005. None passes the clause below. Re-scored 2026-10-11 from a
+    fresh pull (md5 manifest equal on both sides, 1,846 files) with a69c325's scorer and graders: every number in
+    this paragraph and the next is unchanged (rc12/notes.txt STEP 14N; logs/extras14_20261011.jsonl).
     Finished after the first reading (2026-10-04, the chain's DONE marker at 21:06; verify_dev_runs C1-C5 PASS on the
     PC, the run dirs pulled with an md5 manifest equal on both sides, 137 files; STEP 12): BananaMind-2-Mini-Chat,
     both renders, and Swen-28M's plain render (R 4.53, S7 0.00; a diagnostic). cRia-LM-75M-Instruct: not run. Its
     first two processes (template and plain greedy) were each killed at the 1,950 s process cap (exit 124, 1,951 s
     under the GPU lock) before finishing a run, so 0 of its 16 runs exist and the clause does not read it. It is run
-    again, split, under the deviation below (rc12/notes.txt STEP 14X).
+    again, split, under the deviation below (rc12/notes.txt STEP 14X); it has been, and its numbers are below.
     Added before the lock (rc12/notes.txt STEP 13, 13a and 14X; research/CUTS_AUDIT_2026-10.md S9 to S12), each at the
     revision pinned in rc12/pins.json, with the s4 decoding, template render primary and plain diagnostic:
     P-144, the Falcon-H1-Tiny-90M checkpoints other than Instruct: -Instruct-Curriculum, -Instruct-pre-DPO,
@@ -962,18 +973,31 @@ becomes training text). The two share the label D8 by accident.
       Falcon-H1-Tiny-90M-Instruct's, Apache-2.0-based, commercial use allowed, not gated; bf16, the checkpoint's own;
       vLLM with Falcon-H1-Tiny-90M-Instruct's family verdict). Each runs in its own chat template; the pre-DPO pair's
       ships with its release and is used as shipped. The Base ships no chat template and lacks the chat tokens, so it
-      runs the plain render only, a diagnostic the clause never reads. Dev: not yet run.
+      runs the plain render only, a diagnostic the clause never reads. Dev (2026-10-11, rc12/notes.txt STEP 14N;
+      as for every extra here: template, seeds 1-3, rc12/dev_extras14.py, R with its paired CI vs
+      Qwen2.5-0.5B-Instruct, S7 with its 95% CI; verify_dev_runs C1-C5 pass; 0 stored rows regrade differently):
+      -Instruct-Curriculum R 0.64 (-6.44 to -3.68), S7 0.61 (0.00 to 1.33), PERSIST 0.006, LOOKUP 0.000 (P 0.021, X
+      0.000); -Instruct-pre-DPO R 2.57 (-4.67 to -1.55), S7 1.90 (0.86 to 3.14), PERSIST 0.011, LOOKUP 0.000 (P
+      0.021, X 0.000); -Instruct-Curriculum-pre-DPO R 1.87 (-5.22 to -2.40), S7 0.77 (0.15 to 1.54), PERSIST 0.025,
+      LOOKUP 0.000 (P 0.049, X 0.007); -Base, plain only, R 2.90, S7 0.10. None meets the CI part, Level A, the
+      LOOKUP bar or the clause.
     minimind-3 (jingyaogong/minimind-3; Max, 2026-10-07): Apache-2.0, 63,912,192 parameters, Qwen3ForCausalLM with
       its own 6,400-token tokenizer, float16 (the checkpoint's own; the panel's only float16 model), on vLLM after its
       own parity (NEAR_TIE: 228 of 240 turns identical, 0 prompt mismatches, every first difference at margin <= 0.031
       nats). Its training data are mostly Chinese while RC-12 is English; that is reported beside its scores, not
-      used to exclude it. Dev: not yet run.
+      used to exclude it. Dev (2026-10-11, STEP 14N): minimind-3 R 2.30 (-4.87 to -1.91), S7 0.95 (0.30 to 1.79),
+      PERSIST 0.010, LOOKUP 0.000 (P 0.000, X 0.007); none of the bars met. Plain (diagnostic) R 0.09: 0.836 of its
+      plain replies have no word characters (EMPTY), 0.593 of all because it opens a new "User:" line at once and
+      the role cut leaves nothing.
     cRia-LM-75M-Instruct, deviation recorded 2026-10-10 before any of its runs exists: each run is played by 10
       processes, process i taking conversations i, i + 10, ... of the run (the seed's dev run and its own-cf twin),
       and merged into one run in the record order (rc12/shards.py); a generate call holds at most 32 rows. Only
       which conversations share a lockstep batch changes: sampling draws are per conversation and turn, and its
       parity is IDENTICAL (batched vs serial HF). A process of 64 conversations took 326.9 s in a smoke (peak 7.43
-      GiB), against the whole run's 1,951 s and 9 of 12 turns before. Dev: not yet run.
+      GiB), against the whole run's 1,951 s and 9 of 12 turns before. Run 2026-10-11 (rc12/notes.txt STEP 14L): all
+      80 processes exited 0, each gpu.lock hold 839 to 1,293 s, peak 7.55 GiB; verify_dev_runs C1-C5 pass. Dev
+      (STEP 14N): cRia-LM-75M-Instruct R 1.19 (-5.97 to -2.90), S7 0.75 (0.00 to 1.86), PERSIST 0.038, LOOKUP 0.000
+      (P 0.000, X 0.007); none of the bars met.
     P-145 (SmolLM2-135M SFT-only vs Instruct): not run: no licence at the pinned revision
       (HuggingFaceTB/smollm2-135M-SFT-Only at 79528469cd11, read 2026-10-06: no licence in the card, the tags, a
       LICENSE file or the README; SmolLM2-135M-Instruct is Apache-2.0).
@@ -982,7 +1006,9 @@ becomes training text). The two share the label D8 by accident.
       proven exact, plus its own parity), and its USER:/ASSISTANT: format has no end-of-turn token, so only a plain
       row could run without a runner change. Not read by the clause; a later run is a labelled diagnostic.
     An extra in this list whose dev runs do not finish before the lock is listed with "not run" and the reason, as
-    above; its row here is then rewritten with its numbers or that line before the lock.
+    above; its row here is then rewritten with its numbers or that line before the lock. Status 2026-10-11
+    (rc12/notes.txt STEP 14N): every extra in this list has run and is scored above except P-145 and MaxGPT-3
+    (P-147), not run for the reasons given; no extra is running.
   Generation on the 5070 only (the Mac runs likelihood rows only). Every model: template render primary, plain render
   diagnostic, 3 sampling seeds, greedy secondary.
   Baseline clause (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 7): widened to every
@@ -1007,8 +1033,9 @@ becomes training text). The two share the label D8 by accident.
     near the floor, the CI part was in effect a "does not loop" test among floor models. That reading is why Level R
     changed (decision 1, D; s1, s9, s18). Under the clause as it now reads, no public panel model passes on dev at any
     size: the best S7 is LFM2-2.6B's 18.15 (PERSIST 0.812), the best at or below 0.6B LFM2.5-350M's 12.10 (PERSIST
-    0.559), and every scored item 14 extra is at most 2.09 (s9 dev reading; the extras above). No model meets Level A
-    on dev, and none meets the LOOKUP claim's bar (core panel at most 0.014, s10b; every scored item 14 extra 0.000).
+    0.559), every scored item 14 extra is at most 2.09 and every extra added before the lock at most 1.90
+    (Falcon-H1-Tiny-90M-Instruct-pre-DPO) (s9 dev reading; the extras above). No model meets Level A on dev, and none
+    meets the LOOKUP claim's bar (core panel at most 0.014, s10b; every scored extra 0.000).
   Known and unscored (Max, 2026-10-04: took all recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision 5,
     b)): every claim is worded "on our panel" (s1, s10b), and these public small chat models are known and not on it:
     MiniMind2-Small (25.8M; no licence on its card), spark-13m, flame-27m and Pebble-25M (Apache-2.0, remote code),
@@ -1016,9 +1043,9 @@ becomes training text). The two share the label D8 by accident.
     69.2M), ShallowSeek-mini (no HF model class) and RxT-Alpha (RAML non-commercial licence, gated); KeyLM-75M-Instruct
     (75.3M, Apache-2.0, remote code) and petitgpt (124.6M, Apache-2.0, its own inference code), found by the novelty
     check (research/NOVELTY_2026-10.md s6.3) and kept off for the engine work each needs (research/CUTS_AUDIT_2026-10.md
-    row 76); and cRia-LM-75M-Instruct is on the panel, its first run not finished and its split rerun pending
-    (above). Every sub-30M model scored so far has an S7 of at most 2.09, so one of these reaching 40 is unlikely (the
-    decision's judgment); none of them is read by the clause.
+    row 76). cRia-LM-75M-Instruct, listed here until 2026-10-11 as on the panel but not run, has since run under the
+    split deviation and is scored above. Every sub-30M model scored so far has an S7 of at most 2.09, so one of
+    these reaching 40 is unlikely (the decision's judgment); none of them is read by the clause.
 
 13. SEALED SPLIT PROCEDURE (built later, in a separate session; PLAN Phase 0, P-049)
   S1 Author. One dedicated Claude session (the sealed session) writes NEW templates, value frames, fillers, paraphrase

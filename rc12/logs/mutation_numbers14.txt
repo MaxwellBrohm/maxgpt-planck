@@ -1,0 +1,26 @@
+baseline: exit 0 ['test_numbers14: PASS; raw numbers compared: 3217']
+KILLED R off its families: exit 1; FAIL A minimind-3 template mean3: R 2.3093827160493827 S7 0.9523809523809523 vs families 2.299382716049383 0.9523809523809524
+KILLED CI bound moved: exit 1; FAIL C prereg lacks: cRia-LM-75M-Instruct R 1.19 (-5.96 to -2.90), S7 0.75 (0.00 to 1.86), PERSIST 0.038, LOOKUP 0.000 (P 0.000, X 0.007)
+KILLED CI part flag flipped: exit 1; FAIL A Swen-28M: D or the CI part (1.0403806584362147, -0.6031378600823043, False)
+KILLED Base plain row dropped: exit 1; FAIL A extras present: template [], plain ['Falcon-H1-Tiny-90M-Base'] differ from pins.json
+KILLED new extra regrades differently: exit 1; FAIL A minimind-3 plain: 3 rows regrade differently
+KILLED panel comparator R: exit 1; FAIL A Qwen2.5-0.5B-Instruct template mean3: R 5.684157378600823 S7 2.3015873015873014 vs families 5.6841563786008225 2.3015873015873014
+KILLED lik matched count: exit 1; FAIL B Qwen/Qwen3-0.6B plain ROLE: counts differ from the tokenizer-only measurement
+KILLED lik self-check failed: exit 1; FAIL B unsloth/gemma-3-270m-it template: self-check or dtype {'flips': 0, 'max_abs_diff': 0.00013065338134765625, 'n_rows': 48, 'n_scores': 144, 'ok':
+KILLED lik model dropped: exit 1; FAIL B models: [('LiquidAI/LFM2-700M', 'plain')]
+KILLED lik common foils: exit 1; FAIL B SmallDoge/Doge-160M-Instruct TOPIC: common-foil rows 23 vs tokcheck
+KILLED prereg s12 new extra R: exit 1; FAIL C prereg lacks: -Instruct-Curriculum R 0.64 (-6.44 to -3.68), S7 0.61 (0.00 to 1.33), PERSIST 0.006, LOOKUP 0.000 (P 0.021, X 0.000)
+KILLED prereg s12 old extra CI: exit 1; FAIL C prereg lacks: Veyra2-Mango-15M-Instruct 0.87 (-6.20 to -3.41
+KILLED prereg s10b P bound: exit 1; FAIL C prereg lacks: P at most 0.049, X at most 0.007
+KILLED prereg s4 LOOKUP row: exit 1; FAIL C prereg lacks: Qwen3-0.6B 0.74 against 0.22
+KILLED prereg s12 clause max S7: exit 1; FAIL C prereg lacks: every extra added before the lock at most 1.90
+KILLED notes table cell: exit 1; FAIL C notes.txt lacks dev_template line: cRia-75M              1.19  0.75 0.006 0.026 0.000 0.021 0.038 0.000 0.000 0.000 0.017  0.000 0.049 0.462
+KILLED rederive: OWN ungated: exit 1; FAIL D Veyra2-Mango-15M-Instruct plain greedy OWN: rederived 0.020833333333333332 recorded 0.0
+KILLED rederive: COMPOSE in TWOHOP: exit 1; FAIL D Veyra2-Mango-15M-Instruct plain 1 TWOHOP: rederived 0.046875 recorded 0.041666666666666664
+KILLED rederive: BIND as the mean: exit 1; FAIL D Swen-28M template greedy BIND: rederived 0.016666666666666666 recorded 0.0
+KILLED rederive: greedy in the mean: exit 1; FAIL D Veyra2-Mango-15M-Instruct plain mean3 TWOHOP: rederived 0.006944444444444444 recorded 0.020833333333333332
+KILLED rederive: foils by any count: exit 1; FAIL D lik Qwen/Qwen2.5-0.5B-Instruct template BIND: rederived 60 recorded 40
+KILLED rederive: chance 1 / foils: exit 1; FAIL D lik Qwen/Qwen2.5-0.5B-Instruct template BIND: rederived 1.0 recorded 0.5
+KILLED prereg s12 role-cut share: exit 1; FAIL D prereg s12 lacks minimind-3's blank-after-role-cut share 0.593
+KILLED rederive: p10 rank: exit 1; FAIL D lik Qwen/Qwen2.5-0.5B-Instruct template BIND: rederived -4.583160877227783 recorded -4.697037696838379
+mutation_numbers14: 24 / 24 killed, 0 not run, baseline exit 0

@@ -442,7 +442,7 @@ BUILT
                    [--planck-device cpu|mps|cuda, default cpu] [--planck-precision auto|fp32|bf16]. ctx defaults to
                    the checkpoint's seq_len (history fitted to seq_len - 256 by the existing fit()); --ctx above
                    seq_len is refused. Needs torch + tokenizers, so run it with the venv python, e.g.
-                   /Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B runner.py --responder
+                   <venv with torch>/bin/python -B runner.py --responder
                    planck:../runs/x/out/final_00001000.pt --planck-config ../runs/x/config.yaml --seeds greedy,1,2,3
                    --out runs/planck_x
                    Only make_responder (new branch), argparse and the docstring changed; no mutated line moved.
@@ -3494,3 +3494,219 @@ STEP 14L, CONTINUED (2026-10-11, from 09:00 EDT, Claude, W4 commit agent; the at
     each dev run and 48 each twin, no .shards dir left. verify_dev_runs C1 to C5 (PC, as above; log
     ~/planck/logs/w4c_verify_C.log): VERIFY PASS (0 failures) on template and on plain. Every extras phase (A, B, D, C)
     is now run and verified; none is pulled or scored (dev_extras14.py, the s12 numbers: the next step).
+
+STEP 14N (2026-10-11, 22:30 to about 23:15 EDT, Claude, W4; nothing under sealed/ read; no Planck model scored; no
+  model loaded on the Mac; the GPU and gpu.lock not used; PC CPU only): the finished extras and the likelihood rows
+  verified, pulled, scored and re-checked. Prereg still DRAFT, NOT LOCKED; its changes are dated at the end.
+  CODE: git archive of a69c325 (rc12/ and experiments/E004_general_updating/code; tar md5 9e0b0961, equal on the PC)
+    into ~/planck/dev/rc12v_a69c325 (new, named for the commit) and a Mac scratch dir; every step below ran from it,
+    never from the working tree.
+  VERIFY (PC, verify_dev_runs C1-C5, CUDA hidden, HF offline, no --rerun, nice 10; ~/planck/logs/w4s_prep.log and
+    w4s_verify/): VERIFY PASS (0 failures) for all 15 extras on both renders (the Base on plain only: 29 pairs) and
+    the Vertex card row under engines_card.json: 30 of 30 files, none with a FAIL line. cRia's C1 shows the merged
+    sharded runs (engine hfb, float32, parity IDENTICAL).
+  PULL: on the PC an md5 manifest of 1,846 files (every file under rc12_dev/<model>/template and plain for all 28
+    models, rc12_dev/queue_status.txt, rc12_dev_card, the 12 passed rc12_lik dirs; LiquidAI__LFM2-2.6B.part not
+    pulled), 29 tgz copied to the Mac (md5 equal) and unpacked into an empty dir: same file list, 1,846 of 1,846
+    md5-equal.
+  PANEL: dev_regrade.py over the 208 stored panel runs (71,552 rows; 376 rows regrade differently from their run-time
+    grades: the grader changes since the runs of 2026-09-26 to 28) then dev_panel.py: check failures 0; panel.tsv
+    byte-identical to STEP 12's runs/dev_panel_12/panel.tsv and rules.json equal, so dev_panel.py's numbers (the S7
+    and LOOKUP readings of the panel in prereg s9, s10b and s12) stand under a69c325's graders and scorer;
+    dev_baseline_ci.py (the old CI part in s12) was not re-run.
+  EXTRAS: dev_extras14.py --boot 10000 (Qwen2.5-0.5B-Instruct regraded inside it, R 5.68 template, 1.97 plain; 378 s):
+    every pinned extra scored (the Base plain only; its template "not scored", no chat template); stored scores.jsonl
+    == score_lines for 119 of 119 runs. Rows that regrade differently: 0 for every run of 2026-10-10/11 (the P-144
+    four, minimind-3, cRia) and for Swen-28M; 0 to 18 of 2,752 per model and render for the other item 14 extras (card
+    row 17 of 2,064); every one of their s12 numbers is unchanged. No extra meets Level A, the LOOKUP bar or the s12
+    clause; of the new ones none meets the CI part. Results: logs/extras14_20261011.jsonl, panel_20261011.jsonl.
+  TABLE 1, template render, mean of seeds 1-3 (R and S7 in points, families 0-1, LKUP = the LOOKUP family, T0, loop =
+    LOOP-flagged share of all replies); the 13 panel models first (s12 order, then its four extras), then the extras
+    in size order, then the Vertex card row (top_p 0.9, repetition penalty 1.3):
+    model                    R    S7 RECAL  CORR  BIND TWOHO PERSI   OWN TOPIC  ROLE  LOOP  LKUP  T0    loop
+    Qwen2.5-0.5B          5.68  2.30 0.011 0.021 0.011 0.042 0.113 0.007 0.000 0.069 0.237  0.014 0.181 0.291
+    Qwen3.5-0.8B          7.83  4.98 0.006 0.047 0.011 0.236 0.282 0.000 0.035 0.014 0.074  0.000 0.142 0.078
+    LFM2.5-230M           8.76  3.39 0.011 0.062 0.011 0.076 0.323 0.028 0.014 0.035 0.228  0.000 0.184 0.095
+    LFM2.5-350M          17.65 12.10 0.178 0.151 0.122 0.160 0.559 0.021 0.104 0.111 0.182  0.000 0.368 0.026
+    Falcon-H1-Tiny-90M    3.25  3.56 0.044 0.057 0.022 0.097 0.031 0.014 0.014 0.000 0.013  0.000 0.167 0.018
+    SmolLM2-135M          1.36  1.04 0.011 0.016 0.011 0.007 0.018 0.021 0.007 0.000 0.032  0.000 0.056 0.379
+    SmolLM2-360M          5.92  4.32 0.011 0.052 0.044 0.062 0.137 0.007 0.056 0.069 0.094  0.000 0.153 0.242
+    Doge-160M             1.03  0.25 0.006 0.005 0.000 0.000 0.018 0.000 0.007 0.000 0.057  0.000 0.017 0.519
+    LFM2-2.6B            24.22 18.15 0.133 0.271 0.089 0.264 0.812 0.076 0.160 0.278 0.097  0.007 0.517 0.022
+    Qwen3-0.6B           15.84  9.22 0.061 0.094 0.011 0.354 0.352 0.049 0.076 0.000 0.428  0.007 0.271 0.113
+    gemma-3-270m          6.79  4.19 0.011 0.021 0.011 0.194 0.017 0.042 0.007 0.007 0.301  0.000 0.125 0.111
+    LFM2-700M             7.72  6.29 0.056 0.104 0.044 0.194 0.196 0.007 0.014 0.021 0.058  0.000 0.229 0.032
+    LFM2-1.2B            10.95  7.55 0.067 0.109 0.089 0.146 0.362 0.049 0.035 0.035 0.095  0.000 0.333 0.031
+    Blueberry-5M          5.01  0.25 0.006 0.005 0.000 0.007 0.032 0.000 0.000 0.000 0.401  0.000 0.010 0.475
+    BananaMind-2-Nano     0.37  0.00 0.000 0.000 0.000 0.000 0.003 0.000 0.000 0.000 0.031  0.000 0.000 0.870
+    Blueberry-10M         3.52  0.18 0.006 0.000 0.000 0.000 0.023 0.000 0.007 0.000 0.281  0.000 0.003 0.486
+    Vertex-15M            8.64  2.09 0.006 0.016 0.000 0.049 0.029 0.000 0.007 0.069 0.603  0.000 0.108 0.107
+    Mango-15M             0.87  0.30 0.000 0.000 0.000 0.021 0.009 0.000 0.000 0.000 0.049  0.000 0.014 0.659
+    Loom-Spark-3.2        9.55  0.25 0.006 0.005 0.000 0.007 0.063 0.000 0.000 0.000 0.779  0.000 0.021 0.248
+    BananaMind-2-Mini     0.37  0.00 0.000 0.000 0.000 0.000 0.001 0.000 0.000 0.000 0.032  0.000 0.007 0.724
+    Swen-28M              6.72  1.17 0.000 0.005 0.000 0.049 0.032 0.000 0.021 0.007 0.492  0.000 0.031 0.278
+    Mango-30M             0.61  0.36 0.011 0.000 0.000 0.007 0.005 0.000 0.007 0.000 0.026  0.000 0.014 0.590
+    minimind-3            2.30  0.95 0.011 0.000 0.000 0.028 0.010 0.000 0.028 0.000 0.131  0.000 0.045 0.437
+    cRia-75M              1.19  0.75 0.006 0.026 0.000 0.021 0.038 0.000 0.000 0.000 0.017  0.000 0.049 0.462
+    F90M-Curriculum       0.64  0.61 0.017 0.005 0.000 0.014 0.006 0.000 0.007 0.000 0.009  0.000 0.056 0.016
+    F90M-pre-DPO          2.57  1.90 0.017 0.047 0.000 0.049 0.011 0.000 0.014 0.007 0.087  0.000 0.049 0.300
+    F90M-Curr-pre-DPO     1.87  0.77 0.006 0.021 0.000 0.028 0.025 0.000 0.000 0.000 0.090  0.000 0.111 0.248
+    Vertex-15M card row   6.77  0.93 0.000 0.005 0.011 0.028 0.010 0.000 0.000 0.021 0.534  0.000 0.017 0.007
+  TABLE 2, the extras against the comparator (template, seeds 1-3, 10,000 resamples): R with its paired CI vs
+    Qwen2.5-0.5B-Instruct (R 5.68; "met" = the old CI part, lower bound >= -3), S7 with its 95% CI (s7_ci), PERSIST,
+    the LOOKUP claim's value and its P and X probe rates:
+    extra                    R   CI vs Qwen2.5 met         S7 (95% CI) PERSIST LOOKUP  P     X
+    Blueberry-5M          5.01  -2.19 to +0.91 yes   0.25 (0.00 to 0.81)   0.032  0.000 0.007 0.028
+    BananaMind-2-Nano     0.37  -6.66 to -3.99 no    0.00 (0.00 to 0.00)   0.003  0.000 0.000 0.000
+    Blueberry-10M         3.52  -3.61 to -0.70 no    0.18 (0.00 to 0.60)   0.023  0.000 0.000 0.007
+    Vertex-15M            8.64  +1.02 to +4.93 yes   2.09 (0.87 to 3.62)   0.029  0.000 0.000 0.056
+    Mango-15M             0.87  -6.20 to -3.41 no    0.30 (0.00 to 0.89)   0.009  0.000 0.007 0.007
+    Loom-Spark-3.2        9.55  +2.10 to +5.68 yes   0.25 (0.00 to 0.83)   0.063  0.000 0.000 0.069
+    BananaMind-2-Mini     0.37  -6.66 to -4.00 no    0.00 (0.00 to 0.00)   0.001  0.000 0.000 0.000
+    Swen-28M              6.72  -0.60 to +2.71 yes   1.17 (0.30 to 2.38)   0.032  0.000 0.000 0.000
+    Mango-30M             0.61  -6.43 to -3.71 no    0.36 (0.00 to 1.07)   0.005  0.000 0.007 0.007
+    minimind-3            2.30  -4.87 to -1.91 no    0.95 (0.30 to 1.79)   0.010  0.000 0.000 0.007
+    cRia-75M              1.19  -5.97 to -2.90 no    0.75 (0.00 to 1.86)   0.038  0.000 0.000 0.007
+    F90M-Curriculum       0.64  -6.44 to -3.68 no    0.61 (0.00 to 1.33)   0.006  0.000 0.021 0.000
+    F90M-pre-DPO          2.57  -4.67 to -1.55 no    1.90 (0.86 to 3.14)   0.011  0.000 0.021 0.000
+    F90M-Curr-pre-DPO     1.87  -5.22 to -2.40 no    0.77 (0.15 to 1.54)   0.025  0.000 0.049 0.007
+    Vertex-15M card row   6.77  -0.54 to +2.64 yes   0.93 (0.22 to 1.89)   0.010  0.000 0.000 0.042
+  TABLE 3, plain render (diagnostic), mean of seeds 1-3, same columns as TABLE 1; the Base is plain only:
+    model                    R    S7 RECAL  CORR  BIND TWOHO PERSI   OWN TOPIC  ROLE  LOOP  LKUP  T0    loop
+    Qwen2.5-0.5B          1.97  0.37 0.000 0.005 0.000 0.007 0.052 0.000 0.007 0.007 0.099  0.000 0.021 0.629
+    Qwen3.5-0.8B          2.77  0.66 0.022 0.010 0.000 0.014 0.069 0.000 0.000 0.000 0.133  0.000 0.049 0.297
+    LFM2.5-230M          16.60  4.95 0.033 0.073 0.011 0.132 0.317 0.014 0.076 0.007 0.831  0.000 0.188 0.045
+    LFM2.5-350M          18.27  7.50 0.039 0.083 0.056 0.056 0.350 0.208 0.083 0.000 0.770  0.000 0.167 0.063
+    Falcon-H1-Tiny-90M   10.20  5.68 0.061 0.099 0.022 0.083 0.093 0.007 0.090 0.035 0.428  0.000 0.222 0.041
+    SmolLM2-135M          1.26  0.33 0.011 0.005 0.000 0.007 0.022 0.000 0.000 0.000 0.068  0.000 0.049 0.534
+    SmolLM2-360M          3.92  1.78 0.022 0.026 0.000 0.021 0.046 0.000 0.042 0.014 0.182  0.000 0.076 0.326
+    Doge-160M             3.18  0.48 0.006 0.021 0.000 0.007 0.023 0.000 0.000 0.000 0.230  0.000 0.045 0.467
+    LFM2-2.6B            24.93 17.45 0.067 0.224 0.056 0.306 0.847 0.049 0.167 0.354 0.176  0.000 0.448 0.014
+    Qwen3-0.6B            6.09  1.08 0.011 0.016 0.000 0.028 0.131 0.007 0.007 0.007 0.342  0.000 0.076 0.535
+    gemma-3-270m          3.00  0.30 0.000 0.000 0.000 0.021 0.020 0.000 0.000 0.000 0.228  0.000 0.042 0.493
+    LFM2-700M            17.46  6.02 0.028 0.115 0.022 0.139 0.480 0.021 0.076 0.021 0.670  0.000 0.163 0.016
+    LFM2-1.2B            17.30  5.70 0.028 0.094 0.000 0.132 0.511 0.021 0.118 0.007 0.647  0.000 0.174 0.006
+    Blueberry-5M          0.81  0.00 0.000 0.000 0.000 0.000 0.006 0.000 0.000 0.000 0.067  0.000 0.000 0.861
+    BananaMind-2-Nano     3.65  0.48 0.006 0.000 0.000 0.028 0.022 0.000 0.000 0.000 0.273  0.000 0.010 0.687
+    Blueberry-10M         1.86  0.15 0.000 0.010 0.000 0.000 0.018 0.000 0.000 0.000 0.140  0.000 0.021 0.747
+    Vertex-15M            3.09  0.62 0.006 0.010 0.000 0.028 0.008 0.000 0.000 0.000 0.226  0.000 0.049 0.575
+    Mango-15M             3.35  0.30 0.000 0.000 0.000 0.021 0.020 0.000 0.000 0.000 0.260  0.000 0.010 0.592
+    Loom-Spark-3.2        4.14  0.00 0.000 0.000 0.000 0.000 0.028 0.000 0.000 0.000 0.345  0.000 0.000 0.607
+    BananaMind-2-Mini     2.50  0.07 0.000 0.005 0.000 0.000 0.022 0.000 0.000 0.000 0.197  0.000 0.010 0.673
+    Swen-28M              4.53  0.00 0.000 0.000 0.000 0.000 0.019 0.000 0.000 0.000 0.389  0.000 0.000 0.217
+    Mango-30M             3.86  0.33 0.006 0.010 0.000 0.007 0.027 0.000 0.000 0.000 0.297  0.000 0.035 0.489
+    minimind-3            0.09  0.00 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.008  0.000 0.000 0.084
+    cRia-75M              1.93  0.45 0.000 0.010 0.000 0.014 0.007 0.000 0.007 0.000 0.135  0.000 0.003 0.604
+    F90M-Curriculum       1.22  0.78 0.017 0.010 0.000 0.014 0.022 0.000 0.014 0.000 0.033  0.000 0.108 0.028
+    F90M-pre-DPO          5.22  1.54 0.033 0.047 0.000 0.014 0.037 0.007 0.007 0.000 0.325  0.000 0.076 0.361
+    F90M-Curr-pre-DPO     2.92  0.51 0.011 0.010 0.000 0.007 0.039 0.007 0.000 0.000 0.188  0.000 0.080 0.419
+    F90M-Base             2.90  0.10 0.000 0.000 0.000 0.007 0.024 0.000 0.000 0.000 0.230  0.000 0.031 0.542
+  READING (dev, never a claim): the new extras sit with the floor models. cRia-75M (R 1.19, S7 0.75) and minimind-3
+    (2.30, 0.95) loop on 0.46 and 0.44 of their template replies and hit the 256-token cap on 0.44 and 0.31;
+    minimind-3's plain replies are mostly empty (EMPTY 0.836, 0.593 of all replies blank after the role cut: it opens
+    a new "User:" line at once). Of the P-144 checkpoints the pre-DPO one scores best (S7 1.90, below the Instruct
+    release's 3.56) and the Curriculum one hits the cap on 0.856 of template replies (loop 0.016; under 0.02 also
+    Falcon-H1-Tiny-90M-Instruct 0.018 and the Vertex card row 0.007; its LOOP family is 0.009 and every content key is
+    near 0). The highest S7 of any extra is still Vertex-15M's 2.09.
+  INDEPENDENT RE-CHECK (rc12/rederive14.py, new: no rc12 import, written from prereg s4, s5 and s9, not from score.py
+    or lik_score.py): from the raw transcripts, minimind-3, cRia-LM-75M-Instruct and
+    Falcon-H1-Tiny-90M-Instruct-pre-DPO, both renders, every seed and the mean of 3, equal dev_extras14's numbers
+    exactly (450 numbers, largest difference 0; run first with a scratch version of this code). In test_numbers14 part
+    D the same code checks every extras run with 0 rows regrading differently (1,050 numbers), the regraded panel copy
+    (390), all 24 likelihood-row summaries (1,776, foils rebuilt from the token counts, 0 foil mismatches) and
+    minimind-3's blank plain share (1): 0 differences. Its comparison is not vacuous: in a scratch copy OWN read
+    ungated moved R or S7 for 3 of the 3 models, COMPOSE kept in TWOHOP for 2 of 3, BIND as the twins' mean for 3 of
+    3 (and mutation_numbers14 below).
+  LIKELIHOOD ROWS (rc12lik_gpu.sh's output, 6d8fcd8's code; pulled above): lik_score.summarize recomputed on the Mac
+    equals the stored summary.json on 24 of 24 (12 models x 2 renders); every self-check passed in float32 (48 rows,
+    144 scores, largest move 0.000016 to 0.000131 nats, 0 flips); per key the matched / all-equal counts and the
+    chance equal the tokenizer-only logs/lik_tokcheck_pc.json, and the common-foil counts against Qwen2.5 equal its
+    vs_comparator (Qwen2.5 343 / 233 matched / all-equal of 412; gemma 372 / 276; Doge 311 / 146; over_ctx 0,
+    non-finite 0, ties 0 everywhere). LFM2-2.6B has no row (prereg s4). Results: logs/lik_rows_20261011.jsonl.
+  TABLE 4, likelihood rows, template: acc_matched / its chance per key (COMPOS = COMPOSE, diagnostic), and the BIND
+    pair rate:
+    model                   RECALL      CORR      BIND    TWOHOP       OWN     TOPIC      ROLE    LOOKUP    COMPOS pairs
+    Qwen2.5-0.5B         0.45/0.36 0.12/0.18 0.40/0.50 0.42/0.33 0.69/0.36 0.43/0.44 0.71/0.45 0.46/0.22 0.64/0.50 0.15
+    Qwen3.5-0.8B         0.45/0.36 0.23/0.18 0.65/0.50 0.62/0.33 0.69/0.35 0.46/0.44 0.71/0.45 0.72/0.23 1.00/0.50 0.50
+    LFM2.5-230M          0.27/0.37 0.11/0.19 0.59/0.50 0.32/0.36 0.58/0.31 0.39/0.46 0.79/0.43 0.63/0.19 0.64/0.50 0.47
+    LFM2.5-350M          0.37/0.37 0.11/0.19 0.62/0.50 0.36/0.36 0.88/0.31 0.35/0.46 0.64/0.43 0.52/0.19 0.64/0.50 0.41
+    Falcon-H1-Tiny-90M   0.36/0.38 0.20/0.23 0.75/0.50 0.30/0.35 0.64/0.32 0.51/0.39 0.64/0.42 0.34/0.28 0.83/0.50 0.71
+    SmolLM2-135M         0.40/0.40 0.11/0.22 0.39/0.50 0.34/0.36 0.50/0.36 0.56/0.45 0.49/0.41 0.40/0.27 0.25/0.50 0.14
+    SmolLM2-360M         0.53/0.40 0.25/0.22 0.25/0.50 0.48/0.36 0.61/0.36 0.50/0.45 0.74/0.41 0.42/0.27 0.25/0.50 0.07
+    Doge-160M            0.42/0.41 0.29/0.24 0.45/0.50 0.35/0.37 0.50/0.33 0.58/0.46 0.40/0.42 0.22/0.25 0.78/0.50 0.36
+    Qwen3-0.6B           0.39/0.36 0.23/0.18 0.60/0.50 0.62/0.33 0.65/0.36 0.37/0.44 0.69/0.45 0.74/0.22 0.55/0.50 0.45
+    gemma-3-270m         0.31/0.36 0.19/0.18 0.48/0.50 0.35/0.33 0.73/0.34 0.41/0.39 0.39/0.38 0.30/0.20 0.69/0.50 0.35
+    LFM2-700M            0.41/0.37 0.26/0.19 0.59/0.50 0.51/0.36 0.96/0.31 0.23/0.46 0.91/0.43 0.59/0.19 0.27/0.50 0.41
+    LFM2-1.2B            0.51/0.37 0.28/0.19 0.71/0.50 0.70/0.36 0.92/0.31 0.39/0.46 0.88/0.43 0.72/0.19 0.45/0.50 0.41
+  TABLE 5, likelihood rows, plain (same columns):
+    model                   RECALL      CORR      BIND    TWOHOP       OWN     TOPIC      ROLE    LOOKUP    COMPOS pairs
+    Qwen2.5-0.5B         0.45/0.36 0.14/0.18 0.38/0.50 0.54/0.33 0.81/0.36 0.37/0.44 0.66/0.45 0.41/0.22 0.64/0.50 0.10
+    Qwen3.5-0.8B         0.58/0.36 0.16/0.18 0.55/0.50 0.81/0.33 0.92/0.35 0.46/0.44 0.74/0.45 0.72/0.23 0.91/0.50 0.35
+    LFM2.5-230M          0.24/0.37 0.23/0.19 0.59/0.50 0.45/0.36 0.92/0.31 0.39/0.46 0.79/0.43 0.61/0.19 0.64/0.50 0.35
+    LFM2.5-350M          0.56/0.37 0.21/0.19 0.68/0.50 0.55/0.36 1.00/0.31 0.48/0.46 0.64/0.43 0.57/0.19 0.64/0.50 0.47
+    Falcon-H1-Tiny-90M   0.48/0.38 0.23/0.23 0.71/0.50 0.30/0.35 0.72/0.32 0.41/0.39 0.67/0.42 0.43/0.28 0.83/0.50 0.64
+    SmolLM2-135M         0.38/0.40 0.12/0.22 0.39/0.50 0.34/0.36 0.61/0.36 0.44/0.45 0.57/0.41 0.42/0.27 0.38/0.50 0.07
+    SmolLM2-360M         0.57/0.40 0.31/0.22 0.43/0.50 0.52/0.36 0.57/0.36 0.41/0.45 0.80/0.41 0.49/0.27 0.25/0.50 0.14
+    Doge-160M            0.45/0.41 0.18/0.24 0.50/0.50 0.33/0.37 0.54/0.33 0.52/0.46 0.51/0.42 0.36/0.25 0.78/0.50 0.27
+    Qwen3-0.6B           0.42/0.36 0.34/0.18 0.55/0.50 0.73/0.33 0.88/0.36 0.37/0.44 0.77/0.45 0.76/0.22 0.45/0.50 0.40
+    gemma-3-270m         0.22/0.36 0.23/0.18 0.48/0.50 0.40/0.33 0.81/0.34 0.38/0.39 0.59/0.38 0.43/0.20 0.56/0.50 0.13
+    LFM2-700M            0.32/0.37 0.21/0.19 0.38/0.50 0.43/0.36 0.67/0.31 0.32/0.46 0.76/0.43 0.48/0.19 0.18/0.50 0.06
+    LFM2-1.2B            0.27/0.37 0.23/0.19 0.59/0.50 0.53/0.36 0.62/0.31 0.26/0.46 0.61/0.43 0.63/0.19 0.45/0.50 0.29
+  TABLE 6, each model minus Qwen2.5-0.5B-Instruct on the foils both tokenizers share (lik_compare.py), template, with
+    the rows compared:
+    model                   RECALL      CORR      BIND    TWOHOP       OWN     TOPIC      ROLE    LOOKUP    COMPOS
+    Qwen3.5-0.8B         +0.00(38) +0.11(64) +0.25(40) +0.21(48) -0.04(25) +0.03(35) +0.00(35) +0.30(44) +0.36(11)
+    LFM2.5-230M          -0.21(33) -0.03(61) +0.20(30) -0.15(47) -0.18(17) -0.10(30) +0.03(30) +0.21(39) +0.00(11)
+    LFM2.5-350M          -0.15(33) -0.03(61) +0.20(30) -0.11(47) +0.12(17) -0.13(30) -0.10(30) +0.13(39) +0.00(11)
+    Falcon-H1-Tiny-90M   -0.19(26) +0.00(60) +0.15(20) -0.20(40) -0.12(16) +0.19(26) -0.13(23) -0.25(40) +0.33( 6)
+    SmolLM2-135M         -0.15(34) -0.06(64) -0.08(24) -0.16(44) -0.16(19) +0.03(30) -0.32(25) -0.15(41) -0.57( 7)
+    SmolLM2-360M         +0.06(34) +0.08(64) -0.29(24) -0.02(44) -0.16(19) +0.00(30) +0.00(25) -0.07(41) -0.57( 7)
+    Doge-160M            -0.07(30) +0.10(62) -0.10(20) -0.16(43) -0.17(18) +0.05(22) -0.41(22) -0.32(41) +0.11( 9)
+    Qwen3-0.6B           -0.05(38) +0.11(64) +0.20(40) +0.21(48) -0.04(26) -0.06(35) -0.03(35) +0.28(46) -0.09(11)
+    gemma-3-270m         -0.11(36) +0.06(64) +0.13(38) -0.06(48) +0.00(23) +0.17(30) -0.21(24) -0.12(41) +0.18(11)
+    LFM2-700M            -0.03(33) +0.11(61) +0.20(30) +0.04(47) +0.29(17) -0.27(30) +0.17(30) +0.18(39) -0.36(11)
+    LFM2-1.2B            +0.00(33) +0.13(61) +0.27(30) +0.23(47) +0.18(17) -0.10(30) +0.13(30) +0.33(39) -0.18(11)
+  TABLE 7, the same, plain:
+    model                   RECALL      CORR      BIND    TWOHOP       OWN     TOPIC      ROLE    LOOKUP    COMPOS
+    Qwen3.5-0.8B         +0.13(38) +0.02(64) +0.18(40) +0.27(48) +0.12(25) +0.09(35) +0.09(35) +0.32(44) +0.27(11)
+    LFM2.5-230M          -0.24(33) +0.07(61) +0.20(30) -0.11(47) +0.06(17) -0.03(30) +0.10(30) +0.18(39) +0.00(11)
+    LFM2.5-350M          +0.12(33) +0.05(61) +0.33(30) +0.00(47) +0.18(17) +0.07(30) +0.00(30) +0.15(39) +0.00(11)
+    Falcon-H1-Tiny-90M   -0.08(26) -0.02(60) +0.25(20) -0.25(40) -0.19(16) +0.04(26) -0.04(23) -0.12(40) +0.33( 6)
+    SmolLM2-135M         -0.18(34) -0.03(64) +0.00(24) -0.23(44) -0.11(19) -0.03(30) -0.12(25) -0.15(41) -0.43( 7)
+    SmolLM2-360M         +0.09(34) +0.16(64) +0.00(24) -0.05(44) -0.26(19) +0.03(30) +0.16(25) -0.05(41) -0.57( 7)
+    Doge-160M            -0.07(30) +0.00(62) +0.05(20) -0.23(43) -0.17(18) +0.00(22) -0.18(22) -0.12(41) +0.11( 9)
+    Qwen3-0.6B           -0.03(38) +0.20(64) +0.18(40) +0.19(48) +0.08(26) +0.00(35) +0.11(35) +0.35(46) -0.18(11)
+    gemma-3-270m         -0.19(36) +0.09(64) +0.16(38) -0.15(48) +0.00(23) +0.07(30) -0.04(24) +0.05(41) -0.09(11)
+    LFM2-700M            -0.18(33) +0.05(61) +0.00(30) -0.13(47) -0.12(17) -0.10(30) +0.13(30) +0.05(39) -0.45(11)
+    LFM2-1.2B            -0.21(33) +0.07(61) +0.20(30) -0.02(47) -0.24(17) -0.17(30) -0.03(30) +0.36(39) -0.18(11)
+  READING (diagnostic, never in a composite or a claim): with the history golden and the answer forced to a short
+    candidate list, LOOKUP is far above chance for Qwen3-0.6B, Qwen3.5-0.8B, LFM2-700M and LFM2-1.2B (0.59 to 0.74
+    against 0.19 to 0.23), whose generated LOOKUP is 0.000 to 0.007; CORR stays near chance for every model (0.11 to
+    0.29 against 0.18 to 0.24), so picking the latest value is hard even on golden history; OWN is high as its copying
+    cue predicts.
+  TESTS (Mac, ~/.venvs/planck and python3): new rc12/test_numbers14.py pins every number this step records: (A) the
+    results agree with themselves (R and S7 from their families in every row, D, the CI part, the clause and the
+    LOOKUP bar from their numbers, every pinned extra present, the comparator R equal in both pipelines), (B) the
+    likelihood rows (models, self-checks, counts equal the tokenizer-only measurement), (C) prereg s4, s10b and s12
+    carry the numbers and notes.txt carries every line of tables14.py's tables verbatim, (D) with raw copies,
+    rederive14 equals them. rc12/mutation_numbers14.py with the raw copies: 24 / 24 mutants killed (6 in the
+    results files, 4 in the likelihood-row file, 7 in the prereg and notes text, 7 in rederive14's rules), baseline
+    PASS with 3,217 raw numbers compared (logs/mutation_numbers14.txt). On an export of this commit's index (Mac, at
+    most 4 processes): the 34 rc12 test files (extras/ and test_numbers14 included) exit 0, oodh/tests 6 files pass,
+    pc/tests 172 passed. No second agent reviewed this step (none could be called); the independent check of the
+    numbers is the re-derivation above.
+  HYGIENE: rc12/notes.txt (STEP 6's runner line) and pc/notes.txt (line 8) named a Mac venv path with the user name;
+    now "<venv with torch>" and "<venv with pytest>" (pc/notes.txt in its own pc commit).
+  PREREG (DRAFT, changes dated 2026-10-11, this step): s4 likelihood rows: "No row pulled or compared yet" replaced by
+    the pull, the checks and a short diagnostic reading. s10b: the extras added before the lock (LOOKUP 0.000; P at
+    most 0.049, X at most 0.007). s12: the item 14 paragraph says it was re-scored unchanged; P-144, minimind-3 and
+    cRia get their dev numbers in place of "Dev: not yet run" (cRia's run facts from STEP 14L); the status line for
+    unfinished extras (every extra run and scored except P-145 and MaxGPT-3, not run for the reasons given; none
+    running); the clause paragraph (extras added before the lock at most S7 1.90; every scored extra's LOOKUP 0.000);
+    the known-unscored paragraph no longer lists cRia as pending.
+  NOT DONE, OPEN: LFM2-2.6B's likelihood row (drop it or change the rule, for the lock); rc12/dev_regrade.py's
+    durability fix (STEP 14L, cuts audit row 143) still uncommitted, waiting for an independent review; the PC scratch
+    dirs named in STEP 14L's return; ~/planck/dev/rc12v_a69c325 kept as the code of this step's verify.
+  FILES: rc12/rederive14.py, tables14.py, test_numbers14.py, mutation_numbers14.py (new); rc12/logs/
+    extras14_20261011.jsonl, panel_20261011.jsonl, lik_rows_20261011.jsonl, mutation_numbers14.txt (new);
+    rc12/notes.txt; prereg/RC-12.draft.txt (s4, s10b, s12).
