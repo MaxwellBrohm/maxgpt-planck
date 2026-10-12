@@ -5,7 +5,7 @@ STEP 4 (2026-09-24/25): PC setup kit. Files only; nothing was run on the PC, not
 downloaded, the Mac GPU was not used. RUNBOOK.txt has the steps and the file list.
 
 What is verified (Mac, CPU, pytest)
-  Run:  /Users/brohm/Documents/Projects/video-editor/.venv/bin/python -m pytest -q -p no:cacheprovider pc/tests
+  Run:  <venv with pytest>/bin/python -m pytest -q -p no:cacheprovider pc/tests
   51 tests pass in about 15 s. They drive the real runner, guard, heartbeat and bench code
   with a fake nvidia-smi (tests/fake_nvidia_smi.py, same CLI and CSV format) and a fake
   training job (tests/fake_job.py: log.jsonl lines, checkpoint-and-exit on SIGTERM, can
