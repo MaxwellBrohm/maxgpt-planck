@@ -2,6 +2,7 @@
   python e3analyze_p3_mutants.py            DATA mutants on a copy of this folder's Part 3 inputs (after the copy-back)
   python e3analyze_p3_mutants.py --fixture  DATA mutants on tests/p3fixture.py's synthetic record set (before any value)
   python e3analyze_p3_mutants.py --code     CODE mutants of the statistics: tests/test_e3analyze_p3.py must fail on each
+  python e3analyze_p3_mutants.py --result   RESULT mutants (records, results, notes, registry): tests/test_part3_result.py
 A DATA mutant is killed when the set of failing checks differs from the unmutated copy's (expected: the five
 EXPECTED_FAIL checks). Writes nothing here."""
 import json, os, shutil, subprocess, sys, tempfile
@@ -122,8 +123,43 @@ def code_mutants():
     print(f"{len(CODE) - len(bad)}/{len(CODE)} killed"); return 1 if bad else 0
 
 
+RESULT = {  # (name, file under the scratch root, old, new): tests/test_part3_result.py must fail on each
+    "r_bpb_value": None,
+    "r_results_json": ("experiments/E3_seed_noise/results_part3.json", '"gaps": []', '"gaps": ["e3_5m_A_data2"]'),
+    "r_tables": ("experiments/E3_seed_noise/tables_part3.txt", "GAPS: none", "GAPS: none "),
+    "r_notes_number": ("experiments/E3_seed_noise/notes.txt", "0.375% [0.225%, 1.078%]", "0.376% [0.225%, 1.078%]"),
+    "r_notes_k": ("experiments/E3_seed_noise/notes.txt", "k_needed 0.5%: 16, 1%: 4", "k_needed 0.5%: 16, 1%: 3"),
+    "r_notes_sha": ("experiments/E3_seed_noise/notes.txt", "results_part3.json sha256\n17b1614d", "results_part3.json sha256\n17b1614e"),
+    "r_registry_cfg": ("models/registry.jsonl", '"config_sha256": "ef61c789f25cb71d', '"config_sha256": "ef61c789f25cb71e'),
+    "r_registry_seed": ("models/registry.jsonl", '"id": "E3/5m_A/init3/final", "experiment": "E3", "arm": "5m_A", "role": "scored", "seed": 3',
+                        '"id": "E3/5m_A/init3/final", "experiment": "E3", "arm": "5m_A", "role": "scored", "seed": 1'),
+}
+
+
+def result_mutants():
+    root = os.path.dirname(os.path.dirname(SRC)); test = os.path.join(SRC, "tests", "test_part3_result.py"); bad = []
+    for name, spec in RESULT.items():
+        d = os.path.join(WD, name)
+        shutil.copytree(SRC, os.path.join(d, "experiments", "E3_seed_noise"), ignore=shutil.ignore_patterns("__pycache__"))
+        os.makedirs(os.path.join(d, "models")); shutil.copy(os.path.join(root, "models", "registry.jsonl"), os.path.join(d, "models"))
+        if spec is None:   # one copied bpb value moves in its 7th digit
+            p = os.path.join(d, "experiments", "E3_seed_noise", "out", "e3_5m_A_data3", "bpb.jsonl"); r = jl(p)
+            i = next(i for i, x in enumerate(r) if x["set"] == "CHAT" and x["split"] == "all" and x["step"] == 7630)
+            r[i]["bpb"] += 1e-6; wjl(p, r)
+        else:
+            p = os.path.join(d, spec[0]); t = open(p).read()
+            if t.count(spec[1]) != 1: print(f"INVALID  {name}"); bad.append(name); continue
+            open(p, "w").write(t.replace(spec[1], spec[2]))
+        r = subprocess.run([PY, "-m", "pytest", "-q", "-p", "no:cacheprovider", test], capture_output=True, text=True,
+                           env={**os.environ, "E3P3_ROOT": d, "PYTHONDONTWRITEBYTECODE": "1"})
+        k = r.returncode == 1; bad += [] if k else [name]
+        print(f"{'KILLED ' if k else 'SURVIVED'} {name} (pytest rc {r.returncode})", flush=True)
+    print(f"{len(RESULT) - len(bad)}/{len(RESULT)} killed"); return 1 if bad else 0
+
+
 def main():
     if "--code" in sys.argv: rc = code_mutants(); shutil.rmtree(WD); return rc
+    if "--result" in sys.argv: rc = result_mutants(); shutil.rmtree(WD); return rc
     fx = "--fixture" in sys.argv
     base = fails(fresh(fx)); print("baseline failing:", len(base), sorted(base)); killed = 0
     for name, m in DATA.items():

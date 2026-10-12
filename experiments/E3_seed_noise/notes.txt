@@ -703,3 +703,90 @@ begun training, and no Part 3 record has been copied or opened.)
   INDEPENDENT CHECK (before PART 3 RESULT is committed): a separate script, not importing e3analyze*, reads the raw
     copied files and recomputes the family SDs, the rule 1 references and MDEs for F(CHAT) and F(PROSE) and the split;
     its numbers must equal results_part3.json's.
+
+PART 3 RESULT (2026-10-11, by 22:40 EDT, Claude, W1's commit step; e3analyze_p3.py as committed at d307477, before any
+Part 3 value existed, run under the project venv's Python 3.12.13; results_part3.json sha256
+17b1614d0e0f26337c9e39cf7f91a7e5057c0155c84c110d9dc6f0ccd32bb71c, tables_part3.txt sha256
+e07bb9910e1cdf85b520d3a293111f845d7f093fd5dc3ba1839eac8c25148cb1, every metric in the tables. notes.txt through PART 3
+ANALYZER had sha256 13760fda6188d9eb at 22:10:03, when the statistics first ran (shell time). This is the record; no
+interim reading was written before it. 5M arm A (3e-3, r 1), 250M slots, full WSD; rel = fraction of the family's mean.)
+  Runs: one queue start (2026-10-11 13:12:28, plan part3.txt 07018f0f, commit 4962426, from planck_e3p3.bundle by
+    e3p3_waiter.sh; no relaunch), the 9 runs in the registered order, each trained once (rc 0, no resume) and scored at
+    7,344, 7,497 and 7,630; "MARK E3 PART 3 DONE" at 22:00:56 and the waiter's "DONE part3 ended cleanly at its mark". No
+    divergence, GAP or rerun. gpu.lock holds 18.4 to 20.7 min (under 35); waits 20 to 60 min behind the other workflows'
+    jobs. Training took 16.6 min for init2 and 18.7 to 18.8 min for the other 8 (Part 1's 5M runs 16.6 to 16.8): another
+    process kept 0.9 to 1.7 GB on the GPU at each later lock time (under the queue's 3,000 MiB guard); speed only.
+  Copy-back as registered (2026-10-11 22:05): out/<run>/ (bpb.jsonl, preflight.json, train_tail.jsonl with 16 records,
+    run_records.json with one start and one end) and logs/part3/ (queue_e3.txt, status.jsonl, the one code list,
+    e3p3_waiter.log); every copied PC file's sha256 equal on both machines. The only digit run in them that looks like an
+    address is the WSL kernel version in env.platform, as in Part 2's copies.
+  Checks: 27 of 32 pass; the 5 that fail are the registered five (FIXED 2 digest aced7148 over 111 files; train.py
+    aa07b64c, trainer.py 15d1a971, model.py f4e61556, bpb.py 7367071e), and each of those four files equals commit
+    4962426's. The split holds as recorded: every INIT run's drawn, dropped, tokens and sup_tokens equal e3_5m_A_s1_P3's at
+    all 16 tail log steps and at the end; the 5 DATA runs' end counts are pairwise different; e3_5m_A_s1_P3 drew Part 1
+    A1's counts (counts, not hashed content). DATA mutants on these copies (e3analyze_p3_mutants.py): 31 of 31 killed.
+  Independent check (audit/p3_recheck.py, as registered: imports nothing of e3analyze*, quantiles from scipy 1.18.1 under
+    Python 3.14.4, reads the raw copies): 810 comparisons with results_part3.json, 0 disagree, RECHECK PASS.
+  FAMILY SDs (df 4; [95% chi-square interval on rel]):
+    F(CHAT)   sigma_init 0.00232 bpb, 0.203% [0.121%, 0.582%]; sigma_data 0.00430 bpb, 0.375% [0.225%, 1.078%].
+    F(PROSE)  sigma_init 0.00205 bpb, 0.149% [0.089%, 0.427%]; sigma_data 0.00307 bpb, 0.223% [0.134%, 0.641%].
+    M(CHAT) 0.197% and 0.358%; M(PROSE) 0.152% and 0.218%. Secondary (init, data): CHAT user 1.010%, 1.093%; CHAT
+    assistant 0.206%, 0.393%; dolly 0.539%, 1.065%; irc 0.196%, 0.475%; stackexchange 0.122%, 0.229%; the three PROSE
+    sources 0.140% to 0.170%, 0.218% to 0.259%.
+    Training loss over the last 2%: INIT 0.149%, DATA 1.395%. The DATA value is mostly data2 (3.0775 against 3.1401 to
+    3.1826): the tail loss is measured on each run's own batches, so another stream changes what is measured, not only
+    the model; read as stream content, as Part 1's training-loss sigma_seed (1.268%) was.
+    sigma_data is above sigma_init on all 13 metrics (F(CHAT) by x1.85, F(PROSE) x1.50). The metrics share the same 9
+    runs, so that is not 13 pieces of evidence, and with df 4 each the two intervals overlap (F(CHAT) above; not a
+    registered test: the variance ratio 3.43 lies inside a 95% F(4, 4) range, whose upper end is 9.60). Data order is
+    the larger source in these runs; it is not established as larger in general.
+  RULE 1 (the registered consequence; it applies only to verdicts read after this entry):
+    same stream, new init (architecture, shape, anything that changes the init draws): reference sqrt(2) x sigma_init,
+      df 4, factor 3.717. F(CHAT) 0.287% (0.00328 bpb): MDE_u k1 1.065%, k2 0.753%, k3 0.615%, k5 0.476% [k2 at the
+      80% upper-bound SD 1.173%]; k_needed 0.5%: 5, 1%: 2, 2%: 1, so rule 2's k is 5, 2, 2. F(PROSE) 0.210% (0.00290
+      bpb): MDE k1 0.781%, k2 0.552%; k_needed 3, 1, 1, so k 3, 2, 2.
+    same init, new stream (mix, shares, filtering, curriculum, templates): reference sqrt(2) x sigma_data, df 4. F(CHAT)
+      0.531% (0.00608 bpb): MDE_u k1 1.972%, k2 1.395%, k3 1.139%, k5 0.882% [k2 2.172%]; k_needed 0.5%: 16, 1%: 4,
+      2%: 1, so k 16 ("underpowered"), 4, 2. F(PROSE) 0.315% (0.00435 bpb): MDE k1 1.172%, k2 0.829%; k_needed 6, 2, 1,
+      so k 6 ("underpowered"), 2, 2.
+    Against what both classes read until now (sqrt(2) x sigma_seed from Part 1, df 7, factor 3.261: F(CHAT) 0.361%, k
+      at 1% 2 and at 0.5% 6; F(PROSE) 0.210%, k 2 and 2): a data bet now needs 4 seeds for a 1% F(CHAT) effect, not 2,
+      and 6 for a 0.5% F(PROSE) effect, not 2; an init bet's F(CHAT) need at 0.5% falls from 6 to 5, and its F(PROSE)
+      reference SD is unchanged (0.210% both), but df 4's larger factor raises its 0.5% need from 2 to 3. The other two
+      classes keep SD_d and sqrt(2) x sigma_seed.
+  AGAINST PART 1's sigma_seed (descriptive, no rule; another commit; 95% F interval, df 4 and 7): F(CHAT) sigma_init /
+    sigma_seed 0.79 [0.34, 2.39], sigma_data / sigma_seed 1.47 [0.63, 4.43]; F(PROSE) 1.00 [0.43, 3.01] and 1.50 [0.64,
+    4.52]. sqrt(sigma_init^2 + sigma_data^2) / sigma_seed is 1.67 for F(CHAT) and 1.80 for F(PROSE) (1.11 to 2.39 over the
+    13 metrics). If init and data noise added independently it would sit near 1; every single interval above contains 1,
+    so this is not resolved: Part 1's 8 seeds may sit low, these 5-run families high, or the commits may differ. Family
+    means: F(CHAT) INIT 1.14606, DATA 1.14599 (Part 1 arm A's 8 seeds 1.14038 to 1.15126, mean 1.14674); F(PROSE)
+    1.38172 and 1.37900 (Part 1 1.37851 to 1.38514, mean 1.38141).
+  e3_5m_A_s1_P3 BESIDE A1, R2, R3 (descriptive, no rule; same seed, and A1's counts): F(CHAT) 1.14606 against 1.14974,
+    1.14865, 1.14634 (minus their mean -0.00219, -1.26 Part 1 sigma_rep); F(PROSE) 1.38098 against 1.38272, 1.38218,
+    1.38170 (-0.00122, -2.40 sigma_rep). It sits below all three on both; sigma_rep has df 2. Between e39112a and 4962426
+    the harness/ and data_prep/ non-test .py files that differ are train.py (screen flags off, data_seed), runio.py and
+    durable.py (D4), from_pipeline.py, induction.py, attn_diag.py, rc12_eval.py, bpb.py and bpb_hd.py (--hd off), and
+    eval_sets.py, prep_common.py and pretokenize.py (data building, not run here); trainer.py, model.py and data.py do
+    not. A replay across commits, as the free extra pair was; nothing is concluded from one run.
+  USE AND SCOPE (as registered): from this entry on, rule 1 reads sqrt(2) x sigma_init for "same stream, new init" and
+    sqrt(2) x sigma_data for "same init, new stream", df 4, for verdicts read after it. Stage 1 and stage 2 of SCREENS
+    (S001 to S007) stand as read (BATCH 1 CLOSED), and no E2 or E3 reading already recorded is re-read. A later batch
+    that reads these SDs names results_part3.json by its sha256 in its own pre-registration, dated before its values.
+  Registered: the 9 finals in models/registry.jsonl (E3/5m_A/<tag>/final; MODELS.md section 13). Not run: the CUDA
+    flag-off parity run (default_parity.py --device cuda); Part 4 a to c.
+  Tests of this record: tests/test_part3_result.py (5): results_part3.json and tables_part3.txt regenerate byte for byte
+    from the copies; their sha256s are this entry's; 27 of 32 checks; 46 numbers quoted above equal results_part3.json at
+    the printed digits; the 9 registry lines match the start records and the results; audit/p3_recheck.py passes.
+    e3analyze_p3_mutants.py --result: 8 of 8 mutants killed (a copied bpb value moved in its 7th digit, results_part3.json
+    and tables_part3.txt edited, a quoted SD, a quoted k and the results sha256 edited here, a registry config sha256 and
+    seed edited).
+  INCIDENT during this step (2026-10-11 22:17 to about 22:40 EDT): a test run of this folder's tests on an export of the
+    index with GIT_DIR set to this repository's .git (so the analyzer fixture could run git archive) let
+    tests/test_e3p3_waiter.py's fixture commit its three stub files onto main (3541744, a tree holding only them, parent
+    b790d85), and the next push sent it to origin. Found at once from the commit output: be00549 restores b790d85's tree
+    exactly (checked equal) on top of it, pushed as a fast-forward (no force); the index was reset to that tree and HEAD
+    reattached; the working tree was never touched (no file deleted or changed), and the next commit by another workflow
+    (ba7e961) sits on the restored tree. Guard added: the waiter tests strip GIT_DIR and git's other location variables
+    from every git and waiter call (test_an_inherited_git_dir_is_never_written; its mutant in tests/mutation_e3.py is
+    killed), and tests/p3fixture.py takes the repository for git archive from E3P3_GIT_DIR as an argument, never from the
+    environment.

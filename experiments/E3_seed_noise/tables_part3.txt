@@ -1,0 +1,92 @@
+E3 PART 3 TABLES (e3analyze_p3.py, importing e3analyze.py; 5M arm A 3e-3 r 1, 250M slots, full WSD; INIT = seeds 1..5 at data_seed 1, DATA = data_seeds 1..5 at seed 1; e3_5m_A_s1_P3 is member 1 of both)
+
+CHECKS: code digest harness+data_prep .py == FIXED 2 (92deaef0) FAILED (aced7148757af02a over 111 files), data_prep/bpb.py == FIXED 2 FAILED (7367071e460e0039), harness/train.py == FIXED 2 FAILED (aa07b64c7a4e3089), harness/trainer.py == FIXED 2 FAILED (15d1a9719d972d8b), harness/model.py == FIXED 2 FAILED (f4e61556ee9ece8a)  [27/32 pass; expected failures 5; unexpected 0: []]
+GAPS: none
+
+FAMILY SDs (df n - 1); rel = fraction of the family's mean; [95% chi-square interval on rel]; ub80 = 80% upper bound
+metric               fam   n     mean        SD     rel         rel 95% CI    ub80
+F(CHAT)              INIT  5  1.14606  0.002322  0.203% [0.121%, 0.582%]  0.316%
+F(CHAT)              DATA  5  1.14599  0.004300  0.375% [0.225%, 1.078%]  0.584%
+F(PROSE)             INIT  5  1.38172  0.002054  0.149% [0.089%, 0.427%]  0.231%
+F(PROSE)             DATA  5  1.37900  0.003075  0.223% [0.134%, 0.641%]  0.347%
+M(CHAT)              INIT  5  1.14987  0.002270  0.197% [0.118%, 0.567%]  0.308%
+M(CHAT)              DATA  5  1.14987  0.004121  0.358% [0.215%, 1.030%]  0.558%
+M(PROSE)             INIT  5  1.38679  0.002104  0.152% [0.091%, 0.436%]  0.236%
+M(PROSE)             DATA  5  1.38381  0.003020  0.218% [0.131%, 0.627%]  0.340%
+CHAT user            INIT  5  1.45659  0.014711  1.010% [0.605%, 2.902%]  1.573%
+CHAT user            DATA  5  1.46701  0.016035  1.093% [0.655%, 3.141%]  1.703%
+CHAT assistant       INIT  5  1.10581  0.002282  0.206% [0.124%, 0.593%]  0.321%
+CHAT assistant       DATA  5  1.10438  0.004340  0.393% [0.235%, 1.129%]  0.612%
+PROSE cccc           INIT  5  1.31220  0.002183  0.166% [0.100%, 0.478%]  0.259%
+PROSE cccc           DATA  5  1.31050  0.003390  0.259% [0.155%, 0.743%]  0.403%
+PROSE gutenberg      INIT  5  1.49729  0.002101  0.140% [0.084%, 0.403%]  0.219%
+PROSE gutenberg      DATA  5  1.49217  0.003246  0.218% [0.130%, 0.625%]  0.339%
+PROSE wikimedia      INIT  5  1.33402  0.002268  0.170% [0.102%, 0.489%]  0.265%
+PROSE wikimedia      DATA  5  1.33274  0.003105  0.233% [0.140%, 0.669%]  0.363%
+stackexchange        INIT  5  1.35848  0.001660  0.122% [0.073%, 0.351%]  0.190%
+stackexchange        DATA  5  1.35729  0.003104  0.229% [0.137%, 0.657%]  0.356%
+irc                  INIT  5  1.55755  0.003046  0.196% [0.117%, 0.562%]  0.305%
+irc                  DATA  5  1.55820  0.007404  0.475% [0.285%, 1.365%]  0.740%
+dolly                INIT  5  1.33885  0.007220  0.539% [0.323%, 1.550%]  0.840%
+dolly                DATA  5  1.34097  0.014278  1.065% [0.638%, 3.060%]  1.658%
+train loss last 2%   INIT  5  3.17977  0.004726  0.149% [0.089%, 0.427%]  0.232%
+train loss last 2%   DATA  5  3.15020  0.043956  1.395% [0.836%, 4.010%]  2.173%
+
+RULE 1 REFERENCE SDs (sqrt2 x family SD, df 4 unless a GAP): MDE_u(k) as % of the family mean, k = 1, 2, 3, 5 [k2 with the 80% upper-bound SD]; k_needed 0.5% / 1% / 2%; rule 2 k = max(2, k_needed); >5 underpowered
+F(CHAT)   same stream, new init  ref 0.287% (0.00328 bpb), df 4, factor 3.717; MDE k1 1.065% k2 0.753% k3 0.615% k5 0.476% [k2 1.173%]; k_needed 0.500%:5 1.000%:2 2.000%:1; k 0.500%:5 1.000%:2 2.000%:2; underpowered none
+F(CHAT)   same init, new stream  ref 0.531% (0.00608 bpb), df 4, factor 3.717; MDE k1 1.972% k2 1.395% k3 1.139% k5 0.882% [k2 2.172%]; k_needed 0.500%:16 1.000%:4 2.000%:1; k 0.500%:16 1.000%:4 2.000%:2; underpowered 0.500%
+F(PROSE)  same stream, new init  ref 0.210% (0.00290 bpb), df 4, factor 3.717; MDE k1 0.781% k2 0.552% k3 0.451% k5 0.349% [k2 0.861%]; k_needed 0.500%:3 1.000%:1 2.000%:1; k 0.500%:3 1.000%:2 2.000%:2; underpowered none
+F(PROSE)  same init, new stream  ref 0.315% (0.00435 bpb), df 4, factor 3.717; MDE k1 1.172% k2 0.829% k3 0.677% k5 0.524% [k2 1.291%]; k_needed 0.500%:6 1.000%:2 2.000%:1; k 0.500%:6 1.000%:2 2.000%:2; underpowered 0.500%
+M(CHAT)   same stream, new init  ref 0.279% (0.00321 bpb), df 4, factor 3.717; MDE k1 1.038% k2 0.734% k3 0.599% k5 0.464% [k2 1.143%]; k_needed 0.500%:5 1.000%:2 2.000%:1; k 0.500%:5 1.000%:2 2.000%:2; underpowered none
+M(CHAT)   same init, new stream  ref 0.507% (0.00583 bpb), df 4, factor 3.717; MDE k1 1.884% k2 1.332% k3 1.088% k5 0.843% [k2 2.075%]; k_needed 0.500%:15 1.000%:4 2.000%:1; k 0.500%:15 1.000%:4 2.000%:2; underpowered 0.500%
+M(PROSE)  same stream, new init  ref 0.215% (0.00297 bpb), df 4, factor 3.717; MDE k1 0.797% k2 0.564% k3 0.460% k5 0.357% [k2 0.878%]; k_needed 0.500%:3 1.000%:1 2.000%:1; k 0.500%:3 1.000%:2 2.000%:2; underpowered none
+M(PROSE)  same init, new stream  ref 0.309% (0.00427 bpb), df 4, factor 3.717; MDE k1 1.147% k2 0.811% k3 0.662% k5 0.513% [k2 1.264%]; k_needed 0.500%:6 1.000%:2 2.000%:1; k 0.500%:6 1.000%:2 2.000%:2; underpowered 0.500%
+
+RULE 1, OTHER METRICS: reference rel (sqrt2 x family SD) and k_needed 0.5% / 1% / 2%
+CHAT user            same stream, new init: 1.428% k 113/29/8; same init, new stream: 1.546% k 133/34/9
+CHAT assistant       same stream, new init: 0.292% k 5/2/1; same init, new stream: 0.556% k 18/5/2
+PROSE cccc           same stream, new init: 0.235% k 4/1/1; same init, new stream: 0.366% k 8/2/1
+PROSE gutenberg      same stream, new init: 0.198% k 3/1/1; same init, new stream: 0.308% k 6/2/1
+PROSE wikimedia      same stream, new init: 0.240% k 4/1/1; same init, new stream: 0.329% k 6/2/1
+stackexchange        same stream, new init: 0.173% k 2/1/1; same init, new stream: 0.323% k 6/2/1
+irc                  same stream, new init: 0.277% k 5/2/1; same init, new stream: 0.672% k 25/7/2
+dolly                same stream, new init: 0.763% k 33/9/3; same init, new stream: 1.506% k 126/32/8
+train loss last 2%   same stream, new init: 0.210% k 3/1/1; same init, new stream: 1.973% k 216/54/14
+
+AGAINST PART 1's sigma_seed (descriptive; relative SDs; another commit): ratio [95% F interval, df 4 and 7]; sqrt(sigma_init^2 + sigma_data^2) / sigma_seed
+F(CHAT)              sigma_seed 0.255%; INIT 0.79 [0.34, 2.39]; DATA 1.47 [0.63, 4.43]; sum 1.67
+F(PROSE)             sigma_seed 0.149%; INIT 1.00 [0.43, 3.01]; DATA 1.50 [0.64, 4.52]; sum 1.80
+M(CHAT)              sigma_seed 0.251%; INIT 0.79 [0.33, 2.37]; DATA 1.43 [0.61, 4.30]; sum 1.63
+M(PROSE)             sigma_seed 0.151%; INIT 1.01 [0.43, 3.03]; DATA 1.45 [0.62, 4.36]; sum 1.76
+CHAT user            sigma_seed 0.890%; INIT 1.13 [0.48, 3.42]; DATA 1.23 [0.52, 3.70]; sum 1.67
+CHAT assistant       sigma_seed 0.298%; INIT 0.69 [0.29, 2.08]; DATA 1.32 [0.56, 3.97]; sum 1.49
+PROSE cccc           sigma_seed 0.175%; INIT 0.95 [0.40, 2.86]; DATA 1.48 [0.63, 4.45]; sum 1.76
+PROSE gutenberg      sigma_seed 0.114%; INIT 1.23 [0.52, 3.69]; DATA 1.90 [0.81, 5.73]; sum 2.26
+PROSE wikimedia      sigma_seed 0.201%; INIT 0.85 [0.36, 2.55]; DATA 1.16 [0.49, 3.50]; sum 1.44
+stackexchange        sigma_seed 0.139%; INIT 0.88 [0.37, 2.65]; DATA 1.65 [0.70, 4.96]; sum 1.87
+irc                  sigma_seed 0.283%; INIT 0.69 [0.29, 2.08]; DATA 1.68 [0.72, 5.06]; sum 1.82
+dolly                sigma_seed 0.498%; INIT 1.08 [0.46, 3.26]; DATA 2.14 [0.91, 6.43]; sum 2.39
+train loss last 2%   sigma_seed 1.268%; INIT 0.12 [0.05, 0.35]; DATA 1.10 [0.47, 3.31]; sum 1.11
+
+PER-RUN VALUES
+F(CHAT)              INIT s1_P3 1.14606  init2 1.14706  init3 1.14220  init4 1.14660  init5 1.14838
+F(CHAT)              DATA s1_P3 1.14606  data2 1.14249  data3 1.14505  data4 1.14311  data5 1.15324
+F(PROSE)             INIT s1_P3 1.38098  init2 1.38397  init3 1.37917  init4 1.38078  init5 1.38368
+F(PROSE)             DATA s1_P3 1.38098  data2 1.37630  data3 1.37813  data4 1.37630  data5 1.38330
+M(CHAT)              INIT s1_P3 1.15000  init2 1.15097  init3 1.14608  init4 1.15020  init5 1.15209
+M(CHAT)              DATA s1_P3 1.15000  data2 1.14655  data3 1.14905  data4 1.14697  data5 1.15678
+M(PROSE)             INIT s1_P3 1.38598  init2 1.38903  init3 1.38406  init4 1.38608  init5 1.38880
+M(PROSE)             DATA s1_P3 1.38598  data2 1.38132  data3 1.38315  data4 1.38081  data5 1.38782
+train loss last 2%   INIT s1_P3 3.18259  init2 3.18430  init3 3.17320  init4 3.17644  init5 3.18235
+train loss last 2%   DATA s1_P3 3.18259  data2 3.07748  data3 3.14010  data4 3.17840  data5 3.17242
+
+e3_5m_A_s1_P3 BESIDE PART 1's A1, R2, R3 (descriptive, a replay across commits; no rule): value, minus A1, minus the replay mean, in Part 1 sigma_rep
+F(CHAT)              1.14606  A1/R2/R3 1.14974 1.14865 1.14634  -0.00368  -0.00219  -1.26
+F(PROSE)             1.38098  A1/R2/R3 1.38272 1.38218 1.38170  -0.00173  -0.00122  -2.40
+M(CHAT)              1.15000  A1/R2/R3 1.15318 1.15208 1.15002  -0.00318  -0.00176  -1.10
+M(PROSE)             1.38598  A1/R2/R3 1.38786 1.38723 1.38678  -0.00187  -0.00131  -2.42
+train loss last 2%   3.18259  A1/R2/R3 3.18474 3.18283 3.18140  -0.00215  -0.00040  -0.24
+s1_P3 drew Part 1 A1's stream (end-record counts): True
+
+Quantiles: {"factor_df4": 3.7174, "ub80_df4": 1.5576, "chi2_sd_lo_df4": 0.5991, "chi2_sd_hi_df4": 2.8736, "F_0.025_df4_7": 0.1102, "F_0.975_df4_7": 5.5226}
+Not run: {"Part 4 (a, b, c)": "not run", "Part 3 CUDA flag-off parity (default_parity.py --device cuda)": "not run"}

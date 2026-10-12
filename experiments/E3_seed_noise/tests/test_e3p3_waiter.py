@@ -44,8 +44,17 @@ esac
 """
 
 
+GIT_ENV = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY", "GIT_COMMON_DIR")
+
+
+def clean_env(**over):
+    """os.environ without git's location variables: an inherited GIT_DIR once let this file's fixture commit onto the
+    real repository's main (2026-10-11), so neither the fixture repos nor the waiter may see one."""
+    return {**{k: v for k, v in os.environ.items() if k not in GIT_ENV}, **over}
+
+
 def git(cwd, *a):
-    env = {**os.environ, "DEVELOPER_DIR": "/Library/Developer/CommandLineTools", "GIT_TERMINAL_PROMPT": "0"}
+    env = clean_env(DEVELOPER_DIR="/Library/Developer/CommandLineTools", GIT_TERMINAL_PROMPT="0")
     return subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=fixture", "-c", "init.defaultBranch=main", *a],
                           cwd=cwd, env=env, capture_output=True, text=True, check=True).stdout.strip()
 
@@ -86,9 +95,9 @@ def run(tmp, p, k, outcomes=(), maxr="24", flock_rc="0", pat="e3w_test_matches_n
     for f in ("flock", "sha256sum"):
         os.chmod(tmp / "bin" / f, 0o755)
     (tmp / "outcomes").write_text("".join(o + "\n" for o in outcomes))
-    env = {**os.environ, "E3W_HOME": str(p), "E3W_KIT": str(k), "E3W_POLL": poll, "E3W_MAXR": maxr, "E3W_PAT": pat,
-           "E3W_STUBLOG": str(tmp / "stub.log"), "E3W_OUTCOMES": str(tmp / "outcomes"), "E3W_SLEEP": sleep,
-           "PATH": f"{tmp / 'bin'}:{os.environ['PATH']}", "DEVELOPER_DIR": "/Library/Developer/CommandLineTools"}
+    env = clean_env(E3W_HOME=str(p), E3W_KIT=str(k), E3W_POLL=poll, E3W_MAXR=maxr, E3W_PAT=pat,
+                    E3W_STUBLOG=str(tmp / "stub.log"), E3W_OUTCOMES=str(tmp / "outcomes"), E3W_SLEEP=sleep,
+                    PATH=f"{tmp / 'bin'}:{os.environ['PATH']}", DEVELOPER_DIR="/Library/Developer/CommandLineTools")
     rc = subprocess.run(["/bin/bash", str(k / "e3p3_waiter.sh")], env=env, capture_output=True, text=True,
                         timeout=timeout).returncode
     lp = p / "logs" / "e3p3_waiter.log"
@@ -205,3 +214,16 @@ def test_reads_only_what_this_queue_wrote(tmp_path):
     assert rc == 1 and "GIVEUP: 0 relaunches" in log
     rc, log, stub = run(tmp_path, p, k, ["refuse"])                   # this queue refused before its own start line
     assert rc == 1 and len(stub) == 2 and "GIVEUP no part3 start line at" in log.splitlines()[-1], log
+
+
+def test_an_inherited_git_dir_is_never_written(tmp_path, monkeypatch):
+    other = tmp_path / "other.git"           # stands in for the real repository a stray GIT_DIR would name
+    git(str(tmp_path), "init", "-q", "--bare", str(other))
+    monkeypatch.setenv("GIT_DIR", str(other))
+    monkeypatch.setenv("GIT_WORK_TREE", str(tmp_path))
+    p, (k, ref) = tree(tmp_path), kit(tmp_path)
+    rc, log, stub = run(tmp_path, p, k, ["clean"])
+    assert rc == 0 and stub == [call(p, ref)]
+    refs = subprocess.run(["git", "--git-dir", str(other), "for-each-ref"], capture_output=True, text=True,
+                          env=clean_env(DEVELOPER_DIR="/Library/Developer/CommandLineTools")).stdout
+    assert refs == ""                         # no fixture commit and no clone landed in it

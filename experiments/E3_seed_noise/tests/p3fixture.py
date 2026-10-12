@@ -29,9 +29,11 @@ def sha(p): return hashlib.sha256(open(p, "rb").read()).hexdigest()
 
 def code_list(commit: str = COMMIT) -> str:
     """queue_lib.sh code_hashes over `git archive commit`: sha256 of every .py/.yaml/.sh/.txt and tok_v0_8k.json."""
-    env = {**os.environ, "DEVELOPER_DIR": "/Library/Developer/CommandLineTools"}
+    env = {**{k: v for k, v in os.environ.items() if not k.startswith("GIT_")}, "DEVELOPER_DIR": "/Library/Developer/CommandLineTools"}
     root = os.path.dirname(os.path.dirname(E3))     # git archive from a subfolder would take that subtree only
-    tar = subprocess.run(["git", "-C", root, "archive", commit], capture_output=True, env=env, check=True).stdout
+    gd = os.environ.get("E3P3_GIT_DIR")             # an export of the index has no .git: name the repo's, for git archive
+    where = ["--git-dir", gd] if gd else ["-C", root]  # only (never GIT_DIR in the environment: see test_e3p3_waiter.py)
+    tar = subprocess.run(["git", *where, "archive", commit], capture_output=True, env=env, check=True).stdout
     rows = []
     with tarfile.open(fileobj=io.BytesIO(tar)) as t:
         for m in t.getmembers():

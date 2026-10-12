@@ -77,6 +77,9 @@ MUTANTS = [
     ("w_relaunch_any_rc", W, '    if [ "$rc" = 1 ] && printf', '    if true && printf', TW),
     ("w_pgrep_error_is_none", W, "case $? in 0) echo 1 ;; 1) echo 0 ;; *) echo E ;; esac",
      "case $? in 0) echo 1 ;; *) echo 0 ;; esac", TW),
+    # the fixture's own guard (2026-10-11: an inherited GIT_DIR let it commit onto the real repository's main)
+    ("t_fixture_env_keeps_git_dir", X + "tests/" + TW, "return {**{k: v for k, v in os.environ.items() if k not in GIT_ENV}, **over}",
+     "return {**os.environ, **over}", TW),
 ]
 
 

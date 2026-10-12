@@ -240,3 +240,14 @@ train.py's hash of each committed config. Results say "not read": registered bef
 them. Location: the run folder only; not yet in the D: archive on 2026-10-11 09:08 (add it once a copy is hashed
 equal there). `experiments/screens/tests/test_screens_saturday_text.py` checks one saved line per run of every
 SCREENS plan that ran, stage2_replay's included.
+
+## 13. E3 Part 3 registration (2026-10-11)
+
+9 lines, `E3/5m_A/<tag>/final` for tags `s1_P3`, `init2`..`init5`, `data2`..`data5`: E3 Part 3's 5M finals (arm A,
+250M slots, full WSD, 7,630 steps; E3 notes PART 3 REOPENED and PART 3 RESULT), queued once from 4962426 by
+`e3p3_waiter.sh` and done on 2026-10-11 (MARK E3 PART 3 DONE at 22:00:56). Built from the PC's records as section 11's:
+runs.jsonl start and end events (n_params, config_sha256, times), the finals' bytes and sha256 (hashed on the PC), and
+the queue's code list (its sha256 is code.digest). `seed` is the run seed; `hparams.data_seed` the loader's seed (INIT
+runs seed 2..5 at data_seed 1, DATA runs seed 1 at data_seed 2..5, `s1_P3` seed 1 at data_seed 1, in both families).
+Results are results_part3.json's F(CHAT) and F(PROSE). Location: the run folder only; add
+`pc:/mnt/d/planck-archive/E3/<run>` once a copy is hashed equal there.
