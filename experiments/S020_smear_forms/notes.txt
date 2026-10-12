@@ -11,85 +11,126 @@ CHAT dbar -0.38%; onset UNRESOLVED; alpha 0 to 0.7 in 23 of 24 heads, one head f
 RESULTS (R3 YES); harness/blocks.py Attention.forward (the order k_proj, smear, QK-norm, RoPE; V from v_proj; value
 residual mixes v after it); harness/mutants_smear.py (smear_after_qk_norm and smear_values_too are mutants of S007's
 form today; here they become registered arms behind their own flags). S007's robustness seeds 103-105 (W1) not read.
+AMENDED 2026-10-12 (round 2 critique, SCREENS2.txt CHANGES AFTER CRITIQUE (ROUND 2)), still before any batch 2 value
+and before any S020 flag, config or run: M1 adds s020_raw (S007's form re-run in batch 2) so the value smear is read
+against it (V2) as well as the KV form against BASE (V3); L3 makes the REJECT wording depend on Q2's reading; the
+combinations of V2 and V3 are fixed (L7 (c)'s kind); TIE now names its 20M trigger (Q2 EARLIER, or Tier 0 BETTER as
+C8), which the OWN-SIZE line already implied. The draft before it is in git history (92f2ca8).
 
 WHY
   S007 read the registered form (raw key, before QK-norm and RoPE, keys only) as loss-neutral at 8 layers. Two choices in
   that form were made without evidence: (1) smearing before QK-norm leaves the normalised key's scale unchanged, so the
   smear can only turn the key, not add the previous token's key at a learned weight (S007 KNOWN RISKS); after QK-norm
   the previous key is added at its normalised size and alpha sets its weight directly; (2) values unsmeared: KV-shifting
-  attention shifts both, so a head can copy the previous token's value as well as match on its key. Each is a one-flag
-  change of S007's arm; this screen asks whether either form moves chat bpb or induction timing at 5M.
+  attention shifts both, so a head can copy the previous token's value as well as match on its key. Each form is a
+  one-flag change of S007's arm. smear_post is one mechanism against BASE (a smear of the normalised key), so V1 reads
+  it against BASE. smear_kv is two mechanisms against BASE (S007's key smear and a value smear), so the value smear's
+  own effect needs S007's form in the same batch: s020_raw (round 2, M1, for the reason S019 re-runs Canon-AC: without
+  it the question would compare across batches and harness commits).
 
-QUESTIONS (decided, B7; two contrasts in B7's family)
-  V1  smear_post vs base2: the smear after QK-norm (before RoPE), keys only.
-  V2  smear_kv vs base2: keys smeared as S007 (raw key, before QK-norm) AND values smeared with their own scalar.
+QUESTIONS (decided, B7; three contrasts in B7's family)
+  V1  s020_post vs base2: the smear after QK-norm (before RoPE), keys only (two keys against BASE, one mechanism).
+  V2  s020_kv vs s020_raw: the value smear added to S007's key smear (one key, smear_value; s020_raw is this contrast's
+      BASE, paired per seed, as S018's base7 for D2 and S019's canon_ac for E1).
+  V3  s020_kv vs base2: the KV form as a whole (two keys against BASE; the form a NOMINATE carries to 20M).
   Q2 (P-024's own question, B6 ONSET RULE): does induction form earlier (onset_half at matched LR) for either form?
-  Reported beside S007 (batch 1) and S018's smear7, no rule across batches or between V1 and V2.
+  Reported, no rule, not in the family: s020_raw vs base2 (batch 2's replication of S007's contrast; S007's verdict
+  stays batch 1's, and its robustness reading W1's) and s020_post vs s020_raw (the smear's site at one key). Each is
+  reported beside S007 (batch 1) and S018's smear7, with no rule across batches.
 
-THE ARMS (each SIA by construction: new scalars from torch.zeros, no RNG draw; the arm starts as the exact BASE function)
+THE ARMS (each SIA by construction: new scalars from torch.zeros, no RNG draw; each starts as the exact BASE function)
+  s020_raw: model.smear_key true: S007's arm key for key (flag as committed; "raw" site, no value smear). Parameters
+    8 x 3 = 24: 5,010,157 (S007's count). No new harness code; its configs must equal S007's arm key for key except
+    name, out_dir, seed and the LRs (a check2 test).
   s020_post: model.smear_key true, model.smear_site "post_norm" (new field; default "raw" = S007's form, omitted from
     to_dict when "raw"). k = k_norm(k_raw); k_t <- k_t + alpha_h * k_(t-1) on the normalised keys of the same document
     (zero at a document's first token and at the row start on the doc=None path); then RoPE. alpha per KV head, zero
-    init; values untouched. Parameters 8 x 3 = 24: 5,010,157 (S007's count).
+    init; values untouched. Parameters 24: 5,010,157.
   s020_kv: model.smear_key true, model.smear_value true (new field; default false). Keys exactly as S007; values v =
     v_proj(x) become v_t + beta_h * v_(t-1) in the same document (beta per KV head, zero init), before the value
     residual mix, so v_local (what layer 1 hands the value residual) is the smeared value: a registered choice. With
     kv_tie (BASE does not use it) the arm is refused. Parameters 24 + 24 = 48: 5,010,181.
-  B2: two keys against BASE each (smear_key and the new field), one against S007's form; both within 0.01% of BASE.
+  B2: s020_raw one key against BASE (smear_key); s020_post and s020_kv two keys against BASE each (smear_key and the
+    new field) and one against s020_raw (the new field); all within 0.01% of BASE.
 
-WHAT STAYS IDENTICAL  B1 (engine varlen, micro 16: S007's arm peaked at 8.38 GiB; the smokes check). LRs: alpha and beta
-  are 1-D, so split_params puts them in "scalar" (AdamW at scalar_lr, no decay), as S007's alpha. Each arm at its own g
-  pick (B3).
+WHAT STAYS IDENTICAL  B1. ENGINE: all three arms at ONE setting, so V2 pairs within it: varlen at micro 16 (S007's arm
+  peaked at 8.38 GiB), else all three at v8 with base2v8 for V1, V3 and the replication (B4 (4)); the smokes decide,
+  logged before any S020 g-check. One commit: the three arms run from the same harness commit (ORDER 2), so V2 pairs
+  within it. LRs: alpha and beta are 1-D, so split_params puts them in "scalar" (AdamW at scalar_lr, no decay), as
+  S007's alpha. Each arm at its own g pick (B3: s020_raw runs the g-check too, since batch 2's harness may differ from
+  S007's pick conditions).
 BUDGET  B1. LEARNING RATE  B3.
 
-SEEDS AND PAIRING  Seeds 101-105 (look 1); 106-110 only by the SEQUENTIAL RULE. Both pair with base2_s<seed>. Class SIA
-  if each flag's init-isolation test passes, else NEW INIT.
+SEEDS AND PAIRING  Seeds 101-105 (look 1); 106-110 only by the SEQUENTIAL RULE (V2's reference s020_raw then runs them
+  too). V1, V3 and the replication pair with base2_s<seed>; V2 pairs s020_kv with s020_raw at each seed. Class SIA for
+  every contrast if each flag's init-isolation test passes (V2's two arms then share every draw), else NEW INIT.
+  ONSET (B6): V1, V3 and the replication by the ONSET RULE (batch 2's BASE sigma); V2 with s020_raw's own five seeds'
+  onset_half SD (df 4), as S018's D2; all at matched LR (IND-only g 1 runs where a pick is not 1).
 
-METRIC AND DECISION RULE (B5, B7 with the SEQUENTIAL RULE, per contrast; "this smear form on")
-  NOMINATE      lower chat bpb at 5M: a 20M candidate, as S007's NOMINATE. If both forms NOMINATE, both are listed to the
-                20M step with their numbers; its own pre-registration picks (no V1 vs V2 rule is registered here).
-  REJECT        higher chat bpb at 5M. If Q2 reads EARLIER, the ledger row says "earlier induction at a loss cost";
-                otherwise this form of P-024 is recorded as failed at 5M.
-  TIE           loss-neutral: Q2 and, after the lock, Tier 0 decide whether the form goes to 20M (as S007).
-  GUARD-FAIL    as C7.
-  INCONCLUSIVE  only after look 2 (k 10): "not resolved at 5M, k 10".
-  OWN-SIZE (B7)  P-024's own test is "5M with/without, 2 seeds": this screen is that test for these two forms, on every
-    verdict. The 20M confirmation runs on NOMINATE; on TIE it waits on Q2 and Tier 0 (if it is not run, listed to Max);
-    on any other verdict it is not run and is listed to Max (B7).
+METRIC AND DECISION RULE (B5, B7 with the SEQUENTIAL RULE, per contrast)
+  V1 and V3 ("this smear form on"), each:
+    NOMINATE      lower chat bpb at 5M: a 20M candidate, as S007's NOMINATE.
+    REJECT        higher chat bpb at 5M. By Q2 for that form (round 2, L3): EARLIER, the ledger row says "earlier
+                  induction at a loss cost"; LATER, "this form of P-024 failed at 5M (a loss cost and later induction)";
+                  UNRESOLVED, "a loss cost at 5M; induction timing not resolved", never "failed" (P-024's win
+                  condition is induction timing).
+    TIE           loss-neutral: the form goes to 20M if Q2 reads EARLIER or, after the lock, its Tier 0 margin reads
+                  BETTER (B8's NOMINATE-MARGIN); otherwise the 20M test is recorded "not run" and listed to Max (B7).
+    GUARD-FAIL    as C7 (the PROSE guard at t(0.975, df) at each look, SEQUENTIAL RULE).
+    INCONCLUSIVE  only after look 2 (k 10): "not resolved at 5M, k 10".
+  V2 ("the value smear added to S007's key smear") decides only what is recorded about the value half: NOMINATE "the
+    value smear adds to the key smear at 5M"; REJECT "the value smear costs loss beside the key smear at 5M"; TIE
+    "loss-neutral beside it"; GUARD-FAIL as C7; INCONCLUSIVE only after look 2.
+  COMBINATIONS (fixed now, round 2): V3 alone decides whether the KV form goes to 20M (as V1 for its form). When it
+    does, V2's verdict and the reported s020_raw vs base2 go with it, and the 20M step's own pre-registration decides
+    whether the value half is carried; no rule here drops it. A mixed pair (for example V2 NOMINATE with V3 REJECT:
+    the value smear helps beside the key smear while the whole form costs against BASE) is reported with all five
+    readings and decides nothing beyond each contrast's own line. If V1 and V3 both send a form to 20M, both are listed
+    with their numbers; that step's pre-registration picks (no V1 vs V3 rule is registered here).
+  OWN-SIZE (B7)  P-024's own test is "5M with/without, 2 seeds": this screen is that test for these two forms (V1 for
+    the post-norm form, V3 for the KV form), on every verdict; V2 is the value half's own reading. The 20M confirmation
+    runs on NOMINATE; on TIE as written above; on any other verdict it is not run and is listed to Max (B7).
 
-DIAGNOSTICS (B6; reported)  IND curves and onset at matched LR (IND-only g 1 runs where a pick is not 1); HD; SINK; alpha
-  (and beta) per layer and KV head at the final checkpoint with C6-DIAG's NEAR ITS INIT rule; the count of heads far
-  from the rest (S007 saw one per seed, 10.98 and 16.04), reported.
+DIAGNOSTICS (B6; reported)  IND curves and onset at matched LR; HD; SINK; alpha (and beta) per layer and KV head at the
+  final checkpoint for all three arms, with C6-DIAG's NEAR ITS INIT rule; the count of heads far from the rest (S007 saw
+  one per seed, 10.98 and 16.04), reported.
 
-AFTER THE LOCK (B8)  Tier 0 margins on V1 and V2; Tier 0 is recall, P-024's mechanism.
+AFTER THE LOCK (B8)  Tier 0 margins on V1, V2 and V3; Tier 0 is recall, P-024's mechanism.
 
 KNOWN RISKS
   - After QK-norm the smeared key is no longer unit-normalised, so attention logits can grow with alpha; S007 saw alpha
     up to 16 in one head. The clip rate and max |alpha| are reported; a divergence scores +inf (C7), never dropped.
   - Smearing values changes what the value residual carries from layer 1 to every later layer (the registered choice
     above); a gain or cost may come from that path, and the report cannot separate it.
+  - V2 compares two SIA arms that both carry trained smears, so its d_s may be noisier than an arm-vs-BASE contrast;
+    B4 (3)'s own check reads V2's SD against u x SD_d and re-reads at the larger SD if it fails (labelled underpowered).
+    If s020_raw's and s020_kv's g picks differ, V2 mixes the value smear with an LR step (as S018's D2); both picks are
+    printed beside V2.
   - S007's TIE at 8 layers: induction forms in 2 layers anyway at this depth, so either form may move only timing.
   - Starter mix and tok_v0_8k only.
 
 HARNESS CODE NEEDED (default off; each test watched failing on its mutant; nothing written yet)
   - config.py: smear_site ("raw" default, or "post_norm"; anything else refused; "post_norm" only with smear_key) and
-    smear_value (bool; only with smear_key; refused with kv_tie); both omitted from to_dict at their defaults, so S007's
-    and S018's configs and checkpoints are unchanged; refused with any other batch 2 flag.
+    smear_value (bool; only with smear_key; refused with kv_tie); both omitted from to_dict at their defaults, so S007's,
+    S018's and s020_raw's configs and checkpoints are unchanged; refused with any other batch 2 flag.
   - blocks.py Attention: the post-norm smear after k_norm and before RoPE (reusing Attention.smear on the normalised
     key); smear_beta (n_kv_heads,) from torch.zeros and the value smear after v_proj, both with S007's document starts,
     on the doc=None, mask and varlen paths. budget.py: + n_kv_heads per unique block for beta. decode.py: KVDecoder
     keeps the last normalised key (post_norm) or the last raw value (smear_value) per effective layer.
   - Tests: off and the defaults equal absent and the pre-flag commit (20 CPU steps, bitwise), and S007's form ("raw",
-    no value smear) bitwise equal to its pre-flag self; plain-loop references for both forms; leak probes; doc=None
-    equals the packed slice; init isolation (RNG untouched, BASE bitwise, step-0 logits equal); resume 20 + 20 = 40;
-    KV decode equals the full forward; count_analytic equals the meta build (5,010,157 and 5,010,181).
+    no value smear; s020_raw's config) bitwise equal to its pre-flag self; plain-loop references for both forms; leak
+    probes; doc=None equals the packed slice; init isolation (RNG untouched, BASE bitwise, step-0 logits equal); resume
+    20 + 20 = 40; KV decode equals the full forward; count_analytic equals the meta build (5,010,157 and 5,010,181).
   - Mutants: post_norm smeared before the norm (S007's form under the new flag); post_norm after RoPE; value smear
     reading v_(t+1); value smear crossing a document start; value smear only when doc is given; beta drawn from the
     RNG; beta built when smear_value is false; v_local left unsmeared; decode caching the smeared value; the new fields
     in to_dict at their defaults. The two existing mutants (smear_after_qk_norm, smear_values_too) must still be killed
     with the new flags off.
-  - experiments/screens: the registry's S020 (two arms, cls SIA, base2 pairing), analyze2's V1 and V2, OWN-SIZE rows.
+  - experiments/screens: the registry's S020 (three arms, cls SIA, V2's pairing of s020_kv with s020_raw per seed, one
+    engine setting and one commit for all three), analyze2's V1, V2, V3 and the two reported contrasts, OWN-SIZE rows,
+    onset sigma for V2.
 
-COST (est., planning only)  2 arms x (3 g-check + 5 seed runs): smear_post 0.32 h per run (S007's measured x1.027),
-  smear_kv 0.33 h (assumed x1.05): about 5.2 h registered, plus up to 10 IND-only runs (about 3.2 h) and look-2 seeds if
-  the SEQUENTIAL RULE extends a contrast (the arm and base2, 5 runs each).
+COST (est., planning only)  3 arms x (3 g-check + 5 seed runs): s020_raw and smear_post 0.32 h per run (S007's measured
+  x1.027), smear_kv 0.33 h (assumed x1.05): about 7.7 h registered, plus up to 15 IND-only runs (about 4.8 h) and
+  look-2 seeds if the SEQUENTIAL RULE extends a contrast (the arm and its reference, 5 runs each). Before round 2: 2
+  arms, about 5.2 h and 3.2 h.

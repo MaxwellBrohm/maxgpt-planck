@@ -44,7 +44,9 @@ WHY THIS BATCH, AND WHY THESE BETS
                                            2,048 (same token stream)
   S018  P-024 depth half (+)               7 layers, smear off and on (S007's flag)        none (configs)   new init / SIA
   S019  P-148, audit row 31 (Max)          Canon-ACD; against batch 2's own Canon-AC too   model flag       SIA
-  S020  P-024, audit row 32 (Max)          S007's smear after QK-norm; keys and values     model flags      SIA
+  S020  P-024, audit row 32 (Max)          S007's smear after QK-norm; keys and values;    model flags      SIA
+                                           S007's form re-run as the KV form's reference
+                                           (round 2, M1)
   SIA = same-init architecture (C4's loosened class). Every "SIA" holds only if the flag's init-isolation test passes
   in the committed harness; otherwise the arm is NEW INIT (as C4). SIA is given only to a flag whose new parameters
   are constants that draw nothing from the torch RNG (C4's membership rule); S015 and S016 draw their new modules
@@ -56,10 +58,10 @@ CONSIDERED AND NOT IN THIS BATCH (nothing here is dropped for hours; each has it
   S004, S005, S007 (STAGE 2 VERDICTS), so its trigger did not fire. Canon-ACD and S007's variants (rows 31, 32): their
   trigger is "their screens' verdicts", now read (S004 NOMINATE, S007 TIE). FLAG TO MAX (critique R14): answered
   2026-10-12 (MAX'S ANSWERS below): both join this batch as S019 (Canon-ACD) and S020 (S007's two variants), registered
-  in their notes.txt before any batch 2 value (S019 AND S020 below); their 4 contrasts are in B7's family. P-022 and
-  P-148 at 30M, P-020 (sb) at 30M: PLAN 3d under their own pre-registrations (T001). P-110's 9-layer arm and K = V,
-  P-109, plain_block: KEEP DROPPED for the scientific reasons in the cuts audit. P-104: needs eval past 2k. Data bets,
-  P-056, P-101: the pool or E7.
+  in their notes.txt before any batch 2 value (S019 AND S020 below); their 5 contrasts (4 before round 2, M1) are in
+  B7's family. P-022 and P-148 at 30M, P-020 (sb) at 30M: PLAN 3d under their own pre-registrations (T001).
+  P-110's 9-layer arm and K = V, P-109, plain_block: KEEP DROPPED for the scientific reasons in the cuts audit.
+  P-104: needs eval past 2k. Data bets, P-056, P-101: the pool or E7.
 
 B1 SETTING (as C1, with C1-b: every run eager)
   BASE = batch 1's BASE, key for key: E3 arm A's config (5M: d 192, 8 layers, 3 heads, head_dim 64, SwiGLU 488, vocab
@@ -103,10 +105,12 @@ B2 ONE CHANGE, ENFORCED (as C2, including the RC-12 GUARD on every config and ru
   equal-total fit of its one change (S008 CHANGES AFTER CRITIQUE named the 8-layer row's two keys): S009 qk_share and
   mlp_hidden; S010 mlp_act and mlp_hidden; S018 smear7 n_layers and smear_key (against BASE; one key against base7);
   S019 canon and canon_kernel (as S004; one key between its two arms); S020 smear_key and smear_site or smear_value
-  (one key against S007's form). S019's canon_acd is +0.87% (inside 2%); S020's arms +24 and +48 parameters.
+  (one key against S007's form, which batch 2 re-runs as s020_raw: one key, smear_key, against BASE; round 2, M1).
+  S019's canon_acd is +0.87% (inside 2%); S020's arms +24, +24 and +48 parameters.
 
 B3 PER-ARM LEARNING RATE (as C3). Every arm except BASE runs the g-check at seed 1, g in {0.5, 1, 2} x LR5, E2's pick,
-  PROSE guard, tie rule and at most 2 extensions. S018's base7 is an arm here (a new shape). Each notes.txt names the LR
+  PROSE guard, tie rule and at most 2 extensions. S018's base7 is an arm here (a new shape), and so are S019's canon_ac
+  and S020's s020_raw (batch 1 forms re-run as references; each runs its own g-check). Each notes.txt names the LR
   group of its new parameters.
 
 B4 SEEDS, PAIRING, REFERENCE NOISE (as C4, changed in four places, each fixed before any batch 2 value)
@@ -117,7 +121,8 @@ B4 SEEDS, PAIRING, REFERENCE NOISE (as C4, changed in four places, each fixed be
       (SD_d, df 7), SIA 0.347 (u x SD_d, df 7; 0.3466), new init 0.356 (B4 (2), df 4); at k 2 batch 1 read 0.405, 0.548
       and 0.603 (new init then sqrt(2) x sigma_seed). C7's every-seed clause now needs all five d_s on one side. Under
       (5)'s SEQUENTIAL RULE (2026-10-12) look 1 reads at c1 in place of t(0.975): 0.292, 0.394 and 0.418; look 2 (k 10)
-      at c2: 0.206, 0.279 and 0.289. WHY SEEDS 101-105 AGAIN (critique R13): they replay batch 1's token streams and
+      at c2: 0.206, 0.279 and 0.289. These are F(CHAT)'s; F(PROSE)'s guard stays at t(0.975, df) at each look (round
+      2, M2: SEQUENTIAL RULE, READING). WHY SEEDS 101-105 AGAIN (critique R13): they replay batch 1's token streams and
       init draws, so each base2_s<seed> can be checked against base_s<seed> (B1's REPLAY GATE), and S018's arms share
       S007's streams. Stage 2 flagged this draw as high on BASE's F(CHAT) (+0.54% above E3 arm A, "the seed draw is not
       excluded"); paired contrasts cancel the level, but levels, HD readings and any cross-batch comparison (S018 beside
@@ -128,7 +133,8 @@ B4 SEEDS, PAIRING, REFERENCE NOISE (as C4, changed in four places, each fixed be
       (no batch 2 arm is in that class: S017 keeps BASE's stream). SIA stays u x SD_d (df 7), which at 0.328% is above
       the new-init 0.287%; both are used as registered, neither replaced by the other.
   (3) NOISE CHECKS, every class (k 5 gives every arm df 4; bound sqrt(chi2(0.95, 4) / 4) = 1.540, scipy 2026-10-11):
-      same init: as C4, against SD_d. SIA: C4's pooled check, plus a per-arm check against u x SD_d. NEW INIT (critique
+      same init: as C4, against SD_d. SIA: C4's pooled check (across looks: SEQUENTIAL RULE, POOLED SIA CHECK ACROSS
+      LOOKS, round 2, M3), plus a per-arm check against u x SD_d. NEW INIT (critique
       R9; batch 1 had none, and sqrt(2) x sigma_init is a df-4 estimate below batch 1's sqrt(2) x sigma_seed): the
       arm's own SD of d_s against sqrt(2) x sigma_init. A failed check (per metric) re-reads at the LARGER of the
       new-init SD and the observed SD of the failed check (STAGE 2 VERDICTS AUDIT CORRECTIONS (1): C6-DIAG's re-read
@@ -146,7 +152,9 @@ B4 SEEDS, PAIRING, REFERENCE NOISE (as C4, changed in four places, each fixed be
       101-105) at c1; a contrast INCONCLUSIVE at look 1 (after (3)) runs seeds 106-110 for its arm AND its reference
       (base2 gets them too) and is read once more at k 10 at c2 (9 of 10 d_s on one side), which is final: "not resolved
       at 5M, k 10", and B7's OWN-SIZE rule says what follows (as before, with "k 10" for "k 5"). Every other look-1
-      verdict is final. Lan-DeMets Pocock-type spending keeps each of C7's one-sided error rates at 0.025 overall.
+      verdict is final. Lan-DeMets Pocock-type spending keeps each of C7's one-sided error rates on F(CHAT) at 0.025
+      overall; F(PROSE)'s guard is read at C7's t(0.975, df) at each look, so the sequential boundaries never weaken it
+      (round 2, M2).
 
 B5 METRICS (as C5). F(CHAT) decides, F(PROSE) guards, final checkpoint; CCCC-ONLY; the reported list; clip rate.
 
@@ -156,22 +164,27 @@ B6 DIAGNOSTICS (as C6 with AMENDMENT C6-DIAG's runner and READING RULE, and AMEN
   seeds (df 4), thr = 2.776 x sqrt(2) x sigma_seed / sqrt(5) = 1.756 x sigma_seed; EARLIER / LATER / UNRESOLVED as
   BASE-DIAG, Holm over the onset contrasts read. MATCHED LR, widened: every arm whose pick is not g 1 also runs at g 1
   on its five seeds as IND-only runs (never in a bpb verdict), so every onset is read at matched LR; batch 1 ran them
-  only where onset was the win condition. Onset is a win condition only for S018. Every B6 reading uses seeds 101-105
+  only where onset was the win condition. Onset is a decision input for S018 (its depth reading) and for S020 (Q2 sets
+  its TIE's 20M step and its REJECT wording; P-024's win condition is induction timing); every other screen reports it
+  (round 2, L3; this line read "only for S018" before). Every B6 reading uses seeds 101-105
   only; look-2 seeds (SEQUENTIAL RULE) are reported, never read by a B6 rule, and get no IND-only runs. diag_runner.py
   must learn each batch 2 flag (its flag checks and attn_diag's rebuilt-output check) before any batch 2 diagnostic is read.
 
 B7 DECISION RULE (as C7: BETTER, WORSE, EQUAL, UNRESOLVED per metric; NOMINATE, REJECT, TIE, GUARD-FAIL, INCONCLUSIVE;
-  DIVERGENCE as +inf, never dropped). MULTIPLICITY: batch 2's own Holm family over its 17 bpb contrasts (S009 1, S010 1,
-  S011 1, S012 1, S013 2, S014 1, S015 1, S016 1, S017 1, S018 3, S019 2, S020 2; critique R4 corrected 14 to 13, and
-  S019 and S020 added 4 on 2026-10-12; a look-2 contrast enters with its stagewise-ordering p), plus each contrast's
+  DIVERGENCE as +inf, never dropped). MULTIPLICITY: batch 2's own Holm family over its 18 bpb contrasts (S009 1, S010 1,
+  S011 1, S012 1, S013 2, S014 1, S015 1, S016 1, S017 1, S018 3, S019 2, S020 3; critique R4 corrected 14 to 13,
+  S019 and S020 added 4 on 2026-10-12, and round 2's M1 added S020's V3; a look-2 contrast enters with its
+  stagewise-ordering p), plus each contrast's
   Tier 0 margin test after the lock (B8); raw verdicts decide, Holm is reported beside each, and a NOMINATE that does
   not hold under Holm says so in its ledger row.
   OWN-SIZE RULE (critique R11). Each notes.txt names its bet's own test size (its LEDGER row's cheapest test) and says,
   for every verdict, whether that test runs. A verdict that leaves it unrun records the bet "own-size test not run
   (5M <verdict>)", and the list of such bets goes to Max with each test's cost and what it would decide (PLAN
   2026-10-10, audit row 84), never presented as a result and never "failed" at a size it did not run at. Where the
-  bet's own size is 5M (P-024's depth half, P-108, P-113's 5-10M proxy, P-110's 5-10M proxies), this screen is
-  that test, and its larger size is a confirmation.
+  bet's own size is 5M (P-024's depth half and S020's two forms, P-108, P-110's 5-10M proxies), this screen is
+  that test, and its larger size is a confirmation. P-113's 5-10M proxy is NOT on that list (round 2, L6): its
+  ledger default is a repetition-rate fall, which S016 measures and reports with no rule (bpb decides, PLAN Appendix
+  B), so S016 runs the proxy's loss half at 5M only and never settles P-113's own test (S016's OWN-SIZE).
 
 B8 AFTER THE RC-12 LOCK (as C8). The lock window is Oct 11-14, so batch 2 may run after it: Tier 0 margins are then
   scored on every batch 2 final checkpoint by a post-lock addendum per screen, written before that screen's scoring,
@@ -196,16 +209,22 @@ ORDER (no cap; priority only orders the queue)
     flag-off parity run (harness/default_parity.py --device cuda, the launch commit's harness against 77ab43f's, as
     E3 PART 3 CUDA PARITY) (both VERIFY FINDINGS N1); diag_runner.py and analyze.py extended to batch 2 and tested;
     no E4 no-signal pause in force (B8); the FIXED log written; B4 (5)'s SEQUENTIAL RULE in analyze2 and S019's and
-    S020's code (STILL OWED, 2026-10-12); then the start mark, recorded under START MARK (2026-10-12).
-  1 Selection (seed 1): every arm's g-check, in the order its code lands; S009 and S018 first (no new model code);
-    S019 and S020 after their flags land (both need new code).
-  2 Seed sets, seed-major: for seed 101: base2_s101, then every ready arm (and its own BASE, its IND-only runs); then
-    102, ... 105. A stopped queue leaves whole seed sets. A screen whose code lands late runs its seed sets after the
-    others, keeping seed-major order inside itself (C4 pairs by seed and code, not time; its BASE pairing needs the
-    commits' flag-off equivalence test, as C4).
+    S020's code (STILL OWED, 2026-10-12), with round 2's code and Monte Carlo (STILL OWED: the PROSE guard, the pooled
+    check across looks, LOOK-2 ENVIRONMENT); then the start mark, recorded under START MARK (2026-10-12).
+  1 Selection (seed 1): every arm's g-check in the registry's order (S009 ... S020). Every flag is committed before
+    the start mark (ORDER 0), so no screen's code lands late (round 2, L7 (a); this line ordered by code landing
+    before).
+  2 Seed sets, seed-major: for seed 101: base2_s101, then every arm (and its own BASE, its IND-only runs); then
+    102, ... 105. A stopped queue leaves whole seed sets. A screen whose code changes after the start mark (a fix,
+    recorded in a dated entry before any run it affects) reruns its affected runs after the others, keeping seed-major
+    order inside itself (C4 pairs by seed and code, not time; its BASE pairing needs the commits' flag-off equivalence
+    test, as C4). S019's two arms and S020's three run from one commit each, so E1 and V2 pair within one commit.
   3 Look 2 (B4 (5), SEQUENTIAL RULE): once a screen's look-1 verdicts are recorded in a dated entry, each INCONCLUSIVE
     contrast's arm and its reference run seeds 106-110, seed-major (base2_s106, then every extending arm at 106, ...),
-    queued behind the seed sets already queued; the look-2 reading is recorded in its own dated entry.
+    queued behind the seed sets already queued; the look-2 reading is recorded in its own dated entry. A contrast that
+    a later pooled SIA failure re-reads as INCONCLUSIVE is queued the same way once that re-read is recorded (round 2,
+    M3). Before the first look-2 run, the base2_s101 replay and the fingerprint check of LOOK-2 ENVIRONMENT (round 2,
+    L5) run first.
   NO CAP. PLAN.md, GPU and quality policy, 2026-10-11 (Max, verbatim there): "no Planck experiment on it has a GPU-hour
   cap, budget or cut order any more"; hour figures are planning estimates only. So batch 2 has no cap and no cut order.
   Max's rule as the cap reading: nothing in this batch is ever cut, shrunk or deferred for hours. If anything other than
@@ -235,7 +254,8 @@ CODE THAT MUST LAND FIRST (harness/ and experiments/screens/ are W1's paths; bat
   Shared (experiments/screens): a batch 2 registry (arms, allowed keys, classes, k 5, seeds 1 and 101-105, the
   base2_s<seed> and own-BASE names, run root SCREENS2), the config generator and its B2 refusals, analyze.py with B4
   (1)-(5) (per-arm noise checks for every class, each watched failing on a mutant that skips it), B6's widened matched
-  LR and batch-2 onset sigma, B7's 17-contrast Holm family (13 until 2026-10-12) and OWN-SIZE list, B4 (5)'s SEQUENTIAL
+  LR and batch-2 onset sigma, B7's 18-contrast Holm family (13 until 2026-10-12, 17 until round 2) and OWN-SIZE list,
+  B4 (5)'s SEQUENTIAL
   RULE (screens2_seq.py, 2026-10-12) wired into analyze2 with seeds 106-110 allowed only for look-2 runs, B1's REPLAY
   GATE (no arm verdict printed while a replay is out of its bar), S018's depth reading; no cap code (cap_check must not
   run for batch 2: a test).
@@ -243,9 +263,11 @@ CODE THAT MUST LAND FIRST (harness/ and experiments/screens/ are W1's paths; bat
 FILES: experiments/S009_qk_share8, S010_relu2, S011_multipliers, S012_top_aux, S013_hyperconn, S014_role_emb,
   S015_meta_tokens, S016_mos_head, S017_seqlen_curr, S018_smear_depth, S019_canon_acd, S020_smear_forms (each notes.txt).
 
-OPEN BEFORE THE FREEZE ((a) and (b) ANSWERED 2026-10-12, MAX'S ANSWERS below; (c) must also read every 2026-10-12 entry;
-  (d) also needs S019's and S020's code and smokes and the SEQUENTIAL RULE in analyze2): (a) Max sees the (+) additions
-  (S015-S018), k 5 and B4 (5) (INCONCLUSIVE final at k 5); (b) Max's answer on Canon-ACD and S007's variants
+OPEN BEFORE THE FREEZE ((a) and (b) ANSWERED 2026-10-12, MAX'S ANSWERS below; (c) must also read every 2026-10-12 entry:
+  round 2 is RECORDED 2026-10-12 (CHANGES AFTER CRITIQUE (ROUND 2) below; it read the whole text and screens2_seq, not
+  the harness or the screens2 tool code), and (c) closes only when its fixes pass an independent re-check (START MARK
+  (1)); (d) also needs S019's and S020's code and smokes and the SEQUENTIAL RULE in analyze2): (a) Max sees the (+)
+  additions (S015-S018), k 5 and B4 (5) (INCONCLUSIVE final at k 5); (b) Max's answer on Canon-ACD and S007's variants
   (CONSIDERED: the proposal is S019, S020); (c) a second critique round on the CHANGES AFTER CRITIQUE and BATCH 2 CODE
   AND SMOKES below; (d) the code and smokes: done 2026-10-12 (below) except the queue's batch 2 mode, analyze2.py's I/O,
   diag_runner.py's flag checks and S017's sampler, plus the two CUDA checks ORDER 0 gained from VERIFY FINDINGS N1
@@ -268,6 +290,7 @@ C4, C7, C8 and STAGE 2 VERDICTS, PLAN and the audit; verdict CHANGES REQUIRED, 1
   R8 S012: occurrences count only at supervised targets in t's document; a brute-force case and a mutant.
   R9 B4 (3): a per-arm noise check for NEW INIT (and per-arm for SIA beside the pooled one), bound 1.540 at df 4.
   R10 B4 (5): INCONCLUSIVE at k 5 is final at 5M; no seeds are added after a value; put to Max (OPEN (a)).
+     (SUPERSEDED 2026-10-12: Max answered no to Q3; B4 (5) is now the SEQUENTIAL RULE below. Round 2, L7 (b).)
   R11 B7 OWN-SIZE rule; every notes.txt states, per verdict, whether its bet's own-size test runs; S014 and S015
      gate nothing (both behavioural); S013's 5M readings never close P-112; S011's TIE runs the 30M A/B.
   R12 S017: Q2 reads per-stage median tok_per_s from log.jsonl as a magnitude per seed; lock-held hours beside it;
@@ -390,23 +413,29 @@ below, which holds no batch 2 value)
   LOOKS  Look 1 at k 5 (seeds 101-105) for every contrast. A contrast INCONCLUSIVE at look 1 (after B4 (3)'s checks and
     re-reads) runs seeds 106-110 for its arm AND its reference, and is read once more at k 10 (seeds 101-110): look 2,
     final. Every other look-1 verdict is final; seeds run for one contrast never re-read a contrast decided at look 1
-    (S013's two arms, S018's D1-D3, S019's E1 and E2, S020's V1 and V2 extend one contrast at a time).
+    (S013's two arms, S018's D1-D3, S019's E1 and E2, S020's V1-V3 extend one contrast at a time).
   WHO RUNS 106-110  The extending arm at its look-1 g pick, and its reference at the same seeds: base2_s106..110 (BASE
     gets them too; one base2 run per seed serves every extending base2-paired contrast), base2v8_s106..110 for a v8 arm,
-    S018's base7 for D2 (and base2 for D1 and D3), S019's canon_ac for E1. From the launch commit, or a later one only
-    under C4's flag-off equivalence rule. Not extended: B6's readings (seeds 101-105 only; IND at 106-110 is reported)
-    and so no IND-only runs at 106-110; B1's REPLAY GATE (batch 1 has no BASE at 106-110).
+    S018's base7 for D2 (and base2 for D1 and D3), S019's canon_ac for E1, S020's s020_raw for V2 (and base2 for V1 and
+    V3; round 2, M1). From the launch commit, or a later one only under C4's flag-off equivalence rule, and under
+    LOOK-2 ENVIRONMENT below (round 2, L5). Not extended: B6's readings (seeds 101-105 only; IND at 106-110 is
+    reported) and so no IND-only runs at 106-110; B1's REPLAY GATE (batch 1 has no BASE at 106-110; LOOK-2 ENVIRONMENT's
+    replay of base2_s101 is look 2's check instead).
   BOUNDARIES  alpha 0.025 one-sided per direction (C7's t(0.975)); Lan-DeMets Pocock-type spending alpha(t) = 0.025 ln(1 +
     (e - 1) t), t = k1 / 10: a1 = 0.01550 at look 1, a2 = 0.00950 at look 2. With T_j = dbar_j / (SD_ref / sqrt(k_j)) and
     ONE reference SD at both looks (C7 reads E3's committed number each time), T_j = Z_j / W, W = sqrt(chi2_df / df),
     corr(Z1, Z2) = sqrt(k1 / k2); c1 = t_ppf(1 - a1, df), c2 solves P0(T1 <= c1, T2 > c2) = a2 (Gauss-Legendre
     quadrature, screens2_seq.bounds). In t units: df 7 c1 2.6918, c2 2.6912 (C7's single look 2.3646); df 4 3.2626,
-    3.1912 (2.7764); df 9 (an observed-SD re-read at look 2) 2.5537, 2.5670. A diverged BASE seed (C9) changes k: look 1
+    3.1912 (2.7764); df 9 (an observed-SD re-read at look 2) 2.5537, 2.5670, APPROXIMATE (round 2, L7 (d)): that SD
+    comes from the ten d_s themselves, so it is neither independent of T1 and T2 nor the one SD shared by both looks
+    that the law assumes; such a re-read is labelled underpowered (B4 (3)) and its boundaries are reported as
+    approximate; not simulated. A diverged BASE seed (C9) changes k: look 1
     spends at k1 / 10, look 2 spends the rest at the actual correlation (bounds(df, k1, k2)); fewer than 2 seeds at a look
     reads INCONCLUSIVE as C7. Checks: the integrator returns a1 and a2 to 1e-9; an independent Monte Carlo of the shared-W
     law (2,000,000 draws per df) gives 0.025 within 4 SE; with no W (df None) it gives 2.157 and 2.201, the published
     two-look Pocock-type values.
-  READING  Per metric as C7 with thr = c x SD_ref / sqrt(k): look 1 c1 and every d_s on one side (C7 unchanged); look 2
+  READING  F(CHAT) as C7 with thr = c x SD_ref / sqrt(k) (F(PROSE)'s guard: PROSE GUARD below, round 2, M2; this line
+    said "per metric" before): look 1 c1 and every d_s on one side (C7 unchanged); look 2
     c2 and at least sign_min(k2) d_s on one side: 9 of 10 (the smallest count whose one-sided sign-test p is at most
     1/32, the strength of C7's every-seed clause at k 5; 8 of 9 and 8 of 8 if BASE seeds drop); EQUAL |dbar| + thr <
     delta at the look's c. CHAT thresholds (% of BASE): look 1 same init 0.292, SIA 0.394, new init 0.418 (C7's single
@@ -417,6 +446,60 @@ below, which holds no batch 2 value)
   WHY THE ERROR CONTROL HOLDS  The boundaries alone spend 0.025 per direction (and per side of EQUAL, the same law
     shifted by delta); the sign clauses, the EQUAL stop, B4 (3), the PROSE guard and the pooled SIA check can only remove
     a crossing or raise an SD, so each of C7's error rates stays at or under its nominal level under C7's t model.
+    (Round 2: this covers F(CHAT)'s rates only. It said nothing about the guard's own sensitivity, which c1 lowered
+    (M2, PROSE GUARD below), nor about a pooled failure that re-opens a look-1 verdict (M3, below).)
+  PROSE GUARD (round 2, 2026-10-12, M2; before any batch 2 value)  WORSE_PROSE is read at C7's single-look t(0.975,
+    df) at EACH look, never at c1 or c2: look 1 thr = t(0.975, df) x SD_ref / sqrt(k1) with every d_s > 0 (C7's guard
+    exactly); look 2 thr = t(0.975, df) x SD_ref / sqrt(k2) with at least sign_min(k2) d_s > 0 (9 of 10). B4 (3)'s
+    checks and re-reads apply to PROSE as before, at the df in use. Why: read at c1, the guard missed real prose costs
+    that C7 catches, and a look-1 NOMINATE is final. The critique's simulation (its scratchpad, not in the repo;
+    P(WORSE_PROSE at look 1) for a true prose cost of 1.0 / 1.5 / 2.0 SDs of d_s) gave C7 0.305 / 0.636 / 0.873 against
+    c1 0.255 / 0.584 / 0.850 at df 7, and C7 0.251 / 0.563 / 0.827 against c1 0.193 / 0.475 / 0.759 at df 4; this
+    rule's look-1 guard is C7's test, so its look-1 numbers are C7's. The trade: a false WORSE_PROSE can only turn a
+    NOMINATE or TIE into a final GUARD-FAIL (C7: GUARD-FAIL needs BETTER or EQUAL CHAT), never make a NOMINATE or an
+    extension; its rate is at most 0.025 per look under C7's t model, so at most 0.05 over both looks for a contrast
+    that reaches look 2 (a union bound; not simulated). F(CHAT)'s rates and the SIMULATION below are unchanged (they
+    model F(CHAT) only). Code: screens2_seq gains the guard's reading (STILL OWED).
+  POOLED SIA CHECK ACROSS LOOKS (round 2, 2026-10-12, M3; before any batch 2 value)
+    POOL  Per metric, C4's pooled check pools the LOOK-1 residuals (d_s - dbar over seeds 101-105, df 4 each) of every
+      SIA contrast in B7's family whose look-1 seeds are done (S018's D2, S019's E1 and S020's V2 included; the
+      reported-only contrasts are not pooled, since no rule reads them at the SIA SD). Seeds 106-110 never enter the
+      pool, so it holds the same residuals whichever contrasts extend; a contrast read at look 2 gets B4 (3)'s per-arm
+      check on its ten d_s (df 9, bound 1.371) as well.
+    STICKY  Once the pooled check fails for a metric, every SIA family contrast is re-read as C4 and B4 (3) say (as
+      analyze2_lib.read_arm does: every metric at the new-init SD, the failed metric at the larger of that and the
+      pool's current SD, each at its df) from then on; a later pass with more contrasts in the pool does not undo it.
+      The pool is complete when the last SIA family contrast's look 1 is done; the check then runs once more on the
+      complete pool, and no pooled check runs after it. After a failure (earlier or there), every SIA family verdict is
+      re-read at the complete pool's SD once the pool is complete; that reading is its final one at its look.
+    BOUNDARIES OF A RE-READ  At the df of the SD in use: a contrast whose verdict stands at look 1 is re-read at c1
+      (bounds(df, k1, 10)); one already read at look 2 at c2 (bounds(df, k1, k2)); one whose look-2 seeds are still
+      running is read at look 2, at the SD in use when they finish.
+    RETROACTIVE INCONCLUSIVE  A look-1 verdict that a later pooled failure re-reads as INCONCLUSIVE is a look-1
+      INCONCLUSIVE (B4 (5)): its arm and reference run seeds 106-110, queued (ORDER 3) when the re-read is recorded in
+      a dated entry, and it is read at look 2 at the SD in use. A look-2 verdict re-read as INCONCLUSIVE is final ("not
+      resolved at 5M, k 10"); no seed past 110 is ever run. Every re-read is labelled "noise check failed later" and
+      "underpowered" (C4, B4 (3)), with the earlier verdict printed beside it.
+    WHY THE ERROR CONTROL STILL HOLDS (an argument under C7's normal model, NOT simulated; a simulation is owed, STILL
+      OWED): the pool reads only look-1 residuals, which under that model are independent of every contrast's dbar at
+      both looks (residuals are independent of their mean, shared base2 runs included, and seeds 106-110 are new runs).
+      So which SD is in use is independent of the numerators of T1 and T2, and given that choice each contrast's final
+      reading is the two-look design at the SD then in use, never below the new-init SD: at E3's committed new-init SD
+      the boundaries hold under the t model when it is the true SD and are conservative when the true SD is smaller
+      (SD_d, 0.242% on F(CHAT), is); at the pooled SD (a chi-square estimate shared by both looks, used only when it is
+      the larger) they follow the shared-W law at the pool's df, tilted toward larger W, which only lowers T. The
+      argument needs normal, independent run noise and homogeneous SDs across the pooled contrasts; the owed simulation
+      checks it, including a mis-specified case.
+  LOOK-2 ENVIRONMENT (round 2, 2026-10-12, L5; before any batch 2 value)  Every batch 2 run records an environment
+    fingerprint in its run directory (the commit it ran from, the harness code digest, torch and CUDA versions, the
+    GPU driver). Before the first look-2 run, and before any later look-2 run whose fingerprint differs from the last
+    look-2 run's, base2_s101 is replayed at the current fingerprint (a replay: paired with nothing, never in a
+    verdict, its final checkpoint registered) and read against base2_s101 by B1's REPLAY GATE bar (E3's sigma_rep,
+    |t| > t(0.975, 2) = 4.303 at k 1, either reading); outside the bar is a FLAG as B1 (no look-2 reading until it is
+    resolved in a dated entry). An arm and its reference at one look-2 seed must share one fingerprint: when a
+    reference seed (for example base2_s106) ran at another fingerprint than a later extending arm, the reference
+    reruns at the arm's fingerprint and that rerun is the pair (the earlier run is kept, registered and reported,
+    never dropped). Look-1 runs record the fingerprint too (reported; C4's flag-off rule governs their pairing).
   SIMULATION (screens2_seqsim.py, numpy seed 20261012, 1,000,000 replicates per row; F(CHAT); delta 1%; classes from E3:
     same init SD_d 0.2422% df 7; SIA u x SD_d (u 1.3533) df 7 with true SD SD_d, and "SIA at u" with true SD u x SD_d;
     new init sqrt(2) sigma_init 0.2865% df 4; "x1.5" = true SD 1.5 x the class reference (mis-specified); the reference
@@ -454,7 +537,8 @@ below, which holds no batch 2 value)
     full run against the final tests: 20 of 20 killed. Suites on an export of this commit's index: screens 1,044
     passed, 6 skipped; harness 888 passed, 72 skipped (the batch 2 harness and screens code is not in the index).
     Owed before ORDER 0 (STILL OWED below): analyze2_lib.read_arm calls it (look 1 at c1, the extension decision, look
-    2), with fixtures and mutants; holm13 becomes holm17; check2 allows seeds 106-110 only for look-2 runs.
+    2), with fixtures and mutants; holm13 becomes holm17 (holm18 after round 2, M1); check2 allows seeds 106-110 only
+    for look-2 runs.
 
 S019 AND S020 (2026-10-12, Claude, W5; registered on Max's Q4 answer, before any batch 2 value and before their flags,
 configs or runs exist; Mac, no model: parameter arithmetic from S004's and S007's committed counts)
@@ -468,14 +552,18 @@ configs or runs exist; Mac, no model: parameter arithmetic from S004's and S007'
     Both arms run at one engine setting (v16, or both v8 if canon_acd's smoke does not fit), so E1 pairs within it.
   S020 S007's two forms (experiments/S020_smear_forms/notes.txt): smear_post (the smear after QK-norm, before RoPE) and
     smear_kv (keys as S007 and values smeared with their own scalar); V1 and V2 each against base2; P-024's onset (B6)
-    reported per form.
+    reported per form. (AMENDED by round 2, M1: S020 also re-runs S007's form as s020_raw; V2 is now smear_kv vs
+    s020_raw, the value smear alone, and V3 is smear_kv vs base2; CHANGES AFTER CRITIQUE (ROUND 2) below.)
   Both SIA if their init-isolation tests pass (new scalars and kernels from torch.zeros). B7's family is now 17 (B7
-  edited above). Each notes.txt carries its question, the one change, class, picks (B3), decision rule both ways,
-  consequences, OWN-SIZE, risks and HARNESS CODE NEEDED; no flag is written here (W5's harness edits wait on W1's guard).
+  edited above; 18 after round 2's M1). Each notes.txt carries its question, the one change, class, picks (B3),
+  decision rule both ways, consequences, OWN-SIZE, risks and HARNESS CODE NEEDED; no flag is written here (W5's
+  harness edits wait on W1's guard).
 
 START MARK (2026-10-12, Claude, W5; on Max's Q5 answer, verbatim: "Yes, you can sign it off (Recommended)")
   Claude may record batch 2's start mark (the line that lets the queue run ORDER 1) itself, and only when ALL hold:
-  (1) this file is frozen (OPEN (a)-(d) closed, the second critique round recorded) and committed; (2) every ORDER 0
+  (1) this file is frozen (OPEN (a)-(d) closed) and committed, with every HIGH and MEDIUM finding of every critique
+  round fixed or answered in a dated entry, and those fixes inside (3)'s check (round 2, L4; this clause asked only
+  that the second round be "recorded" before); (2) every ORDER 0
   precondition is met and logged in a dated entry, each with its evidence (commit, test counts, the mutants killed, the
   smoke lines, the CUDA parity run, the FIXED log); (3) an independent agent, not the one that met the preconditions,
   has checked every one of them against the committed tree and the PC and recorded a CONFIRMED verdict in a dated entry
@@ -487,26 +575,39 @@ START MARK (2026-10-12, Claude, W5; on Max's Q5 answer, verbatim: "Yes, you can 
 HOURS (2026-10-12, planning only; NO CAP: nothing is cut, shrunk or deferred for these figures)
   Method as BATCH 2 CODE AND SMOKES' HOURS: 0.31 h x base2's 251,838 tok/s over each run's smoke tok/s. New arms:
   canon_ac 0.426 h (S004's eager smoke, x1.375), canon_acd 0.589 h (assumed x1.9), smear_post 0.318 h (S007's eager smoke,
-  x1.027), smear_kv 0.326 h (assumed x1.05); the assumed factors are replaced by their smokes.
-    selection (g-check, 15 arms x 3)          about 19.1 h   (14.1 + S019/S020 5.0)
-    seed sets (5 x (15 arms + base2 + v8))    about 34.8 h   (26.5 + 8.3)
-    REGISTERED                                about 53.9 h
-    B3 extensions (at most 2 per arm)         up to 12.7 h
-    matched-LR IND-only runs (B6, k 5 only)   up to 31.8 h
-    look 2 (seeds 106-110, every arm, base2   up to 34.8 h   (expected far less: the simulation's extension rates are
+  x1.027), smear_kv 0.326 h (assumed x1.05), s020_raw 0.318 h (S007's eager smoke, x1.027; round 2, M1); the assumed
+  factors are replaced by their smokes. REVISED by round 2 (L1: the labels said 15 arms where the sums used 16; M1
+  adds s020_raw, so 17 arms: S009-S018 12, S019 2, S020 3). Before round 2: 19.1, 34.8, 53.9, 12.7, 31.8, 34.8, 133 h.
+    selection (g-check, 17 arms x 3)          about 20.1 h   (14.1 + S019/S020 5.9)
+    seed sets (5 x (17 arms + base2 + v8))    about 36.4 h   (26.5 + 9.9)
+    REGISTERED                                about 56.5 h
+    B3 extensions (at most 2 per arm)         up to 13.4 h
+    matched-LR IND-only runs (B6, k 5 only)   up to 33.4 h
+    look 2 (seeds 106-110, every arm, base2   up to 36.4 h   (expected far less: the simulation's extension rates are
       and base2v8, if every contrast extends)                0.02% to 17% per contrast in the nominal classes)
-    with every conditional run                about 133 h
+    with every conditional run                about 140 h
   Not in these figures (measured and reported): smokes, diag_runner passes, S016's repetition decoding, post-lock Tier 0
-  scoring, and S019's move to v8 if its smoke needs it (base2v8 is already counted).
+  scoring, S019's move to v8 if its smoke needs it (base2v8 is already counted), and LOOK-2 ENVIRONMENT's replays and
+  reruns (0.31 h each; at least one replay if any contrast extends; round 2, L5).
 
 STILL OWED (2026-10-12; none of it is done by this entry)
   - OPEN (c): the second critique round, now also over MAX'S ANSWERS, the SEQUENTIAL RULE (with screens2_seq.py and the
-    simulation), S019 and S020, START MARK and HOURS.
+    simulation), S019 and S020, START MARK and HOURS. (Round 2 recorded below; an independent re-check of its fixes
+    is still owed, and the harness and screens2 tool code was outside its reading.)
   - analyze2_lib: read_arm runs look 1 at c1 (screens2_seq.reading), decides the extension (screens2_seq.extends), reads
-    look 2; holm13 becomes holm17 with the stagewise p; OWN_SIZE rows for S019 (E1, E2) and S020 (V1, V2); fixtures and
-    mutants for each (mutants_screens2.py), and analyze2.py's I/O.
-  - screens2_lib: S019 and S020 in SCREENS2 (S019's E1 pairing canon_acd with canon_ac; both S019 arms at one setting),
-    ORDER2, NAME2_RE (s019, s020), SEEDS2 106-110 allowed only for look-2 runs (a refusal test), plans2 for look 2.
+    look 2; holm13 becomes holm18 with the stagewise p (17 until round 2's M1); OWN_SIZE rows for S019 (E1, E2) and S020
+    (V1, V2, V3); fixtures and mutants for each (mutants_screens2.py), and analyze2.py's I/O.
+  - Round 2 code (each test watched failing on its named mutant): screens2_seq's PROSE guard reading at t(0.975, df) at
+    each look (mutants: the guard at c1 or c2; look 2's guard needing all 10 seeds), and its docstring's reference list
+    gains s020_raw; analyze2_lib's POOLED SIA CHECK ACROSS LOOKS (mutants: look-2 residuals in the pool; a later pass
+    undoing a failure; a retroactive INCONCLUSIVE not extending; a look-2 re-read at c1; a reported-only contrast in the
+    pool); a Monte Carlo of the pooled check across looks (several SIA contrasts sharing base2, the retroactive path
+    included) before the freeze, its numbers recorded beside the M3 argument; LOOK-2 ENVIRONMENT (the fingerprint in
+    every run directory, the queue's refusal of a look-2 pair across fingerprints, the replay's name in screens2_lib,
+    analyze2_lib reading the replay by B1's bar; mutants: a pair across fingerprints read, the replay skipped).
+  - screens2_lib: S019 and S020 in SCREENS2 (S019's E1 pairing canon_acd with canon_ac; both S019 arms at one setting;
+    S020's three arms, V2 pairing smear_kv with s020_raw, all three at one setting; round 2, M1), ORDER2, NAME2_RE
+    (s019, s020), SEEDS2 106-110 allowed only for look-2 runs (a refusal test), plans2 for look 2.
   - harness (W5's code, uncommitted until W1's robustness_k5 leaves plans/CURRENT): S019's site D and S020's smear_site
     and smear_value, each with its tests and mutants (their notes); diag_runner's flag checks for both; their smokes.
   - Everything OPEN (d) and ORDER 0 already listed (the queue's batch 2 mode with look 2 seed sets, S017's sampler, the
@@ -514,3 +615,63 @@ STILL OWED (2026-10-12; none of it is done by this entry)
   FOR OTHER WORKFLOWS: W4 (pc/): boot.d's resume must also resume batch 2's queue (look-2 seed sets included) once
   that queue exists. No batch 1 file was changed by this entry (screens2_seq imports analyze_lib, and the mutation
   runner imports mutation_screens, both unchanged).
+
+CHANGES AFTER CRITIQUE (ROUND 2) (2026-10-12, from 12:00 EDT, Claude, W5; before any batch 2 value: no batch 2 run is
+queued, this step ran no model, queued nothing and did not read the PC. An independent critique of 92f2ca8 read all of
+this file, every S009-S020 notes.txt, SCREENS.txt C4 and C7, screens2_seq.py, screens2_seqsim.py and its JSON; it
+re-derived the boundaries with scipy, ran its own Monte Carlo of the boundaries and of the full rule written from this
+text (it reproduced the SIMULATION's numbers within Monte Carlo error), and re-derived every parameter count, the Holm
+family and the hours. Verdict: not clean, 3 MEDIUM and 7 LOW, no HIGH; F(CHAT)'s error control under the SEQUENTIAL
+RULE holds. It did not read the harness or the screens2 tool code. Each fix below is an edit marked "round 2" in place.)
+  M1 (medium) S020's V2 (smear_kv vs base2) was two mechanisms against its reference, and batch 2 had no S007-form arm,
+     so the value smear's own effect was not identifiable. FIXED: S020 re-runs S007's form as s020_raw (no new code);
+     V2 is now smear_kv vs s020_raw (one key, the value smear), V3 is smear_kv vs base2 (the KV form, which a NOMINATE
+     carries to 20M), V1 is unchanged; s020_raw vs base2 and s020_post vs s020_raw are reported with no rule. Edited:
+     the overview table, B2, B3, B7 (family 18), ORDER 2 (one commit per screen), the SEQUENTIAL RULE (s020_raw runs
+     106-110 for V2), S019 AND S020 (amendment note), HOURS, STILL OWED, and S020's notes (rewritten; V2 and V3's
+     combinations fixed; V2's onset reads s020_raw's own SD as S018's D2). Also fixed while there: S020's TIE now names
+     its 20M trigger (Q2 EARLIER, or Tier 0 BETTER as C8) instead of "Q2 and Tier 0 decide", the same reading
+     S020's OWN-SIZE line already gave.
+  M2 (medium) The look-1 boundary c1 also raised the PROSE guard's threshold, so a real prose cost was caught less
+     often, and a look-1 NOMINATE is final; undisclosed and not simulated. FIXED by the critique's first option:
+     WORSE_PROSE is read at C7's t(0.975, df) at each look (SEQUENTIAL RULE, PROSE GUARD), so look 1's guard is C7's
+     test; the trade (a false WORSE_PROSE at most 0.025 per look, 0.05 over both, a union bound, not simulated) and
+     the critique's numbers are written there. B4 (1) and B4 (5) say so. The guard's code is owed (STILL OWED).
+  M3 (medium) C4's pooled SIA check, which re-reads earlier verdicts, had no registered behaviour across looks. FIXED:
+     SEQUENTIAL RULE, POOLED SIA CHECK ACROSS LOOKS registers the pool (look-1 residuals of SIA family contrasts only),
+     a sticky failure, the boundaries of a re-read at each look, and that a retroactive INCONCLUSIVE extends (a look-2
+     one is final); ORDER 3 queues it. Why the error control still holds is written there as an argument under C7's
+     normal model, labelled NOT simulated; its Monte Carlo, the code, and a test and a mutant for each answer are owed
+     (STILL OWED) before the start mark (ORDER 0).
+  L1 HOURS said 15 arms where its sums used 16: corrected, and recomputed with s020_raw (17 arms): about 56.5 h
+     registered, about 140 h with every conditional run (was 53.9 and 133 h); planning only, NO CAP.
+  L2 Max approved the sequential rule as adding seeds; it also makes look 1 stricter on F(CHAT) (P(BETTER) at a true
+     -0.25%: same init 0.3075 to 0.2533, SIA 0.1922 to 0.1377, new init 0.1731 to 0.1276, SEQUENTIAL RULE's cost
+     line), and the hours went from the 41-74 h in his question to about 133 h and now about 140 h. Both are in this
+     step's report to the workflow for Max (not only in this file); whether Max has read them is not recorded here.
+  L3 B6's "onset is a win condition only for S018" was stale (S020 uses Q2 in TIE and REJECT): reworded. S020's
+     REJECT no longer records "failed at 5M" when Q2 is UNRESOLVED (P-024's win condition is timing): EARLIER, LATER
+     and UNRESOLVED each have their own wording.
+  L4 START MARK (1) asked only that the second round be "recorded": it now needs every HIGH and MEDIUM finding of
+     every round fixed or answered in a dated entry, inside the independent check of (3).
+  L5 Look-2 runs had no replay or environment check: SEQUENTIAL RULE, LOOK-2 ENVIRONMENT registers a fingerprint per
+     run, a base2_s101 replay under B1's bar before the first look-2 run and after any fingerprint change, and one
+     fingerprint per look-2 pair (a reference reruns at the arm's; nothing is dropped). Code owed; its runs are
+     outside the HOURS figures (0.31 h each).
+  L6 S016's OWN-SIZE text said the screen is P-113's own test; the ledger's default reading is the repetition rate,
+     which has no rule here. S016 now says it runs the proxy's loss half only and settles nothing for P-113; B7's
+     OWN-SIZE list drops P-113 and names S020's two forms (whose OWN-SIZE line says this screen is P-024's test).
+  L7 (a) ORDER 1 and 2 no longer speak of code landing late (ORDER 0 makes every flag a precondition); a code change
+     after the start mark reruns its runs. (b) R10 is marked superseded. (c) S019 gains a COMBINATIONS clause (E1
+     picks the form, E2 says whether ACD is a loss candidate, mixed pairs go to PLAN 3d with all three readings); S020
+     gains its own (M1). (d) The df-9 observed-SD re-read's boundaries are labelled approximate (BOUNDARIES).
+  NOT CHANGED: the SEQUENTIAL RULE's boundaries, spending, sign clauses and simulation numbers; screens2_seq.py and its
+     tests (the PROSE guard and the pooled check across looks are owed code, listed in STILL OWED); no batch 1 file;
+     no harness file.
+  OPEN (c): this round is recorded; it closes only after an independent re-check of these fixes (START MARK (1)), and
+     the harness and screens2 tool code still needs the independent verify that ORDER 0 requires.
+  CHECKS (this step, Mac CPU, no model): the HOURS figures recomputed from the smoke table (they reproduce the old
+     53.9 / 133 h before s020_raw); the boundaries, t quantiles and sign counts quoted re-read from screens2_seq
+     (unchanged); the repo's privacy check (tests/privacy.py) and an em-dash grep of the four edited files clean; on
+     an export of this commit's index: screens suite 1,044 passed, 6 skipped (test_screens2_seq.py 26 passed);
+     harness suite 888 passed, 72 skipped. No independent agent has checked these edits yet.

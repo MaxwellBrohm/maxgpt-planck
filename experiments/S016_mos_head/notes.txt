@@ -43,14 +43,20 @@ SEEDS AND PAIRING  Seeds 101-105, paired with base2_s<seed> (or the own BASE, B4
   loop draws nothing after build): it keeps the pairing's draws common. SD_ref sqrt(2) x sigma_init with B4 (3).
 
 METRIC AND DECISION RULE (B5, B7; "MoS K 2 with tanh contexts on a tied head")
-  P-113's own test is its "5-10M proxy, loss plus repetition rate": this screen is its 5M half on every verdict.
+  P-113's own test is its "5-10M proxy, loss plus repetition rate", and the ledger's default win condition is the
+  repetition rate ("Default: repetition rate falls at higher rank"). This screen runs that proxy's LOSS half at 5M on
+  every verdict; the repetition rate is measured and reported (DIAGNOSTICS) with no rule, since bpb decides here (PLAN
+  Appendix B). So no verdict here settles P-113's own test (2026-10-12, round 2 critique L6: this line said "this
+  screen is its 5M half", which overstated what 5M loss decides).
   NOMINATE      lower chat bpb: its 10M half runs (the ledger's proxy), then a 20M confirmation for the curve's head
                 question, with Tier 0 and the repetition rate after the lock.
   REJECT        higher chat bpb: recorded "MoS with tanh contexts on a tied head costs loss at 5M (K 2)", never "MoS
                 failed"; the rank question stays open at sizes where an untied head fits; the 10M half is recorded
                 "not run" and listed to Max (B7 OWN-SIZE).
   TIE           nothing adopted; the repetition-rate reading (below) is reported as the ledger's own default reading,
-                still with no rule; the 10M half is recorded "not run" and listed to Max (B7 OWN-SIZE).
+                still with no rule; the 10M half is recorded "not run" and listed to Max (B7 OWN-SIZE), the list
+                naming the 5M repetition-rate reading beside it, so P-113's own test is never read as settled by a
+                loss-neutral 5M result.
   GUARD-FAIL, INCONCLUSIVE   as C7.
 
 DIAGNOSTICS (B6; reported)  IND, onset at matched LR, HD, SINK. Per module: the mean prior entropy and the share of
