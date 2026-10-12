@@ -1,0 +1,29 @@
+baseline: pass
+KILLED    shards.py: parts concatenated | test_dev_batch_shards.py: FAIL equal in order: greedy files differ from one process
+KILLED    shards.py: contiguous slices | test_dev_batch_shards.py: IndexError: list index out of range
+KILLED    shards.py: config unchecked | test_dev_batch_shards.py: FAIL refuse: a part with another config was merged (0)
+KILLED    shards.py: parts left after the merge | test_dev_batch_shards.py: FAIL equal in order: left behind ['<tmp>/rc12_shards_uieea1lo/a/SAMPLER/plain
+KILLED    shards.py: seconds of one | test_dev_batch_shards.py: FAIL equal in order: shard fields 3 [1.5, 2.25, 0.0]
+KILLED    shards.py: batches of one | test_dev_batch_shards.py: FAIL equal in order: shard fields 3 [1.5, 2.25, 0.0]
+KILLED    shards.py: N 1 accepted | test_dev_batch_shards.py: FAIL refuse: N 1 (0)
+KILLED    shards.py: a string shards value accepted | test_dev_batch_shards.py: TypeError: '>' not supported between instances of 'str' and 'int'
+KILLED    dev_batch.py: a cut run is never merged | test_dev_batch_shards.py: FAIL equal cut then merged: greedy files differ from one process
+KILLED    dev_batch.py: a sharded model runs without --shard | test_dev_batch_shards.py: FAIL refuse: no --shard (0)
+KILLED    dev_batch.py: a done part replayed | test_dev_batch_shards.py: OSError: [Errno 66] Directory not empty: '<tmp>/rc12_shards_qj0d9g2v/a/SAMPLE
+KILLED    dev_batch.py: twin merged on dev | test_dev_batch_shards.py: FAIL merge: shard 2 failed
+KILLED    dev_batch.py: the last part does not merge | test_dev_batch_shards.py: FileNotFoundError: [Errno 2] No such file or directory: '<tmp>/rc12_shards__2
+KILLED    verify_dev_runs.py: C1 shards unchecked | test_dev_batch_shards.py: FAIL verify: C1 shards check (under e3 ok True, under e1 [])
+KILLED    shards.py: review M13: the merged meta drops max_batch | test_dev_batch_shards.py: FAIL equal in order: merged meta lacks ['max_batch']
+KILLED    engines.json: minimind-3 not at its float16 | test_pins_engines.py: FAIL pairs: jingyaogong/minimind-3 engines dtype bfloat16 != pinned float16
+KILLED    engines.json: minimind-3 given another family | test_pins_engines.py: FAIL minimind-3: engine/dtype/parity vllm/float16/fp16 NEAR_TIE or its family 'Vertex' is shared (its own parity, not a 
+KILLED    engines.json: cRia not split | test_pins_engines.py: FAIL shards: cRia shards None max_batch 32 (STEP 14X: 10 and 32)
+KILLED    engines.json: cRia without max_batch 32 | test_pins_engines.py: FAIL shards: cRia shards 10 max_batch None (STEP 14X: 10 and 32)
+KILLED    pins.json: a non-permissive licence | test_pins_engines.py: FAIL licence: jingyaogong/minimind-3 'cc-by-nc-4.0' is not an allowed licence
+KILLED    pins.json: minimind-3 still skipped | test_pins_engines.py: FAIL minimind-3: not pinned, or still in skipped
+KILLED    dev_extras14.py: minimind-3 not scored | test_dev_extras14.py: FAIL list: missing ['minimind-3'], extra [], 14 entries
+KILLED    dev_extras14.py: not in size order | test_dev_extras14.py: FAIL list: not in size order [4984192, 9968128, 9976832, 14957568, 15735168, 22827840, 25178752, 28844544, 30683520, 757
+KILLED    dev_extras14.py: the Base scored on template | test_dev_extras14.py: FAIL plain only: set()
+KILLED    dev_extras14.py: the Base not scored | test_dev_extras14.py: FAIL list: missing ['Falcon-H1-Tiny-90M-Base'], extra [], 14 entries
+KILLED    dev_extras14.py: PLAIN_ONLY ignored by jobs() | test_dev_extras14.py: FAIL jobs: [('Falcon-H1-Tiny-90M-Base', 'template')] differ
+KILLED    dev_extras14.py: the card row dropped | test_dev_extras14.py: FAIL jobs: card rows []
+MUTANTS killed 27/27

@@ -1,0 +1,16 @@
+# SMOKE, not an experiment: its numbers are never read for any decision (E2 notes, FIXED 6).
+id: E2-SMOKE
+hypothesis: >-
+  Smoke test only. The E2/E3 pipeline runs end to end on the PC at a tiny budget: prereg gate, real starter
+  shards at the pinned shares, tokenizer v0 8k, a 5M trunk one step longer than its last branch point, a pause
+  and resume, decay branches from an interior and from the last stable checkpoint, data_prep/bpb.py on the
+  first and last checkpoints, gpu.lock, the output layout, and provenance (tokenizer and shard manifest hashes,
+  engine flags) recorded in every run config and checkpoint.
+metric: >-
+  Plumbing checks only (smoke_check.py): loss and bits per byte fall from the first checkpoint to the last,
+  tokens/s against pc/bench_micro, drawn tokens against the pinned shares, recorded hashes equal the files.
+decision_rule: >-
+  pass if every smoke_check.py check passes; a failure blocks E2 and E3 until fixed. No number from this run
+  enters any E2 or E3 table.
+arms: [smoke_trunk, smoke_bmid, smoke_bend]
+seeds: [1]

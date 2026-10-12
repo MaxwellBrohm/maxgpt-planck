@@ -1,0 +1,26 @@
+{
+ "name": "ft_135m_s0",
+ "cmd": [
+  "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+  "-B",
+  "ft_test.py",
+  "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "--seed",
+  "0",
+  "--bs",
+  "4",
+  "--accum",
+  "4",
+  "--max-len",
+  "768",
+  "--grad-ckpt"
+ ],
+ "started": "2026-09-24 06:53:55",
+ "ended": "2026-09-24 07:38:27",
+ "exit": 0,
+ "killed": null,
+ "min_free": 47,
+ "max_swap_mb": 0.0,
+ "peak_rss_mb": 2479,
+ "elapsed_s": 2672
+}

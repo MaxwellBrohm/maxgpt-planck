@@ -1,0 +1,12 @@
+# K4 H6 (k4_shapes.py; harness/budget.py count_analytic 5,014,741, +0.09% vs BASE).
+# Merge into a K1 FH run config's model: block.
+model:
+  vocab_size: 8192
+  d_model: 192
+  n_layers: 8
+  n_heads: 6
+  n_kv_heads: 6
+  head_dim: 64
+  mlp_hidden: 232
+  seq_len: 2048
+  tie_embeddings: true

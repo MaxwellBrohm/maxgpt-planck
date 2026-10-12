@@ -1,0 +1,7 @@
+# E2 20M arm eta 0.0015, r 1 (written by e2plan.py; E2 notes, SCHEDULE)
+extends: base20m.yaml
+name: 20m_e1.5_r1_b500M
+out_dir: ../../../planck_root/runs/E2/20m_e1.5_r1_b500M
+optim: {lr: 0.0015, embed_lr: 0.0015, scalar_lr: 0.0015}
+schedule: {mode: branch, init_from: ../../../planck_root/runs/E2/20m_e1.5_r1_trunk/stable_00012207.pt, decay_steps: 3052}
+train: {total_steps: 15259, ckpt_every: 305}

@@ -1,0 +1,19 @@
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:   0%|          | 1/311 [00:00<01:29,  3.48it/s]Loading weights:  96%|█████████▌| 298/311 [00:00<00:00, 986.63it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 779.66it/s]
+loaded Qwen/Qwen3-0.6B {'params': 596049920, 'emb': 155582464, 'dtype': 'fp32', 'device': 'mps'} in 2.9s
+new/plain 0/1728 0s len=93
+new/plain 250/1728 37s len=92
+new/plain 500/1728 101s len=210
+new/plain 750/1728 202s len=503
+new/plain 1000/1728 275s len=163
+new/plain 1250/1728 328s len=293
+new/plain 1500/1728 410s len=413
+done new/plain: 1728 scored, 0 skipped, 517s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/Qwen__Qwen3-0.6B__new__plain.jsonl
+new/chat 0/1728 0s len=119
+new/chat 250/1728 46s len=118
+new/chat 500/1728 123s len=261
+new/chat 750/1728 245s len=609
+new/chat 1000/1728 334s len=201
+new/chat 1250/1728 397s len=357
+new/chat 1500/1728 495s len=500
+done new/chat: 1728 scored, 0 skipped, 624s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/Qwen__Qwen3-0.6B__new__chat.jsonl
+ALL DONE Qwen/Qwen3-0.6B in 1145s

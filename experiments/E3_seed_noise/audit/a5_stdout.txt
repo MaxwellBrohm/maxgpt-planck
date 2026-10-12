@@ -1,0 +1,7 @@
+F(CHAT): rho 0.617, Fisher 95% CI [-0.16, 0.92] -> CRN ratio about [0.93, 3.56] (point 1.49)
+   SD_d 0.00278, 95% CI [0.00184, 0.00565]
+F(PROSE): rho 0.530, Fisher 95% CI [-0.28, 0.90] -> CRN ratio about [0.88, 3.15] (point 1.44)
+   SD_d 0.00202, 95% CI [0.00133, 0.00411]
+E2 seed-1 F(CHAT) gap 6e-3 minus 3e-3 at 250M: +0.0032 = 1.15 SD_d; paired k=1 MDE 0.790% = 0.0091 bpb
+F(CHAT) seeds 2..8 MDE paired %: {1: np.float64(0.699), 2: np.float64(0.495), 3: np.float64(0.404), 5: np.float64(0.313)} unpaired %: {1: np.float64(1.242), 2: np.float64(0.878), 3: np.float64(0.717), 5: np.float64(0.555)}
+F(PROSE) seeds 2..8 MDE paired %: {1: np.float64(0.392), 2: np.float64(0.277), 3: np.float64(0.226), 5: np.float64(0.175)} unpaired %: {1: np.float64(0.716), 2: np.float64(0.506), 3: np.float64(0.413), 5: np.float64(0.32)}

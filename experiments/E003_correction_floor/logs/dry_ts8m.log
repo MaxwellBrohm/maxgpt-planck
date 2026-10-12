@@ -1,0 +1,29 @@
+Loading weights:   0%|          | 0/108 [00:00<?, ?it/s]Loading weights: 100%|██████████| 108/108 [00:00<00:00, 65337.49it/s]
+[transformers] [1mGPTNeoForCausalLM LOAD REPORT[0m from: roneneldan/TinyStories-8M
+Key                                                               | Status     |  | 
+------------------------------------------------------------------+------------+--+-
+transformer.h.{0, 1, 2, 3, 4, 5, 6, 7}.attn.attention.bias        | UNEXPECTED |  | 
+transformer.h.{0, 1, 2, 3, 4, 5, 6, 7}.attn.attention.masked_bias | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+loaded roneneldan/TinyStories-8M params=19,702,528 (config 19,702,528, body 6,312,448) sanity_nll=0.7722 in 1.7s mps_alloc=0.10G driver=1.05G peak_driver=1.05G
+wpe row norms {'0-511': 0.3561, '512-767': 0.1641, '768-2047': 0.1643}
+loss self-check hf=6.45727 answer_only=6.45727
+loss mutants {'no_shift': 11.928777694702148, 'prompt_labelled': 6.532041549682617} (must all differ from 6.45727)
+probe step 0 {'step': 0, 'LW': 1.0, 'TS': 0.5, 'NU': 0.0} mps_alloc=0.10G driver=1.10G peak_driver=1.10G
+step 0 loss 6.8494 gnorm 224.84 lr 4.52e-06 2s mps_alloc=0.26G driver=2.18G peak_driver=2.18G
+step 1 loss 6.4277 gnorm 194.19 lr 4.91e-06 4s mps_alloc=0.26G driver=2.18G peak_driver=2.18G
+step 2 loss 5.8617 gnorm 170.25 lr 3.45e-06 6s mps_alloc=0.26G driver=2.14G peak_driver=2.18G
+step 3 loss 4.0842 gnorm 156.97 lr 1.19e-06 8s mps_alloc=0.26G driver=2.14G peak_driver=2.18G
+step 4 loss 3.3792 gnorm 123.57 lr 0.00e+00 10s mps_alloc=0.26G driver=2.14G peak_driver=2.18G
+probe step 5 {'step': 5, 'LW': 1.0, 'TS': 0.5, 'NU': 0.0}
+scored new/plain: 2 items in 0s mps_alloc=0.26G driver=2.11G peak_driver=2.18G
+scored extra/plain: 2 items in 0s mps_alloc=0.26G driver=2.11G peak_driver=2.18G
+scored old/plain: 2 items in 0s mps_alloc=0.26G driver=2.11G peak_driver=2.18G
+scored uprobe/plain: 2 items in 0s mps_alloc=0.26G driver=2.11G peak_driver=2.18G
+scored khard/plain: 2 items in 0s mps_alloc=0.26G driver=2.11G peak_driver=2.18G
+scored kbig/plain: 2 items in 0s mps_alloc=0.26G driver=2.11G peak_driver=2.18G
+scored cross/plain: 2 items in 0s mps_alloc=0.26G driver=2.11G peak_driver=2.18G
+scored dev/plain: 2 items in 0s mps_alloc=0.26G driver=2.11G peak_driver=2.18G
+DONE roneneldan/TinyStories-8M dry total 13s peak_driver=2.18G lock_in_step=None loss_finite=True

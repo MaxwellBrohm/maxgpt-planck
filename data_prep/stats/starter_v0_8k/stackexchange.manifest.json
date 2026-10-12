@@ -1,0 +1,195 @@
+{
+ "bytes_per_token": 3.7434,
+ "code_sha256": {
+  "corpus/oodh.py": "b256d5554d531bd76c531a8bc59c287f57f60e94cc224e3f136add75594987d1",
+  "corpus/sample_plan.py": "a50209255798b4f50117208777cf4429e3d7994f3f37d687caa5aee4e27a9e57",
+  "data_prep/prep_common.py": "7c8fce2b5eccc466070e848e2e55f25cd3a3b247acfc6d66a06334536ac15ada",
+  "data_prep/pretok_worker.py": "616a8e41c5d265e35e7a8fcf9910c755b4d312004a6a0ff79eb9317057b0891a",
+  "data_prep/pretokenize.py": "ad16bf9b782fa0c40729735da5334a9113a8a6f63d2c06fd7c568da1a631ad82",
+  "harness/chat_template.py": "16f5aa51d6c94b01afa7324a8ed119cb585aae1d8122a92eeb99a3d919196774"
+ },
+ "counts": {
+  "chat_docs": 0,
+  "chat_over_2048": 0,
+  "chat_over_2048_tokens": 0,
+  "chat_over_4096": 0,
+  "chat_over_4096_tokens": 0,
+  "docs": 323868,
+  "docs_in": 325176,
+  "empty_docs": 0,
+  "excluded_docs": 1308,
+  "excluded_text_bytes": 5000464,
+  "max_doc_tokens": 52966,
+  "special_replaced_docs": 0,
+  "sup_tokens": 0,
+  "text_bytes": 1217410000,
+  "text_docs": 323868,
+  "tokens": 325539386
+ },
+ "dtype": "uint16",
+ "format": "planck-pretok-v1",
+ "heldout": {
+  "dir": "~/planck/data/tok_sample_v0c/heldout",
+  "manifest_sha256": "d0fa0838a6aa4ee8a6c62d6ffe496f812e8335d90266d34689c97cd9e13cfa63",
+  "source_file": {
+   "docs": 1308,
+   "file": "stackexchange.jsonl",
+   "keys": 1308,
+   "sha256": "ba737dc808d2d3bb95098651f792c10c6406666608d99f1c60ca723999e3d6c1"
+  }
+ },
+ "input": {
+  "bytes": 1450800683,
+  "dir": "~/planck/data/extracted/starter_v0c",
+  "extract_stats_sha256": "8d6452ae8c3be7b0c43e4ba149b273fcb5e59f4ab5c2bd33baaec0b1499872d9",
+  "files": [
+   "stackexchange/stackexchange-00000.jsonl",
+   "stackexchange/stackexchange-00001.jsonl",
+   "stackexchange/stackexchange-00002.jsonl",
+   "stackexchange/stackexchange-00003.jsonl",
+   "stackexchange/stackexchange-00004.jsonl",
+   "stackexchange/stackexchange-00005.jsonl"
+  ]
+ },
+ "kind": "tokens",
+ "n_shards": 11,
+ "seed": 0,
+ "shard_mb": 128,
+ "shards": [
+  {
+   "bytes": 59059228,
+   "docs": 29162,
+   "ids": "stackexchange/stackexchange-00000.ids",
+   "path": "stackexchange/stackexchange-00000.bin",
+   "sha256": "e78b9834870603a490339494d2a22bebbc807b80abf152ad5db0583f08681582",
+   "sup_tokens": 0,
+   "text_bytes": 110483005,
+   "tokens": 29529614
+  },
+  {
+   "bytes": 59737822,
+   "docs": 29545,
+   "ids": "stackexchange/stackexchange-00001.ids",
+   "path": "stackexchange/stackexchange-00001.bin",
+   "sha256": "2921c143d3446cf441f2044c87cf909aef9710e7e9a219e92e3385607b31f665",
+   "sup_tokens": 0,
+   "text_bytes": 111747723,
+   "tokens": 29868911
+  },
+  {
+   "bytes": 58828270,
+   "docs": 29410,
+   "ids": "stackexchange/stackexchange-00002.ids",
+   "path": "stackexchange/stackexchange-00002.bin",
+   "sha256": "7064c5468037c96d589fc2a651ba3d329b5cabf96aeb9397d6ba095e8f79c575",
+   "sup_tokens": 0,
+   "text_bytes": 109955436,
+   "tokens": 29414135
+  },
+  {
+   "bytes": 58856188,
+   "docs": 29492,
+   "ids": "stackexchange/stackexchange-00003.ids",
+   "path": "stackexchange/stackexchange-00003.bin",
+   "sha256": "69b43ebab78f4e16bdfab114f9805b91e0f135deac07701d26890b89d6a52be3",
+   "sup_tokens": 0,
+   "text_bytes": 110017494,
+   "tokens": 29428094
+  },
+  {
+   "bytes": 59158800,
+   "docs": 29367,
+   "ids": "stackexchange/stackexchange-00004.ids",
+   "path": "stackexchange/stackexchange-00004.bin",
+   "sha256": "8b68978f8562f412ccf3c9d95d4fe554a62e3e6074c131a0639c103d6cdcb867",
+   "sup_tokens": 0,
+   "text_bytes": 110710915,
+   "tokens": 29579400
+  },
+  {
+   "bytes": 59188670,
+   "docs": 29587,
+   "ids": "stackexchange/stackexchange-00005.ids",
+   "path": "stackexchange/stackexchange-00005.bin",
+   "sha256": "5f17ac00f9f48b078b83fdf5768a3d98c16d4c570671f77f93774142ebd00960",
+   "sup_tokens": 0,
+   "text_bytes": 110617560,
+   "tokens": 29594335
+  },
+  {
+   "bytes": 58928378,
+   "docs": 29306,
+   "ids": "stackexchange/stackexchange-00006.ids",
+   "path": "stackexchange/stackexchange-00006.bin",
+   "sha256": "e53ed49c1443bc0df5656847616805987ed46a500f74f996c9b3c5233648ca6a",
+   "sup_tokens": 0,
+   "text_bytes": 110143192,
+   "tokens": 29464189
+  },
+  {
+   "bytes": 58978284,
+   "docs": 29338,
+   "ids": "stackexchange/stackexchange-00007.ids",
+   "path": "stackexchange/stackexchange-00007.bin",
+   "sha256": "aa457518ac888c9f963e60ad93cb31250799c75c4bba4c5cb3fa93ee73cb5264",
+   "sup_tokens": 0,
+   "text_bytes": 110225065,
+   "tokens": 29489142
+  },
+  {
+   "bytes": 58724880,
+   "docs": 29215,
+   "ids": "stackexchange/stackexchange-00008.ids",
+   "path": "stackexchange/stackexchange-00008.bin",
+   "sha256": "29650e21c8767dd27a3a3a9bb9fe9c2bc3e9e5071f70f523bce7697fb6412f14",
+   "sup_tokens": 0,
+   "text_bytes": 109849356,
+   "tokens": 29362440
+  },
+  {
+   "bytes": 60404502,
+   "docs": 29900,
+   "ids": "stackexchange/stackexchange-00009.ids",
+   "path": "stackexchange/stackexchange-00009.bin",
+   "sha256": "9151d83b4084f1a5d1c78373061d399a4128c5e42a56adc7b68ecc2f125b258c",
+   "sup_tokens": 0,
+   "text_bytes": 112991104,
+   "tokens": 30202251
+  },
+  {
+   "bytes": 59213750,
+   "docs": 29546,
+   "ids": "stackexchange/stackexchange-00010.ids",
+   "path": "stackexchange/stackexchange-00010.bin",
+   "sha256": "a6ab6e4edf6bc28076b1a79cde6dc207a59865e4ac10d8c2df32fbe2e8f17c54",
+   "sup_tokens": 0,
+   "text_bytes": 110669150,
+   "tokens": 29606875
+  }
+ ],
+ "source": "stackexchange",
+ "tokenizer": {
+  "control_ids": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "end_id": 5,
+  "eot_id": 1,
+  "file": "tok_v0_8k.json",
+  "n_special": 15,
+  "pad_id": 0,
+  "role_ids": {
+   "assistant": 4,
+   "system": 2,
+   "tool": 6,
+   "user": 3
+  },
+  "sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5",
+  "vocab": 8192
+ }
+}

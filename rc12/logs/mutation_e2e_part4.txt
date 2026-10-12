@@ -1,0 +1,22 @@
+RC-12 mutation_e2e.py part 4/8: 17 of 132 mutants, fresh process each, 206 s. No model.
+baseline failures (expected: only the G4 item lines):
+  none
+KILLED    #03 runner: role cut not recorded as the stop reason  <- stops: CONTINUER plain: fake user turn not cut
+KILLED    #11 render: plain render without the generation tag  <- render: plain render string
+KILLED    #19 score: T0 in the composite  <- G2 ANTI_OVERLAP: cell T0:t0=1.00
+KILLED    #27 score: CORR:U without U-diff  <- scoring: CORR:U is not U-diff and U-same pooled
+KILLED    #35 score_stats: sensitivity drops nothing  <- stats: sensitivity
+KILLED    #43 fakes_family: P_OBEYALL lets the newest rule win (correct on 3 of 4 override pairs)  <- G2 P_OBEYALL: cell PERSIST:override=0.75
+KILLED    #51 score: OD1 b: a run missing --own-cf twins still gets a gated OWN  <- G1 IDEAL: OWN_GATED:list=0.00
+KILLED    #59 score_stats: OD1 b: sensitivity row computed with OWN missing  <- stats: sensitivity without the cf rows
+KILLED    #67 score: OD1 b: product of rates (own-history unit x the cf run's rate)  <- owngate: random units: OWN_GATED:list 0.3391927083333333, per-unit AND 0.3125
+KILLED    #75 own_cf: OD1 b: a pick rewrite that did not take passes as swapped  <- owngate: unswapped cf rows not scored 0 in OWN_GATED ({'OWN': 1.0, 'OWN_CF': 1.0, 'OWN_GATED': 1.0, 'cf_unswapped': 0}, pick 1.0)
+KILLED    #83 grade_loop: F2: small-talk fillers ask again (SMALLTALK loops)  <- ackrep: ACKER ack-repeat 0.17712882096069868 / 0.6956055734190782, want 0.17712882096069868 / 0.46859205776173285
+KILLED    #91 score: item 1: LOOKUP listed as an R family  <- scoring: LOOKUP out of R / 9 families: R with LOOKUP 0 100.0, with CORR 0 88.88888888888889 (want 100, 88.89)
+KILLED    #99 score: LOOKUP claim reads the composite instead of the LOOKUP family  <- levelr: LOOKUP claim without T0 >= 0.90 (decision 4): [('no T0', False, ['T0 None < 0.9 (decision 4)']), ('T0 1', False, []), ('T0 0', False, ['T0 0.0
+KILLED    #107 score: Level R S7 bar at 36 (the shortcut mix is 36.7)  <- levelr: s12 clause (S7 point >= 40 and PERSIST >= 0.40): {'bars': True, 'S7': True, 'PERSIST': False, 'None': False, 'PERSIST None': False, 'IDEAL': T
+KILLED    #115 score: summarize reports a fixed s12 verdict  <- levelr: s12 clause (S7 point >= 40 and PERSIST >= 0.40): {'bars': True, 'S7': False, 'PERSIST': False, 'None': False, 'PERSIST None': False, 'IDEAL': 
+KILLED    #123 score_stats: paired S7 difference reads the 9 composite families  <- levelr: paired S7 difference IDEAL - FIRST {'D': 84.76851851851852, 'lo': 82.2337962962963, 'hi': 87.15277777777777, 'n': 200, 'fams': ['RECALL', 'COR
+KILLED    #131 score: the s12 clause passes a missing PERSIST  <- levelr: s12 clause (S7 point >= 40 and PERSIST >= 0.40): {'bars': True, 'S7': False, 'PERSIST': False, 'None': False, 'PERSIST None': True, 'IDEAL': T
+killed 17 | survived 0 | crashed 0 | malformed 0
+ALL MUTANTS KILLED

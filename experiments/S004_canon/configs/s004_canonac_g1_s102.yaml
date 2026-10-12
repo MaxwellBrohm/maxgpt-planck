@@ -1,0 +1,7 @@
+# SCREENS S004 arm canonac, g 1 x LR5, seed 102: screen seed at the g pick (screens.py)
+extends: ../../screens/configs/screens_base.yaml
+name: s004_canonac_g1_s102
+out_dir: ../../../planck_root/runs/SCREENS/s004_canonac_g1_s102
+seed: 102
+optim: {lr: 0.003, embed_lr: 0.003, scalar_lr: 0.003}
+model: {canon: AC, canon_kernel: 4}

@@ -1,0 +1,58 @@
+"""E004 training fillers: practical how-to / why Q&A only (notes (a)). E002's 20 (train_data.T_DISTRACT) with the
+ones that named a training object word (road trip, practice, sessions, chess, job fair, in case), a held-out
+object (invitation), a capitalized word (Sun) or a word 5-gram of E001's filler pools (the E004 eval fillers
+include them) rewritten, plus 28 new ones. No value of any training or held-out
+pool, no names, no digits, no head noun of any training object, no marker (checked in test_train_gen.py)."""
+
+FILLERS_TRAIN = [
+    # E002's list, rewritten where noted
+    ("Any tips for a long drive?", "Plan rest stops every two hours, pack snacks, and download music before the signal drops."),
+    ("What's a good stretch after running?", "A standing quad stretch and a calf stretch against a wall, each held for about thirty seconds."),
+    ("What do I bring to a picnic?", "Sandwiches, fruit, water, a blanket, napkins and a bag for trash."),
+    ("How can I improve at drawing?", "Sketch something small every day, copy pieces you admire, and study basic shapes and shading."),
+    ("What's the best way to learn to type faster?", "Use all ten fingers, keep your eyes on the screen, and do short drills each day."),
+    ("Why is the moon sometimes visible during the day?", "It is bright enough to see whenever it is above the horizon and far enough from the sun."),
+    ("How do I stop procrastinating?", "Break the task into a tiny first step and start it right away."),
+    ("What makes bread rise?", "Yeast eats sugars and releases gas, which gets trapped in the stretchy gluten network."),
+    ("How often should I replace a toothbrush?", "About every three months, or sooner if the bristles look frayed."),
+    ("Is there an easy way to meditate?", "Sit comfortably, breathe slowly, and gently bring your attention back to your breath."),
+    ("How do I make rice less sticky?", "Rinse it until the water runs clear and let it rest, covered, after cooking."),
+    ("Why do my ears pop on planes?", "The air pressure changes faster than the tube behind your eardrum can equalize it."),
+    ("How can I sleep on a noisy street?", "Earplugs, a fan for steady background noise, and heavy drapes all help."),
+    ("What's an easy way to drink more water?", "Keep a bottle within reach and refill it every time you finish a task."),
+    ("How do I get rid of fruit flies?", "Set out a small dish of vinegar with a drop of soap and take out ripe fruit."),
+    ("Why do bees make honey?", "Honey is their stored food for times when flowers are scarce."),
+    ("How should I get ready for a public talk?", "Know your opening lines by heart, rehearse out loud, and time yourself."),
+    ("What's a polite way to turn down a favor?", "Thank them warmly, explain briefly that you can't help this time, and wish them luck."),
+    ("How do I keep a sourdough starter alive?", "Feed it flour and water regularly and keep it somewhere cool between feedings."),
+    ("Why do stars twinkle?", "Moving layers of air bend their light slightly, so the brightness flickers."),
+    # new for E004
+    ("How do I keep lettuce crisp?", "Wrap the leaves loosely in a paper towel and store them in a sealed bag in the fridge."),
+    ("Why does ice float?", "Water expands as it freezes, so ice is less dense than the liquid around it."),
+    ("How do I get candle wax off a tablecloth?", "Harden it with an ice cube, scrape off what you can, then press the rest between paper towels with a warm iron."),
+    ("How can I help my houseplants grow?", "Give them bright indirect light, water only when the soil feels dry, and feed them lightly in spring."),
+    ("Why do onions sting when you cut them?", "Slicing breaks open cells that give off an irritating vapor, and tears form to rinse it away."),
+    ("How do I fold a fitted sheet?", "Tuck the corners into each other, lay it flat, fold the edges in, and fold it into a neat square."),
+    ("What helps a sore throat?", "Warm drinks with honey, plenty of rest, and gargling salt water can all ease it."),
+    ("Why is the ocean salty?", "Rain slowly washes minerals out of rocks, and rivers carry them to the sea, where they build up."),
+    ("How do I sharpen a kitchen knife?", "Hold it at a steady shallow angle against a whetstone and draw it across in smooth, even strokes."),
+    ("How do I stop a cutting board from slipping?", "Lay a damp towel or a sheet of rubber shelf liner underneath it."),
+    ("How do I keep cut apples from browning?", "Toss the slices in a little lemon juice or soak them briefly in salted water."),
+    ("Why do cats purr?", "Purring usually signals contentment, though they also do it to soothe themselves when stressed."),
+    ("How can I save money on groceries?", "Plan meals ahead, shop with a list, buy staples in bulk, and avoid shopping when hungry."),
+    ("What's the trick to a good cup of tea?", "Use freshly boiled water, steep it just long enough, and take the leaves out promptly."),
+    ("How do I get a coffee stain out of a shirt?", "Blot it quickly, rinse it from the back with cold water, and dab on a bit of dish soap."),
+    ("Why does thunder follow lightning?", "Light travels much faster than sound, so the flash arrives before the rumble."),
+    ("How do I keep my laptop from overheating?", "Use it on a hard surface, keep the vents clear, and clean out the dust now and then."),
+    ("What's an easy way to learn new words?", "Read widely, jot down unfamiliar words, and use each one in a sentence of your own."),
+    ("Why do we yawn?", "It may help cool the brain, and it often spreads when people see others yawn."),
+    ("How do I make a paper airplane fly farther?", "Use crisp folds, keep the wings level, and add a small fold at the nose for weight."),
+    ("What should I do if a jar lid is stuck?", "Run the lid under hot water, tap its edge gently, and grip it with a rubber glove."),
+    ("Why do we get goosebumps?", "Tiny muscles at the base of each hair tighten when we are cold or feel a strong emotion."),
+    ("How can I remember more of what I read?", "Pause after each section to sum it up in your own words, then review it the next day."),
+    ("How should I organize a closet?", "Empty it, donate what you have not worn in a year, and group what is left by type."),
+    ("How do I fix a squeaky hinge?", "Wipe the pin clean and add a few drops of oil or a bit of petroleum jelly."),
+    ("Why do rainbows form?", "Sunlight bends and splits inside raindrops, spreading into its separate colors."),
+    ("How do I make scrambled eggs fluffier?", "Whisk them well, cook over low heat, and stir gently until they are just set."),
+    ("What's the easiest way to peel garlic?", "Crush each clove lightly with the flat of a knife and the skin slides right off."),
+]

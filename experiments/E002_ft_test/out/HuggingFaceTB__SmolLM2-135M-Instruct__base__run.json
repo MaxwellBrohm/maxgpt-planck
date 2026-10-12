@@ -1,0 +1,47 @@
+{
+ "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+ "seed": 0,
+ "steps": 0,
+ "lr": 5e-05,
+ "bs": 4,
+ "accum": 4,
+ "eff_batch": 16,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "mps",
+ "dry": false,
+ "tag": "base",
+ "params": 134515008,
+ "torch": "2.13.0",
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "train_stats": {
+  "n": 0,
+  "rejected_long": 0,
+  "kinds": {},
+  "len_sum": 0,
+  "len_max": 0,
+  "split": 0,
+  "mean_len": null
+ },
+ "losses": [],
+ "probe": [],
+ "lock_in_step": null,
+ "eval_s": 529.4,
+ "eval_counts": {
+  "new/plain": 1728,
+  "new/chat": 1728,
+  "extra/plain": 192,
+  "extra/chat": 192,
+  "old/plain": 1116,
+  "uprobe/plain": 576,
+  "khard/plain": 80,
+  "kbig/plain": 441
+ },
+ "peak_mps_driver_gb": 1.302,
+ "peak_mps_alloc_gb": 0.501,
+ "total_s": 531.0
+}

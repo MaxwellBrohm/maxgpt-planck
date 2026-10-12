@@ -1,0 +1,14 @@
+{
+ "name": "C4",
+ "command": "~/planck/venv-hf/bin/python -B e006_ft_test.py HuggingFaceTB/SmolLM2-135M-Instruct --bs 4 --accum 4 --max-len 768 --grad-ckpt --arm C --seed 4 --lr 1.5e-04 --chat --save 1 --tag C4",
+ "ceiling_s": 14400.0,
+ "killed": null,
+ "verdict": null,
+ "start": "2026-09-28 03:27:00",
+ "end": "2026-09-28 03:55:32",
+ "elapsed_s": 1712.1,
+ "exit": 0,
+ "peak_temp_c": 71.0,
+ "peak_gpu_mem_mib": 5221.0,
+ "weights_sha256": "500ddcd24431423450ff59c6b23c6271e8c36fdfbe0d2b1e2773442bff04f493"
+}

@@ -1,0 +1,468 @@
+{
+ "aux": {
+  "pool.surname": {
+   "authors": {
+    "human:census_surnames": 1.0
+   },
+   "class": "P",
+   "dropped": 445,
+   "drops": {
+    "CASE_AMBIG": 157,
+    "HELDOUT_POOL": 10,
+    "PROGRAM_COLLISION": 6,
+    "SAFETY_LIST": 1,
+    "WORD_COLLISION": 271
+   },
+   "file": "pool.surname.jsonl",
+   "kept": 2000,
+   "kind": "human",
+   "ref": "pool.surname@0de93a5e84b6:human:census_surnames=100",
+   "sha256": "0de93a5e84b6425b5d80faf4eebc55f84abeb1bd2b9bd390e84c3c14f9555161",
+   "stats": {
+    "by_band": {
+     "common": 1000,
+     "rare": 1000
+    },
+    "kept": {
+     "common": 1000,
+     "rare": 1000
+    },
+    "universe": 162253
+   },
+   "target": 2000
+  },
+  "rubric.safety": {
+   "authors": {
+    "human:ldnoobw": 1.0
+   },
+   "class": "Z",
+   "dropped": 0,
+   "drops": {},
+   "file": "rubric.safety.jsonl",
+   "kept": 403,
+   "kind": "human",
+   "ref": "rubric.safety@a359f194e11c:human:ldnoobw=100",
+   "sha256": "a359f194e11c874e359e4cc2ecfcf7c6b006d6b40e8f0ae4cac145d864301eb9",
+   "stats": {
+    "kept": 403,
+    "lines": 403
+   },
+   "target": null
+  },
+  "seed.persona": {
+   "authors": {
+    "human:nemotron_personas_usa": 1.0
+   },
+   "class": "Q",
+   "dropped": 4473,
+   "drops": {
+    "HELDOUT_ECHO": 1,
+    "HELDOUT_VOCAB": 1984,
+    "MINOR": 1867,
+    "NAME_AGAIN": 59,
+    "NON_ENGLISH": 16,
+    "NO_LEAD": 546
+   },
+   "file": "seed.persona.jsonl",
+   "kept": 5000,
+   "kind": "human",
+   "ref": "seed.persona@bcbb0ec3db4a:human:nemotron_personas_usa=100",
+   "sha256": "bcbb0ec3db4ad0428527842348bb9d24477cc1ca159c3e70efc871a2ed8ad7bf",
+   "stats": {
+    "by_age_band": {
+     "10s": 109,
+     "20s": 763,
+     "30s": 924,
+     "40s": 863,
+     "50s": 864,
+     "60s": 811,
+     "70s": 480,
+     "80s+": 186
+    },
+    "by_sex": {
+     "Female": 2776,
+     "Male": 2224
+    },
+    "candidates": 15000,
+    "kept": 5000,
+    "universe": 1000000
+   },
+   "target": 5000
+  }
+ },
+ "banks": {
+  "pool.city": {
+   "authors": {
+    "human:geonames_cities": 1.0
+   },
+   "class": "P",
+   "dropped": 316,
+   "drops": {
+    "DUP_NAME": 46,
+    "FEATURE": 159,
+    "FORM": 69,
+    "HELDOUT_POOL": 6,
+    "LEN_ITEM": 7,
+    "WORD_COLLISION": 29
+   },
+   "file": "pool.city.jsonl",
+   "kept": 3000,
+   "kind": "human",
+   "ref": "pool.city@e73eea0b7060:human:geonames_cities=100",
+   "sha256": "e73eea0b7060572aed80b55e57f3391f67e8b8c3d0a27cf61133c6cdb20313c3",
+   "stats": {
+    "by_country": {
+     "Afghanistan": 4,
+     "Albania": 2,
+     "Algeria": 12,
+     "Angola": 35,
+     "Argentina": 22,
+     "Armenia": 1,
+     "Australia": 15,
+     "Austria": 3,
+     "Azerbaijan": 4,
+     "Bahamas": 1,
+     "Bangladesh": 34,
+     "Belarus": 6,
+     "Belgium": 4,
+     "Benin": 3,
+     "Bolivia": 4,
+     "Bosnia and Herzegovina": 2,
+     "Botswana": 1,
+     "Brazil": 166,
+     "Bulgaria": 4,
+     "Burkina Faso": 1,
+     "Burundi": 1,
+     "Cambodia": 2,
+     "Cameroon": 7,
+     "Canada": 26,
+     "Central African Republic": 3,
+     "Chad": 2,
+     "Chile": 17,
+     "China": 473,
+     "Colombia": 30,
+     "Croatia": 1,
+     "Cuba": 10,
+     "Cyprus": 1,
+     "Czechia": 4,
+     "Democratic Republic of the Congo": 24,
+     "Denmark": 2,
+     "Djibouti": 2,
+     "Dominican Republic": 6,
+     "Ecuador": 14,
+     "Egypt": 32,
+     "El Salvador": 3,
+     "Eritrea": 1,
+     "Estonia": 1,
+     "Ethiopia": 16,
+     "Finland": 6,
+     "France": 12,
+     "Gabon": 1,
+     "Gambia": 1,
+     "Georgia": 1,
+     "Germany": 40,
+     "Ghana": 8,
+     "Greece": 2,
+     "Guatemala": 4,
+     "Guinea": 5,
+     "Guinea-Bissau": 1,
+     "Guyana": 1,
+     "Haiti": 4,
+     "Honduras": 4,
+     "Hong Kong": 16,
+     "Hungary": 2,
+     "India": 262,
+     "Indonesia": 88,
+     "Iran": 52,
+     "Iraq": 19,
+     "Ireland": 1,
+     "Israel": 9,
+     "Italy": 18,
+     "Ivory Coast": 10,
+     "Jamaica": 1,
+     "Japan": 125,
+     "Jordan": 4,
+     "Kazakhstan": 13,
+     "Kenya": 12,
+     "Kosovo": 1,
+     "Kuwait": 1,
+     "Kyrgyzstan": 2,
+     "Laos": 1,
+     "Latvia": 1,
+     "Lebanon": 1,
+     "Lesotho": 1,
+     "Liberia": 1,
+     "Libya": 6,
+     "Lithuania": 2,
+     "Macao": 1,
+     "Madagascar": 5,
+     "Malawi": 3,
+     "Malaysia": 51,
+     "Mali": 5,
+     "Mauritania": 1,
+     "Mexico": 92,
+     "Moldova": 1,
+     "Mongolia": 1,
+     "Montenegro": 1,
+     "Morocco": 18,
+     "Mozambique": 11,
+     "Myanmar": 11,
+     "Namibia": 1,
+     "Nepal": 10,
+     "New Zealand": 4,
+     "Nicaragua": 1,
+     "Niger": 3,
+     "Nigeria": 64,
+     "North Korea": 14,
+     "North Macedonia": 1,
+     "Norway": 3,
+     "Oman": 3,
+     "Pakistan": 66,
+     "Palestinian Territory": 1,
+     "Panama": 2,
+     "Papua New Guinea": 1,
+     "Paraguay": 4,
+     "Peru": 15,
+     "Philippines": 75,
+     "Poland": 22,
+     "Portugal": 3,
+     "Puerto Rico": 2,
+     "Qatar": 3,
+     "Republic of the Congo": 1,
+     "Romania": 8,
+     "Russia": 93,
+     "Rwanda": 1,
+     "Saudi Arabia": 19,
+     "Senegal": 10,
+     "Serbia": 3,
+     "Sierra Leone": 3,
+     "Singapore": 8,
+     "Slovakia": 2,
+     "Slovenia": 1,
+     "Somalia": 7,
+     "South Africa": 35,
+     "South Korea": 35,
+     "South Sudan": 3,
+     "Spain": 30,
+     "Sri Lanka": 2,
+     "Sudan": 13,
+     "Suriname": 1,
+     "Sweden": 3,
+     "Switzerland": 2,
+     "Syria": 8,
+     "Taiwan": 17,
+     "Tajikistan": 6,
+     "Tanzania": 23,
+     "Thailand": 9,
+     "The Netherlands": 7,
+     "Togo": 1,
+     "Tunisia": 3,
+     "Turkey": 67,
+     "Turkmenistan": 3,
+     "Uganda": 8,
+     "Ukraine": 30,
+     "United Arab Emirates": 8,
+     "United Kingdom": 36,
+     "United States": 123,
+     "Uruguay": 1,
+     "Uzbekistan": 11,
+     "Venezuela": 30,
+     "Vietnam": 70,
+     "Western Sahara": 1,
+     "Yemen": 6,
+     "Zambia": 8,
+     "Zimbabwe": 4
+    },
+    "kept": 3000,
+    "universe": 34152
+   },
+   "target": 3000
+  }
+ },
+ "code": {
+  "admit.py": "4320e0c819407660b44be07068b273fcd6496e9213cea32ef057a26d0627f7b9",
+  "gates.py": "6ed96f829949549edcdb574dba7042c438d3c4952939f3d6459e9bbdd0670c22",
+  "human.py": "1c910048ffd59909dd2c6c26b7163e83f5dbf25362f4078337cfc3ecde915964",
+  "humanbuild.py": "a319ab48f602a248f729fb91c44a54877229f23eb645295f67f8500744bff671",
+  "humanseed.py": "0543ca1bf90fd589a97d4651c46266ac8b138ffea53e65cfbed482f46e9664ea",
+  "sources.py": "72f075ae3923db210b9e9b8f16f935e16414587beba09c2ba95120b0fcdf23f3",
+  "store.py": "01505d1165a4645ddc711ce59730cec9111ea9e9aad76317a2b7ac3d9104b142",
+  "wordload.py": "9c40994105694fabfc2f760f45337b0e863585d42bb749effad1e5727e68ecd0"
+ },
+ "code_sha256": "41edbcc87f3a9982776a0ee764180995fa5972f188bcee61a20398906dc4f2c4",
+ "fixture": false,
+ "gate_hash": "f8c8742ff496b8b9",
+ "missing": {
+  "pool.name": "ssa_names: status 'incomplete' ['names.zip: HTTPError HTTP Error 403: Forbidden']"
+ },
+ "note": "NOT TRAINING DATA until RC-12 clears (DECON_PENDING); pool.name and pool.city are the only banks load.py installs from this set",
+ "rc12": "pending",
+ "schema": "bankpass-manifest-v1",
+ "sources": {
+  "census_surnames": {
+   "basis": "a U.S. Census Bureau product, a work of the U.S. government (17 U.S.C. 105, no copyright); the product page and the methodology paper state no licence and no restriction. The evidence check only confirms the product page lists this file.",
+   "evidence": {
+    "product_page.html": {
+     "licence_match": "2010surnames/names.zip",
+     "sha256": "ed5e60bd7934035a00868ad43d3682ee2d1c136d51130e54ac4c6968d43ac6ea",
+     "url": "https://www.census.gov/topics/population/genealogy/data/2010_surnames.html"
+    }
+   },
+   "files": {
+    "names.zip": {
+     "bytes": 12874389,
+     "retrieved": "2026-10-04T17:09:23Z",
+     "sha256": "117c41cb4668727b7627b2845b6df3f83eb2a22a1813f42c0ff4bdcab86de135",
+     "url": "https://www2.census.gov/topics/genealogy/2010surnames/names.zip"
+    },
+    "surnames.pdf": {
+     "bytes": 90917,
+     "retrieved": "2026-10-04T17:09:23Z",
+     "sha256": "e39daac09cc976ec8578d2f3875b908d29f9661b87e9fe50914a95edc4cf8b89",
+     "url": "https://www2.census.gov/topics/genealogy/2010surnames/surnames.pdf"
+    }
+   },
+   "license": "public-domain",
+   "retrieved": "2026-10-04T17:09:23Z",
+   "status": "ok",
+   "title": "Frequently occurring surnames from the 2010 Census (U.S. Census Bureau)"
+  },
+  "geonames_cities": {
+   "basis": "readme.txt of the GeoNames dump: CC BY 4.0. The dump changes daily: pinned by sha256 and date",
+   "evidence": {
+    "readme.txt": {
+     "licence_match": "Creative Commons Attribution 4.0 License",
+     "sha256": "b1957379b6c1242c700c98ac9a8aa0a09f56c3c0a50ee72175527005f48ef2c5",
+     "url": "https://download.geonames.org/export/dump/readme.txt"
+    }
+   },
+   "files": {
+    "cities15000.zip": {
+     "bytes": 3360048,
+     "retrieved": "2026-10-04T17:09:25Z",
+     "sha256": "4d91d34a56966f1b6c7ae192e171bd721b47f7b86848955679ed20bd032d4aba",
+     "url": "https://download.geonames.org/export/dump/cities15000.zip"
+    },
+    "countryInfo.txt": {
+     "bytes": 31678,
+     "retrieved": "2026-10-04T17:09:26Z",
+     "sha256": "93bafc525813f22e4711ff9ed6d626343094ce48c26388dc7c49189b3d7d5512",
+     "url": "https://download.geonames.org/export/dump/countryInfo.txt"
+    }
+   },
+   "license": "cc-by-4.0",
+   "retrieved": "2026-10-04T17:09:26Z",
+   "status": "ok",
+   "title": "GeoNames cities15000 and countryInfo"
+  },
+  "ldnoobw": {
+   "basis": "LICENSE at the pinned commit: CC BY 4.0. Rubric only (BANKPASS s3 Z): never training text",
+   "evidence": {
+    "LICENSE": {
+     "licence_match": "Attribution 4.0 International",
+     "sha256": "55bfbc1759943f7d19acfc68e35644b7fbe10cd8d39ab3551ce5ecff5dda9979",
+     "url": "https://raw.githubusercontent.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/5faf2ba42d7b1c0977169ec3611df25a3c08eb13/LICENSE"
+    }
+   },
+   "files": {
+    "en": {
+     "bytes": 3777,
+     "retrieved": "2026-10-04T17:10:46Z",
+     "sha256": "af851ecef1d5f212caba17339b12ac39cc2fef7d78c74876f67237644fcee8bd",
+     "url": "https://raw.githubusercontent.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/5faf2ba42d7b1c0977169ec3611df25a3c08eb13/en"
+    }
+   },
+   "license": "cc-by-4.0",
+   "retrieved": "2026-10-04T17:10:46Z",
+   "revision": "5faf2ba42d7b1c0977169ec3611df25a3c08eb13",
+   "status": "ok",
+   "title": "List of Dirty, Naughty, Obscene and Otherwise Bad Words, English, commit 5faf2ba4"
+  },
+  "nemotron_personas_usa": {
+   "basis": "dataset card at the pinned revision: license cc-by-4.0, ready for commercial use. The persona text is synthetic (NeMo Data Designer, gpt-oss-120b per the card): prompt side only (BANKPASS s3 Q)",
+   "evidence": {
+    "README.md": {
+     "licence_match": "license: cc-by-4.0",
+     "sha256": "31b7c4fa060b4847a0d43c646da25225f8922ce8fc6531330e0b3a842b0c4223",
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA/resolve/5b4cd35ab46490c1da1bd2b5a2324d6f871be180/README.md"
+    }
+   },
+   "files": {
+    "data/train-00000-of-00011.parquet": {
+     "bytes": 244151718,
+     "retrieved": "2026-10-04T17:09:34Z",
+     "sha256": "af5d3e1c0ca2ca9cd12b5bcfc6ca5a850cdc6b7d6c24eb89ce948b23bed9c7e7",
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA/resolve/5b4cd35ab46490c1da1bd2b5a2324d6f871be180/data/train-00000-of-00011.parquet"
+    },
+    "data/train-00001-of-00011.parquet": {
+     "bytes": 244173272,
+     "retrieved": "2026-10-04T17:09:40Z",
+     "sha256": "bce1f98e9aaff5f115dee7f12fa115599381ccb1b4d7594c6d72ce627a617010",
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA/resolve/5b4cd35ab46490c1da1bd2b5a2324d6f871be180/data/train-00001-of-00011.parquet"
+    },
+    "data/train-00002-of-00011.parquet": {
+     "bytes": 244261299,
+     "retrieved": "2026-10-04T17:09:47Z",
+     "sha256": "dabeb21e9de465ef26f5852b0e2d4a9fbbc5d513b4699db601cd632aa2705a9c",
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA/resolve/5b4cd35ab46490c1da1bd2b5a2324d6f871be180/data/train-00002-of-00011.parquet"
+    },
+    "data/train-00003-of-00011.parquet": {
+     "bytes": 244281370,
+     "retrieved": "2026-10-04T17:09:53Z",
+     "sha256": "06fcc5536b191777cadd056bcac93058c7d976195cc16353fa51a9548035c782",
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA/resolve/5b4cd35ab46490c1da1bd2b5a2324d6f871be180/data/train-00003-of-00011.parquet"
+    },
+    "data/train-00004-of-00011.parquet": {
+     "bytes": 244327438,
+     "retrieved": "2026-10-04T17:09:59Z",
+     "sha256": "a0db243958664adfbe824a79616aa804ed247ecaaca00a3a94d8b77f1b573dc9",
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA/resolve/5b4cd35ab46490c1da1bd2b5a2324d6f871be180/data/train-00004-of-00011.parquet"
+    },
+    "data/train-00005-of-00011.parquet": {
+     "bytes": 244390668,
+     "retrieved": "2026-10-04T17:10:06Z",
+     "sha256": "d9676be60167f8ef94fcbaad35613e8057fb92c15bdf3d99847372c793c9064c",
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA/resolve/5b4cd35ab46490c1da1bd2b5a2324d6f871be180/data/train-00005-of-00011.parquet"
+    },
+    "data/train-00006-of-00011.parquet": {
+     "bytes": 244292806,
+     "retrieved": "2026-10-04T17:10:13Z",
+     "sha256": "ac86eedbffce275c92b80f1e7bb2128116e8621c15d4252b0f408ca457bce946",
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA/resolve/5b4cd35ab46490c1da1bd2b5a2324d6f871be180/data/train-00006-of-00011.parquet"
+    },
+    "data/train-00007-of-00011.parquet": {
+     "bytes": 244036642,
+     "retrieved": "2026-10-04T17:10:19Z",
+     "sha256": "85c07ea71ef44eb288dd2714593cb6b4b7592dcea88907fdcc7d395d8941397b",
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA/resolve/5b4cd35ab46490c1da1bd2b5a2324d6f871be180/data/train-00007-of-00011.parquet"
+    },
+    "data/train-00008-of-00011.parquet": {
+     "bytes": 244181148,
+     "retrieved": "2026-10-04T17:10:26Z",
+     "sha256": "04905f56ef5cf35be55d9a0a4a5e577fb9d8908168933ee0e5b414ae8d27f83b",
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA/resolve/5b4cd35ab46490c1da1bd2b5a2324d6f871be180/data/train-00008-of-00011.parquet"
+    },
+    "data/train-00009-of-00011.parquet": {
+     "bytes": 244403073,
+     "retrieved": "2026-10-04T17:10:33Z",
+     "sha256": "e2c01cd32073abd6e231ac17ef8530513f22b6473803acbd5fa2c917f6ee844d",
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA/resolve/5b4cd35ab46490c1da1bd2b5a2324d6f871be180/data/train-00009-of-00011.parquet"
+    },
+    "data/train-00010-of-00011.parquet": {
+     "bytes": 244193296,
+     "retrieved": "2026-10-04T17:10:46Z",
+     "sha256": "2026d1f82d3c1534a2aaf98b0d7c2a9cff2f8f9b161ff55ff51cf929a37bc0d2",
+     "url": "https://huggingface.co/datasets/nvidia/Nemotron-Personas-USA/resolve/5b4cd35ab46490c1da1bd2b5a2324d6f871be180/data/train-00010-of-00011.parquet"
+    }
+   },
+   "license": "cc-by-4.0",
+   "retrieved": "2026-10-04T17:10:46Z",
+   "revision": "5b4cd35ab46490c1da1bd2b5a2324d6f871be180",
+   "status": "ok",
+   "title": "Nemotron-Personas-USA (NVIDIA), revision 5b4cd35a"
+  }
+ },
+ "status": "frozen",
+ "version": "human_v0",
+ "wordlist": "wordlist@4a36995f044f:computed"
+}

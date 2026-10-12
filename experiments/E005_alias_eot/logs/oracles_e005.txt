@@ -1,0 +1,40 @@
+seed 1: n=6404 blocks {'e004': 4502, 'alias': 1287, 'ind': 615} max(rule)=0.622 O1=0.202 O2=0.397 IDEAL=1.00 OK
+seed 2: n=6404 blocks {'e004': 4440, 'alias': 1301, 'ind': 663} max(rule)=0.626 O1=0.197 O2=0.396 IDEAL=1.00 OK
+seed 3: n=6404 blocks {'e004': 4478, 'alias': 1292, 'ind': 634} max(rule)=0.628 O1=0.200 O2=0.400 IDEAL=1.00 OK
+seed 4: n=6404 blocks {'e004': 4476, 'alias': 1291, 'ind': 637} max(rule)=0.627 O1=0.208 O2=0.398 IDEAL=1.00 OK
+seed 5: n=6404 blocks {'e004': 4507, 'ind': 659, 'alias': 1238} max(rule)=0.633 O1=0.198 O2=0.408 IDEAL=1.00 OK
+
+rule (mean over seeds; overall, then per block)     all   e004  alias    ind  max all
+-------------------------------------------------------------------------------------
+O1 first mention                                  0.201  0.275  0.043  0.000    0.208
+O2 last mention                                   0.400  0.430  0.374  0.246    0.408
+O3 last marked, else first                        0.417  0.463  0.349  0.230    0.427
+O4 prefix copy (3/2 words)                        0.400  0.431  0.373  0.244    0.408
+O5 content words vs question                      0.485  0.610  0.254  0.077    0.487
+O5 content words vs q+prefix                      0.485  0.610  0.254  0.077    0.487
+O5 all words vs question                          0.393  0.498  0.191  0.058    0.402
+O5 3-word runs vs q+prefix                        0.403  0.460  0.317  0.179    0.413
+O6 latest naming asked                            0.523  0.655  0.280  0.086    0.527
+O7 latest naming no other                         0.627  0.659  0.619  0.425    0.633
+O8 most frequent                                  0.448  0.503  0.368  0.228    0.455
+X1 second-to-last statement                       0.227  0.255  0.244  0.000    0.231
+X2 latest with update cue                         0.421  0.461  0.366  0.247    0.428
+X3 latest naming asked, full phrase               0.451  0.573  0.220  0.064    0.454
+X4 value at last naming                           0.523  0.655  0.280  0.086    0.527
+X5 statement after last echo                      0.400  0.430  0.374  0.246    0.408
+X6 latest with no q/p overlap                     0.278  0.289  0.300  0.162    0.283
+X7 first naming asked                             0.279  0.374  0.087  0.000    0.284
+X8 latest acked with value                        0.443  0.495  0.368  0.228    0.449
+X9 latest unmarked naming asked                   0.339  0.438  0.143  0.033    0.344
+X10 longest statement                             0.206  0.280  0.033  0.039    0.217
+X11 third-to-last statement                       0.306  0.301  0.289  0.380    0.309
+AR latest alias correction                        0.445  0.430  0.598  0.246    0.449  <- diagnostic
+T topic tracker (diagnostic)                      0.853  0.874  0.705  1.000    0.859  <- diagnostic
+IDEAL                                             1.000  1.000  1.000  1.000    1.000  <- diagnostic
+
+alias block by case (mean over seeds): AR, T, O2, O6, O7
+  latest   n= 3835 AR=1.000 T=0.668 O2=0.428 O6=0.000 O7=0.793
+  earlier  n= 1004 AR=0.000 T=0.906 O2=0.751 O6=0.583 O7=0.923
+  other    n= 1570 AR=0.000 T=0.668 O2=0.000 O6=0.768 O7=0.000
+
+RESULT: ALL PASS (every O and X rule <= 0.70, O1/O2 <= 0.50, IDEAL 1.00 on every seed)

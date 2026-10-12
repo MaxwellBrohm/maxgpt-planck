@@ -1,0 +1,799 @@
+{
+ "items_sha256": "e99b40d6b56c9c2d47ea0daf19316f409b850cd09dcf3f778b5cac5357c4a06d",
+ "groups_n": {
+  "all": 64,
+  "AL1+AL2+AL4": 48,
+  "needs linking": 14,
+  "AL1": 16,
+  "pl:other_obj": 16,
+  "pl:filler": 16,
+  "pl:adjacent": 32,
+  "AL2": 16,
+  "AL3": 16,
+  "AL4": 16
+ },
+ "models": {
+  "base": {
+   "LIK plain": {
+    "all": 0.2188,
+    "AL1+AL2+AL4": 0.2917,
+    "needs linking": 0.2857,
+    "AL1": 0.4375,
+    "pl:other_obj": 0.125,
+    "pl:filler": 0.25,
+    "pl:adjacent": 0.25,
+    "AL2": 0.1875,
+    "AL3": 0.0,
+    "AL4": 0.25
+   },
+   "GEN plain": {
+    "all": 0.0938,
+    "AL1+AL2+AL4": 0.125,
+    "needs linking": 0.0,
+    "AL1": 0.3125,
+    "pl:other_obj": 0.0,
+    "pl:filler": 0.0625,
+    "pl:adjacent": 0.1562,
+    "AL2": 0.0,
+    "AL3": 0.0,
+    "AL4": 0.0625
+   },
+   "LIK plain picks LN's value where LN is wrong": [
+    7,
+    48
+   ],
+   "LIK plain picks T's value where T is wrong": [
+    5,
+    16
+   ],
+   "LIK chat": {
+    "all": 0.1875,
+    "AL1+AL2+AL4": 0.25,
+    "needs linking": 0.2857,
+    "AL1": 0.3125,
+    "pl:other_obj": 0.125,
+    "pl:filler": 0.25,
+    "pl:adjacent": 0.1875,
+    "AL2": 0.25,
+    "AL3": 0.0,
+    "AL4": 0.1875
+   },
+   "GEN chat": {
+    "all": 0.0781,
+    "AL1+AL2+AL4": 0.1042,
+    "needs linking": 0.0714,
+    "AL1": 0.1875,
+    "pl:other_obj": 0.0625,
+    "pl:filler": 0.0625,
+    "pl:adjacent": 0.0938,
+    "AL2": 0.0625,
+    "AL3": 0.0,
+    "AL4": 0.0625
+   },
+   "LIK chat picks LN's value where LN is wrong": [
+    6,
+    48
+   ],
+   "LIK chat picks T's value where T is wrong": [
+    5,
+    16
+   ],
+   "fatal": null,
+   "selftest_fail": [],
+   "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+   "items_sha256_ok": true
+  },
+  "e005_s1": {
+   "LIK plain": {
+    "all": 0.9844,
+    "AL1+AL2+AL4": 0.9792,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 0.9688,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 0.9375
+   },
+   "GEN plain": {
+    "all": 1.0,
+    "AL1+AL2+AL4": 1.0,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 1.0,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 1.0
+   },
+   "LIK plain picks LN's value where LN is wrong": [
+    1,
+    48
+   ],
+   "LIK plain picks T's value where T is wrong": [
+    0,
+    16
+   ],
+   "LIK chat": {
+    "all": 0.9688,
+    "AL1+AL2+AL4": 0.9583,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 0.9375,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 0.875
+   },
+   "GEN chat": {
+    "all": 0.9688,
+    "AL1+AL2+AL4": 0.9583,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 0.9375,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 0.875
+   },
+   "LIK chat picks LN's value where LN is wrong": [
+    2,
+    48
+   ],
+   "LIK chat picks T's value where T is wrong": [
+    0,
+    16
+   ],
+   "fatal": null,
+   "selftest_fail": [],
+   "model": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E005_alias_eot/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s1",
+   "items_sha256_ok": true
+  },
+  "e005_s2": {
+   "LIK plain": {
+    "all": 0.9688,
+    "AL1+AL2+AL4": 0.9583,
+    "needs linking": 1.0,
+    "AL1": 0.9375,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 0.9375,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 0.9375
+   },
+   "GEN plain": {
+    "all": 1.0,
+    "AL1+AL2+AL4": 1.0,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 1.0,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 1.0
+   },
+   "LIK plain picks LN's value where LN is wrong": [
+    0,
+    48
+   ],
+   "LIK plain picks T's value where T is wrong": [
+    0,
+    16
+   ],
+   "LIK chat": {
+    "all": 0.9844,
+    "AL1+AL2+AL4": 0.9792,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 0.9688,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 0.9375
+   },
+   "GEN chat": {
+    "all": 0.9688,
+    "AL1+AL2+AL4": 0.9583,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 0.9375,
+    "pl:filler": 1.0,
+    "pl:adjacent": 0.9688,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 0.875
+   },
+   "LIK chat picks LN's value where LN is wrong": [
+    1,
+    48
+   ],
+   "LIK chat picks T's value where T is wrong": [
+    0,
+    16
+   ],
+   "fatal": null,
+   "selftest_fail": [],
+   "model": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E005_alias_eot/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s2",
+   "items_sha256_ok": true
+  },
+  "e005_s3": {
+   "LIK plain": {
+    "all": 0.9688,
+    "AL1+AL2+AL4": 0.9583,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 0.9375,
+    "pl:adjacent": 0.9688,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 0.875
+   },
+   "GEN plain": {
+    "all": 0.9844,
+    "AL1+AL2+AL4": 0.9792,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 0.9375,
+    "pl:adjacent": 1.0,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 0.9375
+   },
+   "LIK plain picks LN's value where LN is wrong": [
+    2,
+    48
+   ],
+   "LIK plain picks T's value where T is wrong": [
+    0,
+    16
+   ],
+   "LIK chat": {
+    "all": 0.9844,
+    "AL1+AL2+AL4": 0.9792,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 0.9688,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 0.9375
+   },
+   "GEN chat": {
+    "all": 0.9844,
+    "AL1+AL2+AL4": 0.9792,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 0.9688,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 0.9375
+   },
+   "LIK chat picks LN's value where LN is wrong": [
+    1,
+    48
+   ],
+   "LIK chat picks T's value where T is wrong": [
+    0,
+    16
+   ],
+   "fatal": null,
+   "selftest_fail": [],
+   "model": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E005_alias_eot/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s3",
+   "items_sha256_ok": true
+  },
+  "e005_s4": {
+   "LIK plain": {
+    "all": 1.0,
+    "AL1+AL2+AL4": 1.0,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 1.0,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 1.0
+   },
+   "GEN plain": {
+    "all": 1.0,
+    "AL1+AL2+AL4": 1.0,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 1.0,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 1.0
+   },
+   "LIK plain picks LN's value where LN is wrong": [
+    0,
+    48
+   ],
+   "LIK plain picks T's value where T is wrong": [
+    0,
+    16
+   ],
+   "LIK chat": {
+    "all": 1.0,
+    "AL1+AL2+AL4": 1.0,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 1.0,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 1.0
+   },
+   "GEN chat": {
+    "all": 1.0,
+    "AL1+AL2+AL4": 1.0,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 1.0,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 1.0
+   },
+   "LIK chat picks LN's value where LN is wrong": [
+    0,
+    48
+   ],
+   "LIK chat picks T's value where T is wrong": [
+    0,
+    16
+   ],
+   "fatal": null,
+   "selftest_fail": [],
+   "model": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E005_alias_eot/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s4",
+   "items_sha256_ok": true
+  },
+  "e005_s5": {
+   "LIK plain": {
+    "all": 0.9688,
+    "AL1+AL2+AL4": 0.9792,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 0.875,
+    "pl:adjacent": 1.0,
+    "AL2": 0.9375,
+    "AL3": 0.9375,
+    "AL4": 1.0
+   },
+   "GEN plain": {
+    "all": 0.9844,
+    "AL1+AL2+AL4": 0.9792,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 0.9375,
+    "pl:adjacent": 1.0,
+    "AL2": 0.9375,
+    "AL3": 1.0,
+    "AL4": 1.0
+   },
+   "LIK plain picks LN's value where LN is wrong": [
+    0,
+    48
+   ],
+   "LIK plain picks T's value where T is wrong": [
+    0,
+    16
+   ],
+   "LIK chat": {
+    "all": 0.9844,
+    "AL1+AL2+AL4": 0.9792,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 0.9375,
+    "pl:adjacent": 1.0,
+    "AL2": 0.9375,
+    "AL3": 1.0,
+    "AL4": 1.0
+   },
+   "GEN chat": {
+    "all": 1.0,
+    "AL1+AL2+AL4": 1.0,
+    "needs linking": 1.0,
+    "AL1": 1.0,
+    "pl:other_obj": 1.0,
+    "pl:filler": 1.0,
+    "pl:adjacent": 1.0,
+    "AL2": 1.0,
+    "AL3": 1.0,
+    "AL4": 1.0
+   },
+   "LIK chat picks LN's value where LN is wrong": [
+    0,
+    48
+   ],
+   "LIK chat picks T's value where T is wrong": [
+    0,
+    16
+   ],
+   "fatal": null,
+   "selftest_fail": [],
+   "model": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E005_alias_eot/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s5",
+   "items_sha256_ok": true
+  },
+  "e004_s1": {
+   "LIK plain": {
+    "all": 0.8281,
+    "AL1+AL2+AL4": 0.8542,
+    "needs linking": 0.7143,
+    "AL1": 1.0,
+    "pl:other_obj": 0.6875,
+    "pl:filler": 0.6875,
+    "pl:adjacent": 0.9688,
+    "AL2": 0.5625,
+    "AL3": 0.75,
+    "AL4": 1.0
+   },
+   "GEN plain": {
+    "all": 0.7656,
+    "AL1+AL2+AL4": 0.7917,
+    "needs linking": 0.6429,
+    "AL1": 1.0,
+    "pl:other_obj": 0.5625,
+    "pl:filler": 0.625,
+    "pl:adjacent": 0.9375,
+    "AL2": 0.375,
+    "AL3": 0.6875,
+    "AL4": 1.0
+   },
+   "LIK plain picks LN's value where LN is wrong": [
+    0,
+    48
+   ],
+   "LIK plain picks T's value where T is wrong": [
+    5,
+    16
+   ],
+   "LIK chat": {
+    "all": 0.8125,
+    "AL1+AL2+AL4": 0.8542,
+    "needs linking": 0.7143,
+    "AL1": 1.0,
+    "pl:other_obj": 0.75,
+    "pl:filler": 0.6875,
+    "pl:adjacent": 0.9062,
+    "AL2": 0.5625,
+    "AL3": 0.6875,
+    "AL4": 1.0
+   },
+   "GEN chat": {
+    "all": 0.0312,
+    "AL1+AL2+AL4": 0.0417,
+    "needs linking": 0.1429,
+    "AL1": 0.0625,
+    "pl:other_obj": 0.0625,
+    "pl:filler": 0.0,
+    "pl:adjacent": 0.0312,
+    "AL2": 0.0625,
+    "AL3": 0.0,
+    "AL4": 0.0
+   },
+   "LIK chat picks LN's value where LN is wrong": [
+    0,
+    48
+   ],
+   "LIK chat picks T's value where T is wrong": [
+    4,
+    16
+   ],
+   "fatal": null,
+   "selftest_fail": [],
+   "model": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E004_general_updating/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s1",
+   "items_sha256_ok": true
+  },
+  "e004_s2": {
+   "LIK plain": {
+    "all": 0.7969,
+    "AL1+AL2+AL4": 0.8958,
+    "needs linking": 0.7143,
+    "AL1": 1.0,
+    "pl:other_obj": 0.6875,
+    "pl:filler": 0.6875,
+    "pl:adjacent": 0.9062,
+    "AL2": 0.6875,
+    "AL3": 0.5,
+    "AL4": 1.0
+   },
+   "GEN plain": {
+    "all": 0.8438,
+    "AL1+AL2+AL4": 0.9375,
+    "needs linking": 0.7857,
+    "AL1": 1.0,
+    "pl:other_obj": 0.6875,
+    "pl:filler": 0.8125,
+    "pl:adjacent": 0.9375,
+    "AL2": 0.8125,
+    "AL3": 0.5625,
+    "AL4": 1.0
+   },
+   "LIK plain picks LN's value where LN is wrong": [
+    0,
+    48
+   ],
+   "LIK plain picks T's value where T is wrong": [
+    3,
+    16
+   ],
+   "LIK chat": {
+    "all": 0.8594,
+    "AL1+AL2+AL4": 0.9167,
+    "needs linking": 0.8571,
+    "AL1": 1.0,
+    "pl:other_obj": 0.8125,
+    "pl:filler": 0.6875,
+    "pl:adjacent": 0.9688,
+    "AL2": 0.8125,
+    "AL3": 0.6875,
+    "AL4": 0.9375
+   },
+   "GEN chat": {
+    "all": 0.4219,
+    "AL1+AL2+AL4": 0.4583,
+    "needs linking": 0.5714,
+    "AL1": 0.375,
+    "pl:other_obj": 0.375,
+    "pl:filler": 0.3125,
+    "pl:adjacent": 0.5,
+    "AL2": 0.4375,
+    "AL3": 0.3125,
+    "AL4": 0.5625
+   },
+   "LIK chat picks LN's value where LN is wrong": [
+    1,
+    48
+   ],
+   "LIK chat picks T's value where T is wrong": [
+    2,
+    16
+   ],
+   "fatal": null,
+   "selftest_fail": [],
+   "model": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E004_general_updating/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s2",
+   "items_sha256_ok": true
+  },
+  "e004_s3": {
+   "LIK plain": {
+    "all": 0.7656,
+    "AL1+AL2+AL4": 0.8125,
+    "needs linking": 0.5714,
+    "AL1": 0.9375,
+    "pl:other_obj": 0.625,
+    "pl:filler": 0.625,
+    "pl:adjacent": 0.9062,
+    "AL2": 0.5,
+    "AL3": 0.625,
+    "AL4": 1.0
+   },
+   "GEN plain": {
+    "all": 0.75,
+    "AL1+AL2+AL4": 0.8125,
+    "needs linking": 0.5714,
+    "AL1": 0.9375,
+    "pl:other_obj": 0.5625,
+    "pl:filler": 0.6875,
+    "pl:adjacent": 0.875,
+    "AL2": 0.5,
+    "AL3": 0.5625,
+    "AL4": 1.0
+   },
+   "LIK plain picks LN's value where LN is wrong": [
+    2,
+    48
+   ],
+   "LIK plain picks T's value where T is wrong": [
+    7,
+    16
+   ],
+   "LIK chat": {
+    "all": 0.7344,
+    "AL1+AL2+AL4": 0.7917,
+    "needs linking": 0.5714,
+    "AL1": 1.0,
+    "pl:other_obj": 0.625,
+    "pl:filler": 0.5625,
+    "pl:adjacent": 0.875,
+    "AL2": 0.375,
+    "AL3": 0.5625,
+    "AL4": 1.0
+   },
+   "GEN chat": {
+    "all": 0.0312,
+    "AL1+AL2+AL4": 0.0208,
+    "needs linking": 0.0714,
+    "AL1": 0.0625,
+    "pl:other_obj": 0.0625,
+    "pl:filler": 0.0,
+    "pl:adjacent": 0.0312,
+    "AL2": 0.0,
+    "AL3": 0.0625,
+    "AL4": 0.0
+   },
+   "LIK chat picks LN's value where LN is wrong": [
+    1,
+    48
+   ],
+   "LIK chat picks T's value where T is wrong": [
+    7,
+    16
+   ],
+   "fatal": null,
+   "selftest_fail": [],
+   "model": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E004_general_updating/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s3",
+   "items_sha256_ok": true
+  },
+  "e004_s4": {
+   "LIK plain": {
+    "all": 0.7656,
+    "AL1+AL2+AL4": 0.8333,
+    "needs linking": 0.6429,
+    "AL1": 1.0,
+    "pl:other_obj": 0.625,
+    "pl:filler": 0.6875,
+    "pl:adjacent": 0.875,
+    "AL2": 0.5,
+    "AL3": 0.5625,
+    "AL4": 1.0
+   },
+   "GEN plain": {
+    "all": 0.7812,
+    "AL1+AL2+AL4": 0.8125,
+    "needs linking": 0.5714,
+    "AL1": 0.9375,
+    "pl:other_obj": 0.5625,
+    "pl:filler": 0.75,
+    "pl:adjacent": 0.9062,
+    "AL2": 0.5,
+    "AL3": 0.6875,
+    "AL4": 1.0
+   },
+   "LIK plain picks LN's value where LN is wrong": [
+    0,
+    48
+   ],
+   "LIK plain picks T's value where T is wrong": [
+    5,
+    16
+   ],
+   "LIK chat": {
+    "all": 0.7656,
+    "AL1+AL2+AL4": 0.7917,
+    "needs linking": 0.5,
+    "AL1": 0.9375,
+    "pl:other_obj": 0.625,
+    "pl:filler": 0.75,
+    "pl:adjacent": 0.8438,
+    "AL2": 0.4375,
+    "AL3": 0.6875,
+    "AL4": 1.0
+   },
+   "GEN chat": {
+    "all": 0.2188,
+    "AL1+AL2+AL4": 0.25,
+    "needs linking": 0.2857,
+    "AL1": 0.25,
+    "pl:other_obj": 0.1875,
+    "pl:filler": 0.125,
+    "pl:adjacent": 0.2812,
+    "AL2": 0.125,
+    "AL3": 0.125,
+    "AL4": 0.375
+   },
+   "LIK chat picks LN's value where LN is wrong": [
+    1,
+    48
+   ],
+   "LIK chat picks T's value where T is wrong": [
+    6,
+    16
+   ],
+   "fatal": null,
+   "selftest_fail": [],
+   "model": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E004_general_updating/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s4",
+   "items_sha256_ok": true
+  },
+  "e004_s5": {
+   "LIK plain": {
+    "all": 0.7969,
+    "AL1+AL2+AL4": 0.875,
+    "needs linking": 0.5714,
+    "AL1": 1.0,
+    "pl:other_obj": 0.625,
+    "pl:filler": 0.75,
+    "pl:adjacent": 0.9062,
+    "AL2": 0.625,
+    "AL3": 0.5625,
+    "AL4": 1.0
+   },
+   "GEN plain": {
+    "all": 0.7969,
+    "AL1+AL2+AL4": 0.875,
+    "needs linking": 0.6429,
+    "AL1": 1.0,
+    "pl:other_obj": 0.625,
+    "pl:filler": 0.6875,
+    "pl:adjacent": 0.9375,
+    "AL2": 0.625,
+    "AL3": 0.5625,
+    "AL4": 1.0
+   },
+   "LIK plain picks LN's value where LN is wrong": [
+    0,
+    48
+   ],
+   "LIK plain picks T's value where T is wrong": [
+    5,
+    16
+   ],
+   "LIK chat": {
+    "all": 0.7812,
+    "AL1+AL2+AL4": 0.8542,
+    "needs linking": 0.5714,
+    "AL1": 1.0,
+    "pl:other_obj": 0.625,
+    "pl:filler": 0.6875,
+    "pl:adjacent": 0.9062,
+    "AL2": 0.5625,
+    "AL3": 0.5625,
+    "AL4": 1.0
+   },
+   "GEN chat": {
+    "all": 0.5938,
+    "AL1+AL2+AL4": 0.6458,
+    "needs linking": 0.4286,
+    "AL1": 0.8125,
+    "pl:other_obj": 0.4375,
+    "pl:filler": 0.625,
+    "pl:adjacent": 0.6562,
+    "AL2": 0.3125,
+    "AL3": 0.4375,
+    "AL4": 0.8125
+   },
+   "LIK chat picks LN's value where LN is wrong": [
+    0,
+    48
+   ],
+   "LIK chat picks T's value where T is wrong": [
+    4,
+    16
+   ],
+   "fatal": null,
+   "selftest_fail": [],
+   "model": "/Users/brohm/Documents/Projects/maxgpt-planck/experiments/E004_general_updating/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s5",
+   "items_sha256_ok": true
+  }
+ },
+ "addition": {
+  "e005_seeds_scored": [
+   "e005_s1",
+   "e005_s2",
+   "e005_s3",
+   "e005_s4",
+   "e005_s5"
+  ],
+  "seeds_al124_lik_below_half": [],
+  "alias_reading": "DATA GAP",
+  "resolved_by_alias_recency": false
+ }
+}

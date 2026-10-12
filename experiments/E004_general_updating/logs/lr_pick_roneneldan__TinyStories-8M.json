@@ -1,0 +1,73 @@
+{
+ "model": "roneneldan/TinyStories-8M",
+ "mode": "grid",
+ "lrs": [
+  "5e-05",
+  "3e-04",
+  "1e-03"
+ ],
+ "rows": {
+  "5e-05": {
+   "min": 0.0312,
+   "mean": 0.1771,
+   "fams": {
+    "H1": 0.2188,
+    "H2": 0.25,
+    "H3": 0.1875,
+    "H4": 0.0938,
+    "H5": 0.0312,
+    "H6": 0.2188,
+    "H7": 0.1562,
+    "C_noupd": 0.1875,
+    "C_twoslot": 0.25
+   },
+   "lr": "5e-05",
+   "lock_in_step": null,
+   "loss_first10": 4.577,
+   "loss_last50": 0.7374
+  },
+  "3e-04": {
+   "min": 0.0312,
+   "mean": 0.1944,
+   "fams": {
+    "H1": 0.2188,
+    "H2": 0.1875,
+    "H3": 0.25,
+    "H4": 0.1875,
+    "H5": 0.0312,
+    "H6": 0.25,
+    "H7": 0.2812,
+    "C_noupd": 0.1562,
+    "C_twoslot": 0.1875
+   },
+   "lr": "3e-04",
+   "lock_in_step": null,
+   "loss_first10": 3.6978,
+   "loss_last50": 0.7075
+  },
+  "1e-03": {
+   "min": 0.0938,
+   "mean": 0.2153,
+   "fams": {
+    "H1": 0.1562,
+    "H2": 0.2188,
+    "H3": 0.0938,
+    "H4": 0.375,
+    "H5": 0.2188,
+    "H6": 0.3125,
+    "H7": 0.2812,
+    "C_noupd": 0.125,
+    "C_twoslot": 0.1562
+   },
+   "lr": "1e-03",
+   "lock_in_step": null,
+   "loss_first10": 3.7728,
+   "loss_last50": 0.787
+  }
+ },
+ "ineligible": {},
+ "final": false,
+ "decision": "EXTEND",
+ "value": "3e-03",
+ "line": "EXTEND 3e-03"
+}

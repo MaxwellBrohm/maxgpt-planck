@@ -1,0 +1,57 @@
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:   0%|          | 1/311 [00:00<01:32,  3.36it/s]Loading weights:  99%|█████████▉| 309/311 [00:00<00:00, 997.72it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 779.57it/s]
+loaded Qwen/Qwen3-0.6B params=596.0M device=mps eos=[151645, 151643] in 1.6s
+[transformers] The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+[    13s] seed=None R_d2_name                  0/1 tok=356
+[    14s] seed=None R_d2_name__ctrl            0/1 tok=43
+[    23s] seed=None R_d2_number                1/1 tok=330
+[    24s] seed=None R_d2_number__ctrl          1/1 tok=34
+[    47s] seed=None R_d4_pet                   1/1 tok=651
+[    47s] seed=None R_d4_pet__ctrl             1/1 tok=33
+[    67s] seed=None R_d4_city                  1/1 tok=587
+[    67s] seed=None R_d4_city__ctrl            1/1 tok=31
+[    99s] seed=None R_d6_name                  1/1 tok=912
+[    99s] seed=None R_d6_name__ctrl            1/1 tok=31
+[   138s] seed=None R_d6_number                1/1 tok=982
+[   138s] seed=None R_d6_number__ctrl          1/1 tok=39
+[   256s] seed=None R_d10_pet                  1/1 tok=1376
+[   256s] seed=None R_d10_pet__ctrl            1/1 tok=30
+[   315s] seed=None R_d5_multi                 3/3 tok=683
+[   317s] seed=None R_d5_multi__ctrl           3/3 tok=50
+[   318s] seed=None F_ellipsis_capital         2/2 tok=43
+[   318s] seed=None F_ellipsis_capital__ctrl   1/1 tok=19
+[   319s] seed=None F_translate                2/2 tok=50
+[   319s] seed=None F_translate__ctrl          1/1 tok=23
+[   320s] seed=None F_coref_she                1/1 tok=57
+[   320s] seed=None F_coref_she__ctrl          1/1 tok=32
+[   323s] seed=None F_whynot                   1/1 tok=86
+[   327s] seed=None F_whynot__ctrl             1/1 tok=24
+[   328s] seed=None F_shorter                  1/1 tok=66
+[   329s] seed=None F_shorter__ctrl            1/1 tok=24
+[   333s] seed=None I_one_sentence             3/3 tok=149
+[   334s] seed=None I_one_sentence__ctrl       1/1 tok=22
+[   337s] seed=None I_end_question             3/3 tok=146
+[   338s] seed=None I_end_question__ctrl       1/1 tok=33
+[   340s] seed=None I_caps                     3/3 tok=135
+[   340s] seed=None I_caps__ctrl               1/1 tok=23
+[   342s] seed=None I_persona                  4/5 tok=119
+[   342s] seed=None I_persona__ctrl            2/2 tok=41
+[   347s] seed=None K_day                      1/1 tok=220
+[   348s] seed=None K_day__ctrl                1/1 tok=44
+[   360s] seed=None K_time                     1/1 tok=262
+[   362s] seed=None K_time__ctrl               1/1 tok=45
+[   368s] seed=None K_color                    0/1 tok=228
+[   369s] seed=None K_color__ctrl              1/1 tok=42
+[   369s] seed=None O_second_item              1/1 tok=64
+[   371s] seed=None O_last_item                1/1 tok=73
+[   372s] seed=None O_add10                    2/2 tok=59
+[   374s] seed=None O_add10__ctrl              1/1 tok=26
+[   379s] seed=None RI_identity                1/2 tok=162
+[   384s] seed=None RI_binding                 1/1 tok=187
+[   385s] seed=None RI_binding__ctrl           1/1 tok=28
+[   409s] seed=None T_party                    1/1 tok=443
+[   411s] seed=None T_party__ctrl              1/1 tok=40
+[   430s] seed=None T_dragon                   2/2 tok=498
+[   431s] seed=None T_dragon__ctrl             2/2 tok=43
+[   538s] seed=None L_tell_more                0/0 tok=989
+[   554s] seed=None L_chitchat                 0/1 tok=321
+done Qwen/Qwen3-0.6B in 554s -> /Users/brohm/Documents/Projects/maxgpt-nano/research/probe/transcripts/Qwen__Qwen3-0.6B__greedy.jsonl

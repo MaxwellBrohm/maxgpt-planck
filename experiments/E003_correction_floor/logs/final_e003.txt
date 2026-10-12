@@ -1,0 +1,88 @@
+E003 final reading (code/final_e003.py; plan in notes.txt 2026-10-02)
+
+INTEGRITY: 0 problems
+  killed attempts before each job's one completed run (all re-run from scratch, same command):
+    lr_ts1m_3e-04: 1 (swap_grew_1071MB)
+    lr_ts1m_1e-03: 2 (swap_grew_1018MB, swap_grew_1217MB)
+    ft_p14m_s3: 1 (swap_grew_904MB)
+    base_ts33m: 1 (preflight_refused)
+    ft_ts33m_s1: 16 (swap_grew_1039MB, swap_grew_1063MB, swap_grew_1088MB, swap_grew_1089MB, swap_grew_1100MB, )
+    ft_ts33m_s2: 7 (swap_grew_1082MB, swap_grew_1114MB, swap_grew_1321MB, swap_grew_1571MB, swap_grew_1660MB, )
+    lr_p160m_3e-04: 5 (swap_grew_1254MB, swap_grew_859MB, swap_grew_921MB, swap_grew_950MB, swap_grew_993MB)
+    ft_p160m_s2: 1 (swap_grew_833MB)
+
+PRE-REGISTERED READING
+model                               body LR     seeds verdict  best-dev-min(LR)  fails-every-LR  per-object  fit-diag  base-kbig  knowledge
+roneneldan/TinyStories-1M        398,464 5e-05  0/3   FAIL     0.30 (5e-05)      True            0/3        0/3       0.501      uninformative (<0.6)
+EleutherAI/pythia-14m          1,189,888 1e-02  0/3   FAIL     0.35 (1e-02)      True            0/3        -       0.585      uninformative (<0.6)
+roneneldan/TinyStories-3M      1,583,360 1e-02  0/3   FAIL     0.38 (1e-02)      True            0/3        0/3       0.469      uninformative (<0.6)
+EleutherAI/pythia-31m          4,739,072 5e-05  0/3   FAIL     0.52 (5e-05)      True            0/3        -       0.628      read
+roneneldan/TinyStories-8M      6,312,448 3e-04  0/3   FAIL     0.31 (3e-04)      True            0/3        0/3       0.476      uninformative (<0.6)
+EleutherAI/pythia-70m         18,915,328 5e-05  0/3   FAIL     0.50 (5e-05)      True            0/3        -       0.635      read
+roneneldan/TinyStories-33M    28,343,808 5e-05  0/3   FAIL     0.57 (5e-05)      True            0/3        0/3       0.501      uninformative (<0.6)
+EleutherAI/pythia-160m        85,056,000 5e-05  0/3   FAIL     0.69 (5e-05)      True            0/3        -       0.694      read
+  floor, pythia ladder: no pass: floor > 85,056,000 body
+  floor, tinystories ladder: no pass: floor > 28,343,808 body
+  E002 reference (other family, instruct-tuned): SmolLM2-135M-Instruct body 106,203,456 5/5 PASS=True
+
+POST-HOC (descriptive, never a verdict)
+  0/3 seeds: per-seed pass probability one-sided 95% upper bound 0.632
+  component ladders (smallest body where the cell alone is >= 0.8 on 2+ of 3 seeds): pythia|LW10 4,739,072; pythia|TS10 none; pythia|NU10 none; tinystories|LW10 none; tinystories|TS10 none; tinystories|NU10 none
+  model / seed: LW10 TS10 NU10 [Wilson 95%] failing cells; robust = a failing cell's upper bound < 0.8
+  ts1m  s1: LW10 0.36 [0.29,0.43]  TS10 0.31 [0.21,0.43]  NU10 0.48 [0.37,0.60]  failing LW10,TS10,NU10 robust=True
+  ts1m  s2: LW10 0.44 [0.37,0.51]  TS10 0.28 [0.19,0.40]  NU10 0.42 [0.31,0.54]  failing LW10,TS10,NU10 robust=True
+  ts1m  s3: LW10 0.43 [0.36,0.50]  TS10 0.36 [0.25,0.48]  NU10 0.44 [0.32,0.56]  failing LW10,TS10,NU10 robust=True
+  p14m  s1: LW10 0.39 [0.32,0.46]  TS10 0.31 [0.21,0.43]  NU10 0.52 [0.40,0.63]  failing LW10,TS10,NU10 robust=True
+  p14m  s2: LW10 0.39 [0.32,0.46]  TS10 0.38 [0.27,0.50]  NU10 0.44 [0.32,0.56]  failing LW10,TS10,NU10 robust=True
+  p14m  s3: LW10 0.36 [0.29,0.43]  TS10 0.31 [0.21,0.43]  NU10 0.50 [0.38,0.62]  failing LW10,TS10,NU10 robust=True
+  ts3m  s1: LW10 0.35 [0.28,0.42]  TS10 0.30 [0.20,0.42]  NU10 0.55 [0.43,0.66]  failing LW10,TS10,NU10 robust=True
+  ts3m  s2: LW10 0.35 [0.28,0.42]  TS10 0.39 [0.28,0.51]  NU10 0.52 [0.40,0.63]  failing LW10,TS10,NU10 robust=True
+  ts3m  s3: LW10 0.34 [0.28,0.41]  TS10 0.31 [0.21,0.43]  NU10 0.58 [0.46,0.69]  failing LW10,TS10,NU10 robust=True
+  p31m  s1: LW10 0.99 [0.97,1.00]  TS10 0.75 [0.63,0.84]  NU10 0.50 [0.38,0.62]  failing TS10,NU10 robust=True
+  p31m  s2: LW10 0.98 [0.95,0.99]  TS10 0.75 [0.63,0.84]  NU10 0.52 [0.40,0.63]  failing TS10,NU10 robust=True
+  p31m  s3: LW10 1.00 [0.98,1.00]  TS10 0.72 [0.60,0.81]  NU10 0.53 [0.41,0.65]  failing TS10,NU10 robust=True
+  ts8m  s1: LW10 0.51 [0.44,0.58]  TS10 0.44 [0.32,0.56]  NU10 0.59 [0.47,0.70]  failing LW10,TS10,NU10 robust=True
+  ts8m  s2: LW10 0.42 [0.35,0.49]  TS10 0.34 [0.24,0.47]  NU10 0.48 [0.37,0.60]  failing LW10,TS10,NU10 robust=True
+  ts8m  s3: LW10 0.49 [0.42,0.56]  TS10 0.36 [0.25,0.48]  NU10 0.50 [0.38,0.62]  failing LW10,TS10,NU10 robust=True
+  p70m  s1: LW10 0.99 [0.97,1.00]  TS10 0.66 [0.53,0.76]  NU10 0.52 [0.40,0.63]  failing TS10,NU10 robust=True
+  p70m  s2: LW10 0.99 [0.96,1.00]  TS10 0.69 [0.57,0.79]  NU10 0.52 [0.40,0.63]  failing TS10,NU10 robust=True
+  p70m  s3: LW10 0.98 [0.95,0.99]  TS10 0.66 [0.53,0.76]  NU10 0.55 [0.43,0.66]  failing TS10,NU10 robust=True
+  ts33m s1: LW10 0.58 [0.51,0.65]  TS10 0.52 [0.40,0.63]  NU10 0.50 [0.38,0.62]  failing LW10,TS10,NU10 robust=True
+  ts33m s2: LW10 0.53 [0.46,0.59]  TS10 0.42 [0.31,0.54]  NU10 0.73 [0.61,0.83]  failing LW10,TS10,NU10 robust=True
+  ts33m s3: LW10 0.45 [0.38,0.52]  TS10 0.36 [0.25,0.48]  NU10 0.62 [0.50,0.73]  failing LW10,TS10,NU10 robust=True
+  p160m s1: LW10 0.94 [0.90,0.97]  TS10 0.73 [0.61,0.83]  NU10 0.55 [0.43,0.66]  failing TS10,NU10 robust=True
+  p160m s2: LW10 0.99 [0.97,1.00]  TS10 0.34 [0.24,0.47]  NU10 0.00 [0.00,0.06]  failing TS10,NU10 robust=True
+  p160m s3: LW10 0.91 [0.86,0.94]  TS10 0.64 [0.52,0.75]  NU10 0.58 [0.46,0.69]  failing TS10,NU10 robust=True
+  family split and top candidate at d10 (base, then seeds):
+  ts1m  base: LW10 day 0.52 color 0.35 top {'gold': 0.438, 'orig': 0.323, 'prev': 0.24}; TS10 day 0.34 color 0.31 top {'gold': 0.328, 'orig': 0.312, 'other': 0.359}; NU10 day 0.38 color 0.50 top {'gold': 0.438, 'later': 0.562}
+  ts1m  s1  : LW10 day 0.33 color 0.39 top {'gold': 0.359, 'orig': 0.427, 'prev': 0.214}; TS10 day 0.31 color 0.31 top {'gold': 0.312, 'orig': 0.359, 'other': 0.328}; NU10 day 0.53 color 0.44 top {'gold': 0.484, 'later': 0.516}
+  ts1m  s2  : LW10 day 0.46 color 0.42 top {'gold': 0.438, 'orig': 0.37, 'prev': 0.193}; TS10 day 0.38 color 0.19 top {'gold': 0.281, 'orig': 0.328, 'other': 0.391}; NU10 day 0.44 color 0.41 top {'gold': 0.422, 'later': 0.578}
+  ts1m  s3  : LW10 day 0.46 color 0.41 top {'gold': 0.432, 'orig': 0.385, 'prev': 0.182}; TS10 day 0.44 color 0.28 top {'gold': 0.359, 'orig': 0.344, 'other': 0.297}; NU10 day 0.44 color 0.44 top {'gold': 0.438, 'later': 0.562}
+  p14m  base: LW10 day 0.27 color 0.12 top {'gold': 0.198, 'orig': 0.578, 'prev': 0.224}; TS10 day 0.31 color 0.34 top {'gold': 0.328, 'orig': 0.562, 'other': 0.109}; NU10 day 1.00 color 0.94 top {'gold': 0.969, 'later': 0.031}
+  p14m  s1  : LW10 day 0.32 color 0.45 top {'gold': 0.385, 'orig': 0.401, 'prev': 0.214}; TS10 day 0.25 color 0.38 top {'gold': 0.312, 'orig': 0.328, 'other': 0.359}; NU10 day 0.62 color 0.41 top {'gold': 0.516, 'later': 0.484}
+  p14m  s2  : LW10 day 0.38 color 0.40 top {'gold': 0.385, 'orig': 0.375, 'prev': 0.24}; TS10 day 0.31 color 0.44 top {'gold': 0.375, 'orig': 0.281, 'other': 0.344}; NU10 day 0.44 color 0.44 top {'gold': 0.438, 'later': 0.562}
+  p14m  s3  : LW10 day 0.38 color 0.34 top {'gold': 0.359, 'orig': 0.401, 'prev': 0.24}; TS10 day 0.31 color 0.31 top {'gold': 0.312, 'orig': 0.328, 'other': 0.359}; NU10 day 0.53 color 0.47 top {'gold': 0.5, 'later': 0.5}
+  ts3m  base: LW10 day 0.43 color 0.36 top {'gold': 0.396, 'orig': 0.37, 'prev': 0.234}; TS10 day 0.38 color 0.31 top {'gold': 0.344, 'orig': 0.312, 'other': 0.344}; NU10 day 0.50 color 0.47 top {'gold': 0.484, 'later': 0.516}
+  ts3m  s1  : LW10 day 0.38 color 0.32 top {'gold': 0.349, 'orig': 0.422, 'prev': 0.229}; TS10 day 0.38 color 0.22 top {'gold': 0.297, 'orig': 0.344, 'other': 0.359}; NU10 day 0.47 color 0.62 top {'gold': 0.547, 'later': 0.453}
+  ts3m  s2  : LW10 day 0.34 color 0.35 top {'gold': 0.349, 'orig': 0.427, 'prev': 0.224}; TS10 day 0.44 color 0.34 top {'gold': 0.391, 'orig': 0.406, 'other': 0.203}; NU10 day 0.50 color 0.53 top {'gold': 0.516, 'later': 0.484}
+  ts3m  s3  : LW10 day 0.31 color 0.38 top {'gold': 0.344, 'orig': 0.411, 'prev': 0.245}; TS10 day 0.31 color 0.31 top {'gold': 0.312, 'orig': 0.375, 'other': 0.312}; NU10 day 0.62 color 0.53 top {'gold': 0.578, 'later': 0.422}
+  p31m  base: LW10 day 0.12 color 0.35 top {'gold': 0.24, 'orig': 0.599, 'prev': 0.161}; TS10 day 0.12 color 0.41 top {'gold': 0.266, 'orig': 0.594, 'other': 0.141}; NU10 day 0.97 color 0.41 top {'gold': 0.688, 'later': 0.312}
+  p31m  s1  : LW10 day 1.00 color 0.99 top {'gold': 0.995, 'prev': 0.005}; TS10 day 1.00 color 0.50 top {'gold': 0.75, 'other': 0.25}; NU10 day 1.00 color 0.00 top {'gold': 0.5, 'later': 0.5}
+  p31m  s2  : LW10 day 1.00 color 0.97 top {'gold': 0.984, 'prev': 0.016}; TS10 day 1.00 color 0.50 top {'gold': 0.75, 'other': 0.25}; NU10 day 1.00 color 0.03 top {'gold': 0.516, 'later': 0.484}
+  p31m  s3  : LW10 day 1.00 color 1.00 top {'gold': 1.0}; TS10 day 1.00 color 0.44 top {'gold': 0.719, 'other': 0.281}; NU10 day 1.00 color 0.06 top {'gold': 0.531, 'later': 0.469}
+  ts8m  base: LW10 day 0.45 color 0.31 top {'gold': 0.38, 'orig': 0.375, 'prev': 0.245}; TS10 day 0.34 color 0.31 top {'gold': 0.328, 'orig': 0.297, 'other': 0.375}; NU10 day 0.41 color 0.59 top {'gold': 0.5, 'later': 0.5}
+  ts8m  s1  : LW10 day 0.49 color 0.53 top {'gold': 0.51, 'orig': 0.219, 'prev': 0.271}; TS10 day 0.47 color 0.41 top {'gold': 0.438, 'orig': 0.25, 'other': 0.312}; NU10 day 0.59 color 0.59 top {'gold': 0.594, 'later': 0.406}
+  ts8m  s2  : LW10 day 0.41 color 0.44 top {'gold': 0.422, 'orig': 0.339, 'prev': 0.24}; TS10 day 0.34 color 0.34 top {'gold': 0.344, 'orig': 0.25, 'other': 0.406}; NU10 day 0.47 color 0.50 top {'gold': 0.484, 'later': 0.516}
+  ts8m  s3  : LW10 day 0.45 color 0.54 top {'gold': 0.495, 'orig': 0.281, 'prev': 0.224}; TS10 day 0.38 color 0.34 top {'gold': 0.359, 'orig': 0.234, 'other': 0.406}; NU10 day 0.50 color 0.50 top {'gold': 0.5, 'later': 0.5}
+  p70m  base: LW10 day 0.09 color 0.49 top {'gold': 0.292, 'orig': 0.458, 'prev': 0.25}; TS10 day 0.16 color 0.59 top {'gold': 0.375, 'orig': 0.484, 'other': 0.141}; NU10 day 1.00 color 0.28 top {'gold': 0.641, 'later': 0.359}
+  p70m  s1  : LW10 day 0.99 color 1.00 top {'gold': 0.995, 'prev': 0.005}; TS10 day 1.00 color 0.31 top {'gold': 0.656, 'other': 0.344}; NU10 day 1.00 color 0.03 top {'gold': 0.516, 'later': 0.484}
+  p70m  s2  : LW10 day 1.00 color 0.98 top {'gold': 0.99, 'prev': 0.01}; TS10 day 1.00 color 0.38 top {'gold': 0.688, 'other': 0.312}; NU10 day 1.00 color 0.03 top {'gold': 0.516, 'later': 0.484}
+  p70m  s3  : LW10 day 0.99 color 0.98 top {'gold': 0.984, 'prev': 0.016}; TS10 day 1.00 color 0.31 top {'gold': 0.656, 'other': 0.344}; NU10 day 1.00 color 0.09 top {'gold': 0.547, 'later': 0.453}
+  ts33m base: LW10 day 0.39 color 0.39 top {'gold': 0.385, 'orig': 0.411, 'prev': 0.203}; TS10 day 0.28 color 0.38 top {'gold': 0.328, 'orig': 0.328, 'other': 0.344}; NU10 day 0.47 color 0.56 top {'gold': 0.516, 'later': 0.484}
+  ts33m s1  : LW10 day 0.62 color 0.54 top {'gold': 0.583, 'orig': 0.073, 'prev': 0.344}; TS10 day 0.25 color 0.78 top {'gold': 0.516, 'orig': 0.094, 'other': 0.391}; NU10 day 0.44 color 0.56 top {'gold': 0.5, 'later': 0.5}
+  ts33m s2  : LW10 day 0.72 color 0.33 top {'gold': 0.526, 'orig': 0.276, 'prev': 0.198}; TS10 day 0.41 color 0.44 top {'gold': 0.422, 'orig': 0.281, 'other': 0.297}; NU10 day 0.53 color 0.94 top {'gold': 0.734, 'later': 0.266}
+  ts33m s3  : LW10 day 0.59 color 0.30 top {'gold': 0.448, 'orig': 0.411, 'prev': 0.141}; TS10 day 0.34 color 0.38 top {'gold': 0.359, 'orig': 0.438, 'other': 0.203}; NU10 day 0.69 color 0.56 top {'gold': 0.625, 'later': 0.375}
+  p160m base: LW10 day 0.02 color 0.18 top {'gold': 0.099, 'orig': 0.88, 'prev': 0.021}; TS10 day 0.03 color 0.06 top {'gold': 0.047, 'orig': 0.906, 'other': 0.047}; NU10 day 1.00 color 0.59 top {'gold': 0.797, 'later': 0.203}
+  p160m s1  : LW10 day 0.98 color 0.91 top {'gold': 0.943, 'prev': 0.057}; TS10 day 0.97 color 0.50 top {'gold': 0.734, 'other': 0.266}; NU10 day 0.94 color 0.16 top {'gold': 0.547, 'later': 0.453}
+  p160m s2  : LW10 day 0.99 color 1.00 top {'gold': 0.995, 'prev': 0.005}; TS10 day 0.69 color 0.00 top {'gold': 0.344, 'other': 0.656}; NU10 day 0.00 color 0.00 top {'later': 1.0}
+  p160m s3  : LW10 day 0.95 color 0.88 top {'gold': 0.911, 'prev': 0.089}; TS10 day 1.00 color 0.28 top {'gold': 0.641, 'other': 0.359}; NU10 day 1.00 color 0.16 top {'gold': 0.578, 'later': 0.422}

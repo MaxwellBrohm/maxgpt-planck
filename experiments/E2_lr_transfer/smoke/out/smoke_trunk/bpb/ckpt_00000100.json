@@ -1,0 +1,126 @@
+{
+ "checkpoint": "ckpt_00000100.pt",
+ "evalset_config": {
+  "chat_context_bytes": 3072,
+  "context_bytes": 1024,
+  "lookback": 256,
+  "offsets": "UTF-8 byte offsets, at character starts",
+  "scored_chat_roles": [
+   "user",
+   "assistant"
+  ],
+  "window_bytes": 2048
+ },
+ "evalset_sha256": "fe1b55bbe3612d0c968934cbad831a17fd3d73d84aa8f1b7cb2f4523cf4d505b",
+ "max_windows": null,
+ "precision": "fp32",
+ "seconds": 34.25,
+ "seq_len": 2048,
+ "sets": {
+  "cccc": {
+   "bits": 12211566.178487442,
+   "bpb": 2.443071565111299,
+   "bytes": 4998448,
+   "bytes_per_token": 3.2428058720795954,
+   "tokens": 1541396,
+   "truncated": 0,
+   "windows": 2954
+  },
+  "dolly": {
+   "bits": 6531470.259250157,
+   "bpb": 2.3578395713272395,
+   "by_role": {
+    "assistant": {
+     "bits": 2905179.3353090845,
+     "bpb": 2.2692901858743135,
+     "bytes": 1280215,
+     "bytes_per_token": 3.7226482193899955,
+     "tokens": 343899,
+     "windows": 2938
+    },
+    "user": {
+     "bits": 3626290.923941072,
+     "bpb": 2.433927083314756,
+     "bytes": 1489893,
+     "bytes_per_token": 3.505647085398049,
+     "tokens": 424998,
+     "windows": 3038
+    }
+   },
+   "bytes": 2770108,
+   "bytes_per_token": 3.6027036130977232,
+   "tokens": 768897,
+   "truncated": 0,
+   "windows": 5976
+  },
+  "gutenberg": {
+   "bits": 12243660.536549801,
+   "bpb": 2.4183150245936265,
+   "bytes": 5062889,
+   "bytes_per_token": 3.362470736299607,
+   "tokens": 1505705,
+   "truncated": 0,
+   "windows": 2491
+  },
+  "irc": {
+   "bits": 12900124.337953715,
+   "bpb": 2.5889650818112537,
+   "bytes": 4982734,
+   "bytes_per_token": 2.6982689109577875,
+   "tokens": 1846641,
+   "truncated": 0,
+   "windows": 2566
+  },
+  "oasst2": {
+   "bits": 4913712.666743989,
+   "bpb": 2.265346228556091,
+   "by_role": {
+    "assistant": {
+     "bits": 4342070.910005692,
+     "bpb": 2.2612479416343487,
+     "bytes": 1920210,
+     "bytes_per_token": 3.704394629215217,
+     "tokens": 518360,
+     "windows": 1938
+    },
+    "user": {
+     "bits": 571641.7567382972,
+     "bpb": 2.296967696683773,
+     "bytes": 248868,
+     "bytes_per_token": 3.849347274639609,
+     "tokens": 64652,
+     "windows": 1689
+    }
+   },
+   "bytes": 2169078,
+   "bytes_per_token": 3.720468875426235,
+   "tokens": 583012,
+   "truncated": 4,
+   "windows": 3627
+  },
+  "stackexchange": {
+   "bits": 10652912.073509498,
+   "bpb": 2.1330900753945334,
+   "bytes": 4994122,
+   "bytes_per_token": 3.756769768446011,
+   "tokens": 1329366,
+   "truncated": 0,
+   "windows": 3079
+  },
+  "wikimedia": {
+   "bits": 12086661.614922166,
+   "bpb": 2.425352478560537,
+   "bytes": 4983466,
+   "bytes_per_token": 3.4222964806451968,
+   "tokens": 1456176,
+   "truncated": 20,
+   "windows": 3151
+  }
+ },
+ "step": 100,
+ "tokenizer": {
+  "file": "tok_v0_8k.json",
+  "sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5"
+ },
+ "tokens_trained": 3239859
+}

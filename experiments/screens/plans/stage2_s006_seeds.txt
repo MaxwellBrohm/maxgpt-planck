@@ -1,0 +1,7 @@
+# SCREENS stage 2 (ORDER 2), AMENDMENT S006-REINSTATE (SCREENS.txt): S006 mtp seed sets at its g 2 pick, seed 101 then 102, each seed's C6 matched-LR IND-only run at g 1 after its verdict run; after the other stage 2 seed sets (screens.py). train = screens check, preflight, train, score
+wait_mark SCREENS SCREENS STAGE 2 SEEDS DONE
+train s006_mtp_g2_s101
+train s006_mtp_g1_s101
+train s006_mtp_g2_s102
+train s006_mtp_g1_s102
+mark SCREENS STAGE 2 S006 SEEDS DONE

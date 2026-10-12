@@ -1,0 +1,41 @@
+items rebuilt: new 1728, dev 320, cross 384
+model    LR     LW10(s1/s2/s3)        TS10                  NU10                  pass  verdict  bestdevmin  LRruns
+ts1m   5e-05 0.359/0.438/0.432 (0.41) 0.312/0.281/0.359 (0.32) 0.484/0.422/0.438 (0.45)  0/3  FAIL  0.297  4  CHOSEN 5e-05
+p14m   1e-02 0.385/0.385/0.359 (0.38) 0.312/0.375/0.312 (0.33) 0.516/0.438/0.500 (0.48)  0/3  FAIL  0.354  5  EXTEND 1e-02 -> CHOSEN 1e-02
+ts3m   1e-02 0.349/0.349/0.344 (0.35) 0.297/0.391/0.312 (0.33) 0.547/0.516/0.578 (0.55)  0/3  FAIL  0.375  5  EXTEND 1e-02 -> CHOSEN 1e-02
+p31m   5e-05 0.995/0.984/1.000 (0.99) 0.750/0.750/0.719 (0.74) 0.500/0.516/0.531 (0.52)  0/3  FAIL  0.516  3  CHOSEN 5e-05
+ts8m   3e-04 0.510/0.422/0.495 (0.48) 0.438/0.344/0.359 (0.38) 0.594/0.484/0.500 (0.53)  0/3  FAIL  0.312  3  CHOSEN 3e-04
+p70m   5e-05 0.995/0.990/0.984 (0.99) 0.656/0.688/0.656 (0.67) 0.516/0.516/0.547 (0.53)  0/3  FAIL  0.500  3  CHOSEN 5e-05
+ts33m  5e-05 0.583/0.526/0.448 (0.52) 0.516/0.422/0.359 (0.43) 0.500/0.734/0.625 (0.62)  0/3  FAIL  0.568  3  CHOSEN 5e-05
+p160m  5e-05 0.943/0.995/0.911 (0.95) 0.734/0.344/0.641 (0.57) 0.547/0.000/0.578 (0.38)  0/3  FAIL  0.688  3  CHOSEN 5e-05
+LR rows (dev): model lr min LW TS NU loss_first10 loss_last50 eligible
+  ts1m   5e-05 min 0.297 LW 0.391 TS 0.297 NU 0.562 loss 4.362->1.293 True
+  ts1m   3e-04 min 0.266 LW 0.323 TS 0.266 NU 0.609 loss 3.563->1.156 True
+  ts1m   1e-03 min 0.266 LW 0.365 TS 0.266 NU 0.547 loss 3.653->1.173 True
+  ts1m   3e-03 min 0.281 LW 0.375 TS 0.281 NU 0.609 loss 4.334->1.159 True
+  p14m   5e-05 min 0.188 LW 0.906 TS 0.328 NU 0.188 loss 2.115->0.262 True
+  p14m   3e-04 min 0.156 LW 0.536 TS 0.438 NU 0.156 loss 1.599->0.303 True
+  p14m   1e-03 min 0.188 LW 0.589 TS 0.188 NU 0.297 loss 1.680->0.500 True
+  p14m   3e-03 min 0.234 LW 0.422 TS 0.234 NU 0.562 loss 3.405->1.037 True
+  p14m   1e-02 min 0.354 LW 0.354 TS 0.375 NU 0.406 loss 11.969->1.125 True
+  ts3m   5e-05 min 0.234 LW 0.448 TS 0.234 NU 0.406 loss 4.158->0.693 True
+  ts3m   3e-04 min 0.312 LW 0.312 TS 0.406 NU 0.344 loss 3.355->0.779 True
+  ts3m   1e-03 min 0.297 LW 0.365 TS 0.297 NU 0.562 loss 3.753->1.057 True
+  ts3m   3e-03 min 0.339 LW 0.339 TS 0.344 NU 0.484 loss 5.380->1.161 True
+  ts3m   1e-02 min 0.375 LW 0.385 TS 0.375 NU 0.469 loss 7.164->1.390 True
+  p31m   5e-05 min 0.516 LW 1.000 TS 0.906 NU 0.516 loss 1.834->0.061 True
+  p31m   3e-04 min 0.266 LW 0.964 TS 0.719 NU 0.266 loss 1.489->0.102 True
+  p31m   1e-03 min 0.406 LW 0.406 TS 0.422 NU 0.453 loss 1.671->0.638 True
+  ts8m   5e-05 min 0.266 LW 0.344 TS 0.266 NU 0.594 loss 3.725->0.710 True
+  ts8m   3e-04 min 0.312 LW 0.448 TS 0.312 NU 0.531 loss 3.132->0.703 True
+  ts8m   1e-03 min 0.297 LW 0.365 TS 0.297 NU 0.500 loss 3.308->1.129 True
+  p70m   5e-05 min 0.500 LW 1.000 TS 0.656 NU 0.500 loss 1.401->0.065 True
+  p70m   3e-04 min 0.266 LW 0.781 TS 0.422 NU 0.266 loss 1.435->0.403 True
+  p70m   1e-03 min 0.359 LW 0.365 TS 0.359 NU 0.391 loss 2.282->0.922 True
+  ts33m  5e-05 min 0.568 LW 0.568 TS 0.625 NU 0.859 loss 4.143->0.388 True
+  ts33m  3e-04 min 0.266 LW 0.307 TS 0.266 NU 0.422 loss 3.209->0.490 True
+  ts33m  1e-03 min 0.250 LW 0.438 TS 0.250 NU 0.547 loss 3.395->1.007 True
+  p160m  5e-05 min 0.688 LW 0.719 TS 0.688 NU 0.766 loss 1.012->0.098 True
+  p160m  3e-04 min 0.297 LW 0.432 TS 0.297 NU 0.484 loss 1.739->0.742 True
+  p160m  1e-03 min 0.391 LW 0.391 TS 0.422 NU 0.516 loss 4.307->0.976 True
+PROBLEMS: 0

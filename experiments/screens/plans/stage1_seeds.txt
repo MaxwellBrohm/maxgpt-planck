@@ -1,0 +1,15 @@
+# SCREENS stage 1 seed sets (ORDER 1), seed-major: BASE, S001 nogate, S002 novres / noqknorm / nonormscale at their g picks (all 1), S003 at LR5_adamw (eta 3e-3, r 2; S003 STAGE C RESULT), seed 101 then 102; the plan stops at the mark (stage 2 waits for stage 1's plans) (screens.py). train = screens check, preflight, train, score
+wait_mark SCREENS SCREENS S003 STAGE C DONE
+train base_s101
+train s001_nogate_g1_s101
+train s002_novres_g1_s101
+train s002_noqknorm_g1_s101
+train s002_nonormscale_g1_s101
+train s003_adamw_e3_r2_s101
+train base_s102
+train s001_nogate_g1_s102
+train s002_novres_g1_s102
+train s002_noqknorm_g1_s102
+train s002_nonormscale_g1_s102
+train s003_adamw_e3_r2_s102
+mark SCREENS STAGE 1 SEEDS DONE

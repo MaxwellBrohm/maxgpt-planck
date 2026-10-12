@@ -1,0 +1,288 @@
+K1: capacity competition. Does a memorized fact load crowd out in-context skill at 5M? (P-114; bits.md 6.5 item 7)
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model for K1: it writes item files and configs and reads
+JSON. World, formats, metrics, rule KR, seeds and hours: ../SPEC.txt (cited as SPEC n). This file also holds STAGE 0
+(K0), which K1-K5 share.
+
+PRE-REGISTRATION WRITTEN 2026-09-27 01:20 (before any K code, data, item file, config or run exists. Run for this
+entry, no model: the load arithmetic of SPEC 7 and scipy t quantiles. Nothing of K is queued or committed.)
+
+WHY
+  Planck's bet spends parameters on conversational skill and keeps knowledge outside. That is worth doing for
+  capacity reasons only if facts held in the weights cost skill. No usable direct result exists: the one joint study
+  (Barron and White, https://arxiv.org/abs/2506.09099) is a 1.46K-10.6M char-level toy where every model gets 0/40
+  on its held-out cases once facts are added (capacity.md; arch.md F12), and arch.md lists this curve as U1,
+  untested at 5M. Physics 3.3 (https://arxiv.org/abs/2404.05405) gives the scale, about 1 bit/param at 100
+  exposures, and warns that junk-like data slows fact loading. Two mechanisms predict a crowd-out without a capacity
+  limit: in-context learning gives way to in-weights learning when both solve the same items (Singh et al.,
+  https://arxiv.org/abs/2311.08360), and the memorization-to-ICL transition is set by the relative learning rates of
+  sub-circuits "rather than capacity constraints" (Nguyen and Reddy, https://arxiv.org/abs/2412.00104). K1 keeps
+  skill entities disjoint from the fact base (Singh) and adds a kinetics probe (K1-X).
+
+QUESTIONS
+  Q1 At equal total tokens and equal skill tokens, does raising the memorizable fact load from zero to about the
+     100-exposure capacity lower held-out in-context skill (S_ID, SPEC 9)?
+  Q2 (reported) Do skill and language data lower fact storage (FH vs K0-cap)? Does skill peak and fade? How are FB
+     keys answered when the context states a new value (CONFLICT)?
+
+THE ONE MANIPULATION
+  Which slots of the FACT stream hold FB exposures and which hold filler (same formats, nothing learnable; SPEC 3):
+  F0 none; FL the 15,500 FB_low entities; FH all 62,000 FB_high entities. FL's FB_low exposures sit at the same
+  stream positions as in FH (SPEC 3, 11). SKILL and LANG tokens, every format, the FACT token count, shape, LR,
+  schedule and seeds are identical across arms.
+
+STAGE 0 (K0; shared by K1-K5; seed 200, selection only)
+  K0-smoke  The FH config at a tiny budget, labelled smoke, never read: mem_fit ok; tok/s (replaces T in SPEC 13);
+            drawn shares within one item per source; drawn FB exposures per probe entity equal E; FACT stream draw
+            inside its written length; the K-PROBE hook's bitwise hook-off equality on this data.
+  K0-g      The FH config at g in {0.5, 1, 2} x LR5 (ratio r_5 kept), 125M slots as a full schedule (3,815 steps,
+            warmup 76, linear decay over the last 763: E2's 125M length). g_K = argmin over g of the mean NLL on
+            K-DEV, skill answer tokens and FB value tokens weighted equally; ties at 4 decimals go to the lower LR;
+            one more factor-2 point beyond an edge pick, at most one. g_K serves K1, K3 and K5. 125M, not 250M,
+            is a budget choice: E2 Q3 reports how its optimum moves between 125M and 250M, and if it moves by a
+            full grid step K0-g is labelled LENGTH-RISK in every K report (no rerun: the cap does not allow it).
+  K0-cap    FACT share 1.0 (no SKILL, no LANG), N_cap = 124,000 entities (FB_high plus 62,000 more drawn by the
+            same rules), E 100, g_K, 250M, seed 200. R_cap = (expressed value bits + name term, SPEC 9 [C1]) /
+            P_used (SPEC 7, P_used about 3.92M), estimated on FB-PROBE plus 4,096 of the extra entities.
+            CALIBRATED   R_cap >= 0.75 (the rig window of bits.md 6.4 is 1.0 +- 0.25 at 100 exposures)
+            PARTIAL      0.50 <= R_cap < 0.75
+            UNDER-LOADS  R_cap < 0.50: this 7,630-step schedule does not load facts at the Physics rate (Physics:
+                         at least 50K steps). Every K reading then carries the label and speaks only of the load
+                         reached.
+            K0-cap decides nothing about skill; it sets the load words every K report may use.
+
+ARMS (paired seeds 201, 202, 203; g_K; B = 250.0M; SPEC 7 mix)
+  F0  FACT stream all filler                               nominal 0
+  FL  FB_low exposures, filler elsewhere                   nominal 1.02 Mbit, 0.20 bits/param
+  FH  FB_high exposures, filler only in the 5% tail slack  nominal 4.09 Mbit, 0.82 bits/param
+  FH is K-BASE: K3 starts from it, K4 reuses it as its base arm, K5's L0 differs from it only in its fact data.
+
+MANIPULATION CHECK (read before any verdict)
+  LOADED(FH): expressed stored bits minus F0's floor >= min(0.50, 0.6 x R_cap) bits/param on every seed [K1-a].
+    The 0.6 x R_cap term binds only when K0-cap reads PARTIAL or UNDER-LOADS: FH's nominal 0.82 then overfills what
+    this schedule can store, and 60% of the schedule's own pure-fact rate is a full store for it. The report names
+    the term that applied and never uses Physics' 1 bit/param wording under the relative term.
+  LOADED(FL): >= 0.10 bits/param (0.50 Mbit) on every seed.
+  Interim stop [K1-b]: FH at seed 201 runs first. If it fails LOADED on its own, K1 stops for a person before any
+  other K1 run (saves up to 8 x 0.31 = 2.48 h); a NOT-LOADED at one seed is logged in readings.jsonl.
+  F0 must read at the floor on FB-PROBE (BIO_acc < 0.01 on every seed); otherwise FB content leaked into F0's
+  stream and the queue stops for a person.
+  Reported beside it: stored bits as a share of nominal, and FH's bits against K0-cap's (the dilution by skill and
+  language data, Physics 3.3 Results 10-12).
+
+READINGS (KR, SPEC 10; contrasts FH - F0 and FL - F0 on S_ID; SD_ref pooled over both, df 4; delta 3 points)
+  CROWD-OUT     FH LOWER than F0, FH LOADED. The report states whether FL sits between (monotone) or not.
+  NO-CROWD-OUT  FH EQUAL to F0, FH LOADED.
+  FACTS-HELP    FH HIGHER than F0, FH LOADED.
+  NOT-LOADED    FH not LOADED: no premise reading; the S_ID contrasts are reported at the load reached.
+  INCONCLUSIVE  anything else.
+  Name transfer [K1-c]: every reading is computed on S_ID and on S_ID-S (held-out S triples, SPEC 8). CROWD-OUT needs
+  LOWER on both. LOWER on S_ID only reads NAME-TRANSFER (FH handles never-trained name tokens worse, for example by
+  sending non-S names to memory as it learned for F-pool names), not CROWD-OUT; LOWER on S_ID-S only reads
+  CROWD-OUT (TRAINED NAMES). NO-CROWD-OUT and FACTS-HELP likewise need the same label on both.
+  Every verdict carries K0-cap's label, and GENERAL-LANGUAGE COST if FH is WORSE_bpb than F0 (SPEC 10).
+  What each means for Planck:
+    CROWD-OUT: at 5M a fact load near the 100-exposure capacity costs in-context skill; stripping memorizable facts
+      from Planck's data has a capacity reason, and K3 and K5 become the constructive tests.
+    NO-CROWD-OUT: in this world, at this load, facts and in-context skill do not compete for capacity at 5M; fact
+      stripping must rest on other grounds (tokens spent, knowledge-outside behaviour: K5), not on capacity.
+    FACTS-HELP: fact exposure helps skill here (for example through practice with the question frame); the filler
+      QA in F0 has the same frame, so the report names which families moved.
+  Per family: the same rule on each family's LIK (reported, Holm over the 12 family contrasts), so a crowd-out
+  located in U or B (REPORT limits #1 and #2) or in F shows where it lives. F's LIK is read against its marks
+  [K1-e]: 0.625 resolves no reference (its full-form quarter is name matching), 0.81 one reference kind, 1.00
+  both; and per reference kind of the key (K-EVAL-ID 256 each): 0.625 without that kind resolved, 1.00 with it.
+  On the ellipsis half, F-ANTE (reported, SPEC 5) reads about 0.66-0.70 through an ellipsis's antecedent's attribute
+  and the asked name's other statements, a partial resolution: a half between 0.625 and about 0.70 may be that [K1-h].
+  Every family's LIK is printed beside its fitted cue-model ceiling on the same file [K1-f to K1-i] (K-EVAL-ID, K3
+  round 4: R 0.65, U 0.59, B 0.20, F 0.65, A 0.50, P 0.60): a LIK at or under it is no evidence of the family's
+  skill. B's LIK
+  is read beside its cube and 2-4 name parts and its cube-group accuracy (all 4 questions of a group right; every
+  partial-key and name-blind rule and the gate 0.00 there, bar 0.125) [K1-h], A's beside its single-holder split
+  (SPEC 9) [K1-g].
+  Transience: TRANSIENT(arm) if the K-PROBE LIK peak minus the final value (both smoothed, SPEC 9) >= 3 points on 2
+  of 3 seeds [K1-d]; the peak step is reported. A final-checkpoint verdict next to a TRANSIENT label says so.
+
+K1-X (conditional, SPEC 13 order; descriptive only)
+  Trigger: CROWD-OUT, or INCONCLUSIVE with dbar(FH - F0) <= -1.5 points. Runs FH and F0 at 2 x B (every component
+  doubled, so E = 200 and the skill and language doses double too), seed 201 only, g_K.
+  With gap = F0's S_ID minus FH's at seed 201 (gap(B) from the K1 runs): gap(2B) <= gap(B) / 2 reads
+  KINETIC-LEANING (the skill cost shrinks with training, as Nguyen and Reddy's learning-rate account predicts);
+  gap(2B) >= gap(B) - 1 point reads PERSISTENT-LEANING; else reported as is.
+  One seed, never a verdict. Confound stated now: at E 200 the same N is a lighter load relative to capacity, so
+  PERSISTENT-LEANING is the stronger of the two readings.
+
+EXTRA REPORTS (descriptive, no rule)
+  1 Fact side per arm: stored bits (expressed and latent), BIO_acc, QA_acc on QA-train and QA-held (extraction:
+    Physics 3.1 found 86.6% held-out QA with mixed training at 124M-682M; nothing is known at 5M).
+  2 CONFLICT per arm: context-follow, memory and other rates, split known / unknown; the CONSISTENT twins' accuracy.
+    FB entities never appear in K1 skill training, so this is an untrained arbitration (P-142's reading at 5M).
+  3 OOD columns and wrong-pick classes per family and arm; matched vs crossed frames.
+  4 bpb CHAT and PROSE per arm (SPEC 10).
+  5 Per-checkpoint curves (K-PROBE) of skill and fact recall, per arm and seed; the step at which each arm's S
+    reaches half its final value.
+  6 GEN beside LIK for every family (claims on GEN only at 5 points or more).
+
+FIXED BEFORE THE FIRST SCORED RUN (a FIXED log appended here, as SCREENS C9)
+  Code commit and .py sha256s (harness, data_prep, experiments/K/code); tokenizer sha256; K item-file and shard
+  sha256s per arm and seed; the SPEC 5 acceptance report (every oracle per family and column, balance rates, purity
+  counts, mutant results); E2 and E3 results.json sha256 and the values read (eta_5, r_5, T, SD_d, df, u); g_K and
+  the K0-g table; the K0-cap label; config sha256s; the smoke line.
+
+KNOWN RISKS
+  - 7,630 steps may not load facts (K0-cap). The manipulation is then weaker than nominal and the verdict says so.
+  - Filler is same-format junk: all of F0's FACT stream, about 3/4 of FL's. It is constant in tokens, not in
+    content, and Physics 3.3 Result 10 says same-format junk slows fact loading, so FL may load less per entity than
+    FH; loads are therefore read as measured bits, never nominal.
+  - Equal skill dose is bought with filler: F0 is a zero-fact model that still reads about 124M filler tokens.
+  - Vocabulary is not equal across arms: FH's FACT stream trains 336 F-pool name rows, F0's 120 Z-pool rows, and a Z
+    token sits in 1/40 of filler docs against 1/112 for an F token. Kept on purpose: a disjoint filler pool tells
+    filler from FB data at the first token, the role of Physics 3.3 Result 12's domain token (an analogy, untested
+    here), which cut the same-format-junk loss from up to 20x to 2x at 100 exposures (capacity.md); filler names from
+    F-pool triples outside FB_high would equalize the vocabulary and drop that protection. Named, not neutralized.
+  - Pool cue: FB names and skill names come from disjoint pools, so a model can learn "FB name: memory; skill name:
+    context". That is the Singh safeguard's price; CONFLICT is out of distribution for K1.
+  - One world (W = 7, uniform values, uniform exposure); world-draw variance is not measured. Kim et al.
+    (https://arxiv.org/abs/2510.02370) found a Zipfian fact base shifts the balance toward context use; K1's
+    uniform base is the harder case for skill.
+  - df 4 makes thr about 1.6 x SD_ref; a small real effect will read UNRESOLVED.
+  - Minimal slot frames: a verdict is about associative recall, update, binding, reference, abstention and
+    persistence in this world, not about natural chat. The family shares were set by hand, not tuned.
+  - Loss is not a behaviour proxy (SCREENS, citing research/lanes/arch.md 1.4), so no K1 reading rests on bpb.
+
+DEPENDENCIES
+  Before: E2 5M DONE (LR5, T), E3 Part 1 (SD_d, df, u), SPEC 14 code and its tests, K0. After: K2 and K3 read K1's
+  F0 and FH final checkpoints (all 3 seeds, kept until K3 reads); K4 reuses FH as its base arm.
+
+GPU HOURS (SPEC 13 estimates)
+  K0 0.83 (smoke 0.05, K0-g 0.47, K0-cap 0.31); K1 2.79 (9 runs x 0.31); K1-X 1.24 if triggered and under the cap.
+
+CHANGES AFTER CRITIQUE (2026-09-27, adversarial critic, before any K code, data or run; no model loaded. Run: a
+  tokenizer vocab count (CAP 778, LOW 3,913, frame ids as SPEC 1), python for name bits, oracle noise, K5 filler
+  tokens, and a simulation of the transience rule under iid checkpoint noise. [Cn] tags in SPEC, [K1-x] here.)
+  SPEC-wide musts (tags mark the edited text in SPEC):
+  C1 SPEC 2 said name bits are untrained because the first token is. sources.py unsupervises only an item's first
+     token, so M given F and L given F M are trained and the FB triple set is learnable: 4.5 bits per entity at
+     N_high (0.28 Mbit, 6.8% of value bits; 0.87 bits/param with names), 6.5 at N_low, 3.5 at N_cap. A name term is
+     now reported and enters R_cap, so K0-cap's CALIBRATED line is not missed by an uncounted 5-10%.
+  C2 B's "a one-token key fails" was checked only for the first token (O3) and first two (O3b). Two names always
+     differ somewhere, so a key on the last token solved any item whose foils share the first tokens. Now 3/4 of B
+     items give each of 3 foils a different 2-token subset of the asked name (every proper subset matches a foil),
+     O3_S covers all 6 subsets, and reversed twins make any latest- or earliest-match rule on a partial key score
+     one of each pair. Thresholds set to what that design allows (0.65 per item, 0.30 on pairs). (K3 round 2: that
+     design made the asked name the centre of its foils; B now names a whole cube of 8, K1-g.)
+  C3 A allowed " none" from absence alone: an item whose asked attribute, or asked entity, never appears is solved
+     without binding. O9, O10 and O9|10 added; half of A items now carry both lures.
+  C4 C held only the asked attribute's values, so an attribute-blind copier (the value after the asked entity's
+     latest mention, oracle T) could never pick a wrong candidate and LIK could not see it. C now holds every item
+     value; T gets a threshold on R, U, F (on R it sits near 0.61 if 1-3 attributes are uniform: mean of 1, 1/2,
+     1/3); a new wrong-pick class counts another attribute's value.
+  C5 O2 is right exactly when no foil of the asked attribute follows, which the balance rule sets to 1/2, and the
+     threshold was <= 0.50: the check would fail about half the time on noise alone (SE 0.022 at n 512). Rates now
+     pass at t + 3 SE and the 1/2 rules hold exactly per 512-item block.
+  C6 Skill eval used only T names (tokens never trained as names) and FH alone learned "F-pool name: answer from
+     memory". A lower FH S_ID could be name transfer, not capacity. K-EVAL-S (held-out S triples) added; see K1-c.
+  C7 TRANSIENT compared a raw maximum over about 50 checkpoints with one final value on 256 items. Simulated with
+     iid checkpoint noise (python, 2026-09-27): P(peak - final >= 3 points) = 0.83 per seed at SE 2.5 points; with
+     1,024 items and 5-checkpoint means it is 0.002. Real checkpoint noise on fixed items is correlated, so these
+     are bounds on the mechanism, not measured rates.
+  C8 CF-HIT 512 -> 2,048 so K5's known/unknown split has items to read (K5 notes).
+  C9 SPEC 11 claimed equal SKILL and LANG positions for every pair; K5's fact chats are 30 or 41 tokens by arm, so
+     the token mixer's picks differ there. Claim restricted; K5 pairs share init and files.
+  K1 musts:
+  K1-a LOADED was absolute (0.50 bits/param). If K0-cap reads UNDER-LOADS (the notes' own 50K-step risk), FH could
+     never read LOADED and K1's primary reading was unreadable by design, although FH would then be overfilled for
+     this schedule, the right regime for a competition test. Now relative to R_cap when K0-cap is below CALIBRATED.
+  K1-b FH seed 201 first, with a stop for a person if it does not load, so 2.48 h are not spent on a dead arm set.
+  K1-c NAME-TRANSFER label (C6).
+  K1-d smoothed transience (C7).
+  Answers to the critic's questions that needed no change: skill tokens, formats, document lengths and packing are
+  equal across F0/FL/FH (same files and slot plan); vocabulary is not, and is now named under KNOWN RISKS. The load
+  fits nominal capacity (0.87 of the ~1 bit/param 100-exposure figure), so "facts never learned" is caught by
+  LOADED and K0-cap rather than ruled out by arithmetic. No GPU hours added (C6-C8 are inference only).
+
+CHANGES BEFORE FIRST RUN (2026-09-27; no K run has started. Mac CPU only, no language model loaded, nothing
+  trained, queued or committed. Full evidence and tables: ../SPEC.txt section 16)
+  K1-e Family F (15% of skill items, 512 of K-EVAL-ID's 3,072 final questions, one of K1's per-family contrasts)
+     could be solved without resolving any ellipsis or alias: "the latest statement of the asked attribute that
+     names no other entity" read 0.909 on 12,288 training F items and 0.900 on the K-EVAL-ID F block (build design,
+     gen.py samples; the code review measured 0.908 / 0.900), and the best rule on statement forms alone 0.970. A
+     model could then score high on F, and on S_ID, with no reference skill, and an F crowd-out could be a shortcut
+     lost or kept rather than reference resolution. A first redesign (one reference statement per entity, a foil
+     stating the asked attribute by ellipsis or alias, a foil alias after the key's latest in exactly 1/4) took
+     that rule to 0.500, but its kinds were drawn independently, and in mixed-kind items resolving one kind names
+     the key by elimination: the best one-kind rule read 0.90 (SURFe, SURFa), so F could not tell a model that
+     resolves ellipsis only from one that resolves both. Final design (SPEC 4 [R-1]): the key's and the foil's
+     reference statements share one kind, alias in exactly 1/2 of items; the reference shortcuts and the one-kind
+     views are SPEC 5 oracles with bars on F. On samples regenerated with the build commands and seeds (train /
+     K-EVAL-ID): that rule 0.500 / 0.500, "latest ellipsis or alias statement" 0.378 / 0.375, the best form rule
+     0.625 / 0.617 (0.500 / 0.490 on the items whose answer is a reference statement), the best one-kind rules
+     0.812-0.813 / 0.799-0.818, IDEAL 1.000; gen.py check passes. F's LIK marks and the per-kind reading are now in
+     READINGS. S_ID's size (3,072) and the other families' items are unchanged (checked record by record on the
+     samples; A and P eval items get new out-of-item candidates, the candidate draw being one stream in family
+     order); no GPU hours. Full tables: ../SPEC.txt section 16.
+  K1-f Shortcut ceilings per family (REVIEW 2 R-3 and R-4 and the K3 cue-model gate; ../SPEC.txt section 16 K3,
+     code/notes.txt K3 ROUND 1). With R-1 fixed, F still had two cues outside SPEC 5's list: a positional one
+     (LASTSKIP 0.68-0.69) and earlier answers (EXCL 0.69; both 0.73-0.74), so F's 0.625 mark did not hold. A fitted
+     cue model (non-resolution features, cross-fitted) then found the earlier-answer cue in every family and
+     count and prior cues in U and A: R 0.70-0.74, U 0.86-0.88, F 0.72, A 0.90-0.94, P 0.80-0.82, B 0.30-0.49
+     (build design; train, K-EVAL-ID, K-EVAL-S). A K1 arm could have scored those without the skill, and an FH - F0
+     difference could have been a shortcut kept or lost. After the pre-registration changes (no earlier question
+     asks the final attribute except U's stale lure; F thins the foil's last statement too; U's key and foil
+     exchangeable; A's both-items are R or U contexts) the ceilings are R 0.64-0.65, U 0.58-0.62, B 0.29-0.34, F
+     0.61-0.63, A 0.50, P 0.64-0.66 (train, K-EVAL-ID, K-EVAL-S), each within its bar's C5 tolerance (on the
+     training stream at or under the bar: R 0.646, P 0.643), and F's marks (0.625 / 0.81 / 1.00) hold again:
+     LASTSKIP 0.632, EXCL 0.625. R and P sit at their bar by design (O1 0.60). Every family's records changed;
+     S_ID's size, the families' shares and the eval seeds did not; no GPU hours.
+  K1-g Shortcut ceilings, second pass (REVIEW 3a and 3b; ../SPEC.txt section 16 K3 round 2, code/notes.txt K3 ROUND
+     2). Two cheap rules survived K1-f. B: the asked name was the unique centre of its 4 names, so "the latest value
+     of the most central name", blind to the question's name, read 0.92 on B (pairs 0.85): B's per-family contrast
+     could have moved with that rule, not with binding. F: a reference before the asked name's first mention, or an
+     alias before its definition, can only be the foil's (0.68 and 0.70-0.71 on F), so F's 0.625 mark did not hold,
+     and the gate, having no asked-name column, could not see it. After the changes (B names a whole cube
+     {a, a'} x {b, b'} x {c, c'} in 3/4 of items, 8 entities, every name equally central, the asked one uniform; F's
+     reference statements, an ellipsis with its antecedent, follow both entities' first mentions and definitions;
+     an F-specific fitted model in the gate) the ceilings are R 0.63-0.65, U 0.58-0.61, B 0.19-0.23, F 0.63, A 0.50,
+     P 0.65-0.69 (train, K-EVAL-ID, K-EVAL-S; P at 0.688 on both eval files, within C5's tolerance at n 512 and 256),
+     and F's marks (0.625 / 0.81 / 1.00) hold: F-INTRO and F-DEFX 0.61-0.63, SURF 0.60-0.63, SURFe and SURFa
+     0.79-0.82. B is now harder than K1-f's B (8 bindings instead of 4, chance 1/|C| with |C| 14 on K-EVAL-ID instead
+     of 10), so a B contrast is not comparable with a pre-round-2 reading; none exists (no K run has started). K-EVAL-ID
+     keeps its R, U, A, P items; its B and F items and all of K-EVAL-S are new; no GPU hours.
+  K1-h Shortcut ceilings, third pass (REVIEW 4a and 4b; ../SPEC.txt section 16 K3 round 3, code/notes.txt K3 ROUND
+     3). B: SPEC 5's twin-pair bar (0.30) was beaten on every eval set with twins by partial keys whose tie-break a
+     reversal keeps (B-ADAPT, the proper subset of the question's name positions with the fewest matching holders
+     and the smallest value id among them: 0.62-0.68 on pairs; its tie-sharing version 0.43-0.44; O3_12 by value id
+     0.59-0.65 [corrected K3 round 4, REVIEW 5b D-b]), so B's pair reading could
+     have credited binding a model did not have. Each K-EVAL cube item is now scored with 3 copies of its
+     statements asking the asked name's 3 two-token neighbours, a group counting only if all 4 are right: every
+     partial-key and name-blind rule (O3_S, B-CENTER, B-TOKFREQ, B-MAJOR, B-ADAPT, B-FRAME) reads 0.000 on
+     K-EVAL-ID's 96 and K-EVAL-S's 48 groups, the fitted gate 0.000, IDEAL 1.000; REVIEW 4a's tie-sharing rules
+     0.000-0.062 on fresh and gen.py sets. Per item B is unchanged in kind (B-ADAPT 0.63-0.64, bar 0.65). F: an
+     alias was placed 1-10 exchanges after its own definition only, so an alias in the asked name's definition turn
+     could only be the foil's; F-XNEAR read the alias half at 0.66 and F at 0.64-0.65 with nothing resolved, over
+     K1-e's marks. Both aliases now sit in both definitions' windows: F-WINK 0.625 on every set, F-XNEAR 0.618-
+     0.624, F-RX 0.617-0.645, F-FIT4 0.590-0.641, LASTSKIP 0.617-0.646, EXCL 0.625 (fresh sets and gen.py's; the
+     0.645 and 0.646 on 256- and 2,048-item sets inside C5), so the marks 0.625 / 0.81 / 1.00 hold. A: A-MANYFREE,
+     A-QNEW and A-QREPEAT beat 0.50 on A alone (0.65-0.75) but say " none" on 22-57% of R, U and P items and lose
+     0.15-0.30 of all skill items in the mix against O9|10 (A1H 0.04): reported beside A1H, not bars. Ceilings (gen.py
+     check, 81,920 training items; train / K-EVAL-ID / K-EVAL-S): R 0.648 / 0.658 / 0.637, U 0.579 / 0.625 / 0.606, B
+     0.226 / 0.205 / 0.238 (groups 0.000 / 0.000), F 0.628 / 0.652 / 0.641 (the F model with its alias-window
+     columns), A 0.500, P 0.654 / 0.680 / 0.680, each within its bar's C5 tolerance. K-EVAL-ID keeps its R, U, A, P
+     turns; its B block (96 cube groups and 128 items of 2-4 names, 512 questions) and its F items are new, and A's
+     and P's candidates were redrawn; S_ID's size (3,072) and the families' shares did not change; no GPU hours.
+  K1-i Shortcut ceilings, fourth pass (REVIEW 5a and 5b; ../SPEC.txt section 16 K3 round 4, code/notes.txt K3 ROUND
+     4). R and P: earlier questions were drawn from every stated key, so whether the final name had been asked
+     (question to question) told the asked entity's size, and the holders' sizes are read off the statements
+     (statement to statement): a cross-fitted lookup read R 0.68 and P 0.70-0.71, over the bars, and the gate with
+     the final-name question columns R 0.67-0.72 and P 0.75-0.78. SPEC 5 now rules that cue cheap (neither half joins
+     the final question's name to a statement; LINK's chain does, and stays the skill), so the gate carries its
+     columns (it reads REVIEW 5a's round-3 sets at R 0.70-0.71, A 0.66-0.69, P 0.77-0.78, all failing) and the
+     generator no longer feeds it: earlier questions ask bystanders only, R and U leave one bystander unasked (as an
+     A item's asked entity is), and P has a bystander entity and a foil in every item. The lookups now read R
+     0.61-0.66 and P 0.46-0.50. U: the key's and the foil's intro ranks are both block flags (the holder introduced
+     last was the key in 0.54 of non-lure items; now 0.50-0.51). Ceilings (gen.py check, 81,920 training items;
+     train / K-EVAL-ID / K-EVAL-S): R 0.651 / 0.646 / 0.668, U 0.550 / 0.586 / 0.578, B 0.228 / 0.201 / 0.231
+     (groups 0.000 / 0.000), F 0.623 / 0.648 / 0.644, A 0.500, P 0.573 / 0.604 / 0.566, each within its bar's C5
+     tolerance. P's LIK is now read against a lower ceiling than R's (a foil in every P item): P's value part is no
+     longer R's design, so K1 compares P's LIK with its own ceiling and reads P for persistence (the marker) as
+     before. F's marks (0.625 / 0.81 / 1.00) hold (F rules 0.614-0.635 on the fresh sets). Every K-EVAL record is new
+     (questions and flags); S_ID's size and the eval seeds did not change; no GPU hours.

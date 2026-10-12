@@ -1,0 +1,26 @@
+OOD-H Part 1 hashes (public: hashes and counts only; the items are sealed). Written by oodh/build.py.
+status COMPLETE: 150 threads chosen by the rule in oodh/build.py
+sealed/oodh/oodh_part1.jsonl sha256 40d2a76d1315d3cbfaf5e7b899183b7b04fe2561ab2717396782a316e4b268e7
+sorted tree ids (newline-joined, no trailing newline) sha256 4c3f60e3c1c79121982326ca430f9e26b37f4f2037ab17c501903dd179a69eb7
+threads 150; probes 415: H-FACT 226, H-ASK 96, H-CORR 1, H-ABS 92
+probes per thread: 2: 35, 3: 115
+cells (probe-kind mix): H-ABS+H-ASK 13, H-ABS+H-ASK+H-FACT 36, H-ABS+H-FACT 43, H-ASK 3, H-ASK+H-FACT 28, H-CORR+H-FACT 1, H-FACT 26
+thread user turns: 2: 135, 3: 15
+inputs (sha256, first 16 hex): candidates.jsonl f1d0f4f9714e87f3, candidates_deepest.jsonl 1b4533e435273ab1, batch_1.jsonl 1cd824c792bdbb40, batch_2.jsonl c4d1a542cddfe411, batch_3.jsonl 49395084d8048235, batch_4.jsonl f2a2dd8f7fb50610, batch_1_asks.json f32f17b631008e17
+GATE (oodh/gate.py) on oodh_part1.jsonl sha256 40d2a76d1315d3cbfaf5e7b899183b7b04fe2561ab2717396782a316e4b268e7: PASS (gating checks)
+  150 threads; leak list of 54 tree ids
+  ids    pass
+  struct pass
+  G1     pass
+  L2     pass
+  G8     pass
+  ABS    pass
+  VAL    pass
+  G7     pass
+  reported, NOT gating for OOD-H (DESIGN s12):
+    G2    129 findings (structural, see s12)
+    G4    45 findings (structural, see s12)
+    2+-value VAL probes: 44 of 323 VAL; top cheater passes there: OVERLAP_A 32, MARKER_OBJ 31, WORDING 30, OVERLAP_B 27, EXL_MARKER 25, EXL_OVERLAP 25
+  G4 histogram (threads passed by k of the 11 generic cheaters): 0:95, 1:2, 2:3, 3:5, 4:5, 5:15, 6:25
+  cheater family scores: FIRST 0.73, LAST 0.72, WORDING 0.75, OVERLAP_A 0.75, OVERLAP_B 0.74, MARKER 0.74, ECHO 0.00, DEFLECT 0.00, SHOTGUN 0.59, USERVOICE 0.01, ABSTAIN 0.00, ROLECAP 0.01, ANTI_OVERLAP 0.71, ANTI_WORDING 0.72, LONGEST 0.72, SHORTEST 0.72, LEASTFREQ 0.73, MOSTFREQ 0.72, POS2 0.04, PENULT 0.05, ANTEPENULT 0.00, PENULT_MARKER 0.00, PREV_FRESH 0.72, EXL_OVERLAP 0.74, EXL_WORDING 0.72, EXL_MARKER 0.74, LATEST_USER_SWAP 0.05, LATEST_USER 0.03, ORDER_ABS 0.40, MYONLY 0.60, MARKER_OBJ 0.75
+  verdict: LOCK CANDIDATE (150 threads; gating checks pass; G2/G4 reported per DESIGN s12, not gating)

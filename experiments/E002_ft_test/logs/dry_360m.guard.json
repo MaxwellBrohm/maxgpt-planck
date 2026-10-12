@@ -1,0 +1,27 @@
+{
+ "name": "dry_360m",
+ "cmd": [
+  "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+  "-B",
+  "ft_test.py",
+  "HuggingFaceTB/SmolLM2-360M-Instruct",
+  "--seed",
+  "0",
+  "--dry",
+  "--bs",
+  "2",
+  "--accum",
+  "8",
+  "--max-len",
+  "768",
+  "--grad-ckpt"
+ ],
+ "started": "2026-09-24 06:42:30",
+ "ended": "2026-09-24 06:44:20",
+ "exit": 0,
+ "killed": null,
+ "min_free": 52,
+ "max_swap_mb": 0.0,
+ "peak_rss_mb": 1131,
+ "elapsed_s": 110
+}

@@ -1,0 +1,156 @@
+2026-09-26 05:31:23 QUEUE E006 START (run 20260926-053123)
+2026-09-26 05:31:23 code sha256 at start: 133 files, digest 1de2e13c4f5d64b7
+2026-09-26 05:32:07 check replay_build exit=0 (})
+2026-09-26 05:32:11 check identity_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 05:32:12 check eval_identity_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 05:32:29 check items_big_check exit=0 (RESULT: ALL PASS (sha256 566ef4676b1997317e91cdbb0baf6162bd5531ece5def44a105669caa625166e))
+2026-09-26 05:39:19 check validate_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 05:40:29 check test_train_e006p exit=0 (RESULT: ALL PASS)
+2026-09-26 05:40:32 check test_replay_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 05:40:32 check test_rules_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 05:40:56 check test_analyze_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 05:44:34 check mutation_e006 exit=0 (RESULT: ALL PASS (baselines pass, every mutant killed))
+2026-09-26 05:45:07 check test_queue_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 06:09:18 PC power loss at about 06:03 (Mac AC dropped 4 s at 06:03:40; Windows Kernel-Power 41, reboot 06:04:05); the queue died while waiting for gpu.lock after its checks, before any GPU job. Restarted by Claude.
+2026-09-26 06:09:19 QUEUE E006 START (run 20260926-060919)
+2026-09-26 06:09:19 code sha256 at start: 133 files, digest 1de2e13c4f5d64b7
+2026-09-26 06:09:23 check identity_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 06:09:24 check eval_identity_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 06:09:41 check items_big_check exit=0 (RESULT: ALL PASS (sha256 566ef4676b1997317e91cdbb0baf6162bd5531ece5def44a105669caa625166e))
+2026-09-26 06:17:21 check validate_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 06:18:38 check test_train_e006p exit=0 (RESULT: ALL PASS)
+2026-09-26 06:18:42 check test_replay_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 06:18:42 check test_rules_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 06:19:14 check test_analyze_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 06:23:11 check mutation_e006 exit=0 (RESULT: ALL PASS (baselines pass, every mutant killed))
+2026-09-26 06:23:48 check test_queue_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 07:45:06 dryC5 exit=0 killed=None (elapsed_s 20.1, peak_gpu_mem_mib 4681.0, weights_sha256 None)
+2026-09-26 09:28:54 dryC6a exit=0 killed=None (elapsed_s 30.4, peak_gpu_mem_mib 4519.0, weights_sha256 unsaved)
+2026-09-26 10:21:14 dryC6b exit=0 killed=None (elapsed_s 35.9, peak_gpu_mem_mib 4500.0, weights_sha256 unsaved)
+2026-09-26 11:05:22 dryP exit=0 killed=None (elapsed_s 25.2, peak_gpu_mem_mib 4505.0, weights_sha256 unsaved)
+2026-09-26 11:10:29 dryG exit=0 killed=None (elapsed_s 25.2, peak_gpu_mem_mib 6469.0, weights_sha256 unsaved)
+2026-09-26 11:10:42 drychat exit=0 killed=None (elapsed_s 10.1, peak_gpu_mem_mib 1491.0, weights_sha256 None)
+2026-09-26 11:10:42 check compare_dry exit=0 (RESULT: ALL PASS)
+2026-09-26 11:45:42 base exit=0 killed=None (elapsed_s 1425.5, peak_gpu_mem_mib 11600.0, weights_sha256 5af571cbf074e6d21a03528d2330792e532ca608f24ac70a143f6b369968ab8c)
+2026-09-26 11:50:16 chat_base exit=0 killed=None (elapsed_s 231.6, peak_gpu_mem_mib 3337.0, weights_sha256 None)
+2026-09-26 12:04:57 e005w1 exit=9 killed=gpu_mem (elapsed_s 846.0, peak_gpu_mem_mib 11602.0, weights_sha256 None)
+2026-09-26 12:04:57 QUEUE STOPPED: gpu_mem verdict in e005w1
+2026-09-26 14:55:57 e005w1's gpu_mem kill: torch's allocator cache filled the card (whole-card reading), not live memory; fix PYTORCH_CUDA_ALLOC_CONF=per_process_memory_fraction:0.70, equal scores shown on a subset (notes.txt POST-RUN LOG, deviation 2026-09-26). e005w1 stays a GAP here; rerun by hand as e005w1_r2. Restarted by Claude.
+2026-09-26 14:55:59 QUEUE E006 START (run 20260926-145559)
+2026-09-26 14:55:59 every job of this run: PYTORCH_CUDA_ALLOC_CONF=per_process_memory_fraction:0.70
+2026-09-26 14:55:59 code sha256 at start: 133 files, digest f3065d54f48b436a
+2026-09-26 14:56:03 check identity_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 14:56:04 check eval_identity_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 14:56:22 check items_big_check exit=0 (RESULT: ALL PASS (sha256 566ef4676b1997317e91cdbb0baf6162bd5531ece5def44a105669caa625166e))
+2026-09-26 15:03:17 check validate_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 15:04:30 check test_train_e006p exit=0 (RESULT: ALL PASS)
+2026-09-26 15:04:33 check test_replay_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 15:04:33 check test_rules_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 15:04:57 check test_analyze_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 15:09:13 check mutation_e006 exit=0 (RESULT: ALL PASS (baselines pass, every mutant killed))
+2026-09-26 15:09:47 check test_queue_e006 exit=0 (RESULT: ALL PASS)
+2026-09-26 15:09:47 dryC5: done earlier (exit 0), skipped
+2026-09-26 15:09:47 dryC6a: done earlier (exit 0), skipped
+2026-09-26 15:09:47 dryC6b: done earlier (exit 0), skipped
+2026-09-26 15:09:47 dryP: done earlier (exit 0), skipped
+2026-09-26 15:09:47 dryG: done earlier (exit 0), skipped
+2026-09-26 15:09:47 drychat: done earlier (exit 0), skipped
+2026-09-26 15:09:47 check compare_dry exit=0 (RESULT: ALL PASS)
+2026-09-26 15:09:47 base: done earlier (exit 0), skipped
+2026-09-26 15:09:47 chat_base: done earlier (exit 0), skipped
+2026-09-26 15:09:49 GAP: e005w1 failed earlier (see logs/e005w1.*); the queue does not rerun it
+2026-09-26 15:09:49 GAP: e005w1
+2026-09-26 15:35:04 chat_e005w1 exit=0 killed=None (elapsed_s 236.8, peak_gpu_mem_mib 2815.0, weights_sha256 None)
+2026-09-26 16:34:52 e004w1 exit=0 killed=None (elapsed_s 1753.1, peak_gpu_mem_mib 8046.0, weights_sha256 91a3aab0e5569da3deef7e82bcf40a17bf273cf17612b948cdf4c7966935cf7e)
+2026-09-26 17:00:50 e005w2 exit=0 killed=None (elapsed_s 1142.9, peak_gpu_mem_mib 7910.0, weights_sha256 4ef6230afd4d6c972e7cf69cc2cba4e98b615495b30b8693ad1282fb2165506c)
+2026-09-26 17:16:53 chat_e005w2 exit=0 killed=None (elapsed_s 95.7, peak_gpu_mem_mib 2018.0, weights_sha256 None)
+2026-09-26 18:17:58 e004w2 exit=0 killed=None (elapsed_s 3273.7, peak_gpu_mem_mib 8049.0, weights_sha256 aee5a7fa1e7004fa657d3d39f88752554540fcd2ca1dba0e19f75efa31519076)
+2026-09-26 19:08:47 e005w3 exit=0 killed=None (elapsed_s 1354.0, peak_gpu_mem_mib 7870.0, weights_sha256 aa5f99f15d644f88fc07be200efb39adc10195d2ababd0232deb358ee1e222a1)
+2026-09-26 19:40:18 chat_e005w3 exit=0 killed=None (elapsed_s 257.6, peak_gpu_mem_mib 2657.0, weights_sha256 None)
+2026-09-26 20:28:48 e004w3 exit=0 killed=None (elapsed_s 2268.0, peak_gpu_mem_mib 8033.0, weights_sha256 efd68a20a3e7d56f8b91b7d2dc05c6b64b530bfaf056e8bebc9b0a7bd3ff3dd0)
+2026-09-26 21:06:16 e005w4 exit=0 killed=None (elapsed_s 1364.1, peak_gpu_mem_mib 7860.0, weights_sha256 1d330be9b9deb881d14bb9de7719d62dd76910d2fae37d4e2da0b1b0bce39940)
+2026-09-26 21:34:58 chat_e005w4 exit=0 killed=None (elapsed_s 96.0, peak_gpu_mem_mib 1473.0, weights_sha256 None)
+2026-09-26 22:25:43 e004w4 exit=0 killed=None (elapsed_s 2136.6, peak_gpu_mem_mib 7752.0, weights_sha256 8ad34021ebf02dc7cb068b3d363811033c039d7e5f50d2f790ef797550e6bed2)
+2026-09-26 23:00:27 e005w5 exit=0 killed=None (elapsed_s 1323.8, peak_gpu_mem_mib 7882.0, weights_sha256 131c81134f227a4b7893cfa58c16ebb63a66766ea39930c9825811ef65299cb4)
+2026-09-26 23:20:47 chat_e005w5 exit=0 killed=None (elapsed_s 257.7, peak_gpu_mem_mib 1880.0, weights_sha256 None)
+2026-09-27 00:20:14 e004w5 exit=0 killed=None (elapsed_s 1490.3, peak_gpu_mem_mib 7743.0, weights_sha256 1bb9f377f3096537ff7db0ccd3052843d81f088470f96b3d4903e4179f6bd47b)
+2026-09-27 00:56:25 C1 exit=0 killed=None (elapsed_s 1722.8, peak_gpu_mem_mib 7661.0, weights_sha256 9efee059f19ce4f3513751227274f63082fb6c572f7599d9f219cc92b49c258f)
+2026-09-27 01:49:35 chat_C1 exit=0 killed=None (elapsed_s 272.1, peak_gpu_mem_mib 3220.0, weights_sha256 None)
+2026-09-27 02:51:28 P1 exit=0 killed=None (elapsed_s 1722.4, peak_gpu_mem_mib 7356.0, weights_sha256 0b8530dd179ea7ca8691421f54e0666d0e7935da95f5b1c49b86d064d94cb12a)
+2026-09-27 03:55:07 chat_P1 exit=0 killed=None (elapsed_s 226.8, peak_gpu_mem_mib 2252.0, weights_sha256 None)
+2026-09-27 04:45:24 G1 exit=0 killed=None (elapsed_s 1828.3, peak_gpu_mem_mib 8881.0, weights_sha256 a23aabbb3e9666aa9acf28f8f1e3d66cfcb6eefe8a99a4977a90eb8b896bfd0d)
+2026-09-27 05:25:18 chat_G1 exit=0 killed=None (elapsed_s 161.4, peak_gpu_mem_mib 1935.0, weights_sha256 None)
+2026-09-27 10:25:06 PC power loss at about 06:03 (Mac on battery 06:02:56-06:03:00; WSL up 06:03:34); the queue died during C2 (training done, scoring in GEN al/plain; no run.json, no guard.json). C2's 34 files hashed and moved to ~/planck/e006_run/crashed/C2_20260927-0603 (MANIFEST_sha256.txt); C2 reruns under its own name. DEVIATION in notes.txt. Restarted by Claude.
+2026-09-27 10:25:07 QUEUE E006 START (run 20260927-102507)
+2026-09-27 10:25:07 every job of this run: PYTORCH_CUDA_ALLOC_CONF=per_process_memory_fraction:0.70
+2026-09-27 10:25:07 code sha256 at start: 133 files, digest f3065d54f48b436a
+2026-09-27 10:25:11 check identity_e006 exit=0 (RESULT: ALL PASS)
+2026-09-27 10:25:12 check eval_identity_e006 exit=0 (RESULT: ALL PASS)
+2026-09-27 10:25:29 check items_big_check exit=0 (RESULT: ALL PASS (sha256 566ef4676b1997317e91cdbb0baf6162bd5531ece5def44a105669caa625166e))
+2026-09-27 10:32:23 check validate_e006 exit=0 (RESULT: ALL PASS)
+2026-09-27 10:33:39 check test_train_e006p exit=0 (RESULT: ALL PASS)
+2026-09-27 10:33:43 check test_replay_e006 exit=0 (RESULT: ALL PASS)
+2026-09-27 10:33:43 check test_rules_e006 exit=0 (RESULT: ALL PASS)
+2026-09-27 10:34:07 check test_analyze_e006 exit=0 (RESULT: ALL PASS)
+2026-09-27 10:38:19 check mutation_e006 exit=0 (RESULT: ALL PASS (baselines pass, every mutant killed))
+2026-09-27 10:38:53 check test_queue_e006 exit=0 (RESULT: ALL PASS)
+2026-09-27 10:38:53 dryC5: done earlier (exit 0), skipped
+2026-09-27 10:38:53 dryC6a: done earlier (exit 0), skipped
+2026-09-27 10:38:53 dryC6b: done earlier (exit 0), skipped
+2026-09-27 10:38:53 dryP: done earlier (exit 0), skipped
+2026-09-27 10:38:53 dryG: done earlier (exit 0), skipped
+2026-09-27 10:38:53 drychat: done earlier (exit 0), skipped
+2026-09-27 10:38:53 check compare_dry exit=0 (RESULT: ALL PASS)
+2026-09-27 10:38:53 base: done earlier (exit 0), skipped
+2026-09-27 10:38:53 chat_base: done earlier (exit 0), skipped
+2026-09-27 10:39:04 GAP: e005w1 failed earlier (see logs/e005w1.*); the queue does not rerun it
+2026-09-27 10:39:04 GAP: e005w1
+2026-09-27 10:39:05 chat_e005w1: done earlier (exit 0), skipped
+2026-09-27 10:39:05 e004w1: done earlier (exit 0), skipped
+2026-09-27 10:39:16 e005w2: done earlier (exit 0), skipped
+2026-09-27 10:39:16 chat_e005w2: done earlier (exit 0), skipped
+2026-09-27 10:39:16 e004w2: done earlier (exit 0), skipped
+2026-09-27 10:39:27 e005w3: done earlier (exit 0), skipped
+2026-09-27 10:39:27 chat_e005w3: done earlier (exit 0), skipped
+2026-09-27 10:39:27 e004w3: done earlier (exit 0), skipped
+2026-09-27 10:39:38 e005w4: done earlier (exit 0), skipped
+2026-09-27 10:39:38 chat_e005w4: done earlier (exit 0), skipped
+2026-09-27 10:39:38 e004w4: done earlier (exit 0), skipped
+2026-09-27 10:39:49 e005w5: done earlier (exit 0), skipped
+2026-09-27 10:39:49 chat_e005w5: done earlier (exit 0), skipped
+2026-09-27 10:39:50 e004w5: done earlier (exit 0), skipped
+2026-09-27 10:40:00 C1: done earlier (exit 0), skipped
+2026-09-27 10:40:00 chat_C1: done earlier (exit 0), skipped
+2026-09-27 10:40:11 P1: done earlier (exit 0), skipped
+2026-09-27 10:40:11 chat_P1: done earlier (exit 0), skipped
+2026-09-27 10:40:22 G1: done earlier (exit 0), skipped
+2026-09-27 10:40:22 chat_G1: done earlier (exit 0), skipped
+2026-09-27 11:47:00 C2 exit=0 killed=None (elapsed_s 1712.3, peak_gpu_mem_mib 7792.0, weights_sha256 641b454dc62056da92b0bc7d8d185261f9c47cff25f01e16ecfd4c269284e4f9)
+2026-09-27 12:10:57 chat_C2 exit=0 killed=None (elapsed_s 100.8, peak_gpu_mem_mib 1825.0, weights_sha256 None)
+2026-09-27 14:11:09 P2: not started (exit 1: gpu.lock busy for 7200 s or preflight wait over; try 1 of 12)
+2026-09-27 16:22:09 P2 exit=0 killed=None (elapsed_s 1695.2, peak_gpu_mem_mib 7254.0, weights_sha256 764bf1aeb8159fd01ec30d159f0c7a3a5bc45021db3edbdbbdffb72023559f28)
+2026-09-27 17:21:52 chat_P2 exit=0 killed=None (elapsed_s 147.1, peak_gpu_mem_mib 1978.0, weights_sha256 None)
+2026-09-27 18:48:59 G2 exit=0 killed=None (elapsed_s 1818.6, peak_gpu_mem_mib 8900.0, weights_sha256 9a9bb3fd313647a8c6eff2c4a715314c0ef25737880a7a6962586ebd4013c9fd)
+2026-09-27 19:25:06 chat_G2 exit=0 killed=None (elapsed_s 120.9, peak_gpu_mem_mib 1804.0, weights_sha256 None)
+2026-09-27 21:01:51 C3 exit=0 killed=None (elapsed_s 1717.0, peak_gpu_mem_mib 5938.0, weights_sha256 514b41f319be45fdb18c9420ae857a87327a67d13f95a2532937814a0795f7d1)
+2026-09-27 22:11:30 chat_C3 exit=0 killed=None (elapsed_s 181.4, peak_gpu_mem_mib 2517.0, weights_sha256 None)
+2026-09-27 23:53:24 P3 exit=0 killed=None (elapsed_s 1717.3, peak_gpu_mem_mib 6012.0, weights_sha256 25bfda881792395d642ebe67c8d57a9e9b3259cca57275437bda51e8fd504e6b)
+2026-09-28 00:34:10 chat_P3 exit=0 killed=None (elapsed_s 141.3, peak_gpu_mem_mib 1573.0, weights_sha256 None)
+2026-09-28 01:34:50 G3 exit=0 killed=None (elapsed_s 1836.8, peak_gpu_mem_mib 8556.0, weights_sha256 2fce1c50e6a98c4dd48b09ebc64cc768738bc104fa5fea88718fb9795c0e03ce)
+2026-09-28 02:15:25 chat_G3 exit=0 killed=None (elapsed_s 196.5, peak_gpu_mem_mib 2770.0, weights_sha256 None)
+2026-09-28 03:55:32 C4 exit=0 killed=None (elapsed_s 1712.1, peak_gpu_mem_mib 5221.0, weights_sha256 500ddcd24431423450ff59c6b23c6271e8c36fdfbe0d2b1e2773442bff04f493)
+2026-09-28 04:47:42 chat_C4 exit=0 killed=None (elapsed_s 70.6, peak_gpu_mem_mib 1464.0, weights_sha256 None)
+2026-09-28 05:56:50 P4 exit=0 killed=None (elapsed_s 1717.0, peak_gpu_mem_mib 5165.0, weights_sha256 2a41496d6848c384626450bc9a0967c064c5ebf6999fcd6374c258f27a5c6f85)
+2026-09-28 06:43:22 chat_P4 exit=0 killed=None (elapsed_s 196.6, peak_gpu_mem_mib 2532.0, weights_sha256 None)
+2026-09-28 07:54:20 G4 exit=0 killed=None (elapsed_s 1827.5, peak_gpu_mem_mib 8609.0, weights_sha256 0fa2b48afcdc3c6c8f2bb45978af94b0e4af9abb17e645031353be088d292a7f)
+2026-09-28 08:18:55 chat_G4 exit=0 killed=None (elapsed_s 90.7, peak_gpu_mem_mib 1623.0, weights_sha256 None)
+2026-09-28 09:10:35 C5 exit=0 killed=None (elapsed_s 1678.1, peak_gpu_mem_mib 8513.0, weights_sha256 444f2236a22ba364b7e10e3fa8b7e987e85549923862c0be1e0c95f0e0a4f8eb)
+2026-09-28 09:38:53 chat_C5 exit=0 killed=None (elapsed_s 176.4, peak_gpu_mem_mib 2087.0, weights_sha256 None)
+2026-09-28 10:23:06 P5 exit=0 killed=None (elapsed_s 1687.6, peak_gpu_mem_mib 8777.0, weights_sha256 62cca3bb379d137c5500341b13268812cfc5bb94fd6317932cb728bd15fb5347)
+2026-09-28 10:41:04 chat_P5 exit=0 killed=None (elapsed_s 95.8, peak_gpu_mem_mib 1699.0, weights_sha256 None)
+2026-09-28 11:27:23 G5 exit=0 killed=None (elapsed_s 1798.4, peak_gpu_mem_mib 8415.0, weights_sha256 f4fbd4e7441d5e60cd0cc31e0efed0912fb8c7be56b1da37e07fc87988ebb752)
+2026-09-28 12:30:33 chat_G5 exit=0 killed=None (elapsed_s 146.2, peak_gpu_mem_mib 1950.0, weights_sha256 None)
+2026-09-28 14:01:27 C1t exit=0 killed=None (elapsed_s 1256.3, peak_gpu_mem_mib 7713.0, weights_sha256 3c892fa5ea6f534ab1f32d84996a52368892e795073cb56e85cba72429349b4d)
+2026-09-28 14:55:56 C2t exit=0 killed=None (elapsed_s 1183.4, peak_gpu_mem_mib 7302.0, weights_sha256 6663f740a6a6710558e404831a8cae9a2e26e2c1a81192dab08286244fc52815)
+2026-09-28 14:56:18 readings: 20260928-145618	final	C PARTIAL-X | P PARTIAL-X | G FAIL | Q-H5 INCONCLUSIVE | Q-chat PROTECTS | knowledge REDUCES THE COST
+2026-09-28 14:56:18 QUEUE E006 DONE

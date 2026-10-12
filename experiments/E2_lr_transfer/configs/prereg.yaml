@@ -1,0 +1,38 @@
+# E2 pre-registration for the harness gate (train.py refuses a run without it; the queue passes
+# --require-committed, so it must be committed unchanged). The full pre-registration is
+# experiments/E2_lr_transfer/notes.txt AT THE SAME COMMIT; where this summary and notes.txt differ, notes.txt
+# governs. PLAN Phase 3a; LEDGER "Tune LR at 5M, check transfer to 20M".
+id: E2
+hypothesis: >-
+  Q1: which NorMuon matrix LR (eta) and AdamW ratio (r = embed_lr / lr = scalar_lr / lr) minimise held-out
+  chat bits per byte at 5M for a 250M-slot run (stages A: eta in {0.75, 1.5, 3, 6, 12} x 1e-3 at r 1;
+  B: r in {0.5, 1, 2, 4, 8}; C: all LRs x g in {0.5, 1, 2}; edge extensions by the notes' rule).
+  Q2: whether the 5M optimum holds at 20M within one factor-2 grid step (20M grid g in {0.5, 1, 2} around the
+  5M pick). Q3 (reported, no rule): how the optimum moves with run length.
+metric: >-
+  F(CHAT) = data_prep/bpb.py bits per byte of the run's FINAL checkpoint on the oasst2 eval set (eval sets v0,
+  evalset_sha256 fe1b55bb...; fp32, batch 16384 tokens, all windows); F(PROSE) = cccc + gutenberg + wikimedia
+  pooled. M (mean of final and the 2 rolling checkpoints before it) is reported, never decides.
+decision_rule: >-
+  Stage pick = argmin F(CHAT) at the 250M branch on the stage's axis; if its F(PROSE) is more than 1% above
+  the axis's best F(PROSE), the pick moves one grid step toward the PROSE best; exact ties (4 decimals) go to
+  the lower LR. Final 5M pick = stage C's pick; E3's paired seeds 2..8 override it if the runner-up is lower
+  on F(CHAT) with two-sided p < 0.05. Transfer: s = v20(500M) - v5(125M) (parabola vertex in log2 eta);
+  HOLDS if |s| < 1, MOVES if |s| >= 1 (E2b, muP/CompleteP, before any cross-size claim), UNRESOLVED if a
+  vertex is only a grid-edge bound. A non-finite loss scores +inf and is never resumed.
+engine_settings: >-
+  The engine settings (train.compile and its backend, train.doc_attn, train.ce_chunk_rows (lean loss),
+  optim.batched, train.lazy_metrics, train.cuda_mem_cap_gib, train.auto_micro_on_oom (false), precision bf16,
+  data.mode, window_tokens, max_item_len) are FIXED before the first scored run, in configs/engine.yaml
+  (engine_fixed set, values appended to the notes' FIXED log), and recorded in every run config: every run
+  config extends engine.yaml, so each run's config_sha256 in runs.jsonl and the config stored in every
+  checkpoint carry them. preflight.py --strict refuses a run whose engine keys are unfixed, "auto", unset
+  where the harness reads them, or set where the harness ignores them. No comparison mixes engine settings;
+  a change reruns every run of the affected comparison.
+data: >-
+  Starter shards v0 8k (shard manifest sha256 23647db7...ef41344), pinned shares cccc 0.4142,
+  stackexchange 0.2219, gutenberg 0.1479, wikimedia 0.1479, irc 0.0400, dolly 0.0160, oasst2 0.0120;
+  tokenizer tok_v0_8k.json sha256 078b24c4...; recorded in every config's provenance block and checked by
+  preflight.py against the files. Starter-corpus exception (notes FIXED 7): checkpoints are calibration only.
+seeds: [1]
+arms: "stage A: configs/5m_e{0.75,1.5,3,6,12}_r1_{trunk,b62M,b125M,b250M}.yaml; later stages by the rules"

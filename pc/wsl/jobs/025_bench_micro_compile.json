@@ -1,0 +1,10 @@
+{
+ "name": "025_bench_micro_compile",
+ "cmd": ["$PLANCK_HOME/venv/bin/python", "pc/bench_micro.py", "--compile",
+         "--targets", "5e6,30e6", "--batches", "16,32",
+         "--out", "$PLANCK_HOME/runs/bench_micro.jsonl"],
+ "cwd": "$PLANCK_HOME/repo",
+ "no_prereg_reason": "throughput benchmark with torch.compile (E1 calibration input)",
+ "max_hours": 2,
+ "max_attempts": 1
+}

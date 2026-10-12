@@ -1,0 +1,11 @@
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 3644.55it/s]
+loaded HuggingFaceTB/SmolLM2-135M-Instruct params=134.5M in 1.6s mps_alloc=0.50G driver=1.03G peak_driver=1.03G
+scored new/plain: 1728 items in 159s mps_alloc=0.50G driver=1.25G peak_driver=1.25G
+scored new/chat: 1728 items in 186s mps_alloc=0.50G driver=1.22G peak_driver=1.25G
+scored extra/plain: 192 items in 13s mps_alloc=0.50G driver=1.27G peak_driver=1.27G
+scored extra/chat: 192 items in 16s mps_alloc=0.50G driver=1.27G peak_driver=1.27G
+scored old/plain: 1116 items in 83s mps_alloc=0.50G driver=1.26G peak_driver=1.27G
+scored uprobe/plain: 576 items in 62s mps_alloc=0.50G driver=1.30G peak_driver=1.30G
+scored khard/plain: 80 items in 2s mps_alloc=0.50G driver=1.09G peak_driver=1.30G
+scored kbig/plain: 441 items in 8s mps_alloc=0.50G driver=1.05G peak_driver=1.30G
+DONE HuggingFaceTB/SmolLM2-135M-Instruct base total 531s peak_driver=1.302G lock_in_step=None

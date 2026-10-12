@@ -1,0 +1,54 @@
+S004 STAGE 2 VERDICT TABLES (analyze.py verdicts on the copied seed runs, 2026-10-11; SCREENS.txt STAGE 2 VERDICTS (2026-10-11))
+A 5M loss reading only (C8): bpb at 5M, 250.0M slots, starter mix, tok_v0_8k. No RC-12 or Tier 0 score.
+Class SIA, k 2, seeds 101 102, pick g 1 (C3 g-check, seed 1).
+d = arm - BASE (bpb; negative = arm better).
+
+C7 READINGS
+arm          metric     d s101    d s102    dbar      thr      delta    SD_ref   df  p (two-sided)  label
+canonac      CHAT       -0.01137  -0.00956  -0.01047  0.00632  0.01154  0.00378  7   0.0058  BETTER
+canonac      PROSE      -0.00854  -0.01015  -0.00934  0.00458  0.01387  0.00274  7   0.00192  BETTER
+canonac      cccc       -0.00877  -0.01097  -0.00987  0.00521  0.01319  0.00312  7   0.00286  BETTER
+canonac      gutenberg  -0.00927  -0.00825  -0.00876  0.00383  0.01500  0.00229  7   0.000997  BETTER
+canonac      wikimedia  -0.00757  -0.01126  -0.00941  0.00596  0.01342  0.00356  7   0.00729  BETTER
+
+VERDICT S004.canonac: NOMINATE; labels none; Holm (family of 9 so far): holds (p 0.0058)
+C4 pooled SIA check CHAT: SD 0.1832% of BASE vs limit 0.4646% (df 7, 7 arms): ok
+C4 pooled SIA check PROSE: SD 0.0984% of BASE vs limit 0.2801% (df 7, 7 arms): ok
+At E3 arm A's mean (SD_ref, thr and delta scaled): NOMINATE
+BASE replay label: BASE replay: stable; onset: BASE replay: stable
+
+C5 REPORTED, NO RULE (d s101, d s102; F = final checkpoint, M = mean of the 3 scored checkpoints)
+canonac      CHAT assistant      -0.01003  -0.01436  mean -0.01220  BASE 1.11105 1.11742
+canonac      CHAT user           -0.02171  +0.02747  mean +0.00288  BASE 1.47237 1.45449
+canonac      F(CHAT)             -0.01137  -0.00956  mean -0.01047  BASE 1.15250 1.15609
+canonac      F(PROSE)            -0.00854  -0.01015  mean -0.00934  BASE 1.38621 1.38848
+canonac      M(CHAT)             -0.01205  -0.00970  mean -0.01088  BASE 1.15685 1.15978
+canonac      M(PROSE)            -0.00850  -0.01023  mean -0.00937  BASE 1.39089 1.39299
+canonac      PROSE cccc          -0.00877  -0.01097  mean -0.00987  BASE 1.31693 1.32074
+canonac      PROSE gutenberg     -0.00927  -0.00825  mean -0.00876  BASE 1.50080 1.49935
+canonac      PROSE wikimedia     -0.00757  -0.01126  mean -0.00941  BASE 1.33930 1.34380
+canonac      dolly               -0.00193  -0.01510  mean -0.00851  BASE 1.34102 1.35854
+canonac      irc                 -0.00676  -0.01145  mean -0.00910  BASE 1.56033 1.57182
+canonac      stackexchange       -0.00597  -0.00776  mean -0.00686  BASE 1.36194 1.36354
+canonac      train loss last 2%  -0.01962  -0.02413  mean -0.02187  BASE 3.17695 3.20989
+
+CLIP RATE AND SPEED (log.jsonl gnorm over the 1.0 clip; median tok/s from the third record)
+base_s101                clipped   5 of 763  rate 0.66%  gnorm max 2.0325  tok/s 254,081
+base_s102                clipped   9 of 763  rate 1.18%  gnorm max 2.0648  tok/s 253,648
+s004_canonac_g1_s101     clipped   6 of 763  rate 0.79%  gnorm max 2.0449  tok/s 184,908
+s004_canonac_g1_s102     clipped   7 of 763  rate 0.92%  gnorm max 2.0761  tok/s 185,007
+
+IND ONSET (AMENDMENT BASE-DIAG ONSET RULE; steps)
+sigma_seed 83.802 (BASE onset_half 101..105: [612, 459, 459, 612, 459]), df 4
+arm {'101': 612, '102': 612}  BASE {'101': 612, '102': 459}  d [0, 153]  dbar +76.5  thr 232.7  p 0.413  UNRESOLVED  Holm does not hold
+
+C6 READINGS (AMENDMENT C6-DIAG READING RULE; E3 PART 4d SDs, absolute units; c6_tables.txt has all 9)
+HD_asst   arm 0.09059 0.09011  BASE 0.09876 0.09960  d -0.00817 -0.00949  dbar -0.00883  thr 0.00559  p 0.0073  LOWER  class new init  Holm holds  [noise check failed (pooled SIA)]
+          re-read SD 0.00334 replaces the SIA SD 0.00520 (SMALLER)
+          at the registered SD: SD 0.00520, df 7, thr 0.00870  p 0.0475  LOWER  Holm does not hold  (reported, no rule)
+          at the observed pooled SD: SD 0.01068, df 7, thr 0.01786  p 0.281  UNRESOLVED  Holm does not hold  (reported, no rule)
+HD_user   arm 0.19816 0.18304  BASE 0.18661 0.18741  d +0.01155 -0.00438  dbar +0.00359  thr 0.01380  p 0.558  UNRESOLVED  class SIA  Holm does not hold
+HDn_asst  arm 0.09637 0.11878  BASE 0.14744 0.14650  d -0.05107 -0.02772  dbar -0.03940  descriptive: higher 0, lower 2
+HDn_user  arm 0.14754 0.19695  BASE 0.16229 0.14091  d -0.01475 +0.05604  dbar +0.02065  descriptive: higher 1, lower 1
+IND       arm 11.55455 11.50856  BASE 7.54642 8.82495  d +4.00813 +2.68361  dbar +3.34587  thr 4.40669  p 0.116  UNRESOLVED  class SIA  Holm does not hold
+NEAR ITS INIT (S004): does not fire; per seed {"101": {"A": 0.10101696057245135, "C": 0.1100161885842681}, "102": {"A": 0.09726628265343606, "C": 0.1125298859551549}}; threshold 0.01

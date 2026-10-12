@@ -1,0 +1,14 @@
+{
+ "name": "G1",
+ "command": "~/planck/venv-hf/bin/python -B e006_ft_test.py HuggingFaceTB/SmolLM2-135M-Instruct --bs 4 --accum 4 --max-len 768 --grad-ckpt --arm G --seed 1 --lr 1.5e-04 --chat --save 1 --tag G1",
+ "ceiling_s": 14400.0,
+ "killed": null,
+ "verdict": null,
+ "start": "2026-09-27 04:14:55",
+ "end": "2026-09-27 04:45:23",
+ "elapsed_s": 1828.3,
+ "exit": 0,
+ "peak_temp_c": 68.0,
+ "peak_gpu_mem_mib": 8881.0,
+ "weights_sha256": "a23aabbb3e9666aa9acf28f8f1e3d66cfcb6eefe8a99a4977a90eb8b896bfd0d"
+}

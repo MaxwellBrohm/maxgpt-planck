@@ -1,0 +1,31 @@
+baseline (gates on H1-H5 and C_noupd, item checks on 384 items, purity on 300 training examples, template 5-grams): CLEAN
+
+KILLED  design / gate              C_noupd with A always first
+KILLED  design / gate              B stated once (no B correction)
+KILLED  design / gate              H1 latest correction named
+KILLED  design / gate              H5 asked object's latest moved last
+KILLED  design / gate              IDEAL answers first mention
+KILLED  design / gate              fake scorer reads the gold
+KILLED  item / refs                pron/ell not adjacent
+KILLED  item / text                value inside a filler
+KILLED  item / echo                question echoes a statement
+KILLED  item / content             H1 latest correction shares a content word
+KILLED  item / fillers             d one short
+KILLED  item / text                gold value reused by another statement
+KILLED  item / refs                alias missing from the original
+KILLED  item / fillers             training filler in an eval item
+KILLED  item / structure           k outside the family range
+KILLED  purity / H6 object         eval object in a training turn
+KILLED  purity / H4 d20            d 20 (text only, annotation unchanged)
+KILLED  purity / H5 obj3           third object statement
+KILLED  purity / H3 k45            an object corrected 4+ times
+KILLED  purity / H1/H2 echo        question echoes a statement
+KILLED  purity / H1/H2 alias       alias surname in a turn
+KILLED  purity / H7 filler         H7 filler in training
+KILLED  purity / eval marker       eval marker on a statement
+KILLED  purity / H6 value          digit in the answer
+KILLED  ngram / template           training template in an eval pool
+KILLED  ngram / template           training acknowledgement in the eval acks
+
+26 of 26 mutants killed (none by a crash: yes); baseline clean
+RESULT: ALL PASS

@@ -1,0 +1,217 @@
+{
+ "model": "EleutherAI/pythia-14m",
+ "seed": 0,
+ "steps": 5,
+ "lr": 5e-05,
+ "bs": 4,
+ "accum": 4,
+ "eff_batch": 16,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "mps",
+ "dry": true,
+ "tag": "dry",
+ "sets": [
+  "cont",
+  "eval",
+  "know"
+ ],
+ "chat": false,
+ "max_new": 48,
+ "params": 14067712,
+ "checks": {
+  "params_config": {
+   "total": 14067712,
+   "embedding": 12877824,
+   "body": 1189888,
+   "tok_emb": 6438912,
+   "out_head": 6438912,
+   "pos_emb": 0,
+   "layers": 6,
+   "d": 128,
+   "vocab": 50304,
+   "n_ctx": 2048
+  },
+  "params_model": 14067712,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": false,
+  "config_says_tied": false,
+  "sanity_nll": 3.8286
+ },
+ "trained_ctx": 2048,
+ "torch": "2.13.0",
+ "train_stream": "train_e004.stream(seed) = Random(1000 * seed + 44)",
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "loss_selfcheck": {
+  "hf": 3.8719663619995117,
+  "answer_only": 3.8719663619995117
+ },
+ "loss_mutants": {
+  "no_shift": 9.782331466674805,
+  "prompt_labelled": 3.7642416954040527
+ },
+ "train_s": 2.5,
+ "s_per_step": 0.5,
+ "train_stats": {
+  "n": 84,
+  "rejected_long": 0,
+  "drawn": {
+   "twoslot": 18,
+   "upd": 19,
+   "noupd": 14,
+   "noupd_b": 8,
+   "cross": 5,
+   "noupd_incid": 2,
+   "mid": 9,
+   "twoslot_b": 4,
+   "revert": 4,
+   "upd_incid": 1
+  },
+  "kept": {
+   "twoslot": 18,
+   "upd": 19,
+   "noupd": 14,
+   "noupd_b": 8,
+   "cross": 5,
+   "noupd_incid": 2,
+   "mid": 9,
+   "twoslot_b": 4,
+   "revert": 4,
+   "upd_incid": 1
+  },
+  "len_sum": 33286,
+  "len_max": 672,
+  "split": 0,
+  "mean_len": 396.3,
+  "shares": {
+   "cross": {
+    "drawn": 0.0595,
+    "kept": 0.0595
+   },
+   "mid": {
+    "drawn": 0.1071,
+    "kept": 0.1071
+   },
+   "noupd": {
+    "drawn": 0.1667,
+    "kept": 0.1667
+   },
+   "noupd_b": {
+    "drawn": 0.0952,
+    "kept": 0.0952
+   },
+   "noupd_incid": {
+    "drawn": 0.0238,
+    "kept": 0.0238
+   },
+   "revert": {
+    "drawn": 0.0476,
+    "kept": 0.0476
+   },
+   "twoslot": {
+    "drawn": 0.2143,
+    "kept": 0.2143
+   },
+   "twoslot_b": {
+    "drawn": 0.0476,
+    "kept": 0.0476
+   },
+   "upd": {
+    "drawn": 0.2262,
+    "kept": 0.2262
+   },
+   "upd_incid": {
+    "drawn": 0.0119,
+    "kept": 0.0119
+   }
+  },
+  "max_share_shift": 0.0
+ },
+ "losses": [
+  4.0507,
+  3.83571,
+  3.95476,
+  3.77861,
+  3.36274
+ ],
+ "probe": [
+  {
+   "step": 0,
+   "H1": 0.0,
+   "H2": 0.0,
+   "H3": 0.0,
+   "H4": 0.0,
+   "H5": 0.0,
+   "H6": 0.0,
+   "H7": 0.0,
+   "C_noupd": 0.0,
+   "C_twoslot": 0.0
+  },
+  {
+   "step": 5,
+   "H1": 0.0,
+   "H2": 0.0,
+   "H3": 0.0,
+   "H4": 0.0,
+   "H5": 0.0,
+   "H6": 0.0,
+   "H7": 0.0,
+   "C_noupd": 0.0,
+   "C_twoslot": 0.0
+  }
+ ],
+ "lock_in_step": null,
+ "loss_finite": true,
+ "eval_s": 1.3,
+ "eval_counts": {
+  "e004/plain": 2,
+  "new/plain": 2,
+  "extra/plain": 2,
+  "old/plain": 2,
+  "uprobe/plain": 2,
+  "cross/plain": 2,
+  "khard/plain": 2,
+  "kbig/plain": 2,
+  "gen_e004/plain": 2,
+  "gen_cont/plain": 2
+ },
+ "summary": {
+  "LIK e004/plain": {
+   "H1": 0.0,
+   "H2": null,
+   "H3": null,
+   "H4": null,
+   "H5": null,
+   "H6": null,
+   "H7": null,
+   "C_noupd": null,
+   "C_twoslot": null,
+   "ID": null
+  },
+  "GEN e004/plain": {
+   "strict": 0,
+   "lenient": 0,
+   "n": 2,
+   "capped": 0,
+   "bare": 0
+  },
+  "GEN cont/plain": {
+   "strict": 0,
+   "lenient": 0,
+   "n": 2,
+   "capped": 0,
+   "bare": 0
+  }
+ },
+ "selftest_fail": [],
+ "peak_mps_driver_gb": 1.174,
+ "peak_mps_alloc_gb": 0.263,
+ "total_s": 5.9
+}

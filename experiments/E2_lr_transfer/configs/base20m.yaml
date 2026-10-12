@@ -1,0 +1,18 @@
+# E2/E3 base, 20M: base5m.yaml with the 20M shape and micro 8 x accum 2 (the same 32,768 token slots per
+# step). Every 20M run config (E2 20M grid, E3 Part 2) extends this file. E2 notes: MODEL, SCHEDULE.
+extends: base5m.yaml
+
+model:                          # harness/budget.py --target 20e6 --vocab 8192: 20,001,511 params
+  vocab_size: 8192
+  d_model: 320
+  n_layers: 14
+  n_heads: 5
+  n_kv_heads: 5
+  head_dim: 64
+  mlp_hidden: 864
+  seq_len: 2048
+  tie_embeddings: true
+
+train:
+  micro_batch: 8
+  grad_accum: 2

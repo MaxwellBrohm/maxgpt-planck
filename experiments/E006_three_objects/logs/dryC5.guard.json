@@ -1,0 +1,13 @@
+{
+ "name": "dryC5",
+ "command": "~/planck/venv-hf/bin/python -B numerics_e006.py e005_ft_test.py HuggingFaceTB/SmolLM2-135M-Instruct --bs 4 --accum 4 --max-len 768 --grad-ckpt --seed 0 --dry --device cuda --sets eval,cont,know --chat --tag dryC5",
+ "ceiling_s": 1800.0,
+ "killed": null,
+ "verdict": null,
+ "start": "2026-09-26 07:44:46",
+ "end": "2026-09-26 07:45:06",
+ "elapsed_s": 20.1,
+ "exit": 0,
+ "peak_temp_c": 60.0,
+ "peak_gpu_mem_mib": 4681.0
+}

@@ -1,0 +1,322 @@
+E006 reading (analyze_e006.py), 2026-09-26 15:09:48
+
+== C: no complete scored seed
+
+== P: no complete scored seed
+
+== G: no complete scored seed
+
+== e005w (E005 weights, CUDA): pass rule FAIL (no PASS, PARTIAL-G or PARTIAL-X condition holds)
+   leave one seed out: {'without s1': 'FAIL', 'without s2': 'FAIL', 'without s3': 'FAIL', 'without s4': 'FAIL', 'without s5': 'FAIL'}
+   fewest item flips that change the label: None []
+   sub-reading: ID LIK < 0.8 on a majority of seeds (0.938)
+   sub-reading: H1 LIK by the latest statement's reference form (range over seeds): alias 0.857, ell 0.857, pron 1.000
+   sub-reading: H2 LIK by the latest statement's reference form (range over seeds): alias 1.000, ell 0.857, pron 1.000
+   sub-reading: H1+H2 alias items by placement, LIK (range over seeds): adjacent 1.000 (n 9), filler 0.857 (n 14), B_sep 0.947 (n 19)
+   sub-reading: wrong LIK picks, H1/H2 alias, pooled over seeds: 3 wrong: other_after 2, A_prev 1; of them lures 1
+   sub-reading: wrong GEN picks, H1/H2 alias, pooled over seeds: 1 wrong: other_after 1; of them lures 0
+   sub-reading: wrong LIK picks, H1/H2 not alias, pooled over seeds: 6 wrong: A_prev 6; of them lures 4
+   sub-reading: wrong GEN picks, H1/H2 not alias, pooled over seeds: 8 wrong: A_prev 8; of them lures 5
+   sub-reading: wrong LIK picks, H5, pooled over seeds: 25 wrong: other_after 20, A_prev 4, other_before 1; of them lures 0
+   sub-reading: wrong GEN picks, H5, pooled over seeds: 27 wrong: other_after 21, A_prev 5, other_before 1; of them lures 0
+   sub-reading: wrong LIK picks, C_noupd, pooled over seeds: 12 wrong: other_after 12; of them lures 0
+   sub-reading: wrong GEN picks, C_noupd, pooled over seeds: 13 wrong: other_after 13; of them lures 0
+   sub-reading: wrong LIK picks, C_twoslot, pooled over seeds: 9 wrong: other_after 5, A_prev 4; of them lures 1
+   sub-reading: wrong GEN picks, C_twoslot, pooled over seeds: 9 wrong: other_after 6, A_prev 3; of them lures 0
+   alias reading: INCONCLUSIVE (HIGH 1, LOW 0); stopping learned: False [False, False, False, False, False]
+   s1 LIK H1:0.906 H2:0.953 H3:0.844 H4:0.953 H5:0.609 H6:0.891 H7:0.906 C_noupd:0.812 C_twoslot:0.859 ID:0.938
+   s1 GEN H1:0.906 H2:0.953 H3:0.891 H4:0.953 H5:0.578 H6:0.938 H7:0.922 C_noupd:0.797 C_twoslot:0.859 ID:0.953
+   s2 missing or incomplete (counts as failing)
+   s3 missing or incomplete (counts as failing)
+   s4 missing or incomplete (counts as failing)
+   s5 missing or incomplete (counts as failing)
+
+== e004w (E004 weights, CUDA): no complete scored seed
+
+Q-H5 (BIG H5, plain, P - C): NOT READ
+   P - C, BIG H5 LIK: not read
+   P - C, BIG H5 GEN: not read
+   L4 - C (BIG H5 LIK) -; training-device shift C - e005w -
+   BIG H5 pooled C: LIK - GEN - (seeds [])
+   BIG H5 pooled P: LIK - GEN - (seeds [])
+   BIG H5 pooled e004w: LIK - GEN - (seeds [])
+   BIG H5 pooled e005w: LIK 0.547 GEN - (seeds [1])
+   per seed P_s - C_s LIK:  (0 of 0 > 0)
+   per seed P_s - C_s GEN:  (0 of 0 > 0)
+   D4004 H5 LIK pooled C: - (>= E004's stored 0.756: False); E005 Mac stored 0.656
+   D4004 H5 LIK pooled P: - (>= E004's stored 0.756: False); E005 Mac stored 0.656
+   D4004 H5 LIK pooled e004w: - (>= E004's stored 0.756: False); E005 Mac stored 0.656
+   D4004 H5 LIK pooled e005w: 0.609 (>= E004's stored 0.756: False); E005 Mac stored 0.656
+   C BIG H5 LIK by intro order ; other object's indirect after the asked latest 
+   C BIG H5 wrong LIK picks: 0, {}; the dialogue's last statement 0
+   C BIG H5 wrong GEN picks: 0, {}; the dialogue's last statement 0
+   C D4004 H5 LIK by intro order ; other object's indirect after the asked latest 
+   C D4004 H5 wrong LIK picks: 0, {}; the dialogue's last statement 0
+   C D4004 H5 wrong GEN picks: 0, {}; the dialogue's last statement 0
+   C D4004 U families LIK by gold-last: True: - (0), False: - (0)
+   P BIG H5 LIK by intro order ; other object's indirect after the asked latest 
+   P BIG H5 wrong LIK picks: 0, {}; the dialogue's last statement 0
+   P BIG H5 wrong GEN picks: 0, {}; the dialogue's last statement 0
+   P D4004 H5 LIK by intro order ; other object's indirect after the asked latest 
+   P D4004 H5 wrong LIK picks: 0, {}; the dialogue's last statement 0
+   P D4004 H5 wrong GEN picks: 0, {}; the dialogue's last statement 0
+   P D4004 U families LIK by gold-last: True: - (0), False: - (0)
+   e004w BIG H5 LIK by intro order ; other object's indirect after the asked latest 
+   e004w BIG H5 wrong LIK picks: 0, {}; the dialogue's last statement 0
+   e004w BIG H5 wrong GEN picks: 0, {}; the dialogue's last statement 0
+   e004w D4004 H5 LIK by intro order ; other object's indirect after the asked latest 
+   e004w D4004 H5 wrong LIK picks: 0, {}; the dialogue's last statement 0
+   e004w D4004 H5 wrong GEN picks: 0, {}; the dialogue's last statement 0
+   e004w D4004 U families LIK by gold-last: True: - (0), False: - (0)
+   e005w BIG H5 LIK by intro order 1: 0.855 (76), 2: 0.377 (77), 3: 0.282 (39); other object's indirect after the asked latest False: 0.490 (96), True: 0.604 (96)
+   e005w BIG H5 LIK reweighted to D4004's intro mix 0.553; by rule NL right/wrong False: 0.625 (96), True: 0.469 (96)
+   e005w BIG H5 wrong LIK picks: 87, {'other_after': 73, 'A_prev': 14}; the dialogue's last statement 53
+   e005w BIG H5 wrong GEN picks: 0, {}; the dialogue's last statement 0
+   e005w D4004 H5 LIK by intro order 1: 0.852 (27), 2: 0.500 (20), 3: 0.353 (17); other object's indirect after the asked latest False: 0.719 (32), True: 0.500 (32)
+   e005w D4004 H5 wrong LIK picks: 25, {'other_after': 20, 'A_prev': 4, 'other_before': 1}; the dialogue's last statement 18
+   e005w D4004 H5 wrong GEN picks: 27, {'other_after': 21, 'A_prev': 5, 'other_before': 1}; the dialogue's last statement 19
+   e005w recency index big H5: n 192, mean_rank 3.531, top1 0.276, mean_margin_vs_gold -3.190
+   e005w recency index big C_noupd: n 192, mean_rank 2.734, top1 0.130, mean_margin_vs_gold -5.212
+   e005w recency index big C_twoslot: n 192, mean_rank 4.010, top1 0.026, mean_margin_vs_gold -7.963
+   e005w D4004 U families LIK by gold-last: True: 0.958 (192), False: 0.859 (192)
+   C BIG C_noupd wrong LIK picks: 0, {}; the dialogue's last statement 0
+   P BIG C_noupd wrong LIK picks: 0, {}; the dialogue's last statement 0
+   C BIG C_noupd wrong GEN picks: 0, {}; the dialogue's last statement 0
+   P BIG C_noupd wrong GEN picks: 0, {}; the dialogue's last statement 0
+   C BIG C_twoslot wrong LIK picks: 0, {}; the dialogue's last statement 0
+   P BIG C_twoslot wrong LIK picks: 0, {}; the dialogue's last statement 0
+   C BIG C_twoslot wrong GEN picks: 0, {}; the dialogue's last statement 0
+   P BIG C_twoslot wrong GEN picks: 0, {}; the dialogue's last statement 0
+   note: on H5, C_noupd and C_twoslot the gold is never the dialogue's last statement, so a weaker recency prior alone raises all three; rule NL scores .94 on both controls (they cannot discriminate), H5L can
+
+Q-chat (G vs C, chat probe): NOT READ
+Knowledge (G vs C, kbig441 unexposed, 16 exposed items left out): NOT READ
+   G - C TF: not read
+   G - C TF2: not read
+   G - C LOOP: not read
+   G - C CHECKS (per model, of 73): not read
+   chat base: TF 0.01 TF2 0.01 WHOLE 0.03 LOOP 0.013 (old rule 0.013) CAP 68 EOS 81 CHECKS 21/73 same-first 5/96 latest-plan 0.00 stopped-turn tokens 55.9 sig bc7133961bd46d7b
+   knowledge kbig G - C, unexposed (the reading): not read
+   knowledge kbig G - C, all 441: not read
+   knowledge kbig G - C, unexposed, loose exposure: not read
+
+Cost G - C (COST: d <= -0.05 and CI high < 0; LOWER: CI high < 0)
+   G - C e004 H1 LIK plain: not read
+   G - C e004 H1 GEN plain: not read
+   G - C e004 H2 LIK plain: not read
+   G - C e004 H2 GEN plain: not read
+   G - C e004 H3 LIK plain: not read
+   G - C e004 H3 GEN plain: not read
+   G - C e004 H4 LIK plain: not read
+   G - C e004 H4 GEN plain: not read
+   G - C e004 H5 LIK plain: not read
+   G - C e004 H5 GEN plain: not read
+   G - C e004 H6 LIK plain: not read
+   G - C e004 H6 GEN plain: not read
+   G - C e004 H7 LIK plain: not read
+   G - C e004 H7 GEN plain: not read
+   G - C e004 C_noupd LIK plain: not read
+   G - C e004 C_noupd GEN plain: not read
+   G - C e004 C_twoslot LIK plain: not read
+   G - C e004 C_twoslot GEN plain: not read
+   G - C e004 ID LIK plain: not read
+   G - C e004 ID GEN plain: not read
+   G - C big H5 LIK plain: not read
+   G - C big H5 GEN plain: not read
+   G - C big C_noupd LIK plain: not read
+   G - C big C_noupd GEN plain: not read
+   G - C big C_twoslot LIK plain: not read
+   G - C big C_twoslot GEN plain: not read
+   G - C h5l H5L LIK plain: not read
+   G - C h5l H5L GEN plain: not read
+   G - C e004 H1 LIK chat: not read
+   G - C e004 H1 GEN chat: not read
+   G - C e004 H2 LIK chat: not read
+   G - C e004 H2 GEN chat: not read
+   G - C e004 H3 LIK chat: not read
+   G - C e004 H3 GEN chat: not read
+   G - C e004 H4 LIK chat: not read
+   G - C e004 H4 GEN chat: not read
+   G - C e004 H5 LIK chat: not read
+   G - C e004 H5 GEN chat: not read
+   G - C e004 H6 LIK chat: not read
+   G - C e004 H6 GEN chat: not read
+   G - C e004 H7 LIK chat: not read
+   G - C e004 H7 GEN chat: not read
+   G - C e004 C_noupd LIK chat: not read
+   G - C e004 C_noupd GEN chat: not read
+   G - C e004 C_twoslot LIK chat: not read
+   G - C e004 C_twoslot GEN chat: not read
+   G - C e004 ID LIK chat: not read
+   G - C e004 ID GEN chat: not read
+   G - C big H5 LIK chat: not read
+   G - C big H5 GEN chat: not read
+   G - C big C_noupd LIK chat: not read
+   G - C big C_noupd GEN chat: not read
+   G - C big C_twoslot LIK chat: not read
+   G - C big C_twoslot GEN chat: not read
+   G - C h5l H5L LIK chat: not read
+   G - C h5l H5L GEN chat: not read
+
+Cost P - C (COST: d <= -0.05 and CI high < 0; LOWER: CI high < 0)
+   P - C e004 H1 LIK plain: not read
+   P - C e004 H1 GEN plain: not read
+   P - C e004 H2 LIK plain: not read
+   P - C e004 H2 GEN plain: not read
+   P - C e004 H3 LIK plain: not read
+   P - C e004 H3 GEN plain: not read
+   P - C e004 H4 LIK plain: not read
+   P - C e004 H4 GEN plain: not read
+   P - C e004 H5 LIK plain: not read
+   P - C e004 H5 GEN plain: not read
+   P - C e004 H6 LIK plain: not read
+   P - C e004 H6 GEN plain: not read
+   P - C e004 H7 LIK plain: not read
+   P - C e004 H7 GEN plain: not read
+   P - C e004 C_noupd LIK plain: not read
+   P - C e004 C_noupd GEN plain: not read
+   P - C e004 C_twoslot LIK plain: not read
+   P - C e004 C_twoslot GEN plain: not read
+   P - C e004 ID LIK plain: not read
+   P - C e004 ID GEN plain: not read
+   P - C big H5 LIK plain: not read
+   P - C big H5 GEN plain: not read
+   P - C big C_noupd LIK plain: not read
+   P - C big C_noupd GEN plain: not read
+   P - C big C_twoslot LIK plain: not read
+   P - C big C_twoslot GEN plain: not read
+   P - C h5l H5L LIK plain: not read
+   P - C h5l H5L GEN plain: not read
+   P - C e004 H1 LIK chat: not read
+   P - C e004 H1 GEN chat: not read
+   P - C e004 H2 LIK chat: not read
+   P - C e004 H2 GEN chat: not read
+   P - C e004 H3 LIK chat: not read
+   P - C e004 H3 GEN chat: not read
+   P - C e004 H4 LIK chat: not read
+   P - C e004 H4 GEN chat: not read
+   P - C e004 H5 LIK chat: not read
+   P - C e004 H5 GEN chat: not read
+   P - C e004 H6 LIK chat: not read
+   P - C e004 H6 GEN chat: not read
+   P - C e004 H7 LIK chat: not read
+   P - C e004 H7 GEN chat: not read
+   P - C e004 C_noupd LIK chat: not read
+   P - C e004 C_noupd GEN chat: not read
+   P - C e004 C_twoslot LIK chat: not read
+   P - C e004 C_twoslot GEN chat: not read
+   P - C e004 ID LIK chat: not read
+   P - C e004 ID GEN chat: not read
+   P - C big H5 LIK chat: not read
+   P - C big H5 GEN chat: not read
+   P - C big C_noupd LIK chat: not read
+   P - C big C_noupd GEN chat: not read
+   P - C big C_twoslot LIK chat: not read
+   P - C big C_twoslot GEN chat: not read
+   P - C h5l H5L LIK chat: not read
+   P - C h5l H5L GEN chat: not read
+
+Companion reading: the pass rule's H5 and control cells on BIG (reported, not ruled)
+   C BIG H5 (LIK/GEN, bar 0.8): s1 -/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   C BIG C_noupd (LIK/GEN, bar 0.8): s1 -/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   C BIG C_twoslot (LIK/GEN, bar 0.8): s1 -/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   P BIG H5 (LIK/GEN, bar 0.8): s1 -/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   P BIG C_noupd (LIK/GEN, bar 0.8): s1 -/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   P BIG C_twoslot (LIK/GEN, bar 0.8): s1 -/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   G BIG H5 (LIK/GEN, bar 0.8): s1 -/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   G BIG C_noupd (LIK/GEN, bar 0.8): s1 -/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   G BIG C_twoslot (LIK/GEN, bar 0.8): s1 -/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   e005w BIG H5 (LIK/GEN, bar 0.8): s1 0.547/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   e005w BIG C_noupd (LIK/GEN, bar 0.8): s1 0.844/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   e005w BIG C_twoslot (LIK/GEN, bar 0.8): s1 0.901/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   e004w BIG H5 (LIK/GEN, bar 0.8): s1 -/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   e004w BIG C_noupd (LIK/GEN, bar 0.8): s1 -/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+   e004w BIG C_twoslot (LIK/GEN, bar 0.8): s1 -/-, s2 -/-, s3 -/-, s4 -/-, s5 -/-
+
+Q-device (stated, not ruled): C minus E005 (Mac records) unless named
+   e004 H1 LIK plain: not read
+   e004 H1 LIK chat: not read
+   e004 H1 GEN plain: not read
+   e004 H1 GEN chat: not read
+   e004 H2 LIK plain: not read
+   e004 H2 LIK chat: not read
+   e004 H2 GEN plain: not read
+   e004 H2 GEN chat: not read
+   e004 H3 LIK plain: not read
+   e004 H3 LIK chat: not read
+   e004 H3 GEN plain: not read
+   e004 H3 GEN chat: not read
+   e004 H4 LIK plain: not read
+   e004 H4 LIK chat: not read
+   e004 H4 GEN plain: not read
+   e004 H4 GEN chat: not read
+   e004 H5 LIK plain: not read
+   e004 H5 LIK chat: not read
+   e004 H5 GEN plain: not read
+   e004 H5 GEN chat: not read
+   e004 H6 LIK plain: not read
+   e004 H6 LIK chat: not read
+   e004 H6 GEN plain: not read
+   e004 H6 GEN chat: not read
+   e004 H7 LIK plain: not read
+   e004 H7 LIK chat: not read
+   e004 H7 GEN plain: not read
+   e004 H7 GEN chat: not read
+   e004 C_noupd LIK plain: not read
+   e004 C_noupd LIK chat: not read
+   e004 C_noupd GEN plain: not read
+   e004 C_noupd GEN chat: not read
+   e004 C_twoslot LIK plain: not read
+   e004 C_twoslot LIK chat: not read
+   e004 C_twoslot GEN plain: not read
+   e004 C_twoslot GEN chat: not read
+   e004 ID LIK plain: not read
+   e004 ID LIK chat: not read
+   e004 ID GEN plain: not read
+   e004 ID GEN chat: not read
+   al AL1 LIK plain: not read
+   al AL1 LIK chat: not read
+   al AL2 LIK plain: not read
+   al AL2 LIK chat: not read
+   al AL3 LIK plain: not read
+   al AL3 LIK chat: not read
+   al AL4 LIK plain: not read
+   al AL4 LIK chat: not read
+   new all LIK plain: not read
+   extra all LIK plain: not read
+   old all LIK plain: not read
+   uprobe all LIK plain: not read
+   cross all LIK plain: not read
+   kbig all LIK plain: not read
+   khard all LIK plain: not read
+   chat probe TF: not read
+   chat probe TF2: not read
+   chat probe LOOP: not read
+   chat probe CHECKS (per model, of 73): not read
+   0 of 0 intervals exclude 0 (about 0.0 expected by chance)
+   BIG H5 LIK: C - e005w (training device): not read
+   BIG H5 GEN: C - e005w (training device): not read
+   BIG C_noupd LIK: C - e005w (training device): not read
+   BIG C_noupd GEN: C - e005w (training device): not read
+   BIG C_twoslot LIK: C - e005w (training device): not read
+   BIG C_twoslot GEN: C - e005w (training device): not read
+   scoring device e005w1 (CUDA) vs E005 s1 (Mac) e004/plain: LIK flips 0 of 640, max |score diff| 0.00010395050048828125
+   scoring device e005w1 vs E005 s1 GEN plain: identical replies 640 of 640
+   scoring device e005w1 (CUDA) vs E005 s1 (Mac) e004/chat: LIK flips 0 of 640, max |score diff| 0.0001010894775390625
+   base (CUDA) vs E004's untouched records new/plain: flips 0 of 1723, max |diff| 2.574920654296875e-05
+   base (CUDA) vs E004's untouched records new/chat: flips 0 of 1723, max |diff| 6.341934204101562e-05
+   base (CUDA) vs E004's untouched records extra/plain: flips 0 of 192, max |diff| 1.8358230590820312e-05
+   base (CUDA) vs E004's untouched records extra/chat: flips 0 of 192, max |diff| 3.886222839355469e-05
+   base (CUDA) vs E004's untouched records old/plain: flips 0 of 1116, max |diff| 7.43865966796875e-05
+   base (CUDA) vs E004's untouched records uprobe/plain: flips 0 of 574, max |diff| 3.4809112548828125e-05
+   base (CUDA) vs E004's untouched records cross/plain: flips 0 of 384, max |diff| 2.8133392333984375e-05
+   base (CUDA) vs E004's untouched records cross/chat: flips 0 of 384, max |diff| 4.744529724121094e-05
+   base transcript sha256 dc488fd0 (E004's untouched ffa5ee69; the E006 file adds weights_sha256 and tag to each record)
+   numerics twin C1t (TF32) - C1, BIG H5 LIK: not read
+   numerics twin C1t (TF32) - C1, BIG C_noupd LIK: not read
+   numerics twin C1t (TF32) - C1, BIG C_twoslot LIK: not read
+   numerics twin C2t (TF32) - C2, BIG H5 LIK: not read
+   numerics twin C2t (TF32) - C2, BIG C_noupd LIK: not read
+   numerics twin C2t (TF32) - C2, BIG C_twoslot LIK: not read
+
+Training traces (lock-in step, s/step, G's replay use)

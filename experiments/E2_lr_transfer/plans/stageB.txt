@@ -1,0 +1,18 @@
+# stageB (e2plan.py). train = preflight, train, then score if it is a branch
+train 5m_e3_r0.5_trunk
+train 5m_e3_r0.5_b62M
+train 5m_e3_r0.5_b125M
+train 5m_e3_r0.5_b250M
+train 5m_e3_r2_trunk
+train 5m_e3_r2_b62M
+train 5m_e3_r2_b125M
+train 5m_e3_r2_b250M
+train 5m_e3_r4_trunk
+train 5m_e3_r4_b62M
+train 5m_e3_r4_b125M
+train 5m_e3_r4_b250M
+train 5m_e3_r8_trunk
+train 5m_e3_r8_b62M
+train 5m_e3_r8_b125M
+train 5m_e3_r8_b250M
+mark E2 STAGE B DONE

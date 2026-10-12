@@ -1,0 +1,59 @@
+baseline p: PASS (4s)
+baseline pos: PASS (3s)
+baseline enc: PASS (0s)
+baseline drop: PASS (0s)
+baseline big: PASS (0s)
+baseline rules: PASS (0s)
+baseline queue: PASS (38s)
+baseline sched: PASS (1s)
+KILLED   P1 split drawn from R_new (3s) s1: Q = F = 0 does not equal train_e005.stream on 1500 draws
+KILLED   P2 split moves B's original too (3s) s1#9: P's alias plan is not C's plan transformed
+KILLED   P3 other_obj placement falls into the split branch (3s) s1: Q = F = 0 does not equal train_e005.stream on 1500 draws
+KILLED   P4 y-first keeps an indirect first correction (3s) s1#34: P's ind plan is not C's plan transformed
+KILLED   P5 y-first drops the planned gap (3s) s1#34: P's ind plan is not C's plan transformed
+KILLED   P6 y-first puts Y's corrections before X (3s) s1#34: P's ind plan is not C's plan transformed
+KILLED   P7 y-first changes the ask (3s) s1#34: P's ind plan is not C's plan transformed
+KILLED   P8 an unchanged ALIAS example is marked (3s) s1: Q = F = 0 does not equal train_e005.stream on 1500 draws
+KILLED   P9 R_pos seeded like R_new (3s) IND y-first share 0.227 vs F_YFIRST 0.3
+KILLED   P10 the render draw taken from R_pos (3s) s1: Q = F = 0 does not equal train_e005.stream on 1500 draws
+KILLED   P11 the value type drawn from R_pos (3s) s1: Q = F = 0 does not equal train_e005.stream on 1500 draws
+KILLED   P12 F_YFIRST 0.30 -> 0.40 (3s) IND y-first share 0.436 vs F_YFIRST 0.4
+KILLED   O1 introduction order off by one (3s) position statistics of C (0.069, None, 0.2665) != notes (0.6658, 0.069, 0.2665)
+KILLED   O2 gate tolerance loosened (3s) position gate does not fail (once) a stream 1e-6 above the limit on all GL2
+KILLED   R1 replay label span starts on the header newline (0s) encode: ['span 45:66 does not decode to its assistant turn + <|im_end|>', 'span 88:112 does not decode to its 
+KILLED   R2 <|im_end|> not in the target (0s) a valid thread was dropped (split)
+KILLED   R3 cut keeps a dangling user turn (0s) a valid thread was dropped (first_exchange_too_long)
+KILLED   R4 replay order not seeded per seed (0s) replay_order: not deterministic per seed, or equal across seeds
+KILLED   R10 a lossy thread is not dropped (0s) not dropped: lossy_text
+KILLED   R11 the whole input is not checked (0s) whole-input check: an input that lost a user-turn character passed check_replay_labels
+KILLED   R5 probe containment needs 8 words (0s) drop rule: test-tree-3 got keep, want probe_turn
+KILLED   R6 eval overlap by 9-grams (0s) drop rule: test-tree-2 got keep, want eval_8gram
+KILLED   R7 surnames matched case-sensitively (0s) drop rule: test-tree-5 got keep, want eval_surname
+KILLED   R8 reserve leak read from assistant turns (0s) drop rule: test-tree-0 got keep, want reserve_leak
+KILLED   R9 strict exposure needs only the gold (0s) exposure: Bhutan strict True, Laos strict True loose True (want True, False, True)
+KILLED   B1 H5L gold not forced last (0s) H5L: an item whose asked latest is not last
+KILLED   B2 H5L strata ignored (0s) H5L: introduction-order strata are not 64/64/64
+KILLED   Q1 gain threshold 0.06 -> 0.05 (0s) 0.0599 is no gain
+KILLED   Q2 gain CI low >= 0 (0s) CI low 0 is not > 0
+KILLED   Q3 NOT THE CAUSE with CI high <= 0.06 (0s) CI high 0.06 is not < 0.06
+KILLED   Q4 the WORSE branch unreachable (0s) WORSE on both
+KILLED   Q5 paired difference sign (0s) paired: all right minus all wrong = 1, CI 1..1
+KILLED   Q6 pairing by item broken (0s) paired: sign is X - Y
+KILLED   Q7 chat mean per conversation, not per turn (0s) chat_boot: turn-weighted (4 of 5 turns)
+KILLED   Q8 TF ratio 0.5 -> 0.6 (0s) SMALL EFFECT (TF ratio)
+KILLED   Q9 loop margin inclusive (0s) PARTLY PROTECTS naming (b) loops: {'label': 'PROTECTS', 'failed': []}
+KILLED   Q10 checks read on the CI high side (0s) PARTLY PROTECTS naming (c) probe checks: {'label': 'PROTECTS', 'failed': []}
+KILLED   Q11 device shift without abs (0s) GAIN when the device shift is -0.05
+KILLED   Q12 recency trade on either condition (0s) trade needs <= -0.05, CI < 0
+KILLED   Q13 knowledge big effect 0.03 -> 0.02 (0s) knowledge SMALL REDUCTION
+KILLED   Q14 NO DROP flag at > 0.05 (0s) no flag at exactly 0.05
+KILLED   Q15 L4 not read raises the NO DROP flag (0s) L4 NOT READ flag when L4 - C is not read
+KILLED   G1 replacement instead of addition (3 update micro-batches) (1s) g_schedule: not [u, u, u, u, r] per step
+KILLED   G2 the replay micro-batch first (1s) g_schedule: not [u, u, u, u, r] per step
+KILLED   U1 a temp verdict does not stop the queue (37s) FAIL  4 a temp verdict stops the queue
+KILLED   U2 finished jobs are not skipped on a restart (31s) FAIL  2 a restart skips every finished job
+KILLED   U3 a GPU job runs without the lock (39s) FAIL  1 every GPU job took the lock first
+KILLED   U4 a failed scored job stops the queue (42s) FAIL  3 its chat probe is not run
+
+48 mutants: {'KILLED': 48}
+RESULT: ALL PASS (baselines pass, every mutant killed)

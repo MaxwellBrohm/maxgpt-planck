@@ -1,0 +1,86 @@
+{
+ "model": "roneneldan/TinyStories-3M",
+ "seed": 0,
+ "steps": 0,
+ "lr": 5e-05,
+ "bs": 4,
+ "accum": 4,
+ "eff_batch": 16,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "mps",
+ "dry": false,
+ "tag": "base",
+ "sets": [
+  "dev",
+  "eval"
+ ],
+ "params": 8278400,
+ "checks": {
+  "params_config": {
+   "total": 8278400,
+   "embedding": 6695040,
+   "body": 1583360,
+   "tok_emb": 6432896,
+   "out_head": 0,
+   "pos_emb": 262144,
+   "layers": 8,
+   "d": 128,
+   "vocab": 50257,
+   "n_ctx": 2048
+  },
+  "params_model": 8278400,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [
+   "transformer.h.0.attn.attention.bias",
+   "transformer.h.0.attn.attention.masked_bias",
+   "transformer.h.1.attn.attention.bias",
+   "transformer.h.1.attn.attention.masked_bias",
+   "transformer.h.2.attn.attention.bias",
+   "transformer.h.2.attn.attention.masked_bias",
+   "transformer.h.3.attn.attention.bias",
+   "transformer.h.3.attn.attention.masked_bias",
+   "transformer.h.4.attn.attention.bias",
+   "transformer.h.4.attn.attention.masked_bias"
+  ],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": true,
+  "config_says_tied": true,
+  "sanity_nll": 0.844
+ },
+ "trained_ctx": 512,
+ "torch": "2.13.0",
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "train_stats": {
+  "n": 0,
+  "rejected_long": 0,
+  "kinds": {},
+  "len_sum": 0,
+  "len_max": 0,
+  "split": 0,
+  "mean_len": null
+ },
+ "losses": [],
+ "loss_finite": true,
+ "probe": [],
+ "lock_in_step": null,
+ "eval_s": 153.6,
+ "eval_counts": {
+  "new/plain": 1728,
+  "extra/plain": 192,
+  "old/plain": 1116,
+  "uprobe/plain": 576,
+  "khard/plain": 80,
+  "kbig/plain": 441,
+  "cross/plain": 384,
+  "dev/plain": 320
+ },
+ "peak_mps_driver_gb": 2.114,
+ "peak_mps_alloc_gb": 0.062,
+ "total_s": 155.3
+}

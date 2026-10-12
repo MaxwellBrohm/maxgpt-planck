@@ -1,0 +1,245 @@
+T001: the PLAN 3d 2-layer toy (multi-query repeated associative recall, MQRAR), and its pick rules
+Cuts audit S3 (research/CUTS_AUDIT_2026-10.md row 9; PLAN 3d "A 2-layer toy (minutes) runs first"; PLAN must-run list
+"P-022 or P-148 (whichever the toy favors)"; LEDGER P-020, P-022, P-024, P-148).
+
+PRE-REGISTRATION WRITTEN 2026-10-10 17:30 EDT by Claude (workflow W5), before any T001 code exists and before any toy
+run of any kind. No model was loaded for this entry. No stage 2 verdict of S004, S005 or S007 has been read by this
+workflow (none is in the repo's committed text at this time). Nothing here is committed by this step.
+
+WHY
+  PLAN 3d puts a 2-layer toy before the 30M architecture tests; it was never built (audit row 9), so P-148 (Canon)
+  holds the must-run slot by default, P-022 (a gated delta-rule layer) was never looked at, and S005 tests only one
+  P-020 variant (the forget gate). LEDGER P-020: "Toy MQRAR, 2 layers, d=128 (minutes)", win ">=1.5x MQRAR capacity
+  ... latest-wins >=0.8 on 4/5 seeds". LEDGER P-022: "Toy MQRAR + entity tracking". LEDGER P-024: "Toy induction 1
+  vs 2 layers". MQRAR is the toy form of limit 1 (updating after a correction): a key is re-assigned and a later
+  query must return the latest value (research/followup/archfp.md 1.4: at 2 layers, d=256, one head, softmax+RoPE
+  held 128 pairs and stick-breaking 192, the top of that paper's tested range).
+
+WHAT THE TOY DECIDES, AND WHAT IT DOES NOT
+  It decides two picks and reports one reading, all fixed below before any run:
+    R1  which of P-022 (gated delta-rule layer) and P-148 (Canon-AC) takes the 30M must-run slot in PLAN 3d;
+    R2  which P-020 variant is the 30M P-020 test's arm;
+    R3  P-024's 1-vs-2-layer reading (the gate for S007's depth-reduced arm, PLAN Appendix B).
+  It does not touch any 5M screen: S004's and S005's 5M results stand as their own pre-registrations read them, and
+  neither verdict enters R1 or R2 (loss is not a behaviour proxy for attention-side changes, arch.md 1.4). S004's
+  verdict is reported beside R1, as S004 notes ("reported to the PLAN 3d toy") ask, and changes nothing in it.
+  The bet that loses R1 is not dropped: it takes the next PLAN 3d architecture slot after the must-run list, and if
+  the Nov 22 checkpoint cannot hold it, it goes on the deferral list to Max (PLAN rule), never "failed".
+  If R2 picks a variant other than the forget gate, the 30M P-020 test runs it under its own new pre-registration
+  (S005 notes: "a different variant there is a new pre-registration").
+  Batch 1's ORDER cut (analyze_lib toy_favours_p022) is W1's: this entry does not set it; R1's result goes to W1.
+
+TASK (registered generator; this repo's own definition, not checked against 2410.17980's exact format)
+  Tokens: BOS 0, SET 1, ASK 2, COPY 3, key tokens 4..163 (K = 160), value tokens 164..227 (V = 64); vocab 228.
+  A sample at size n (n distinct keys, drawn without replacement from the K keys):
+    1. BOS; then every one of the n keys is SET once, in random order, each to a uniform random value: "SET k v".
+    2. Then 2n events. Family "mqrar": each event is, with probability 1/2, a query "ASK k v" (k uniform over the n
+       keys, v its current value), otherwise an update "SET k v'" (k uniform, v' uniform over the 63 values that
+       differ from k's current value). Family "ar" (plain recall, no updates): all 2n events are queries. Family
+       "track" (entity tracking): query with probability 1/2, else with probability 1/2 "COPY a b" (a != b uniform;
+       b takes a's current value at that moment), else an update as in mqrar.
+    Length L = 1 + 9n (every event is 3 tokens). Loss and scoring only at query answers: the logits at the key token
+    of "ASK k v" predict v. Training loss: cross-entropy over the whole vocab at those positions only.
+  Per query the generator records: the answer; updated (the key had >= 2 writes before the query); stale (values the
+  key held earlier that differ from the answer); first (the key's first value); tracked (its latest write was a
+  COPY); distance in events since the latest write.
+
+MODELS AND ARMS (CPU and GPU in fp32, TF32 off; every arm built by experiments/T001_mqrar_toy code, not the harness)
+  Common: d = 128, 2 heads of 64, pre-RMSNorm blocks (mixer, then a GELU MLP of width 512), final RMSNorm, tied
+  embedding, RoPE base 10,000 on q and k unless the arm says otherwise. No QK-norm, no attention gate, no value
+  residual (the Planck BASE block's extras are left out of the toy; a known limit below).
+  Two-layer arms in R1/R2:
+    base   softmax attention in both layers.
+    fg     forget gate in both layers, S005's registered form: per head f[t] = sigmoid(w_h . a_t + b_h), a_t the
+           mixer input; logit bias for query i, key j <= i: sum over l in (j, i] of log f[l]; w = 0, b set so the
+           half-life equals the longest training row (865 tokens), b = log(f / (1 - f)), f = 2^(-1/865); RoPE kept.
+    sb     stick-breaking attention in both layers, no RoPE: z = q.k / 8; A[i,j] = sigmoid(z[i,j]) x prod over k in
+           (j, i] of (1 - sigmoid(z[i,k])), j <= i (the current token included); output A V, no renormalisation.
+    sa     Selective Attention in both layers, parameter-free: S = ReLU(head 0's causal logits), column 0 (BOS) and
+           the diagonal zeroed, shifted one query down, F = cumulative sum over queries; F is subtracted from every
+           head's logits before the softmax. (The form as recalled from 2410.02703's pseudo-code; not checked.)
+    alibi  learned ALiBi slopes in both layers, RoPE kept: logit bias -m_h (i - j), m_h = softplus(p_h) >= 0, init
+           m = (2^-4, 2^-8).
+    gdn    P-022's arm: layer 0 softmax attention as base, layer 1 a gated delta-rule layer: q, k, v projections,
+           a depthwise causal conv of kernel 4 then SiLU on each (as Gated DeltaNet), q and k L2-normalised per head,
+           alpha_t = sigmoid(.), beta_t = sigmoid(.) per head from the layer input, state update
+           M_t = alpha_t (I - beta_t k_t k_t^T) M_{t-1} + beta_t k_t v_t^T, read o_t = M_t^T q_t, per-head RMSNorm,
+           output projection. No output gate (the layer has 2,116 more parameters than an attention layer). The
+           layer-1 position is where the delta rule can act as a current-value register on layer 0's output.
+    canon  P-148's arm: S004's Canon-AC form in both layers: h = h + conv_A(h) before the mixer and h = h + conv_C(h)
+           before the MLP, depthwise causal kernel 4, zero init (starts as the base function).
+  Diagnostic arms (reported, never in R1 or R2): smear (2 layers, S007's smeared key: raw k_t + alpha_h k_(t-1)
+  before RoPE, alpha = 0 at init); gdn_nc (gdn without its conv, to see how much of gdn is the conv, which overlaps
+  Canon's mechanism). One-layer arms for R3: base1, smear1, and canon1 (reported).
+  Init: every weight matrix normal(0, 0.02) (output and MLP-down projections 0.02 / sqrt(2 x layers)), drawn in
+  module order after torch.manual_seed(seed); the new parameters of fg, alibi, smear, canon and sa are constants
+  (no RNG draw), so those arms share every base draw at a seed. gdn and gdn_nc draw their own (new init).
+
+TRAINING
+  Each step: n uniform integer in [8, 96], a batch of 32 samples of family mqrar at that n (track runs: family
+  track). Data come from numpy default_rng([1000 + seed]) and never from torch, so every arm at a seed sees the same
+  batches in the same order (common random numbers). AdamW (0.9, 0.95), eps 1e-8, weight decay 0.1 on tensors of
+  dim >= 2 only, 200 linear warmup steps then cosine to 0.1 x LR, gradient clip 1.0, 6,000 steps.
+  A run whose loss turns non-finite stops and is marked diverged: in a verdict it counts at the worst value of every
+  metric (accuracy 0, capacity 4, LW 0) and is named in the report.
+
+CALIBRATION C0 (reads BASE at seed 0 only, LR 1e-3; applied by runplan.py, never by hand)
+  (a) If base's dev accuracy at n = 8 is below 0.5, every run uses 12,000 steps (once; C0 is then rerun at 12,000).
+  (b) If base's dev accuracy is >= 0.9 at every grid point up to 96, the grid gains 128 and 160 and training n
+      becomes uniform in [8, 160] for every run (once; C0 rerun). Neither rule reads any other arm.
+
+LEARNING RATE (C3-like, seed 0, never in a verdict)
+  Every arm at LR {3e-4, 1e-3, 3e-3}, seed 0. Pick: the highest mean dev mqrar accuracy over the grid; ties to the
+  smaller LR. If the pick is 3e-4 or 3e-3, one extension (1e-4 or 1e-2) runs and the pick is re-taken over four.
+
+SEEDS AND PAIRING
+  Verdict seeds 1-5 at each arm's picked LR (init seed s, data stream 1000 + s). Arms are paired by seed. Eval sets
+  are fixed and identical for every run: test 256 samples and dev 128 samples per (family, n), from default_rng
+  seeds disjoint from every training stream. Grid G = {8, 16, 24, 32, 48, 64, 96} (+128, 160 under C0 b).
+
+METRICS (test sets; the prediction at a query is the argmax over the 64 value tokens)
+  acc(n)   fraction of mqrar queries answered with the current value.
+  cap      MQRAR capacity: the largest n in G with acc(m) >= 0.9 for every m in G up to n; 4 if acc(8) < 0.9. A cap at
+           the top of G is censored (a lower bound) and labelled so.
+  LW       latest-wins: accuracy on updated queries, the mean of the per-n rates over n in {8, 16, 24, 32}.
+  AR32     plain-recall accuracy on family ar at n = 32 (the no-recall-loss guard).
+  Reported only: acc(n), LW(n), STALE (an earlier value), FIRST (the first value), accuracy by distance, ar at every
+  n; track accuracy overall and on tracked queries; parameter counts; train loss curve; wall time.
+
+PICK RULES (fixed now; X vs base unless named; "on >= 4/5" = the paired per-seed difference has that sign on at
+least 4 of the 5 verdict seeds)
+  helps(X):  [ mean(LW_X - LW_base) >= 0.05 and LW_X > LW_base on >= 4/5 ]
+             or [ geometric mean of cap_X / cap_base >= 1.25 and cap_X > cap_base on >= 4/5 ],
+             and the guard mean(AR32_X - AR32_base) >= -0.05.
+  R1 (P-022 vs P-148 for the 30M must-run slot):
+    - helps(gdn) and not helps(canon): P-022.     - helps(canon) and not helps(gdn): P-148.
+    - both: head to head, d = LW_gdn - LW_canon per seed: P-022 if mean d >= 0.05 and d > 0 on >= 4/5; P-148 if
+      mean d <= -0.05 and d < 0 on >= 4/5; else on cap_gdn / cap_canon the same way at a geometric mean of 1.25 (or
+      1 / 1.25); else P-022 (Max's ledger rule puts the bet untested at this size first; P-148 has its 5M screen).
+    - neither: P-148. The toy measures P-022's own claim (latest-wins) and would have found nothing; it does not
+      measure P-148's claim (same-type pair binding), so a Canon null here is not evidence against P-148.
+  R2 (the P-020 variant; candidates fg, sb, sa, alibi):
+    pass(X): [ geometric mean cap ratio >= 1.5 and cap_X > cap_base on >= 4/5 ] or [ LW_X >= 0.8 on >= 4/5 seeds
+      and mean(LW_X - LW_base) >= 0.10 and LW_X > LW_base on >= 4/5 ], and the guard (LEDGER P-020's toy lines).
+    Among the passing variants: the highest mean LW; if the top two are within 0.02, the higher geometric mean cap
+    ratio; if within 5%, the order fg, alibi, sa, sb (fg has S005's 5M screen and harness code; then by build cost at
+    30M). If none passes: the same choice among those with helps(X). If none helps: fg (S005's variant) by default,
+    and the ledger row says no variant beat base on the toy.
+  R3 (P-024, 1 vs 2 layers; AR32 per seed): YES if mean(AR32_smear1) >= mean(AR32_base) - 0.05 and AR32_smear1 -
+    AR32_base1 >= 0.2 on >= 4/5; NO if mean(AR32_smear1 - AR32_base1) <= 0.05; else PARTIAL. YES or PARTIAL is the
+    toy's half of PLAN Appendix B's trigger for S007's depth-reduced arm (its own pre-registration); S007's Q2 is
+    reported beside it and does not block it (a null Q2 says nothing about depth, S007 notes Q2).
+  Tracking (LEDGER P-022's entity tracking): base, gdn and canon also train on family track at seeds 1-3 at their
+  picked LR; accuracy on tracked queries per arm is reported with R1 and enters no rule.
+  Code: metrics.py implements these rules on the per-run JSON; its tests fix each threshold.
+
+NOT IN T001
+  PaTH (LEDGER P-020's fifth variant): its products of data-dependent Householder transforms need a chunked kernel;
+  the naive form keeps B x H x L^2 x 64 floats for the backward (about 19 GB at batch 32, L 865), so no reference
+  can be built and tested today. This is a build-cost reason, so under Max's rule it goes to Max as a question, not
+  a silent cut: build a chunked PaTH (est. a day of Claude work) and run it as a fifth R2 candidate, or record it
+  "not run". If it is built before the first verdict-seed run of T001, it joins R2 as a candidate in the order
+  after sb; otherwise R2 runs over the four and PaTH's line says why.
+
+CODE (own module under experiments/T001_mqrar_toy; nothing in harness/; each test watched failing on a mutant)
+  task.py (generator), layers.py (mixers, delta rule naive and chunked, conv), model.py (arms), train.py (one run,
+  JSON out), metrics.py (metrics and R1-R3), runplan.py (the run order, C0, LR picks), run_pc.sh (the PC driver).
+  Tests at least: the delta rule against a hand-computed 3-step case; chunked == naive (values and gradients);
+  causality (a change at position t moves no output before t) for every arm; zero-init arms equal base at init;
+  the generator's key updates (the answer is the latest write, updates change the value, stale and first are
+  right, queries only of set keys, the loss mask only on answers); capacity and every R1-R3 threshold.
+
+GPU PLAN (run order; launched only after an independent critique of this entry and the code; never by this step)
+  On the PC 5070, one run per gpu.lock hold (each under 35 minutes, timeout 1,800 s), from a code tarball with its
+  own name (never planck.bundle), outputs in its own directory. Order: C0; seed 0 LR runs for base, gdn, canon, fg,
+  sb, sa, alibi, then the diagnostic arms; then seeds 1-5 in the same arm order; then the track runs. The queue
+  waits again after every 2 h lock wait instead of giving up, so it needs no relaunch watcher; STOP and PAUSE files,
+  45 GB free, GPU at or below 75 C and at most 3,000 MiB in use when the lock is taken, as the screens' drivers.
+  Hours: unmeasured here; the CPU smoke (labelled smoke, read only for speed and finiteness) gives the step time.
+
+KNOWN RISKS AND LIMITS
+  - A 2-layer d=128 toy is far from Planck's 8-layer 5M or 30M models; it ranks mechanisms on one synthetic skill.
+  - The toy block lacks QK-norm, the attention gate and value residual; a variant that interacts with them at 30M is
+    not tested here.
+  - Variants are this repo's registered forms, from the papers as summarised in research/ (not their code).
+  - Mixed-n training (8-96 in one run) differs from per-n training in 2410.17980; capacities are not comparable to
+    that paper's numbers, only between arms here.
+  - LR is picked on seed 0's dev sets; verdicts use seeds 1-5 and the separate test sets.
+  - gdn includes Gated DeltaNet's short conv, which overlaps Canon's previous-token path; gdn_nc is reported so a
+    gdn win can be attributed, but R1 reads gdn as P-022's published form.
+
+CHANGES BEFORE ANY TOY RUN (2026-10-10 17:43 EDT, Claude; written after the code and the smoke below, before any
+training run whose accuracy anyone reads; nothing above changed except as listed. First stamped 17:50 in error: the
+file was last written at 17:43:04, corrected per critique D2. The entries marked [rule] touch rule details; all came
+before any accuracy was read, critique D5)
+  - The run-order module is runplan.py (named queue.py above at first; "queue" is a standard-library module name).
+  - gdn's gate init, not fixed above: gate weights normal(0, 0.02); alpha's bias at the forget gate's rule
+    (sigmoid(bias) = 2^(-1/865)), beta's bias 0 (beta 0.5). gdn has 2,116 parameters more than base (stated above
+    first as "within 2,100"); canon 2,048; fg 516; alibi and smear 4; sb and sa 0. base 423,040; base1 226,176.
+  - [rule] LW counts an n with no updated query as 0 (never seen at these sizes; a rule, so it is fixed).
+  - [rule] R2's "top two within 0.02" is applied to every variant within 0.02 of the top, then capacity within 5%, then
+    the order; equal to the text whenever at most two variants are close.
+  - Verdict runs go seed-major (seed 1 for every arm in the order above, then seed 2, ...), so a stopped queue
+    leaves balanced seeds.
+  - [rule] Comparisons in metrics.py carry a 1e-9 float tolerance, so a mean of exactly 0.05 counts as 0.05.
+SMOKE (2026-10-10 17:37:39 EDT, Mac CPU, labelled smoke, never read): all 12 arms, seed 0, LR 1e-3, 30 steps at batch
+  32, n in [8, 96], tiny eval sets; every run finished with finite losses (outputs in a scratch directory, not the
+  repo). Accuracies were not opened.
+TESTS (Mac CPU, 2026-10-10): tests/ 143 passed. tests/mutation_t001.py on scratch copies: 66 of 66 mutants killed
+  (generator: latest vs first value, repeated updates, COPY direction, mask and answer position, updated/stale
+  flags, event rates, eval streams; delta rule: alpha on the write, erase dropped, beta dropped, chunked system and
+  decays; stick-breaking, Selective Attention, forget gate, ALiBi, conv, smear, Canon init, gdn layer, RoPE; every
+  pick-rule threshold and default; C0, LR extension, run order; scoring). One first-draft mutant (an inclusive mask
+  in the chunked system) was equivalent, since the unit-triangular solve never reads the diagonal; it was replaced.
+DRIVER DRY RUN (PC, 2026-10-10 17:40, scratch HOME under /tmp with its own fake gpu.lock; a stub train.py that
+  touches no GPU and fails on its 4th call): sha check and unpack, C0 then base's LR runs, the 1e-4 extension
+  named on a tie, the stop on a failed run ("NEEDS A PERSON"), single instance, STOP, and a bad sha all behaved as
+  written. The real gpu.lock was not taken.
+GPU BENCH (PC 5070, 2026-10-10 17:42:11-17:42:24, one gpu.lock hold of 13 s, 772 MiB in use by others; labelled bench:
+  step time and peak memory only, no accuracy; batch 32, 20 timed steps after 5): ms per step at n 52 / n 96 (L 469 /
+  865): base 10.9 / 28.2, fg 12.7 / 33.8, sb 19.9 / 60.3, sa 15.6 / 47.3, alibi 11.8 / 31.6, gdn 15.4 / 33.5, canon
+  12.1 / 30.3, smear1 6.0 / 15.0; peak 0.5-2.3 GiB (sb at n 96 the largest). Data generation adds about 6 ms per step
+  (Mac CPU). Estimate, not measured end to end: 2-3.5 minutes per 6,000-step run with its eval; 105-117 runs, about
+  4.5-5 GPU h in per-run holds of a few minutes each. If C0 (a) fires, about twice that; if C0 (b) fires, rows up to
+  1,441 tokens, about 2.5x per step and sb near 7 GiB at n 160 (an OOM stops the queue for a person).
+
+AMENDMENT A1 (2026-10-10 18:19 EDT, Claude, W5's commit-and-run step; after the independent critique of this entry
+and the code, before any training run beyond the labelled smoke and bench above; no toy accuracy has been read)
+  Why (critique D1): every ASK echoes the current value, so a key's earlier events act as votes. The causal shortcut
+  "the most frequent earlier value of the key, ties to the most recent" scores acc 0.913-0.930 at every n from 8 to
+  96 on the registered test streams (cap 96, censored, under the rule above) and LW 0.761-0.801. So the capacity
+  paths of helps, R1's head to head and R2's pass, the C0 (b) trigger and the LR pick could be met by vote counting.
+  Changes (task.py, train.py, metrics.py, runplan.py; tests/test_amend_a1.py):
+  - Per query the generator also records outvoted: among the key's earlier explicit "SET k v" and "ASK k v" events,
+    some other value occurs more often than the answer; and tied: one occurs as often and none more (reported only).
+    7-9% of queries (20-24% of updated ones) are outvoted: 142 at n 8 up to 2,060 at n 96 in the test sets. On
+    an outvoted query every majority-of-earlier-occurrences rule is wrong, whatever its tie rule; the shortcut above
+    scores 0 there.
+  - acc_ov(n): accuracy on outvoted queries. LWO: the mean of acc_ov over n in {8, 16, 24, 32} (an n without an
+    outvoted query counts 0).
+  - cap: the largest n in G with acc(m) >= 0.9 and acc_ov(m) >= 0.9 for every m in G up to n; 4 if n 8 fails;
+    censored at the top of G as before. The capacity and LW defined above stay as cap_all and LW, reported only.
+  - Every pick rule reads LWO where it said LW (helps, R1's head to head, R2's pass and its ranking) and the new cap.
+  - R2's pass needs LWO_X >= 0.8 on >= 4/5 seeds on both paths (LEDGER P-020 lists capacity and latest-wins
+    together): pass(X) = LWO_X >= 0.8 on >= 4/5, and ([cap ratio >= 1.5 and cap_X > cap_base on >= 4/5] or [mean
+    LWO gain >= 0.10 and positive on >= 4/5]), and the guard. An absolute bar on the capacity path rather than a
+    gain, so a variant that holds more keys can pass while base is already near the ceiling at small n.
+  - C0 (b) fires only if base's dev acc and dev acc_ov are both >= 0.9 at every grid point up to 96.
+  - LR pick: the highest mean over the grid of (dev acc + dev acc_ov) / 2; ties to the smaller LR.
+  - R2's capacity tie ("within 5%") carries the same 1e-9 float tolerance as the other comparisons.
+  Unchanged: task, arms, training, seeds, grid, every threshold's value, AR32 and R3, the track runs.
+  Also fixed after the critique, touching no rule: tests now pin R2's tie windows and the censoring label (D3) and the
+  registered arm forms and training constants (D4, tests/test_pins.py); the PC driver's heat stop sends TERM to
+  timeout, lets its -k 60 KILL python, and releases gpu.lock only once python is gone (D6). PC dry run in a scratch
+  HOME with a fake nvidia-smi and a stub trainer that ignores TERM: the old driver released the lock with the stub
+  still running; the new one released it 61 s after the stop with the stub gone. Tests: 198 passed with -W error;
+  tests/mutation_t001.py: 119 of 119 mutants killed (the first 66, the critique's 34, 4 more constants and A1's 15).
+
+AMENDMENT A2 (2026-10-10 22:21 EDT, Claude; scheduling only: no rule, metric, run, setting or code that trains or
+scores changes). Up to here 12 of about 110 runs exist (C0 and seed-0 LR runs of base, gdn and canon); C0 (a) fired.
+With five queues sharing gpu.lock, one run per hold gave T001 about one run per 30-40 min. run_pc.sh now starts the
+next run inside the same hold while the hold is under 15 min old, at least 600 s remain before a 34 min hold cap
+(a later run's timeout is cut to fit), STOP and PAUSE are absent and the GPU is at or below 80 C. Holds stay under
+the 35 min rule. PC dry run (stub trainer, scratch HOME, fake nvidia-smi): several runs per hold, rotation at the age
+limit, the cut timeouts, STOP between runs, a heat stop in a hold's second run (the stub is gone before the lock is
+released) and DONE inside a hold all behaved as written; the real gpu.lock was not taken.

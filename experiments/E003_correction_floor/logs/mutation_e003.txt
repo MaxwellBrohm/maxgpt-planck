@@ -1,0 +1,41 @@
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer GPTNeoXTokenizer. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+unmutated: 0 failures []
+killed   ties count as right (empty answer passes)  <- right(): tie passes (empty answer)
+killed   gold compared with the first foil only (plausible wrong answer passes)  <- right(): wrong with 3 candidates passes
+killed   gold-only record passes  <- right(): gold-only passes
+killed   empty record passes  <- right(): empty dict passes
+killed   NaN scores pass  <- right(): NaN gold passes
+killed   pass rule ignores two-slot and no-update  <- primary: 0.7 should fail
+killed   pass rule read at d4  <- primary: 0.8 exactly should pass
+killed   pass rule uses > 0.8  <- primary: 0.8 exactly should pass
+killed   'most seeds' counts a tie  <- verdict: 1/2 should fail (tie is not most)
+killed   paired CI ignores prompt hashes  <- paired: prompt-hash mismatch not caught
+killed   paired change sign flipped  <- paired: all gained should be +1 {'n': 50, 'acc_before': 1.0, 'acc_after': 0.0, 'd_acc': -1.0, 'd_acc_ci95': [-
+killed   LR pick: tie -> larger LR  <- pick_lr tie -> smaller LR: got 'CHOSEN 1e-03', want 'CHOSEN 3e-04'
+killed   LR pick: by mean instead of min cell  <- pick_lr min-cell, not mean: got 'CHOSEN 5e-05', want 'CHOSEN 3e-04'
+killed   LR pick: NaN-loss run eligible  <- pick_lr NaN-loss run is ineligible: got 'CHOSEN 1e-03', want 'CHOSEN 3e-04'
+killed   LR pick: never extends  <- pick_lr top LR best but < 0.8 -> extend: got 'CHOSEN 1e-03', want 'EXTEND 3e-03'
+killed   LR pick: extends even when the top LR passes  <- pick_lr top LR passes -> no extension: got 'EXTEND 3e-03', want 'CHOSEN 1e-03'
+killed   LR pick: dev NU read at d4  <- pick_lr min-cell, not mean: got 'CHOSEN 5e-05', want 'CHOSEN 3e-04'
+killed   analysis: crossed pair = either answer  <- analysis: secondary label must need the crossed pair
+killed   analysis: knowledge change vs itself, not the untouched model  <- analysis: knowledge gain sign {'n': 441, 'acc_before': 1.0, 'acc_after': 1.0, 'd_acc': 0.0, 'd_acc_ci95': [0.0
+killed   analysis: pass rule read from the wrong set  <- analysis: ideal should pass with cross_pair 1.0 (1.0)
+killed   analysis: length split flipped  <- analysis: length split {'LW10|fits<=512': {'acc': 0.0, 'n': 96, 'se': 0.0}, 'LW10|over512': {'acc': 1.0, 'n': 
+killed   analysis: secondary label ignores the crossed pair  <- analysis: secondary label must need the crossed pair
+killed   analysis: fitting-items secondary reads the over-context items  <- analysis: fitting items all right -> secondary pass
+killed   dev draw reuses the scored eval items  <- dev: 320 dev prompts are also eval prompts
+killed   dev draw drops two-slot  <- dev: wrong composition 256 {'LW': 192, 'TS': 0, 'NU': 64}
+killed   eval items changed (a filler dropped)  <- identity: 1589 of 1728 new items differ from E002's
+killed   eval sets missing the crossed control  <- identity: E003 eval sets ['extra', 'kbig', 'khard', 'new', 'old', 'uprobe'] are not E002's plain sets ['cross'
+killed   eval items drawn with another seed  <- identity: 1728 of 1728 new items differ from E002's
+killed   params: GPT-Neo position table not counted  <- params: roneneldan/TinyStories-1M formula 3614912/3216448 vs file 3745984/3347520
+killed   params: Pythia head counted as tied  <- params: EleutherAI/pythia-14m formula 7628800/6438912 vs file 14067712/12877824
+killed   queue: LR search scores the eval items  <- queue: LR-search runs must score dev only: ['LRSEARCH_ARGS=(--seed 0 --sets eval,dev --save 0)']
+killed   queue: scored seeds include the LR-search seed 0  <- queue: scored seeds must be 1 2 3
+killed   queue: micro-batch differs from E002  <- queue: training settings differ from E002 135M: ['COMMON=(--bs 16 --accum 1 --max-len 768 --grad-ckpt)']
+killed   loss self-check comparator always matches  <- close: 1% should not match
+killed   examples left-truncated (old bug)  <- tok: a streamed example does not start at the dialogue start (truncated?)
+killed   prompt tokens labelled  <- tok: answer decodes to "User: I picked silver for the new winter coat.\nAssistant: Nice, silver for the winter
+killed   max_len 512 (biased long-distance mix)  <- tok: length limit shifts the d>=8 mix toward first-mentioned golds (0.352 -> 0.456)
+37 of 37 mutants killed
+exit=0

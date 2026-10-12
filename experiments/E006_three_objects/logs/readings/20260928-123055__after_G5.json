@@ -1,0 +1,1199 @@
+{
+ "arm C": {
+  "label": "PARTIAL-X",
+  "detail": "updating with a named limit: H5 (4 seeds pass everything else)",
+  "sub": [],
+  "any_seed": "PARTIAL-X",
+  "loo": {
+   "without s1": "PARTIAL-X",
+   "without s2": "PARTIAL-X",
+   "without s3": "PARTIAL-X",
+   "without s4": "PARTIAL-X",
+   "without s5": "PARTIAL-X"
+  },
+  "flips": [
+   3,
+   [
+    [
+     1,
+     "LIK",
+     "C_noupd"
+    ],
+    [
+     5,
+     "LIK",
+     "C_twoslot"
+    ]
+   ]
+  ],
+  "alias": {
+   "label": "DATA GAP",
+   "classes": [
+    "HIGH",
+    "HIGH",
+    "HIGH",
+    "HIGH",
+    "HIGH"
+   ],
+   "n_high": 5,
+   "n_low": 0,
+   "note": null
+  },
+  "stopping": {
+   "learned": true,
+   "seeds_stop": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "arm P": {
+  "label": "PARTIAL-X",
+  "detail": "updating with a named limit: H5 (3 seeds pass everything else)",
+  "sub": [],
+  "any_seed": "FAIL (any-seed variant: LIK failure on H1, H2 or a control on seed(s) [2, 4])",
+  "loo": {
+   "without s1": "FAIL",
+   "without s2": "PARTIAL-X",
+   "without s3": "FAIL",
+   "without s4": "PARTIAL-X",
+   "without s5": "FAIL"
+  },
+  "flips": [
+   1,
+   [
+    [
+     5,
+     "LIK",
+     "C_twoslot"
+    ]
+   ]
+  ],
+  "alias": {
+   "label": "DATA GAP",
+   "classes": [
+    "HIGH",
+    "HIGH",
+    "HIGH",
+    "HIGH",
+    "HIGH"
+   ],
+   "n_high": 5,
+   "n_low": 0,
+   "note": null
+  },
+  "stopping": {
+   "learned": true,
+   "seeds_stop": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "arm G": {
+  "label": "FAIL",
+  "detail": "no PASS, PARTIAL-G or PARTIAL-X condition holds",
+  "sub": [
+   "H1 LIK by the latest statement's reference form (range over seeds): alias 0.857-0.952, ell 0.809-0.952, pron 0.955-1.000",
+   "H2 LIK by the latest statement's reference form (range over seeds): alias 0.952-1.000, ell 0.809-0.905, pron 0.955-1.000",
+   "H1+H2 alias items by placement, LIK (range over seeds): adjacent 1.000-1.000 (n 9), filler 0.714-0.929 (n 14), B_sep 0.947-1.000 (n 19)",
+   "wrong LIK picks, H1/H2 alias, pooled over seeds: 12 wrong: other_after 11, A_prev 1; of them lures 1",
+   "wrong GEN picks, H1/H2 alias, pooled over seeds: 12 wrong: other_after 11, A_prev 1; of them lures 0",
+   "wrong LIK picks, H1/H2 not alias, pooled over seeds: 34 wrong: A_prev 29, other_after 5; of them lures 22",
+   "wrong GEN picks, H1/H2 not alias, pooled over seeds: 32 wrong: A_prev 26, other_after 6; of them lures 18",
+   "wrong LIK picks, H5, pooled over seeds: 116 wrong: other_after 85, A_prev 24, other_before 7; of them lures 0",
+   "wrong GEN picks, H5, pooled over seeds: 109 wrong: other_after 82, A_prev 21, other_before 6; of them lures 0",
+   "wrong LIK picks, C_noupd, pooled over seeds: 51 wrong: other_after 51; of them lures 1",
+   "wrong GEN picks, C_noupd, pooled over seeds: 55 wrong: other_after 53, none 2; of them lures 1",
+   "wrong LIK picks, C_twoslot, pooled over seeds: 55 wrong: other_after 31, A_prev 24; of them lures 2",
+   "wrong GEN picks, C_twoslot, pooled over seeds: 57 wrong: other_after 35, A_prev 21, none 1; of them lures 1"
+  ],
+  "any_seed": "FAIL",
+  "loo": {
+   "without s1": "FAIL",
+   "without s2": "FAIL",
+   "without s3": "FAIL",
+   "without s4": "FAIL",
+   "without s5": "FAIL"
+  },
+  "flips": [
+   1,
+   [
+    [
+     2,
+     "GEN",
+     "C_noupd"
+    ]
+   ]
+  ],
+  "alias": {
+   "label": "DATA GAP",
+   "classes": [
+    "HIGH",
+    "HIGH",
+    "HIGH",
+    "HIGH",
+    "HIGH"
+   ],
+   "n_high": 5,
+   "n_low": 0,
+   "note": null
+  },
+  "stopping": {
+   "learned": true,
+   "seeds_stop": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "arm e005w": {
+  "label": "PARTIAL-X",
+  "detail": "updating with a named limit: H5 (3 seeds pass everything else)",
+  "sub": [],
+  "any_seed": "PARTIAL-X",
+  "loo": {
+   "without s1": "PARTIAL-X",
+   "without s2": "FAIL",
+   "without s3": "FAIL",
+   "without s4": "PARTIAL-X",
+   "without s5": "FAIL"
+  },
+  "flips": [
+   2,
+   [
+    [
+     5,
+     "LIK",
+     "C_twoslot"
+    ]
+   ]
+  ],
+  "alias": {
+   "label": "DATA GAP",
+   "classes": [
+    "HIGH",
+    "HIGH",
+    "HIGH",
+    "HIGH",
+    "HIGH"
+   ],
+   "n_high": 5,
+   "n_low": 0,
+   "note": null
+  },
+  "stopping": {
+   "learned": true,
+   "seeds_stop": [
+    false,
+    true,
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "arm e004w": {
+  "label": "FAIL",
+  "detail": "no PASS, PARTIAL-G or PARTIAL-X condition holds",
+  "sub": [
+   "LIK < 0.8 on H1, H2 or a control on a majority of seeds (seeds failing LIK: H1 5, H2 5, C_noupd 0, C_twoslot 0)",
+   "ID LIK >= 0.8 (0.906-0.953) while H1 or H2 LIK < 0.8 on a majority of seeds",
+   "H1 LIK by the latest statement's reference form (range over seeds): alias 0.095-0.333, ell 0.762-0.857, pron 1.000-1.000",
+   "H2 LIK by the latest statement's reference form (range over seeds): alias 0.238-0.524, ell 0.667-0.905, pron 0.955-0.955",
+   "H1+H2 alias items by placement, LIK (range over seeds): adjacent 0.667-0.778 (n 9), filler 0.000-0.286 (n 14), B_sep 0.053-0.368 (n 19)",
+   "wrong LIK picks, H1/H2 alias, pooled over seeds: 147 wrong: A_prev 139, A_earlier 5, other_before 2, other_after 1; of them lures 57",
+   "wrong GEN picks, H1/H2 alias, pooled over seeds: 140 wrong: A_prev 133, A_earlier 5, other_after 1, other_before 1; of them lures 51",
+   "wrong LIK picks, H1/H2 not alias, pooled over seeds: 46 wrong: A_prev 39, other_after 7; of them lures 24",
+   "wrong GEN picks, H1/H2 not alias, pooled over seeds: 42 wrong: A_prev 37, other_after 5; of them lures 23",
+   "wrong LIK picks, H5, pooled over seeds: 78 wrong: other_after 49, A_prev 26, other_before 3; of them lures 0",
+   "wrong GEN picks, H5, pooled over seeds: 78 wrong: other_after 51, A_prev 24, other_before 3; of them lures 0",
+   "wrong LIK picks, C_noupd, pooled over seeds: 35 wrong: other_after 35; of them lures 0",
+   "wrong GEN picks, C_noupd, pooled over seeds: 41 wrong: other_after 38, none 3; of them lures 0",
+   "wrong LIK picks, C_twoslot, pooled over seeds: 50 wrong: A_prev 40, other_after 10; of them lures 4",
+   "wrong GEN picks, C_twoslot, pooled over seeds: 50 wrong: A_prev 38, other_after 12; of them lures 3"
+  ],
+  "any_seed": "FAIL",
+  "loo": {
+   "without s1": "FAIL",
+   "without s2": "FAIL",
+   "without s3": "FAIL",
+   "without s4": "FAIL",
+   "without s5": "FAIL"
+  },
+  "flips": [
+   null,
+   []
+  ],
+  "alias": {
+   "label": "REAL LIMIT",
+   "classes": [
+    "LOW",
+    "LOW",
+    "MID",
+    "LOW",
+    "LOW"
+   ],
+   "n_high": 0,
+   "n_low": 4,
+   "note": null
+  },
+  "stopping": {
+   "learned": false,
+   "seeds_stop": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ]
+  }
+ },
+ "Q-H5": {
+  "label": {
+   "label": "INCONCLUSIVE",
+   "flags": [],
+   "suffix": null
+  },
+  "d": {
+   "LIK": [
+    0.0020833333333333333,
+    -0.08854166666666667,
+    0.10520833333333333,
+    5,
+    192
+   ],
+   "GEN": [
+    0.0125,
+    -0.08645833333333333,
+    0.12083333333333333,
+    5,
+    192
+   ]
+  },
+  "p_minus_l4": {
+   "LIK": [
+    -0.12708333333333333,
+    -0.190625,
+    -0.065625,
+    5,
+    192
+   ],
+   "GEN": [
+    -0.121875,
+    -0.19479166666666667,
+    -0.059375,
+    5,
+    192
+   ]
+  },
+  "l4_minus_c_lik": 0.12916666666666665,
+  "dev_shift_lik": 0.0010416666666666075,
+  "h5l": {
+   "LIK": [
+    0.0010416666666666667,
+    -0.0375,
+    0.04583333333333333,
+    5,
+    192
+   ],
+   "GEN": [
+    -0.008333333333333333,
+    -0.04895833333333333,
+    0.03854166666666667,
+    5,
+    192
+   ]
+  },
+  "reported": {
+   "C BIG H5 reweighted to the D4004 intro mix": 0.657754211249277,
+   "P BIG H5 reweighted to the D4004 intro mix": 0.6627929362304362,
+   "e004w BIG H5 reweighted to the D4004 intro mix": 0.7890914869122105,
+   "e005w BIG H5 reweighted to the D4004 intro mix": 0.656644013880856,
+   "P - C BIG C_noupd LIK": [
+    -0.003125,
+    -0.030208333333333334,
+    0.021875,
+    5,
+    192
+   ],
+   "P - C BIG C_noupd GEN": [
+    -0.00625,
+    -0.035416666666666666,
+    0.025,
+    5,
+    192
+   ],
+   "P - C BIG C_twoslot LIK": [
+    0.0125,
+    -0.017708333333333333,
+    0.04583333333333333,
+    5,
+    192
+   ],
+   "P - C BIG C_twoslot GEN": [
+    0.00625,
+    -0.029166666666666667,
+    0.041666666666666664,
+    5,
+    192
+   ]
+  }
+ },
+ "Q-chat": {
+  "label": {
+   "label": "PROTECTS",
+   "failed": []
+  },
+  "measures": {
+   "TF": [
+    -0.2778523489932886,
+    -0.37229565320103947,
+    -0.18333064516129036
+   ],
+   "TF2": [
+    -0.28053691275167786,
+    -0.37962403283033386,
+    -0.1841726618705036
+   ],
+   "LOOP": [
+    -0.30201342281879195,
+    -0.519014985562083,
+    -0.11749798387096777
+   ]
+  },
+  "checks": [
+   6.8,
+   -0.20499999999999546,
+   13.6
+  ],
+  "knowledge": {
+   "label": "REDUCES THE COST",
+   "K": {
+    "unexposed (the reading)": [
+     0.05694117647058824,
+     0.03152941176470588,
+     0.08423529411764706,
+     5,
+     425
+    ],
+    "all 441": [
+     0.05623582766439909,
+     0.031281179138322006,
+     0.08253968253968254,
+     5,
+     441
+    ],
+    "unexposed, loose exposure": [
+     0.05738636363636364,
+     0.028977272727272727,
+     0.08693181818181818,
+     5,
+     352
+    ]
+   },
+   "n_exposed": 16
+  }
+ },
+ "cost G": {
+  "e004 H1 LIK plain": [
+   0.0,
+   -0.0375,
+   0.034375,
+   5,
+   64
+  ],
+  "e004 H1 GEN plain": [
+   0.003125,
+   -0.040625,
+   0.05,
+   5,
+   64
+  ],
+  "e004 H2 LIK plain": [
+   0.0,
+   -0.046875,
+   0.0375,
+   5,
+   64
+  ],
+  "e004 H2 GEN plain": [
+   -0.009375,
+   -0.046875,
+   0.025,
+   5,
+   64
+  ],
+  "e004 H3 LIK plain": [
+   -0.0125,
+   -0.065625,
+   0.0375,
+   5,
+   64
+  ],
+  "e004 H3 GEN plain": [
+   -0.021875,
+   -0.075,
+   0.028125,
+   5,
+   64
+  ],
+  "e004 H4 LIK plain": [
+   -0.003125,
+   -0.025,
+   0.01875,
+   5,
+   64
+  ],
+  "e004 H4 GEN plain": [
+   -0.00625,
+   -0.03125,
+   0.015625,
+   5,
+   64
+  ],
+  "e004 H5 LIK plain": [
+   -0.021875,
+   -0.075,
+   0.034375,
+   5,
+   64
+  ],
+  "e004 H5 GEN plain": [
+   0.003125,
+   -0.053125,
+   0.059375,
+   5,
+   64
+  ],
+  "e004 H6 LIK plain": [
+   -0.009375,
+   -0.06875,
+   0.040625,
+   5,
+   64
+  ],
+  "e004 H6 GEN plain": [
+   -0.009375,
+   -0.0625,
+   0.046875,
+   5,
+   64
+  ],
+  "e004 H7 LIK plain": [
+   -0.0125,
+   -0.05007812499999993,
+   0.021875,
+   5,
+   64
+  ],
+  "e004 H7 GEN plain": [
+   -0.003125,
+   -0.0375,
+   0.028125,
+   5,
+   64
+  ],
+  "e004 C_noupd LIK plain": [
+   -0.021875,
+   -0.078125,
+   0.03125,
+   5,
+   64
+  ],
+  "e004 C_noupd GEN plain": [
+   -0.01875,
+   -0.084375,
+   0.0375,
+   5,
+   64
+  ],
+  "e004 C_twoslot LIK plain": [
+   -0.025,
+   -0.071875,
+   0.021875,
+   5,
+   64
+  ],
+  "e004 C_twoslot GEN plain": [
+   -0.015625,
+   -0.071875,
+   0.034375,
+   5,
+   64
+  ],
+  "e004 ID LIK plain": [
+   -0.01875,
+   -0.05625,
+   0.0125,
+   5,
+   64
+  ],
+  "e004 ID GEN plain": [
+   0.00625,
+   -0.021875,
+   0.0375,
+   5,
+   64
+  ],
+  "big H5 LIK plain": [
+   0.014583333333333334,
+   -0.028125,
+   0.05625,
+   5,
+   192
+  ],
+  "big H5 GEN plain": [
+   0.009375,
+   -0.0375,
+   0.06041666666666667,
+   5,
+   192
+  ],
+  "big C_noupd LIK plain": [
+   -0.008333333333333333,
+   -0.0375,
+   0.020833333333333332,
+   5,
+   192
+  ],
+  "big C_noupd GEN plain": [
+   -0.0125,
+   -0.04583333333333333,
+   0.020833333333333332,
+   5,
+   192
+  ],
+  "big C_twoslot LIK plain": [
+   0.014583333333333334,
+   -0.008333333333333333,
+   0.03854166666666667,
+   5,
+   192
+  ],
+  "big C_twoslot GEN plain": [
+   0.015625,
+   -0.0125,
+   0.04375,
+   5,
+   192
+  ],
+  "h5l H5L LIK plain": [
+   -0.0010416666666666667,
+   -0.03125,
+   0.030208333333333334,
+   5,
+   192
+  ],
+  "h5l H5L GEN plain": [
+   -0.010416666666666666,
+   -0.04583333333333333,
+   0.028125,
+   5,
+   192
+  ],
+  "e004 H1 LIK chat": [
+   -0.015625,
+   -0.059375,
+   0.01875,
+   5,
+   64
+  ],
+  "e004 H1 GEN chat": [
+   -0.00625,
+   -0.040625,
+   0.021875,
+   5,
+   64
+  ],
+  "e004 H2 LIK chat": [
+   0.00625,
+   -0.05,
+   0.071875,
+   5,
+   64
+  ],
+  "e004 H2 GEN chat": [
+   0.003125,
+   -0.0375,
+   0.0375,
+   5,
+   64
+  ],
+  "e004 H3 LIK chat": [
+   -0.009375,
+   -0.05625,
+   0.0375,
+   5,
+   64
+  ],
+  "e004 H3 GEN chat": [
+   0.0,
+   -0.0625,
+   0.065625,
+   5,
+   64
+  ],
+  "e004 H4 LIK chat": [
+   0.01875,
+   -0.01875,
+   0.059375,
+   5,
+   64
+  ],
+  "e004 H4 GEN chat": [
+   0.003125,
+   -0.034375,
+   0.0375,
+   5,
+   64
+  ],
+  "e004 H5 LIK chat": [
+   0.00625,
+   -0.04375,
+   0.05625,
+   5,
+   64
+  ],
+  "e004 H5 GEN chat": [
+   0.00625,
+   -0.05,
+   0.059375,
+   5,
+   64
+  ],
+  "e004 H6 LIK chat": [
+   -0.034375,
+   -0.096875,
+   0.01875,
+   5,
+   64
+  ],
+  "e004 H6 GEN chat": [
+   -0.015625,
+   -0.0625,
+   0.01875,
+   5,
+   64
+  ],
+  "e004 H7 LIK chat": [
+   0.003125,
+   -0.034375,
+   0.053125,
+   5,
+   64
+  ],
+  "e004 H7 GEN chat": [
+   -0.009375,
+   -0.040625,
+   0.021875,
+   5,
+   64
+  ],
+  "e004 C_noupd LIK chat": [
+   -0.025,
+   -0.08125,
+   0.021875,
+   5,
+   64
+  ],
+  "e004 C_noupd GEN chat": [
+   -0.015625,
+   -0.06875,
+   0.03125,
+   5,
+   64
+  ],
+  "e004 C_twoslot LIK chat": [
+   0.0,
+   -0.05,
+   0.05,
+   5,
+   64
+  ],
+  "e004 C_twoslot GEN chat": [
+   -0.009375,
+   -0.0625,
+   0.040625,
+   5,
+   64
+  ],
+  "e004 ID LIK chat": [
+   -0.00625,
+   -0.03125,
+   0.015625,
+   5,
+   64
+  ],
+  "e004 ID GEN chat": [
+   0.0,
+   -0.028125,
+   0.028125,
+   5,
+   64
+  ],
+  "big H5 LIK chat": [
+   0.01875,
+   -0.029166666666666667,
+   0.06770833333333333,
+   5,
+   192
+  ],
+  "big H5 GEN chat": [
+   0.028125,
+   -0.023958333333333335,
+   0.08645833333333333,
+   5,
+   192
+  ],
+  "big C_noupd LIK chat": [
+   -0.010416666666666666,
+   -0.052083333333333336,
+   0.028125,
+   5,
+   192
+  ],
+  "big C_noupd GEN chat": [
+   -0.020833333333333332,
+   -0.06041666666666667,
+   0.013541666666666667,
+   5,
+   192
+  ],
+  "big C_twoslot LIK chat": [
+   0.013541666666666667,
+   -0.013541666666666667,
+   0.03958333333333333,
+   5,
+   192
+  ],
+  "big C_twoslot GEN chat": [
+   0.013541666666666667,
+   -0.011458333333333333,
+   0.03958333333333333,
+   5,
+   192
+  ],
+  "h5l H5L LIK chat": [
+   -0.023958333333333335,
+   -0.06145833333333333,
+   0.009375,
+   5,
+   192
+  ],
+  "h5l H5L GEN chat": [
+   -0.021875,
+   -0.05416666666666667,
+   0.008333333333333333,
+   5,
+   192
+  ]
+ },
+ "cost P": {
+  "e004 H1 LIK plain": [
+   0.0125,
+   -0.01875,
+   0.053125,
+   5,
+   64
+  ],
+  "e004 H1 GEN plain": [
+   0.009375,
+   -0.03125,
+   0.053125,
+   5,
+   64
+  ],
+  "e004 H2 LIK plain": [
+   0.00625,
+   -0.034375,
+   0.046875,
+   5,
+   64
+  ],
+  "e004 H2 GEN plain": [
+   -0.0125,
+   -0.05625,
+   0.028125,
+   5,
+   64
+  ],
+  "e004 H3 LIK plain": [
+   0.00625,
+   -0.040625,
+   0.05625,
+   5,
+   64
+  ],
+  "e004 H3 GEN plain": [
+   -0.00625,
+   -0.05625,
+   0.04070312499999886,
+   5,
+   64
+  ],
+  "e004 H4 LIK plain": [
+   -0.009375,
+   -0.040625,
+   0.01875,
+   5,
+   64
+  ],
+  "e004 H4 GEN plain": [
+   -0.009375,
+   -0.0375,
+   0.015625,
+   5,
+   64
+  ],
+  "e004 H5 LIK plain": [
+   -0.009375,
+   -0.09375,
+   0.08125,
+   5,
+   64
+  ],
+  "e004 H5 GEN plain": [
+   0.0,
+   -0.08125,
+   0.090625,
+   5,
+   64
+  ],
+  "e004 H6 LIK plain": [
+   0.009375,
+   -0.040625,
+   0.05625,
+   5,
+   64
+  ],
+  "e004 H6 GEN plain": [
+   -0.003125,
+   -0.053125,
+   0.046875,
+   5,
+   64
+  ],
+  "e004 H7 LIK plain": [
+   0.009375,
+   -0.03125,
+   0.053125,
+   5,
+   64
+  ],
+  "e004 H7 GEN plain": [
+   0.00625,
+   -0.025,
+   0.0375,
+   5,
+   64
+  ],
+  "e004 C_noupd LIK plain": [
+   -0.028125,
+   -0.103125,
+   0.04375,
+   5,
+   64
+  ],
+  "e004 C_noupd GEN plain": [
+   -0.021875,
+   -0.09375,
+   0.046875,
+   5,
+   64
+  ],
+  "e004 C_twoslot LIK plain": [
+   -0.015625,
+   -0.07820312499999993,
+   0.053125,
+   5,
+   64
+  ],
+  "e004 C_twoslot GEN plain": [
+   0.00625,
+   -0.05625,
+   0.071875,
+   5,
+   64
+  ],
+  "e004 ID LIK plain": [
+   -0.0125,
+   -0.053125,
+   0.01875,
+   5,
+   64
+  ],
+  "e004 ID GEN plain": [
+   0.00625,
+   -0.021875,
+   0.0375,
+   5,
+   64
+  ],
+  "big H5 LIK plain": [
+   0.0020833333333333333,
+   -0.08854166666666667,
+   0.10520833333333333,
+   5,
+   192
+  ],
+  "big H5 GEN plain": [
+   0.0125,
+   -0.08645833333333333,
+   0.12083333333333333,
+   5,
+   192
+  ],
+  "big C_noupd LIK plain": [
+   -0.003125,
+   -0.030208333333333334,
+   0.021875,
+   5,
+   192
+  ],
+  "big C_noupd GEN plain": [
+   -0.00625,
+   -0.035416666666666666,
+   0.025,
+   5,
+   192
+  ],
+  "big C_twoslot LIK plain": [
+   0.0125,
+   -0.017708333333333333,
+   0.04583333333333333,
+   5,
+   192
+  ],
+  "big C_twoslot GEN plain": [
+   0.00625,
+   -0.029166666666666667,
+   0.041666666666666664,
+   5,
+   192
+  ],
+  "h5l H5L LIK plain": [
+   0.0010416666666666667,
+   -0.0375,
+   0.04583333333333333,
+   5,
+   192
+  ],
+  "h5l H5L GEN plain": [
+   -0.008333333333333333,
+   -0.04895833333333333,
+   0.03854166666666667,
+   5,
+   192
+  ],
+  "e004 H1 LIK chat": [
+   -0.003125,
+   -0.0375,
+   0.025,
+   5,
+   64
+  ],
+  "e004 H1 GEN chat": [
+   -0.009375,
+   -0.05,
+   0.025,
+   5,
+   64
+  ],
+  "e004 H2 LIK chat": [
+   0.03125,
+   -0.003125,
+   0.075,
+   5,
+   64
+  ],
+  "e004 H2 GEN chat": [
+   0.009375,
+   -0.03125,
+   0.05007812499999886,
+   5,
+   64
+  ],
+  "e004 H3 LIK chat": [
+   0.01875,
+   -0.040625,
+   0.078125,
+   5,
+   64
+  ],
+  "e004 H3 GEN chat": [
+   0.009375,
+   -0.053125,
+   0.08125,
+   5,
+   64
+  ],
+  "e004 H4 LIK chat": [
+   0.009375,
+   -0.0375,
+   0.053125,
+   5,
+   64
+  ],
+  "e004 H4 GEN chat": [
+   -0.003125,
+   -0.053125,
+   0.04375,
+   5,
+   64
+  ],
+  "e004 H5 LIK chat": [
+   -0.009375,
+   -0.10320312499999992,
+   0.09382812499999886,
+   5,
+   64
+  ],
+  "e004 H5 GEN chat": [
+   -0.00625,
+   -0.109375,
+   0.090625,
+   5,
+   64
+  ],
+  "e004 H6 LIK chat": [
+   0.009375,
+   -0.04375,
+   0.065625,
+   5,
+   64
+  ],
+  "e004 H6 GEN chat": [
+   0.0125,
+   -0.028125,
+   0.05625,
+   5,
+   64
+  ],
+  "e004 H7 LIK chat": [
+   0.01875,
+   -0.028125,
+   0.06875,
+   5,
+   64
+  ],
+  "e004 H7 GEN chat": [
+   -0.003125,
+   -0.03125,
+   0.025,
+   5,
+   64
+  ],
+  "e004 C_noupd LIK chat": [
+   -0.0375,
+   -0.109375,
+   0.034375,
+   5,
+   64
+  ],
+  "e004 C_noupd GEN chat": [
+   -0.034375,
+   -0.096875,
+   0.025,
+   5,
+   64
+  ],
+  "e004 C_twoslot LIK chat": [
+   -0.009375,
+   -0.0625,
+   0.04375,
+   5,
+   64
+  ],
+  "e004 C_twoslot GEN chat": [
+   0.0,
+   -0.053125,
+   0.05,
+   5,
+   64
+  ],
+  "e004 ID LIK chat": [
+   0.009375,
+   -0.021875,
+   0.046875,
+   5,
+   64
+  ],
+  "e004 ID GEN chat": [
+   0.021875,
+   -0.0125,
+   0.059375,
+   5,
+   64
+  ],
+  "big H5 LIK chat": [
+   0.0020833333333333333,
+   -0.10729166666666666,
+   0.11666666666666667,
+   5,
+   192
+  ],
+  "big H5 GEN chat": [
+   -0.005208333333333333,
+   -0.10833333333333334,
+   0.096875,
+   5,
+   192
+  ],
+  "big C_noupd LIK chat": [
+   -0.008333333333333333,
+   -0.04479166666666667,
+   0.029166666666666667,
+   5,
+   192
+  ],
+  "big C_noupd GEN chat": [
+   -0.011458333333333333,
+   -0.052083333333333336,
+   0.028125,
+   5,
+   192
+  ],
+  "big C_twoslot LIK chat": [
+   0.003125,
+   -0.027083333333333334,
+   0.03125,
+   5,
+   192
+  ],
+  "big C_twoslot GEN chat": [
+   -0.004166666666666667,
+   -0.040625,
+   0.03125,
+   5,
+   192
+  ],
+  "h5l H5L LIK chat": [
+   0.004166666666666667,
+   -0.03229166666666667,
+   0.042708333333333334,
+   5,
+   192
+  ],
+  "h5l H5L GEN chat": [
+   -0.00625,
+   -0.04791666666666667,
+   0.03125,
+   5,
+   192
+  ]
+ },
+ "Q-device": {
+  "n_ci": 59,
+  "n_clear": 0
+ }
+}

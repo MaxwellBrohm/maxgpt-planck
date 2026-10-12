@@ -1,0 +1,8 @@
+{
+ "name": "010_verify_cuda",
+ "cmd": ["$PLANCK_HOME/venv/bin/python", "pc/verify_cuda.py"],
+ "cwd": "$PLANCK_HOME/repo",
+ "no_prereg_reason": "environment check, not an experiment",
+ "max_hours": 0.25,
+ "max_attempts": 1
+}

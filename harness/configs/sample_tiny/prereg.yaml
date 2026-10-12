@@ -1,0 +1,8 @@
+# Pre-registration. train.py refuses to start without this file next to config.yaml,
+# and without non-empty id, hypothesis, metric and decision_rule.
+id: SAMPLE-000
+hypothesis: The harness trains end to end on synthetic data (smoke test, not an experiment).
+metric: training loss on the synthetic copy and counting tasks
+decision_rule: pass if the loss at the last step is below the loss at step 10
+arms: [sample_tiny]
+seeds: [0]

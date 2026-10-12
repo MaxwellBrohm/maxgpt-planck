@@ -1,0 +1,70 @@
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 3699.11it/s]
+loaded HuggingFaceTB/SmolLM2-135M-Instruct params=134,515,008 (config 134,515,008, body 106,203,456) sanity_nll=1.9598 2.3s mps_alloc=0.50G driver=1.06G peak_driver=1.06G
+loss self-check hf=2.41722 answer_only=2.41722
+probe step 0 {'step': 0, 'H1': 0.0, 'H2': 0.0, 'H3': 0.0625, 'H4': 0.125, 'H5': 0.125, 'H6': 0.1875, 'H7': 0.1875, 'C_noupd': 0.3125, 'C_twoslot': 0.1875} mps_alloc=0.50G driver=2.06G peak_driver=2.06G
+step 0 loss 2.4585 gnorm 9.93 lr 1.50e-05 6s mps_alloc=1.81G driver=4.16G peak_driver=4.16G
+step 10 loss 1.2452 gnorm 5.19 lr 8.98e-05 66s mps_alloc=1.81G driver=5.16G peak_driver=5.16G
+step 20 loss 0.9268 gnorm 5.06 lr 1.49e-04 126s mps_alloc=1.81G driver=5.16G peak_driver=5.16G
+step 30 loss 0.6569 gnorm 4.48 lr 1.48e-04 188s mps_alloc=1.81G driver=5.16G peak_driver=5.16G
+step 40 loss 0.7433 gnorm 3.94 lr 1.46e-04 248s mps_alloc=1.81G driver=5.16G peak_driver=5.16G
+probe step 50 {'step': 50, 'H1': 0.375, 'H2': 0.1875, 'H3': 0.4375, 'H4': 0.6875, 'H5': 0.25, 'H6': 0.75, 'H7': 0.5625, 'C_noupd': 0.375, 'C_twoslot': 0.625}
+step 50 loss 0.6776 gnorm 3.47 lr 1.44e-04 365s mps_alloc=1.81G driver=4.17G peak_driver=5.16G
+step 60 loss 0.6180 gnorm 3.22 lr 1.42e-04 426s mps_alloc=1.81G driver=5.17G peak_driver=5.17G
+step 70 loss 0.4386 gnorm 3.27 lr 1.39e-04 489s mps_alloc=1.81G driver=5.17G peak_driver=5.17G
+step 80 loss 0.4162 gnorm 2.65 lr 1.35e-04 548s mps_alloc=1.81G driver=6.17G peak_driver=6.17G
+step 90 loss 0.4877 gnorm 3.06 lr 1.32e-04 603s mps_alloc=1.81G driver=6.17G peak_driver=6.17G
+probe step 100 {'step': 100, 'H1': 0.5625, 'H2': 0.625, 'H3': 0.5625, 'H4': 0.75, 'H5': 0.75, 'H6': 0.625, 'H7': 0.6875, 'C_noupd': 0.8125, 'C_twoslot': 0.6875}
+step 100 loss 0.3800 gnorm 2.04 lr 1.28e-04 724s mps_alloc=1.81G driver=4.17G peak_driver=6.17G
+step 110 loss 0.4829 gnorm 2.74 lr 1.23e-04 782s mps_alloc=1.81G driver=5.17G peak_driver=6.17G
+step 120 loss 0.5979 gnorm 3.63 lr 1.19e-04 846s mps_alloc=1.81G driver=5.17G peak_driver=6.17G
+step 130 loss 0.3817 gnorm 2.16 lr 1.14e-04 909s mps_alloc=1.81G driver=5.17G peak_driver=6.17G
+step 140 loss 0.4083 gnorm 2.34 lr 1.09e-04 970s mps_alloc=1.81G driver=5.17G peak_driver=6.17G
+probe step 150 {'step': 150, 'H1': 0.75, 'H2': 0.625, 'H3': 0.75, 'H4': 0.875, 'H5': 0.8125, 'H6': 1.0, 'H7': 0.9375, 'C_noupd': 0.875, 'C_twoslot': 0.8125}
+step 150 loss 0.3711 gnorm 2.14 lr 1.03e-04 1085s mps_alloc=1.81G driver=4.17G peak_driver=6.17G
+step 160 loss 0.4281 gnorm 2.43 lr 9.76e-05 1146s mps_alloc=1.81G driver=5.17G peak_driver=6.17G
+step 170 loss 0.4065 gnorm 2.44 lr 9.19e-05 1209s mps_alloc=1.81G driver=6.18G peak_driver=6.18G
+step 180 loss 0.3582 gnorm 2.03 lr 8.62e-05 1273s mps_alloc=1.81G driver=6.18G peak_driver=6.18G
+step 190 loss 0.3534 gnorm 2.31 lr 8.03e-05 1332s mps_alloc=1.81G driver=6.18G peak_driver=6.18G
+probe step 200 {'step': 200, 'H1': 0.8125, 'H2': 0.625, 'H3': 0.8125, 'H4': 0.8125, 'H5': 0.625, 'H6': 0.9375, 'H7': 0.875, 'C_noupd': 0.8125, 'C_twoslot': 0.8125}
+step 200 loss 0.3501 gnorm 1.66 lr 7.44e-05 1451s mps_alloc=1.81G driver=4.17G peak_driver=6.18G
+step 210 loss 0.3550 gnorm 1.77 lr 6.85e-05 1513s mps_alloc=1.81G driver=5.17G peak_driver=6.18G
+step 220 loss 0.3714 gnorm 2.25 lr 6.27e-05 1575s mps_alloc=1.81G driver=5.17G peak_driver=6.18G
+step 230 loss 0.3185 gnorm 1.84 lr 5.69e-05 1633s mps_alloc=1.81G driver=6.17G peak_driver=6.18G
+step 240 loss 0.4049 gnorm 2.44 lr 5.13e-05 1694s mps_alloc=1.81G driver=6.17G peak_driver=6.18G
+probe step 250 {'step': 250, 'H1': 0.75, 'H2': 0.5, 'H3': 0.75, 'H4': 0.8125, 'H5': 0.6875, 'H6': 0.875, 'H7': 0.875, 'C_noupd': 0.8125, 'C_twoslot': 0.875}
+step 250 loss 0.3641 gnorm 1.87 lr 4.58e-05 1812s mps_alloc=1.81G driver=4.17G peak_driver=6.18G
+step 260 loss 0.3657 gnorm 1.65 lr 4.04e-05 1870s mps_alloc=1.81G driver=5.17G peak_driver=6.18G
+step 270 loss 0.3864 gnorm 2.54 lr 3.53e-05 1929s mps_alloc=1.81G driver=5.17G peak_driver=6.18G
+step 280 loss 0.3716 gnorm 1.84 lr 3.04e-05 1987s mps_alloc=1.81G driver=5.17G peak_driver=6.18G
+step 290 loss 0.3360 gnorm 1.69 lr 2.58e-05 2047s mps_alloc=1.81G driver=6.17G peak_driver=6.18G
+probe step 300 {'step': 300, 'H1': 0.8125, 'H2': 0.5625, 'H3': 0.75, 'H4': 0.8125, 'H5': 0.625, 'H6': 0.875, 'H7': 0.9375, 'C_noupd': 0.8125, 'C_twoslot': 0.875}
+step 300 loss 0.3844 gnorm 2.10 lr 2.16e-05 2165s mps_alloc=1.81G driver=4.17G peak_driver=6.18G
+step 310 loss 0.3635 gnorm 2.07 lr 1.76e-05 2227s mps_alloc=1.81G driver=5.17G peak_driver=6.18G
+step 320 loss 0.3740 gnorm 1.48 lr 1.40e-05 2285s mps_alloc=1.81G driver=5.17G peak_driver=6.18G
+step 330 loss 0.4151 gnorm 2.31 lr 1.07e-05 2346s mps_alloc=1.81G driver=5.17G peak_driver=6.18G
+step 340 loss 0.4065 gnorm 1.68 lr 7.91e-06 2408s mps_alloc=1.81G driver=5.17G peak_driver=6.18G
+probe step 350 {'step': 350, 'H1': 0.8125, 'H2': 0.5625, 'H3': 0.75, 'H4': 0.8125, 'H5': 0.5625, 'H6': 0.875, 'H7': 0.9375, 'C_noupd': 0.8125, 'C_twoslot': 0.875}
+step 350 loss 0.3776 gnorm 2.25 lr 5.49e-06 2524s mps_alloc=1.81G driver=4.16G peak_driver=6.18G
+step 360 loss 0.4043 gnorm 2.22 lr 3.49e-06 2582s mps_alloc=1.81G driver=5.16G peak_driver=6.18G
+step 370 loss 0.3570 gnorm 2.56 lr 1.94e-06 2641s mps_alloc=1.81G driver=5.16G peak_driver=6.18G
+step 380 loss 0.3743 gnorm 2.23 lr 8.34e-07 2701s mps_alloc=1.81G driver=5.16G peak_driver=6.18G
+step 390 loss 0.3630 gnorm 1.88 lr 1.87e-07 2765s mps_alloc=1.81G driver=5.16G peak_driver=6.18G
+step 399 loss 0.3836 gnorm 1.82 lr 0.00e+00 2819s mps_alloc=1.81G driver=5.16G peak_driver=6.18G
+probe step 400 {'step': 400, 'H1': 0.8125, 'H2': 0.5625, 'H3': 0.75, 'H4': 0.8125, 'H5': 0.5625, 'H6': 0.875, 'H7': 0.9375, 'C_noupd': 0.8125, 'C_twoslot': 0.875}
+scored e004/plain: 640 items in 247s mps_alloc=0.50G driver=2.22G peak_driver=6.18G
+scored e004/chat: 640 items in 290s mps_alloc=0.50G driver=2.14G peak_driver=6.18G
+scored new/plain: 1728 items in 159s mps_alloc=0.50G driver=1.25G peak_driver=6.18G
+scored extra/plain: 192 items in 13s mps_alloc=0.50G driver=1.27G peak_driver=6.18G
+scored old/plain: 1116 items in 83s mps_alloc=0.50G driver=1.26G peak_driver=6.18G
+scored uprobe/plain: 576 items in 62s mps_alloc=0.50G driver=1.30G peak_driver=6.18G
+scored cross/plain: 384 items in 71s mps_alloc=0.50G driver=1.18G peak_driver=6.18G
+scored new/chat: 1728 items in 186s mps_alloc=0.50G driver=1.22G peak_driver=6.18G
+scored extra/chat: 192 items in 16s mps_alloc=0.50G driver=1.27G peak_driver=6.18G
+scored cross/chat: 384 items in 83s mps_alloc=0.50G driver=2.22G peak_driver=6.18G
+scored khard/plain: 80 items in 2s mps_alloc=0.50G driver=1.09G peak_driver=6.18G
+scored kbig/plain: 441 items in 8s mps_alloc=0.50G driver=1.05G peak_driver=6.18G
+generated e004/plain: strict 530/640 in 101s mps_alloc=0.50G driver=2.99G peak_driver=6.18G
+generated e004/chat: strict 84/640 in 358s mps_alloc=0.50G driver=8.38G peak_driver=8.38G
+generated cont/plain: strict 396/416 in 58s mps_alloc=0.50G driver=1.44G peak_driver=8.38G
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00,  4.35it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00,  4.35it/s]
+DONE HuggingFaceTB/SmolLM2-135M-Instruct s4 total 4673s peak_driver=8.383G lock_in_step=None loss_finite=True

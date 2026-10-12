@@ -1,0 +1,8 @@
+# E3 5M arm A (eta 0.003, r 1), seed 3 (e3plan.py)
+extends: ../../E2_lr_transfer/configs/base5m.yaml
+name: e3_5m_A_s3
+out_dir: ../../../planck_root/runs/E3/e3_5m_A_s3
+seed: 3
+optim: {lr: 0.003, embed_lr: 0.003, scalar_lr: 0.003}
+schedule: {mode: full, decay_frac: 0.2}
+train: {total_steps: 7630, ckpt_every: 153}

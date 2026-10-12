@@ -1,0 +1,109 @@
+== determinism
+PASS  seed 0 twice gives identical examples
+PASS  seed 1 differs from seed 0
+PASS  seed 3 twice gives identical examples
+== pool level
+PASS  templates: placeholders, no markers or literal values, pool sizes, 0 pool-level frame echoes (0 problems) []
+PASS  fillers: >= 40 how-to/why Q&A, no value/digit/object word/marker/name (0 problems) []
+PASS  0 word 5-grams shared with E001's filler pools (0) []
+== 2000 dialogues from stream(0)
+PASS  structure: 0 failing dialogues
+PASS  references: 0 failing dialogues
+PASS  values: 0 failing dialogues
+PASS  answer: 0 failing dialogues
+PASS  echo: 0 failing dialogues
+PASS  heldout: 0 failing dialogues
+== coverage (every pool entry, object, value, kind, marker, reference form used)
+      in these 2000: 0 pool entries unused []
+PASS  every entry of every phrasing pool used in seed 0's full 6,400-example stream (331 entries; missing [])
+      least-used pool entries: [(2, ('colour', 'rev_pron', 0)), (2, ('colour', 'rev_pron', 1)), (2, ('month', 'rev_ell', 0))]
+PASS  every training object used
+PASS  every training value used
+PASS  every training value is a gold somewhere
+== shares vs notes.txt
+PASS  kind upd          0.246 (target 0.250)
+PASS  kind twoslot      0.212 (target 0.200)
+PASS  kind twoslot_b    0.049 (target 0.050)
+PASS  kind noupd        0.141 (target 0.150)
+PASS  kind noupd_b      0.053 (target 0.050)
+PASS  kind noupd_incid  0.074 (target 0.075)
+PASS  kind upd_incid    0.045 (target 0.050)
+PASS  kind mid          0.076 (target 0.075)
+PASS  kind revert       0.050 (target 0.050)
+PASS  kind cross        0.053 (target 0.050)
+PASS  value types {'weekday': 496, 'city': 523, 'colour': 470, 'month': 511}
+PASS  reference form full 0.290 (target 0.30, n = 4224 corrections)
+PASS  reference form head 0.198 (target 0.20, n = 4224 corrections)
+PASS  reference form pron 0.262 (target 0.25, n = 4224 corrections)
+PASS  reference form ell  0.250 (target 0.25, n = 4224 corrections)
+PASS  corrections without a marker 0.345 (target 0.35)
+PASS  second object's first statement marked 0.299 (target 0.30)
+PASS  first original / incidental marked 0.088 (target 0.10)
+PASS  all 7 training markers used {'oh,': 521, 'change of plans': 399, 'update:': 521, 'wait': 540, 'actually': 502, 'sorry, I meant': 426, 'never mind,': 405}
+PASS  non-correction markers {'update:': 132, 'wait': 139, 'oh,': 142, 'actually': 133}
+PASS  question names the object by full phrase 0.505, head noun 0.495
+PASS  d covers 0-10: {0: 175, 1: 169, 2: 183, 3: 189, 4: 205, 5: 189, 6: 145, 7: 194, 8: 185, 9: 201, 10: 165}
+      k of the asked object: {0: 626, 1: 444, 2: 484, 3: 446}; objects: {2: 1169, 1: 831}
+PASS  pre-check of the stream rule (full oracles in validate_e004.py): first-mention gold 0.265, last-mention gold 0.430 (<= 0.50)
+      answers after a correction drawn from ans / ans_upd: {'ans_upd': 506, 'ans': 868}
+== the scored seeds 1-5 (per-example checks on 2,000 each, coverage on each full 6,400 stream)
+PASS  seed 1: failing dialogues {'structure': 0, 'references': 0, 'values': 0, 'answer': 0, 'echo': 0, 'heldout': 0}; unused pool entries []
+PASS  seed 2: failing dialogues {'structure': 0, 'references': 0, 'values': 0, 'answer': 0, 'echo': 0, 'heldout': 0}; unused pool entries []
+PASS  seed 3: failing dialogues {'structure': 0, 'references': 0, 'values': 0, 'answer': 0, 'echo': 0, 'heldout': 0}; unused pool entries []
+PASS  seed 4: failing dialogues {'structure': 0, 'references': 0, 'values': 0, 'answer': 0, 'echo': 0, 'heldout': 0}; unused pool entries []
+PASS  seed 5: failing dialogues {'structure': 0, 'references': 0, 'values': 0, 'answer': 0, 'echo': 0, 'heldout': 0}; unused pool entries []
+== sample
+User: How can I save money on groceries?
+Assistant: Plan meals ahead, shop with a list, buy staples in bulk, and avoid shopping when hungry.
+User: Monday is when my yoga class happens.
+Assistant: Understood.
+User: Oh, it's happening on Tuesday now.
+Assistant: No problem, Tuesday.
+User: Sunday is when my job interview happens.
+Assistant: Okay, I'll remember Sunday.
+User: Change of plans: we bumped the job interview to Friday.
+Assistant: Okay, updated to Friday.
+User: Change of plans: make that Thursday.
+Assistant: No problem, Thursday.
+User: How do I stop procrastinating?
+Assistant: Break the task into a tiny first step and start it right away.
+User: How do I keep cut apples from browning?
+Assistant: Toss the slices in a little lemon juice or soak them briefly in salted water.
+User: How do I make scrambled eggs fluffier?
+Assistant: Whisk them well, cook over low heat, and stir gently until they are just set.
+User: How can I sleep on a noisy street?
+Assistant: Earplugs, a fan for steady background noise, and heavy drapes all help.
+User: How do I fix a squeaky hinge?
+Assistant: Wipe the pin clean and add a few drops of oil or a bit of petroleum jelly.
+User: How often should I replace a toothbrush?
+Assistant: About every three months, or sooner if the bristles look frayed.
+User: Can you tell me the day for the class?
+Assistant: Since the update, it's Tuesday.
+   [twoslot weekday gold=Tuesday k=1 d=6 refs=['full', 'pron', 'full', 'full', 'ell']]
+User: What's the best way to learn to type faster?
+Assistant: Use all ten fingers, keep your eyes on the screen, and do short drills each day.
+User: How can I improve at drawing?
+Assistant: Sketch something small every day, copy pieces you admire, and study basic shapes and shading.
+User: Oh, Chicago is hosting the conference.
+Assistant: Noted, Chicago for that.
+User: Scratch that, Vienna.
+Assistant: Noted, Vienna.
+User: Actually, make that Paris.
+Assistant: Okay, updated to Paris.
+User: What's a good stretch after running?
+Assistant: A standing quad stretch and a calf stretch against a wall, each held for about thirty seconds.
+User: What's an easy way to learn new words?
+Assistant: Read widely, jot down unfamiliar words, and use each one in a sentence of your own.
+User: How can I remember more of what I read?
+Assistant: Pause after each section to sum it up in your own words, then review it the next day.
+User: What makes bread rise?
+Assistant: Yeast eats sugars and releases gas, which gets trapped in the stretchy gluten network.
+User: Is there an easy way to meditate?
+Assistant: Sit comfortably, breathe slowly, and gently bring your attention back to your breath.
+User: What should I do if a jar lid is stuck?
+Assistant: Run the lid under hot water, tap its edge gently, and grip it with a rubber glove.
+User: Which city do I go to for the conference?
+Assistant: Paris is the city now.
+   [upd city gold=Paris k=2 d=6 refs=['full', 'ell', 'ell']]
+
+RESULT: ALL PASS

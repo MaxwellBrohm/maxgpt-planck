@@ -1,0 +1,209 @@
+{
+ "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+ "weights_in": "../../E004_general_updating/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s3",
+ "arm": null,
+ "seed": 3,
+ "steps": 0,
+ "lr": 0.00015,
+ "bs": 4,
+ "accum": 4,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "cuda",
+ "dry": false,
+ "tag": "e004w3",
+ "sets": [
+  "al",
+  "big",
+  "eval",
+  "h5l"
+ ],
+ "chat": true,
+ "max_new": 48,
+ "checks": {
+  "params_config": {
+   "total": 134515008,
+   "embedding": 28311552,
+   "body": 106203456,
+   "tok_emb": 28311552,
+   "out_head": 0,
+   "pos_emb": 0,
+   "layers": 30,
+   "d": 576,
+   "vocab": 49152,
+   "n_ctx": 8192
+  },
+  "params_model": 134515008,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": true,
+  "config_says_tied": true,
+  "sanity_nll": 2.339
+ },
+ "numerics": {
+  "float32_matmul_precision": "highest",
+  "tf32_matmul": false,
+  "tf32_cudnn": false,
+  "cudnn_benchmark": false,
+  "cudnn_deterministic": true,
+  "deterministic_algorithms": true,
+  "deterministic_warn_only": true,
+  "cublas_workspace_config": ":4096:8",
+  "sdpa": {
+   "flash": false,
+   "mem_efficient": false,
+   "math": true,
+   "cudnn": false
+  },
+  "hf_hub_offline": "1",
+  "hf_home_set": true,
+  "versions": {
+   "torch": "2.13.0+cu130",
+   "transformers": "5.15.1",
+   "tokenizers": "0.22.2",
+   "safetensors": "0.8.0"
+  },
+  "cuda": "13.0",
+  "cuda_available": true,
+  "gpu": "NVIDIA GeForce RTX 5070",
+  "driver": "596.49"
+ },
+ "tf32": false,
+ "replay_pool_sha256": null,
+ "params": 134515008,
+ "train_stream": null,
+ "train_stats": null,
+ "losses": [],
+ "probe": [],
+ "lock_in_step": null,
+ "loss_finite": true,
+ "weights_sha256": "efd68a20a3e7d56f8b91b7d2dc05c6b64b530bfaf056e8bebc9b0a7bd3ff3dd0",
+ "weights": "../E004_general_updating/weights/HuggingFaceTB__SmolLM2-135M-Instruct__s3",
+ "eval_s": 2258.6,
+ "eval_counts": {
+  "e004/plain": 640,
+  "e004/chat": 640,
+  "big/plain": 576,
+  "big/chat": 576,
+  "h5l/plain": 192,
+  "h5l/chat": 192,
+  "al/plain": 64,
+  "al/chat": 64,
+  "gen_e004/plain": 640,
+  "gen_e004/chat": 640,
+  "gen_big/plain": 576,
+  "gen_big/chat": 576,
+  "gen_h5l/plain": 192,
+  "gen_h5l/chat": 192,
+  "gen_al/plain": 64,
+  "gen_al/chat": 64
+ },
+ "summary": {
+  "LIK e004/plain": {
+   "C_noupd": 0.9375,
+   "C_twoslot": 0.875,
+   "H1": 0.7031,
+   "H2": 0.6719,
+   "H3": 0.8281,
+   "H4": 0.9219,
+   "H5": 0.8125,
+   "H6": 0.8125,
+   "H7": 0.8906,
+   "ID": 0.9531
+  },
+  "LIK e004/chat": {
+   "C_noupd": 0.8438,
+   "C_twoslot": 0.8125,
+   "H1": 0.6562,
+   "H2": 0.7031,
+   "H3": 0.8438,
+   "H4": 0.8906,
+   "H5": 0.7656,
+   "H6": 0.8125,
+   "H7": 0.875,
+   "ID": 0.9219
+  },
+  "LIK big/plain": {
+   "C_noupd": 0.9583,
+   "C_twoslot": 0.8021,
+   "H5": 0.8438
+  },
+  "LIK big/chat": {
+   "C_noupd": 0.8958,
+   "C_twoslot": 0.8073,
+   "H5": 0.7917
+  },
+  "LIK h5l/plain": {
+   "H5L": 0.901
+  },
+  "LIK h5l/chat": {
+   "H5L": 0.849
+  },
+  "LIK al/plain": {
+   "AL": 0.7656
+  },
+  "LIK al/chat": {
+   "AL": 0.7344
+  },
+  "GEN e004/plain": {
+   "C_noupd": 0.9062,
+   "C_twoslot": 0.8438,
+   "H1": 0.7656,
+   "H2": 0.7812,
+   "H3": 0.8594,
+   "H4": 0.9062,
+   "H5": 0.8281,
+   "H6": 0.8594,
+   "H7": 0.9531,
+   "ID": 0.9688,
+   "capped": 0
+  },
+  "GEN e004/chat": {
+   "C_noupd": 0.0781,
+   "C_twoslot": 0.0156,
+   "H1": 0.0156,
+   "H2": 0.0,
+   "H3": 0.0,
+   "H4": 0.0938,
+   "H5": 0.0312,
+   "H6": 0.1094,
+   "H7": 0.0938,
+   "ID": 0.0156,
+   "capped": 610
+  },
+  "GEN big/plain": {
+   "C_noupd": 0.9115,
+   "C_twoslot": 0.8385,
+   "H5": 0.8542,
+   "capped": 0
+  },
+  "GEN big/chat": {
+   "C_noupd": 0.0573,
+   "C_twoslot": 0.0156,
+   "H5": 0.0625,
+   "capped": 546
+  },
+  "GEN h5l/plain": {
+   "H5L": 0.9115,
+   "capped": 0
+  },
+  "GEN h5l/chat": {
+   "H5L": 0.0365,
+   "capped": 185
+  },
+  "GEN al/plain": {
+   "AL": 0.75,
+   "capped": 0
+  },
+  "GEN al/chat": {
+   "AL": 0.0312,
+   "capped": 62
+  }
+ },
+ "selftest_fail": [],
+ "total_s": 2261.0,
+ "peak_cuda_gb": 2.558
+}

@@ -1,0 +1,37 @@
+baseline grader: 51 fixtures (18 correct natural answers, 33 bad replies), mismatches 0
+baseline scorer metrics_ft.right: 10 fixtures, mismatches 0
+  KILLED   grader | c1 dropped                             | strict verdict flips | 'Your piano lesson is on Friday and the teacher said the room will be ready early so bring the sheet music along' want False [1] got True []
+  KILLED   grader | c1 ignores the cap                     | strict verdict flips | 'Your piano lesson is on Friday and the teacher said the room will be ready early so bring the sheet music along' want False [1] got True []
+  KILLED   grader | c1 ignores emptiness                   | clause report only | '' want False [1, 3] got False [3]; '   ' want False [1, 3] got False [3]
+  KILLED   grader | c2 dropped                             | strict verdict flips | "It's on Friday. It's on Friday." want False [2] got True []; 'Friday friday friday' want False [2] got True []
+  KILLED   grader | c2 only a word 3x in a row             | strict verdict flips | "It's on Friday. It's on Friday." want False [2] got True []
+  KILLED   grader | c2 only repeated 3-grams               | strict verdict flips | 'Friday friday friday' want False [2] got True []
+  KILLED   grader | c3 dropped                             | strict verdict flips | 'Sure, I can help with your lesson.' want False [3] got True []; 'Fridays are best for your lesson.' want False [3] got True []
+  KILLED   grader | c3 gold as a substring                 | strict verdict flips | 'The hotel floor is number five.' want True [] got False [3]; 'The tent is grey now.' want True [] got False [3]
+  KILLED   grader | c3 case-sensitive gold                 | strict verdict flips | 'friday' want True [] got False [3]; 'The hotel floor is number five.' want True [] got False [3]
+  KILLED   grader | c4 dropped                             | strict verdict flips | 'Friday or Monday.' want False [4] got True []; 'Monday, then Friday.' want False [4] got True []
+  KILLED   grader | c4 in-context candidates only          | strict verdict flips | 'Friday, or Sunday at the latest.' want False [4] got True []
+  KILLED   grader | c4 only values after the gold          | strict verdict flips | 'Monday, then Friday.' want False [4] got True []
+  KILLED   grader | c5 dropped                             | strict verdict flips | 'Friday is not the day.' want False [5] got True []; 'It is not on Friday.' want False [5] got True []
+  KILLED   grader | c5 E002 window (4 words before gold)   | strict verdict flips | 'Friday is not the day.' want False [5] got True []; 'Friday, no longer the plan.' want False [5] got True []
+  KILLED   grader | c5 without interjection no             | strict verdict flips | 'No, Friday.' want False [5] got True []
+  KILLED   grader | c5 without n't                         | strict verdict flips | "The lesson isn't on Friday." want False [5] got True []
+  KILLED   grader | c5 cues as substrings                  | strict verdict flips | "For the piano, it's Friday." want True [] got False [5]; 'Friday, bring your notes.' want True [] got False [5]
+  KILLED   grader | c6 dropped                             | strict verdict flips | 'Is it Friday?' want False [6] got True []; "I think it's Friday." want False [6] got True []
+  KILLED   grader | c6 no question-mark check              | strict verdict flips | 'Is it Friday?' want False [6] got True []
+  KILLED   grader | c6 no hedge check                      | strict verdict flips | "I think it's Friday." want False [6] got True []; 'Probably Friday.' want False [6] got True []
+  KILLED   grader | c6 pre-registered hedges only          | strict verdict flips | 'It could be Friday.' want False [6] got True []
+  KILLED   grader | c7 dropped                             | strict verdict flips | 'My piano lesson is on Friday.' want False [7] got True []; 'My weekly lesson is on Friday.' want False [7] got True []
+  KILLED   grader | c7 role tags only                      | strict verdict flips | 'My piano lesson is on Friday.' want False [7] got True []; 'My weekly lesson is on Friday.' want False [7] got True []
+  KILLED   grader | c7 'my' only                           | strict verdict flips | 'Assistant: Your lesson is on Friday.' want False [7] got True []; 'User: Friday works.' want False [7] got True []
+  KILLED   grader | c7 window 1 word                       | strict verdict flips | 'My weekly lesson is on Friday.' want False [7] got True []
+  KILLED   grader | c7 alias ignored                       | strict verdict flips | "It's my Adeyemi slot, Friday." want False [7] got True []
+  KILLED   grader | May matched case-insensitively         | strict verdict flips | 'Your camping trip is in July, so you may want to book early.' want True [] got False [4]; 'You may want to check the date.' want False [3] got True []
+  KILLED   grader | number words not accepted              | strict verdict flips | 'The hotel floor is number five.' want True [] got False [3]; "It's on the 5th floor." want True [] got False [3]
+  KILLED   grader | grey not accepted                      | strict verdict flips | 'The tent is grey now.' want True [] got False [3]
+  KILLED   grader | strict = lenient                       | strict verdict flips | 'Your piano lesson is on Friday and the teacher said the room will be ready early so bring the sheet music along' want False [1] got True [1]; "It's on Friday. It's on Friday. It's on Friday." want False [1, 2] got True [1, 2]
+  KILLED   scorer | tie counts as right                    | {'gold': -1.0, 'a': -1.0} want False got True
+  KILLED   scorer | gold-only set counts                   | {'gold': -1.0} want False got True
+  KILLED   scorer | non-finite foils skipped               | {'gold': -1.0, 'a': nan} want False got True
+  KILLED   scorer | gold beats the mean foil               | {'gold': -1.0, 'a': -0.5, 'b': -3.0} want False got True
+mutants killed 34/34 (none by a crash); ALL PASS

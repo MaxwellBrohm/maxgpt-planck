@@ -1,0 +1,395 @@
+{
+ "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+ "weights_in": null,
+ "arm": "P",
+ "seed": 0,
+ "steps": 5,
+ "lr": 0.00015,
+ "bs": 4,
+ "accum": 4,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "cuda",
+ "dry": true,
+ "tag": "dryP",
+ "sets": [
+  "al",
+  "big",
+  "cont",
+  "eval",
+  "h5l",
+  "know"
+ ],
+ "chat": true,
+ "max_new": 48,
+ "checks": {
+  "params_config": {
+   "total": 134515008,
+   "embedding": 28311552,
+   "body": 106203456,
+   "tok_emb": 28311552,
+   "out_head": 0,
+   "pos_emb": 0,
+   "layers": 30,
+   "d": 576,
+   "vocab": 49152,
+   "n_ctx": 8192
+  },
+  "params_model": 134515008,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": true,
+  "config_says_tied": true,
+  "sanity_nll": 1.9598
+ },
+ "numerics": {
+  "float32_matmul_precision": "highest",
+  "tf32_matmul": false,
+  "tf32_cudnn": false,
+  "cudnn_benchmark": false,
+  "cudnn_deterministic": true,
+  "deterministic_algorithms": true,
+  "deterministic_warn_only": true,
+  "cublas_workspace_config": ":4096:8",
+  "sdpa": {
+   "flash": false,
+   "mem_efficient": false,
+   "math": true,
+   "cudnn": false
+  },
+  "hf_hub_offline": "1",
+  "hf_home_set": true,
+  "versions": {
+   "torch": "2.13.0+cu130",
+   "transformers": "5.15.1",
+   "tokenizers": "0.22.2",
+   "safetensors": "0.8.0"
+  },
+  "cuda": "13.0",
+  "cuda_available": true,
+  "gpu": "NVIDIA GeForce RTX 5070",
+  "driver": "596.49"
+ },
+ "tf32": false,
+ "replay_pool_sha256": null,
+ "params": 134515008,
+ "train_stream": "train_e005.stream(seed): R_mix = Random(1000 * seed + 46) draws block (E004 .70 = train_e004.stream(seed) in order, ALIAS .20, IND .10; R_new = Random(1000 * seed + 45)) then render (chat .50); change (a)/(b) from R_pos = Random(1000 * seed + 47): train_e006p.stream_p",
+ "loss_selfcheck": {
+  "first": {
+   "hf": 2.1984567642211914,
+   "answer_only": 2.198456287384033,
+   "n_labelled": 30
+  },
+  "plain": {
+   "hf": 1.9983303546905518,
+   "answer_only": 1.9983294010162354,
+   "n_labelled": 32
+  },
+  "chat": {
+   "hf": 2.401355028152466,
+   "answer_only": 2.401355028152466,
+   "n_labelled": 29
+  }
+ },
+ "loss_mutants": {
+  "first": {
+   "no_shift": 11.45664119720459,
+   "prompt_labelled": 2.2410085201263428
+  },
+  "plain": {
+   "no_shift": 11.100800514221191,
+   "prompt_labelled": 2.425694704055786
+  },
+  "chat": {
+   "no_shift": 12.059629440307617,
+   "prompt_labelled": 2.1964478492736816
+  }
+ },
+ "train_s": 8.7,
+ "s_per_step": 1.74,
+ "renders_trained": {
+  "plain": 39,
+  "chat": 41
+ },
+ "update_digest": {
+  "sha256": "bd40e1c31b03a6f76ec6264e3e20a3d953f7f55365817fedf5871914b94eb724",
+  "n": 84
+ },
+ "train_stats": {
+  "n": 84,
+  "rejected_long": 2,
+  "mean_len": 440.4,
+  "len_max": {
+   "plain": 659,
+   "chat": 732
+  },
+  "split": {
+   "plain": 0,
+   "chat": 0
+  },
+  "shares": {
+   "kind": {
+    "alias_earlier": {
+     "drawn": 0.0116,
+     "kept": 0.0119
+    },
+    "alias_latest": {
+     "drawn": 0.1163,
+     "kept": 0.1071
+    },
+    "alias_other": {
+     "drawn": 0.0349,
+     "kept": 0.0357
+    },
+    "cross": {
+     "drawn": 0.0581,
+     "kept": 0.0595
+    },
+    "ind_x": {
+     "drawn": 0.0814,
+     "kept": 0.0833
+    },
+    "ind_y": {
+     "drawn": 0.0349,
+     "kept": 0.0357
+    },
+    "mid": {
+     "drawn": 0.0581,
+     "kept": 0.0595
+    },
+    "noupd": {
+     "drawn": 0.1395,
+     "kept": 0.1429
+    },
+    "noupd_b": {
+     "drawn": 0.0698,
+     "kept": 0.0595
+    },
+    "noupd_incid": {
+     "drawn": 0.0116,
+     "kept": 0.0119
+    },
+    "revert": {
+     "drawn": 0.0349,
+     "kept": 0.0357
+    },
+    "twoslot": {
+     "drawn": 0.1395,
+     "kept": 0.1429
+    },
+    "twoslot_b": {
+     "drawn": 0.0349,
+     "kept": 0.0357
+    },
+    "upd": {
+     "drawn": 0.1744,
+     "kept": 0.1786
+    }
+   },
+   "block": {
+    "alias": {
+     "drawn": 0.1628,
+     "kept": 0.1548
+    },
+    "e004": {
+     "drawn": 0.7209,
+     "kept": 0.7262
+    },
+    "ind": {
+     "drawn": 0.1163,
+     "kept": 0.119
+    }
+   },
+   "render": {
+    "chat": {
+     "drawn": 0.5116,
+     "kept": 0.5
+    },
+    "plain": {
+     "drawn": 0.4884,
+     "kept": 0.5
+    }
+   },
+   "case": {
+    "None": {
+     "drawn": 0.7209,
+     "kept": 0.7262
+    },
+    "ask_x": {
+     "drawn": 0.0814,
+     "kept": 0.0833
+    },
+    "ask_y": {
+     "drawn": 0.0349,
+     "kept": 0.0357
+    },
+    "earlier": {
+     "drawn": 0.0116,
+     "kept": 0.0119
+    },
+    "latest": {
+     "drawn": 0.1163,
+     "kept": 0.1071
+    },
+    "other": {
+     "drawn": 0.0349,
+     "kept": 0.0357
+    }
+   },
+   "placement": {
+    "None": {
+     "drawn": 0.8372,
+     "kept": 0.8452
+    },
+    "adjacent": {
+     "drawn": 0.0698,
+     "kept": 0.0714
+    },
+    "filler": {
+     "drawn": 0.0465,
+     "kept": 0.0357
+    },
+    "other_obj": {
+     "drawn": 0.0465,
+     "kept": 0.0476
+    }
+   }
+  },
+  "max_share_shift": 0.0116
+ },
+ "losses": [
+  2.67135,
+  2.95953,
+  2.29253,
+  2.43779,
+  2.89329
+ ],
+ "probe": [
+  {
+   "step": 0,
+   "H1": 0.0,
+   "H2": 0.0,
+   "H3": 0.0,
+   "H4": 1.0,
+   "H5": 0.0,
+   "H6": 0.0,
+   "H7": 0.0,
+   "C_noupd": 0.0,
+   "C_twoslot": 0.0
+  },
+  {
+   "step": 5,
+   "H1": 0.0,
+   "H2": 0.0,
+   "H3": 0.0,
+   "H4": 1.0,
+   "H5": 0.0,
+   "H6": 0.0,
+   "H7": 0.0,
+   "C_noupd": 0.0,
+   "C_twoslot": 0.0
+  }
+ ],
+ "lock_in_step": null,
+ "loss_finite": true,
+ "weights_sha256": "unsaved",
+ "weights": null,
+ "eval_s": 5.2,
+ "eval_counts": {
+  "e004/plain": 2,
+  "e004/chat": 2,
+  "new/plain": 2,
+  "extra/plain": 2,
+  "old/plain": 2,
+  "uprobe/plain": 2,
+  "cross/plain": 2,
+  "new/chat": 2,
+  "extra/chat": 2,
+  "cross/chat": 2,
+  "khard/plain": 2,
+  "kbig/plain": 2,
+  "big/plain": 2,
+  "big/chat": 2,
+  "h5l/plain": 2,
+  "h5l/chat": 2,
+  "al/plain": 2,
+  "al/chat": 2,
+  "gen_e004/plain": 2,
+  "gen_e004/chat": 2,
+  "gen_cont/plain": 2,
+  "gen_big/plain": 2,
+  "gen_big/chat": 2,
+  "gen_h5l/plain": 2,
+  "gen_h5l/chat": 2,
+  "gen_al/plain": 2,
+  "gen_al/chat": 2
+ },
+ "summary": {
+  "LIK e004/plain": {
+   "H1": 0.0
+  },
+  "LIK e004/chat": {
+   "H1": 0.0
+  },
+  "LIK big/plain": {
+   "H5": 0.5
+  },
+  "LIK big/chat": {
+   "H5": 0.5
+  },
+  "LIK h5l/plain": {
+   "H5L": 0.0
+  },
+  "LIK h5l/chat": {
+   "H5L": 0.0
+  },
+  "LIK al/plain": {
+   "AL": 0.5
+  },
+  "LIK al/chat": {
+   "AL": 0.5
+  },
+  "GEN e004/plain": {
+   "H1": 0.0,
+   "capped": 0
+  },
+  "GEN e004/chat": {
+   "H1": 0.5,
+   "capped": 0
+  },
+  "GEN cont/plain": {
+   "all": 0.0,
+   "capped": 0
+  },
+  "GEN big/plain": {
+   "H5": 0.5,
+   "capped": 0
+  },
+  "GEN big/chat": {
+   "H5": 0.5,
+   "capped": 0
+  },
+  "GEN h5l/plain": {
+   "H5L": 0.0,
+   "capped": 0
+  },
+  "GEN h5l/chat": {
+   "H5L": 0.0,
+   "capped": 0
+  },
+  "GEN al/plain": {
+   "AL": 1.0,
+   "capped": 0
+  },
+  "GEN al/chat": {
+   "AL": 0.0,
+   "capped": 0
+  }
+ },
+ "selftest_fail": [],
+ "total_s": 17.8,
+ "peak_cuda_gb": 2.766
+}

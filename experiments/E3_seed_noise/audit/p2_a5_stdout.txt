@@ -1,0 +1,38 @@
+scipy 1.18.1 python 3.14.4
+  factor df1                             scipy 14.08258666  own 14.08258666  rel diff 1.3e-16
+  factor df2                             scipy 5.363312902  own 5.363312902  rel diff 0.0e+00
+  factor df7                             scipy 3.260653896  own 3.260653896  rel diff 1.4e-15
+  ub80 df2                               scipy 2.116936494  own 2.116936494  rel diff 0.0e+00
+  chi2 0.025 df2                         scipy 0.05063561597  own 0.05063561597  rel diff 8.2e-16
+  chi2 0.975 df2                         scipy 7.377758908  own 7.377758908  rel diff 1.2e-16
+  F 0.025 (2,7)                          scipy 0.02540959938  own 0.02540959938  rel diff 3.7e-15
+  F 0.975 (2,7)                          scipy 6.541520297  own 6.541520297  rel diff 1.4e-16
+F(CHAT)
+  SD_d                                   scipy 0.001894330459  own 0.001894330459  rel diff 0.0e+00
+  sigma_seed                             scipy 0.001223058589  own 0.001223058589  rel diff 0.0e+00
+  rho                                    scipy -0.4545813709  own -0.4545813709  rel diff 2.4e-16
+  rho = 0 p (pearsonr, exact)            scipy 0.6995777541  own 0.6995777541  rel diff 3.2e-16
+  t (3 seeds)                            scipy 0.0778225223  own 0.0778225223  rel diff 0.0e+00
+  p (3 seeds)                            scipy 0.9450542964  own 0.9450542964  rel diff 1.2e-16
+  CI low (3 seeds)                       scipy -0.004620663847  own -0.004620663847  rel diff 0.0e+00
+  CI high (3 seeds)                      scipy 0.004790891618  own 0.004790891618  rel diff 0.0e+00
+  t (seeds 2..3)                         scipy -0.8263032673  own -0.8263032673  rel diff 2.7e-16
+  p (seeds 2..3)                         scipy 0.5603662914  own 0.5603662914  rel diff 2.0e-16
+  CRN ratio                              scipy 0.9130751375  own 0.9130751375  rel diff 0.0e+00
+  MDE paired k1 (bpb)                    scipy 0.01015988699  own 0.01015988699  rel diff 0.0e+00
+  MDE unpaired k1 (bpb)                  scipy 0.009276740213  own 0.009276740213  rel diff 0.0e+00
+F(PROSE)
+  SD_d                                   scipy 0.0005731466002  own 0.0005731466002  rel diff 1.9e-16
+  sigma_seed                             scipy 0.001134862317  own 0.001134862317  rel diff 0.0e+00
+  rho                                    scipy 0.9085363607  own 0.9085363607  rel diff 0.0e+00
+  rho = 0 p (pearsonr, exact)            scipy 0.2744015043  own 0.2744015043  rel diff 4.0e-16
+  t (3 seeds)                            scipy -6.225485278  own -6.225485278  rel diff 1.4e-16
+  p (3 seeds)                            scipy 0.02484448736  own 0.02484448736  rel diff 1.4e-16
+  CI low (3 seeds)                       scipy -0.003483827656  own -0.003483827656  rel diff 0.0e+00
+  CI high (3 seeds)                      scipy -0.0006362774884  own -0.0006362774884  rel diff 3.4e-16
+  t (seeds 2..3)                         scipy -3.733250381  own -3.733250381  rel diff 0.0e+00
+  p (seeds 2..3)                         scipy 0.1666155257  own 0.1666155257  rel diff 1.7e-16
+  CRN ratio                              scipy 2.800221933  own 2.800221933  rel diff 1.6e-16
+  MDE paired k1 (bpb)                    scipy 0.003073964556  own 0.003073964556  rel diff 1.4e-16
+  MDE unpaired k1 (bpb)                  scipy 0.00860778297  own 0.00860778297  rel diff 0.0e+00
+largest relative difference 3.7e-15 (F 0.025 (2,7))

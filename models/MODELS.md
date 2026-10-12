@@ -1,0 +1,242 @@
+# Planck models: what we keep, where, and how
+
+Every model this project trains, fine-tunes or tweaks is kept, with one line in
+[`registry.jsonl`](registry.jsonl): successes, failures, diagnostics and runs that were killed. A failure
+with its weights is evidence; a failure without them is an anecdote. Weights never go into git
+(`.gitignore` has `*.pt`, `*.safetensors`, `experiments/**/weights/`); the registry is what git carries.
+
+Written 2026-09-26. Tools: [`registry.py`](registry.py) (validate, list, add, verify, hash) and
+[`regtools.py`](regtools.py) (run readers, hashing, safetensors headers). Both are stdlib only, and
+neither imports torch or loads weights. Tests: `python3 models/tests/test_registry.py` and
+`python3 models/tests/test_registry_cross.py`.
+
+## 1. What is kept
+
+- **Final weights of every run that took a real optimizer step**, whatever its outcome: scored seeds,
+  reruns, LR-search points, ablation arms, failures. A queue passes `--save 1` (or the harness default)
+  for every such job, including LR searches. Saving never changes a result; it is still logged when an
+  experiment turns it on after pre-registration.
+- **Diverged or crashed runs**: the last finite checkpoint. The harness raises on a non-finite loss
+  without saving it, so its rolling checkpoints before the divergence are the record; they are not pruned.
+- **Killed and dry runs** get a registry line with `status: not_saved` and `files: []`, so the count of
+  trained models is complete. Dry runs (a handful of steps on padded batches, a pipeline check) are not
+  saved by default.
+- **Intermediate checkpoints (thinning)**, for from-scratch runs:
+  1. always: `final_<step>.pt`, every `stable_<step>.pt` (branch points; the harness never prunes them),
+     and every checkpoint a result was read from (E2's scorer reads final plus the two rolling before it);
+  2. when a config keeps more rolling checkpoints (`keep_last 0`), the archive keeps those nearest 1%,
+     3%, 10% and 30% of the run and drops the rest, and only after the run is registered and its results
+     are read;
+  3. pre-registered configs are not changed to keep more (E2/E3 and the S00x screens keep 2 rolling).
+- **Public models** that are only evaluated (RC-12 baselines, E001) are not copied: their HF id and
+  snapshot revision identify them.
+
+## 2. Where
+
+| place | location string | what lives there |
+|---|---|---|
+| Mac, in the repo | `mac:experiments/<E>/weights/<slug>__<tag>` | where Mac runs write; copies of small models stay |
+| PC archive (D: drive) | `pc:/mnt/d/planck-archive/<id>` | every model, one directory per registry id |
+| PC run areas | `pc:~/planck/runs/...`, `pc:~/planck/e006_run/weights/...` | where PC runs write; not the archive |
+| off-site (optional) | `hf:<owner>/<repo>@<revision>` | not set up |
+
+- **Small models keep a Mac copy**: up to 600 MB of files per model (every 135M fp32 fine-tune fits),
+  within a 50 GB budget for all Mac copies. Mac copies on 2026-09-26: 33 models, 9.95 GB. Larger models
+  live on the PC archive only.
+- **The archive is the D: drive** (about 466 GB free), as `/mnt/d/planck-archive` from WSL. Layout: the
+  registry id is the path, e.g. `/mnt/d/planck-archive/E005/135m/s1/model.safetensors`. Each id directory
+  holds the entry's registered files under their own names (not the whole run directory).
+- **Archive status, SCREENS (2026-10-10, 16:57)**: `/mnt/d` was not mounted in WSL (`No such device`), so no
+  archive copy of a SCREENS run could be checked or made; the 129 saved SCREENS lines (96 run finals, 33 trunk
+  stables; section 10) list only their run folders. Whether archive_loop.sh copied any SCREENS run before
+  D: dropped is unknown. When D: is back: copy, hash with `verify --where pc`, then add the archive locations.
+- **Archive status (2026-10-03, 00:30)**: all 158 saved models in the registry, 419 files, 29.06 GB
+  (29,058,924,614 bytes), every PC copy re-hashed by `verify --where pc` on the PC (683 files, archive and
+  run areas: 0 missing or mismatched). Added 2026-10-03: E003 ts33m and p160m s1-s3 (6, uploaded from the
+  Mac and hash-checked on the PC), E006 17 trained models plus C2's power-cut attempt (byte-identical to C2),
+  E2 78 (5M: 27 branch finals, 9 trunk finals, 27 stables; 20M: 6 branch finals, 3 trunk finals, 6 stables)
+  and E3 18. Layout exception: what `~/planck/bin/archive_loop.sh` copies (E2, E3, E006) sits under the run
+  folder's name (`E2/<run>/`, `E3/<run>/`, `E006/<tag>/`), not the id path; each entry's location says
+  which. No registered file reaches the 4 GB FAT32 limit (largest 649 MB). The loop (rewritten 2026-10-03)
+  copies TRUNK_DONE or SCORED runs of any capitalized `runs/<EXP>` and every `e<NNN>_run/weights` folder
+  older than 60 min, never overwrites, never copies a 0-byte file, and skips a pass when D: is not mounted;
+  its first pass left 2 MISMATCHes as they are (`E2/20m_e6_r1_trunk/log.jsonl` and `train.out` in the
+  archive are the 2026-09-29 crashed attempt's; the run folder holds the longer resumed ones). The scored
+  rolling checkpoints of E2/E3 are in `data_offload/` (corpus/stats/offload_2026-10.txt), not registered
+  one by one. Earlier (2026-09-26 17:37): 38 models, 185 files, 10.18 GB; the 5 E2 smoke checkpoints are
+  archive-only (a second smoke run into `~/planck/runs/smoke`, 17:07-17:11, overwrote their run-area files;
+  that run is not registered).
+- `~/planck/dev/...` is a working area that has been cleaned by another process once; a copy there
+  (for example E006's reference copies of E004/E005) is listed but is never the only copy.
+- **Off-site backup (option, needs Max)**: a private Hugging Face model repo per experiment, pushed with
+  `huggingface-cli upload`. This needs Max's HF token with write scope on the PC; nothing is uploaded
+  until he provides it and says private or public. The location is then `hf:<owner>/<repo>@<commit>`.
+
+## 3. Naming
+
+- **id** = `<experiment>/<arm>/<run tag>[/<checkpoint>]`, stable forever, and the archive path.
+  Examples: `E005/135m/s3`, `E003/p14m/lr1e-02/s0`, `E002/135m/s0r`, `E2/smoke/trunk/stable_400`,
+  and later `E2/5m_e3_r1/trunk/final`. A killed attempt adds `/killed-<YYYYMMDDTHHMMSS>` (its end time).
+- The arm is the model or arm short name the experiment's queue uses (`135m`, `ts1m`, `p70m`, `C`, `P`).
+- A model is never renamed; a rerun is a new id (`s0r`, `<tag>_r2`).
+
+## 4. Registry fields (schema 1)
+
+One JSON object per line. `registry.py validate` enforces every rule below, and across entries: no file at a
+location is claimed by two entries, and a checkpoint's `parent` is a registered id.
+
+| field | meaning |
+|---|---|
+| `id`, `experiment`, `arm`, `role`, `seed` | identity; `role` is scored, rerun, lr_search, dry_run, smoke, branch_point, ... |
+| `kind` | `finetune` (needs `base_model`), `from_scratch` (`base_model` null), `checkpoint` (needs `parent` id and `step`) |
+| `base_model` | `{id, revision, revision_source}`: the HF id and the snapshot commit trained from |
+| `params_total`, `params_body` | body = total minus token and position embeddings and an untied output head; `params_source` says where they came from |
+| `tokenizer` | `{id, sha256}`: sha256 of the `tokenizer.json` shipped beside the weights (a not_saved run: the base snapshot's) |
+| `data` | `{identity, sha256}`: the manifest or seeded stream trained on, and its sha256 where one exists |
+| `code` | `{git_commit, relation, digest_sha256, digest_source}`: see below |
+| `config_sha256` | harness runs: `config_sha256` from runs.jsonl. HF fine-tunes: sha256 of the canonical JSON `{"script", "args"}` (sorted keys, no spaces) of the training job's guard record command after the interpreter (the `ft_test.py` job, never an eval job such as `gen_probe.py` that reuses the tag); `config_source` names the record |
+| `hparams` | steps, LR, batch and precision as recorded |
+| `result` | the reading the experiment's results.json or AUDIT.md gives this model, or `not scored` |
+| `status` | `success` (met its pre-registered rule), `failure` (scored and failed, or the run failed), `partial` (the experiment's reading is partial, e.g. E005 PARTIAL-X), `diagnostic` (a rerun, smoke or branch point, not in a pass-rule tally), `not_saved` (trained, weights not kept) |
+| `run` | `{state, started, ended, log}`: completed, killed, dry, in_progress or unknown |
+| `files` | `[{path, bytes, sha256}]`, paths relative to each location; `[]` exactly when `status` is not_saved |
+| `locations` | `mac:`, `pc:~/planck...`, `pc:/mnt/d/planck-archive...` or `hf:` strings; never a machine address |
+| `created` | a saved model: the weights file's mtime; otherwise the run's end |
+| `release` | `with_writeup`, `never` or `undecided` (section 7) |
+| `notes` | free text; every null among params, tokenizer, data, config, created, base revision and file hashes must be explained here by naming the field |
+
+- **code.relation**: `pre_run` = the commit was made before the run started and the experiment's code
+  is unchanged from it to HEAD apart from the process guard and queue scripts; `post_run` = the first
+  commit holding the code came after the run, so the run-time code may differ. `digest_sha256` is the
+  sha256 of a code-hash list written at run time (E005's `code_sha256_at_start.txt`, the harness's
+  `code_sha256.txt`).
+- **Never guess.** An unknown field is null, with the reason in `notes`.
+- No private data: no absolute home paths, machine addresses or emails (`validate` rejects them).
+
+## 5. How to register
+
+```bash
+# a saved E002-E006 style run (weights/<slug>__<tag>, out/<slug>__<tag>__run.json, logs/<job>.guard.json)
+python3 models/registry.py add --from-run experiments/E003_correction_floor/weights/roneneldan__TinyStories-33M__s1 \
+  --id E003/ts33m/s1 --set arm='"ts33m"' --set status='"failure"' --set result='"..."' \
+  --set data='{"identity": "...", "sha256": null}' --set code='{...}' --set notes='"data.sha256: ..."'
+# anything else (harness runs, not_saved runs): a JSON object or JSON lines with every field
+python3 models/registry.py add --json entry.json
+python3 models/registry.py validate
+python3 models/registry.py verify --where mac        # re-hash every Mac copy
+```
+
+`add --from-run` fills hashes, parameter counts (run.json checks or the safetensors header), the base
+revision (only when the local HF cache holds exactly one snapshot, older than the run), the config
+sha256, run times and the Mac location from the training job's guard record (`ft_test.py` or `e00N_ft_test.py`); it
+refuses a run without a finished one. The
+experiment-specific fields are passed with `--set`. The E2 smoke lines are the template for harness
+runs (fields from runs.jsonl's start and end events). An entry registered where its files are not
+reachable carries null hashes; `verify --where pc --fill` on the PC fills them and never changes a
+recorded hash.
+
+**Every new queue** (checklist): `--save 1` on every trained job; the guard record keeps the command;
+after the queue, register every run (saved or not) the same day; then copy to the archive.
+
+## 6. How to archive and restore
+
+Archive (on the PC, from WSL):
+
+```bash
+id=E005/135m/s1; mkdir -p /mnt/d/planck-archive/$id
+cp -a <source dir>/. /mnt/d/planck-archive/$id/
+# add "pc:/mnt/d/planck-archive/$id" to the entry's locations, then:
+python3 models/registry.py validate && python3 models/registry.py verify --where pc --id "$id"
+```
+
+A source is deleted only after `verify` reports OK at the new location and the entry lists it. From the
+Mac, `--root pc:/mnt/d/planck-archive=<mounted dir>` maps a PC location to a local directory.
+
+Restore: `registry.py list --id '<glob>'` gives the locations; copy the directory, run `verify` on it,
+then load it.
+- HF fine-tunes (E002-E006): the directory is a `save_pretrained` folder; load it with transformers
+  `from_pretrained(dir)` and the tokenizer from the same folder. `base_model.revision` pins the base.
+- Harness runs: `harness/runio.load_checkpoint(path)` returns model and optimizer state, `model_cfg`,
+  `config`, `schedule`, `data_state` and RNG state, enough to resume or branch; build the model from
+  `model_cfg` at the code in `code`.
+
+## 7. Public release
+
+Weights are published with the writeup that reports them, failures included, under the project license
+once it is chosen (README: "to be chosen before the first model release"). Exceptions and conditions:
+- **never**: runs on the starter corpus (E2, E3, the S00x screens and their smoke): E2 notes FIXED 7
+  and SCREENS.txt make them calibration only, never released, never an init for a recipe run.
+- **fine-tunes of third-party models** (E002-E006) are released only under terms the base model's
+  license allows; check its model card at the recorded revision. Until then `release` is `undecided`.
+- a release carries the registry line and the result with it, and passes `validate` (no private paths).
+
+## 8. Save behavior per experiment (2026-09-26)
+
+| exp | trains | final weights saved by its queue | where | not saved | state | hook |
+|---|---|---|---|---|---|---|
+| E001 | no (scores public models and MaxGPT-3 read-only) | n/a | n/a | n/a | done | none needed |
+| E002 | SmolLM2-135M-I, 400 steps | yes from seed 1 (`--save` default 1; dry and steps-0 runs skipped) | mac (5, 2.71 GB) | s0 (ran before the save code), 2 dry; the 360M arm never ran | done | none: no future runs |
+| E003 | 8 public bases, 1M-160M | scored seeds yes (`--save 1`); LR search no (`--save 0`); dry no | mac (24, 4.62 GB) + archive | 29 LR, 8 dry, 33 killed attempts | done 2026-09-27 20:56, audited 2026-10-02; every run registered (2026-10-03: ts33m and p160m s1-s3, p160m's 3 LR runs, 21 later killed attempts) | none: no future runs |
+| E004 | SmolLM2-135M-I + tiny ladder | 135M seeds yes; LR searches no; tiny-ladder seeds never ran (their queue lines carry `--save 0`) | mac (5, 2.71 GB) + pc dev copy | 21 LR, 7 dry, 1 killed | done | none: no future runs; a rerun of the ladder passes `--save 1` |
+| E005 | SmolLM2-135M-I | yes (`--save 1`) | mac (5, 2.71 GB) + pc dev copy | 1 dry | done (AL diagnostic is eval only) | none |
+| E006 | SmolLM2-135M-I arms C/P/G x 5 seeds + 2 TF32 twins | yes (`--save 1`), saved and hashed before scoring, `weights_sha256` in each guard record | `pc:~/planck/e006_run/weights` + archive | dry runs (outputs deleted by design) | done 2026-09-28 14:56, audited 2026-10-02; registered 2026-10-03: 17 trained models, C2's power-cut attempt (weights byte-identical to C2's) and the 5 dry runs | none: archive_loop.sh copies new `e<NNN>_run/weights` dirs |
+| E2, E3 | harness, from scratch, 5M and 20M | yes: `final_*.pt` and `stable_*.pt` never pruned; rolling `keep_last 2` (pre-registered) | `pc:~/planck/runs/E2`, `.../E3` + archive (scored rolling checkpoints in `data_offload/`) | rolling checkpoints beyond 2 | E2 5M and 20M done (2026-10-02 23:43; 20m_e6_r1_trunk crash-resumed once after the 09-29 power cut), E3 Part 1 done (18 runs); registered 2026-10-03 (E2 84 lines, E3 18) | none: runs need committed code and checked config sha256, and saving already meets section 1; archive_loop.sh copies finished runs |
+| S001-S007 | harness, 5M | as E2 (SCREENS.txt: keep_last 2 plus final; C8 keeps finals until post-lock scoring) | `pc:~/planck/runs/SCREENS` (archive not checked: D: unmounted 2026-10-10) | rolling checkpoints beyond 2; the C1-a and eager smokes' checkpoints (deleted by design) | 96 queue runs done 2026-10-04 to 10-07 03:03; registered 2026-10-10 (section 10) | none: C8's "kept until then" becomes "kept" |
+| RC-12 baselines | no (13 public models, inference) | nothing to save | n/a | n/a | PC queue | proposal: record each model's HF snapshot revision in the run records; not implemented (PC-side code, outside experiments/) |
+
+No hook was implemented on 2026-09-26: every experiment either already saves final weights (E002
+from seed 1, E003 scored, E004 135M, E005, E006, the harness), is running (E003, E006), is finished
+with no future runs (editing its queue would make the committed script disagree with what ran), or is
+pre-registered with committed configs whose sha256 the analyzer checks (E2, E3, screens).
+
+Superseded: E002 notes, POST-HOC ADDITION 2 ("deleted when E002 is done"). Those weights are kept.
+
+## 9. Backfill of 2026-09-26
+
+117 lines, all from records on the Mac (no model loaded):
+- **33 saved models on the Mac, 9,949,117,385 bytes** (9.83 GB of it `model.safetensors`), every file
+  hashed and re-verified with `verify --where mac` (180 files OK). The 10 E004/E005 weights equal the
+  `weights_sha256` E005's AL diagnostic recorded when it scored them.
+- **5 E2 smoke checkpoints on the PC** (3 finals, 2 branch points), registered from runs.jsonl with
+  null hashes: the PC was offline. Filled later that day on the PC with `verify --where pc --fill`, and
+  copied to the archive (both copies hash equal).
+- **79 trained but not saved**: 47 LR-search runs (`--save 0`: E003 26, E004 21), 18 dry runs, E002's
+  seed 0 (before the save code), and 13 killed attempts from the queue logs (E003 12, E004 1).
+
+## 10. SCREENS registration (2026-10-10)
+
+145 lines, `SCREENS/...`, built from the PC's own records (no model loaded, no stage 2 result read):
+- **96 queue runs**, one line each for the final checkpoint (`SCREENS/<screen>_<arm>/<g..>_s<seed>/final`, BASE as
+  `SCREENS/BASE/s<seed>/final`, S005's own BASE as `SCREENS/S005_base/...`, the S003 search as
+  `SCREENS/S003_adamw_e<eta>_r<r>/<trunk|b62M|b125M|b250M>/final`), plus **33 trunk stables** of the 11 S003 search
+  trunks (`.../trunk/stable_<step>`, kind checkpoint). Hashes and bytes from the PC run folders, re-hashed there by
+  `verify --where pc --id 'SCREENS/*'` (129 files, 0 missing or mismatched); config_sha256 is train.py's hash of
+  the resolved config and equals that of the committed config for all 96; code is the commit each queue cloned,
+  with its code_sha256 list. The two scored rolling checkpoints of each run stay in its folder, not registered one
+  by one (as E2/E3). Results: the recorded selection and stage 1 readings; the 15 runs of stage2_seeds,
+  stage2_s006_seeds and stage2_base_diag say "not read" (registered before the stage 2 verdict step).
+- **16 smokes, not_saved**: the C1-a gate's 10 compiled smokes (2026-10-02) and the 6 eager smokes (2026-10-04),
+  300 steps on real starter data in scratch trees, checkpoints deleted after by design. The gate's flag_parity runs
+  (200 steps on synthetic batches, compile-parity probes) are not registered, as no compile-parity probe is.
+
+## 11. E3 Part 2 registration (2026-10-10)
+
+6 lines, `E3/20m_<A|B>/s<seed>/final`: E3 Part 2's 20M finals (500M slots, full WSD, 15,259 steps), which had none
+(the W1 verify's note; the SCREENS C6 diagnostics queue scores them, group e3p2). Built from the PC's records, as
+E3 Part 1's: runs.jsonl start and end events (n_params, config_sha256, times), the final checkpoints' bytes, sha256
+and mtimes, and the queue's code list (one queue start at 3c102f7); params_body is the E2 20M entries' (the same
+model section in the config); results are results_part2.json's F(CHAT) and F(PROSE). Location: the run folder only.
+Not yet archived: the D: drive did not answer on 2026-10-10; add the archive location once copied.
+`experiments/screens/tests/test_registry_c6_inputs.py` checks that every checkpoint the C6 runner scores is a
+registered final.
+
+## 12. SCREENS replay registration (2026-10-11)
+
+3 lines, `SCREENS/BASE/s101_rep1/final`, `SCREENS/BASE/s101_hookoff/final` and `SCREENS/BASE/s101_rep2/final`: the
+runs of plan stage2_replay (SCREENS.txt AMENDMENT BASE-REPLAY), queued from 2aa3787 and done on 2026-10-10 (mark
+SCREENS BASE REPLAY DONE at 23:51:19). Built from the PC's records as section 10's: runs.jsonl start and end events
+(n_params, config_sha256, times), the finals' bytes and sha256, and the queue's code list. config_sha256 equals
+train.py's hash of each committed config. Results say "not read": registered before the stage 2 verdict step reads
+them. Location: the run folder only; not yet in the D: archive on 2026-10-11 09:08 (add it once a copy is hashed
+equal there). `experiments/screens/tests/test_screens_saturday_text.py` checks one saved line per run of every
+SCREENS plan that ran, stage2_replay's included.

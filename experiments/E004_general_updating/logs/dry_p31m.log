@@ -1,0 +1,23 @@
+Loading weights:   0%|          | 0/76 [00:00<?, ?it/s]Loading weights: 100%|██████████| 76/76 [00:00<00:00, 5205.13it/s]
+loaded EleutherAI/pythia-31m params=30,494,720 (config 30,494,720, body 4,739,072) sanity_nll=3.5116 1.6s mps_alloc=0.11G driver=1.04G peak_driver=1.04G
+loss self-check hf=3.62884 answer_only=3.62884
+loss mutants {'no_shift': 10.154230117797852, 'prompt_labelled': 3.3980801105499268} (must all differ from 3.62884)
+probe step 0 {'step': 0, 'H1': 0.0, 'H2': 0.0, 'H3': 0.0, 'H4': 0.0, 'H5': 0.0, 'H6': 0.0, 'H7': 0.0, 'C_noupd': 0.0, 'C_twoslot': 0.0} mps_alloc=0.11G driver=1.13G peak_driver=1.13G
+step 0 loss 3.7936 gnorm 85.45 lr 4.52e-06 1s mps_alloc=0.41G driver=1.21G peak_driver=1.21G
+step 1 loss 3.6240 gnorm 81.03 lr 4.91e-06 2s mps_alloc=0.41G driver=1.21G peak_driver=1.21G
+step 2 loss 3.5888 gnorm 94.21 lr 3.45e-06 3s mps_alloc=0.41G driver=1.21G peak_driver=1.21G
+step 3 loss 3.4927 gnorm 71.33 lr 1.19e-06 4s mps_alloc=0.41G driver=1.21G peak_driver=1.21G
+step 4 loss 2.9853 gnorm 59.54 lr 0.00e+00 5s mps_alloc=0.41G driver=1.21G peak_driver=1.21G
+probe step 5 {'step': 5, 'H1': 0.0, 'H2': 0.0, 'H3': 0.0, 'H4': 0.0, 'H5': 0.0, 'H6': 0.0, 'H7': 0.0, 'C_noupd': 0.0, 'C_twoslot': 0.0}
+scored e004/plain: 2 items in 0s mps_alloc=0.11G driver=1.04G peak_driver=1.21G
+scored new/plain: 2 items in 0s mps_alloc=0.11G driver=1.05G peak_driver=1.21G
+scored extra/plain: 2 items in 0s mps_alloc=0.11G driver=1.05G peak_driver=1.21G
+scored old/plain: 2 items in 0s mps_alloc=0.11G driver=1.05G peak_driver=1.21G
+scored uprobe/plain: 2 items in 0s mps_alloc=0.11G driver=1.05G peak_driver=1.21G
+scored cross/plain: 2 items in 0s mps_alloc=0.11G driver=1.06G peak_driver=1.21G
+scored khard/plain: 2 items in 0s mps_alloc=0.11G driver=1.05G peak_driver=1.21G
+scored kbig/plain: 2 items in 0s mps_alloc=0.11G driver=1.04G peak_driver=1.21G
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer GPTNeoXTokenizer. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+generated e004/plain: strict 0/2 in 1s mps_alloc=0.11G driver=1.11G peak_driver=1.21G
+generated cont/plain: strict 0/2 in 0s mps_alloc=0.11G driver=1.12G peak_driver=1.21G
+DONE EleutherAI/pythia-31m dry total 9s peak_driver=1.207G lock_in_step=None loss_finite=True

@@ -1,0 +1,100 @@
+S008: share W_q and W_k across layer pairs and reinvest the saving in one more layer, at equal total parameters
+(LEDGER P-110, rank 109)
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION WRITTEN 2026-09-26 10:48 (before any S008 config, run or E2/E3 result exists. Run for this entry,
+no model: harness/budget.py solve and count_analytic.) experiments/SCREENS.txt C1-C9 are part of this entry.
+STATUS 2026-09-26: DROPPED FROM THIS BATCH after a critique, before any config or run existed. Nothing below is
+queued; the text is kept as the record. Reasons and the numbers checked: CHANGES AFTER CRITIQUE at the end.
+
+WHY
+  P-110 (LEDGER): "Share W_q/W_k across 2-4 layers or tie K=V, and reinvest in depth"; prior art MASA (100-700M),
+  CLA (1B/3B), and QKV-variants arXiv 2606.04032 (K=V costs 3.1% perplexity); win: "reinvested depth beats the
+  baseline at equal total". At 5M every parameter is scarce (the embedding is 31% of the total), and the harness
+  already has the switch (config.py qk_share; blocks.py reuses the owner's modules, so parameters() counts them
+  once). This is the cheapest capacity-allocation bet with no code to land, and bits per byte is its natural
+  metric. K = V is not tested: its one measured cost (3.1%) points the other way.
+
+QUESTION (decided, C7)
+  At equal total parameters, does sharing W_q/W_k between consecutive layer pairs, with the saving spent on a ninth
+  layer, change held-out chat bits per byte at 5M, 250M slots?
+
+THE CHANGE (one idea, three keys, set by the budget solver)
+  model.qk_share: 2, model.n_layers: 9, model.mlp_hidden: 464 (d 192, 3 heads and head_dim 64 unchanged).
+  budget.py --target 5e6 --qk-share 2 --fixed-d 192 (2026-09-26) returned two shapes: 8 layers with SwiGLU 552
+  (the saving spent on MLP width, its first row) and 9 layers with SwiGLU 464 (its second row). P-110 says depth, so
+  the 9-layer row is the arm. Total 5,020,440 vs BASE 5,010,133 (+0.21%; count_analytic), inside the 2% rule.
+  W_q/W_k owners by unique layer: 0 0 2 2 4 4 6 6 8 (config.qk_owner), so the ninth layer has its own. The MLP
+  width move (488 to 464) is the solver's equal-total fit, part of the one idea. The config generator's C2 check
+  allows exactly these three keys for this arm. Depth also changes what depends on it: o_proj/down_proj init std
+  (1/sqrt(2 x depth), model.py) and the 1/sqrt(depth index) norm scaling of layer 9; both are part of "one more
+  layer".
+
+WHAT STAYS IDENTICAL
+  Everything else in C1: width, heads, vocab, data, stream per seed, batch, schedule, engine flags, eval, scorer.
+  LRs move only by the arm's g pick (C3).
+
+BUDGET
+  B from E2 (C1): 250.0M slots, 7,630 steps, WSD with decay from step 6,104. Tokens are matched; the ninth layer
+  costs about 1/8 more compute per token (est.), reported as hours.
+
+LEARNING RATE
+  C3 g-check at seed 1: g in {0.5, 1, 2} x LR5, E2's pick rule and extensions (a shared W_q/W_k gets gradients from
+  two layers, so its effective step size changes).
+
+SEEDS AND PAIRING
+  Seeds 101..100+k, paired with the shared BASE run (C4). Class: NEW INIT (fewer W_q/W_k modules and a ninth block
+  shift every later draw): SD_ref = sqrt(2) * sigma_init (sqrt(2) * sigma_seed if E3 Part 3 did not run).
+  k = max(2, k_needed(1%)), at most 5.
+
+METRIC AND DECISION RULE
+  C5 and C7: F(CHAT) decides, F(PROSE) guards, in E3 MDE units. The arm is "shared W_q/W_k, 9 layers":
+    NOMINATE      lower chat bpb at equal total: a candidate, confirmed at 20M with its own solver shape and
+                  g-check, where the share of attention parameters differs.
+    REJECT        higher chat bpb: sharing costs more than a layer buys at 5M.
+    TIE           no measurable difference: the baseline keeps unshared W_q/W_k (nothing is adopted on a tie).
+    GUARD-FAIL, INCONCLUSIVE  as C7.
+  Also reported, no rule: F(CHAT) per GPU-hour (the arm does more compute per token).
+
+DIAGNOSTICS (C6; reported)
+  IND curve and onset, HD, SINK per layer (layer pairs that share W_q/W_k read side by side).
+
+AFTER THE LOCK (C8)
+  Tier 0 margins with C7; E004 item pick shares reported.
+
+KNOWN RISKS
+  - Depth is also PLAN's E9 question, which PLAN 3d runs at 5M only if E4 finds signal at 5M. This arm adds one
+    layer as the price of sharing, and its verdict is a loss reading only: it is not evidence on depth vs width.
+  - One solver shape; a 2-layer share at 5M says little about 3-4 layer shares (the ledger's range).
+  - New-init noise; k may reach 5 and "underpowered".
+  - Starter mix and tok_v0_8k only (C1 scope).
+
+HARNESS CODE NEEDED
+  None for training. qk_share exists and is covered: testutil.ARMS "qk_share2" runs through test_decode.py and the
+  leak tests (test_s3_pipeline_leak.py), test_budget.py checks the module reuse and the analytic count, and
+  test_s3_optim.py checks that shared W_q/W_k appear once in the optimizer. The config generator's C2 check needs
+  this arm's three-key allowance (a test: a fourth key refused).
+
+COST (est., SCREENS GPU HOURS, assumed x1.1)
+  g-check 3 x 0.34 = 1.0 h; 0.34 h per seed (BASE shared). k = 3: 2.0 h.
+
+CHANGES AFTER CRITIQUE (2026-09-26; no config or run existed, nothing committed. Checked before editing:
+harness/model.py reset_parameters (o_proj and down_proj std / sqrt(2 x depth)), blocks.py norm_scale_for, PLAN 3d
+(E8/E9/E10 at 5M only if E4 finds signal at 5M); run: harness/budget.py count_analytic, arithmetic only, no model)
+  DROPPED: the arm is not one change, so no verdict could be attributed. At equal total it moves four things:
+    1 the W_q/W_k sharing itself (qk_share 2);
+    2 a ninth layer (n_layers 9);
+    3 the MLP width, SwiGLU 488 to 464 (the solver's equal-total fit);
+    4 through cfg.depth, every layer's o_proj/down_proj init std (model.py: std / sqrt(2 x depth)) and the norm
+      scaling of the added layer.
+  A NOMINATE would support only "this shape beats BASE at equal total", never "sharing is free", and the depth part
+  is PLAN's E9, which PLAN 3d runs at 5M only if E4 finds signal at 5M.
+  The critique's control, checked with count_analytic (d 192, 3 heads, head_dim 64, vocab 8192):
+    8 layers, qk_share 2, SwiGLU 552      5,010,133 (equal to BASE exactly; same depth, init std and norm scaling)
+    9 layers, qk_share 2, SwiGLU 464      5,020,440 (this arm)
+    9 layers, unshared, SwiGLU 404        5,004,312 (-0.12%; E9 territory)
+  The 8-layer row still differs from BASE in two keys (sharing plus the width the saving buys), and it is not
+  P-110's bet ("reinvest in depth"). Adding it would make S008 a two-arm screen of a rank-109 bet under a 25 h cap
+  (SCREENS ORDER), so neither arm runs in this batch.
+  Ledger status: P-110 "not run" (PLAN: a bet that never runs is "not run", never "failed"). A later
+  pre-registration can take the 8-layer row as the sharing contrast and leave depth to E9.

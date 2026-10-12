@@ -1,0 +1,13 @@
+# SCREENS stage 2 seed sets, seed-major (ORDER 2); cut by ORDER's cap rule (SCREENS.txt), no run: S006 (screens.py). train = screens check, preflight, train, score
+wait_mark SCREENS SCREENS S006 EXTENSION DONE
+train base_s101
+train s005_base_s101
+train s005_forget_g1_s101
+train s004_canonac_g1_s101
+train s007_smear_g1_s101
+train base_s102
+train s005_base_s102
+train s005_forget_g1_s102
+train s004_canonac_g1_s102
+train s007_smear_g1_s102
+mark SCREENS STAGE 2 SEEDS DONE

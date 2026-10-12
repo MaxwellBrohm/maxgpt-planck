@@ -1,0 +1,24 @@
+{
+ "name": "dry_chat_falcon_cpu",
+ "cmd": [
+  "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+  "run_chat.py",
+  "tiiuae/Falcon-H1-Tiny-90M-Instruct",
+  "--device",
+  "cpu",
+  "--mode",
+  "greedy",
+  "--only",
+  "R_d2_name,K_time",
+  "--out",
+  "../out/dry/dry__falcon_cpu.jsonl"
+ ],
+ "started": "2026-09-24 00:53:50",
+ "ended": "2026-09-24 00:58:06",
+ "exit": 0,
+ "killed": null,
+ "min_free": 77,
+ "max_swap_mb": 0.0,
+ "peak_rss_mb": 1828,
+ "elapsed_s": 256
+}

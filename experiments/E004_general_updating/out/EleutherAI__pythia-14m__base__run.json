@@ -1,0 +1,112 @@
+{
+ "model": "EleutherAI/pythia-14m",
+ "seed": 0,
+ "steps": 0,
+ "lr": 5e-05,
+ "bs": 4,
+ "accum": 4,
+ "eff_batch": 16,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "mps",
+ "dry": false,
+ "tag": "base",
+ "sets": [
+  "cont",
+  "eval",
+  "know"
+ ],
+ "chat": false,
+ "max_new": 48,
+ "params": 14067712,
+ "checks": {
+  "params_config": {
+   "total": 14067712,
+   "embedding": 12877824,
+   "body": 1189888,
+   "tok_emb": 6438912,
+   "out_head": 6438912,
+   "pos_emb": 0,
+   "layers": 6,
+   "d": 128,
+   "vocab": 50304,
+   "n_ctx": 2048
+  },
+  "params_model": 14067712,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": false,
+  "config_says_tied": false,
+  "sanity_nll": 3.8286
+ },
+ "trained_ctx": 2048,
+ "torch": "2.13.0",
+ "train_stream": "train_e004.stream(seed) = Random(1000 * seed + 44)",
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "train_stats": {
+  "n": 0,
+  "rejected_long": 0,
+  "drawn": {},
+  "kept": {},
+  "len_sum": 0,
+  "len_max": 0,
+  "split": 0,
+  "mean_len": null,
+  "shares": {},
+  "max_share_shift": null
+ },
+ "losses": [],
+ "probe": [],
+ "lock_in_step": null,
+ "loss_finite": true,
+ "eval_s": 102.6,
+ "eval_counts": {
+  "e004/plain": 640,
+  "new/plain": 1728,
+  "extra/plain": 192,
+  "old/plain": 1116,
+  "uprobe/plain": 576,
+  "cross/plain": 384,
+  "khard/plain": 80,
+  "kbig/plain": 441,
+  "gen_e004/plain": 640,
+  "gen_cont/plain": 416
+ },
+ "summary": {
+  "LIK e004/plain": {
+   "H1": 0.0156,
+   "H2": 0.0312,
+   "H3": 0.1875,
+   "H4": 0.2656,
+   "H5": 0.0938,
+   "H6": 0.1406,
+   "H7": 0.2344,
+   "C_noupd": 0.2344,
+   "C_twoslot": 0.1875,
+   "ID": 0.2812
+  },
+  "GEN e004/plain": {
+   "strict": 0,
+   "lenient": 0,
+   "n": 640,
+   "capped": 56,
+   "bare": 1
+  },
+  "GEN cont/plain": {
+   "strict": 0,
+   "lenient": 0,
+   "n": 416,
+   "capped": 11,
+   "bare": 0
+  }
+ },
+ "peak_mps_driver_gb": 1.249,
+ "peak_mps_alloc_gb": 0.052,
+ "total_s": 104.7
+}

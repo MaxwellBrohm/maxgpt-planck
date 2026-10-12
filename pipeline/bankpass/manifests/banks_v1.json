@@ -1,0 +1,3836 @@
+{
+ "aux": {
+  "intent": {
+   "authors": {
+    "gemma-4-12b": 0.3445,
+    "ministral-3-8b": 0.3422,
+    "qwen3.5-9b": 0.3133
+   },
+   "class": "I",
+   "dropped": 5461,
+   "drops": {
+    "AUTHOR_TRIM": 26,
+    "DIGIT": 1,
+    "DUP_EXACT": 4,
+    "HELDOUT_ECHO": 1,
+    "HELDOUT_VOCAB": 39,
+    "HOLE": 1,
+    "LEN_ITEM": 69,
+    "NON_ENGLISH": 11,
+    "SAFETY": 1,
+    "SAFETY_LIST": 1,
+    "STAGE_DIR": 5,
+    "THOUGHT_TAG": 1,
+    "TOPIC_NOT_SELECTED": 4063,
+    "TOPIC_TEXT_MISMATCH": 1238
+   },
+   "file": "intent.jsonl",
+   "kept": 3016,
+   "kind": "teacher",
+   "ref": "intent@32173f23ada9:g34m34q31",
+   "sha256": "32173f23ada906d4e153919aac2d1f27ff553dc5d58853374f35613a31271634"
+  },
+  "label.notewas": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "N",
+   "dropped": 11,
+   "drops": {
+    "LABEL_NOT_CHOSEN": 11
+   },
+   "file": "label.notewas.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "label.notewas@6870ba917439:g100",
+   "sha256": "6870ba9174396f54d22a86304c7640f73831716aa40328cf78e7a3840570c949"
+  },
+  "open.topic_spec": {
+   "authors": {
+    "gemma-4-12b": 0.3427,
+    "ministral-3-8b": 0.3146,
+    "qwen3.5-9b": 0.3427
+   },
+   "class": "O",
+   "dropped": 2813,
+   "drops": {
+    "AI_ISM": 1,
+    "AUTHOR_TRIM": 298,
+    "HELDOUT_ECHO": 5,
+    "HELDOUT_VOCAB": 7,
+    "JUDGE_DROP": 567,
+    "JUDGE_MISSING": 229,
+    "LEN_ITEM": 534,
+    "MINED_COPY": 14,
+    "OODH_ECHO": 31,
+    "SAFETY": 1,
+    "STAGE_DIR": 2,
+    "SUPERSEDED_V1": 57,
+    "TOPIC_COPY": 279,
+    "TOPIC_NOT_SELECTED": 483,
+    "TOPIC_TEXT_MISMATCH": 305
+   },
+   "file": "open.topic_spec.jsonl",
+   "kept": 178,
+   "kind": "teacher",
+   "ref": "open.topic_spec@d5b8d7cc9084:g34m31q34",
+   "sha256": "d5b8d7cc9084a3a42c7df0839bbee0e671e003a54f194230a64a90aacb18fab1"
+  },
+  "pool.surname": {
+   "authors": {
+    "human:census_surnames": 1.0
+   },
+   "class": "P",
+   "dropped": 445,
+   "drops": {
+    "CASE_AMBIG": 157,
+    "HELDOUT_POOL": 10,
+    "PROGRAM_COLLISION": 6,
+    "SAFETY_LIST": 1,
+    "WORD_COLLISION": 271
+   },
+   "file": "pool.surname.jsonl",
+   "kept": 2000,
+   "kind": "human",
+   "ref": "pool.surname@0de93a5e84b6:human:census_surnames=100",
+   "sha256": "0de93a5e84b6425b5d80faf4eebc55f84abeb1bd2b9bd390e84c3c14f9555161",
+   "target": 2000
+  },
+  "rubric.safety": {
+   "authors": {
+    "human:ldnoobw": 1.0
+   },
+   "class": "Z",
+   "dropped": 0,
+   "drops": {},
+   "file": "rubric.safety.jsonl",
+   "kept": 403,
+   "kind": "human",
+   "ref": "rubric.safety@a359f194e11c:human:ldnoobw=100",
+   "sha256": "a359f194e11c874e359e4cc2ecfcf7c6b006d6b40e8f0ae4cac145d864301eb9",
+   "target": null
+  },
+  "seed.persona": {
+   "authors": {
+    "human:nemotron_personas_usa": 1.0
+   },
+   "class": "Q",
+   "dropped": 4473,
+   "drops": {
+    "HELDOUT_ECHO": 1,
+    "HELDOUT_VOCAB": 1984,
+    "MINOR": 1867,
+    "NAME_AGAIN": 59,
+    "NON_ENGLISH": 16,
+    "NO_LEAD": 546
+   },
+   "file": "seed.persona.jsonl",
+   "kept": 5000,
+   "kind": "human",
+   "ref": "seed.persona@bcbb0ec3db4a:human:nemotron_personas_usa=100",
+   "sha256": "bcbb0ec3db4ad0428527842348bb9d24477cc1ca159c3e70efc871a2ed8ad7bf",
+   "target": 5000
+  }
+ },
+ "banks": {
+  "close.goodbye": {
+   "authors": {
+    "gemma-4-12b": 0.3436,
+    "ministral-3-8b": 0.3436,
+    "qwen3.5-9b": 0.3129
+   },
+   "class": "C",
+   "distinct_2": 0.3899,
+   "dropped": 1557,
+   "drops": {
+    "AI_ISM": 1,
+    "AUTHOR_TRIM": 74,
+    "BANK_PROMPT_ECHO": 5,
+    "DUP_EXACT_PREJUDGE": 105,
+    "DUP_NEAR": 26,
+    "HELDOUT_ECHO": 1,
+    "HELDOUT_VOCAB": 7,
+    "JUDGE_DROP": 968,
+    "LEN_ITEM": 332,
+    "MINED_COPY": 32,
+    "SAFETY": 1,
+    "STAGE_DIR": 3,
+    "USER_VOICE": 2
+   },
+   "file": "close.goodbye.jsonl",
+   "frames": 773,
+   "kept": 783,
+   "kind": "teacher",
+   "p_exact": 0.7,
+   "ref": "close.goodbye@ebad5239de07:g34m34q31",
+   "sha256": "ebad5239de079b3defef729450a21b11eb7f2455bc451b1e9596e9ed704bcdec",
+   "target": 780,
+   "top_frame_share": 0.0064
+  },
+  "identity.q.self": {
+   "authors": {
+    "gemma-4-12b": 0.3425,
+    "ministral-3-8b": 0.3425,
+    "qwen3.5-9b": 0.3151
+   },
+   "class": "S",
+   "distinct_2": 0.6264,
+   "dropped": 257,
+   "drops": {
+    "AUTHOR_TRIM": 8,
+    "DUP_EXACT_PREJUDGE": 38,
+    "DUP_NEAR": 6,
+    "JUDGE_DROP": 146,
+    "LEN_ITEM": 59
+   },
+   "file": "identity.q.self.jsonl",
+   "frames": 72,
+   "kept": 73,
+   "kind": "teacher",
+   "p_exact": 0.4731,
+   "ref": "identity.q.self@6a535bf43002:g34m34q32",
+   "sha256": "6a535bf43002fb03c760f4d50f1877e2dd1b1aee02e0a9e3670c9003ab6b850e",
+   "target": 108,
+   "top_frame_share": 0.0274
+  },
+  "identity.q.user": {
+   "authors": {
+    "gemma-4-12b": 0.3393,
+    "ministral-3-8b": 0.3214,
+    "qwen3.5-9b": 0.3393
+   },
+   "class": "S",
+   "distinct_2": 0.6676,
+   "dropped": 264,
+   "drops": {
+    "AUTHOR_TRIM": 94,
+    "DUP_EXACT_PREJUDGE": 30,
+    "DUP_NEAR": 11,
+    "JUDGE_DROP": 87,
+    "LEN_ITEM": 40,
+    "STAGE_DIR": 2
+   },
+   "file": "identity.q.user.jsonl",
+   "frames": 56,
+   "kept": 56,
+   "kind": "teacher",
+   "p_exact": 0.3733,
+   "ref": "identity.q.user@9a98108179d1:g34m32q34",
+   "sha256": "9a98108179d19cc93642e05c3a679b8580780bf9d0ce781872633efcf7e18cf5",
+   "target": 105,
+   "top_frame_share": 0.0179
+  },
+  "key.fav_colour.bait": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.9211,
+   "dropped": 217,
+   "drops": {
+    "AUTHOR_TRIM": 15,
+    "JUDGE_DROP": 17,
+    "LEN_ITEM": 43,
+    "SPEECH_FORM": 75,
+    "SUPERSEDED_V1": 65,
+    "USER_VOICE": 2
+   },
+   "file": "key.fav_colour.bait.jsonl",
+   "frames": 3,
+   "kept": 3,
+   "kind": "teacher",
+   "p_exact": 0.07,
+   "ref": "key.fav_colour.bait@b15eb9df01b6:g33m33q33",
+   "sha256": "b15eb9df01b669b7da540aa16402fedc44b8fa19bc6429f1a0243f06c92caed4",
+   "target": 30,
+   "top_frame_share": 0.3333
+  },
+  "key.fav_colour.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.6553,
+   "dropped": 136,
+   "drops": {
+    "AUTHOR_TRIM": 38,
+    "CORR_MARKER": 18,
+    "DUP_EXACT_PREJUDGE": 10,
+    "HELDOUT_VOCAB": 2,
+    "JUDGE_DROP": 22,
+    "LEN_ITEM": 7,
+    "SAFETY_LIST": 1,
+    "SPEECH_FORM": 1,
+    "TPL_FORM": 20,
+    "TPL_VALUE_REPEATED": 17
+   },
+   "file": "key.fav_colour.corr.jsonl",
+   "frames": 24,
+   "kept": 24,
+   "kind": "teacher",
+   "p_exact": 0.2897,
+   "ref": "key.fav_colour.corr@b90e8ee936bd:g33m33q33",
+   "sha256": "b90e8ee936bd0f6d47c5a9a8d9827a0f352fcf6bc61fc06986973accef2e91b8",
+   "target": 58,
+   "top_frame_share": 0.0417
+  },
+  "key.fav_colour.query": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7634,
+   "dropped": 685,
+   "drops": {
+    "AUTHOR_TRIM": 31,
+    "BANK_PROMPT_ECHO": 1,
+    "DUP_EXACT_PREJUDGE": 1,
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 19,
+    "LEN_ITEM": 186,
+    "NON_ENGLISH": 2,
+    "QUERY_VALUE": 4,
+    "SPEECH_FORM": 294,
+    "SUPERSEDED_V1": 119,
+    "TPL_FORM": 27
+   },
+   "file": "key.fav_colour.query.jsonl",
+   "frames": 15,
+   "kept": 15,
+   "kind": "teacher",
+   "p_exact": 0.0929,
+   "ref": "key.fav_colour.query@ccf1d8050fdb:g33m33q33",
+   "sha256": "ccf1d8050fdb81f162cf2805a01df759fe3bcd42465219c2f482019b9a415c53",
+   "target": 113,
+   "top_frame_share": 0.0667
+  },
+  "key.fav_food.bait": {
+   "authors": {
+    "gemma-4-12b": 0.9412,
+    "ministral-3-8b": 0.0588
+   },
+   "class": "K",
+   "distinct_2": 0.678,
+   "dropped": 213,
+   "drops": {
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 2,
+    "LEN_ITEM": 59,
+    "SPEECH_FORM": 90,
+    "STAGE_DIR": 1,
+    "SUPERSEDED_V1": 60
+   },
+   "file": "key.fav_food.bait.jsonl",
+   "frames": 17,
+   "kept": 17,
+   "kind": "teacher",
+   "p_exact": 0.3967,
+   "ref": "key.fav_food.bait@619efdda300c:g94m6",
+   "sha256": "619efdda300ca547f288720b0864ba785b3e372b4f97dc446d055fcbecf118ac",
+   "target": 30,
+   "top_frame_share": 0.0588
+  },
+  "key.fav_food.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.6259,
+   "dropped": 108,
+   "drops": {
+    "AUTHOR_TRIM": 26,
+    "BANK_PROMPT_ECHO": 1,
+    "CORR_MARKER": 13,
+    "DUP_EXACT_PREJUDGE": 20,
+    "HELDOUT_VOCAB": 2,
+    "JUDGE_DROP": 18,
+    "LEN_ITEM": 2,
+    "TPL_FORM": 12,
+    "TPL_VALUE_REPEATED": 14
+   },
+   "file": "key.fav_food.corr.jsonl",
+   "frames": 12,
+   "kept": 12,
+   "kind": "teacher",
+   "p_exact": 0.1333,
+   "ref": "key.fav_food.corr@5747ab3fc4a0:g33m33q33",
+   "sha256": "5747ab3fc4a0a880eab4bf93ec4645f96e7243dab0bbb4c8ea19a737b9a6f016",
+   "target": 63,
+   "top_frame_share": 0.0833
+  },
+  "key.fav_food.query": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7744,
+   "dropped": 732,
+   "drops": {
+    "AUTHOR_TRIM": 62,
+    "DUP_NEAR": 3,
+    "JUDGE_DROP": 2,
+    "LEN_ITEM": 141,
+    "SPEECH_FORM": 310,
+    "SUPERSEDED_V1": 157,
+    "TPL_FORM": 57
+   },
+   "file": "key.fav_food.query.jsonl",
+   "frames": 18,
+   "kept": 18,
+   "kind": "teacher",
+   "p_exact": 0.1096,
+   "ref": "key.fav_food.query@d56cab2d6e73:g33m33q33",
+   "sha256": "d56cab2d6e73520b1cd68477e9e35911acd5308ac86898fffdfe41d58055e118",
+   "target": 115,
+   "top_frame_share": 0.0556
+  },
+  "key.hobby.bait": {
+   "authors": {
+    "gemma-4-12b": 0.84,
+    "qwen3.5-9b": 0.16
+   },
+   "class": "K",
+   "distinct_2": 0.5368,
+   "dropped": 215,
+   "drops": {
+    "DUP_EXACT_PREJUDGE": 6,
+    "DUP_NEAR": 2,
+    "FRAME_CAP": 1,
+    "JUDGE_DROP": 7,
+    "LEN_ITEM": 63,
+    "NON_ENGLISH": 2,
+    "QUERY_VALUE": 7,
+    "SPEECH_FORM": 57,
+    "SUPERSEDED_V1": 70
+   },
+   "file": "key.hobby.bait.jsonl",
+   "frames": 23,
+   "kept": 25,
+   "kind": "teacher",
+   "p_exact": 0.5833,
+   "ref": "key.hobby.bait@3ebbe205b5dc:g84q16",
+   "sha256": "3ebbe205b5dc77db50d6b3f83c9c43f2054ec70bbcc010c9c3fe717d39f458a9",
+   "target": 30,
+   "top_frame_share": 0.08
+  },
+  "key.hobby.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3438,
+    "ministral-3-8b": 0.3438,
+    "qwen3.5-9b": 0.3125
+   },
+   "class": "K",
+   "distinct_2": 0.6973,
+   "dropped": 138,
+   "drops": {
+    "AUTHOR_TRIM": 24,
+    "CORR_MARKER": 7,
+    "DUP_EXACT_PREJUDGE": 43,
+    "HOLE": 1,
+    "JUDGE_DROP": 29,
+    "TPL_FORM": 32,
+    "TPL_VALUE_REPEATED": 2
+   },
+   "file": "key.hobby.corr.jsonl",
+   "frames": 32,
+   "kept": 32,
+   "kind": "teacher",
+   "p_exact": 0.2872,
+   "ref": "key.hobby.corr@36a0582548e6:g34m34q31",
+   "sha256": "36a0582548e6cea2ea3a9753ac389d52ff02d179137176c30fdced7276b033e6",
+   "target": 78,
+   "top_frame_share": 0.0312
+  },
+  "key.hobby.query": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7014,
+   "dropped": 789,
+   "drops": {
+    "AUTHOR_TRIM": 44,
+    "DUP_EXACT_PREJUDGE": 2,
+    "DUP_NEAR": 2,
+    "HELDOUT_VOCAB": 3,
+    "JUDGE_DROP": 14,
+    "LEN_ITEM": 141,
+    "NON_ENGLISH": 7,
+    "QUERY_VALUE": 10,
+    "SPEECH_FORM": 302,
+    "SUPERSEDED_V1": 175,
+    "TPL_FORM": 89
+   },
+   "file": "key.hobby.query.jsonl",
+   "frames": 21,
+   "kept": 21,
+   "kind": "teacher",
+   "p_exact": 0.1105,
+   "ref": "key.hobby.query@966f6dcbd9d1:g33m33q33",
+   "sha256": "966f6dcbd9d1805138741b89f63b4359a842e4f729a5f150d0e8b7f947f6cc9c",
+   "target": 133,
+   "top_frame_share": 0.0476
+  },
+  "key.hobby.twin": {
+   "authors": {
+    "gemma-4-12b": 0.7619,
+    "qwen3.5-9b": 0.2381
+   },
+   "class": "K",
+   "distinct_2": 0.4945,
+   "dropped": 19,
+   "drops": {
+    "DUP_EXACT_PREJUDGE": 1,
+    "FRAME_CAP": 3,
+    "JUDGE_DROP": 6,
+    "LEN_ITEM": 9
+   },
+   "file": "key.hobby.twin.jsonl",
+   "frames": 17,
+   "kept": 21,
+   "kind": "teacher",
+   "p_exact": 0.49,
+   "ref": "key.hobby.twin@424b768bbe39:g76q24",
+   "sha256": "424b768bbe396bc0a8d46d38deee1524e340d6325e6559f4d7399da292f2e469",
+   "target": 30,
+   "top_frame_share": 0.0952
+  },
+  "key.home_city.bait": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.9103,
+   "dropped": 224,
+   "drops": {
+    "AUTHOR_TRIM": 23,
+    "JUDGE_DROP": 8,
+    "LEN_ITEM": 29,
+    "NON_ENGLISH": 4,
+    "SPEECH_FORM": 65,
+    "SUPERSEDED_V1": 94,
+    "USER_VOICE": 1
+   },
+   "file": "key.home_city.bait.jsonl",
+   "frames": 6,
+   "kept": 6,
+   "kind": "teacher",
+   "p_exact": 0.14,
+   "ref": "key.home_city.bait@e455023f42e8:g33m33q33",
+   "sha256": "e455023f42e85541f7f770509f02e2a99f7fb1a118bb1498f3311e8cf69c7221",
+   "target": 30,
+   "top_frame_share": 0.1667
+  },
+  "key.home_city.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3409,
+    "ministral-3-8b": 0.3182,
+    "qwen3.5-9b": 0.3409
+   },
+   "class": "K",
+   "distinct_2": 0.4838,
+   "dropped": 212,
+   "drops": {
+    "AUTHOR_TRIM": 35,
+    "CORR_MARKER": 32,
+    "DUP_EXACT_PREJUDGE": 35,
+    "DUP_NEAR": 4,
+    "HELDOUT_VOCAB": 2,
+    "JUDGE_DROP": 37,
+    "LEN_ITEM": 6,
+    "NON_ENGLISH": 1,
+    "SPEECH_FORM": 3,
+    "TPL_FORM": 57
+   },
+   "file": "key.home_city.corr.jsonl",
+   "frames": 84,
+   "kept": 88,
+   "kind": "teacher",
+   "p_exact": 0.5867,
+   "ref": "key.home_city.corr@2296d0c5941e:g34m32q34",
+   "sha256": "2296d0c5941ee9aac34f5ac98cbe2be84fb20f83bc6b7a4c4e6b45bbd2943c38",
+   "target": 105,
+   "top_frame_share": 0.0227
+  },
+  "key.home_city.plant": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.9245,
+   "dropped": 791,
+   "drops": {
+    "AUTHOR_TRIM": 209,
+    "BANK_PROMPT_ECHO": 3,
+    "DUP_EXACT_PREJUDGE": 145,
+    "DUP_NEAR": 4,
+    "HELDOUT_VOCAB": 2,
+    "JUDGE_DROP": 266,
+    "LEN_ITEM": 154,
+    "NON_ENGLISH": 7,
+    "SAFETY": 1
+   },
+   "file": "key.home_city.plant.jsonl",
+   "frames": 9,
+   "kept": 9,
+   "kind": "teacher",
+   "p_exact": 0.0225,
+   "ref": "key.home_city.plant@f086378b3b66:g33m33q33",
+   "sha256": "f086378b3b661f5a5ddd34c1a497950e852befaa42a6e8c402f65ff8b6737f4c",
+   "target": 280,
+   "top_frame_share": 0.1111
+  },
+  "key.home_city.query": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.759,
+   "dropped": 1002,
+   "drops": {
+    "AUTHOR_TRIM": 41,
+    "DUP_NEAR": 10,
+    "HELDOUT_ECHO": 2,
+    "JUDGE_DROP": 3,
+    "LEN_ITEM": 228,
+    "NON_ENGLISH": 5,
+    "SPEECH_FORM": 436,
+    "SUPERSEDED_V1": 159,
+    "THOUGHT_TAG": 1,
+    "TPL_FORM": 117
+   },
+   "file": "key.home_city.query.jsonl",
+   "frames": 18,
+   "kept": 18,
+   "kind": "teacher",
+   "p_exact": 0.0728,
+   "ref": "key.home_city.query@486872912fe3:g33m33q33",
+   "sha256": "486872912fe3a184aa71ee768d98920034d022940062c9e25d6fcf04702e8a81",
+   "target": 173,
+   "top_frame_share": 0.0556
+  },
+  "key.home_city.twin": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.9223,
+   "dropped": 64,
+   "drops": {
+    "AUTHOR_TRIM": 43,
+    "JUDGE_DROP": 4,
+    "LEN_ITEM": 7,
+    "TPL_VALUE_REPEATED": 10
+   },
+   "file": "key.home_city.twin.jsonl",
+   "frames": 6,
+   "kept": 6,
+   "kind": "teacher",
+   "p_exact": 0.14,
+   "ref": "key.home_city.twin@b6c4abff139d:g33m33q33",
+   "sha256": "b6c4abff139d57b626a81af6cf7d61576d26c116e828c42d140252844af8de72",
+   "target": 30,
+   "top_frame_share": 0.1667
+  },
+  "key.item_colour.bait": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.8214,
+   "dropped": 237,
+   "drops": {
+    "AUTHOR_TRIM": 30,
+    "DUP_EXACT_PREJUDGE": 3,
+    "HELDOUT_ECHO": 1,
+    "HELDOUT_VOCAB": 2,
+    "JUDGE_DROP": 16,
+    "LEN_ITEM": 38,
+    "QUERY_VALUE": 31,
+    "SPEECH_FORM": 31,
+    "SUPERSEDED_V1": 73,
+    "TPL_VALUE_MISSING": 9,
+    "TPL_VALUE_REPEATED": 3
+   },
+   "file": "key.item_colour.bait.jsonl",
+   "frames": 3,
+   "kept": 3,
+   "kind": "teacher",
+   "p_exact": 0.07,
+   "ref": "key.item_colour.bait@04d5661f9a92:g33m33q33",
+   "sha256": "04d5661f9a92c0f2fd84c524d23082d544d8c96f688383bf919e8f17b5ac20a0",
+   "target": 30,
+   "top_frame_share": 0.3333
+  },
+  "key.item_colour.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7308,
+   "dropped": 354,
+   "drops": {
+    "AUTHOR_TRIM": 47,
+    "CORR_MARKER": 32,
+    "DUP_EXACT_PREJUDGE": 113,
+    "DUP_NEAR": 3,
+    "HELDOUT_VOCAB": 5,
+    "JUDGE_DROP": 93,
+    "LEN_ITEM": 2,
+    "TPL_FORM": 55,
+    "TPL_VALUE_REPEATED": 4
+   },
+   "file": "key.item_colour.corr.jsonl",
+   "frames": 6,
+   "kept": 6,
+   "kind": "teacher",
+   "p_exact": 0.035,
+   "ref": "key.item_colour.corr@038fda897894:g33m33q33",
+   "sha256": "038fda897894d03a9d6c8f04ebdde83548afaad94811490fd583a0c152b38bf3",
+   "target": 120,
+   "top_frame_share": 0.1667
+  },
+  "key.item_colour.query": {
+   "authors": {
+    "gemma-4-12b": 0.3396,
+    "ministral-3-8b": 0.3208,
+    "qwen3.5-9b": 0.3396
+   },
+   "class": "K",
+   "distinct_2": 0.5655,
+   "dropped": 1257,
+   "drops": {
+    "AUTHOR_TRIM": 77,
+    "BANK_PROMPT_ECHO": 4,
+    "DUP_EXACT_PREJUDGE": 20,
+    "DUP_NEAR": 18,
+    "HELDOUT_ECHO": 1,
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 16,
+    "LEN_ITEM": 155,
+    "NON_ENGLISH": 1,
+    "QUERY_VALUE": 7,
+    "SPEECH_FORM": 396,
+    "SUPERSEDED_V1": 230,
+    "TPL_FORM": 214,
+    "TPL_VALUE_MISSING": 84,
+    "TPL_VALUE_REPEATED": 33
+   },
+   "file": "key.item_colour.query.jsonl",
+   "frames": 53,
+   "kept": 53,
+   "kind": "teacher",
+   "p_exact": 0.1874,
+   "ref": "key.item_colour.query@fda8b4cb0cd5:g34m32q34",
+   "sha256": "fda8b4cb0cd587c72ad45d7be14d1b9ea9985703edede732c911d3267f4dbafe",
+   "target": 198,
+   "top_frame_share": 0.0189
+  },
+  "key.item_colour.twin": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 1.0,
+   "dropped": 87,
+   "drops": {
+    "AUTHOR_TRIM": 29,
+    "JUDGE_DROP": 29,
+    "LEN_ITEM": 13,
+    "NON_ENGLISH": 1,
+    "SPEECH_FORM": 3,
+    "TPL_VALUE_REPEATED": 12
+   },
+   "file": "key.item_colour.twin.jsonl",
+   "frames": 3,
+   "kept": 3,
+   "kind": "teacher",
+   "p_exact": 0.07,
+   "ref": "key.item_colour.twin@70c16a36e380:g33m33q33",
+   "sha256": "70c16a36e380c67913a79ce86acce7716473acc80daf38df9410821f68e09f2e",
+   "target": 30,
+   "top_frame_share": 0.3333
+  },
+  "key.job.bait": {
+   "authors": {
+    "gemma-4-12b": 0.8571,
+    "ministral-3-8b": 0.1429
+   },
+   "class": "K",
+   "distinct_2": 0.7826,
+   "dropped": 223,
+   "drops": {
+    "DUP_NEAR": 1,
+    "JUDGE_DROP": 10,
+    "LEN_ITEM": 40,
+    "SPEECH_FORM": 104,
+    "SUPERSEDED_V1": 67,
+    "USER_VOICE": 1
+   },
+   "file": "key.job.bait.jsonl",
+   "frames": 7,
+   "kept": 7,
+   "kind": "teacher",
+   "p_exact": 0.1633,
+   "ref": "key.job.bait@fbca719cbb11:g86m14",
+   "sha256": "fbca719cbb115198f0c7a0626c2bdb940488eba81c0cb2fd58a2c4f5afa317e9",
+   "target": 30,
+   "top_frame_share": 0.1429
+  },
+  "key.job.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7143,
+   "dropped": 171,
+   "drops": {
+    "AUTHOR_TRIM": 27,
+    "CORR_MARKER": 2,
+    "DUP_EXACT_PREJUDGE": 30,
+    "HOLE": 45,
+    "JUDGE_DROP": 3,
+    "TPL_FORM": 60,
+    "TPL_VALUE_REPEATED": 4
+   },
+   "file": "key.job.corr.jsonl",
+   "frames": 9,
+   "kept": 9,
+   "kind": "teacher",
+   "p_exact": 0.0926,
+   "ref": "key.job.corr@cfb6c3d464db:g33m33q33",
+   "sha256": "cfb6c3d464db8b235437154b221a49d8b0a0fbc7f1226ae4c42110217b33bf24",
+   "target": 68,
+   "top_frame_share": 0.1111
+  },
+  "key.job.query": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.9348,
+   "dropped": 1177,
+   "drops": {
+    "AUTHOR_TRIM": 57,
+    "DUP_EXACT_PREJUDGE": 2,
+    "DUP_NEAR": 4,
+    "HELDOUT_VOCAB": 5,
+    "JUDGE_DROP": 19,
+    "LEN_ITEM": 313,
+    "NON_ENGLISH": 8,
+    "QUERY_VALUE": 2,
+    "SPEECH_FORM": 444,
+    "SUPERSEDED_V1": 222,
+    "TPL_FORM": 101
+   },
+   "file": "key.job.query.jsonl",
+   "frames": 3,
+   "kept": 3,
+   "kind": "teacher",
+   "p_exact": 0.0117,
+   "ref": "key.job.query@a191df3a1013:g33m33q33",
+   "sha256": "a191df3a1013a1d44a451baa6acef8704db73a903fd5dc25263357f66a257335",
+   "target": 180,
+   "top_frame_share": 0.3333
+  },
+  "key.person_city.bait": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7059,
+   "dropped": 218,
+   "drops": {
+    "AUTHOR_TRIM": 7,
+    "HELDOUT_ECHO": 1,
+    "HELDOUT_VOCAB": 2,
+    "JUDGE_DROP": 6,
+    "LEN_ITEM": 15,
+    "NON_ENGLISH": 4,
+    "SPEECH_FORM": 63,
+    "SUPERSEDED_V1": 57,
+    "TPL_VALUE_MISSING": 32,
+    "TPL_VALUE_REPEATED": 28,
+    "USER_VOICE": 3
+   },
+   "file": "key.person_city.bait.jsonl",
+   "frames": 12,
+   "kept": 12,
+   "kind": "teacher",
+   "p_exact": 0.28,
+   "ref": "key.person_city.bait@174f560f928d:g33m33q33",
+   "sha256": "174f560f928d93e60b005520aeb57acf8f60b63f1e837188079be7e7d2b3f3af",
+   "target": 30,
+   "top_frame_share": 0.0833
+  },
+  "key.person_city.corr": {
+   "authors": {
+    "gemma-4-12b": 0.34,
+    "ministral-3-8b": 0.34,
+    "qwen3.5-9b": 0.32
+   },
+   "class": "K",
+   "distinct_2": 0.5019,
+   "dropped": 220,
+   "drops": {
+    "AUTHOR_TRIM": 26,
+    "CORR_MARKER": 6,
+    "DUP_EXACT_PREJUDGE": 61,
+    "DUP_NEAR": 1,
+    "JUDGE_DROP": 91,
+    "NON_ENGLISH": 2,
+    "TPL_FORM": 21,
+    "TPL_VALUE_MISSING": 5,
+    "TPL_VALUE_REPEATED": 7
+   },
+   "file": "key.person_city.corr.jsonl",
+   "frames": 48,
+   "kept": 50,
+   "kind": "teacher",
+   "p_exact": 0.3977,
+   "ref": "key.person_city.corr@29e13212dac1:g34m34q32",
+   "sha256": "29e13212dac1b19bb00a0579d9e2567e38ebdea3287319a3b7cf66fe8ca78c85",
+   "target": 88,
+   "top_frame_share": 0.04
+  },
+  "key.person_city.plant": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.8534,
+   "dropped": 1091,
+   "drops": {
+    "AUTHOR_TRIM": 105,
+    "BANK_PROMPT_ECHO": 1,
+    "DUP_EXACT_PREJUDGE": 381,
+    "DUP_NEAR": 2,
+    "HELDOUT_VOCAB": 3,
+    "JUDGE_DROP": 361,
+    "LEN_ITEM": 135,
+    "NON_ENGLISH": 3,
+    "PERSPECTIVE": 1,
+    "TPL_VALUE_MISSING": 88,
+    "TPL_VALUE_REPEATED": 9,
+    "USER_VOICE": 2
+   },
+   "file": "key.person_city.plant.jsonl",
+   "frames": 9,
+   "kept": 9,
+   "kind": "teacher",
+   "p_exact": 0.0154,
+   "ref": "key.person_city.plant@a17d6943c900:g33m33q33",
+   "sha256": "a17d6943c90099f20f02e6a63c12c52d77d6687d32f1d7dce510c703e53bf084",
+   "target": 410,
+   "top_frame_share": 0.1111
+  },
+  "key.person_city.query": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.67,
+   "dropped": 1899,
+   "drops": {
+    "AUTHOR_TRIM": 110,
+    "DUP_EXACT_PREJUDGE": 20,
+    "DUP_NEAR": 22,
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 30,
+    "LEN_ITEM": 366,
+    "NON_ENGLISH": 15,
+    "SPEECH_FORM": 574,
+    "SUPERSEDED_V1": 266,
+    "TPL_FORM": 328,
+    "TPL_VALUE_MISSING": 139,
+    "TPL_VALUE_REPEATED": 21,
+    "USER_VOICE": 7
+   },
+   "file": "key.person_city.query.jsonl",
+   "frames": 21,
+   "kept": 21,
+   "kind": "teacher",
+   "p_exact": 0.0493,
+   "ref": "key.person_city.query@16915ed6f3a4:g33m33q33",
+   "sha256": "16915ed6f3a4d973b58770add8a85a28527f6da85d9030134e336b141f7e0c20",
+   "target": 298,
+   "top_frame_share": 0.0476
+  },
+  "key.person_city.twin": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.8376,
+   "dropped": 78,
+   "drops": {
+    "AUTHOR_TRIM": 10,
+    "DUP_EXACT_PREJUDGE": 6,
+    "JUDGE_DROP": 40,
+    "LEN_ITEM": 11,
+    "SPEECH_FORM": 1,
+    "TPL_VALUE_MISSING": 8,
+    "TPL_VALUE_REPEATED": 2
+   },
+   "file": "key.person_city.twin.jsonl",
+   "frames": 12,
+   "kept": 12,
+   "kind": "teacher",
+   "p_exact": 0.28,
+   "ref": "key.person_city.twin@fb60c7367e2a:g33m33q33",
+   "sha256": "fb60c7367e2ab58e10bd321331e31fee9dd504bcc82c6e9d6dcb47d5eeca146e",
+   "target": 30,
+   "top_frame_share": 0.0833
+  },
+  "key.person_job.bait": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.8375,
+   "dropped": 224,
+   "drops": {
+    "AUTHOR_TRIM": 12,
+    "JUDGE_DROP": 9,
+    "LEN_ITEM": 39,
+    "NON_ENGLISH": 3,
+    "PERSPECTIVE": 5,
+    "SPEECH_FORM": 37,
+    "SUPERSEDED_V1": 85,
+    "TPL_VALUE_MISSING": 31,
+    "USER_VOICE": 3
+   },
+   "file": "key.person_job.bait.jsonl",
+   "frames": 6,
+   "kept": 6,
+   "kind": "teacher",
+   "p_exact": 0.14,
+   "ref": "key.person_job.bait@c5bda0f4ab0c:g33m33q33",
+   "sha256": "c5bda0f4ab0c9f510bad419f5a9c8c43b86447a76f7621f726f5c003178eb0b7",
+   "target": 30,
+   "top_frame_share": 0.1667
+  },
+  "key.person_job.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.6667,
+   "dropped": 225,
+   "drops": {
+    "AUTHOR_TRIM": 4,
+    "CORR_MARKER": 4,
+    "DUP_EXACT_PREJUDGE": 38,
+    "DUP_NEAR": 15,
+    "FRAME_CAP": 1,
+    "HELDOUT_VOCAB": 1,
+    "HOLE": 27,
+    "JUDGE_DROP": 84,
+    "LEN_ITEM": 10,
+    "NON_ENGLISH": 1,
+    "SPEECH_FORM": 1,
+    "TPL_FORM": 21,
+    "TPL_VALUE_MISSING": 13,
+    "TPL_VALUE_REPEATED": 5
+   },
+   "file": "key.person_job.corr.jsonl",
+   "frames": 14,
+   "kept": 15,
+   "kind": "teacher",
+   "p_exact": 0.1105,
+   "ref": "key.person_job.corr@b61319e0f833:g33m33q33",
+   "sha256": "b61319e0f8335e0dff2ca14055e5a42c027bb0c2fe19f19e34c1241df9d1e9dd",
+   "target": 95,
+   "top_frame_share": 0.1333
+  },
+  "key.person_job.query": {
+   "authors": {
+    "gemma-4-12b": 0.339,
+    "ministral-3-8b": 0.322,
+    "qwen3.5-9b": 0.339
+   },
+   "class": "K",
+   "distinct_2": 0.6122,
+   "dropped": 1711,
+   "drops": {
+    "AUTHOR_TRIM": 48,
+    "DUP_EXACT_PREJUDGE": 15,
+    "DUP_NEAR": 13,
+    "HELDOUT_VOCAB": 3,
+    "JUDGE_DROP": 56,
+    "LEN_ITEM": 337,
+    "NON_ENGLISH": 3,
+    "QUERY_VALUE": 6,
+    "SPEECH_FORM": 705,
+    "SUPERSEDED_V1": 288,
+    "TPL_FORM": 91,
+    "TPL_VALUE_MISSING": 108,
+    "TPL_VALUE_REPEATED": 36,
+    "USER_VOICE": 2
+   },
+   "file": "key.person_job.query.jsonl",
+   "frames": 57,
+   "kept": 59,
+   "kind": "teacher",
+   "p_exact": 0.1513,
+   "ref": "key.person_job.query@937feca27288:g34m32q34",
+   "sha256": "937feca272884b7a3fc811e4e4b91202fc28ecd96b79df65b72b281899c79dee",
+   "target": 273,
+   "top_frame_share": 0.0339
+  },
+  "key.person_job.twin": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "K",
+   "distinct_2": 0.6068,
+   "dropped": 70,
+   "drops": {
+    "BANK_PROMPT_ECHO": 3,
+    "HOLE": 23,
+    "JUDGE_DROP": 11,
+    "LEN_ITEM": 23,
+    "NON_ENGLISH": 1,
+    "SPEECH_FORM": 1,
+    "TPL_VALUE_MISSING": 6,
+    "TPL_VALUE_REPEATED": 2
+   },
+   "file": "key.person_job.twin.jsonl",
+   "frames": 10,
+   "kept": 10,
+   "kind": "teacher",
+   "p_exact": 0.2333,
+   "ref": "key.person_job.twin@2ce74c87cd88:g100",
+   "sha256": "2ce74c87cd88f3c5e17779ae0453dce839f2e589af479f1ffae5c3e51e6a9af2",
+   "target": 30,
+   "top_frame_share": 0.1
+  },
+  "key.person_name.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7273,
+   "dropped": 141,
+   "drops": {
+    "AUTHOR_TRIM": 15,
+    "CORR_MARKER": 5,
+    "DUP_EXACT_PREJUDGE": 8,
+    "DUP_NEAR": 1,
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 53,
+    "LEN_ITEM": 7,
+    "SAFETY": 1,
+    "SPEECH_FORM": 5,
+    "TPL_FORM": 40,
+    "TPL_VALUE_MISSING": 3,
+    "TPL_VALUE_REPEATED": 2
+   },
+   "file": "key.person_name.corr.jsonl",
+   "frames": 9,
+   "kept": 9,
+   "kind": "teacher",
+   "p_exact": 0.1189,
+   "ref": "key.person_name.corr@c9e11e749fdd:g33m33q33",
+   "sha256": "c9e11e749fdda61b284cec93b2a546891c554e2149d8faa6b77699157859ded1",
+   "target": 53,
+   "top_frame_share": 0.1111
+  },
+  "key.person_name.query": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7199,
+   "dropped": 1442,
+   "drops": {
+    "AUTHOR_TRIM": 93,
+    "DUP_EXACT_PREJUDGE": 18,
+    "DUP_NEAR": 19,
+    "HELDOUT_VOCAB": 2,
+    "JUDGE_DROP": 9,
+    "LEN_ITEM": 188,
+    "NON_ENGLISH": 2,
+    "SAFETY_LIST": 1,
+    "SPEECH_FORM": 463,
+    "SUPERSEDED_V1": 265,
+    "TPL_FORM": 160,
+    "TPL_VALUE_MISSING": 144,
+    "TPL_VALUE_REPEATED": 78
+   },
+   "file": "key.person_name.query.jsonl",
+   "frames": 18,
+   "kept": 18,
+   "kind": "teacher",
+   "p_exact": 0.0548,
+   "ref": "key.person_name.query@cc9c1881c68a:g33m33q33",
+   "sha256": "cc9c1881c68af11a4668ee62ae4a2aac04af9cf6e5c7db071a46cefd681e4193",
+   "target": 230,
+   "top_frame_share": 0.0556
+  },
+  "key.person_name.twin": {
+   "authors": {
+    "gemma-4-12b": 0.7917,
+    "qwen3.5-9b": 0.2083
+   },
+   "class": "K",
+   "distinct_2": 0.5486,
+   "dropped": 66,
+   "drops": {
+    "JUDGE_DROP": 36,
+    "LEN_ITEM": 26,
+    "TPL_VALUE_REPEATED": 4
+   },
+   "file": "key.person_name.twin.jsonl",
+   "frames": 24,
+   "kept": 24,
+   "kind": "teacher",
+   "p_exact": 0.56,
+   "ref": "key.person_name.twin@51070b696679:g79q21",
+   "sha256": "51070b696679e05fcfae960dba7b43222bad36f8de919a2125007b95ac53ed24",
+   "target": 30,
+   "top_frame_share": 0.0417
+  },
+  "key.pet_name.bait": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7573,
+   "dropped": 221,
+   "drops": {
+    "AUTHOR_TRIM": 41,
+    "DUP_EXACT_PREJUDGE": 1,
+    "DUP_NEAR": 3,
+    "JUDGE_DROP": 5,
+    "LEN_ITEM": 30,
+    "SPEECH_FORM": 40,
+    "SUPERSEDED_V1": 94,
+    "TPL_VALUE_MISSING": 7
+   },
+   "file": "key.pet_name.bait.jsonl",
+   "frames": 9,
+   "kept": 9,
+   "kind": "teacher",
+   "p_exact": 0.21,
+   "ref": "key.pet_name.bait@704561852750:g33m33q33",
+   "sha256": "7045618527507a382f01caffaf38c62a802743b33a0875cc1b1d515603631923",
+   "target": 30,
+   "top_frame_share": 0.1111
+  },
+  "key.pet_name.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3429,
+    "ministral-3-8b": 0.3143,
+    "qwen3.5-9b": 0.3429
+   },
+   "class": "K",
+   "distinct_2": 0.5432,
+   "dropped": 145,
+   "drops": {
+    "AUTHOR_TRIM": 13,
+    "CORR_MARKER": 11,
+    "DUP_EXACT_PREJUDGE": 21,
+    "DUP_NEAR": 1,
+    "JUDGE_DROP": 47,
+    "LEN_ITEM": 6,
+    "SPEECH_FORM": 5,
+    "TPL_FORM": 23,
+    "TPL_PRONOUN": 17,
+    "TPL_VALUE_MISSING": 1
+   },
+   "file": "key.pet_name.corr.jsonl",
+   "frames": 35,
+   "kept": 35,
+   "kind": "teacher",
+   "p_exact": 0.4224,
+   "ref": "key.pet_name.corr@a496d9a7b6e1:g34m31q34",
+   "sha256": "a496d9a7b6e1ac54f7af3f4d785029e3b50d86ce6719afff9ab3e3b549dba27e",
+   "target": 58,
+   "top_frame_share": 0.0286
+  },
+  "key.pet_name.plant": {
+   "authors": {
+    "gemma-4-12b": 0.3409,
+    "ministral-3-8b": 0.3182,
+    "qwen3.5-9b": 0.3409
+   },
+   "class": "K",
+   "distinct_2": 0.7724,
+   "dropped": 656,
+   "drops": {
+    "AUTHOR_TRIM": 262,
+    "DUP_EXACT_PREJUDGE": 32,
+    "DUP_NEAR": 9,
+    "HELDOUT_VOCAB": 6,
+    "JUDGE_DROP": 124,
+    "LEN_ITEM": 23,
+    "SPEECH_FORM": 1,
+    "TPL_VALUE_MISSING": 184,
+    "TPL_VALUE_REPEATED": 9,
+    "USER_VOICE": 6
+   },
+   "file": "key.pet_name.plant.jsonl",
+   "frames": 44,
+   "kept": 44,
+   "kind": "teacher",
+   "p_exact": 0.1322,
+   "ref": "key.pet_name.plant@0207e6634dce:g34m32q34",
+   "sha256": "0207e6634dce3ab3026dfc50487f8eff6d7226b7d64a369f6cb682b243662760",
+   "target": 233,
+   "top_frame_share": 0.0227
+  },
+  "key.pet_name.twin": {
+   "authors": {
+    "gemma-4-12b": 0.7857,
+    "qwen3.5-9b": 0.2143
+   },
+   "class": "K",
+   "distinct_2": 0.7634,
+   "dropped": 76,
+   "drops": {
+    "JUDGE_DROP": 9,
+    "LEN_ITEM": 34,
+    "SPEECH_FORM": 4,
+    "TPL_VALUE_MISSING": 8,
+    "TPL_VALUE_REPEATED": 21
+   },
+   "file": "key.pet_name.twin.jsonl",
+   "frames": 14,
+   "kept": 14,
+   "kind": "teacher",
+   "p_exact": 0.3267,
+   "ref": "key.pet_name.twin@455c9f703920:g79q21",
+   "sha256": "455c9f703920bb5a47b7653abbc1d1d93f27f05a740656b26a2672592805aee5",
+   "target": 30,
+   "top_frame_share": 0.0714
+  },
+  "key.plan_city.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3137,
+    "ministral-3-8b": 0.3431,
+    "qwen3.5-9b": 0.3431
+   },
+   "class": "K",
+   "distinct_2": 0.4124,
+   "dropped": 128,
+   "drops": {
+    "AUTHOR_TRIM": 13,
+    "CORR_MARKER": 16,
+    "DUP_EXACT_PREJUDGE": 10,
+    "DUP_NEAR": 11,
+    "FRAME_CAP": 3,
+    "HELDOUT_VOCAB": 5,
+    "JUDGE_DROP": 14,
+    "LEN_ITEM": 2,
+    "SPEECH_FORM": 2,
+    "TPL_FORM": 48,
+    "TPL_VALUE_MISSING": 2,
+    "TPL_VALUE_REPEATED": 2
+   },
+   "file": "key.plan_city.corr.jsonl",
+   "frames": 97,
+   "kept": 102,
+   "kind": "teacher",
+   "p_exact": 0.7,
+   "ref": "key.plan_city.corr@02ecae0bc9ce:g31m34q34",
+   "sha256": "02ecae0bc9cea6ff50c41925640a3169910ac6cc3044ee28fdabd3ace41c229f",
+   "target": 75,
+   "top_frame_share": 0.049
+  },
+  "key.plan_city.plant": {
+   "authors": {
+    "gemma-4-12b": 0.3419,
+    "ministral-3-8b": 0.3162,
+    "qwen3.5-9b": 0.3419
+   },
+   "class": "K",
+   "distinct_2": 0.633,
+   "dropped": 723,
+   "drops": {
+    "AUTHOR_TRIM": 180,
+    "BANK_PROMPT_ECHO": 1,
+    "DUP_EXACT_PREJUDGE": 141,
+    "DUP_NEAR": 13,
+    "HELDOUT_ECHO": 53,
+    "HELDOUT_VOCAB": 6,
+    "JUDGE_DROP": 217,
+    "LEN_ITEM": 71,
+    "NON_ENGLISH": 4,
+    "SPEECH_FORM": 1,
+    "TPL_VALUE_MISSING": 36
+   },
+   "file": "key.plan_city.plant.jsonl",
+   "frames": 113,
+   "kept": 117,
+   "kind": "teacher",
+   "p_exact": 0.2617,
+   "ref": "key.plan_city.plant@b501760793a2:g34m32q34",
+   "sha256": "b501760793a29947e05fe0c5d6186cba985b1aba81ba5c961ee1b752bfaec160",
+   "target": 313,
+   "top_frame_share": 0.0256
+  },
+  "key.plan_city.query": {
+   "authors": {
+    "gemma-4-12b": 0.3438,
+    "ministral-3-8b": 0.3125,
+    "qwen3.5-9b": 0.3438
+   },
+   "class": "K",
+   "distinct_2": 0.6375,
+   "dropped": 1218,
+   "drops": {
+    "AUTHOR_TRIM": 72,
+    "DUP_EXACT_PREJUDGE": 10,
+    "DUP_NEAR": 10,
+    "HELDOUT_ECHO": 2,
+    "HELDOUT_VOCAB": 3,
+    "JUDGE_DROP": 18,
+    "LEN_ITEM": 156,
+    "NON_ENGLISH": 7,
+    "SPEECH_FORM": 458,
+    "SUPERSEDED_V1": 177,
+    "TPL_FORM": 131,
+    "TPL_VALUE_MISSING": 123,
+    "TPL_VALUE_REPEATED": 50,
+    "USER_VOICE": 1
+   },
+   "file": "key.plan_city.query.jsonl",
+   "frames": 32,
+   "kept": 32,
+   "kind": "teacher",
+   "p_exact": 0.1131,
+   "ref": "key.plan_city.query@25d68eab76ff:g34m31q34",
+   "sha256": "25d68eab76ff4d3f77cbbc2bec10a772b21ec624ba469981eef53a3e894c3bf5",
+   "target": 198,
+   "top_frame_share": 0.0312
+  },
+  "key.plan_city.twin": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7408,
+   "dropped": 62,
+   "drops": {
+    "AUTHOR_TRIM": 5,
+    "BANK_PROMPT_ECHO": 21,
+    "JUDGE_DROP": 24,
+    "LEN_ITEM": 6,
+    "SPEECH_FORM": 1,
+    "TPL_VALUE_MISSING": 5
+   },
+   "file": "key.plan_city.twin.jsonl",
+   "frames": 18,
+   "kept": 18,
+   "kind": "teacher",
+   "p_exact": 0.42,
+   "ref": "key.plan_city.twin@65865316724d:g33m33q33",
+   "sha256": "65865316724d6200fca4145a04f2af1f699cd2cdde7da8756f2128b7b711d7a1",
+   "target": 30,
+   "top_frame_share": 0.0556
+  },
+  "key.plan_day.bait": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.8916,
+   "dropped": 234,
+   "drops": {
+    "AUTHOR_TRIM": 30,
+    "DUP_NEAR": 1,
+    "HELDOUT_ECHO": 2,
+    "JUDGE_DROP": 11,
+    "LEN_ITEM": 3,
+    "QUERY_VALUE": 12,
+    "SPEECH_FORM": 67,
+    "SUPERSEDED_V1": 101,
+    "TPL_VALUE_MISSING": 7
+   },
+   "file": "key.plan_day.bait.jsonl",
+   "frames": 6,
+   "kept": 6,
+   "kind": "teacher",
+   "p_exact": 0.14,
+   "ref": "key.plan_day.bait@aa7f0aa14867:g33m33q33",
+   "sha256": "aa7f0aa14867f4052aaf8f1ed84f16d866978a1b13b4799f662cdd59514abfa9",
+   "target": 30,
+   "top_frame_share": 0.1667
+  },
+  "key.plan_day.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3415,
+    "ministral-3-8b": 0.3171,
+    "qwen3.5-9b": 0.3415
+   },
+   "class": "K",
+   "distinct_2": 0.4509,
+   "dropped": 189,
+   "drops": {
+    "AUTHOR_TRIM": 33,
+    "CORR_MARKER": 12,
+    "DUP_EXACT_PREJUDGE": 35,
+    "DUP_NEAR": 1,
+    "HELDOUT_VOCAB": 3,
+    "JUDGE_DROP": 58,
+    "TPL_FORM": 31,
+    "TPL_PRONOUN": 16
+   },
+   "file": "key.plan_day.corr.jsonl",
+   "frames": 40,
+   "kept": 41,
+   "kind": "teacher",
+   "p_exact": 0.3827,
+   "ref": "key.plan_day.corr@fc835b14e895:g34m32q34",
+   "sha256": "fc835b14e89527a27fb04721a7d4f03fb0aded5e42c19ea14503cf73e4732948",
+   "target": 75,
+   "top_frame_share": 0.0488
+  },
+  "key.plan_day.plant": {
+   "authors": {
+    "gemma-4-12b": 0.3361,
+    "ministral-3-8b": 0.3193,
+    "qwen3.5-9b": 0.3445
+   },
+   "class": "K",
+   "distinct_2": 0.597,
+   "dropped": 511,
+   "drops": {
+    "AUTHOR_TRIM": 48,
+    "DUP_EXACT_PREJUDGE": 158,
+    "DUP_NEAR": 8,
+    "HELDOUT_ECHO": 16,
+    "HELDOUT_VOCAB": 9,
+    "JUDGE_DROP": 217,
+    "LEN_ITEM": 32,
+    "NON_ENGLISH": 3,
+    "SPEECH_FORM": 6,
+    "TPL_VALUE_MISSING": 14
+   },
+   "file": "key.plan_day.plant.jsonl",
+   "frames": 119,
+   "kept": 119,
+   "kind": "teacher",
+   "p_exact": 0.3911,
+   "ref": "key.plan_day.plant@b739da4fd00e:g34m32q34",
+   "sha256": "b739da4fd00eab3b14192aa6941df221fee1f48678d08940def9aa6a10f08a6a",
+   "target": 213,
+   "top_frame_share": 0.0084
+  },
+  "key.plan_day.query": {
+   "authors": {
+    "gemma-4-12b": 0.3415,
+    "ministral-3-8b": 0.3171,
+    "qwen3.5-9b": 0.3415
+   },
+   "class": "K",
+   "distinct_2": 0.6267,
+   "dropped": 909,
+   "drops": {
+    "AUTHOR_TRIM": 63,
+    "BANK_PROMPT_ECHO": 1,
+    "DUP_EXACT_PREJUDGE": 2,
+    "DUP_NEAR": 5,
+    "HELDOUT_ECHO": 1,
+    "JUDGE_DROP": 5,
+    "LEN_ITEM": 83,
+    "QUERY_VALUE": 1,
+    "SPEECH_FORM": 278,
+    "SUPERSEDED_V1": 157,
+    "TPL_FORM": 202,
+    "TPL_VALUE_MISSING": 70,
+    "TPL_VALUE_REPEATED": 41
+   },
+   "file": "key.plan_day.query.jsonl",
+   "frames": 41,
+   "kept": 41,
+   "kind": "teacher",
+   "p_exact": 0.1939,
+   "ref": "key.plan_day.query@ecb662d575a7:g34m32q34",
+   "sha256": "ecb662d575a77bb41152414b3a13e88eda67c91c86caaafb42cadd340d1367a8",
+   "target": 148,
+   "top_frame_share": 0.0244
+  },
+  "key.plan_day.twin": {
+   "authors": {
+    "gemma-4-12b": 0.8261,
+    "qwen3.5-9b": 0.1739
+   },
+   "class": "K",
+   "distinct_2": 0.5853,
+   "dropped": 57,
+   "drops": {
+    "BANK_PROMPT_ECHO": 1,
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 34,
+    "LEN_ITEM": 15,
+    "SPEECH_FORM": 3,
+    "TPL_VALUE_REPEATED": 3
+   },
+   "file": "key.plan_day.twin.jsonl",
+   "frames": 23,
+   "kept": 23,
+   "kind": "teacher",
+   "p_exact": 0.5367,
+   "ref": "key.plan_day.twin@f2734c7dfeb1:g83q17",
+   "sha256": "f2734c7dfeb138b38794bd913d420443bfcc58c677a65d6bbd254a5e8397b5fa",
+   "target": 30,
+   "top_frame_share": 0.0435
+  },
+  "key.plan_month.bait": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.8182,
+   "dropped": 211,
+   "drops": {
+    "AUTHOR_TRIM": 17,
+    "HELDOUT_ECHO": 16,
+    "JUDGE_DROP": 3,
+    "LEN_ITEM": 39,
+    "SPEECH_FORM": 54,
+    "SUPERSEDED_V1": 78,
+    "TPL_VALUE_MISSING": 2,
+    "TPL_VALUE_REPEATED": 2
+   },
+   "file": "key.plan_month.bait.jsonl",
+   "frames": 9,
+   "kept": 9,
+   "kind": "teacher",
+   "p_exact": 0.21,
+   "ref": "key.plan_month.bait@e0a0ae148f95:g33m33q33",
+   "sha256": "e0a0ae148f953d908257cb815589d0d4afa04b7b4f725a8d51da2afd85e35a24",
+   "target": 30,
+   "top_frame_share": 0.1111
+  },
+  "key.plan_month.corr": {
+   "authors": {
+    "gemma-4-12b": 0.325,
+    "ministral-3-8b": 0.325,
+    "qwen3.5-9b": 0.35
+   },
+   "class": "K",
+   "distinct_2": 0.4623,
+   "dropped": 260,
+   "drops": {
+    "AUTHOR_TRIM": 19,
+    "CORR_MARKER": 3,
+    "DUP_EXACT_PREJUDGE": 5,
+    "DUP_NEAR": 6,
+    "JUDGE_DROP": 90,
+    "LEN_ITEM": 1,
+    "TPL_FORM": 72,
+    "TPL_PRONOUN": 63,
+    "TPL_VALUE_REPEATED": 1
+   },
+   "file": "key.plan_month.corr.jsonl",
+   "frames": 40,
+   "kept": 40,
+   "kind": "teacher",
+   "p_exact": 0.2857,
+   "ref": "key.plan_month.corr@68cf3684b2ea:g32m32q35",
+   "sha256": "68cf3684b2ea475b3eea21ac66cdf29022d17e461da273a2c461a65d9b6535cb",
+   "target": 98,
+   "top_frame_share": 0.025
+  },
+  "key.plan_month.plant": {
+   "authors": {
+    "gemma-4-12b": 0.3158,
+    "ministral-3-8b": 0.3421,
+    "qwen3.5-9b": 0.3421
+   },
+   "class": "K",
+   "distinct_2": 0.6525,
+   "dropped": 664,
+   "drops": {
+    "AUTHOR_TRIM": 173,
+    "DUP_EXACT_PREJUDGE": 218,
+    "DUP_NEAR": 10,
+    "HELDOUT_ECHO": 34,
+    "HELDOUT_VOCAB": 5,
+    "JUDGE_DROP": 96,
+    "LEN_ITEM": 106,
+    "NON_ENGLISH": 1,
+    "SPEECH_FORM": 1,
+    "STAGE_DIR": 3,
+    "TPL_VALUE_MISSING": 17
+   },
+   "file": "key.plan_month.plant.jsonl",
+   "frames": 73,
+   "kept": 76,
+   "kind": "teacher",
+   "p_exact": 0.2128,
+   "ref": "key.plan_month.plant@7ff48ae42940:g32m34q34",
+   "sha256": "7ff48ae42940f4ef180bd6d0f6e314685356aa1b8bed4c407ae51531700451ba",
+   "target": 250,
+   "top_frame_share": 0.0263
+  },
+  "key.plan_month.query": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7451,
+   "dropped": 1012,
+   "drops": {
+    "AUTHOR_TRIM": 84,
+    "BANK_PROMPT_ECHO": 2,
+    "DUP_EXACT_PREJUDGE": 3,
+    "DUP_NEAR": 4,
+    "EMOJI": 1,
+    "HELDOUT_ECHO": 11,
+    "HELDOUT_VOCAB": 2,
+    "JUDGE_DROP": 16,
+    "LEN_ITEM": 111,
+    "NON_ENGLISH": 1,
+    "SPEECH_FORM": 370,
+    "SUPERSEDED_V1": 131,
+    "THOUGHT_TAG": 2,
+    "TPL_FORM": 179,
+    "TPL_VALUE_MISSING": 71,
+    "TPL_VALUE_REPEATED": 24
+   },
+   "file": "key.plan_month.query.jsonl",
+   "frames": 18,
+   "kept": 18,
+   "kind": "teacher",
+   "p_exact": 0.0773,
+   "ref": "key.plan_month.query@771341bf9610:g33m33q33",
+   "sha256": "771341bf961085e26d53d25ec6874dadb125e8d9bdcfd03f0fc9c9c12716351e",
+   "target": 163,
+   "top_frame_share": 0.0556
+  },
+  "key.plan_month.twin": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "K",
+   "distinct_2": 0.6592,
+   "dropped": 70,
+   "drops": {
+    "BANK_PROMPT_ECHO": 24,
+    "DIGIT": 1,
+    "JUDGE_DROP": 25,
+    "LEN_ITEM": 11,
+    "NON_ENGLISH": 1,
+    "SAFETY": 1,
+    "SPEECH_FORM": 6,
+    "TPL_VALUE_REPEATED": 1
+   },
+   "file": "key.plan_month.twin.jsonl",
+   "frames": 10,
+   "kept": 10,
+   "kind": "teacher",
+   "p_exact": 0.2333,
+   "ref": "key.plan_month.twin@587c70f888e7:g100",
+   "sha256": "587c70f888e71626283d91cab28ef775b7d0a379ad5658d0731810dbac5f8215",
+   "target": 30,
+   "top_frame_share": 0.1
+  },
+  "key.plan_time.bait": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7355,
+   "dropped": 186,
+   "drops": {
+    "AUTHOR_TRIM": 19,
+    "HELDOUT_ECHO": 2,
+    "JUDGE_DROP": 14,
+    "LEN_ITEM": 13,
+    "NON_ENGLISH": 1,
+    "SPEECH_FORM": 44,
+    "SUPERSEDED_V1": 84,
+    "TPL_VALUE_MISSING": 9
+   },
+   "file": "key.plan_time.bait.jsonl",
+   "frames": 24,
+   "kept": 24,
+   "kind": "teacher",
+   "p_exact": 0.56,
+   "ref": "key.plan_time.bait@83c679ad88b7:g33m33q33",
+   "sha256": "83c679ad88b7c51a8f214ac2b373e23cb11cf9e4513ec226a6911535f03e6c6d",
+   "target": 30,
+   "top_frame_share": 0.0417
+  },
+  "key.plan_time.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3571,
+    "qwen3.5-9b": 0.6429
+   },
+   "class": "K",
+   "distinct_2": 0.4809,
+   "dropped": 216,
+   "drops": {
+    "DUP_EXACT_PREJUDGE": 105,
+    "DUP_NEAR": 2,
+    "JUDGE_DROP": 109
+   },
+   "file": "key.plan_time.corr.jsonl",
+   "frames": 14,
+   "kept": 14,
+   "kind": "teacher",
+   "p_exact": 0.0852,
+   "ref": "key.plan_time.corr@2b9f175b60e7:g36q64",
+   "sha256": "2b9f175b60e765370d4c6588fd29ebcd369a07b4f13658b23dde2feedcbdf92b",
+   "target": 115,
+   "top_frame_share": 0.0714
+  },
+  "key.plan_time.plant": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.7148,
+   "dropped": 482,
+   "drops": {
+    "AUTHOR_TRIM": 106,
+    "DUP_EXACT_PREJUDGE": 276,
+    "DUP_NEAR": 15,
+    "HELDOUT_ECHO": 9,
+    "HELDOUT_VOCAB": 3,
+    "JUDGE_DROP": 68,
+    "LEN_ITEM": 3,
+    "TPL_VALUE_MISSING": 2
+   },
+   "file": "key.plan_time.plant.jsonl",
+   "frames": 18,
+   "kept": 18,
+   "kind": "teacher",
+   "p_exact": 0.0519,
+   "ref": "key.plan_time.plant@20e9d5c06eeb:g33m33q33",
+   "sha256": "20e9d5c06eeb8ccbe754f65d68debbeee5dbfbaa029e2ed00df6c786c8b8640a",
+   "target": 243,
+   "top_frame_share": 0.0556
+  },
+  "key.plan_time.query": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.6561,
+   "dropped": 1039,
+   "drops": {
+    "AUTHOR_TRIM": 78,
+    "DUP_EXACT_PREJUDGE": 5,
+    "DUP_NEAR": 13,
+    "HELDOUT_VOCAB": 2,
+    "JUDGE_DROP": 5,
+    "LEN_ITEM": 132,
+    "NON_ENGLISH": 1,
+    "QUERY_VALUE": 1,
+    "SPEECH_FORM": 406,
+    "SUPERSEDED_V1": 179,
+    "TPL_FORM": 119,
+    "TPL_VALUE_MISSING": 80,
+    "TPL_VALUE_REPEATED": 18
+   },
+   "file": "key.plan_time.query.jsonl",
+   "frames": 20,
+   "kept": 21,
+   "kind": "teacher",
+   "p_exact": 0.0875,
+   "ref": "key.plan_time.query@ca5cdf80be3b:g33m33q33",
+   "sha256": "ca5cdf80be3b4b61074942cc44cd3d110567dd2a3f52074f04e70cfd73d42eb5",
+   "target": 168,
+   "top_frame_share": 0.0952
+  },
+  "key.plan_time.twin": {
+   "authors": {
+    "gemma-4-12b": 0.8824,
+    "qwen3.5-9b": 0.1176
+   },
+   "class": "K",
+   "distinct_2": 0.5974,
+   "dropped": 33,
+   "drops": {
+    "BANK_PROMPT_ECHO": 1,
+    "JUDGE_DROP": 22,
+    "TPL_VALUE_REPEATED": 10
+   },
+   "file": "key.plan_time.twin.jsonl",
+   "frames": 17,
+   "kept": 17,
+   "kind": "teacher",
+   "p_exact": 0.3967,
+   "ref": "key.plan_time.twin@80fb0dca1641:g88q12",
+   "sha256": "80fb0dca16415a9f0abdcee3e29b10e986601f73209e1b539bea8c7558ff0346",
+   "target": 30,
+   "top_frame_share": 0.0588
+  },
+  "key.user_name.bait": {
+   "authors": {
+    "gemma-4-12b": 0.5714,
+    "ministral-3-8b": 0.4286
+   },
+   "class": "K",
+   "distinct_2": 0.8404,
+   "dropped": 203,
+   "drops": {
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 5,
+    "LEN_ITEM": 33,
+    "SPEECH_FORM": 121,
+    "SUPERSEDED_V1": 41,
+    "USER_VOICE": 2
+   },
+   "file": "key.user_name.bait.jsonl",
+   "frames": 7,
+   "kept": 7,
+   "kind": "teacher",
+   "p_exact": 0.1633,
+   "ref": "key.user_name.bait@0a5f72a69543:g57m43",
+   "sha256": "0a5f72a69543607955d6754144756ce9bab188719780b992b365877633996374",
+   "target": 30,
+   "top_frame_share": 0.1429
+  },
+  "key.user_name.corr": {
+   "authors": {
+    "gemma-4-12b": 0.3421,
+    "ministral-3-8b": 0.3158,
+    "qwen3.5-9b": 0.3421
+   },
+   "class": "K",
+   "distinct_2": 0.5114,
+   "dropped": 154,
+   "drops": {
+    "AUTHOR_TRIM": 13,
+    "CORR_MARKER": 23,
+    "DUP_EXACT_PREJUDGE": 23,
+    "DUP_NEAR": 3,
+    "HELDOUT_VOCAB": 3,
+    "JUDGE_DROP": 43,
+    "SPEECH_FORM": 4,
+    "TPL_FORM": 40,
+    "TPL_VALUE_REPEATED": 2
+   },
+   "file": "key.user_name.corr.jsonl",
+   "frames": 76,
+   "kept": 76,
+   "kind": "teacher",
+   "p_exact": 0.665,
+   "ref": "key.user_name.corr@6f8433b0eb1e:g34m32q34",
+   "sha256": "6f8433b0eb1ee538db7e98af1473efc5bbdfc85feb55a4bb12241a75fe5fbb3b",
+   "target": 80,
+   "top_frame_share": 0.0132
+  },
+  "key.user_name.plant": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "K",
+   "distinct_2": 0.8415,
+   "dropped": 1251,
+   "drops": {
+    "AUTHOR_TRIM": 238,
+    "BANK_PROMPT_ECHO": 1,
+    "DUP_EXACT_PREJUDGE": 390,
+    "DUP_NEAR": 8,
+    "HELDOUT_VOCAB": 8,
+    "JUDGE_DROP": 296,
+    "LEN_ITEM": 290,
+    "NON_ENGLISH": 4,
+    "STAGE_DIR": 1,
+    "TPL_VALUE_REPEATED": 13,
+    "USER_VOICE": 2
+   },
+   "file": "key.user_name.plant.jsonl",
+   "frames": 9,
+   "kept": 9,
+   "kind": "teacher",
+   "p_exact": 0.0151,
+   "ref": "key.user_name.plant@f99b43c35494:g33m33q33",
+   "sha256": "f99b43c354944f74198c0ffda19b7197f52d5cec98ba948506ac0638c019b4d6",
+   "target": 418,
+   "top_frame_share": 0.1111
+  },
+  "label.fav_colour": {
+   "authors": {
+    "qwen3.5-9b": 1.0
+   },
+   "class": "N",
+   "dropped": 14,
+   "drops": {
+    "LABEL_NOT_CHOSEN": 12,
+    "LEN_ITEM": 2
+   },
+   "file": "label.fav_colour.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "label.fav_colour@0848c019c699:q100",
+   "sha256": "0848c019c699a9c805db1697ab9338258dc03ce763be52f3bc9289f5905c3476"
+  },
+  "label.fav_food": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "N",
+   "dropped": 14,
+   "drops": {
+    "HELDOUT_POOL": 1,
+    "LABEL_NOT_CHOSEN": 11,
+    "LEN_ITEM": 2
+   },
+   "file": "label.fav_food.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "label.fav_food@514016862a81:g100",
+   "sha256": "514016862a81706a54f1aea5052ec2817df82bbb0fd79ffe3ea3cf100450ed05"
+  },
+  "label.hobby": {
+   "authors": {
+    "ministral-3-8b": 1.0
+   },
+   "class": "N",
+   "dropped": 14,
+   "drops": {
+    "LABEL_NOT_CHOSEN": 10,
+    "LEN_ITEM": 4
+   },
+   "file": "label.hobby.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "label.hobby@2937df9e9b92:m100",
+   "sha256": "2937df9e9b92fa6736a77e52195bd4292923d50617e818da96ad8120a6476362"
+  },
+  "label.home_city": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "N",
+   "dropped": 14,
+   "drops": {
+    "LABEL_NOT_CHOSEN": 14
+   },
+   "file": "label.home_city.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "label.home_city@fba032eee3c1:g100",
+   "sha256": "fba032eee3c1db23b292b01e5e305d8800890e6b249ffb7325c22e06b52ffdc7"
+  },
+  "label.item_colour": {
+   "authors": {
+    "ministral-3-8b": 1.0
+   },
+   "class": "N",
+   "dropped": 14,
+   "drops": {
+    "LABEL_NOT_CHOSEN": 14
+   },
+   "file": "label.item_colour.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "label.item_colour@b99d92815bfa:m100",
+   "sha256": "b99d92815bfafbb834b69c85f759b8ebf36c256283e74420f788f3ef38801cee"
+  },
+  "label.job": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "N",
+   "dropped": 14,
+   "drops": {
+    "LABEL_NOT_CHOSEN": 12,
+    "LEN_ITEM": 2
+   },
+   "file": "label.job.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "label.job@87d36c954583:g100",
+   "sha256": "87d36c954583880e5a082418004c918d3f276a58d1202475a904b4f64f53049e"
+  },
+  "label.person_city": {
+   "authors": {
+    "qwen3.5-9b": 1.0
+   },
+   "class": "N",
+   "dropped": 9,
+   "drops": {
+    "LABEL_NOT_CHOSEN": 9
+   },
+   "file": "label.person_city.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "label.person_city@b903f88eb13e:q100",
+   "sha256": "b903f88eb13e39f855d9852428714f0754a10129a7214c2c15446ed1b4e60d43"
+  },
+  "label.person_job": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "N",
+   "dropped": 14,
+   "drops": {
+    "HELDOUT_POOL": 1,
+    "LABEL_NOT_CHOSEN": 10,
+    "LEN_ITEM": 3
+   },
+   "file": "label.person_job.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "label.person_job@cb5be3aa95ad:g100",
+   "sha256": "cb5be3aa95ad92da6261c1422b38275edb0c05ec20bcf041a540c65f18495c92"
+  },
+  "label.person_name": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "N",
+   "dropped": 14,
+   "drops": {
+    "LABEL_NOT_CHOSEN": 10,
+    "LEN_ITEM": 4
+   },
+   "file": "label.person_name.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "label.person_name@c25bf120edc2:g100",
+   "sha256": "c25bf120edc2e834a6f00629b1a5164244ec8b55db18398fb60155a7733b72d0"
+  },
+  "label.plan_day": {
+   "authors": {
+    "ministral-3-8b": 1.0
+   },
+   "class": "N",
+   "dropped": 14,
+   "drops": {
+    "LABEL_NOT_CHOSEN": 14
+   },
+   "file": "label.plan_day.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "label.plan_day@de7fa462c1cc:m100",
+   "sha256": "de7fa462c1cc8d82a01f5f99e617c0e3bdcb935656f7f6e9c02d9a0b4b07afff"
+  },
+  "label.user_name": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "N",
+   "dropped": 14,
+   "drops": {
+    "LABEL_NOT_CHOSEN": 13,
+    "LEN_ITEM": 1
+   },
+   "file": "label.user_name.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "label.user_name@8760d1c6ba2a:g100",
+   "sha256": "8760d1c6ba2ad0da0bf30f2903fb3c5401f8cb34ada5571727c4103ccf0c124c"
+  },
+  "list.add": {
+   "authors": {
+    "gemma-4-12b": 0.3151,
+    "ministral-3-8b": 0.3425,
+    "qwen3.5-9b": 0.3425
+   },
+   "class": "L",
+   "distinct_2": 0.5131,
+   "dropped": 337,
+   "drops": {
+    "AUTHOR_TRIM": 55,
+    "DUP_EXACT_PREJUDGE": 136,
+    "DUP_NEAR": 45,
+    "JUDGE_DROP": 86,
+    "NON_ENGLISH": 1,
+    "TPL_VALUE_MISSING": 14
+   },
+   "file": "list.add.jsonl",
+   "frames": 73,
+   "kept": 73,
+   "kind": "teacher",
+   "p_exact": 0.3785,
+   "ref": "list.add@311c1b45db90:g32m34q34",
+   "sha256": "311c1b45db904c88a5accf4dba07d08828272ec94c8fc5af43f4036c461bc9a5",
+   "target": 135,
+   "top_frame_share": 0.0137
+  },
+  "list.init.chore": {
+   "authors": {
+    "gemma-4-12b": 0.3438,
+    "ministral-3-8b": 0.3125,
+    "qwen3.5-9b": 0.3438
+   },
+   "class": "L",
+   "distinct_2": 0.725,
+   "dropped": 698,
+   "drops": {
+    "AUTHOR_TRIM": 88,
+    "DUP_EXACT_PREJUDGE": 29,
+    "DUP_NEAR": 6,
+    "JUDGE_DROP": 48,
+    "LEN_ITEM": 1,
+    "SUPERSEDED_V1": 78,
+    "TPL_ITEMS_JOIN": 412,
+    "TPL_VALUE_MISSING": 36
+   },
+   "file": "list.init.chore.jsonl",
+   "frames": 32,
+   "kept": 32,
+   "kind": "teacher",
+   "p_exact": 0.1545,
+   "ref": "list.init.chore@907f4b163125:g34m31q34",
+   "sha256": "907f4b1631259ad03aa63089c93950267e0558c1050a29f81eeca0ed1242bae7",
+   "target": 145,
+   "top_frame_share": 0.0312
+  },
+  "list.init.city": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "L",
+   "distinct_2": 0.9667,
+   "dropped": 687,
+   "drops": {
+    "AUTHOR_TRIM": 36,
+    "DUP_EXACT_PREJUDGE": 20,
+    "DUP_NEAR": 1,
+    "HELDOUT_ECHO": 1,
+    "JUDGE_DROP": 54,
+    "SUPERSEDED_V1": 43,
+    "TPL_ITEMS_JOIN": 485,
+    "TPL_VALUE_MISSING": 47
+   },
+   "file": "list.init.city.jsonl",
+   "frames": 3,
+   "kept": 3,
+   "kind": "teacher",
+   "p_exact": 0.015,
+   "ref": "list.init.city@058bce75b430:g33m33q33",
+   "sha256": "058bce75b43038007cc467b1604ee59a0239b1986c8c7b0d6d611e3dcd3d2d10",
+   "target": 140,
+   "top_frame_share": 0.3333
+  },
+  "list.init.grocery": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "L",
+   "distinct_2": 0.9429,
+   "dropped": 807,
+   "drops": {
+    "AUTHOR_TRIM": 26,
+    "DUP_EXACT_PREJUDGE": 80,
+    "JUDGE_DROP": 106,
+    "SUPERSEDED_V1": 64,
+    "TPL_ITEMS_JOIN": 349,
+    "TPL_VALUE_MISSING": 182
+   },
+   "file": "list.init.grocery.jsonl",
+   "frames": 3,
+   "kept": 3,
+   "kind": "teacher",
+   "p_exact": 0.0133,
+   "ref": "list.init.grocery@4046ba8315df:g33m33q33",
+   "sha256": "4046ba8315df44d349bab64df509e81e6cd79a22e7795ac02890a800336a4a26",
+   "target": 158,
+   "top_frame_share": 0.3333
+  },
+  "list.init.name": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "L",
+   "distinct_2": 0.664,
+   "dropped": 662,
+   "drops": {
+    "AUTHOR_TRIM": 46,
+    "DUP_EXACT_PREJUDGE": 71,
+    "DUP_NEAR": 3,
+    "JUDGE_DROP": 72,
+    "LEN_ITEM": 4,
+    "SUPERSEDED_V1": 97,
+    "TPL_ITEMS_JOIN": 249,
+    "TPL_VALUE_MISSING": 120
+   },
+   "file": "list.init.name.jsonl",
+   "frames": 18,
+   "kept": 18,
+   "kind": "teacher",
+   "p_exact": 0.0933,
+   "ref": "list.init.name@5fb36918896d:g33m33q33",
+   "sha256": "5fb36918896d80499d6c43ea8928846c9dc868f4a8d1670abb4f6a208b99e4f7",
+   "target": 135,
+   "top_frame_share": 0.0556
+  },
+  "list.move_first": {
+   "authors": {
+    "gemma-4-12b": 0.3134,
+    "ministral-3-8b": 0.3433,
+    "qwen3.5-9b": 0.3433
+   },
+   "class": "L",
+   "distinct_2": 0.4339,
+   "dropped": 393,
+   "drops": {
+    "AUTHOR_TRIM": 112,
+    "DUP_EXACT_PREJUDGE": 113,
+    "DUP_NEAR": 74,
+    "JUDGE_DROP": 68,
+    "LEN_ITEM": 16,
+    "TPL_VALUE_MISSING": 10
+   },
+   "file": "list.move_first.jsonl",
+   "frames": 67,
+   "kept": 67,
+   "kind": "teacher",
+   "p_exact": 0.3065,
+   "ref": "list.move_first@e0ac49f26833:g31m34q34",
+   "sha256": "e0ac49f26833a1beec4a76f40a246c88d3abba123c532b030207643194ea08ba",
+   "target": 153,
+   "top_frame_share": 0.0149
+  },
+  "list.move_last": {
+   "authors": {
+    "gemma-4-12b": 0.3151,
+    "ministral-3-8b": 0.3425,
+    "qwen3.5-9b": 0.3425
+   },
+   "class": "L",
+   "distinct_2": 0.428,
+   "dropped": 277,
+   "drops": {
+    "AUTHOR_TRIM": 32,
+    "BANK_PROMPT_ECHO": 39,
+    "DUP_EXACT_PREJUDGE": 75,
+    "DUP_NEAR": 32,
+    "JUDGE_DROP": 90,
+    "LEN_ITEM": 9
+   },
+   "file": "list.move_last.jsonl",
+   "frames": 72,
+   "kept": 73,
+   "kind": "teacher",
+   "p_exact": 0.4443,
+   "ref": "list.move_last@501567c7b05d:g32m34q34",
+   "sha256": "501567c7b05d4d9119e8d6649c5a52ca0d12cd3a9bb87b853b4d526e7ebc4e54",
+   "target": 115,
+   "top_frame_share": 0.0274
+  },
+  "list.q.contains": {
+   "authors": {
+    "gemma-4-12b": 0.3167,
+    "ministral-3-8b": 0.3417,
+    "qwen3.5-9b": 0.3417
+   },
+   "class": "L",
+   "distinct_2": 0.4658,
+   "dropped": 300,
+   "drops": {
+    "AUTHOR_TRIM": 48,
+    "DUP_EXACT_PREJUDGE": 141,
+    "DUP_NEAR": 37,
+    "JUDGE_DROP": 47,
+    "LEN_ITEM": 7,
+    "TPL_VALUE_MISSING": 19,
+    "TPL_VALUE_REPEATED": 1
+   },
+   "file": "list.q.contains.jsonl",
+   "frames": 116,
+   "kept": 120,
+   "kind": "teacher",
+   "p_exact": 0.6,
+   "ref": "list.q.contains@af33533eb69e:g32m34q34",
+   "sha256": "af33533eb69e90f295afb12e1338558cfd59675313ac94e515bff7477c949d87",
+   "target": 140,
+   "top_frame_share": 0.0167
+  },
+  "list.q.count": {
+   "authors": {
+    "gemma-4-12b": 0.314,
+    "ministral-3-8b": 0.343,
+    "qwen3.5-9b": 0.343
+   },
+   "class": "L",
+   "distinct_2": 0.3312,
+   "dropped": 173,
+   "drops": {
+    "AUTHOR_TRIM": 36,
+    "BANK_PROMPT_ECHO": 13,
+    "DUP_EXACT_PREJUDGE": 42,
+    "DUP_NEAR": 30,
+    "HELDOUT_VOCAB": 4,
+    "JUDGE_DROP": 37,
+    "TPL_VALUE_MISSING": 10,
+    "TPL_VALUE_REPEATED": 1
+   },
+   "file": "list.q.count.jsonl",
+   "frames": 186,
+   "kept": 207,
+   "kind": "teacher",
+   "p_exact": 0.7,
+   "ref": "list.q.count@b9aadbe71495:g31m34q34",
+   "sha256": "b9aadbe714951a46841efdffbb40d11540938b52eba890e72089aa4e4f0f8faa",
+   "target": 125,
+   "top_frame_share": 0.0193
+  },
+  "list.q.first": {
+   "authors": {
+    "gemma-4-12b": 0.3174,
+    "ministral-3-8b": 0.3353,
+    "qwen3.5-9b": 0.3473
+   },
+   "class": "L",
+   "distinct_2": 0.4571,
+   "dropped": 163,
+   "drops": {
+    "AUTHOR_TRIM": 6,
+    "DUP_EXACT_PREJUDGE": 47,
+    "DUP_NEAR": 9,
+    "JUDGE_DROP": 73,
+    "LEN_ITEM": 12,
+    "TPL_VALUE_MISSING": 16
+   },
+   "file": "list.q.first.jsonl",
+   "frames": 158,
+   "kept": 167,
+   "kind": "teacher",
+   "p_exact": 0.7,
+   "ref": "list.q.first@73ea30bf08e5:g32m34q35",
+   "sha256": "73ea30bf08e5820557dec14c1d3e27e81ea28338f7a368fe897979a8c2141e6f",
+   "target": 110,
+   "top_frame_share": 0.024
+  },
+  "list.q.last": {
+   "authors": {
+    "gemma-4-12b": 0.3125,
+    "ministral-3-8b": 0.3438,
+    "qwen3.5-9b": 0.3438
+   },
+   "class": "L",
+   "distinct_2": 0.398,
+   "dropped": 192,
+   "drops": {
+    "AUTHOR_TRIM": 16,
+    "DUP_EXACT_PREJUDGE": 68,
+    "DUP_NEAR": 6,
+    "FRAME_CAP": 1,
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 69,
+    "LEN_ITEM": 10,
+    "TPL_VALUE_MISSING": 21
+   },
+   "file": "list.q.last.jsonl",
+   "frames": 107,
+   "kept": 128,
+   "kind": "teacher",
+   "p_exact": 0.7,
+   "ref": "list.q.last@805bbf89e7f3:g31m34q34",
+   "sha256": "805bbf89e7f319651f2bc070fc8c70db350af0db443516a29f7521a70c4f6294",
+   "target": 105,
+   "top_frame_share": 0.0547
+  },
+  "list.q.ordinal": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "L",
+   "distinct_2": 0.5034,
+   "dropped": 242,
+   "drops": {
+    "AUTHOR_TRIM": 3,
+    "DUP_EXACT_PREJUDGE": 61,
+    "DUP_NEAR": 3,
+    "JUDGE_DROP": 149,
+    "TPL_VALUE_MISSING": 26
+   },
+   "file": "list.q.ordinal.jsonl",
+   "frames": 18,
+   "kept": 18,
+   "kind": "teacher",
+   "p_exact": 0.1482,
+   "ref": "list.q.ordinal@434e0cdcb87a:g33m33q33",
+   "sha256": "434e0cdcb87ae65c5496138f92967fb17b640c0505dc6a8d599f0193a5ba1904",
+   "target": 85,
+   "top_frame_share": 0.0556
+  },
+  "list.q.other": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "L",
+   "distinct_2": 0.7143,
+   "dropped": 87,
+   "drops": {
+    "JUDGE_DROP": 47,
+    "TPL_VALUE_MISSING": 15,
+    "TPL_VALUE_REPEATED": 25
+   },
+   "file": "list.q.other.jsonl",
+   "frames": 3,
+   "kept": 3,
+   "kind": "teacher",
+   "p_exact": 0.07,
+   "ref": "list.q.other@6bb352c5fe79:g100",
+   "sha256": "6bb352c5fe79dc4e89c33efaa0a59f2c21b20f0fa6b909af433696a012a6c57b",
+   "target": 30,
+   "top_frame_share": 0.3333
+  },
+  "list.remove": {
+   "authors": {
+    "gemma-4-12b": 0.3191,
+    "ministral-3-8b": 0.3404,
+    "qwen3.5-9b": 0.3404
+   },
+   "class": "L",
+   "distinct_2": 0.5083,
+   "dropped": 363,
+   "drops": {
+    "AUTHOR_TRIM": 104,
+    "DUP_EXACT_PREJUDGE": 149,
+    "DUP_NEAR": 34,
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 65,
+    "TPL_VALUE_MISSING": 10
+   },
+   "file": "list.remove.jsonl",
+   "frames": 47,
+   "kept": 47,
+   "kind": "teacher",
+   "p_exact": 0.2437,
+   "ref": "list.remove@f287742cabcc:g32m34q34",
+   "sha256": "f287742cabcc693808a6d153c0fa982e3742e36f81f39abe218822cb52000c3c",
+   "target": 135,
+   "top_frame_share": 0.0213
+  },
+  "listname.chore": {
+   "authors": {
+    "qwen3.5-9b": 1.0
+   },
+   "class": "N",
+   "dropped": 17,
+   "drops": {
+    "DUP_EXACT_PREJUDGE": 1,
+    "HELDOUT_POOL": 1,
+    "JUDGE_DROP": 5,
+    "LISTNAME_NOT_CHOSEN": 10
+   },
+   "file": "listname.chore.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "listname.chore@61a324fa8ce9:q100",
+   "sha256": "61a324fa8ce982efb9b8a21f1b388f7779d6b07586fd6dcbf97de297a2336400"
+  },
+  "listname.city": {
+   "authors": {
+    "qwen3.5-9b": 1.0
+   },
+   "class": "N",
+   "dropped": 17,
+   "drops": {
+    "JUDGE_DROP": 13,
+    "LISTNAME_NOT_CHOSEN": 4
+   },
+   "file": "listname.city.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "listname.city@bf876dc03f70:q100",
+   "sha256": "bf876dc03f707483b3d576b58400c81b2e3f026e5087d8969df17ed331447428"
+  },
+  "listname.grocery": {
+   "authors": {
+    "ministral-3-8b": 1.0
+   },
+   "class": "N",
+   "dropped": 17,
+   "drops": {
+    "DUP_EXACT_PREJUDGE": 1,
+    "JUDGE_DROP": 4,
+    "LISTNAME_NOT_CHOSEN": 12
+   },
+   "file": "listname.grocery.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "listname.grocery@818a906ef84f:m100",
+   "sha256": "818a906ef84f106b8d5faea1c80e50f181871febc5fe6ce7123b1db3d93c24de"
+  },
+  "listname.name": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "N",
+   "dropped": 17,
+   "drops": {
+    "DUP_EXACT_PREJUDGE": 1,
+    "HELDOUT_POOL": 2,
+    "JUDGE_DROP": 9,
+    "LISTNAME_NOT_CHOSEN": 5
+   },
+   "file": "listname.name.jsonl",
+   "kept": 1,
+   "kind": "teacher",
+   "ref": "listname.name@06b79c9bbd78:g100",
+   "sha256": "06b79c9bbd78f632bc4de042976fcab9b11d3ee10b5b059a1a4266912a136e88"
+  },
+  "lookup.cf": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "U",
+   "distinct_2": 0.9608,
+   "dropped": 147,
+   "drops": {
+    "AUTHOR_TRIM": 9,
+    "JUDGE_DROP": 18,
+    "LEN_ITEM": 9,
+    "SUPERSEDED_V1": 11,
+    "TPL_VALUE_MISSING": 100
+   },
+   "file": "lookup.cf.jsonl",
+   "frames": 3,
+   "kept": 3,
+   "kind": "teacher",
+   "p_exact": 0.07,
+   "ref": "lookup.cf@3f203c16fcfb:g33m33q33",
+   "sha256": "3f203c16fcfb62292866264257c73b9963fbd5a66b6ce580463f837bb0089806",
+   "target": 30,
+   "top_frame_share": 0.3333
+  },
+  "lookup.ctx": {
+   "authors": {
+    "gemma-4-12b": 0.4167,
+    "qwen3.5-9b": 0.5833
+   },
+   "class": "U",
+   "distinct_2": 0.7281,
+   "dropped": 618,
+   "drops": {
+    "DUP_EXACT_PREJUDGE": 54,
+    "JUDGE_DROP": 52,
+    "LEN_ITEM": 14,
+    "SUPERSEDED_V1": 55,
+    "TPL_VALUE_MISSING": 434,
+    "TPL_VALUE_REPEATED": 9
+   },
+   "file": "lookup.ctx.jsonl",
+   "frames": 11,
+   "kept": 12,
+   "kind": "teacher",
+   "p_exact": 0.0683,
+   "ref": "lookup.ctx@8902516f2827:g42q58",
+   "sha256": "8902516f2827a727681f2fd7e14a669135a5ab45c0ac704cfb441732bac8062d",
+   "target": 123,
+   "top_frame_share": 0.1667
+  },
+  "lookup.q.city": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "U",
+   "distinct_2": 0.8319,
+   "dropped": 461,
+   "drops": {
+    "AUTHOR_TRIM": 51,
+    "BANK_PROMPT_ECHO": 2,
+    "DUP_EXACT_PREJUDGE": 43,
+    "HELDOUT_ECHO": 1,
+    "JUDGE_DROP": 327,
+    "LEN_ITEM": 25,
+    "STAGE_DIR": 1,
+    "TPL_VALUE_MISSING": 11
+   },
+   "file": "lookup.q.city.jsonl",
+   "frames": 9,
+   "kept": 9,
+   "kind": "teacher",
+   "p_exact": 0.0406,
+   "ref": "lookup.q.city@1857a368cffd:g33m33q33",
+   "sha256": "1857a368cffda898f77f046036a8c449f75334fda2c85f43c78224acd8dcb229",
+   "target": 155,
+   "top_frame_share": 0.1111
+  },
+  "lookup.q.colour": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "U",
+   "distinct_2": 0.7906,
+   "dropped": 75,
+   "drops": {
+    "AUTHOR_TRIM": 16,
+    "DUP_NEAR": 1,
+    "JUDGE_DROP": 47,
+    "LEN_ITEM": 10,
+    "TPL_VALUE_MISSING": 1
+   },
+   "file": "lookup.q.colour.jsonl",
+   "frames": 15,
+   "kept": 15,
+   "kind": "teacher",
+   "p_exact": 0.35,
+   "ref": "lookup.q.colour@41d4b27201bb:g33m33q33",
+   "sha256": "41d4b27201bbd5bf0a02702d1f218865c493506b86405b13d20fc7cea03e1f4c",
+   "target": 30,
+   "top_frame_share": 0.0667
+  },
+  "lookup.q.month": {
+   "authors": {
+    "gemma-4-12b": 0.3433,
+    "ministral-3-8b": 0.3134,
+    "qwen3.5-9b": 0.3433
+   },
+   "class": "U",
+   "distinct_2": 0.4452,
+   "dropped": 53,
+   "drops": {
+    "AUTHOR_TRIM": 4,
+    "BANK_PROMPT_ECHO": 1,
+    "DUP_EXACT_PREJUDGE": 1,
+    "DUP_NEAR": 8,
+    "HELDOUT_ECHO": 3,
+    "JUDGE_DROP": 27,
+    "LEN_ITEM": 9
+   },
+   "file": "lookup.q.month.jsonl",
+   "frames": 67,
+   "kept": 67,
+   "kind": "teacher",
+   "p_exact": 0.7,
+   "ref": "lookup.q.month@f06585c84fa6:g34m31q34",
+   "sha256": "f06585c84fa6daf2145a140366674cef9a2268bc5a32da40fd35469007d45cf5",
+   "target": 38,
+   "top_frame_share": 0.0149
+  },
+  "lookup.q.weekday": {
+   "authors": {
+    "gemma-4-12b": 0.3438,
+    "ministral-3-8b": 0.3438,
+    "qwen3.5-9b": 0.3125
+   },
+   "class": "U",
+   "distinct_2": 0.4624,
+   "dropped": 394,
+   "drops": {
+    "AUTHOR_TRIM": 61,
+    "BANK_PROMPT_ECHO": 20,
+    "DUP_EXACT_PREJUDGE": 5,
+    "DUP_NEAR": 10,
+    "JUDGE_DROP": 276,
+    "LEN_ITEM": 20,
+    "NON_ENGLISH": 1,
+    "TPL_VALUE_MISSING": 1
+   },
+   "file": "lookup.q.weekday.jsonl",
+   "frames": 95,
+   "kept": 96,
+   "kind": "teacher",
+   "p_exact": 0.4123,
+   "ref": "lookup.q.weekday@25a0f599c75d:g34m34q31",
+   "sha256": "25a0f599c75d8d42494f6d3a380a0d8094f4765e16b6ef27a48d3ea16cfc3b7a",
+   "target": 163,
+   "top_frame_share": 0.0208
+  },
+  "marker.err": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "M",
+   "distinct_2": 0.9667,
+   "dropped": 51,
+   "drops": {
+    "AUTHOR_TRIM": 19,
+    "DUP_EXACT_PREJUDGE": 3,
+    "HELDOUT_VOCAB": 1,
+    "LEN_ITEM": 28
+   },
+   "file": "marker.err.jsonl",
+   "frames": 9,
+   "kept": 9,
+   "kind": "teacher",
+   "p_exact": 0.315,
+   "ref": "marker.err@454ff56d6519:g33m33q33",
+   "sha256": "454ff56d651948fd6edcde6baba67367ba2676638fa6e0bd484191b9bcb2bb6a",
+   "target": 20,
+   "top_frame_share": 0.1111
+  },
+  "open.greet": {
+   "authors": {
+    "gemma-4-12b": 0.3171,
+    "ministral-3-8b": 0.3415,
+    "qwen3.5-9b": 0.3415
+   },
+   "class": "O",
+   "distinct_2": 0.7559,
+   "dropped": 2429,
+   "drops": {
+    "AUTHOR_TRIM": 181,
+    "BANK_PROMPT_ECHO": 6,
+    "DIGIT": 1,
+    "DUP_EXACT_PREJUDGE": 607,
+    "DUP_NEAR": 4,
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 1575,
+    "LEN_ITEM": 52,
+    "NON_ENGLISH": 1,
+    "STAGE_DIR": 1
+   },
+   "file": "open.greet.jsonl",
+   "frames": 40,
+   "kept": 41,
+   "kind": "teacher",
+   "p_exact": 0.0349,
+   "ref": "open.greet@de1b369479a7:g32m34q34",
+   "sha256": "de1b369479a7ab7c739d4ac60bc371cdf19873a38cc1586a416bf6dca89a66be",
+   "target": 823,
+   "top_frame_share": 0.0488
+  },
+  "open.topic": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "O",
+   "distinct_2": 0.929,
+   "dropped": 4535,
+   "drops": {
+    "AUTHOR_TRIM": 924,
+    "BANK_PROMPT_ECHO": 1,
+    "DUP_EXACT_PREJUDGE": 262,
+    "DUP_NEAR": 170,
+    "HELDOUT_ECHO": 8,
+    "HELDOUT_VOCAB": 2,
+    "JUDGE_DROP": 914,
+    "LEN_ITEM": 124,
+    "MINED_COPY": 5,
+    "OODH_ECHO": 12,
+    "TPL_TOPIC_SPECIFIC": 2109,
+    "TPL_VALUE_REPEATED": 4
+   },
+   "file": "open.topic.jsonl",
+   "frames": 15,
+   "kept": 15,
+   "kind": "teacher",
+   "p_exact": 0.0065,
+   "ref": "open.topic@70f230007801:g33m33q33",
+   "sha256": "70f23000780130a386fc78c1422fe7e570e0e7cf7582c8581f9babcabc582c30",
+   "target": 1613,
+   "top_frame_share": 0.0667
+  },
+  "pool.assistant_name": {
+   "authors": {
+    "gemma-4-12b": 0.3139,
+    "ministral-3-8b": 0.3431,
+    "qwen3.5-9b": 0.3431
+   },
+   "class": "P",
+   "dropped": 323,
+   "drops": {
+    "AUTHOR_TRIM": 27,
+    "DUP_EXACT": 180,
+    "HELDOUT_POOL": 2,
+    "LEN_ITEM": 46,
+    "WORD_COLLISION": 68
+   },
+   "file": "pool.assistant_name.jsonl",
+   "kept": 137,
+   "kind": "teacher",
+   "ref": "pool.assistant_name@9fa4d625d462:g31m34q34",
+   "sha256": "9fa4d625d462b268b647eed282154299a9ece524e20cf2b2714a3c488552b498"
+  },
+  "pool.avoid_word": {
+   "authors": {
+    "computed": 1.0
+   },
+   "class": "P",
+   "dropped": 0,
+   "drops": {},
+   "file": "pool.avoid_word.jsonl",
+   "kept": 80,
+   "kind": "computed",
+   "ref": "pool.avoid_word@8231092d8d40:computed=100",
+   "sha256": "8231092d8d40abaa6e44f382b1e1dbc473ff4d086b79e35c08e6fce17c929a30"
+  },
+  "pool.chore": {
+   "authors": {
+    "gemma-4-12b": 0.3349,
+    "ministral-3-8b": 0.3397,
+    "qwen3.5-9b": 0.3254
+   },
+   "class": "P",
+   "dropped": 91,
+   "drops": {
+    "DUP_EXACT": 42,
+    "HELDOUT_POOL": 36,
+    "LEN_ITEM": 13
+   },
+   "file": "pool.chore.jsonl",
+   "kept": 209,
+   "kind": "teacher",
+   "ref": "pool.chore@87d485945583:g33m34q33",
+   "sha256": "87d4859455834e76efcf92b0cfcee6eafc35943db831eda8017dc49dea71daaf"
+  },
+  "pool.city": {
+   "authors": {
+    "human:geonames_cities": 1.0
+   },
+   "class": "P",
+   "dropped": 316,
+   "drops": {
+    "DUP_NAME": 46,
+    "FEATURE": 159,
+    "FORM": 69,
+    "HELDOUT_POOL": 6,
+    "LEN_ITEM": 7,
+    "WORD_COLLISION": 29
+   },
+   "file": "pool.city.jsonl",
+   "kept": 3000,
+   "kind": "human",
+   "ref": "pool.city@e73eea0b7060:human:geonames_cities=100",
+   "sha256": "e73eea0b7060572aed80b55e57f3391f67e8b8c3d0a27cf61133c6cdb20313c3",
+   "target": 3000
+  },
+  "pool.entity_kind": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "P",
+   "dropped": 95,
+   "drops": {
+    "ENTITY_FEW_ATTRS": 87,
+    "HELDOUT_POOL": 7,
+    "NON_ENGLISH": 1
+   },
+   "file": "pool.entity_kind.jsonl",
+   "kept": 5,
+   "kind": "teacher",
+   "ref": "pool.entity_kind@3968b2e43f1f:g100",
+   "sha256": "3968b2e43f1f8c3a088758cce9dbcc10e51d2bbc16d66e6c635d89215148b97f"
+  },
+  "pool.food": {
+   "authors": {
+    "gemma-4-12b": 0.3192,
+    "ministral-3-8b": 0.3305,
+    "qwen3.5-9b": 0.3503
+   },
+   "class": "P",
+   "dropped": 246,
+   "drops": {
+    "AUTHOR_TRIM": 20,
+    "DUP_EXACT": 131,
+    "HELDOUT_POOL": 1,
+    "LEN_ITEM": 90,
+    "NON_ENGLISH": 4
+   },
+   "file": "pool.food.jsonl",
+   "kept": 354,
+   "kind": "teacher",
+   "ref": "pool.food@6ff82efb1709:g32m33q35",
+   "sha256": "6ff82efb17093f6d31ce04d573208125c4eaa3faef4edd488dd0012b1169b760"
+  },
+  "pool.grocery": {
+   "authors": {
+    "gemma-4-12b": 0.3128,
+    "ministral-3-8b": 0.3436,
+    "qwen3.5-9b": 0.3436
+   },
+   "class": "P",
+   "dropped": 373,
+   "drops": {
+    "AUTHOR_TRIM": 49,
+    "DUP_EXACT": 309,
+    "HELDOUT_POOL": 5,
+    "LEN_ITEM": 10
+   },
+   "file": "pool.grocery.jsonl",
+   "kept": 227,
+   "kind": "teacher",
+   "ref": "pool.grocery@cf1a0161404f:g31m34q34",
+   "sha256": "cf1a0161404f4f2a750c6fe3a2923bdb985f1716257c7a4a31c196e5480ca63c"
+  },
+  "pool.hobby": {
+   "authors": {
+    "gemma-4-12b": 0.3162,
+    "ministral-3-8b": 0.3419,
+    "qwen3.5-9b": 0.3419
+   },
+   "class": "P",
+   "dropped": 343,
+   "drops": {
+    "AUTHOR_TRIM": 117,
+    "DUP_EXACT": 109,
+    "HELDOUT_POOL": 38,
+    "JUDGE_DROP": 36,
+    "LEN_ITEM": 43
+   },
+   "file": "pool.hobby.jsonl",
+   "kept": 117,
+   "kind": "teacher",
+   "ref": "pool.hobby@b3fed19c07a3:g32m34q34",
+   "sha256": "b3fed19c07a39040d93452ffda63a203b99cf8bae5ef0d14ba4cd131e303fddf"
+  },
+  "pool.job": {
+   "authors": {
+    "gemma-4-12b": 0.343,
+    "ministral-3-8b": 0.343,
+    "qwen3.5-9b": 0.314
+   },
+   "class": "P",
+   "dropped": 428,
+   "drops": {
+    "AUTHOR_TRIM": 100,
+    "DUP_EXACT": 314,
+    "HELDOUT_POOL": 10,
+    "LEN_ITEM": 2,
+    "NON_ENGLISH": 1,
+    "SAFETY": 1
+   },
+   "file": "pool.job.jsonl",
+   "kept": 172,
+   "kind": "teacher",
+   "ref": "pool.job@951b5f8d9349:g34m34q31",
+   "sha256": "951b5f8d93495fcd8310d0f4ecea138fa801263ab9930e878be2ba2edbb48860"
+  },
+  "pool.object": {
+   "authors": {
+    "gemma-4-12b": 0.3393,
+    "ministral-3-8b": 0.3452,
+    "qwen3.5-9b": 0.3155
+   },
+   "class": "P",
+   "dropped": 264,
+   "drops": {
+    "AUTHOR_TRIM": 41,
+    "DUP_EXACT": 89,
+    "HELDOUT_POOL": 68,
+    "JUDGE_DROP": 15,
+    "LEN_ITEM": 51
+   },
+   "file": "pool.object.jsonl",
+   "kept": 336,
+   "kind": "teacher",
+   "ref": "pool.object@72b47c9a6d11:g34m35q32",
+   "sha256": "72b47c9a6d11538a32ef4c94bf665abe16214491b386b4cb1171038c51a1b1be"
+  },
+  "pool.pet_name": {
+   "authors": {
+    "gemma-4-12b": 0.3259,
+    "ministral-3-8b": 0.3527,
+    "qwen3.5-9b": 0.3214
+   },
+   "class": "P",
+   "dropped": 976,
+   "drops": {
+    "AUTHOR_TRIM": 74,
+    "DUP_EXACT": 874,
+    "HELDOUT_POOL": 4,
+    "LEN_ITEM": 24
+   },
+   "file": "pool.pet_name.jsonl",
+   "kept": 224,
+   "kind": "teacher",
+   "ref": "pool.pet_name@42c3e8cfc465:g33m35q32",
+   "sha256": "42c3e8cfc465b333daf35e30632f5bb1bc3ed4f4e1a349b221f3a57627c27b11"
+  },
+  "pool.plan": {
+   "authors": {
+    "gemma-4-12b": 0.3421,
+    "ministral-3-8b": 0.3421,
+    "qwen3.5-9b": 0.3158
+   },
+   "class": "P",
+   "dropped": 486,
+   "drops": {
+    "AUTHOR_TRIM": 61,
+    "DUP_EXACT": 38,
+    "HELDOUT_POOL": 85,
+    "JUDGE_DROP": 259,
+    "LEN_ITEM": 43
+   },
+   "file": "pool.plan.jsonl",
+   "kept": 114,
+   "kind": "teacher",
+   "ref": "pool.plan@7a7b2fcb7fa3:g34m34q32",
+   "sha256": "7a7b2fcb7fa36a39fdba7542eb6d4d9163eedefd2ad49344dc6be321731b51ac"
+  },
+  "pool.relation": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "P",
+   "dropped": 33,
+   "drops": {
+    "AUTHOR_TRIM": 17,
+    "DUP_EXACT": 11,
+    "LEN_ITEM": 5
+   },
+   "file": "pool.relation.jsonl",
+   "kept": 27,
+   "kind": "teacher",
+   "ref": "pool.relation@e754a8cbf296:g33m33q33",
+   "sha256": "e754a8cbf29656bb496e94d971e9251f06b6b85118bf19a01e8f8a38d7ef6cd5"
+  },
+  "pool.req_adj": {
+   "authors": {
+    "computed": 1.0
+   },
+   "class": "P",
+   "dropped": 1,
+   "drops": {
+    "SAFETY_LIST": 1
+   },
+   "file": "pool.req_adj.jsonl",
+   "kept": 895,
+   "kind": "computed",
+   "ref": "pool.req_adj@b13b3db38f58:computed=100",
+   "sha256": "b13b3db38f586fd712f0aec14228ef3ff52f55d2558425fc4ce6b7a9782e1e00"
+  },
+  "pool.req_noun": {
+   "authors": {
+    "computed": 1.0
+   },
+   "class": "P",
+   "dropped": 3,
+   "drops": {
+    "SAFETY_LIST": 3
+   },
+   "file": "pool.req_noun.jsonl",
+   "kept": 2376,
+   "kind": "computed",
+   "ref": "pool.req_noun@08899daf0331:computed=100",
+   "sha256": "08899daf0331eb074f7fb380c7400ad00a58adcd4ea98487d28d9f7175b395fd"
+  },
+  "pool.req_verb": {
+   "authors": {
+    "computed": 1.0
+   },
+   "class": "P",
+   "dropped": 1,
+   "drops": {
+    "SAFETY_LIST": 1
+   },
+   "file": "pool.req_verb.jsonl",
+   "kept": 712,
+   "kind": "computed",
+   "ref": "pool.req_verb@d40e0e02c6b8:computed=100",
+   "sha256": "d40e0e02c6b8307fe76df8ff7ff903dbf777b48df895917e9bfacc411f82afc1"
+  },
+  "recap": {
+   "authors": {
+    "gemma-4-12b": 0.3426,
+    "ministral-3-8b": 0.3148,
+    "qwen3.5-9b": 0.3426
+   },
+   "class": "S",
+   "distinct_2": 0.4545,
+   "dropped": 324,
+   "drops": {
+    "AUTHOR_TRIM": 149,
+    "DUP_EXACT_PREJUDGE": 1,
+    "DUP_NEAR": 8,
+    "HELDOUT_ECHO": 16,
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 52,
+    "LEN_ITEM": 96,
+    "STAGE_DIR": 1
+   },
+   "file": "recap.jsonl",
+   "frames": 215,
+   "kept": 216,
+   "kind": "teacher",
+   "p_exact": 0.7,
+   "ref": "recap@01350d8aeda3:g34m31q34",
+   "sha256": "01350d8aeda327a39f248614068bb2e3036accc38ef76adbf48a91f51a4ac1d4",
+   "target": 180,
+   "top_frame_share": 0.0093
+  },
+  "return": {
+   "authors": {
+    "gemma-4-12b": 0.3415,
+    "ministral-3-8b": 0.3171,
+    "qwen3.5-9b": 0.3415
+   },
+   "class": "S",
+   "distinct_2": 0.8094,
+   "dropped": 819,
+   "drops": {
+    "AUTHOR_TRIM": 337,
+    "HELDOUT_VOCAB": 6,
+    "JUDGE_DROP": 80,
+    "LEN_ITEM": 353,
+    "SAFETY_LIST": 1,
+    "STAGE_DIR": 42
+   },
+   "file": "return.jsonl",
+   "frames": 41,
+   "kept": 41,
+   "kind": "teacher",
+   "p_exact": 0.0957,
+   "ref": "return@90132d0adfdb:g34m32q34",
+   "sha256": "90132d0adfdb575882f818f15e23d4ad19b8799406588ff2bc0d819c73ecb9db",
+   "target": 300,
+   "top_frame_share": 0.0244
+  },
+  "rule.avoid_word": {
+   "authors": {
+    "gemma-4-12b": 0.3421,
+    "ministral-3-8b": 0.3158,
+    "qwen3.5-9b": 0.3421
+   },
+   "class": "R",
+   "distinct_2": 0.5794,
+   "dropped": 188,
+   "drops": {
+    "AUTHOR_TRIM": 36,
+    "BANK_PROMPT_ECHO": 6,
+    "DUP_EXACT_PREJUDGE": 20,
+    "DUP_NEAR": 32,
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 51,
+    "LEN_ITEM": 3,
+    "NON_ENGLISH": 2,
+    "SAFETY_LIST": 2,
+    "TPL_VALUE_MISSING": 29,
+    "TPL_VALUE_REPEATED": 6
+   },
+   "file": "rule.avoid_word.jsonl",
+   "frames": 145,
+   "kept": 152,
+   "kind": "teacher",
+   "p_exact": 0.7,
+   "ref": "rule.avoid_word@c49e81b4fa52:g34m32q34",
+   "sha256": "c49e81b4fa52b057d8dcf29643d60e69d9cab3fd925f24f936eecd72e12ca964",
+   "target": 113,
+   "top_frame_share": 0.0263
+  },
+  "rule.call_user": {
+   "authors": {
+    "gemma-4-12b": 0.3419,
+    "ministral-3-8b": 0.3162,
+    "qwen3.5-9b": 0.3419
+   },
+   "class": "R",
+   "distinct_2": 0.4636,
+   "dropped": 183,
+   "drops": {
+    "AUTHOR_TRIM": 58,
+    "BANK_PROMPT_ECHO": 2,
+    "DUP_EXACT_PREJUDGE": 17,
+    "DUP_NEAR": 32,
+    "JUDGE_DROP": 20,
+    "LEN_ITEM": 2,
+    "OODH_ECHO": 1,
+    "TPL_VALUE_MISSING": 51
+   },
+   "file": "rule.call_user.jsonl",
+   "frames": 117,
+   "kept": 117,
+   "kind": "teacher",
+   "p_exact": 0.7,
+   "ref": "rule.call_user@a8c5b90efefa:g34m32q34",
+   "sha256": "a8c5b90efefae122e4b04f2277b01f3151a59ea40100ee6edb4cc72955717f4c",
+   "target": 100,
+   "top_frame_share": 0.0085
+  },
+  "rule.end_question": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "R",
+   "distinct_2": 0.7088,
+   "dropped": 299,
+   "drops": {
+    "AUTHOR_TRIM": 25,
+    "BANK_PROMPT_ECHO": 17,
+    "HELDOUT_ECHO": 3,
+    "JUDGE_DROP": 223,
+    "LEN_ITEM": 31
+   },
+   "file": "rule.end_question.jsonl",
+   "frames": 21,
+   "kept": 21,
+   "kind": "teacher",
+   "p_exact": 0.14,
+   "ref": "rule.end_question@946248304a52:g33m33q33",
+   "sha256": "946248304a52f8666179579ed938e8c571e61f5fc80278e4f3dfd3dae3acf3a3",
+   "target": 105,
+   "top_frame_share": 0.0476
+  },
+  "rule.max_words": {
+   "authors": {
+    "gemma-4-12b": 0.3415,
+    "ministral-3-8b": 0.3415,
+    "qwen3.5-9b": 0.3171
+   },
+   "class": "R",
+   "distinct_2": 0.6244,
+   "dropped": 1009,
+   "drops": {
+    "AUTHOR_TRIM": 90,
+    "BANK_PROMPT_ECHO": 4,
+    "DUP_EXACT_PREJUDGE": 28,
+    "DUP_NEAR": 16,
+    "HELDOUT_VOCAB": 1,
+    "JUDGE_DROP": 186,
+    "LEN_ITEM": 5,
+    "SUPERSEDED_V1": 595,
+    "TPL_VALUE_MISSING": 79,
+    "TPL_VALUE_REPEATED": 5
+   },
+   "file": "rule.max_words.jsonl",
+   "frames": 41,
+   "kept": 41,
+   "kind": "teacher",
+   "p_exact": 0.2126,
+   "ref": "rule.max_words@d7b693709429:g34m34q32",
+   "sha256": "d7b693709429c31cc387b83e155de5d1acd4964a7ae6779e3236151d109c2e53",
+   "target": 135,
+   "top_frame_share": 0.0244
+  },
+  "rule.one_sentence": {
+   "authors": {
+    "gemma-4-12b": 1.0
+   },
+   "class": "R",
+   "distinct_2": 1.0,
+   "dropped": 299,
+   "drops": {
+    "BANK_PROMPT_ECHO": 1,
+    "DUP_EXACT_PREJUDGE": 1,
+    "HELDOUT_VOCAB": 2,
+    "JUDGE_DROP": 237,
+    "LEN_ITEM": 57,
+    "SAFETY": 1
+   },
+   "file": "rule.one_sentence.jsonl",
+   "frames": 1,
+   "kept": 1,
+   "kind": "teacher",
+   "p_exact": 0.007,
+   "ref": "rule.one_sentence@7c24ede18473:g100",
+   "sha256": "7c24ede184736212d1f5dbf934561eaf9615c394f4951aac6655b0ecc06bf352",
+   "target": 100,
+   "top_frame_share": 1.0
+  },
+  "rule.override": {
+   "authors": {
+    "gemma-4-12b": 0.3415,
+    "ministral-3-8b": 0.3171,
+    "qwen3.5-9b": 0.3415
+   },
+   "class": "R",
+   "distinct_2": 0.8383,
+   "dropped": 49,
+   "drops": {
+    "AUTHOR_TRIM": 23,
+    "JUDGE_DROP": 26
+   },
+   "file": "rule.override.jsonl",
+   "frames": 38,
+   "kept": 41,
+   "kind": "teacher",
+   "p_exact": 0.7,
+   "ref": "rule.override@f64f2f20f81a:g34m32q34",
+   "sha256": "f64f2f20f81a5959fb631467f5c70d2c4baf26c77ab6f41b2009b3710f02cd16",
+   "target": 30,
+   "top_frame_share": 0.0488
+  },
+  "rule.start_name": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "R",
+   "distinct_2": 0.6705,
+   "dropped": 219,
+   "drops": {
+    "AUTHOR_TRIM": 84,
+    "BANK_PROMPT_ECHO": 1,
+    "DUP_NEAR": 5,
+    "JUDGE_DROP": 32,
+    "LEN_ITEM": 12,
+    "TPL_VALUE_MISSING": 39,
+    "TPL_VALUE_REPEATED": 45,
+    "USER_VOICE": 1
+   },
+   "file": "rule.start_name.jsonl",
+   "frames": 21,
+   "kept": 21,
+   "kind": "teacher",
+   "p_exact": 0.1885,
+   "ref": "rule.start_name@81e3bb831fd6:g33m33q33",
+   "sha256": "81e3bb831fd65151adb8a56e9234915ebf9aba3d65c36cc0bdc413a399334058",
+   "target": 78,
+   "top_frame_share": 0.0476
+  },
+  "social.how_are_you": {
+   "authors": {
+    "ministral-3-8b": 0.9091,
+    "qwen3.5-9b": 0.0909
+   },
+   "class": "S",
+   "distinct_2": 0.9745,
+   "dropped": 99,
+   "drops": {
+    "DUP_EXACT_PREJUDGE": 6,
+    "JUDGE_DROP": 76,
+    "LEN_ITEM": 16,
+    "SAFETY_LIST": 1
+   },
+   "file": "social.how_are_you.jsonl",
+   "frames": 11,
+   "kept": 11,
+   "kind": "teacher",
+   "p_exact": 0.22,
+   "ref": "social.how_are_you@0295f7eb0dc7:m91q9",
+   "sha256": "0295f7eb0dc78ecc9f78af9768c110acafce4de8f90abfd905f58c62d9f63544",
+   "target": 35,
+   "top_frame_share": 0.0909
+  },
+  "social.thanks": {
+   "authors": {
+    "gemma-4-12b": 0.3415,
+    "ministral-3-8b": 0.3171,
+    "qwen3.5-9b": 0.3415
+   },
+   "class": "S",
+   "distinct_2": 0.8507,
+   "dropped": 79,
+   "drops": {
+    "AUTHOR_TRIM": 36,
+    "DUP_EXACT_PREJUDGE": 3,
+    "DUP_NEAR": 2,
+    "JUDGE_DROP": 20,
+    "LEN_ITEM": 18
+   },
+   "file": "social.thanks.jsonl",
+   "frames": 40,
+   "kept": 41,
+   "kind": "teacher",
+   "p_exact": 0.7,
+   "ref": "social.thanks@b64f7f35d158:g34m32q34",
+   "sha256": "b64f7f35d1582a2f1f8354f37893d21cf00f162457bb68c2146b885a4925fda5",
+   "target": 38,
+   "top_frame_share": 0.0488
+  },
+  "social.who_are_you": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3175,
+    "qwen3.5-9b": 0.3492
+   },
+   "class": "S",
+   "distinct_2": 0.6454,
+   "dropped": 57,
+   "drops": {
+    "AUTHOR_TRIM": 6,
+    "DUP_EXACT_PREJUDGE": 7,
+    "DUP_NEAR": 1,
+    "JUDGE_DROP": 28,
+    "LEN_ITEM": 15
+   },
+   "file": "social.who_are_you.jsonl",
+   "frames": 63,
+   "kept": 63,
+   "kind": "teacher",
+   "p_exact": 0.7,
+   "ref": "social.who_are_you@eb1eeee942d1:g33m32q35",
+   "sha256": "eb1eeee942d1bae5c702d14c5c7c172d7ae796f8e21fe64c07eae7e19a25bb51",
+   "target": 38,
+   "top_frame_share": 0.0159
+  },
+  "swap.q": {
+   "authors": {
+    "gemma-4-12b": 0.3421,
+    "ministral-3-8b": 0.3158,
+    "qwen3.5-9b": 0.3421
+   },
+   "class": "S",
+   "distinct_2": 0.6585,
+   "dropped": 1304,
+   "drops": {
+    "AI_ISM": 1,
+    "AUTHOR_TRIM": 15,
+    "BANK_PROMPT_ECHO": 1,
+    "DUP_EXACT_PREJUDGE": 55,
+    "DUP_NEAR": 2,
+    "JUDGE_DROP": 171,
+    "LEN_ITEM": 168,
+    "NON_ENGLISH": 1,
+    "SUPERSEDED_V1": 427,
+    "TPL_VALUE_MISSING": 307,
+    "TPL_VALUE_REPEATED": 156
+   },
+   "file": "swap.q.jsonl",
+   "frames": 76,
+   "kept": 76,
+   "kind": "teacher",
+   "p_exact": 0.266,
+   "ref": "swap.q@9b3ba2bd613e:g34m32q34",
+   "sha256": "9b3ba2bd613e86deeb0d172644fe6df8591e0497e1ddac415a6194c0a50ef9b1",
+   "target": 200,
+   "top_frame_share": 0.0132
+  },
+  "system.lookup": {
+   "authors": {
+    "gemma-4-12b": 0.3143,
+    "ministral-3-8b": 0.3429,
+    "qwen3.5-9b": 0.3429
+   },
+   "class": "Y",
+   "distinct_2": 0.4043,
+   "dropped": 605,
+   "drops": {
+    "AUTHOR_TRIM": 115,
+    "BANK_PROMPT_ECHO": 335,
+    "DUP_EXACT_PREJUDGE": 8,
+    "DUP_NEAR": 14,
+    "EMOJI": 2,
+    "JUDGE_DROP": 39,
+    "LEN_ITEM": 1,
+    "STAGE_DIR": 80,
+    "TPL_VALUE_MISSING": 4,
+    "TPL_VALUE_REPEATED": 7
+   },
+   "file": "system.lookup.jsonl",
+   "frames": 35,
+   "kept": 35,
+   "kind": "teacher",
+   "p_exact": 0.115,
+   "ref": "system.lookup@fe1e221a0ae3:g31m34q34",
+   "sha256": "fe1e221a0ae3dbed3dd17c1789a407f458f2c16a8960ec6fb5eb96aaa94ba750",
+   "target": 213,
+   "top_frame_share": 0.0286
+  },
+  "system.plain": {
+   "authors": {
+    "gemma-4-12b": 0.3333,
+    "ministral-3-8b": 0.3333,
+    "qwen3.5-9b": 0.3333
+   },
+   "class": "Y",
+   "distinct_2": 0.8462,
+   "dropped": 2977,
+   "drops": {
+    "AI_ISM": 4,
+    "AUTHOR_TRIM": 160,
+    "DUP_EXACT_PREJUDGE": 1952,
+    "DUP_NEAR": 58,
+    "JUDGE_DROP": 62,
+    "LEN_ITEM": 305,
+    "TPL_VALUE_MISSING": 424,
+    "TPL_VALUE_REPEATED": 12
+   },
+   "file": "system.plain.jsonl",
+   "frames": 3,
+   "kept": 3,
+   "kind": "teacher",
+   "p_exact": 0.0021,
+   "ref": "system.plain@2a742f452431:g33m33q33",
+   "sha256": "2a742f452431db17ce200cfd4af9efd292c6d8e8f07eab83ba07a0e32b1cdb73",
+   "target": 993,
+   "top_frame_share": 0.3333
+  },
+  "topic": {
+   "authors": {
+    "gemma-4-12b": 0.3433,
+    "ministral-3-8b": 0.3433,
+    "qwen3.5-9b": 0.3134
+   },
+   "class": "T",
+   "dropped": 1168,
+   "drops": {
+    "AUTHOR_TRIM": 389,
+    "HELDOUT_POOL": 98,
+    "LEN_ITEM": 166,
+    "NON_ENGLISH": 1,
+    "NOT_SELECTED": 244,
+    "SUPERSEDED_V1": 3,
+    "TOPIC_FORM": 1,
+    "TOPIC_NAME": 4,
+    "TOPIC_NO_WORDSETS": 208,
+    "TOPIC_PERSONAL": 54
+   },
+   "file": "topic.jsonl",
+   "kept": 402,
+   "kind": "teacher",
+   "ref": "topic@1d78b52dd3b8:g34m34q31",
+   "sha256": "1d78b52dd3b8e769ce503a12eae5a9b79a42545af9b4e327d63476031c5408c8"
+  },
+  "topicwords": {
+   "authors": {
+    "gemma-4-12b": 0.3466,
+    "ministral-3-8b": 0.3475,
+    "qwen3.5-9b": 0.306
+   },
+   "class": "W",
+   "dropped": 2022,
+   "drops": {
+    "TOPIC_NOT_SELECTED": 1551,
+    "TOPIC_TEXT_MISMATCH": 471
+   },
+   "file": "topicwords.jsonl",
+   "generic_n": 378,
+   "generic_sha256": "c8ab04df08881ab9a66e41c416a1aecd160be1c2b27c787cc33dc676aa853acc",
+   "kept": 1157,
+   "kind": "teacher",
+   "ref": "topicwords@f34da051f3ff:g35m35q31",
+   "sha256": "f34da051f3ffe79aded44b7a3b6ff846b321fa8d4bce4035b9256d0ba7697373",
+   "topics": 402
+  }
+ },
+ "code_sha256": "3db7d7c91354da8d2fddb13143920304415eedd0ec4e18870441109f71c7b79b",
+ "excluded": {
+  "instr.para": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.fav_colour.plant": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.fav_colour.twin": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.fav_food.plant": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.fav_food.twin": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.hobby.plant": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.item_colour.plant": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.job.plant": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.job.twin": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.person_job.plant": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.person_name.bait": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.person_name.plant": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.pet_name.query": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.plan_city.bait": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.user_name.query": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "key.user_name.twin": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "label.pet_name": {
+   "codes": [
+    "EMPTY"
+   ],
+   "n": 1
+  },
+  "label.plan_city": {
+   "codes": [
+    "EMPTY"
+   ],
+   "n": 1
+  },
+  "label.plan_month": {
+   "codes": [
+    "EMPTY"
+   ],
+   "n": 1
+  },
+  "label.plan_time": {
+   "codes": [
+    "EMPTY"
+   ],
+   "n": 1
+  },
+  "marker.fix": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  },
+  "pool.pet_kind": {
+   "codes": [
+    "AUTHOR_SHARE"
+   ],
+   "n": 1
+  }
+ },
+ "fixture": false,
+ "gate_hash": "f8c8742ff496b8b9",
+ "human_bankset": "human_v0",
+ "rc12": "pending",
+ "schema": "bankpass-manifest-v1",
+ "stage": {
+  "entity_attr_drops": {
+   "NO_PRED": 30
+  },
+  "label_votes": 12,
+  "plan_sha256": "d238cf95ad5824c48b8acf927f109f93d887751e55f762e104e8e4762d232be8",
+  "selected_without_wordset_calls": 0,
+  "topic_text_mismatch": {
+   "intent": 1238,
+   "open.topic_spec": 305,
+   "topicwords.raw": 471
+  },
+  "topics_kept": 402,
+  "topics_selected": 999,
+  "votes": "w4 re-vote (amendment 7)"
+ },
+ "status": "frozen",
+ "version": "bankpass-v1",
+ "w4_gates": {
+  "mined_examples": {
+   "n": 6,
+   "texts": 1276
+  },
+  "oodh_reserved_user_turns": {
+   "n": 8,
+   "texts": 14202
+  },
+  "rc12_dev": {
+   "n": 8,
+   "texts": 18040
+  },
+  "safety_terms": true
+ },
+ "wordlist": "wordlist@d128e120c743:computed",
+ "wordlist_v0": "wordlist@4a36995f044f:computed"
+}

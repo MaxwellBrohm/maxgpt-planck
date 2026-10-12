@@ -1,0 +1,55 @@
+S005 STAGE 2 VERDICT TABLES (analyze.py verdicts on the copied seed runs, 2026-10-11; SCREENS.txt STAGE 2 VERDICTS (2026-10-11))
+A 5M loss reading only (C8): bpb at 5M, 250.0M slots, starter mix, tok_v0_8k. No RC-12 or Tier 0 score.
+Class SIA, k 2, seeds 101 102, pick g 1 (C3 g-check, seed 1).
+d = arm - BASE (bpb; negative = arm better).
+
+C7 READINGS
+arm          metric     d s101    d s102    dbar      thr      delta    SD_ref   df  p (two-sided)  label
+forget       CHAT       -0.01148  -0.01627  -0.01388  0.00632  0.01154  0.00378  7   0.00127  BETTER
+forget       PROSE      -0.01006  -0.01127  -0.01066  0.00458  0.01387  0.00274  7   0.000907  BETTER
+forget       cccc       -0.00911  -0.01196  -0.01054  0.00521  0.01319  0.00311  7   0.002  BETTER
+forget       gutenberg  -0.01188  -0.01153  -0.01170  0.00383  0.01501  0.00229  7   0.000173  BETTER
+forget       wikimedia  -0.00915  -0.01031  -0.00973  0.00596  0.01342  0.00356  7   0.00619  BETTER
+
+VERDICT S005.forget: NOMINATE; labels none; Holm (family of 9 so far): holds (p 0.00127)
+C4 pooled SIA check CHAT: SD 0.1832% of BASE vs limit 0.4646% (df 7, 7 arms): ok
+C4 pooled SIA check PROSE: SD 0.0984% of BASE vs limit 0.2801% (df 7, 7 arms): ok
+At E3 arm A's mean (SD_ref, thr and delta scaled): NOMINATE
+BASE replay label: not applicable; onset: not applicable
+
+C5 REPORTED, NO RULE (d s101, d s102; F = final checkpoint, M = mean of the 3 scored checkpoints)
+forget       CHAT assistant      -0.01115  -0.01347  mean -0.01231  BASE 1.11066 1.11661
+forget       CHAT user           -0.01400  -0.03792  mean -0.02596  BASE 1.46087 1.47146
+forget       F(CHAT)             -0.01148  -0.01627  mean -0.01388  BASE 1.15084 1.15732
+forget       F(PROSE)            -0.01006  -0.01127  mean -0.01066  BASE 1.38658 1.38825
+forget       M(CHAT)             -0.01155  -0.01590  mean -0.01373  BASE 1.15477 1.16075
+forget       M(PROSE)            -0.00978  -0.01131  mean -0.01055  BASE 1.39130 1.39277
+forget       PROSE cccc          -0.00911  -0.01196  mean -0.01054  BASE 1.31659 1.32061
+forget       PROSE gutenberg     -0.01188  -0.01153  mean -0.01170  BASE 1.50207 1.49897
+forget       PROSE wikimedia     -0.00915  -0.01031  mean -0.00973  BASE 1.33946 1.34361
+forget       dolly               -0.01199  -0.02499  mean -0.01849  BASE 1.34071 1.35850
+forget       irc                 -0.00745  -0.01265  mean -0.01005  BASE 1.55923 1.57135
+forget       stackexchange       -0.00668  -0.00949  mean -0.00809  BASE 1.36126 1.36393
+forget       train loss last 2%  -0.02211  -0.02915  mean -0.02563  BASE 3.17504 3.20969
+
+CLIP RATE AND SPEED (log.jsonl gnorm over the 1.0 clip; median tok/s from the third record)
+s005_base_s101           clipped   5 of 763  rate 0.66%  gnorm max 2.0324  tok/s 191,762
+s005_base_s102           clipped   9 of 763  rate 1.18%  gnorm max 2.0649  tok/s 191,422
+s005_forget_g1_s101      clipped   6 of 763  rate 0.79%  gnorm max 2.1684  tok/s 85,096
+s005_forget_g1_s102      clipped   8 of 763  rate 1.05%  gnorm max 2.0714  tok/s 85,053
+
+IND ONSET (AMENDMENT BASE-DIAG ONSET RULE; steps)
+not read: S005 pairs with its own BASE (AMENDMENT BASE-DIAG)
+descriptive (C6): arm [459, 612]  own BASE [459, 459]  d [0, 153]  earlier 0, later 1, same 1
+
+C6 READINGS (AMENDMENT C6-DIAG READING RULE; E3 PART 4d SDs, absolute units; c6_tables.txt has all 9)
+HD_asst   arm 0.08785 0.08708  BASE 0.11010 0.09182  d -0.02226 -0.00474  dbar -0.01350  thr 0.00559  p 0.000726  LOWER  class new init  Holm holds  [noise check failed (pooled SIA)]
+          re-read SD 0.00334 replaces the SIA SD 0.00520 (SMALLER)
+          at the registered SD: SD 0.00520, df 7, thr 0.00870  p 0.00799  LOWER  Holm does not hold  (reported, no rule)
+          at the observed pooled SD: SD 0.01068, df 7, thr 0.01786  p 0.117  UNRESOLVED  Holm does not hold  (reported, no rule)
+HD_user   arm 0.18489 0.18759  BASE 0.18945 0.18661  d -0.00457 +0.00097  dbar -0.00180  thr 0.01380  p 0.767  UNRESOLVED  class SIA  Holm does not hold
+HDn_asst  arm 0.10756 0.09775  BASE 0.18775 0.10339  d -0.08019 -0.00564  dbar -0.04291  descriptive: higher 0, lower 2
+HDn_user  arm 0.17410 0.12786  BASE 0.13196 0.13596  d +0.04214 -0.00810  dbar +0.01702  descriptive: higher 1, lower 1
+IND       arm 5.31499 5.27094  BASE 6.31779 9.38782  d -1.00280 -4.11688  dbar -2.55984  thr 4.40669  p 0.212  UNRESOLVED  class SIA  Holm does not hold
+NEAR ITS INIT (S005): does not fire; per seed {"101": 0.7919117713626095, "102": 0.8223594561135705}; threshold 1023.0
+S005 DIAGNOSTICS flag (BETTER on CHAT with LOWER HD_asst): FLAGGED (CHAT BETTER, HD_asst LOWER)

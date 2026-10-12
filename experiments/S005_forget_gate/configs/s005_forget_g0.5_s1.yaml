@@ -1,0 +1,8 @@
+# SCREENS S005 arm forget, g 0.5 x LR5, seed 1: C3 g-check (screens.py)
+extends: ../../screens/configs/screens_base.yaml
+name: s005_forget_g0.5_s1
+out_dir: ../../../planck_root/runs/SCREENS/s005_forget_g0.5_s1
+seed: 1
+optim: {lr: 0.0015, embed_lr: 0.0015, scalar_lr: 0.0015}
+train: {doc_attn: mask, micro_batch: 8, grad_accum: 2}
+model: {forget_gate: true}

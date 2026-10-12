@@ -1,0 +1,41 @@
+PASS E004 H1 alias LIK per seed [0.19, 0.33, 0.33, 0.19, 0.1] = audit [0.19, 0.33, 0.33, 0.19, 0.1]
+PASS E004 H1 ell LIK per seed [0.81, 0.76, 0.76, 0.81, 0.86] = audit [0.81, 0.76, 0.76, 0.81, 0.86]
+PASS E004 H1 pron LIK per seed [1.0, 1.0, 1.0, 1.0, 1.0] = audit [1.0, 1.0, 1.0, 1.0, 1.0]
+PASS E004 H2 alias LIK per seed [0.24, 0.52, 0.38, 0.33, 0.38] = audit [0.24, 0.52, 0.38, 0.33, 0.38]
+PASS E004 H2 ell LIK per seed [0.9, 0.9, 0.67, 0.67, 0.9] = audit [0.9, 0.9, 0.67, 0.67, 0.9]
+PASS E004 H2 pron LIK per seed [0.95, 0.95, 0.95, 0.95, 0.95] = audit [0.95, 0.95, 0.95, 0.95, 0.95]
+PASS alias items 42, placement counts {'adjacent': 9, 'filler': 14, 'B_sep': 19} = step 1's 9/14/19
+PASS H1/H2 alias wrong LIK picks 147 {'A_prev': 139, 'other_after': 1, 'other_before': 2, 'A_earlier': 5} lures 57 = audit (81 + 66; 76 + 63 previous; 3 + 2 older; 3 B)
+PASS H5 wrong LIK picks 78 {'other_after': 49, 'A_prev': 26, 'other_before': 3} = audit (52 other object, 49 after; 26 asked object's own)
+PASS H5 with / without another indirect after [0.66876, 0.84376] = .67/.84
+PASS same label and cells as E004's analyzer
+PASS E004's fixed sub-reading strings are replaced (present in E004's analyzer, absent here)
+PASS the FAIL sub-readings carry the placement split and the wrong picks
+PASS alias reading on E004 (no alias training) REAL LIMIT ['LOW', 'LOW', 'MID', 'LOW', 'LOW']
+PASS cross/chat compared by hash: {'n_a': 384, 'n_b': 184, 'matched': 184, 'flips': 0, 'only_a': 200, 'only_b': 0, 'max_abs_score_diff': 0.0}
+PASS 8 continuity sets, 0 flips
+PASS E004 s1 chat H1: capped 1.0, strict 0.0, first line 0.6094
+PASS alias HIGH needs both >= 0.8, LOW both <= 0.5
+PASS 3 HIGH of 5 -> DATA GAP
+PASS 2 HIGH + 3 missing of 5 planned -> INCONCLUSIVE
+PASS 3 LOW -> REAL LIMIT
+PASS all MID -> INCONCLUSIVE
+PASS AL note only when AL LIK < 0.5 on a majority
+PASS a seed stops iff |chat - plain| <= 0.10 on every pass family (literal 'within')
+PASS stopping learned on a majority of planned seeds
+PASS flips_by_hash {'n_a': 3, 'n_b': 2, 'matched': 1, 'flips': 1, 'only_a': 1, 'only_b': 1, 'max_abs_score_diff': 2}
+PASS a hash with two different scores raises
+PASS family_diff is E005 minus E004 (a missing seed is skipped)
+PASS role classification ['gold', 'A_prev', 'A_earlier', 'A_earlier', 'other_before', 'other_after', 'not_in_context', 'none', 'tie']
+PASS lure flag follows the picked statement
+PASS placement classification ['adjacent', 'filler', 'B_sep']
+PASS facts of the synthetic item {'form': 'alias', 'place': 'filler', 'other_after': True, 'other_ind_after': True}
+PASS nothing after the latest {'form': 'pron', 'place': None, 'other_after': False, 'other_ind_after': False}
+PASS H5 split flags
+PASS LIK tie -> tie; a foil on top -> that foil
+PASS first-line variant: the first line is graded as a stopped reply
+PASS the join refuses a record that does not match its rebuilt item
+PASS empty E005 out: NOT_SCORED, alias INCONCLUSIVE, no crash
+PASS E004 vs itself: every family difference is 0
+PASS 0.797 printed as 0.797 and a small McNemar p in scientific notation
+0 failures; ALL PASS

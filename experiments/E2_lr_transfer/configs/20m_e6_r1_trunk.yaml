@@ -1,0 +1,7 @@
+# E2 20M arm eta 0.006, r 1 (written by e2plan.py; E2 notes, SCHEDULE)
+extends: base20m.yaml
+name: 20m_e6_r1_trunk
+out_dir: ../../../planck_root/runs/E2/20m_e6_r1_trunk
+optim: {lr: 0.006, embed_lr: 0.006, scalar_lr: 0.006}
+schedule: {mode: trunk, branch_points: [6104, 12207]}
+train: {total_steps: 12208, ckpt_every: 244}

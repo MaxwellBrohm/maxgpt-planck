@@ -1,0 +1,69 @@
+baseline: pass
+KILLED    queue_dev_baselines.sh: finished seeds rerun | 1 lines, first: FAIL restart: lock calls 1
+KILLED    queue_dev_baselines.sh: plain before template | 1 lines, first: FAIL default plan: order or content
+KILLED    queue_dev_baselines.sh: greedy last | 1 lines, first: FAIL default plan: order or content
+KILLED    queue_dev_baselines.sh: seed 3 missing | 2 lines, first: FAIL default plan: order or content
+KILLED    queue_dev_baselines.sh: comparator not first | 2 lines, first: FAIL default plan: order or content
+KILLED    queue_dev_baselines.sh: core not by size | 2 lines, first: FAIL default plan: order or content
+KILLED    queue_dev_baselines.sh: an extra missing | 3 lines, first: FAIL default plan: order or content
+KILLED    queue_dev_baselines.sh: the seed does not reach the run | 33 lines, first: FAIL fresh: counts {'key': 'IDEAL template 1 fake dev', 'start': '2026-10-10T17:12:21', 'end': '2026-10-10T17:12:22', 'exit': '0', 'done': '0', 'convs
+KILLED    queue_dev_baselines.sh: the render does not reach the run | 33 lines, first: FAIL fresh: counts {'key': 'IDEAL plain greedy fake dev', 'start': '2026-10-10T17:12:29', 'end': '2026-10-10T17:12:30', 'exit': '0', 'done': '0', 'con
+KILLED    queue_dev_baselines.sh: another lock file | 14 lines, first: FAIL fresh: lock calls [], processes 0
+KILLED    queue_dev_baselines.sh: lock wait not 7200 s | 2 lines, first: FAIL fresh: lock calls [['-E', '75', '-w', '60', '9']], processes 14
+KILLED    queue_dev_baselines.sh: no retry on a lock timeout | 2 lines, first: FAIL lock retry: [{'key': 'IDEAL template greedy fake dev', 'start': '2026-10-10T17:13:47', 'end': '2026-10-10T17:13:47', 'exit': '75', 'done': '0', '
+KILLED    queue_dev_baselines.sh: a lock timeout is not retried | 2 lines, first: FAIL lock retry: [{'key': 'IDEAL template greedy fake dev', 'start': '2026-10-10T17:14:20', 'end': '2026-10-10T17:14:20', 'exit': '75', 'done': '0', '
+KILLED    queue_dev_baselines.sh: a failure does not skip the rest of the render | 10 lines, first: FAIL fresh: failure then skip {'key': 'NOPE template 1 fake dev', 'start': '2026-10-10T17:14:28', 'end': '2026-10-10T17:14:29', 'exit': '1', 'done': '
+KILLED    queue_dev_baselines.sh: one failure skips every later render and model | 24 lines, first: FAIL fresh: failure then skip {'key': 'NOPE plain greedy fake dev', 'start': '2026-10-10T17:14:44', 'end': '2026-10-10T17:14:44', 'exit': 'SKIP', 'don
+KILLED    queue_dev_baselines.sh: STOP file ignored before a wait | 1 lines, first: FAIL STOP
+KILLED    queue_dev_baselines.sh: STOP ignored in a session | 1 lines, first: FAIL D: STOP in a session
+KILLED    queue_dev_baselines.sh: a model without an engine is run | 13 lines, first: FAIL fresh: status keys/order ['IDEAL template greedy fake dev', 'IDEAL template greedy fake owncf', 'IDEAL template 1 fake dev', 'IDEAL template 1 fa
+KILLED    queue_dev_baselines.sh: status for a run finished earlier | 1 lines, first: FAIL half: [{'key': 'IDEAL template 1 fake dev', 'start': '2026-10-10T17:16:18', 'end': '2026-10-10T17:16:18', 'exit': '0', 'done': '1', 'convs': '12'
+KILLED    queue_dev_baselines.sh: no status for the own-cf twin | 7 lines, first: FAIL fresh: status keys/order ['IDEAL template greedy fake dev', 'IDEAL template 1 fake dev', 'IDEAL plain greedy fake dev', 'IDEAL plain 1 fake dev',
+KILLED    queue_dev_baselines.sh: (test speed) limit dropped: full dev | 31 lines, first: FAIL fresh: counts {'key': 'IDEAL template greedy fake dev', 'start': '2026-10-10T17:16:50', 'end': '2026-10-10T17:16:51', 'exit': '0', 'done': '1', '
+KILLED    queue_dev_baselines.sh: no DONE marker | 3 lines, first: FAIL fresh: DONE
+KILLED    queue_dev_baselines.sh: the engine or model does not reach the run | 77 lines, first: FAIL fresh: counts {'key': 'CAPPER template greedy fake dev', 'start': '2026-10-10T17:17:22', 'end': '2026-10-10T17:17:22', 'exit': '0', 'done': '0', 
+KILLED    queue_dev_baselines.sh: engines.json unread | 68 lines, first: FAIL fresh: status keys/order ['IDEAL template greedy - dev', 'IDEAL template greedy - owncf', 'IDEAL template 1 - dev', 'IDEAL template 1 - owncf', '
+KILLED    queue_dev_baselines.sh: sessions off: one hold per process | 10 lines, first: FAIL fresh: lock calls [['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', 
+KILLED    queue_dev_baselines.sh: no 5 min tail by default | 3 lines, first: FAIL A: 150 s processes, sessions [12, 4] (want 11, 5)
+KILLED    queue_dev_baselines.sh: the tail ignored | 2 lines, first: FAIL A: 150 s processes, sessions [12, 4] (want 11, 5)
+KILLED    queue_dev_baselines.sh: the last process's time ignored (a long model stretches a session) | 1 lines, first: FAIL B: 1000 s processes, sessions [2, 1]
+KILLED    queue_dev_baselines.sh: no release on crossing SESSION_S | 1 lines, first: FAIL C: SESSION_S 0, sessions [3, 1]
+KILLED    queue_dev_baselines.sh: release only on crossing | 3 lines, first: FAIL A: 150 s processes, sessions [12, 4] (want 11, 5)
+KILLED    queue_dev_baselines.sh: lock held through the DONE marker | 1 lines, first: FAIL A: lock at status / DONE calls [True, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True]
+KILLED    queue_dev_baselines.sh: lock released mid-process | 12 lines, first: FAIL fresh: lock calls [['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', 
+KILLED    queue_dev_baselines.sh: the process inherits gpu.lock's fd | 7 lines, first: FAIL fresh: lock calls [['-E', '75', '-w', '7200', '9']], processes 0
+KILLED    queue_dev_baselines.sh: the process inherits the queue lock's fd | 6 lines, first: FAIL fresh: lock calls [['-E', '75', '-w', '7200', '9']], processes 0
+KILLED    queue_dev_baselines.sh: a crashed queue's lock goes while its process runs | 1 lines, first: FAIL E: queue killed mid-process: gpu.lock held False, queue lock held False
+KILLED    queue_dev_baselines.sh: the gpu.lock waiter keeps the queue lock (killed mid-wait) | 1 lines, first: FAIL killed waiting: queue lock held True, processes 0
+KILLED    queue_dev_baselines.sh: t0 = the session's start | 4 lines, first: FAIL A: 150 s processes, sessions [7, 7, 2] (want 11, 5)
+KILLED    queue_dev_baselines.sh: first t0 before the lock wait | 1 lines, first: FAIL A: t0 / t1 are not the process's own start and end
+KILLED    queue_dev_baselines.sh: no session note | 6 lines, first: FAIL fresh: session notes ['', '']
+KILLED    queue_dev_baselines.sh: release keeps the lock fd open | 1 lines, first: FAIL A: lock at status / DONE calls [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
+KILLED    queue_dev_baselines.sh: a new lock wait before every process | 9 lines, first: FAIL fresh: lock calls [['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', '9'], ['-E', '75', '-w', '7200', 
+KILLED    queue_dev_baselines.sh: process count not reset per session | 3 lines, first: FAIL A: 150 s processes, sessions None (want 11, 5)
+KILLED    queue_dev_baselines.sh: every session the same id | 3 lines, first: FAIL A: 150 s processes, sessions None (want 11, 5)
+KILLED    queue_dev_baselines.sh: a lock timeout starts a session | 2 lines, first: FAIL lock retry: [{'key': 'IDEAL template greedy fake dev', 'start': '2026-10-10T17:25:08', 'end': '2026-10-10T17:25:08', 'exit': '0', 'done': '1', 'c
+KILLED    queue_dev_baselines.sh: STEP 14X: the shard does not reach the process | 22 lines, first: FAIL S1: processes ['greedy -']
+KILLED    queue_dev_baselines.sh: STEP 14X: a sharded model runs unsplit | 22 lines, first: FAIL S1: processes ['greedy -']
+KILLED    queue_dev_baselines.sh: STEP 14X: engines.json shards unread | 23 lines, first: FAIL S1: processes ['greedy -']
+KILLED    queue_dev_baselines.sh: STEP 14X: done shards rerun | 3 lines, first: FAIL S2: restart ['greedy 0/3', 'greedy 1/3', 'greedy 2/3']
+KILLED    queue_dev_baselines.sh: STEP 14X: the last shard skipped too (a cut run never merges) | 5 lines, first: FAIL S3: processes [], want ['greedy 2/3']
+KILLED    queue_dev_baselines.sh: STEP 14X: a shard skipped while its twin's part is missing | 3 lines, first: FAIL S3b: processes ['greedy 2/3'], want ['greedy 0/3', 'greedy 2/3']
+KILLED    queue_dev_baselines.sh: STEP 14X: after a failed shard the next shards run | 2 lines, first: FAIL S2: first pass ['greedy 0/3', 'greedy 1/3', 'greedy 2/3'] ['1', '1', '1', '1', '1', '1', 'SKIP', 'SKIP']
+KILLED    queue_dev_baselines.sh: STEP 14X: a bad shards value is run | 1 lines, first: FAIL S4: ['1', '1']
+KILLED    queue_dev_baselines.sh: STEP 14X: shards share one log | 1 lines, first: FAIL S1: logs ['SAMPLER_template_1.log', 'SAMPLER_template_greedy.log']
+KILLED    queue_dev_baselines.sh: STEP 14X: no shard in the status note | 1 lines, first: FAIL S1: status notes ['session_35840.1_process_1', 'session_35840.1_process_1', 'session_35840.1_process_2', 'session_35840.1_process_2', 'session_35
+KILLED    queue_dev_baselines.sh: STEP 14X: no run file | 7 lines, first: Traceback (most recent call last):
+KILLED    queue_dev_baselines.sh: STEP 14X: run file models over several lines | 1 lines, first: FAIL default plan: run file models ['Q_MODELS=Qwen/Qwen2.5-0.5B-Instruct\n']
+KILLED    queue_dev_baselines.sh: STEP 14X: no run id on the start line | 1 lines, first: FAIL S1: run file {'run': '20261010T172955.51410', 'pid': '51410', 'code': '<tmp>/rc12_mq_qqexb9rq'
+KILLED    queue_dev_baselines.sh: STEP 14X: run file timeout not the effective one | 1 lines, first: FAIL S1: run file {'run': '20261010T173012.54639', 'pid': '54639', 'code': '<tmp>/rc12_mq_057o8vwu'
+KILLED    queue_dev_baselines.sh: STEP 14X: run file drops the limit | 1 lines, first: FAIL S1: run file {'run': '20261010T173046.62910', 'pid': '62910', 'code': '<tmp>/rc12_mq_48v79vxm'
+KILLED    queue_dev_baselines.sh: STEP 14X: run file seeds not the queue's | 1 lines, first: FAIL S1: run file {'run': '20261010T173053.64210', 'pid': '64210', 'code': '<tmp>/rc12_mq_1cl5ir14'
+KILLED    queue_status.py: first turn not counted | 24 lines, first: FAIL fresh: counts {'key': 'IDEAL template greedy fake dev', 'start': '2026-10-10T17:30:21', 'end': '2026-10-10T17:30:21', 'exit': '0', 'done': '1', '
+KILLED    queue_status.py: runs swapped | 2 lines, first: FAIL status unit: ['M template 2 vllm dev start=2026-09-26T09:59:56 end=2026-09-26T10:00:00 exit=0 done=1 convs=2 replies=24 stops=eos:24 secs=4 lock_
+KILLED    queue_status.py: start is the end | 1 lines, first: FAIL status unit: ['M template 2 vllm dev start=2026-09-26T10:00:00 end=2026-09-26T10:00:00 exit=0 done=1 convs=3 replies=36 stops=cap:3,eot:33 secs=1
+KILLED    queue_status.py: stop reasons unsorted | 1 lines, first: FAIL status unit: ['M template 2 vllm dev start=2026-09-26T09:59:50 end=2026-09-26T10:00:00 exit=0 done=1 convs=3 replies=36 stops=eot:33,cap:3 secs=1
+KILLED    queue_status.py: progress total wrong | 4 lines, first: FAIL fresh: DONE
+KILLED    queue_status.py: run in progress not shown | 1 lines, first: FAIL status unit: progress ['complete 2 of 16 runs', '  M                                template 2/4 done, dev run mean 10 s', '  M                  
+KILLED    queue_status.py: lock seconds wrong | 3 lines, first: FAIL status unit: ['M template 2 vllm dev start=2026-09-26T09:59:50 end=2026-09-26T10:00:00 exit=0 done=1 convs=3 replies=36 stops=cap:3,eot:33 secs=1
+MUTANTS killed 67/67; 1420 s

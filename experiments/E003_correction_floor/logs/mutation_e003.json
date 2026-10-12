@@ -1,0 +1,289 @@
+{
+ "unmutated_fails": [],
+ "mutants": [
+  {
+   "mutant": "ties count as right (empty answer passes)",
+   "status": "killed",
+   "by": [
+    "right(): tie passes (empty answer)",
+    "oracle empty passes the pass rule: {'LW10': 1.0, 'TS10': 1.0, 'NU10': 1.0, 'pass': True}"
+   ]
+  },
+  {
+   "mutant": "gold compared with the first foil only (plausible wrong answer passes)",
+   "status": "killed",
+   "by": [
+    "right(): wrong with 3 candidates passes",
+    "last-mentioned: {'LW10': 1.0, 'TS10': 1.0, 'NU10': 0.0, 'pass': False}"
+   ]
+  },
+  {
+   "mutant": "gold-only record passes",
+   "status": "killed",
+   "by": [
+    "right(): gold-only passes"
+   ]
+  },
+  {
+   "mutant": "empty record passes",
+   "status": "killed",
+   "by": [
+    "right(): empty dict passes"
+   ]
+  },
+  {
+   "mutant": "NaN scores pass",
+   "status": "killed",
+   "by": [
+    "right(): NaN gold passes",
+    "right(): NaN foil passes"
+   ]
+  },
+  {
+   "mutant": "pass rule ignores two-slot and no-update",
+   "status": "killed",
+   "by": [
+    "primary: 0.7 should fail",
+    "primary: missing two-slot must fail"
+   ]
+  },
+  {
+   "mutant": "pass rule read at d4",
+   "status": "killed",
+   "by": [
+    "primary: 0.8 exactly should pass",
+    "primary: must be read at d10, not d4"
+   ]
+  },
+  {
+   "mutant": "pass rule uses > 0.8",
+   "status": "killed",
+   "by": [
+    "primary: 0.8 exactly should pass"
+   ]
+  },
+  {
+   "mutant": "'most seeds' counts a tie",
+   "status": "killed",
+   "by": [
+    "verdict: 1/2 should fail (tie is not most)"
+   ]
+  },
+  {
+   "mutant": "paired CI ignores prompt hashes",
+   "status": "killed",
+   "by": [
+    "paired: prompt-hash mismatch not caught"
+   ]
+  },
+  {
+   "mutant": "paired change sign flipped",
+   "status": "killed",
+   "by": [
+    "paired: all gained should be +1 {'n': 50, 'acc_before': 1.0, 'acc_after': 0.0, 'd_acc': -1.0, 'd_acc_ci95': [-1.0, -1.0], 'gained': 0, 'lost': 50, 'd_margin': -2.0, 'd_margin_ci95': [-2.0, -2.0]}",
+    "paired: margin change should be +2"
+   ]
+  },
+  {
+   "mutant": "LR pick: tie -> larger LR",
+   "status": "killed",
+   "by": [
+    "pick_lr tie -> smaller LR: got 'CHOSEN 1e-03', want 'CHOSEN 3e-04'",
+    "pick_lr all-zero runs (empty or wrong answers score 0): tie -> smallest LR, no extension: got 'EXTEND 3e-03', want 'CHOSEN 5e-05'"
+   ]
+  },
+  {
+   "mutant": "LR pick: by mean instead of min cell",
+   "status": "killed",
+   "by": [
+    "pick_lr min-cell, not mean: got 'CHOSEN 5e-05', want 'CHOSEN 3e-04'",
+    "pick_lr min-cell, not mean (order swapped): got 'CHOSEN 3e-04', want 'CHOSEN 5e-05'"
+   ]
+  },
+  {
+   "mutant": "LR pick: NaN-loss run eligible",
+   "status": "killed",
+   "by": [
+    "pick_lr NaN-loss run is ineligible: got 'CHOSEN 1e-03', want 'CHOSEN 3e-04'"
+   ]
+  },
+  {
+   "mutant": "LR pick: never extends",
+   "status": "killed",
+   "by": [
+    "pick_lr top LR best but < 0.8 -> extend: got 'CHOSEN 1e-03', want 'EXTEND 3e-03'",
+    "pick_lr 4-LR grid extends to 1e-02: got 'CHOSEN 3e-03', want 'EXTEND 1e-02'"
+   ]
+  },
+  {
+   "mutant": "LR pick: extends even when the top LR passes",
+   "status": "killed",
+   "by": [
+    "pick_lr top LR passes -> no extension: got 'EXTEND 3e-03', want 'CHOSEN 1e-03'"
+   ]
+  },
+  {
+   "mutant": "LR pick: dev NU read at d4",
+   "status": "killed",
+   "by": [
+    "pick_lr min-cell, not mean: got 'CHOSEN 5e-05', want 'CHOSEN 3e-04'",
+    "pick_lr min-cell, not mean (order swapped): got 'CHOSEN 3e-04', want 'CHOSEN 5e-05'"
+   ]
+  },
+  {
+   "mutant": "analysis: crossed pair = either answer",
+   "status": "killed",
+   "by": [
+    "analysis: secondary label must need the crossed pair",
+    "analysis: cross pair with B wrong {'acc': 1.0, 'n': 64, 'se': 0.0}"
+   ]
+  },
+  {
+   "mutant": "analysis: knowledge change vs itself, not the untouched model",
+   "status": "killed",
+   "by": [
+    "analysis: knowledge gain sign {'n': 441, 'acc_before': 1.0, 'acc_after': 1.0, 'd_acc': 0.0, 'd_acc_ci95': [0.0, 0.0], 'gained': 0, 'lost': 0, 'd_margin': 0.0, 'd_margin_ci95': [0.0, 0.0]}",
+    "analysis: knowledge loss sign"
+   ]
+  },
+  {
+   "mutant": "analysis: pass rule read from the wrong set",
+   "status": "killed",
+   "by": [
+    "analysis: ideal should pass with cross_pair 1.0 (1.0)",
+    "analysis: ideal cells should be 1.0"
+   ]
+  },
+  {
+   "mutant": "analysis: length split flipped",
+   "status": "killed",
+   "by": [
+    "analysis: length split {'LW10|fits<=512': {'acc': 0.0, 'n': 96, 'se': 0.0}, 'LW10|over512': {'acc': 1.0, 'n': 96, 'se': 0.0}, 'TS10|fits<=512': {'acc': 0.0, 'n': 32, 'se': 0.0}, 'TS10|over512': {'acc': 1.0, 'n': 32, 'se': 0.0}, 'NU10|fits<=512': {'acc': 0.0, 'n': 32, 'se': 0.0}, 'NU10|over512': {'acc': 1.0, 'n': 32, 'se': 0.0}, 'pass_on_fitting_items': True}"
+   ]
+  },
+  {
+   "mutant": "analysis: secondary label ignores the crossed pair",
+   "status": "killed",
+   "by": [
+    "analysis: secondary label must need the crossed pair"
+   ]
+  },
+  {
+   "mutant": "analysis: fitting-items secondary reads the over-context items",
+   "status": "killed",
+   "by": [
+    "analysis: fitting items all right -> secondary pass"
+   ]
+  },
+  {
+   "mutant": "dev draw reuses the scored eval items",
+   "status": "killed",
+   "by": [
+    "dev: 320 dev prompts are also eval prompts",
+    "dev: a dev dialogue equals an eval dialogue"
+   ]
+  },
+  {
+   "mutant": "dev draw drops two-slot",
+   "status": "killed",
+   "by": [
+    "dev: wrong composition 256 {'LW': 192, 'TS': 0, 'NU': 64}",
+    "dev oracle ideal should pass {'LW10': 1.0, 'TS10': None, 'NU10': 1.0, 'pass': False}"
+   ]
+  },
+  {
+   "mutant": "eval items changed (a filler dropped)",
+   "status": "killed",
+   "by": [
+    "identity: 1589 of 1728 new items differ from E002's",
+    "identity: 151 of 192 extra items differ from E002's"
+   ]
+  },
+  {
+   "mutant": "eval sets missing the crossed control",
+   "status": "killed",
+   "by": [
+    "identity: E003 eval sets ['extra', 'kbig', 'khard', 'new', 'old', 'uprobe'] are not E002's plain sets ['cross', 'extra', 'kbig', 'khard', 'new', 'old', 'uprobe']",
+    "analysis: ideal should pass with cross_pair 1.0 (None)"
+   ]
+  },
+  {
+   "mutant": "eval items drawn with another seed",
+   "status": "killed",
+   "by": [
+    "identity: 1728 of 1728 new items differ from E002's"
+   ]
+  },
+  {
+   "mutant": "params: GPT-Neo position table not counted",
+   "status": "killed",
+   "by": [
+    "params: roneneldan/TinyStories-1M formula 3614912/3216448 vs file 3745984/3347520",
+    "params: roneneldan/TinyStories-3M formula 8016256/6432896 vs file 8278400/6695040"
+   ]
+  },
+  {
+   "mutant": "params: Pythia head counted as tied",
+   "status": "killed",
+   "by": [
+    "params: EleutherAI/pythia-14m formula 7628800/6438912 vs file 14067712/12877824",
+    "params: EleutherAI/pythia-31m formula 17616896/12877824 vs file 30494720/25755648"
+   ]
+  },
+  {
+   "mutant": "queue: LR search scores the eval items",
+   "status": "killed",
+   "by": [
+    "queue: LR-search runs must score dev only: ['LRSEARCH_ARGS=(--seed 0 --sets eval,dev --save 0)']"
+   ]
+  },
+  {
+   "mutant": "queue: scored seeds include the LR-search seed 0",
+   "status": "killed",
+   "by": [
+    "queue: scored seeds must be 1 2 3"
+   ]
+  },
+  {
+   "mutant": "queue: micro-batch differs from E002",
+   "status": "killed",
+   "by": [
+    "queue: training settings differ from E002 135M: ['COMMON=(--bs 16 --accum 1 --max-len 768 --grad-ckpt)']"
+   ]
+  },
+  {
+   "mutant": "loss self-check comparator always matches",
+   "status": "killed",
+   "by": [
+    "close: 1% should not match",
+    "close: NaN must not match"
+   ]
+  },
+  {
+   "mutant": "examples left-truncated (old bug)",
+   "status": "killed",
+   "by": [
+    "tok: a streamed example does not start at the dialogue start (truncated?)",
+    "tok: a streamed example does not start at the dialogue start (truncated?)"
+   ]
+  },
+  {
+   "mutant": "prompt tokens labelled",
+   "status": "killed",
+   "by": [
+    "tok: answer decodes to \"User: I picked silver for the new winter coat.\\nAssistant: Nice, silver for the winter coat.\\nUser: Small change, the coat is gray now.\\nAssistant: Noted, gray now.\\nUser: What makes bread rise?\\nAssistant: Yeast eats sugars and releases gas, which gets trapped in the stretchy gluten network.\\nUser: Why is the moon sometimes visible during the day?\\nAssistant: It is bright enough to see whenever it is above the horizon and far enough from the Sun.\\nUser: Small change, the coat is orange now.\\nAssistant: Noted, orange now.\\nUser: How do I get rid of fruit flies?\\nAssistant: Set out a small dish of vinegar with a drop of soap and take out ripe fruit.\\nUser: What color are we doing the winter coat in?\\nAssistant: We're doing it in orange.\" not ' orange.'",
+    "tok: answer decodes to \"User: What's the best way to learn to type faster?\\nAssistant: Use all ten fingers, keep your eyes on the screen, and practice in short daily sessions.\\nUser: Put the flight down for Sunday, please.\\nAssistant: Done, the flight is down for Sunday.\\nUser: Why do stars twinkle?\\nAssistant: Moving layers of air bend their light slightly, so the brightness flickers.\\nUser: How should I prepare for a job fair?\\nAssistant: Research the employers, bring copies of your resume, and practice a short introduction.\\nUser: What's a simple way to meditate?\\nAssistant: Sit comfortably, breathe slowly, and gently bring your attention back to your breath.\\nUser: The team meeting got scheduled for Monday.\\nAssistant: Sounds good, Monday it is.\\nUser: Which day did we land on for the team meeting?\\nAssistant: We landed on Monday.\" not ' Monday.'"
+   ]
+  },
+  {
+   "mutant": "max_len 512 (biased long-distance mix)",
+   "status": "killed",
+   "by": [
+    "tok: length limit shifts the d>=8 mix toward first-mentioned golds (0.352 -> 0.456)",
+    "tok: length limit shifts the d>=8 mix toward first-mentioned golds (0.352 -> 0.436)"
+   ]
+  }
+ ],
+ "killed": 37,
+ "total": 37
+}

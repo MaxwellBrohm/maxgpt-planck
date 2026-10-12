@@ -1,0 +1,26 @@
+PASS  98 copied E005 code files equal the list and their E005 source []
+PASS  al/al_items.jsonl equals E005's
+PASS  al/al_items.sha256 equals E005's
+PASS  snapshot 12fd25f7 holds config.json, generation_config.json, model.safetensors, tokenizer.json, tokenizer_config.json, special_tokens_map.json, vocab.json, merges.txt (missing: [])
+PASS  snapshot model.safetensors sha256 5af571cb...
+PASS  torch 2.13.0+cu130 (pinned 2.13.0)
+PASS  transformers 5.15.1 (pinned 5.15.1)
+PASS  tokenizers 0.22.2 (pinned 0.22.2)
+PASS  safetensors 0.8.0 (pinned 0.8.0)
+PASS  big/big_items.jsonl equals its sha256
+PASS  al/al_items.jsonl equals its sha256
+PASS  replay pool equals the pool fixed at writing (replay_ref/replay_pool.sha256)
+PASS  replay/replay_pool_ids.txt equals replay_ref's
+PASS  replay/exposed_kbig.json equals replay_ref's
+PASS  10 reference hashes in E005's al/out (10)
+PASS  reference e004_s1 weights hash 91a3aab0
+PASS  reference e004_s2 weights hash aee5a7fa
+PASS  reference e004_s3 weights hash efd68a20
+PASS  reference e004_s4 weights hash 8ad34021
+PASS  reference e004_s5 weights hash 1bb9f377
+PASS  reference e005_s1 weights hash f846ac3d
+PASS  reference e005_s2 weights hash 4ef6230a
+PASS  reference e005_s3 weights hash aa5f99f1
+PASS  reference e005_s4 weights hash 1d330be9
+PASS  reference e005_s5 weights hash 131c8113
+RESULT: ALL PASS

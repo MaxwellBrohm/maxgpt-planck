@@ -1,0 +1,452 @@
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer GPTNeoXTokenizer. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+{
+ "e002_oracles": {
+  "ideal": {
+   "LW10": 1.0,
+   "TS10": 1.0,
+   "NU10": 1.0,
+   "pass": true
+  },
+  "empty": {
+   "LW10": 0.0,
+   "TS10": 0.0,
+   "NU10": 0.0,
+   "pass": false
+  },
+  "wrong": {
+   "LW10": 0.0,
+   "TS10": 0.0,
+   "NU10": 0.0,
+   "pass": false
+  },
+  "first": {
+   "LW10": 0.0,
+   "TS10": 0.0,
+   "NU10": 1.0,
+   "pass": false
+  },
+  "last": {
+   "LW10": 1.0,
+   "TS10": 0.0,
+   "NU10": 0.0,
+   "pass": false
+  }
+ },
+ "leak_checks": 24133,
+ "heldout": {
+  "eval_frames": 181,
+  "train_frames": 105,
+  "shared_frames": 0,
+  "shared_5grams": [
+   "and my <e>'s <e> is",
+   "i'm <v>. my <e> <v>"
+  ]
+ },
+ "shortcuts": {
+  "first_mentioned_right": 0.356,
+  "last_mentioned_right": 0.398,
+  "latest_rule_right": 1.0,
+  "kinds": {
+   "upd": 2942,
+   "noupd_b": 594,
+   "noupd_incid": 1214,
+   "noupd": 2425,
+   "persp": 2674,
+   "twoslot": 2325,
+   "twohop": 2570,
+   "bind": 2778,
+   "revert": 628,
+   "upd_incid": 608,
+   "twoslot_b": 608,
+   "mid": 634
+  },
+  "families": {
+   "update": 11978,
+   "persp": 2674,
+   "twohop": 2570,
+   "bind": 2778
+  },
+  "by_kind": {
+   "mid": {
+    "n": 634,
+    "first": 0.0,
+    "last": 0.0
+   },
+   "noupd": {
+    "n": 2425,
+    "first": 1.0,
+    "last": 0.0
+   },
+   "noupd_b": {
+    "n": 594,
+    "first": 0.0,
+    "last": 1.0
+   },
+   "noupd_incid": {
+    "n": 1214,
+    "first": 1.0,
+    "last": 0.0
+   },
+   "revert": {
+    "n": 628,
+    "first": 1.0,
+    "last": 1.0
+   },
+   "twoslot": {
+    "n": 2325,
+    "first": 0.0,
+    "last": 0.0
+   },
+   "twoslot_b": {
+    "n": 608,
+    "first": 0.0,
+    "last": 1.0
+   },
+   "upd": {
+    "n": 2942,
+    "first": 0.0,
+    "last": 1.0
+   },
+   "upd_incid": {
+    "n": 608,
+    "first": 0.0,
+    "last": 0.0
+   }
+  }
+ },
+ "copies": {
+  "copied": [
+   "eval_extra.py",
+   "guard.py",
+   "items.py",
+   "items_new.py",
+   "kbig_items.py",
+   "khard_items.py",
+   "lik.py",
+   "metrics_ft.py",
+   "train_data.py",
+   "uprobe_items.py",
+   "validate.py"
+  ],
+  "identical_to_E002_now": {
+   "eval_extra.py": true,
+   "guard.py": true,
+   "items.py": true,
+   "items_new.py": true,
+   "kbig_items.py": true,
+   "khard_items.py": true,
+   "lik.py": true,
+   "metrics_ft.py": true,
+   "train_data.py": true,
+   "uprobe_items.py": true,
+   "validate.py": true
+  }
+ },
+ "identity": {
+  "new": {
+   "n": 1728,
+   "differ": 0
+  },
+  "extra": {
+   "n": 192,
+   "differ": 0
+  },
+  "old": {
+   "n": 1116,
+   "differ": 0
+  },
+  "uprobe": {
+   "n": 576,
+   "differ": 0
+  },
+  "khard": {
+   "n": 80,
+   "differ": 0
+  },
+  "kbig": {
+   "n": 441,
+   "differ": 0
+  },
+  "cross": {
+   "n": 384,
+   "differ": 0
+  }
+ },
+ "dev": {
+  "n": 320,
+  "cells": {
+   "LW": 192,
+   "TS": 64,
+   "NU": 64
+  },
+  "oracles": {
+   "ideal": {
+    "LW10": 1.0,
+    "TS10": 1.0,
+    "NU10": 1.0,
+    "pass": true
+   },
+   "empty": {
+    "LW10": 0.0,
+    "TS10": 0.0,
+    "NU10": 0.0,
+    "pass": false
+   },
+   "wrong": {
+    "LW10": 0.0,
+    "TS10": 0.0,
+    "NU10": 0.0,
+    "pass": false
+   },
+   "first": {
+    "LW10": 0.0,
+    "TS10": 0.0,
+    "NU10": 1.0,
+    "pass": false
+   },
+   "last": {
+    "LW10": 1.0,
+    "TS10": 0.0,
+    "NU10": 0.0,
+    "pass": false
+   }
+  }
+ },
+ "pick": [
+  [
+   "ideal in the middle",
+   "CHOSEN 3e-04"
+  ],
+  [
+   "tie -> smaller LR",
+   "CHOSEN 3e-04"
+  ],
+  [
+   "all-zero runs (empty or wrong answers score 0): tie -> smallest LR, no extension",
+   "CHOSEN 5e-05"
+  ],
+  [
+   "top LR best but < 0.8 -> extend",
+   "EXTEND 3e-03"
+  ],
+  [
+   "after extension -> pick, never extend again",
+   "CHOSEN 1e-03"
+  ],
+  [
+   "top LR passes -> no extension",
+   "CHOSEN 1e-03"
+  ],
+  [
+   "4-LR grid extends to 1e-02",
+   "EXTEND 1e-02"
+  ],
+  [
+   "NaN-loss run is ineligible",
+   "CHOSEN 3e-04"
+  ],
+  [
+   "short run is ineligible",
+   "CHOSEN 5e-05"
+  ],
+  [
+   "incomplete dev scoring is ineligible",
+   "CHOSEN 5e-05"
+  ],
+  [
+   "nothing eligible -> NONE",
+   "NONE no eligible LR-search run"
+  ],
+  [
+   "min-cell, not mean",
+   "CHOSEN 3e-04"
+  ],
+  [
+   "min-cell, not mean (order swapped)",
+   "CHOSEN 5e-05"
+  ]
+ ],
+ "analysis": {
+  "ideal": true,
+  "empty": false,
+  "wrong": false
+ },
+ "params": {
+  "roneneldan/TinyStories-1M": {
+   "total": 3745984,
+   "embedding": 3347520,
+   "body": 398464
+  },
+  "EleutherAI/pythia-14m": {
+   "total": 14067712,
+   "embedding": 12877824,
+   "body": 1189888
+  },
+  "roneneldan/TinyStories-3M": {
+   "total": 8278400,
+   "embedding": 6695040,
+   "body": 1583360
+  },
+  "EleutherAI/pythia-31m": {
+   "total": 30494720,
+   "embedding": 25755648,
+   "body": 4739072
+  },
+  "roneneldan/TinyStories-8M": {
+   "total": 19702528,
+   "embedding": 13390080,
+   "body": 6312448
+  },
+  "EleutherAI/pythia-70m": {
+   "total": 70426624,
+   "embedding": 51511296,
+   "body": 18915328
+  },
+  "roneneldan/TinyStories-33M": {
+   "total": 68514048,
+   "embedding": 40170240,
+   "body": 28343808
+  },
+  "EleutherAI/pythia-160m": {
+   "total": 162322944,
+   "embedding": 77266944,
+   "body": 85056000
+  }
+ },
+ "queue": {
+  "lr_args": [
+   "LRSEARCH_ARGS=(--seed 0 --sets dev --save 0)"
+  ],
+  "scored_args": [
+   "SCORED_ARGS=(--sets eval --save 1)"
+  ]
+ },
+ "tokenization": {
+  "pythia": {
+   "family": "pythia",
+   "tokenizer_shared": true,
+   "raw_over_max_len": 0,
+   "raw_n": 3000,
+   "kept_mean_len": 310.4,
+   "kept_max_len": 703,
+   "stream_rejected": 1,
+   "stream_n": 2000,
+   "d8plus_first_right_all": 0.361,
+   "d8plus_first_right_kept": 0.361,
+   "trained_ctx": 2048,
+   "n_ctx": 2048,
+   "eval_len": {
+    "new": {
+     "max": 626,
+     "over_trained_ctx": 0,
+     "n": 1728,
+     "LW10_over_trained_ctx": "0/192",
+     "TS10_over_trained_ctx": "0/64",
+     "NU10_over_trained_ctx": "0/64"
+    },
+    "extra": {
+     "max": 480,
+     "over_trained_ctx": 0,
+     "n": 192
+    },
+    "old": {
+     "max": 585,
+     "over_trained_ctx": 0,
+     "n": 1116
+    },
+    "uprobe": {
+     "max": 602,
+     "over_trained_ctx": 0,
+     "n": 576
+    },
+    "khard": {
+     "max": 141,
+     "over_trained_ctx": 0,
+     "n": 80
+    },
+    "kbig": {
+     "max": 39,
+     "over_trained_ctx": 0,
+     "n": 441
+    },
+    "cross": {
+     "max": 620,
+     "over_trained_ctx": 0,
+     "n": 384
+    },
+    "dev": {
+     "max": 621,
+     "over_trained_ctx": 0,
+     "n": 320,
+     "LW10_over_trained_ctx": "0/192",
+     "TS10_over_trained_ctx": "0/64",
+     "NU10_over_trained_ctx": "0/64"
+    }
+   }
+  },
+  "tinystories": {
+   "family": "tinystories",
+   "tokenizer_shared": true,
+   "raw_over_max_len": 0,
+   "raw_n": 3000,
+   "kept_mean_len": 298.3,
+   "kept_max_len": 675,
+   "stream_rejected": 0,
+   "stream_n": 2000,
+   "d8plus_first_right_all": 0.361,
+   "d8plus_first_right_kept": 0.361,
+   "trained_ctx": 512,
+   "n_ctx": 2048,
+   "eval_len": {
+    "new": {
+     "max": 605,
+     "over_trained_ctx": 191,
+     "n": 1728,
+     "LW10_over_trained_ctx": "101/192",
+     "TS10_over_trained_ctx": "26/64",
+     "NU10_over_trained_ctx": "0/64"
+    },
+    "extra": {
+     "max": 463,
+     "over_trained_ctx": 0,
+     "n": 192
+    },
+    "old": {
+     "max": 568,
+     "over_trained_ctx": 32,
+     "n": 1116
+    },
+    "uprobe": {
+     "max": 584,
+     "over_trained_ctx": 73,
+     "n": 576
+    },
+    "khard": {
+     "max": 133,
+     "over_trained_ctx": 0,
+     "n": 80
+    },
+    "kbig": {
+     "max": 36,
+     "over_trained_ctx": 0,
+     "n": 441
+    },
+    "cross": {
+     "max": 598,
+     "over_trained_ctx": 128,
+     "n": 384
+    },
+    "dev": {
+     "max": 601,
+     "over_trained_ctx": 132,
+     "n": 320,
+     "LW10_over_trained_ctx": "103/192",
+     "TS10_over_trained_ctx": "29/64",
+     "NU10_over_trained_ctx": "0/64"
+    }
+   }
+  }
+ }
+}
+0 failures
+exit=0

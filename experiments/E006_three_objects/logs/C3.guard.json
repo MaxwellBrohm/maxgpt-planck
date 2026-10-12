@@ -1,0 +1,14 @@
+{
+ "name": "C3",
+ "command": "~/planck/venv-hf/bin/python -B e006_ft_test.py HuggingFaceTB/SmolLM2-135M-Instruct --bs 4 --accum 4 --max-len 768 --grad-ckpt --arm C --seed 3 --lr 1.5e-04 --chat --save 1 --tag C3",
+ "ceiling_s": 14400.0,
+ "killed": null,
+ "verdict": null,
+ "start": "2026-09-27 20:33:14",
+ "end": "2026-09-27 21:01:51",
+ "elapsed_s": 1717.0,
+ "exit": 0,
+ "peak_temp_c": 68.0,
+ "peak_gpu_mem_mib": 5938.0,
+ "weights_sha256": "514b41f319be45fdb18c9420ae857a87327a67d13f95a2532937814a0795f7d1"
+}

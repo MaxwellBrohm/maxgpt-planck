@@ -1,0 +1,90 @@
+{
+ "bytes_per_token": 3.5764,
+ "code_sha256": {
+  "corpus/oodh.py": "b256d5554d531bd76c531a8bc59c287f57f60e94cc224e3f136add75594987d1",
+  "corpus/sample_plan.py": "a50209255798b4f50117208777cf4429e3d7994f3f37d687caa5aee4e27a9e57",
+  "data_prep/prep_common.py": "7c8fce2b5eccc466070e848e2e55f25cd3a3b247acfc6d66a06334536ac15ada",
+  "data_prep/pretok_worker.py": "616a8e41c5d265e35e7a8fcf9910c755b4d312004a6a0ff79eb9317057b0891a",
+  "data_prep/pretokenize.py": "ad16bf9b782fa0c40729735da5334a9113a8a6f63d2c06fd7c568da1a631ad82",
+  "harness/chat_template.py": "16f5aa51d6c94b01afa7324a8ed119cb585aae1d8122a92eeb99a3d919196774"
+ },
+ "counts": {
+  "chat_docs": 8208,
+  "chat_over_2048": 43,
+  "chat_over_2048_tokens": 143312,
+  "chat_over_4096": 11,
+  "chat_over_4096_tokens": 59043,
+  "docs": 8208,
+  "docs_in": 11062,
+  "empty_docs": 0,
+  "excluded_docs": 2854,
+  "excluded_text_bytes": 2772962,
+  "max_doc_tokens": 6990,
+  "special_replaced_docs": 0,
+  "sup_tokens": 1026535,
+  "text_bytes": 8319448,
+  "text_docs": 0,
+  "tokens": 2326192
+ },
+ "dtype": null,
+ "format": "planck-pretok-v1",
+ "heldout": {
+  "dir": "~/planck/data/tok_sample_v0c/heldout",
+  "manifest_sha256": "d0fa0838a6aa4ee8a6c62d6ffe496f812e8335d90266d34689c97cd9e13cfa63",
+  "source_file": {
+   "docs": 2854,
+   "file": "dolly.jsonl",
+   "keys": 3903,
+   "sha256": "42126122b7dc94b742b2a0984eb5bb6090bc4ca5ea5944308d53a944c267a5c2"
+  }
+ },
+ "input": {
+  "bytes": 27761965,
+  "dir": "~/planck/data/extracted/starter_v0c",
+  "extract_stats_sha256": "8d6452ae8c3be7b0c43e4ba149b273fcb5e59f4ab5c2bd33baaec0b1499872d9",
+  "files": [
+   "dolly/dolly-00000.jsonl"
+  ]
+ },
+ "kind": "chat",
+ "n_shards": 1,
+ "seed": 0,
+ "shard_mb": 128,
+ "shards": [
+  {
+   "bytes": 10366431,
+   "docs": 8208,
+   "ids": "dolly/dolly-00000.ids",
+   "path": "dolly/dolly-00000.jsonl",
+   "sha256": "42d7392e4d75a6855e2491fa071485b05442e51bdc1e98f685c19b60a3a9690f",
+   "sup_tokens": 1026535,
+   "text_bytes": 8319448,
+   "tokens": 2326192
+  }
+ ],
+ "source": "dolly",
+ "tokenizer": {
+  "control_ids": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "end_id": 5,
+  "eot_id": 1,
+  "file": "tok_v0_8k.json",
+  "n_special": 15,
+  "pad_id": 0,
+  "role_ids": {
+   "assistant": 4,
+   "system": 2,
+   "tool": 6,
+   "user": 3
+  },
+  "sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5",
+  "vocab": 8192
+ }
+}

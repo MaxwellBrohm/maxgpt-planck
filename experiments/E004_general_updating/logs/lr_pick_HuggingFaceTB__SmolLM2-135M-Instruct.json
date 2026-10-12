@@ -1,0 +1,53 @@
+{
+ "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+ "mode": "135m",
+ "lrs": [
+  "5e-05",
+  "1.5e-04"
+ ],
+ "rows": {
+  "5e-05": {
+   "min": 0.5938,
+   "mean": 0.743,
+   "fams": {
+    "H1": 0.5938,
+    "H2": 0.5938,
+    "H3": 0.6875,
+    "H4": 0.9062,
+    "H5": 0.8125,
+    "H6": 0.6562,
+    "H7": 0.875,
+    "C_noupd": 0.7812,
+    "C_twoslot": 0.7812
+   },
+   "lr": "5e-05",
+   "lock_in_step": null,
+   "loss_first10": 2.4639,
+   "loss_last50": 0.3844
+  },
+  "1.5e-04": {
+   "min": 0.7812,
+   "mean": 0.8542,
+   "fams": {
+    "H1": 0.7812,
+    "H2": 0.7812,
+    "H3": 0.8438,
+    "H4": 1.0,
+    "H5": 0.8438,
+    "H6": 0.875,
+    "H7": 0.8125,
+    "C_noupd": 0.9062,
+    "C_twoslot": 0.8438
+   },
+   "lr": "1.5e-04",
+   "lock_in_step": null,
+   "loss_first10": 2.1475,
+   "loss_last50": 0.3678
+  }
+ },
+ "ineligible": {},
+ "final": false,
+ "decision": "CHOSEN",
+ "value": "1.5e-04",
+ "line": "CHOSEN 1.5e-04"
+}

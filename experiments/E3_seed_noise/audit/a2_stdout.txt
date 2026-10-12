@@ -1,0 +1,78 @@
+prereg.yaml sha256 be89babbfee883ad
+PASS e3_5m_A_s1 preflight/config/engine/shares/prereg
+PASS e3_5m_A_s1 run start/end records  [loss_end 3.2380 s 993.7]
+PASS e3_5m_A_s1 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_B_s1 preflight/config/engine/shares/prereg
+PASS e3_5m_B_s1 run start/end records  [loss_end 3.2362 s 999.6]
+PASS e3_5m_B_s1 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_A_s2 preflight/config/engine/shares/prereg
+PASS e3_5m_A_s2 run start/end records  [loss_end 2.8933 s 997.2]
+PASS e3_5m_A_s2 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_B_s2 preflight/config/engine/shares/prereg
+PASS e3_5m_B_s2 run start/end records  [loss_end 2.9085 s 994.7]
+PASS e3_5m_B_s2 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_A_s3 preflight/config/engine/shares/prereg
+PASS e3_5m_A_s3 run start/end records  [loss_end 3.1862 s 998.8]
+PASS e3_5m_A_s3 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_B_s3 preflight/config/engine/shares/prereg
+PASS e3_5m_B_s3 run start/end records  [loss_end 3.1961 s 1012.7]
+PASS e3_5m_B_s3 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_A_s4 preflight/config/engine/shares/prereg
+PASS e3_5m_A_s4 run start/end records  [loss_end 3.1908 s 993.3]
+PASS e3_5m_A_s4 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_B_s4 preflight/config/engine/shares/prereg
+PASS e3_5m_B_s4 run start/end records  [loss_end 3.2017 s 993.8]
+PASS e3_5m_B_s4 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_A_s5 preflight/config/engine/shares/prereg
+PASS e3_5m_A_s5 run start/end records  [loss_end 3.0460 s 993.1]
+PASS e3_5m_A_s5 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_B_s5 preflight/config/engine/shares/prereg
+PASS e3_5m_B_s5 run start/end records  [loss_end 3.0545 s 993.0]
+PASS e3_5m_B_s5 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_A_s6 preflight/config/engine/shares/prereg
+PASS e3_5m_A_s6 run start/end records  [loss_end 3.2962 s 992.3]
+PASS e3_5m_A_s6 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_B_s6 preflight/config/engine/shares/prereg
+PASS e3_5m_B_s6 run start/end records  [loss_end 3.2924 s 993.6]
+PASS e3_5m_B_s6 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_A_s7 preflight/config/engine/shares/prereg
+PASS e3_5m_A_s7 run start/end records  [loss_end 3.4075 s 994.3]
+PASS e3_5m_A_s7 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_B_s7 preflight/config/engine/shares/prereg
+PASS e3_5m_B_s7 run start/end records  [loss_end 3.4126 s 992.1]
+PASS e3_5m_B_s7 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_A_s8 preflight/config/engine/shares/prereg
+PASS e3_5m_A_s8 run start/end records  [loss_end 3.1780 s 995.0]
+PASS e3_5m_A_s8 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_B_s8 preflight/config/engine/shares/prereg
+PASS e3_5m_B_s8 run start/end records  [loss_end 3.1918 s 992.7]
+PASS e3_5m_B_s8 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_A_s1_R2 preflight/config/engine/shares/prereg
+PASS e3_5m_A_s1_R2 run start/end records  [loss_end 3.2305 s 993.3]
+PASS e3_5m_A_s1_R2 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS e3_5m_A_s1_R3 preflight/config/engine/shares/prereg
+PASS e3_5m_A_s1_R3 run start/end records  [loss_end 3.2300 s 992.1]
+PASS e3_5m_A_s1_R3 bpb records (tok, evalset, fp32, all windows, 3 ckpts)
+PASS every run scored the same windows and bytes per set
+truncated windows per set (final): {'e3_5m_A_s1': {'cccc': 0, 'dolly': 0, 'gutenberg': 0, 'irc': 0, 'oasst2': 4, 'stackexchange': 0, 'wikimedia': 20}} identical across runs: True
+E2 pair start: {'run': '5m_e3_r1_b250M', 'prereg_id': 'E2', 'resumed_from': '5m_e3_r1_trunk/stable_00006104.pt', 'schedule': {'decay_start': 6104, 'mode': 'branch', 'total_steps': 7630, 'warmup_steps': 76}, 'step': 6104}
+E2 250M F(CHAT): 1.5e-3 1.1487 3e-3 1.1479 6e-3 1.1511 -> runner-up B=1.5e-3 stage_C lrs {'pick': [0.003, 1.0], 'runner_up': [0.0015, 1.0]}
+PASS e3_5m_A_s1 config lr 0.003 seed 1
+PASS e3_5m_B_s1 config lr 0.0015 seed 1
+PASS e3_5m_A_s2 config lr 0.003 seed 2
+PASS e3_5m_B_s2 config lr 0.0015 seed 2
+PASS e3_5m_A_s3 config lr 0.003 seed 3
+PASS e3_5m_B_s3 config lr 0.0015 seed 3
+PASS e3_5m_A_s4 config lr 0.003 seed 4
+PASS e3_5m_B_s4 config lr 0.0015 seed 4
+PASS e3_5m_A_s5 config lr 0.003 seed 5
+PASS e3_5m_B_s5 config lr 0.0015 seed 5
+PASS e3_5m_A_s6 config lr 0.003 seed 6
+PASS e3_5m_B_s6 config lr 0.0015 seed 6
+PASS e3_5m_A_s7 config lr 0.003 seed 7
+PASS e3_5m_B_s7 config lr 0.0015 seed 7
+PASS e3_5m_A_s8 config lr 0.003 seed 8
+PASS e3_5m_B_s8 config lr 0.0015 seed 8
+PASS e3_5m_A_s1_R2 config lr 0.003 seed 1
+PASS e3_5m_A_s1_R3 config lr 0.003 seed 1
+FAILS: []

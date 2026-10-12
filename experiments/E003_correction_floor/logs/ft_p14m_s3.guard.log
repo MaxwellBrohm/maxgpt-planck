@@ -1,0 +1,19 @@
+02:45:33 start free=36% swap=7307MB cmd=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B e003_ft_test.py EleutherAI/pythia-14m --bs 4 --accum 4 --max-len 768 --grad-ckpt --sets eval --save 1 --seed 3 --lr 1e-02 --tag s3
+02:46:05 t=   32s active=   32s free=30% swap=7892MB rss=1958MB
+02:46:36 t=   62s active=   62s free=30% swap=7900MB rss=2271MB
+02:47:06 t=   93s active=   93s free=29% swap=7868MB rss=2015MB
+02:47:37 t=  124s active=  124s free=30% swap=8211MB rss=1896MB
+02:47:37 KILL: swap_grew_904MB
+02:47:42 end exit=-15 killed=swap_grew_904MB active=124s paused=0s pauses=0 min_free=29% max_swap=8211MB peak_rss=2288MB
+04:44:50 start free=75% swap=5606MB cmd=/Users/brohm/Documents/Projects/video-editor/.venv/bin/python -B e003_ft_test.py EleutherAI/pythia-14m --bs 4 --accum 4 --max-len 768 --grad-ckpt --sets eval --save 1 --seed 3 --lr 1e-02 --tag s3
+04:45:22 t=   32s active=   32s free=64% swap=5606MB rss=1430MB
+04:45:53 t=   63s active=   63s free=58% swap=5606MB rss=2330MB
+04:46:24 t=   94s active=   94s free=59% swap=5606MB rss=2339MB
+04:46:55 t=  125s active=  125s free=60% swap=5606MB rss=2359MB
+04:47:26 t=  156s active=  156s free=68% swap=5606MB rss=2359MB
+04:47:57 t=  187s active=  187s free=68% swap=5606MB rss=2360MB
+04:48:28 t=  218s active=  218s free=57% swap=5606MB rss=1025MB
+04:48:59 t=  249s active=  249s free=56% swap=5606MB rss=2073MB
+04:49:30 t=  280s active=  280s free=57% swap=5598MB rss=2075MB
+04:50:01 t=  311s active=  311s free=57% swap=5598MB rss=2078MB
+04:50:18 end exit=0 killed=None active=328s paused=0s pauses=0 min_free=56% max_swap=5606MB peak_rss=2360MB

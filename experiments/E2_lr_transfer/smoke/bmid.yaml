@@ -1,0 +1,8 @@
+# SMOKE branch from the trunk's interior stable checkpoint (step 400): decay 100 steps (s * 0.2 / 0.8), 500 in all.
+extends: ../configs/base5m.yaml
+name: smoke_bmid
+out_dir: ../../../planck_root/runs/smoke/smoke_bmid
+runs_jsonl: ../../../planck_root/runs/smoke/runs.jsonl
+optim: {lr: 3.0e-3, embed_lr: 3.0e-3, scalar_lr: 3.0e-3}
+schedule: {mode: branch, init_from: ../../../planck_root/runs/smoke/smoke_trunk/stable_00000400.pt, decay_steps: 100}
+train: {total_steps: 500, ckpt_every: 10}

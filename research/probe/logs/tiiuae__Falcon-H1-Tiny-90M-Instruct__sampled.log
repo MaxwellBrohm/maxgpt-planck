@@ -1,0 +1,59 @@
+Loading weights:   0%|          | 0/386 [00:00<?, ?it/s]Loading weights: 100%|██████████| 386/386 [00:00<00:00, 13223.25it/s]
+loaded tiiuae/Falcon-H1-Tiny-90M-Instruct params=91.1M device=mps eos=[228, 11] in 0.9s
+/Users/brohm/Documents/Projects/video-editor/.venv/lib/python3.12/site-packages/torch/nn/functional.py:5823: UserWarning: MPS: The constant padding of more than 3 dimensions is not currently supported natively. It uses View Ops default implementation to run. This may have performance implications. (Triggered internally at /Users/runner/work/pytorch/pytorch/aten/src/ATen/native/mps/operations/Pad.mm:567.)
+  return torch._C._nn.pad(input, pad, mode, value)
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+[    16s] seed=0 R_d2_name                  1/1 tok=500
+[    19s] seed=0 R_d2_name__ctrl            1/1 tok=42
+[    36s] seed=0 R_d2_number                0/1 tok=480
+[    39s] seed=0 R_d2_number__ctrl          0/1 tok=34
+[    67s] seed=0 R_d4_pet                   1/1 tok=769
+[    70s] seed=0 R_d4_pet__ctrl             1/1 tok=33
+[    99s] seed=0 R_d4_city                  0/1 tok=774
+[   102s] seed=0 R_d4_city__ctrl            1/1 tok=33
+[   144s] seed=0 R_d6_name                  0/1 tok=1056
+[   148s] seed=0 R_d6_name__ctrl            0/1 tok=33
+[   190s] seed=0 R_d6_number                0/1 tok=1052
+[   193s] seed=0 R_d6_number__ctrl          1/1 tok=39
+[   264s] seed=0 R_d10_pet                  0/1 tok=1453
+[   266s] seed=0 R_d10_pet__ctrl            1/1 tok=31
+[   289s] seed=0 R_d5_multi                 3/3 tok=798
+[   291s] seed=0 R_d5_multi__ctrl           2/3 tok=53
+[   294s] seed=0 F_ellipsis_capital         2/2 tok=82
+[   295s] seed=0 F_ellipsis_capital__ctrl   1/1 tok=17
+[   297s] seed=0 F_translate                0/2 tok=65
+[   299s] seed=0 F_translate__ctrl          0/1 tok=23
+[   305s] seed=0 F_coref_she                1/1 tok=206
+[   307s] seed=0 F_coref_she__ctrl          0/1 tok=34
+[   313s] seed=0 F_whynot                   1/1 tok=197
+[   315s] seed=0 F_whynot__ctrl             0/1 tok=23
+[   317s] seed=0 F_shorter                  1/1 tok=64
+[   317s] seed=0 F_shorter__ctrl            1/1 tok=22
+[   326s] seed=0 I_one_sentence             0/3 tok=328
+[   327s] seed=0 I_one_sentence__ctrl       0/1 tok=20
+[   341s] seed=0 I_end_question             0/3 tok=571
+[   343s] seed=0 I_end_question__ctrl       1/1 tok=32
+[   348s] seed=0 I_caps                     3/3 tok=194
+[   349s] seed=0 I_caps__ctrl               0/1 tok=21
+[   362s] seed=0 I_persona                  2/5 tok=584
+[   363s] seed=0 I_persona__ctrl            0/2 tok=44
+[   379s] seed=0 K_day                      1/1 tok=509
+[   381s] seed=0 K_day__ctrl                1/1 tok=46
+[   400s] seed=0 K_time                     0/1 tok=529
+[   404s] seed=0 K_time__ctrl               1/1 tok=44
+[   423s] seed=0 K_color                    1/1 tok=528
+[   426s] seed=0 K_color__ctrl              0/1 tok=42
+[   430s] seed=0 O_second_item              1/1 tok=150
+[   432s] seed=0 O_last_item                0/1 tok=62
+[   437s] seed=0 O_add10                    2/2 tok=172
+[   439s] seed=0 O_add10__ctrl              1/1 tok=24
+[   448s] seed=0 RI_identity                1/2 tok=386
+[   458s] seed=0 RI_binding                 0/1 tok=286
+[   460s] seed=0 RI_binding__ctrl           1/1 tok=31
+[   475s] seed=0 T_party                    1/1 tok=585
+[   476s] seed=0 T_party__ctrl              1/1 tok=45
+[   491s] seed=0 T_dragon                   1/2 tok=594
+[   493s] seed=0 T_dragon__ctrl             2/2 tok=46
+[   524s] seed=0 L_tell_more                0/0 tok=1093
+[   550s] seed=0 L_chitchat                 0/1 tok=970
+done tiiuae/Falcon-H1-Tiny-90M-Instruct in 550s -> /Users/brohm/Documents/Projects/maxgpt-nano/research/probe/transcripts/tiiuae__Falcon-H1-Tiny-90M-Instruct__sampled.jsonl

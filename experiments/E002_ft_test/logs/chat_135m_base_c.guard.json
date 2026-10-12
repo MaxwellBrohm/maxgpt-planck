@@ -1,0 +1,24 @@
+{
+ "name": "chat_135m_base_c",
+ "cmd": [
+  "/Users/brohm/Documents/Projects/video-editor/.venv/bin/python",
+  "-B",
+  "run_chat.py",
+  "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "--mode",
+  "greedy",
+  "--out",
+  "../transcripts/HuggingFaceTB__SmolLM2-135M-Instruct__base__greedy.jsonl"
+ ],
+ "started": "2026-09-24 17:48:02",
+ "ended": "2026-09-24 17:50:46",
+ "exit": -15,
+ "killed": "swap_grew_1125MB",
+ "min_free": 50,
+ "max_swap_mb": 2038.44,
+ "peak_rss_mb": 862,
+ "elapsed_s": 164,
+ "active_s": 159,
+ "paused_s": 0,
+ "n_pauses": 0
+}

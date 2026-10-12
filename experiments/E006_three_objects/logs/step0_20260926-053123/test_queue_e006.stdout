@@ -1,0 +1,19 @@
+PASS  1 full run ends DONE
+PASS  1 GPU jobs in the pre-registered order
+PASS  1 every GPU job took the lock first
+PASS  1 step-0 checks ran before the first GPU job
+PASS  1 compare_dry ran after the dry runs, before base
+PASS  1 an analysis after every scored arm job and a final one
+PASS  2 a restart skips every finished job
+PASS  2 the restart logs 'done earlier' and ends DONE
+PASS  3 a failed scored job gives a GAP line
+PASS  3 its chat probe is not run
+PASS  3 the queue goes on to G3 and ends DONE
+PASS  4 a temp verdict stops the queue
+PASS  4 no GPU job after the verdict
+PASS  5 a step-0 failure stops before any GPU job
+PASS  6 a failed dry run stops
+PASS  7 a busy lock is retried and the job then runs
+PASS  8 the retry limit stops the queue
+PASS  9 a job that failed earlier is not rerun
+RESULT: ALL PASS

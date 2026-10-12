@@ -1,0 +1,85 @@
+"""Mutants for the stage 2 verdict step's new rule code (2026-10-11; the first 40 written before any real value was
+read at 09:47:53 EDT, s2r_base_by_seed_e3_arm_b at 10:08 and the s2r_up_* and s2r_sens_* ones at 10:50, after it):
+c6read_lib.py and c6read.py (AMENDMENT C6-DIAG's READING RULE, CHECKS, NEAR ITS INIT) and basereplay.py (AMENDMENT
+BASE-REPLAY's readings and labels, the BASE LEVEL over seeds 101 to 105). Read by mutation_screens.py (name, file,
+old, new, test file); each must make its test file fail.
+"""
+CL, CR, BR = "experiments/screens/c6read_lib.py", "experiments/screens/c6read.py", "experiments/screens/basereplay.py"
+TC, TB = "test_c6read.py", "test_basereplay.py"
+MUTANTS_S2RULES = [
+    # c6read_lib.py: the reading
+    ("s2r_higher_every_seed_dropped", CL, "higher = dbar > thr and all(x > 0 for x in d)", "higher = dbar > thr", TC),
+    ("s2r_lower_every_seed_dropped", CL, "lower = -dbar > thr and all(x < 0 for x in d)", "lower = -dbar > thr", TC),
+    ("s2r_thr_one_sided", CL, "thr = t_ppf(0.975, df) * se", "thr = t_ppf(0.95, df) * se", TC),
+    ("s2r_p_one_sided", CL, "p = 2 * (1 - t_cdf(abs(dbar) / se, df))", "p = (1 - t_cdf(abs(dbar) / se, df))", TC),
+    ("s2r_u_left_at_1", CL, '"SIA": u_of(noise["df"]) * noise["SD_d"]', '"SIA": noise["SD_d"]', TC),
+    ("s2r_u_at_df7_always", CL, "return math.sqrt(df / chi2_ppf(0.20, df))", "return math.sqrt(7 / chi2_ppf(0.20, 7))", TC),
+    ("s2r_new_init_without_sqrt2", CL, '"new init": math.sqrt(2) * noise["sigma_seed"]}', '"new init": noise["sigma_seed"]}', TC),
+    ("s2r_missing_value_read", CL, 'why = ([f"value missing at seeds {miss}"] if miss else [])', "why = ([])", TC),
+    ("s2r_no_sd_read", CL, '+ (["PART 4d gives no SD"] if noise is None else [])', "+ ([])", TC),
+    ("s2r_nan_kept", CL, "and math.isfinite(arm[s]) and math.isfinite(base[s])]", "]", TC),
+    ("s2r_pooled_blind", CL, 'return {"sd": sd, "limit": lim, "df": df, "arms": len(rs), "ok": sd <= lim}',
+     'return {"sd": sd, "limit": lim, "df": df, "arms": len(rs), "ok": True}', TC),
+    ("s2r_pooled_without_u", CL, "lim = u_of(noise[\"df\"]) * noise[\"SD_d\"] * sd_bound(df)",
+     'lim = noise["SD_d"] * sd_bound(df)', TC),
+    ("s2r_same_init_blind", CL, 'return {"sd": sd, "limit": lim, "df": df, "ok": sd <= lim}',
+     'return {"sd": sd, "limit": lim, "df": df, "ok": True}', TC),
+    ("s2r_reread_not_underpowered", CL, '+ (["underpowered"] if larger else [])}', "+ ([] if larger else [])}", TC),  # re-anchored 10:50
+    # c6read_lib.py: C4's "underpowered" only for a larger re-read SD; the sensitivity block (added after the audit)
+    ("s2r_up_unconditional", CL, '"labels": c["labels"] + [why] + (["underpowered"] if larger else [])}',
+     '"labels": c["labels"] + [why, "underpowered"]}', TC),
+    ("s2r_up_flipped", CL, 'larger = r["sd_ref"] > c["sd_ref"]', 'larger = r["sd_ref"] < c["sd_ref"]', TC),
+    ("s2r_up_registered_recorded_wrong", CL, '"sd_ref_registered": c["sd_ref"],', '"sd_ref_registered": r["sd_ref"],', TC),
+    ("s2r_sens_dropped", CL, '| ({"sensitivity": sens} if sens else {})', "| {}", TC),
+    ("s2r_sens_registered_at_reread_sd", CL, '"at_registered_sd": alt_family(res, {k: first[k] for k in re_})}',
+     '"at_registered_sd": alt_family(res, {k: res[k] for k in re_})}', TC),
+    ("s2r_sens_pooled_at_registered_sd", CL, 'reading(res[k]["d"], pooled["sd"], pooled["df"])',
+     'reading(res[k]["d"], res[k]["sd_ref_registered"], pooled["df"])', TC),
+    ("s2r_sens_pooled_df", CL, 'reading(res[k]["d"], pooled["sd"], pooled["df"])', 'reading(res[k]["d"], pooled["sd"], res[k]["df"])', TC),
+    ("s2r_sens_pooled_for_same_init", CL, 'pool = [k for k in re_ if FAILED_SIA in res[k]["labels"]]', "pool = re_", TC),
+    ("s2r_sens_smaller_flipped", CL, 'if res[k]["sd_ref"] < res[k]["sd_ref_registered"]]',
+     'if res[k]["sd_ref"] > res[k]["sd_ref_registered"]]', TC),
+    ("s2r_sens_holm_ignores_swap", CL, 'ps = {k: (swap.get(k) or c)["p_two_sided"]', 'ps = {k: c["p_two_sided"]', TC),
+    ("s2r_sens_holm_only_swapped", CL, 'for k, c in res.items() if c["reading"] == "rule"}\n    hm = {k: "holds"',
+     'for k, c in res.items() if c["reading"] == "rule" and k in swap}\n    hm = {k: "holds"', TC),
+    ("s2r_reread_keeps_class", CL, 'r = contrast(c["arm"], c["base"], "new init", noise)',
+     'r = contrast(c["arm"], c["base"], c["class"], noise)', TC),
+    ("s2r_holm_no_step_down", CL, "        ok = ok and p <= alpha / (len(items) - i)\n        out[name] = ok\n    return out\n\n\ndef alt_family",
+     "        ok = p <= alpha / (len(items) - i)\n        out[name] = ok\n    return out\n\n\ndef alt_family", TC),  # re-anchored 10:50
+    ("s2r_s005_flag_ignores_hd", CL, 'return chat_label == "BETTER" and bool(hd_asst) and hd_asst.get("label") == "LOWER"',
+     'return chat_label == "BETTER"', TC),
+    ("s2r_near_s005_direction", CL, "else all(v > thr for v in per.values())", "else all(v < thr for v in per.values())", TC),
+    ("s2r_near_one_seed_enough", CL, "near = [k for k in sites if all(per[s][k] < thr for s in per)]",
+     "near = [k for k in sites if any(per[s][k] < thr for s in per)]", TC),
+    ("s2r_near_s007_threshold", CL, '"S007": 0.05,', '"S007": 0.5,', TC),
+    # analyze_lib.py: C7's unconditional "underpowered" is right only while the new-init SD is the larger (guard test)
+    ("s2r_c7_guard_new_init_small", "experiments/screens/analyze_lib.py", 'math.sqrt(2) * n["sigma_seed_rel"]',
+     'n["sigma_seed_rel"]', "test_screens_stage2_verdicts.py::test_c7_reread_sd"),
+    # c6read.py: the checks and their gate
+    ("s2r_check1_tolerance_ignored", CR, "if not c1 <= REL_TOL:", "if False:", TC),
+    ("s2r_check2_ckpt_unchecked", CR, 'if want is None or v.get("checkpoint_sha256") != want:', "if False:", TC),
+    ("s2r_check2_code_unchecked", CR, 'if v.get("code_sha256") != rec["code_sha256"]:', "if False:", TC),
+    ("s2r_failed_check_still_read", CR, "if ok(f(s)) else None for s in seeds}", "for s in seeds}", TC),
+    ("s2r_check3_wrong_step", CR, "return next((v for s, v in curve if s == L.STEPS), None)", "return curve[0][1] if curve else None", TC),
+    ("s2r_sink_paired_flipped", CR, "[x - y for x, y in zip(on, off)]", "[y - x for x, y in zip(on, off)]", TC),
+    ("s2r_base_by_seed_e3_arm_b", CR, '"e3_arm_a": [v[0] for v in', '"e3_arm_a": [v[1] for v in', TC),
+    ("s2r_hdn_read_by_rule", CR, "        if m in C.RULED:\n", "        if True:\n", TC),
+    # basereplay.py
+    ("s2b_pair_term_dropped", BR, "return math.sqrt((2 * e3_rel ** 2 + pair ** 2) / 3) * base",
+     "return math.sqrt((2 * e3_rel ** 2) / 3) * base", TB),
+    ("s2b_sd_rep_unscaled", BR, "return math.sqrt((2 * e3_rel ** 2 + pair ** 2) / 3) * base",
+     "return math.sqrt((2 * e3_rel ** 2 + pair ** 2) / 3)", TB),
+    ("s2b_sqrt_three_halves_dropped", BR, "t = x / (sd * math.sqrt(1.5))", "t = x / sd", TB),
+    ("s2b_df_two", BR, "DF_REP = 3", "DF_REP = 2", TB),
+    ("s2b_d_sign", BR, '"D": shift(m - b, sd)', '"D": shift(b - m, sd)', TB),
+    ("s2b_h_against_base", BR, 'else shift(h - m, sd)}', 'else shift(h - b, sd)}', TB),
+    ("s2b_relabel_plus_d", BR, "d = [x - dmap[k] for x in r[\"d\"]]", "d = [x + dmap[k] for x in r[\"d\"]]", TB),
+    ("s2b_relabel_chat_only", BR, "d = [x - dmap[k] for x in r[\"d\"]]", 'd = [x - (dmap[k] if k == "CHAT" else 0) for x in r["d"]]', TB),
+    ("s2b_s005_labelled", BR, 'PAIRED = ("S004.canonac", "S006.mtp", "S007.smear")',
+     'PAIRED = ("S004.canonac", "S005.forget", "S006.mtp", "S007.smear")', TB),
+    ("s2b_onset_plus_d", BR, 'r = AL.onset_reading([x - d_onset for x in o["d"]]', 'r = AL.onset_reading([x + d_onset for x in o["d"]]', TB),
+    ("s2b_level_sqrt_term", BR, "t = gap / (sigma_seed * math.sqrt(1 / len(xs) + 1 / len(e3a)))",
+     "t = gap / (sigma_seed * math.sqrt(1 / len(xs)))", TB),
+    ("s2b_seed_draw_from_n5", BR, 'fresh = all(out["CHAT"]["n3"]["above_all_8"])', 'fresh = all(out["CHAT"]["n5"]["above_all_8"])', TB),
+    ("s2b_level_missing_seed_read", BR, 'if any(x is None or x.get("diverged") for x in v.values()):', "if False:", TB),
+]

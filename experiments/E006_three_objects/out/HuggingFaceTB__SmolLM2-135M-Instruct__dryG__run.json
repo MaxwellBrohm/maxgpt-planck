@@ -1,0 +1,468 @@
+{
+ "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+ "weights_in": null,
+ "arm": "G",
+ "seed": 0,
+ "steps": 5,
+ "lr": 0.00015,
+ "bs": 4,
+ "accum": 4,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "cuda",
+ "dry": true,
+ "tag": "dryG",
+ "sets": [
+  "al",
+  "big",
+  "cont",
+  "eval",
+  "h5l",
+  "know"
+ ],
+ "chat": true,
+ "max_new": 48,
+ "checks": {
+  "params_config": {
+   "total": 134515008,
+   "embedding": 28311552,
+   "body": 106203456,
+   "tok_emb": 28311552,
+   "out_head": 0,
+   "pos_emb": 0,
+   "layers": 30,
+   "d": 576,
+   "vocab": 49152,
+   "n_ctx": 8192
+  },
+  "params_model": 134515008,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": true,
+  "config_says_tied": true,
+  "sanity_nll": 1.9598
+ },
+ "numerics": {
+  "float32_matmul_precision": "highest",
+  "tf32_matmul": false,
+  "tf32_cudnn": false,
+  "cudnn_benchmark": false,
+  "cudnn_deterministic": true,
+  "deterministic_algorithms": true,
+  "deterministic_warn_only": true,
+  "cublas_workspace_config": ":4096:8",
+  "sdpa": {
+   "flash": false,
+   "mem_efficient": false,
+   "math": true,
+   "cudnn": false
+  },
+  "hf_hub_offline": "1",
+  "hf_home_set": true,
+  "versions": {
+   "torch": "2.13.0+cu130",
+   "transformers": "5.15.1",
+   "tokenizers": "0.22.2",
+   "safetensors": "0.8.0"
+  },
+  "cuda": "13.0",
+  "cuda_available": true,
+  "gpu": "NVIDIA GeForce RTX 5070",
+  "driver": "596.49"
+ },
+ "tf32": false,
+ "replay_pool_sha256": "94d0f651c58f49781c628d30c13e36c9a396a9116363da8e05f09cbbec93da39",
+ "params": 134515008,
+ "train_stream": "train_e005.stream(seed): R_mix = Random(1000 * seed + 46) draws block (E004 .70 = train_e004.stream(seed) in order, ALIAS .20, IND .10; R_new = Random(1000 * seed + 45)) then render (chat .50); plus one replay micro-batch per step (e006_train.g_train)",
+ "loss_selfcheck": {
+  "first": {
+   "hf": 2.1984567642211914,
+   "answer_only": 2.198456287384033,
+   "n_labelled": 30
+  },
+  "plain": {
+   "hf": 1.9983303546905518,
+   "answer_only": 1.9983294010162354,
+   "n_labelled": 32
+  },
+  "chat": {
+   "hf": 2.401355028152466,
+   "answer_only": 2.401355028152466,
+   "n_labelled": 29
+  },
+  "replay": {
+   "hf": 2.0417299270629883,
+   "answer_only": 2.0417299270629883,
+   "n_labelled": 1119
+  }
+ },
+ "loss_mutants": {
+  "first": {
+   "no_shift": 11.45664119720459,
+   "prompt_labelled": 2.2410085201263428
+  },
+  "plain": {
+   "no_shift": 11.100800514221191,
+   "prompt_labelled": 2.425694704055786
+  },
+  "chat": {
+   "no_shift": 12.059629440307617,
+   "prompt_labelled": 2.1964478492736816
+  },
+  "replay": {
+   "no_shift": 14.087885856628418,
+   "prompt_labelled": 2.289001226425171
+  }
+ },
+ "train_s": 10.8,
+ "renders_trained": {
+  "plain": 40,
+  "chat": 40
+ },
+ "losses_update": [
+  2.67135,
+  2.91515,
+  2.2628,
+  2.35907,
+  2.59103
+ ],
+ "losses_replay": [
+  0.51043,
+  0.33791,
+  0.35234,
+  0.33472,
+  0.49061
+ ],
+ "gnorm_update_part": [
+  8.26808,
+  8.00636,
+  7.39963,
+  8.07839,
+  8.34362
+ ],
+ "gnorm_total": [
+  8.33435,
+  8.00786,
+  7.4013,
+  8.08406,
+  8.39641
+ ],
+ "replay_stats": {
+  "used": 20,
+  "dropped": {
+   "first_exchange_too_long": 1
+  },
+  "cut": 3,
+  "exchanges": 31,
+  "tokens": 8618,
+  "labelled": 7105
+ },
+ "replay_threads": [
+  "oasst2:87e45335-a63a-4c47-b6e9-3240020c088a",
+  "oasst2:51f1a886-6780-42cf-a558-8e18ace1d215",
+  "oasst2:114851f3-cb3a-472d-b8ca-21b595ae5c66",
+  "oasst2:80f2532c-a9e8-454b-98b7-c2cd8e4055b6",
+  "oasst2:eb604985-4e75-422c-ba53-fd3db4db00cf",
+  "oasst2:83d3846e-f076-4925-8849-56e9e24924de",
+  "oasst2:c83c2440-5b11-4d6c-8def-98b76d078423",
+  "oasst2:af04d707-6006-4447-a797-8134c6f13272",
+  "oasst2:a3a5a18f-343b-40bc-a039-976daa9ab3cb",
+  "oasst2:ccda9c25-0939-4f28-8841-66a03c7c0cc5",
+  "oasst2:aad4b20e-b2f4-43ec-bdcf-216a0b0e69ca",
+  "oasst2:82e1acc4-cb74-46cc-b7d9-c0f2205552d6",
+  "oasst2:d4e94714-d8a3-427e-8fea-2a8c744a9424",
+  "oasst2:50967fe7-5bbc-4cd9-8808-45d0a5525fd6",
+  "oasst2:dfc611e1-66f9-498b-8062-e8634c48b1fa",
+  "oasst2:eba417df-6dc0-401a-8771-77efd0ed25b4",
+  "oasst2:8a375443-9bf8-494d-a493-2ead9bbbbef1",
+  "oasst2:1ba945f1-1d58-4815-b9f8-dacaca15180a",
+  "oasst2:7ff0c120-6216-4230-bc23-c98b683811dc",
+  "oasst2:c9676170-c01c-4d82-9e72-c41bf007afd0"
+ ],
+ "replay_digest": {
+  "sha256": "2599f777dfb578f3d36eec3d449ec8114550fb3d4c950b6afc9cf1ff9f330958",
+  "n": 20
+ },
+ "update_digest": {
+  "sha256": "70f8e69512f999d27ad4a9811c3e5ad9b2f532961ce510d5587524105d5b52a6",
+  "n": 84
+ },
+ "s_per_step": 2.16,
+ "train_stats": {
+  "n": 84,
+  "rejected_long": 3,
+  "mean_len": 439.3,
+  "len_max": {
+   "plain": 659,
+   "chat": 728
+  },
+  "split": {
+   "plain": 0,
+   "chat": 0
+  },
+  "shares": {
+   "kind": {
+    "alias_earlier": {
+     "drawn": 0.023,
+     "kept": 0.0238
+    },
+    "alias_latest": {
+     "drawn": 0.1149,
+     "kept": 0.0952
+    },
+    "alias_other": {
+     "drawn": 0.023,
+     "kept": 0.0238
+    },
+    "cross": {
+     "drawn": 0.0575,
+     "kept": 0.0595
+    },
+    "ind_x": {
+     "drawn": 0.069,
+     "kept": 0.0714
+    },
+    "ind_y": {
+     "drawn": 0.046,
+     "kept": 0.0476
+    },
+    "mid": {
+     "drawn": 0.0575,
+     "kept": 0.0595
+    },
+    "noupd": {
+     "drawn": 0.1379,
+     "kept": 0.1429
+    },
+    "noupd_b": {
+     "drawn": 0.069,
+     "kept": 0.0595
+    },
+    "noupd_incid": {
+     "drawn": 0.0115,
+     "kept": 0.0119
+    },
+    "revert": {
+     "drawn": 0.0345,
+     "kept": 0.0357
+    },
+    "twoslot": {
+     "drawn": 0.1494,
+     "kept": 0.1548
+    },
+    "twoslot_b": {
+     "drawn": 0.0345,
+     "kept": 0.0357
+    },
+    "upd": {
+     "drawn": 0.1724,
+     "kept": 0.1786
+    }
+   },
+   "block": {
+    "alias": {
+     "drawn": 0.1609,
+     "kept": 0.1429
+    },
+    "e004": {
+     "drawn": 0.7241,
+     "kept": 0.7381
+    },
+    "ind": {
+     "drawn": 0.1149,
+     "kept": 0.119
+    }
+   },
+   "render": {
+    "chat": {
+     "drawn": 0.5057,
+     "kept": 0.4881
+    },
+    "plain": {
+     "drawn": 0.4943,
+     "kept": 0.5119
+    }
+   },
+   "case": {
+    "None": {
+     "drawn": 0.7241,
+     "kept": 0.7381
+    },
+    "ask_x": {
+     "drawn": 0.069,
+     "kept": 0.0714
+    },
+    "ask_y": {
+     "drawn": 0.046,
+     "kept": 0.0476
+    },
+    "earlier": {
+     "drawn": 0.023,
+     "kept": 0.0238
+    },
+    "latest": {
+     "drawn": 0.1149,
+     "kept": 0.0952
+    },
+    "other": {
+     "drawn": 0.023,
+     "kept": 0.0238
+    }
+   },
+   "placement": {
+    "None": {
+     "drawn": 0.8391,
+     "kept": 0.8571
+    },
+    "adjacent": {
+     "drawn": 0.069,
+     "kept": 0.0714
+    },
+    "filler": {
+     "drawn": 0.046,
+     "kept": 0.0238
+    },
+    "other_obj": {
+     "drawn": 0.046,
+     "kept": 0.0476
+    }
+   }
+  },
+  "max_share_shift": 0.0222
+ },
+ "losses": [
+  3.18178,
+  3.25306,
+  2.61514,
+  2.6938,
+  3.08163
+ ],
+ "probe": [
+  {
+   "step": 0,
+   "H1": 0.0,
+   "H2": 0.0,
+   "H3": 0.0,
+   "H4": 1.0,
+   "H5": 0.0,
+   "H6": 0.0,
+   "H7": 0.0,
+   "C_noupd": 0.0,
+   "C_twoslot": 0.0
+  },
+  {
+   "step": 5,
+   "H1": 0.0,
+   "H2": 0.0,
+   "H3": 0.0,
+   "H4": 1.0,
+   "H5": 0.0,
+   "H6": 0.0,
+   "H7": 0.0,
+   "C_noupd": 0.0,
+   "C_twoslot": 0.0
+  }
+ ],
+ "lock_in_step": null,
+ "loss_finite": true,
+ "weights_sha256": "unsaved",
+ "weights": null,
+ "eval_s": 5.1,
+ "eval_counts": {
+  "e004/plain": 2,
+  "e004/chat": 2,
+  "new/plain": 2,
+  "extra/plain": 2,
+  "old/plain": 2,
+  "uprobe/plain": 2,
+  "cross/plain": 2,
+  "new/chat": 2,
+  "extra/chat": 2,
+  "cross/chat": 2,
+  "khard/plain": 2,
+  "kbig/plain": 2,
+  "big/plain": 2,
+  "big/chat": 2,
+  "h5l/plain": 2,
+  "h5l/chat": 2,
+  "al/plain": 2,
+  "al/chat": 2,
+  "gen_e004/plain": 2,
+  "gen_e004/chat": 2,
+  "gen_cont/plain": 2,
+  "gen_big/plain": 2,
+  "gen_big/chat": 2,
+  "gen_h5l/plain": 2,
+  "gen_h5l/chat": 2,
+  "gen_al/plain": 2,
+  "gen_al/chat": 2
+ },
+ "summary": {
+  "LIK e004/plain": {
+   "H1": 0.0
+  },
+  "LIK e004/chat": {
+   "H1": 0.0
+  },
+  "LIK big/plain": {
+   "H5": 0.5
+  },
+  "LIK big/chat": {
+   "H5": 0.5
+  },
+  "LIK h5l/plain": {
+   "H5L": 0.0
+  },
+  "LIK h5l/chat": {
+   "H5L": 0.0
+  },
+  "LIK al/plain": {
+   "AL": 0.5
+  },
+  "LIK al/chat": {
+   "AL": 0.5
+  },
+  "GEN e004/plain": {
+   "H1": 0.0,
+   "capped": 0
+  },
+  "GEN e004/chat": {
+   "H1": 0.5,
+   "capped": 0
+  },
+  "GEN cont/plain": {
+   "all": 0.0,
+   "capped": 0
+  },
+  "GEN big/plain": {
+   "H5": 0.5,
+   "capped": 0
+  },
+  "GEN big/chat": {
+   "H5": 0.5,
+   "capped": 0
+  },
+  "GEN h5l/plain": {
+   "H5L": 0.0,
+   "capped": 0
+  },
+  "GEN h5l/chat": {
+   "H5L": 0.0,
+   "capped": 0
+  },
+  "GEN al/plain": {
+   "AL": 1.0,
+   "capped": 0
+  },
+  "GEN al/chat": {
+   "AL": 0.0,
+   "capped": 0
+  }
+ },
+ "selftest_fail": [],
+ "total_s": 20.1,
+ "peak_cuda_gb": 3.366
+}

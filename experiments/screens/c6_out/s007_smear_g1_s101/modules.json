@@ -1,0 +1,93 @@
+{
+ "checkpoint": "final_00007630.pt",
+ "checkpoint_sha256": "87e6a8f609c564c4f461fe9a3b42e8cf17ffeba52a15a609dd0dbb5315aeed44",
+ "code_sha256": {
+  "data_prep/bpb.py": "7367071e460e0039760b22a48091ad267746ec1341008ab87ad15bd20cfad1f2",
+  "data_prep/bpb_hd.py": "31e8514785f3d98ca01948ad525fcf13d37be8e67c8201c81084aaaa61d5534f",
+  "data_prep/evalwin.py": "e31107725df257719a5696b4125f6bef402c0d8c28d8d00dfb818c4f5af27169",
+  "experiments/screens/diag_lib.py": "b933c83aaf58d2478f64e34ef4eaa20044dad6af4faf1f0d9028c191c63341eb",
+  "experiments/screens/diag_runner.py": "cb3bfdd8928ecfbd1ef5fe0ddaa1144e3a35a260f9f41664aea97974ba66d6e6",
+  "harness/attn_diag.py": "aa9631c77b34d0722adfe4b756f3a437cf2bff2f334ef3670f2d833e7da9af55",
+  "harness/blocks.py": "f1962a5cb7ead3d307a57f4877d186e206236d208ce3ad29b44f13aa6727698f",
+  "harness/induction.py": "c15701d31417c3e24d9fec7bd48b600f078eb4c65ed31c5f31e403d9898b97e4",
+  "harness/model.py": "f4e61556ee9ece8a01a2e9f36808c8ca161c393bc1836e0a542408a911cd14b6"
+ },
+ "device": "cpu",
+ "evalset_sha256": "fe1b55bbe3612d0c968934cbad831a17fd3d73d84aa8f1b7cb2f4523cf4d505b",
+ "exp": "SCREENS",
+ "group": "stage2",
+ "job": "modules",
+ "result": {
+  "smear_alpha": [
+   {
+    "alpha": [
+     0.6832380890846252,
+     0.14798696339130402,
+     0.19188712537288666
+    ],
+    "layer": 0
+   },
+   {
+    "alpha": [
+     0.08615471422672272,
+     0.14402639865875244,
+     0.2682953476905823
+    ],
+    "layer": 1
+   },
+   {
+    "alpha": [
+     0.1275668442249298,
+     0.13850082457065582,
+     0.2795669734477997
+    ],
+    "layer": 2
+   },
+   {
+    "alpha": [
+     0.2497100681066513,
+     0.12890654802322388,
+     0.15095950663089752
+    ],
+    "layer": 3
+   },
+   {
+    "alpha": [
+     0.19135531783103943,
+     0.30698055028915405,
+     0.38362351059913635
+    ],
+    "layer": 4
+   },
+   {
+    "alpha": [
+     0.0028980018105357885,
+     0.22181689739227295,
+     0.11906659603118896
+    ],
+    "layer": 5
+   },
+   {
+    "alpha": [
+     0.13574089109897614,
+     10.981301307678223,
+     0.1589493751525879
+    ],
+    "layer": 6
+   },
+   {
+    "alpha": [
+     0.10602878779172897,
+     0.44163230061531067,
+     0.08389407396316528
+    ],
+    "layer": 7
+   }
+  ]
+ },
+ "run": "s007_smear_g1_s101",
+ "seconds": 0.0,
+ "step": 7630,
+ "tokenizer_sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5",
+ "torch": "2.13.0+cu130"
+}

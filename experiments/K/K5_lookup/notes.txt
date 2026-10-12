@@ -1,0 +1,128 @@
+K5: lookup vs memorization. With a lookup line for a share p of fact questions, what do the weights still store,
+and does the model use the lookup, including when it contradicts memory?
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model. World, lookup format, metrics, rule KR, seeds and
+hours: ../SPEC.txt (SPEC n); the load reference: ../K1_capacity/notes.txt (FL).
+
+PRE-REGISTRATION WRITTEN 2026-09-27 01:20 (before any K code, data, config or run exists. Run for this entry, no
+model: the token arithmetic below. Nothing of K is queued or committed.)
+
+WHY
+  Planck keeps knowledge outside the weights (LEDGER P-082..P-094, P-142; REPORT 5.1 limit 7). Two things must hold
+  at small size: a model with a lookup should stop spending capacity on facts, and it should follow the lookup.
+  What is known: LMLM, which excludes looked-up values from the loss, keeps their loss high on TOFU where a standard
+  objective drives it down, and its 382M model falls below its no-lookup twin with the database off (Zhao et al.,
+  https://arxiv.org/abs/2505.15962; 124M and up). Retrieval-augmented pretraining leaves masked LMs of 8.5M-98M with
+  less world knowledge in the weights (Samuel et al., https://arxiv.org/abs/2404.10939). Small models follow
+  conflicting context: GPT-2 small at 0.90 and Pythia-160M at 0.71 on native ParaConflict, with swings by phrasing
+  (Fouilhe et al., https://arxiv.org/abs/2609.24238). In GPT-2 small the memorized answer beats a repeated in-context
+  counterfactual in 4% of cases (Ortu et al., https://arxiv.org/abs/2402.11655), and in Pythia fact frequency drives
+  the choice (Yu, Merullo, Pavlick, https://arxiv.org/abs/2310.15910). Untested: a lookup fraction with a
+  counterfactual test at 5M (arch.md U5; localize.md 3.2 (d)).
+
+QUESTIONS
+  Q1 When a share p of fact chats carries a hit lookup line, how many bits of the fact base do the weights still
+     store, against p = 0?
+  Q2 Does the model answer from a hit line for a known entity, for an entity it never saw, and when the line
+     contradicts what it stores?
+  Q3 (reported) Does a lookup channel change in-context skill (S_ID) or general language (bpb)?
+
+THE ONE MANIPULATION
+  The hit fraction p of K5 fact chats: 0, 0.5, 1.0. Every K5 fact chat carries a lookup line (SPEC 6), a hit with
+  probability p (seeded per chat, the same draws for every arm at a seed: chat i is a hit in L50 exactly when its
+  uniform draw is below 0.5), else a miss. Entities, questions, answers, exposures, SKILL and LANG are identical.
+  Pairing [K5-b]: a chat is 30 tokens with a miss and 41 with a hit, so the token mixer's picks, and so the stream
+  positions of SKILL and LANG, differ between arms at a seed; K5 pairs share init and files, not positions (SPEC 11).
+
+DATA (SPEC 7 mix: SKILL 0.25 and LANG 0.25, K1's files; FACT 0.50 as below)
+  FB_K5 = FB_low (15,500 entities, the K1 values). Facts reach the model only through K5 fact chats (SPEC 6): no bio
+  docs, so the memory the probes read is in the chat format the model trained on. Each attribute of each entity is
+  answered E5 = 60 times: 180 two-question chats per entity. Tokens (python, 2026-09-27): p = 1: 15,500 x 180 x 41 =
+  114.4M; p = 0.5: 99.0M; p = 0: 83.7M. Filler (SPEC 3, chat-format fact QA and bio docs) fills each arm's FACT share
+  to the same length, so filler varies with p (about 4.4M tokens at L100 to 35.1M at L0 within 95% of the FACT
+  half, 118.8M; 9.2M to 39.9M over the full 123.6M draw; python 2026-09-27 [K5-c]); stated as a confound.
+  Load: 15,500 x 66 = 1.02 Mbit nominal, 0.20 bits/param: K1 FL's load, so K1 FL is the nearest bio-format reference.
+  Answers after a hit are supervised like every assistant turn; the tool line is never supervised.
+
+ARMS (seeds 201-203, g_K, B = 250.0M)
+  L0 (p 0)     L50 (p 0.5)     L100 (p 1.0)
+
+MEASURES (SPEC 8, 9)
+  Memory M(arm) = latent stored bits (CE renormalized over V) on FB-MISS, 4,096 entities x 6 attributes: the miss
+    line is the trained no-answer format for p < 1; FB-NOTOOL (no tool turn) is reported beside it. Expressed bits
+    and greedy accuracy on both are reported. At p = 1 neither format was ever trained, which is why M reads latent
+    bits: a model that has learned to answer " none" without a hit still shows what it stores in how it ranks V.
+  Use: FB-HIT accuracy; UNSEEN-HIT accuracy (a record for an entity never seen: pure reading); CF-HIT rates, where the
+    record's asked value is replaced: follow (the record's value, gold), memory (the FB value), other; split known /
+    unknown [K5-a]: known = the FB value is the argmax over V of the arm's latent (V-renormalized) distribution on
+    FB-MISS for that key, one rule for every arm (L100 never trained a miss line, so its greedy output there is not
+    a memory read). A known or unknown rate is read only on 100 items or more, else KNOWN-TOO-FEW with the pooled
+    rate reported. CF-HIT holds 2,048 items (SPEC 8) so a weak memory still yields enough known items.
+  Skill and language: S_ID, per-family LIK, CONFLICT (SPEC 8, statements rather than tool lines), bpb.
+
+READINGS (KR, SPEC 10)
+  Memory: contrasts L100 - L0 and L50 - L0 on M, SD_ref pooled over both (df 4), delta 10% of L0's mean M.
+    OFFLOAD      L100 LOWER than L0 and M(L100) <= 0.5 x M(L0) on every seed: an always-available lookup halves or
+                 more what the weights store.
+    NO-OFFLOAD   L100 EQUAL to L0, or M(L100) >= 0.8 x M(L0) on every seed.
+    PARTIAL      anything else. L50 is reported as a dose point (a mid-way M, one near L0 or one near L100).
+    L0 must store: M(L0) >= 0.10 bits/param (0.50 Mbit) on every seed, else NOT-LOADED and no memory reading
+    (the chat-only exposure at 60 per attribute may load less than K1 FL's bio docs; Extra 1 compares them).
+  Use (per arm with p > 0; UNSEEN-HIT on 512 items, CF-HIT on 2,048; thresholds from P-085's "follows a
+  conflicting passage >= 0.8"):
+    USES-LOOKUP       UNSEEN-HIT >= 0.9 and CF-HIT follow >= 0.8 on known items, on every seed.
+    MEMORY-OVERRIDES  CF-HIT follow <= 0.5 on known items on 2 of 3 seeds.
+    MIXED             anything else.
+    L0 never saw a hit, so its hit rates measure whether in-context reading transfers to the tool line (reported,
+    no label).
+  Skill: S_ID of L100 and L50 against L0 with KR (delta 3 points, SD_ref pooled over the two, df 4), reported.
+  What the readings mean for Planck: OFFLOAD with USES-LOOKUP says that at 5M, lookup-bearing chat data keeps facts
+  out of the weights and the model reads them from context, the knowledge-outside design working as intended.
+  NO-OFFLOAD with USES-LOOKUP says the model still memorizes whatever it is supervised to say, so keeping facts out
+  needs more than a lookup channel (for example LMLM-style exclusion where the text form allows it: P-083, P-086).
+  MEMORY-OVERRIDES says counterfactual lookups must be trained (P-084, P-085) before a lookup can be trusted.
+
+EXTRA REPORTS (descriptive)
+  1 M per arm against K1 FL's bio-format stored bits (the same entities, a different exposure format).
+  2 Per-checkpoint M and FB-HIT from the K-PROBE hook (K5 adds 256 FB-MISS and 256 FB-HIT prompts to its probe
+    file): does memorization rise and fall in L100 as copying takes over (Singh et al.'s transience, in reverse)?
+  3 CF-HIT follow rate by attribute and by the position of the asked attribute inside the record.
+  4 FB-NOTOOL against FB-MISS (format sensitivity; Fouilhe et al.: phrasing swings memory-vs-context choices).
+  5 K1 FH/FL CONFLICT rates beside K5's CF-HIT (a stated value in the chat vs a value in a tool line).
+
+NOT APPLIED, WITH REASON
+  LMLM's loss mask on looked-up values (arch.md A7): in this chat frame the answer after a hit is the looked-up value
+  itself, so masking it removes the answer's only supervision; the tool line, LMLM's returned value, is already
+  unsupervised (harness/chat_template.py). Lookup noise (Kim et al., https://arxiv.org/abs/2510.02370: 1%
+  inconsistency decides context vs memory): every training lookup here is correct; a noisy-lookup arm would train a
+  different policy and needs its own pre-registration. A model-invoked lookup (P-090): here the harness always
+  inserts the line.
+
+KNOWN RISKS
+  - Filler differs by p (about 4M to 35M tokens of same-format junk); Physics 3.3 Result 10 says junk slows fact
+    loading, which would push L0's M down and shrink an OFFLOAD contrast; the filler token count per arm is reported.
+  - At 5M, context-following may sit at ceiling for every arm (arch.md PITFALLS), which makes CF-HIT follow
+    uninformative; the known / unknown split and FB-NOTOOL are the guard.
+  - The record carries all six attributes, so a wrong answer can be another attribute of the same record: wrong
+    picks are classified (another record value, the FB value, other).
+  - Exposure is uniform, so there is no frequency axis (Yu, Merullo, Pavlick found frequency drives the choice);
+    the known / unknown split is the only memory-strength axis.
+  - K5 names are FB names, so the pool cue of K1's KNOWN RISKS applies in reverse: here FB names meet context.
+  - df 4 for each KR pool.
+
+DEPENDENCIES
+  K0 (g_K, K0-smoke on a K5 config too); SPEC 14 code incl. lookup.py (tests: a hit line decodes to the entity's
+  record; the tool turn's loss flags are all false; mutant: the answer after a hit left unsupervised); K1 FL for
+  Extra 1; K1's CONFLICT file.
+
+GPU HOURS (SPEC 13): 2.79 (9 runs x 0.31).
+
+CHANGES AFTER CRITIQUE (2026-09-27, adversarial critic; no model loaded. Run: python for the token figures)
+  Lookup use vs memorization is distinguishable here: UNSEEN-HIT (a record for a never-seen name) is pure reading,
+  and CF-HIT on known keys sets the lookup against memory; FB-HIT alone cannot tell them apart and decides nothing.
+  K5-a The known / unknown split used the arm's greedy answer on a miss line, a format L100 never trained, so L100,
+     the arm the question is about, could have almost no "known" items and USES-LOOKUP or MEMORY-OVERRIDES could
+     not be read for it. Now the latent argmax over V (the same reading as M), a 100-item floor, and 2,048 CF-HIT.
+  K5-b The pairing claim of SPEC 11 did not hold for K5 (chat lengths differ by arm); stated.
+  K5-c The filler figure "0 to about 35M" was wrong at L100: 118.8M - 114.4M = 4.4M, not 0.
+  Suggested, not applied (should): report the supervised-token count of the FACT stream per arm (filler bio docs
+  supervise 15 of 16 tokens, tool lines none, so L0's FACT stream carries more supervised tokens than L100's).

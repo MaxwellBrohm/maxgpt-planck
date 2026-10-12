@@ -1,0 +1,30 @@
+Loading weights:   0%|          | 0/108 [00:00<?, ?it/s]Loading weights: 100%|██████████| 108/108 [00:00<00:00, 66664.43it/s]
+[transformers] [1mGPTNeoForCausalLM LOAD REPORT[0m from: roneneldan/TinyStories-8M
+Key                                                               | Status     |  | 
+------------------------------------------------------------------+------------+--+-
+transformer.h.{0, 1, 2, 3, 4, 5, 6, 7}.attn.attention.bias        | UNEXPECTED |  | 
+transformer.h.{0, 1, 2, 3, 4, 5, 6, 7}.attn.attention.masked_bias | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+loaded roneneldan/TinyStories-8M params=19,702,528 (config 19,702,528, body 6,312,448) sanity_nll=0.7722 1.7s mps_alloc=0.10G driver=1.05G peak_driver=1.05G
+loss self-check hf=7.02818 answer_only=7.02819
+loss mutants {'no_shift': 10.804532051086426, 'prompt_labelled': 6.628783702850342} (must all differ from 7.02818)
+probe step 0 {'step': 0, 'H1': 0.0, 'H2': 0.0, 'H3': 1.0, 'H4': 0.0, 'H5': 0.0, 'H6': 1.0, 'H7': 0.0, 'C_noupd': 0.0, 'C_twoslot': 0.0} mps_alloc=0.10G driver=3.12G peak_driver=3.12G
+step 0 loss 6.3801 gnorm 127.25 lr 4.52e-06 2s mps_alloc=0.30G driver=3.20G peak_driver=3.20G
+step 1 loss 6.0272 gnorm 113.43 lr 4.91e-06 4s mps_alloc=0.30G driver=3.13G peak_driver=3.20G
+step 2 loss 5.5015 gnorm 88.00 lr 3.45e-06 6s mps_alloc=0.30G driver=3.13G peak_driver=3.20G
+step 3 loss 4.7910 gnorm 69.96 lr 1.19e-06 8s mps_alloc=0.30G driver=3.13G peak_driver=3.20G
+step 4 loss 4.5167 gnorm 58.61 lr 0.00e+00 10s mps_alloc=0.30G driver=3.13G peak_driver=3.20G
+probe step 5 {'step': 5, 'H1': 0.0, 'H2': 0.0, 'H3': 0.0, 'H4': 0.0, 'H5': 0.0, 'H6': 0.0, 'H7': 1.0, 'C_noupd': 0.0, 'C_twoslot': 0.0}
+scored e004/plain: 2 items in 0s mps_alloc=0.10G driver=1.05G peak_driver=3.20G
+scored new/plain: 2 items in 0s mps_alloc=0.10G driver=1.06G peak_driver=3.20G
+scored extra/plain: 2 items in 0s mps_alloc=0.10G driver=1.07G peak_driver=3.20G
+scored old/plain: 2 items in 0s mps_alloc=0.10G driver=1.06G peak_driver=3.20G
+scored uprobe/plain: 2 items in 0s mps_alloc=0.10G driver=1.07G peak_driver=3.20G
+scored cross/plain: 2 items in 0s mps_alloc=0.10G driver=1.07G peak_driver=3.20G
+scored khard/plain: 2 items in 0s mps_alloc=0.10G driver=1.07G peak_driver=3.20G
+scored kbig/plain: 2 items in 0s mps_alloc=0.10G driver=1.05G peak_driver=3.20G
+generated e004/plain: strict 0/2 in 2s mps_alloc=0.10G driver=1.55G peak_driver=3.20G
+generated cont/plain: strict 0/2 in 0s mps_alloc=0.10G driver=1.08G peak_driver=3.20G
+DONE roneneldan/TinyStories-8M dry total 19s peak_driver=3.203G lock_in_step=None loss_finite=True

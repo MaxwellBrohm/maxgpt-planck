@@ -1,0 +1,28 @@
+-- part_parse
+PASS defaults {'steps': 400, 'lr': 0.00015, 'bs': 4, 'accum': 4, 'max_len': 768, 'probe_every': 50, 'tag': 's1', 'max_new': 48, 'chat': False, 'dry': False, 'plan': False, 'device': 'mps', 'save': 0} sets ['cont', 'eval', 'know']
+PASS --steps 0 -> tag base
+PASS --dry -> 5 steps, tag dry, LR 1.5e-4
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct --seed 1 --sets bogus
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct --seed 1 --sets dev,eval
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct --seed 1 --max-new 64
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct --seed 1 --bs 0
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct --seed 1 --lr 0
+PASS refused: HuggingFaceTB/SmolLM2-135M-Instruct --seed 1 --sets 
+PASS refused: --seed 1
+-- part_plan
+PASS scored run LIK sets {('e004', 'plain'): 640, ('e004', 'chat'): 640, ('new', 'plain'): 1728, ('extra', 'plain'): 192, ('old', 'plain'): 1116, ('uprobe', 'plain'): 576, ('cross', 'plain'): 384, ('new', 'chat'): 1728, ('extra', 'chat'): 192, ('cross', 'chat'): 384, ('khard', 'plain'): 80, ('kbig', 'plain'): 441}
+PASS GEN sets {('e004', 'plain'): 640, ('e004', 'chat'): 640, ('cont', 'plain'): 416}
+PASS probe 144, LR 1.5e-4, training fields 0.5 {'e004': 0.7, 'alias': 0.2, 'ind': 0.1}
+PASS outputs unique and inside E005's out/
+PASS baseline plan: no probe, no training
+PASS dry plan: <= 2 items per set incl. chat GEN
+-- part_imports
+PASS --plan imports neither torch nor transformers ([])
+-- part_dry_renders
+PASS dry-run examples per seed hold both renders; check batches fill within 40 draws [(0, {'plain': 40, 'chat': 44}, 17), (1, {'plain': 33, 'chat': 51}, 16), (2, {'plain': 41, 'chat': 43}, 20), (3, {'plain': 42, 'chat': 42}, 18), (4, {'plain': 41, 'chat': 43}, 17), (5, {'plain': 47, 'chat': 37}, 18)]
+-- part_wiring
+PASS the entry point trains through e005_train, never e004_train
+PASS e005_train keeps E004's optimizer, schedule, clip, loss, probe and checkpointing lines []
+PASS dry steps are padded to --max-len
+0 failures; ALL PASS

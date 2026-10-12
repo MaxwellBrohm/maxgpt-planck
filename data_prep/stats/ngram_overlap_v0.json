@@ -1,0 +1,180 @@
+{
+ "evalset_sha256": "fe1b55bbe3612d0c968934cbad831a17fd3d73d84aa8f1b7cb2f4523cf4d505b",
+ "format": "planck-ngram-overlap-v1",
+ "n": 13,
+ "sampled_total": 4449577,
+ "sets": {
+  "cccc": {
+   "bytes_share_docs_ge_50pct": 0.23181,
+   "docs": 878,
+   "docs_hit_ge_50pct": 246,
+   "docs_hit_ge_90pct": 106,
+   "examples_ge_90pct": [
+    "cccc:2avkvmubtmo5z7hvfzblio4u5za46ihw",
+    "cccc:2mqkyuzxcrjmwfu23vdjzgk6njumo75t",
+    "cccc:2twtf2u6t55bfhhy3vki7kzx4gvilvzq",
+    "cccc:2zzxccljq3kybufduabnl7d6b3gtqqkn",
+    "cccc:34oywsragxd37ptmycuxgh5iblfrcd2d"
+   ],
+   "hit_share": 0.31547,
+   "hit_share_by_train_source": {
+    "cccc": 0.31465,
+    "dolly": 5e-05,
+    "gutenberg": 0.00023,
+    "irc": 0.00062,
+    "oasst2": 0.0001,
+    "stackexchange": 0.00179,
+    "wikimedia": 0.00314
+   },
+   "hit_share_of_once_seen": 0.30231,
+   "sampled": 767346
+  },
+  "dolly": {
+   "assistant_bytes_share_turns_ge_50pct": 0.0201,
+   "assistant_hit_share": 0.0309,
+   "assistant_turns_hit_ge_50pct": 34,
+   "bytes_share_docs_ge_50pct": 0.04173,
+   "docs": 2854,
+   "docs_hit_ge_50pct": 76,
+   "docs_hit_ge_90pct": 18,
+   "examples_ge_90pct": [
+    "dolly:10106",
+    "dolly:11711",
+    "dolly:13380",
+    "dolly:1416",
+    "dolly:14173"
+   ],
+   "hit_share": 0.05894,
+   "hit_share_by_train_source": {
+    "cccc": 0.01623,
+    "dolly": 0.04311,
+    "gutenberg": 0.00024,
+    "irc": 0.00026,
+    "oasst2": 0.00059,
+    "stackexchange": 0.00341,
+    "wikimedia": 0.00298
+   },
+   "hit_share_of_once_seen": 0.05087,
+   "sampled": 352912,
+   "user_bytes_share_turns_ge_50pct": 0.06113,
+   "user_hit_share": 0.08109,
+   "user_turns_hit_ge_50pct": 90
+  },
+  "gutenberg": {
+   "bytes_share_docs_ge_50pct": 0.0,
+   "docs": 31,
+   "docs_hit_ge_50pct": 0,
+   "docs_hit_ge_90pct": 0,
+   "examples_ge_90pct": [],
+   "hit_share": 0.01616,
+   "hit_share_by_train_source": {
+    "cccc": 0.00042,
+    "dolly": 0.00013,
+    "gutenberg": 0.01598,
+    "irc": 0.00024,
+    "oasst2": 0.0002,
+    "stackexchange": 0.00043,
+    "wikimedia": 3e-05
+   },
+   "hit_share_of_once_seen": 0.01522,
+   "sampled": 752709
+  },
+  "irc": {
+   "bytes_share_docs_ge_50pct": 0.00122,
+   "docs": 242,
+   "docs_hit_ge_50pct": 5,
+   "docs_hit_ge_90pct": 2,
+   "examples_ge_90pct": [
+    "irc:2015-12-16-#ubuntu-news",
+    "irc:2019-04-27-#ubuntu-irc"
+   ],
+   "hit_share": 0.08317,
+   "hit_share_by_train_source": {
+    "cccc": 0.00503,
+    "dolly": 2e-05,
+    "gutenberg": 0.0001,
+    "irc": 0.08292,
+    "oasst2": 6e-05,
+    "stackexchange": 0.00098,
+    "wikimedia": 0.00156
+   },
+   "hit_share_of_once_seen": 0.05113,
+   "sampled": 922322
+  },
+  "oasst2": {
+   "assistant_bytes_share_turns_ge_50pct": 0.0007,
+   "assistant_hit_share": 0.01661,
+   "assistant_turns_hit_ge_50pct": 4,
+   "bytes_share_docs_ge_50pct": 0.00064,
+   "docs": 1094,
+   "docs_hit_ge_50pct": 2,
+   "docs_hit_ge_90pct": 0,
+   "examples_ge_90pct": [],
+   "hit_share": 0.01649,
+   "hit_share_by_train_source": {
+    "cccc": 0.00964,
+    "dolly": 0.00118,
+    "gutenberg": 0.00175,
+    "irc": 0.0063,
+    "oasst2": 0.0081,
+    "stackexchange": 0.00645,
+    "wikimedia": 0.00612
+   },
+   "hit_share_of_once_seen": 0.00742,
+   "sampled": 272821,
+   "user_bytes_share_turns_ge_50pct": 0.00469,
+   "user_hit_share": 0.01527,
+   "user_turns_hit_ge_50pct": 8
+  },
+  "stackexchange": {
+   "bytes_share_docs_ge_50pct": 0.0,
+   "docs": 1308,
+   "docs_hit_ge_50pct": 0,
+   "docs_hit_ge_90pct": 0,
+   "examples_ge_90pct": [],
+   "hit_share": 0.01353,
+   "hit_share_by_train_source": {
+    "cccc": 0.00158,
+    "dolly": 7e-05,
+    "gutenberg": 0.00012,
+    "irc": 0.00085,
+    "oasst2": 0.00025,
+    "stackexchange": 0.01316,
+    "wikimedia": 0.00074
+   },
+   "hit_share_of_once_seen": 0.01192,
+   "sampled": 658387
+  },
+  "wikimedia": {
+   "bytes_share_docs_ge_50pct": 0.07559,
+   "docs": 1317,
+   "docs_hit_ge_50pct": 102,
+   "docs_hit_ge_90pct": 39,
+   "examples_ge_90pct": [
+    "wikimedia:wikibooks.com:0-110308",
+    "wikimedia:wikibooks.com:0-179981",
+    "wikimedia:wikibooks.com:0-241461",
+    "wikimedia:wikibooks.com:0-248635",
+    "wikimedia:wikibooks.com:0-249446"
+   ],
+   "hit_share": 0.10171,
+   "hit_share_by_train_source": {
+    "cccc": 0.01114,
+    "dolly": 0.00012,
+    "gutenberg": 8e-05,
+    "irc": 0.00092,
+    "oasst2": 0.00011,
+    "stackexchange": 0.0011,
+    "wikimedia": 0.09261
+   },
+   "hit_share_of_once_seen": 0.08692,
+   "sampled": 723080
+  }
+ },
+ "shard_manifest_sha256": "23647db746de12075cdd96929f004e41c1a5b1ed5ab7bb57b1ccef090ef41344",
+ "stride": 2,
+ "tokenizer": {
+  "file": "tok_v0_8k.json",
+  "sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5"
+ }
+}

@@ -1,0 +1,142 @@
+{
+ "bytes_per_token": 3.2688,
+ "code_sha256": {
+  "corpus/oodh.py": "b256d5554d531bd76c531a8bc59c287f57f60e94cc224e3f136add75594987d1",
+  "corpus/sample_plan.py": "a50209255798b4f50117208777cf4429e3d7994f3f37d687caa5aee4e27a9e57",
+  "data_prep/prep_common.py": "7c8fce2b5eccc466070e848e2e55f25cd3a3b247acfc6d66a06334536ac15ada",
+  "data_prep/pretok_worker.py": "616a8e41c5d265e35e7a8fcf9910c755b4d312004a6a0ff79eb9317057b0891a",
+  "data_prep/pretokenize.py": "ad16bf9b782fa0c40729735da5334a9113a8a6f63d2c06fd7c568da1a631ad82",
+  "harness/chat_template.py": "16f5aa51d6c94b01afa7324a8ed119cb585aae1d8122a92eeb99a3d919196774"
+ },
+ "counts": {
+  "chat_docs": 0,
+  "chat_over_2048": 0,
+  "chat_over_2048_tokens": 0,
+  "chat_over_4096": 0,
+  "chat_over_4096_tokens": 0,
+  "docs": 4534,
+  "docs_in": 4565,
+  "empty_docs": 0,
+  "excluded_docs": 31,
+  "excluded_text_bytes": 5063066,
+  "max_doc_tokens": 134088,
+  "special_replaced_docs": 0,
+  "sup_tokens": 0,
+  "text_bytes": 733440461,
+  "text_docs": 4534,
+  "tokens": 224378050
+ },
+ "dtype": "uint16",
+ "format": "planck-pretok-v1",
+ "heldout": {
+  "dir": "~/planck/data/tok_sample_v0c/heldout",
+  "manifest_sha256": "d0fa0838a6aa4ee8a6c62d6ffe496f812e8335d90266d34689c97cd9e13cfa63",
+  "source_file": {
+   "docs": 31,
+   "file": "gutenberg.jsonl",
+   "keys": 31,
+   "sha256": "7fd251f138b63e0e9721d9d6d0cce9b2b2dcba5cdb283b98d4edfd4337fa4e20"
+  }
+ },
+ "input": {
+  "bytes": 758635263,
+  "dir": "~/planck/data/extracted/starter_v0c",
+  "extract_stats_sha256": "8d6452ae8c3be7b0c43e4ba149b273fcb5e59f4ab5c2bd33baaec0b1499872d9",
+  "files": [
+   "gutenberg/gutenberg-00000.jsonl",
+   "gutenberg/gutenberg-00001.jsonl",
+   "gutenberg/gutenberg-00002.jsonl"
+  ]
+ },
+ "kind": "tokens",
+ "n_shards": 6,
+ "seed": 0,
+ "shard_mb": 128,
+ "shards": [
+  {
+   "bytes": 74147580,
+   "docs": 748,
+   "ids": "gutenberg/gutenberg-00000.ids",
+   "path": "gutenberg/gutenberg-00000.bin",
+   "sha256": "72a1be717ccd70cde6758424fd3b27d64dbdbc7295317f3c09c343adedc2c175",
+   "sup_tokens": 0,
+   "text_bytes": 121229446,
+   "tokens": 37073790
+  },
+  {
+   "bytes": 72446656,
+   "docs": 750,
+   "ids": "gutenberg/gutenberg-00001.ids",
+   "path": "gutenberg/gutenberg-00001.bin",
+   "sha256": "8e480fa32a49c56a3d64d5fe675d39758a21bea938a8557bb5dd4e8a985c274e",
+   "sup_tokens": 0,
+   "text_bytes": 118655798,
+   "tokens": 36223328
+  },
+  {
+   "bytes": 79243750,
+   "docs": 784,
+   "ids": "gutenberg/gutenberg-00002.ids",
+   "path": "gutenberg/gutenberg-00002.bin",
+   "sha256": "30df4f913b9950520aebe326aa48fc68305a88dccc0cde7a71d48e6633096543",
+   "sup_tokens": 0,
+   "text_bytes": 129196179,
+   "tokens": 39621875
+  },
+  {
+   "bytes": 77006088,
+   "docs": 775,
+   "ids": "gutenberg/gutenberg-00003.ids",
+   "path": "gutenberg/gutenberg-00003.bin",
+   "sha256": "d468ea1a32caccbb8f716ed6ec37f4d34846bbee945a8ff881c754d0f69ce707",
+   "sup_tokens": 0,
+   "text_bytes": 125524913,
+   "tokens": 38503044
+  },
+  {
+   "bytes": 74199008,
+   "docs": 751,
+   "ids": "gutenberg/gutenberg-00004.ids",
+   "path": "gutenberg/gutenberg-00004.bin",
+   "sha256": "6c9e9849a48306a28c1a606f466c2bf7e1dfd3a91e1a850104c8fe831a7ba7a5",
+   "sup_tokens": 0,
+   "text_bytes": 121354794,
+   "tokens": 37099504
+  },
+  {
+   "bytes": 71713018,
+   "docs": 726,
+   "ids": "gutenberg/gutenberg-00005.ids",
+   "path": "gutenberg/gutenberg-00005.bin",
+   "sha256": "4e3029c1e832f98b7fdc0617f3bad4837d83e60f25f2875df88893cccd5ecdd6",
+   "sup_tokens": 0,
+   "text_bytes": 117479331,
+   "tokens": 35856509
+  }
+ ],
+ "source": "gutenberg",
+ "tokenizer": {
+  "control_ids": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "end_id": 5,
+  "eot_id": 1,
+  "file": "tok_v0_8k.json",
+  "n_special": 15,
+  "pad_id": 0,
+  "role_ids": {
+   "assistant": 4,
+   "system": 2,
+   "tool": 6,
+   "user": 3
+  },
+  "sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5",
+  "vocab": 8192
+ }
+}

@@ -1,0 +1,76 @@
+-- HuggingFaceTB/SmolLM2-135M-Instruct (GPT2Tokenizer, vocab 49152)
+PASS HuggingFaceTB/SmolLM2-135M-Instruct: label check flags 3 of 3 wrong labellings
+PASS HuggingFaceTB/SmolLM2-135M-Instruct: labels = -100 on the prompt, answer ids on the answer (0 bad of 400)
+PASS HuggingFaceTB/SmolLM2-135M-Instruct: answer tokens decode to exactly the target (0 bad; split 0)
+PASS HuggingFaceTB/SmolLM2-135M-Instruct: stream keeps 400 <= 768 tokens, rejected 0 (= 0 over-long in the first 400 drawn)
+PASS HuggingFaceTB/SmolLM2-135M-Instruct: rejection at 350 tokens: drawn 241, rejected 141 (= 141 over-limit), kept all <= 350
+PASS HuggingFaceTB/SmolLM2-135M-Instruct: make_batch shapes, padding and label alignment
+PASS HuggingFaceTB/SmolLM2-135M-Instruct: equal candidate token counts on 1120/1120 items []
+PASS HuggingFaceTB/SmolLM2-135M-Instruct: the count comparison separates a 1-token gold from a long foil [1, 5]
+PASS HuggingFaceTB/SmolLM2-135M-Instruct: joint tokenization for every candidate (0 split)
+INFO HuggingFaceTB/SmolLM2-135M-Instruct: longest prompt+candidate tokens per family C_noupd=990 C_twoslot=1135 H1=803 H2=736 H3=906 H4=1150 H5=1043 H6=743 H7=709 ID=800
+INFO HuggingFaceTB/SmolLM2-135M-Instruct: eval draw, share of items over 512 / over 768 tokens per family C_noupd=0.80/0.20 C_twoslot=0.91/0.16 H1=0.94/0.03 H2=0.83/0.00 H3=0.97/0.06 H4=1.00/1.00 H5=1.00/0.34 H6=0.78/0.00 H7=0.69/0.00 ID=0.67/0.00
+PASS HuggingFaceTB/SmolLM2-135M-Instruct: stub scoring right on gold-preferring 60/60, uniform 0/60, foil-preferring 0/60
+PASS HuggingFaceTB/SmolLM2-135M-Instruct: probe returns the 9 pass-rule families (uniform stub: all 0.0)
+PASS lock-in step reads the min over the 9 families
+-- roneneldan/TinyStories-8M (GPT2Tokenizer, vocab 50257)
+PASS roneneldan/TinyStories-8M: label check flags 3 of 3 wrong labellings
+PASS roneneldan/TinyStories-8M: labels = -100 on the prompt, answer ids on the answer (0 bad of 400)
+PASS roneneldan/TinyStories-8M: answer tokens decode to exactly the target (0 bad; split 0)
+PASS roneneldan/TinyStories-8M: stream keeps 400 <= 768 tokens, rejected 0 (= 0 over-long in the first 400 drawn)
+PASS roneneldan/TinyStories-8M: rejection at 350 tokens: drawn 227, rejected 127 (= 127 over-limit), kept all <= 350
+PASS roneneldan/TinyStories-8M: make_batch shapes, padding and label alignment
+PASS roneneldan/TinyStories-8M: equal candidate token counts on 1120/1120 items []
+PASS roneneldan/TinyStories-8M: the count comparison separates a 1-token gold from a long foil [1, 5]
+PASS roneneldan/TinyStories-8M: joint tokenization for every candidate (0 split)
+INFO roneneldan/TinyStories-8M: longest prompt+candidate tokens per family C_noupd=966 C_twoslot=1104 H1=783 H2=713 H3=877 H4=1124 H5=1012 H6=721 H7=692 ID=779
+INFO roneneldan/TinyStories-8M: eval draw, share of items over 512 / over 768 tokens per family C_noupd=0.75/0.20 C_twoslot=0.89/0.16 H1=0.92/0.02 H2=0.80/0.00 H3=0.95/0.05 H4=1.00/1.00 H5=1.00/0.23 H6=0.69/0.00 H7=0.59/0.00 ID=0.64/0.00
+-- EleutherAI/pythia-31m (GPTNeoXTokenizer, vocab 50277)
+PASS EleutherAI/pythia-31m: label check flags 3 of 3 wrong labellings
+PASS EleutherAI/pythia-31m: labels = -100 on the prompt, answer ids on the answer (0 bad of 400)
+PASS EleutherAI/pythia-31m: answer tokens decode to exactly the target (0 bad; split 0)
+PASS EleutherAI/pythia-31m: stream keeps 400 <= 768 tokens, rejected 0 (= 0 over-long in the first 400 drawn)
+PASS EleutherAI/pythia-31m: rejection at 350 tokens: drawn 256, rejected 156 (= 156 over-limit), kept all <= 350
+PASS EleutherAI/pythia-31m: make_batch shapes, padding and label alignment
+PASS EleutherAI/pythia-31m: equal candidate token counts on 1120/1120 items []
+PASS EleutherAI/pythia-31m: the count comparison separates a 1-token gold from a long foil [1, 5]
+PASS EleutherAI/pythia-31m: joint tokenization for every candidate (0 split)
+INFO EleutherAI/pythia-31m: longest prompt+candidate tokens per family C_noupd=1007 C_twoslot=1147 H1=818 H2=742 H3=923 H4=1175 H5=1058 H6=753 H7=718 ID=810
+INFO EleutherAI/pythia-31m: eval draw, share of items over 512 / over 768 tokens per family C_noupd=0.81/0.20 C_twoslot=0.91/0.17 H1=0.97/0.03 H2=0.86/0.00 H3=0.97/0.11 H4=1.00/1.00 H5=1.00/0.39 H6=0.81/0.00 H7=0.72/0.00 ID=0.72/0.02
+-- roneneldan/TinyStories-3M (GPT2Tokenizer, vocab 50257)
+PASS roneneldan/TinyStories-3M: label check flags 3 of 3 wrong labellings
+PASS roneneldan/TinyStories-3M: labels = -100 on the prompt, answer ids on the answer (0 bad of 400)
+PASS roneneldan/TinyStories-3M: answer tokens decode to exactly the target (0 bad; split 0)
+PASS roneneldan/TinyStories-3M: stream keeps 400 <= 768 tokens, rejected 0 (= 0 over-long in the first 400 drawn)
+PASS roneneldan/TinyStories-3M: rejection at 350 tokens: drawn 227, rejected 127 (= 127 over-limit), kept all <= 350
+PASS roneneldan/TinyStories-3M: make_batch shapes, padding and label alignment
+PASS roneneldan/TinyStories-3M: equal candidate token counts on 1120/1120 items []
+PASS roneneldan/TinyStories-3M: the count comparison separates a 1-token gold from a long foil [1, 5]
+PASS roneneldan/TinyStories-3M: joint tokenization for every candidate (0 split)
+INFO roneneldan/TinyStories-3M: longest prompt+candidate tokens per family C_noupd=966 C_twoslot=1104 H1=783 H2=713 H3=877 H4=1124 H5=1012 H6=721 H7=692 ID=779
+INFO roneneldan/TinyStories-3M: eval draw, share of items over 512 / over 768 tokens per family C_noupd=0.75/0.20 C_twoslot=0.89/0.16 H1=0.92/0.02 H2=0.80/0.00 H3=0.95/0.05 H4=1.00/1.00 H5=1.00/0.23 H6=0.69/0.00 H7=0.59/0.00 ID=0.64/0.00
+-- EleutherAI/pythia-14m (GPTNeoXTokenizer, vocab 50277)
+PASS EleutherAI/pythia-14m: label check flags 3 of 3 wrong labellings
+PASS EleutherAI/pythia-14m: labels = -100 on the prompt, answer ids on the answer (0 bad of 400)
+PASS EleutherAI/pythia-14m: answer tokens decode to exactly the target (0 bad; split 0)
+PASS EleutherAI/pythia-14m: stream keeps 400 <= 768 tokens, rejected 0 (= 0 over-long in the first 400 drawn)
+PASS EleutherAI/pythia-14m: rejection at 350 tokens: drawn 256, rejected 156 (= 156 over-limit), kept all <= 350
+PASS EleutherAI/pythia-14m: make_batch shapes, padding and label alignment
+PASS EleutherAI/pythia-14m: equal candidate token counts on 1120/1120 items []
+PASS EleutherAI/pythia-14m: the count comparison separates a 1-token gold from a long foil [1, 5]
+PASS EleutherAI/pythia-14m: joint tokenization for every candidate (0 split)
+INFO EleutherAI/pythia-14m: longest prompt+candidate tokens per family C_noupd=1007 C_twoslot=1147 H1=818 H2=742 H3=923 H4=1175 H5=1058 H6=753 H7=718 ID=810
+INFO EleutherAI/pythia-14m: eval draw, share of items over 512 / over 768 tokens per family C_noupd=0.81/0.20 C_twoslot=0.91/0.17 H1=0.97/0.03 H2=0.86/0.00 H3=0.97/0.11 H4=1.00/1.00 H5=1.00/0.39 H6=0.81/0.00 H7=0.72/0.00 ID=0.72/0.02
+-- roneneldan/TinyStories-1M (GPT2Tokenizer, vocab 50257)
+PASS roneneldan/TinyStories-1M: label check flags 3 of 3 wrong labellings
+PASS roneneldan/TinyStories-1M: labels = -100 on the prompt, answer ids on the answer (0 bad of 400)
+PASS roneneldan/TinyStories-1M: answer tokens decode to exactly the target (0 bad; split 0)
+PASS roneneldan/TinyStories-1M: stream keeps 400 <= 768 tokens, rejected 0 (= 0 over-long in the first 400 drawn)
+PASS roneneldan/TinyStories-1M: rejection at 350 tokens: drawn 227, rejected 127 (= 127 over-limit), kept all <= 350
+PASS roneneldan/TinyStories-1M: make_batch shapes, padding and label alignment
+PASS roneneldan/TinyStories-1M: equal candidate token counts on 1120/1120 items []
+PASS roneneldan/TinyStories-1M: the count comparison separates a 1-token gold from a long foil [1, 5]
+PASS roneneldan/TinyStories-1M: joint tokenization for every candidate (0 split)
+INFO roneneldan/TinyStories-1M: longest prompt+candidate tokens per family C_noupd=966 C_twoslot=1104 H1=783 H2=713 H3=877 H4=1124 H5=1012 H6=721 H7=692 ID=779
+INFO roneneldan/TinyStories-1M: eval draw, share of items over 512 / over 768 tokens per family C_noupd=0.75/0.20 C_twoslot=0.89/0.16 H1=0.92/0.02 H2=0.80/0.00 H3=0.95/0.05 H4=1.00/1.00 H5=1.00/0.23 H6=0.69/0.00 H7=0.59/0.00 ID=0.64/0.00
+0 failures in 37s; ALL PASS

@@ -1,0 +1,19 @@
+Loading weights:   0%|          | 0/272 [00:00<?, ?it/s]Loading weights: 100%|██████████| 272/272 [00:00<00:00, 10814.16it/s]
+loaded HuggingFaceTB/SmolLM2-135M-Instruct {'params': 134515008, 'emb': 28311552, 'dtype': 'fp32', 'device': 'mps'} in 1.5s
+new/plain 0/1728 0s len=104
+new/plain 250/1728 12s len=105
+new/plain 500/1728 32s len=233
+new/plain 750/1728 62s len=551
+new/plain 1000/1728 85s len=178
+new/plain 1250/1728 101s len=320
+new/plain 1500/1728 126s len=451
+done new/plain: 1728 scored, 0 skipped, 159s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/HuggingFaceTB__SmolLM2-135M-Instruct__new__plain.jsonl
+new/chat 0/1728 0s len=140
+new/chat 250/1728 15s len=141
+new/chat 500/1728 38s len=286
+new/chat 750/1728 74s len=642
+new/chat 1000/1728 100s len=222
+new/chat 1250/1728 120s len=382
+new/chat 1500/1728 149s len=528
+done new/chat: 1728 scored, 0 skipped, 186s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/HuggingFaceTB__SmolLM2-135M-Instruct__new__chat.jsonl
+ALL DONE HuggingFaceTB/SmolLM2-135M-Instruct in 347s

@@ -1,0 +1,70 @@
+{
+ "ok": true,
+ "runs": [
+  {
+   "config": "experiments/E2_lr_transfer/smoke/bend.yaml",
+   "config_sha256": "e3a85693b54d18728e99b3c2e5b4fd199bbfc835b26fcbc874ca25256e08deb2",
+   "engine": {
+    "data.max_item_len": 2048,
+    "data.mode": "pack",
+    "data.window_tokens": 131072,
+    "optim.batched": true,
+    "train.auto_micro_on_oom": false,
+    "train.ce_chunk_rows": 0,
+    "train.compile": false,
+    "train.compile_backend": "inductor",
+    "train.compile_dynamic": null,
+    "train.cuda_mem_cap_gib": null,
+    "train.cuda_mem_margin_gib": 0.5,
+    "train.doc_attn": "varlen",
+    "train.lazy_metrics": false,
+    "train.precision": "bf16"
+   },
+   "engine_fixed": null,
+   "engine_not_read_by_harness": [
+    "train.auto_micro_on_oom",
+    "train.ce_chunk_rows",
+    "train.compile",
+    "train.compile_backend",
+    "train.compile_dynamic",
+    "train.cuda_mem_cap_gib",
+    "train.cuda_mem_margin_gib"
+   ],
+   "file_sha256": "bcbc6eb4add17835b38fd398395ada9a89fb0c85a8149a3e0d3a38436e77b2d6",
+   "init_from": "planck_root/runs/smoke/smoke_trunk/stable_00001200.pt",
+   "n_files": {
+    "cccc": 31,
+    "dolly": 1,
+    "gutenberg": 6,
+    "irc": 6,
+    "oasst2": 1,
+    "stackexchange": 11,
+    "wikimedia": 3
+   },
+   "n_params": 5010133,
+   "name": "smoke_bend",
+   "ok": true,
+   "prereg": {
+    "committed": null,
+    "id": "E2-SMOKE",
+    "sha256": "cab28843a20544aaa2abe5c1f844281f063b04a5888b84e0cef3ef8960c834a3"
+   },
+   "refusals": [],
+   "schedule": {
+    "mode": "branch",
+    "total_steps": 1500,
+    "warmup_steps": 76
+   },
+   "shares": {
+    "cccc": 0.414241,
+    "dolly": 0.016002,
+    "gutenberg": 0.147915,
+    "irc": 0.040004,
+    "oasst2": 0.012001,
+    "stackexchange": 0.221922,
+    "wikimedia": 0.147915
+   }
+  }
+ ],
+ "strict": false
+}

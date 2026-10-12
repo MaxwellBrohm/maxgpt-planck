@@ -1,0 +1,134 @@
+{
+ "model": "roneneldan/TinyStories-8M",
+ "seed": 0,
+ "steps": 5,
+ "lr": 5e-05,
+ "bs": 4,
+ "accum": 4,
+ "eff_batch": 16,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "mps",
+ "dry": true,
+ "tag": "dry",
+ "sets": [
+  "dev",
+  "eval"
+ ],
+ "params": 19702528,
+ "checks": {
+  "params_config": {
+   "total": 19702528,
+   "embedding": 13390080,
+   "body": 6312448,
+   "tok_emb": 12865792,
+   "out_head": 0,
+   "pos_emb": 524288,
+   "layers": 8,
+   "d": 256,
+   "vocab": 50257,
+   "n_ctx": 2048
+  },
+  "params_model": 19702528,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [
+   "transformer.h.0.attn.attention.bias",
+   "transformer.h.0.attn.attention.masked_bias",
+   "transformer.h.1.attn.attention.bias",
+   "transformer.h.1.attn.attention.masked_bias",
+   "transformer.h.2.attn.attention.bias",
+   "transformer.h.2.attn.attention.masked_bias",
+   "transformer.h.3.attn.attention.bias",
+   "transformer.h.3.attn.attention.masked_bias",
+   "transformer.h.4.attn.attention.bias",
+   "transformer.h.4.attn.attention.masked_bias"
+  ],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": true,
+  "config_says_tied": true,
+  "sanity_nll": 0.7722
+ },
+ "trained_ctx": 512,
+ "torch": "2.13.0",
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "wpe_row_norm_mean": {
+  "0-511": 0.3561,
+  "512-767": 0.1641,
+  "768-2047": 0.1643
+ },
+ "loss_selfcheck": {
+  "hf": 6.457267761230469,
+  "answer_only": 6.457266330718994
+ },
+ "loss_mutants": {
+  "no_shift": 11.928777694702148,
+  "prompt_labelled": 6.532041549682617
+ },
+ "train_s": 10.2,
+ "s_per_step": 2.04,
+ "train_stats": {
+  "n": 84,
+  "rejected_long": 0,
+  "kinds": {
+   "noupd_incid": 4,
+   "noupd_b": 2,
+   "persp": 15,
+   "upd": 14,
+   "bind": 9,
+   "noupd": 11,
+   "twohop": 14,
+   "mid": 3,
+   "revert": 1,
+   "twoslot": 7,
+   "twoslot_b": 3,
+   "upd_incid": 1
+  },
+  "len_sum": 24524,
+  "len_max": 623,
+  "split": 0,
+  "mean_len": 292.0
+ },
+ "losses": [
+  6.84944,
+  6.42771,
+  5.86166,
+  4.08419,
+  3.37925
+ ],
+ "loss_finite": true,
+ "probe": [
+  {
+   "step": 0,
+   "LW": 1.0,
+   "TS": 0.5,
+   "NU": 0.0
+  },
+  {
+   "step": 5,
+   "LW": 1.0,
+   "TS": 0.5,
+   "NU": 0.0
+  }
+ ],
+ "lock_in_step": null,
+ "eval_s": 0.7,
+ "eval_counts": {
+  "new/plain": 2,
+  "extra/plain": 2,
+  "old/plain": 2,
+  "uprobe/plain": 2,
+  "khard/plain": 2,
+  "kbig/plain": 2,
+  "cross/plain": 2,
+  "dev/plain": 2
+ },
+ "selftest_fail": [],
+ "peak_mps_driver_gb": 2.18,
+ "peak_mps_alloc_gb": 0.342,
+ "total_s": 13.4
+}

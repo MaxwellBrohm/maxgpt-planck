@@ -1,0 +1,65 @@
+{
+ "ok": true,
+ "runs": [
+  {
+   "config": "experiments/E3_seed_noise/configs/e3_20m_A_s1.yaml",
+   "config_sha256": "c6cc96eb4cb93c3a226b00b6d588e85a4e81856d42fdeee8cff5e643cf6e297f",
+   "engine": {
+    "data.max_item_len": 2048,
+    "data.mode": "pack",
+    "data.window_tokens": 131072,
+    "optim.batched": true,
+    "train.auto_micro_on_oom": false,
+    "train.ce_chunk_rows": 0,
+    "train.compile": false,
+    "train.compile_backend": "inductor",
+    "train.compile_dynamic": null,
+    "train.cuda_mem_cap_gib": null,
+    "train.cuda_mem_margin_gib": 0.5,
+    "train.doc_attn": "varlen",
+    "train.lazy_metrics": false,
+    "train.precision": "bf16"
+   },
+   "engine_fixed": "2026-09-26 93ea41c",
+   "engine_not_read_by_harness": [
+    "train.auto_micro_on_oom",
+    "train.cuda_mem_cap_gib",
+    "train.cuda_mem_margin_gib"
+   ],
+   "file_sha256": "83e28d5f80ddf646fdbf593e1949aa32664f3adb688667fdd063a211d78c580f",
+   "n_files": {
+    "cccc": 31,
+    "dolly": 1,
+    "gutenberg": 6,
+    "irc": 6,
+    "oasst2": 1,
+    "stackexchange": 11,
+    "wikimedia": 3
+   },
+   "n_params": 20001511,
+   "name": "e3_20m_A_s1",
+   "ok": true,
+   "prereg": {
+    "committed": true,
+    "id": "E3",
+    "sha256": "be89babbfee883adb28f5012f758cde169695c013d4dee74e3dd7fe5e1d7d80c"
+   },
+   "refusals": [],
+   "schedule": {
+    "mode": "full",
+    "total_steps": 15259,
+    "warmup_steps": 76
+   },
+   "shares": {
+    "cccc": 0.414241,
+    "dolly": 0.016002,
+    "gutenberg": 0.147915,
+    "irc": 0.040004,
+    "oasst2": 0.012001,
+    "stackexchange": 0.221922,
+    "wikimedia": 0.147915
+   }
+  }
+ ],
+ "strict": true
+}

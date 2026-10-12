@@ -1,0 +1,29 @@
+baseline (unmutated, n = 400): {'structure': 0, 'references': 0, 'values': 0, 'answer': 0, 'echo': 0, 'heldout': 0, 'pools': 0, 'fillers': 0, 'e001': 0, 'determinism': 0, 'coverage': 0} -> clean
+KILLED  echo in training (question): {'echo': 74, 'pools': 2}
+KILLED  echo in training (ack vs answer): {'echo': 54, 'pools': 2}
+KILLED  alias defined in training: {'heldout': 14}
+KILLED  eval marker in training: {'heldout': 61, 'references': 61}
+KILLED  held-out object in a filler: {'heldout': 69, 'fillers': 1}
+KILLED  held-out value in a template: {'values': 92, 'pools': 2}
+KILLED  training value in a filler: {'values': 69, 'fillers': 1}
+KILLED  digit in a filler: {'values': 69, 'fillers': 1}
+KILLED  E001 filler 5-gram: {'e001': 6}
+KILLED  k range leak (1-4): {'structure': 70}
+KILLED  d range leak (0-12): {'structure': 65}
+KILLED  indirect reference not adjacent: {'references': 21}
+KILLED  retracting marker on a non-correction: {'references': 19}
+KILLED  bare answer: {'answer': 11}
+KILLED  negation in an answer: {'answer': 9, 'pools': 1}
+KILLED  hedge in an answer: {'answer': 10, 'pools': 1}
+KILLED  user's voice in an answer: {'answer': 11}
+KILLED  unseeded stream: {'determinism': 1}
+KILLED  gold = first mention: {'structure': 287, 'values': 287}
+KILLED  question copies a statement frame: {'echo': 372}
+KILLED  undeclared kind (binding family): {'structure': 400}
+KILLED  held-out value type: {'structure': 400} (crashed, not counted: ['values:KeyError', 'echo:KeyError'])
+KILLED  three objects: {'structure': 400, 'references': 12}
+KILLED  k recorded wrong: {'structure': 400}
+KILLED  answer without newline: {'answer': 400}
+KILLED  unused pool entry: coverage reports 10 missing entries
+
+RESULT: ALL MUTANTS KILLED

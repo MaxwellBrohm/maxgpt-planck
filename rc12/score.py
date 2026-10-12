@@ -1,0 +1,370 @@
+"""RC-12 scoring (SPEC s6): units, family and cell scores, the Level R composite, the Level A criteria, the Tier 0
+gate, the K report and the diagnostics. Input: graded rows from runner.py (one per conversation x seed).
+Bootstrap, headroom, PERSIST base rates and the sensitivity row: score_stats.py.
+
+Unit: a conversation's unit score (runner/graders: mean of its probes, or all-right for RECALL abstain, ROLE,
+  LOOKUP), except BIND, whose unit is the PAIR (both twins right; twins joined by pair_id within one run).
+Run: one (train_seed, seed) combination. Family score = mean over its units in a run, then over sampling seeds,
+  then over training seeds (nested means). Seeds: sampling seeds when any are present, else greedy (--seeds).
+Composite R = 100 x unweighted mean of the 9 COMPOSITE family scores (T0 is a gate, K is reported
+  separately, TWOHOP:COMPOSE is diagnostic and never enters TWOHOP). Since 2026-10-04 R is reported beside Level R,
+  never claimed (with PLAN's original non-inferiority CI against Qwen2.5, score_stats.noninferior). LOOKUP is graded
+  and reported (REPORTED: its family and cell keys, its s8 cheater gates) but not in R (Max, 2026-10-02: took all
+  recommendations in rc12/DECISIONS_FOR_MAX.md (item 1); prereg draft s11: every core baseline at the floor on dev).
+LOOKUP claim (Max, 2026-10-04: LOOKUP is its own pre-registered headline claim, reported beside R and never folded
+  into it; prereg draft s1, s10b): lookup_claim() reads the LOOKUP family score (every cell; a unit is right only if
+  its P probe AND its abstain X probe are right) against BARS lookup 0.60 (proposal), inclusive. Claimable only with
+  >= 3 training seeds, every own-history row in the template render and sampled (no greedy row), and T0 >= 0.90
+  (Max, 2026-10-04: DECISIONS_LEVEL_R_FOR_MAX.md decision 4 (a); T0 None counts as unmet). The P and X probe
+  rates and the cells are reported beside it; its 95% CI is score_stats.lookup_ci (bootstrap as for R).
+S7 and Level R (Max, 2026-10-04: took all recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision 1, D);
+  prereg draft s1, s9): S7 = 100 x unweighted mean of the 7 STATE7 family scores (RECALL CORR BIND TWOHOP OWN TOPIC
+  ROLE; OWN = OWN_GATED, so S7 is None without the --own-cf rows, as R is; S7_ungated is reported beside). level_r():
+  the 95% CI lower bound of S7 (score_stats.s7_ci) >= BARS s7 (40 points: the G2 cheater bar, 0.40 per family,
+  committed in SPEC v0.1 on 2026-09-25) and PERSIST (point) >= BARS persist (0.40), both inclusive; claimable only
+  with >= 3 training seeds and T0 >= 0.90 (why_not lists what is missing). The OOD-H wording rule (oodh_wording)
+  words the claim and is not part of the verdict. s12_clause(): a public panel model passes the Level R bar if its
+  S7 point estimate >= 40 and its PERSIST >= 0.40 (no CI, no T0, no training-seed count).
+Level A (SPEC s6; thresholds re-anchored by the s10 rule, prereg draft s10, notes STEP 10c): CORR:U (U-diff + U-same
+  units pooled) >= 0.60, CORR:C_noupd >= 0.60, CORR:C_twoslot >= 0.60, BIND pair rate >= 0.60 (each was 0.80; Max,
+  2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item D)), LOOP rate over every reply of every
+  conversation (all families, LOOP flag only) <= 2% and no higher than the comparator's. Claimable only with >= 3
+  training seeds and T0 >= 0.90. Without a comparator the last sub-criterion is unknown and Level A is not met.
+near_duplicate (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 12)): the share of
+  replies (every reply, the loop rate's denominator) that grade_loop.near_dup marks (12 words or fewer, exactly one
+  word edit from an earlier reply) and that are not LOOP; reported beside the loop rate, never gated.
+Ack-repeat (OD6 iii, ruled 2026-09-25): a reply to a statement turn (S L C I O T, and since F2 a small-talk D filler
+  with asks: false) equal to an earlier reply; the mark is never a flag (grade_loop.py); its rate is reported
+  beside the loop rate (ack_repeat over every reply, ack_repeat_of_statements over statement-turn replies) and
+  never enters Level A. ack_repeat_of_answers (over
+  statement-turn replies) is the part that repeats an earlier reply to an asking turn: an answer said again, not an
+  acknowledgement said twice (verifier 2026-09-25). Since F1 (decided 2026-09-25, prereg draft s17 OD6 follow-up)
+  those replies are LOOPs too, so they count in the loop rate; the rate stays reported beside it.
+equality_only (F3 / strict case d measurement, reported, never scored): per family, the probes whose only failing
+  clause is the loop rule's equality clause (graders.eq_only), with the number of probes graded.
+OWN gate (OD1 b, ruled 2026-09-25): score the model's --own-cf OWN run (runner --own-cf --families OWN, same seeds
+  and --train-seed) together with its normal run (pass both transcripts files). An OWN unit then counts right in R
+  only if it is right in BOTH runs: OWN_GATED, which fills the OWN slot of families and R. OWN (own-history run
+  alone, the reported number) and OWN_CF (--own-cf run alone) are reported beside it. cf rows count nowhere else.
+  A twin must come from the same responder and render (twin()); a cf row marked cf_unswapped (own_cf.py: the
+  rewrite did not take) makes its unit 0 in OWN_GATED, and own_gate reports how many there were. Seeds are chosen
+  from the own-history rows (select()).
+  If any run lacks the cf twin of any of its OWN units, OWN_GATED is MISSING, so families["OWN"] and R are None
+  (never the ungated value); R_ungated (the composite with the own-history OWN) is reported beside, for diagnostics
+  and for the fake machinery tests, which have no cf run."""
+import argparse
+import json
+from collections import defaultdict
+
+import grade_loop as L
+import grade_text as T
+
+COMPOSITE = ["RECALL", "CORR", "BIND", "TWOHOP", "PERSIST", "OWN", "TOPIC", "ROLE", "LOOP"]
+REPORTED = ["LOOKUP"]               # graded, reported, cheater-gated (s8); out of R (item 1, 2026-10-02)
+STATE7 = ["RECALL", "CORR", "BIND", "TWOHOP", "OWN", "TOPIC", "ROLE"]  # S7, the Level R state score (Max, 2026-10-04)
+DIAG = {("TWOHOP", "COMPOSE")}
+LEVEL_A = {"CORR:U": ("CORR", ("U-diff", "U-same")), "CORR:C_noupd": ("CORR", ("C_noupd",)),
+           "CORR:C_twoslot": ("CORR", ("C_twoslot",)), "BIND": ("BIND", None)}
+BARS = dict(level_a=0.60, loop=0.02, t0=0.90, min_train_seeds=3,     # level_a: the s10 re-anchor (item D)
+            s7=40.0, persist=0.40,                                    # Level R (Max, 2026-10-04: decision 1, D)
+            lookup=0.60)                                              # the LOOKUP claim (Max, 2026-10-04; s10b)
+LOOKUP_CLAIM = "LOOKUP"             # its key: the family score, never a COMPOSITE family
+DEGEN = ("LOOP", "RUNAWAY", "EMPTY", "LEAK")
+GATE = {"OWN": "OWN_GATED"}          # OD1 (b): composite family -> the key that fills its slot in R
+SLOT = {v: k for k, v in GATE.items()}
+
+
+def mean(xs):
+    xs = list(xs)
+    return sum(xs) / len(xs) if xs else None
+
+
+def select(rows, seeds=None):
+    """rows of the chosen seeds: sampling seeds if present, else greedy (seed None)."""
+    if seeds is None:          # chosen from the own-history rows: --own-cf rows only follow them (verifier 2026-09-25)
+        sampled = {r["seed"] for r in rows if r["seed"] is not None and not r.get("own_cf")}
+        seeds = sampled or {None}
+    return [r for r in rows if r["seed"] in set(seeds)]
+
+
+def runs(rows):
+    out = defaultdict(list)
+    for r in rows:
+        out[(r.get("train_seed", 0), r["seed"])].append(r)
+    return out
+
+
+def twin(r, cf):
+    """the --own-cf twin of own-history OWN row r: the cf row with its id, from the same responder and render (a cf
+    run of another model or render is no twin, verifier 2026-09-25); None if there is none."""
+    c = cf.get(r["id"])
+    return c if c is not None and (c.get("responder"), c.get("render")) == (r.get("responder"), r.get("render")) \
+        else None
+
+
+def units(run_rows):
+    """units of one run: dicts family, cell, uid, score, knowledge. Rows of an --own-cf run (own_cf true) are never
+    own-history units: an OWN cf row gives an OWN_CF unit (cf rows of other families are ignored), and when EVERY
+    own-history OWN row of the run has its cf twin (twin()), each OWN row also gives an OWN_GATED unit, right (1.0)
+    only if the unit is right (1.0) in BOTH runs and the cf rewrite took (OD1 b; an OWN conversation has one probe,
+    so its unit is 0 or 1; a cf row marked cf_unswapped kept the model's own commitment, so it proves nothing)."""
+    out, pairs = [], defaultdict(list)
+    cf = {r["id"]: r for r in run_rows if r.get("own_cf") and r["family"] == "OWN"}
+    own = [r for r in run_rows if r["family"] == "OWN" and not r.get("own_cf")]
+    gated = bool(own) and all(twin(r, cf) is not None for r in own)
+    for r in run_rows:
+        if r.get("own_cf"):
+            if r["family"] == "OWN":
+                out.append(dict(family="OWN_CF", cell=r["cell"], uid=r["id"], score=r["unit"]))
+            continue
+        if r["family"] == "BIND":
+            pairs[r["pair_id"]].append(r)
+        else:
+            out.append(dict(family=r["family"], cell=r["cell"], uid=r["id"], score=r["unit"]))
+        if gated and r["family"] == "OWN":
+            c = twin(r, cf) or {}
+            out.append(dict(family="OWN_GATED", cell=r["cell"], uid=r["id"],
+                            score=float(r["unit"] == 1.0 and c.get("unit") == 1.0 and not c.get("cf_unswapped"))))
+    for pid, twins in sorted(pairs.items()):
+        assert len(twins) == 2, f"BIND pair {pid} has {len(twins)} twins in one run"
+        out.append(dict(family="BIND", cell=twins[0]["cell"], uid=pid,
+                        score=float(all(t["unit"] == 1.0 for t in twins))))
+    return out
+
+
+def unit_keys(u):
+    """every score key a unit counts toward."""
+    f, c = u["family"], u["cell"]
+    keys = [f"{f}:{c}"]
+    if (f, c) not in DIAG:
+        keys.append(f)
+    for k, (fam, cells) in LEVEL_A.items():
+        if f == fam and (cells is None or c in cells) and k not in keys:
+            keys.append(k)
+    return keys
+
+
+def nested(per_run):
+    """per_run {(train_seed, seed): value} -> mean over sampling seeds, then over training seeds."""
+    by_train = defaultdict(list)
+    for (tr, _), v in per_run.items():
+        if v is not None:
+            by_train[tr].append(v)
+    return mean(mean(v) for v in by_train.values())
+
+
+def key_scores(rows):
+    """{key: nested score} over every family, family:cell and Level A key. OWN_GATED keys only when EVERY run with
+    OWN units has them (OD1 b: one run without its --own-cf twins makes the gated OWN missing, never partial)."""
+    per = defaultdict(dict)
+    for rk, rr in runs(rows).items():
+        acc = defaultdict(list)
+        for u in units(rr):
+            for k in unit_keys(u):
+                acc[k].append(u["score"])
+        for k, v in acc.items():
+            per[k][rk] = mean(v)
+    if set(per.get("OWN_GATED", {})) != set(per.get("OWN", {})):
+        per = {k: v for k, v in per.items() if k.split(":")[0] != "OWN_GATED"}
+    return {k: nested(v) for k, v in per.items()}
+
+
+def loop_stats(rows):
+    n = sum(len(r["flags"]) for r in rows)
+    rates = {d: sum(d in f for r in rows for f in r["flags"]) / n for d in DEGEN} if n else {}
+    return n, rates
+
+
+def ack_stats(rows):
+    """OD6 (iii) ack-repeat rates (a reply to a statement turn equal to an earlier reply; grade_loop.ack_repeat):
+    over every reply (the loop rate's denominator) and over statement-turn replies. Reported beside the loop rate,
+    never in it and never in Level A. None when any row was graded without the ack_repeat record."""
+    if not rows or any("ack_repeat" not in r for r in rows):
+        return None, None
+    marks = [a for r in rows for a in r["ack_repeat"]]
+    stated = [a for a in marks if a is not None]
+    hits = sum(a is True for a in stated)
+    return hits / len(marks), (hits / len(stated) if stated else None)
+
+
+def answer_repeat_stats(rows):
+    """share of statement-turn replies that repeat an earlier reply to an ASKING turn (grade_loop.answer_repeat: an
+    answer said again, a subset of the ack-repeats). Reported beside ack_repeat, never in Level A. None when any row
+    was graded without the ack_of_answer record."""
+    if not rows or any("ack_of_answer" not in r for r in rows):
+        return None
+    marks = [a for r in rows for a in r["ack_of_answer"] if a is not None]
+    return sum(a is True for a in marks) / len(marks) if marks else None
+
+
+def equality_only_stats(rows):
+    """F3 / strict case (d) measurement (prereg draft s6, s17 OD6 follow-up (3); verifier 2026-09-25): per family,
+    [probes failing ONLY through the loop rule's equality clause (graders.eq_only), probes graded]. Reported, never
+    scored. None when any probe was graded without the eq_only record."""
+    ps = [(r["family"], p) for r in rows for p in r["probes"]]
+    if not ps or any("eq_only" not in p for _, p in ps):
+        return None
+    out = defaultdict(lambda: [0, 0])
+    for f, p in ps:
+        out[f][0] += p["eq_only"] is True
+        out[f][1] += 1
+    return dict(out)
+
+
+def near_duplicate_stats(rows):
+    """item 12 (2026-10-02): share of every reply (the loop rate's denominator) that grade_loop.near_dup marks and the
+    loop rule did not flag LOOP. Reported beside the loop rate, never in Level A. None without replies, or when a row
+    carries no turns (synthetic rows, as ack_stats)."""
+    if any("turns" not in r for r in rows):
+        return None
+    n = hits = 0
+    for r in rows:
+        ws = [T.lwords(T.norm(t["reply"])) for t in r["turns"]]
+        for i, fl in enumerate(r["flags"]):
+            n += 1
+            hits += "LOOP" not in fl and L.near_dup_ws(ws[i], ws[:i])
+    return hits / n if n else None
+
+
+def composite(fam, fams=None):
+    """100 x the unweighted mean of fam over fams (default COMPOSITE: R; STATE7: S7); None if any is missing."""
+    fams = COMPOSITE if fams is None else fams
+    missing = [f for f in fams if fam.get(f) is None]
+    if missing:
+        return None
+    return 100 * mean(fam[f] for f in fams)
+
+
+def level_r(s7_lo, persist, t0=None, n_train=1):
+    """Level R (module docstring; prereg draft s9). s7_lo: the lower bound of S7's 95% CI (score_stats.s7_ci);
+    persist: the PERSIST family score (point). met reads the two bars; claimable also needs the seeds and T0."""
+    crit = dict(S7_lo=dict(value=s7_lo, bar=BARS["s7"], met=s7_lo is not None and s7_lo >= BARS["s7"]),
+                PERSIST=dict(value=persist, bar=BARS["persist"], met=persist is not None and persist >= BARS["persist"]))
+    met = all(c["met"] for c in crit.values())
+    why = [f"{n_train} training seed(s), < {BARS['min_train_seeds']}"] if n_train < BARS["min_train_seeds"] else []
+    if t0 is None or t0 < BARS["t0"]:
+        why.append(f"T0 {t0} < {BARS['t0']}")
+    return dict(crit=crit, met=met, claimable=not why and met, why_not=why, n_train_seeds=n_train)
+
+
+def s12_clause(summ):
+    """the s12 baseline clause for Level R (Max, 2026-10-04): a public panel model passes if its S7 point estimate
+    >= BARS s7 and its PERSIST >= BARS persist (summ: its score.summarize over its sampling seeds). S7 None fails."""
+    s7, p = summ["S7"], summ["families"]["PERSIST"]
+    return dict(S7=s7, PERSIST=p, passes=s7 is not None and s7 >= BARS["s7"] and p is not None and p >= BARS["persist"])
+
+
+def level_a(ks, loop_rate, comparator_loop=None, n_train=1, t0=None):
+    crit = {k: dict(value=ks.get(k), bar=BARS["level_a"], met=ks.get(k) is not None and ks[k] >= BARS["level_a"])
+            for k in LEVEL_A}
+    crit["LOOP"] = dict(value=loop_rate, bar=BARS["loop"], met=loop_rate is not None and loop_rate <= BARS["loop"])
+    crit["LOOP_vs_comparator"] = dict(value=loop_rate, bar=comparator_loop,
+                                      met=comparator_loop is not None and loop_rate <= comparator_loop)
+    met = all(c["met"] for c in crit.values())
+    claimable = met and n_train >= BARS["min_train_seeds"] and t0 is not None and t0 >= BARS["t0"]
+    return crit, met, claimable
+
+
+def probe_rate(rows, family, kind):
+    """nested share of the family's probes of one kind (P, X) that are right (diagnostic beside the claim)."""
+    per = {}
+    for rk, rr in runs(rows).items():
+        oks = [p["ok"] for r in rr if r["family"] == family for p in r["probes"] if p.get("kind") == kind]
+        if oks:
+            per[rk] = mean(oks)
+    return nested(per) if per else None
+
+
+def lookup_claim(ks, rows, n_train):
+    """the LOOKUP headline claim (module docstring; prereg draft s10b). rows: the selected own-history rows. Never in
+    R: it reads only the LOOKUP keys and probes, and T0 (the shared sanity gate, decision 4). why lists what keeps a
+    met bar from being claimable."""
+    v = ks.get(LOOKUP_CLAIM)
+    met = v is not None and v >= BARS["lookup"]
+    why = [] if n_train >= BARS["min_train_seeds"] else [f"{n_train} training seed(s), < {BARS['min_train_seeds']}"]
+    t0 = ks.get("T0")
+    if t0 is None or t0 < BARS["t0"]:
+        why.append(f"T0 {t0} < {BARS['t0']} (decision 4)")
+    renders = sorted({str(r.get("render")) for r in rows if r["family"] == LOOKUP_CLAIM})
+    if renders != ["template"]:
+        why.append(f"render {renders} (s10b: the template render)")
+    if any(r["seed"] is None for r in rows if r["family"] == LOOKUP_CLAIM):
+        why.append("greedy rows (s10b: sampled, T 0.6)")
+    return dict(value=v, bar=BARS["lookup"], met=met, claimable=met and not why, why_not=why,
+                cells={k.split(":", 1)[1]: x for k, x in ks.items() if k.startswith(LOOKUP_CLAIM + ":")},
+                P=probe_rate(rows, LOOKUP_CLAIM, "P"), X=probe_rate(rows, LOOKUP_CLAIM, "X"), n_train_seeds=n_train)
+
+
+def summarize(rows, comparator=None, seeds=None):
+    """comparator: a summary dict of the comparator model (for the loop sub-criterion), or None. rows may include
+    the model's --own-cf OWN rows: they only gate OWN (OD1 b) and count in nothing else."""
+    sel = select(rows, seeds)
+    ks = key_scores(sel)
+    rows = [r for r in sel if not r.get("own_cf")]
+    cf_own = [r for r in sel if r.get("own_cf") and r["family"] == "OWN"]
+    fam = {f: ks.get(GATE.get(f, f)) for f in COMPOSITE}
+    n_rep, degen = loop_stats(rows)
+    ack_all, ack_stated = ack_stats(rows)
+    t0 = ks.get("T0")
+    n_train = len({r.get("train_seed", 0) for r in rows})
+    crit, met, claimable = level_a(ks, degen.get("LOOP"), comparator and comparator["loop_rate"], n_train, t0)
+    own = [p for r in rows if r["family"] == "OWN" for p in r["probes"] if "source_fail" in p]
+    lenient = defaultdict(list)
+    for r in rows:
+        for p in r["probes"]:
+            lenient[r["family"]].append(bool(p.get("lenient")))
+    k_follow, k_control = ks.get("K:followup"), ks.get("K:control")
+    out = dict(
+        R=composite(fam), R_ungated=composite({f: ks.get(f) for f in COMPOSITE}), families=fam, keys=ks,
+        S7=composite(fam, STATE7), S7_ungated=composite({f: ks.get(f) for f in STATE7}, STATE7),
+        loop_rate=degen.get("LOOP"), degenerate_rates=degen,
+        ack_repeat=ack_all, ack_repeat_of_statements=ack_stated, ack_repeat_of_answers=answer_repeat_stats(rows),
+        equality_only=equality_only_stats(rows), near_duplicate=near_duplicate_stats(rows),
+        replies=n_rep, level_a=crit, level_a_met=met, level_a_claimable=claimable, n_train_seeds=n_train,
+        lookup_claim=lookup_claim(ks, rows, n_train),
+        seeds=sorted({str(r["seed"]) for r in rows}),
+        t0=dict(score=t0, met=t0 is not None and t0 >= BARS["t0"],
+                failures=sorted({r["id"] for r in rows if r["family"] == "T0" and r["unit"] < 1})),
+        k=dict(followup=k_follow, control=k_control,
+               gap=None if k_follow is None or k_control is None else k_control - k_follow),
+        own_gate=dict(OWN=ks.get("OWN"), OWN_CF=ks.get("OWN_CF"), OWN_GATED=ks.get("OWN_GATED"),
+                      cf_unswapped=sum(bool(r.get("cf_unswapped")) for r in cf_own) if cf_own else None),
+        own_source_fail=mean(p["source_fail"] for p in own) if own else None,
+        capture_rate=mean(bool(r["leaks"]) for r in rows) if rows else None,
+        lenient={f: mean(v) for f, v in lenient.items()})
+    out["s12_clause"] = s12_clause(out)          # the Level R bar as a public panel model is read (s12)
+    return out
+
+
+def score_lines(rows):
+    """per-run family and cell score lines (scores.jsonl)."""
+    out = []
+    for (tr, sd), rr in sorted(runs(rows).items(), key=lambda x: (x[0][0], str(x[0][1]))):
+        acc = defaultdict(list)
+        for u in units(rr):
+            for k in unit_keys(u):
+                acc[k].append(u["score"])
+        for k in sorted(acc):
+            out.append(dict(train_seed=tr, seed=sd, key=k, score=mean(acc[k]), n_units=len(acc[k])))
+    return out
+
+
+def load_rows(path):
+    return [json.loads(line) for line in open(path)]
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("transcripts", nargs="+", help="transcripts.jsonl files of ONE model (training seeds, and "
+                    "its --own-cf OWN runs for the OD1 b gate)")
+    ap.add_argument("--comparator", default=None, help="the comparator's transcripts.jsonl")
+    args = ap.parse_args()
+    rows = [r for p in args.transcripts for r in load_rows(p)]
+    comp = summarize(load_rows(args.comparator)) if args.comparator else None
+    s = summarize(rows, comp)
+    s.pop("keys")
+    print(json.dumps(s, indent=1))
+
+
+if __name__ == "__main__":
+    main()

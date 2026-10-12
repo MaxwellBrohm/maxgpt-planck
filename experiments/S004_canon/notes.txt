@@ -1,0 +1,247 @@
+S004: Canon-AC layers at 5M (LEDGER P-148, known-apply; PLAN must-run list "P-022 or P-148 (whichever the toy
+favors)"; REPORT s6 lever 4, previous-token mixing; research/lanes/arch.md 1.6, and item 1 of its section 2 A/B list)
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION WRITTEN 2026-09-26 10:12 (before the flag, any S004 config, run or E2/E3 result exists. Run for this
+entry, no model: parameter arithmetic below.) experiments/SCREENS.txt C1-C9 are part of this entry. REVISED
+2026-09-26 after a critique, before the flag or any config or run exists, nothing committed: CHANGES AFTER CRITIQUE.
+
+WHY
+  Canon layers are residual, trainable causal 1-D convolutions with kernel 4, inserted before attention (A), inside it
+  (B), before the MLP (C) and inside the MLP (D) (arch.md 1.6, Physics of LMs 4.1). In-scale synthetic results:
+  reasoning depth +200-400% at 8L512D/12L768D; real pretraining at 1.3B "shows high noise and limited resolution";
+  cost under 0.45% extra parameters for GPT2-small, and Canon-AC +5.8% forward time at 1.3B (naive code). Their
+  claimed mechanism is faster formation of the local token-to-token circuits that induction and associative recall
+  are built from (arch.md), which REPORT s6 ties to binding (limit 2: multi-token keys need a previous-token path).
+  arch.md's first recommended A/B is Canon-AC or Canon-ACD at kernel 4. PLAN 3d tests P-148 at 30M after a 2-layer
+  toy. This 5M screen is the cheap first look at the loss cost or gain and at induction timing, before 30M.
+  Must-run status is conditional: PLAN's list names "P-022 or P-148 (whichever the toy favors)". If the PLAN 3d toy
+  favours P-022, this screen feeds no must-run bet; it then ranks as an ordinary bet in SCREENS' order and cut rule
+  (the cut rule protects S004 only while P-148 is the must-run pick).
+
+QUESTIONS
+  Q1 (decided, C7) Does Canon-AC change held-out chat bits per byte at 5M, 250M slots?
+  Q2 (reported) Is final IND higher, and does induction form earlier (IND onset, C6)? Onset is read only at matched
+     LR (C6 MATCHED LR): if S004's g pick is 1; otherwise it is printed and labelled "LR-confounded, not read" (S004
+     gets no extra g = 1 runs; S006 and S007, whose win condition is onset, do).
+
+THE CHANGE (one flag)
+  model.canon: "AC" (new field; default "" = off) with model.canon_kernel: 4 (new; used only when canon is on).
+  At every block: h = attn_norm(x) * norm_scale, then h = h + conv_A(h) before attention; h = mlp_norm(x) *
+  norm_scale, then h = h + conv_C(h) before the MLP. conv_* is depthwise (one kernel per channel), causal, kernel 4,
+  no bias, and never reaches across a document start in packed rows (taps at in-document position < j are zero).
+  Init: zero, created without drawing from the torch RNG (a registered choice: the arm then starts as the exact
+  BASE function, and every BASE parameter keeps its draw; the Canon paper's init is not recorded in the repo).
+  Parameters: 2 sites x 8 layers x 192 channels x 4 taps = 12,288; total 5,022,421 vs 5,010,133 (+0.25%, arithmetic
+  from budget.py's BASE count), inside the 2% rule, so the shape is not re-solved. The config generator's C2 check
+  allows exactly these two keys for this arm, model.canon and model.canon_kernel (a test: a third key is refused).
+
+WHAT STAYS IDENTICAL
+  Everything in C1, including the engine (the convolutions sit outside attention, so doc_attn varlen still
+  applies). LRs move only by the arm's g pick (C3). The conv weights go to the "scalar" group (AdamW at scalar_lr, no
+  weight decay), routed by name: harness/optim.py split_params would otherwise put any 2-D tensor in the NorMuon
+  "matrix" group, and orthogonalizing a 192 x 4 kernel bank is not what that group's LR was tuned for. The conv LR
+  is therefore the embedding LR: E2 sets optim.embed_lr = optim.scalar_lr = r x eta (E2 notes, "Both AdamW groups
+  move together"), so the kernels train at g x r_5 x eta_5, a value tuned for embeddings and norm gains, not for a
+  new module. No separate multiplier is registered (it would be another selection axis); the weight-size
+  diagnostic below shows whether the kernels moved.
+
+BUDGET
+  B from E2 (C1): 250.0M slots, 7,630 steps, WSD with decay from step 6,104.
+
+LEARNING RATE
+  C3 g-check at seed 1: g in {0.5, 1, 2} x LR5, E2's pick rule and extensions.
+
+SEEDS AND PAIRING
+  Seeds 101..100+k, paired with the shared BASE run (C4). Class: SIA if the init-isolation test (below) passes in
+  the committed harness, else NEW INIT (sqrt(2) * sigma_init). SIA is a loosening of E3 rule 1 (architecture is in
+  its new-init row), justified only by the bitwise-shared draws, so SD_ref = u x SD_d (u = 1.353 at df 7, C4) and
+  the verdict waits for C4's pooled SIA noise check. k = max(2, k_needed(1%)) for the class SD, at most 5.
+
+METRIC AND DECISION RULE
+  C5 and C7: F(CHAT) decides, F(PROSE) guards, in E3 MDE units. The arm is "Canon-AC on":
+    NOMINATE      Canon lowers chat bpb at 5M: a loss candidate; its behaviour test is PLAN 3d at 30M (binding,
+                  LEDGER P-148's win condition), which this does not replace.
+    REJECT        Canon raises chat bpb at 5M: reported to the PLAN 3d toy and the P-022-or-P-148 choice; not a
+                  behavioural verdict (arch.md 1.4: loss is not a behaviour proxy for attention-side changes).
+    TIE           loss-neutral at 5M: the 30M behaviour test decides.
+    GUARD-FAIL, INCONCLUSIVE  as C7.
+  Q2 reading (P-024-style, reported with C7 only if an E3 Part 4d addendum gives IND an SD): IND onset in tokens,
+  arm minus BASE per seed, and the number of seeds with an earlier onset.
+
+DIAGNOSTICS (C6; reported)
+  IND curve (every 153 steps) and onset, HD, SINK. Also the mean absolute conv weight per site and layer at the
+  final checkpoint (whether the zero-initialised convolutions were used at all).
+
+AFTER THE LOCK (C8)
+  Tier 0 margins with C7; E004 item pick shares reported (binding and first-mention preference are Canon's target).
+
+KNOWN RISKS
+  - A convolution that reaches across a document start leaks between packed documents; one that reads t+1 leaks the
+    future. Both are what harness/selftest.py's leak tests look for, and both get mutants below.
+  - Zero init may leave the convolutions little used in 7,630 steps; the weight-size diagnostic shows it.
+  - Throughput cost at 5M is unmeasured (arch.md: +5.8% forward at 1.3B for Canon-AC, naive); the smoke run times
+    it, and the report gives F(CHAT) per GPU-hour beside F(CHAT).
+  - Real-data evidence exists only at 1.3B and above, and is noisy (arch.md 1.6).
+  - Starter mix and tok_v0_8k only (C1 scope).
+
+HARNESS CODE NEEDED (default off; each test watched failing on its mutant)
+  - config.py: canon (str, "" off) and canon_kernel (int, 4). blocks.py: the two convolutions per Block when on,
+    reading in-document positions (model.py already derives pos from doc for RoPE) on EVERY path: the doc=None path
+    (plain causal over the row, is_causal SDPA in blocks.py), which is the one data_prep/bpb.py uses (it calls
+    model(idx) with no document ids, so F(CHAT) is scored there), the mask path and the varlen path.
+  - doc=None test (M5): on scrambled weights, model(idx) on one document equals that document's slice of the packed
+    mask path, and of the varlen path (test_s3_docattn.py's CPU stand-in; the CUDA parity test on the PC). Mutant:
+    the convolutions applied only when doc is given (F(CHAT) would then score a model without Canon).
+  - budget.py count_analytic counts them; test_budget.py's module-vs-analytic check covers the new arm.
+  - optim.py split_params routes the conv weights to "scalar" by name (test; mutant: they land in "matrix").
+  - testutil.ARMS gains "canon_ac", so test_decode.py (decode.py needs a per-site cache of the last 3 normalised
+    inputs per effective layer), test_s3_leak.py and test_s3_docattn.py run it on scrambled weights (scramble makes
+    the zero-init kernels non-zero, so the checks are not vacuous), and test_model_mask.py runs it once SCREENS CODE
+    moves that test to testutil.ARMS on scrambled weights (its own ARMS list today would not reach it). Mutants: a
+    centred (non-causal) kernel; a kernel that ignores document starts; the decode cache off by one position.
+  - Flag-off equivalence: a CPU run with canon "" is bitwise equal to the pre-flag commit's run (weights, optimizer,
+    loader state, log records).
+  - Init isolation: at a seed, every parameter the arm shares with BASE is bitwise equal at init, and at step 0 the
+    arm's logits equal BASE's on the same batch (zero init). Mutant: the conv built with nn.Conv1d defaults (draws
+    from the RNG) must fail it.
+  - A smoke run on the PC (labelled smoke): mem_fit ok at micro 16, tok/s, leak self-test passed.
+  LANDED 2026-09-26, NOT committed (Mac CPU only; the PC was offline, so no CUDA test and no smoke run yet):
+  - Flag: model.canon ("" off, the default; "A", "C" or "AC"; anything else refused) and model.canon_kernel (int
+    >= 2, default 4). PlanckConfig.canon_sites() drops "C" when mlp_hidden = 0. With canon "" to_dict() omits both
+    keys, so an off run's checkpoint model_cfg is the pre-flag dict (train.py resume and init_from, E2 preflight).
+  - blocks.CanonConv: weight (d_model, K) from torch.zeros (no RNG draw), out[t] = h[t] + sum_j weight[:, j] *
+    h[t - j]. Block.canon_a acts on attn_norm(x) * norm_scale before attention (the gate reads that same h),
+    Block.canon_c on mlp_norm(x) * norm_scale before the MLP. Names blocks.<u>.canon_a.weight and .canon_c.weight;
+    a looped block's kernels are shared like its other weights.
+  - Document starts: model.canon_skip_masks(doc, K) builds the K - 1 tap masks from doc (runs of equal ids, the
+    mask's and varlen's rule), never from a loader-given pos; doc=None zero-pads before the row start only. Mask
+    engine and doc_attn varlen get the same masks (the convs sit outside attention).
+  - optim.split_params sends names containing ".canon_" to "scalar" (AdamW, scalar_lr, no decay) before the 2-D
+    rule; optim_batched's AdamW step is shape-agnostic. budget.count_analytic adds len(canon_sites()) x d x K per
+    unique block: BASE 5,010,133, Canon-AC 5,022,421 (analytic == meta build, tested).
+  - decode.KVDecoder keeps the last K - 1 conv inputs per (effective layer, site) and runs the block's own conv.
+  - testutil.ARMS gains "canon_ac" (test_s3_leak, test_s3_docattn's CPU stand-in and test_decode now run it).
+    test_model_mask.py and test_budget.py are unchanged (the move to testutil.ARMS is SCREENS shared code; the
+    module-vs-analytic count for Canon is in test_screen_canon.py). The C2 generator's two-key test is not written
+    (no generator exists yet).
+  - Tests, harness/test_screen_canon.py: test_init_isolation, test_conv_equals_plain_loop_reference,
+    test_leak_probes, test_leak_probes_varlen_cpu_reference_kernel, test_doc_none_equals_packed_slice (M5, mask
+    and varlen), test_startup_selftest_passes, test_budget_counts_canon, test_budget_5m_base_and_arm,
+    test_decode_matches_full_forward; CUDA only (skipped on the Mac): test_cuda_leak_probes_canon (mask, varlen),
+    test_cuda_varlen_parity_canon. harness/test_screen_canon_run.py (split off for the file-size limit):
+    test_config_values_and_dict, test_off_equals_absent_20_steps, test_off_equals_preflag_commit_20_steps (git show
+    5c5a30a:harness/*.py, skipped without git), test_gradient_reaches_every_tap_and_scalar_group,
+    test_resume_20_plus_20_equals_40_with_canon (per-matrix and batched optimizer).
+  - Mutants, harness/mutants.py group "canon" (mutation_check.py --group canon; a mutant's new tests field runs
+    those two files): canon_centred_kernel, canon_ignores_doc_starts, canon_skip_off_by_one, canon_only_with_doc
+    (M5), canon_init_draws_rng (nn.Conv1d defaults), canon_built_when_off, canon_off_in_model_cfg,
+    canon_in_normuon, canon_budget_c_without_mlp, canon_decode_cache_short.
+  - Results (Mac CPU, 2026-09-26): the two files 60 passed, 3 skipped (CUDA); mutation_check --group canon 10/10
+    killed; full harness suite 498 passed, 22 skipped (CUDA), 106 s (harness/notes.txt records 431 passed, 19
+    skipped before the flag; not re-run here; +67 = 60 new + 7 canon_ac cases in the shared files). The pre-flag test ran (not skipped) in the tree; in
+    scratch copies it skips unless GIT_DIR is set, and with GIT_DIR it also killed canon_built_when_off and
+    canon_off_in_model_cfg.
+  - Still open: the PC CUDA tests and the smoke run (tok/s: the tap loop adds about 8 elementwise launches per
+    site on packed rows, 16 sites at 5M, unmeasured).
+
+COST (est., SCREENS GPU HOURS, assumed x1.1 until the smoke run)
+  g-check 3 x 0.34 = 1.0 h; 0.34 h per seed (BASE shared). k = 3: 2.0 h. Second in stage 2 (after S005).
+
+CHANGES AFTER CRITIQUE (2026-09-26; no flag, config or run existed, nothing committed. Checked before editing:
+data_prep/bpb.py (model(idx), no doc), harness/model.py and blocks.py (the doc=None branch is is_causal SDPA),
+testutil.py (scramble), test_model_mask.py, test_s3_docattn.py, optim.py split_params; E2 notes (r); PLAN must-run
+list)
+  1 (must, M1) Class SAME INIT renamed SIA, a loosening of E3 rule 1; SD_ref = u x SD_d with C4's pooled check.
+  2 (must, M3) IND onset read only at matched LR; otherwise "LR-confounded, not read".
+  3 (must, M5) The flag is registered on every path including doc=None (the path bpb.py scores), with a test and a
+    mutant; the claim that testutil.ARMS reaches test_model_mask.py was false and is corrected.
+  4 (should) The C2 allowance names both keys; the conv LR (the embedding LR, g x r_5 x eta_5) is stated; the
+    conditional must-run status is stated.
+
+C1-a GATE (2026-10-02, the PC 5070; Claude; method, the batch table and the findings in SCREENS.txt
+"C1-a GATE RESULTS"; nothing committed, no screen run queued, no config changed)
+  RESULT: FAIL, and not by a margin. All S004 arms run eager, with S004's own eager BASE per seed. Logged before
+  any S004 run; none has run.
+  The ENGINE edit (screens_lib S004 "train.compile": False) and the rebuild of the 3 g-check configs (all still
+  train.compile default) are NOT done here; they come before any S004 run.
+  (1) Compiled smoke, s004_canonac_g1_s1.yaml, 300 steps: ok. 6 graphs, 3 breaks (varlen cu_seqlens, as BASE), no
+      limit line, 5,022,421 params, loss 8.81 to 4.70, 467k tok/s median (shared BASE smoke 548k, so about
+      0.85x), 5.43 GiB peak reserved.
+  (2) Parity (flag_parity.py S004:canonac), 2 invocations: a FAIL (worst ratio mean|d| 469, last-50 176), b FAIL
+      (250, 86); pooled p 0.003 / 0.003. Under torch deterministic mode the compiled Canon model does not train:
+      loss 9.05 at step 1 and 9.04 to 9.07 at step 200 (eager:det 0.18), and its default:det curves are not
+      repeatable, within or across invocations (every other arm's are). A harness defect in the compiled Canon
+      path under deterministic algorithms, not investigated here; the flag's owner should look before any
+      compiled Canon run.
+  DIAGNOSTIC (one invocation with plain, non-deterministic compiled arms, what the screens train; no effect on
+  the result): FAIL 1.90 / 4.59, with that invocation's floor at 0.0039 / 0.0049. Its two compiled last-50 means
+  (0.6298, 0.6722) lie inside the 9 plain eager runs of the three invocations (0.6405 to 0.6976); pooled p of the
+  plain compiled curves alone against all 10 eager curves 0.212 / 0.333 (computed on the Mac from the same JSONs).
+  So the deterministic compiled path is broken, and the plain one is not shown to differ, nor shown equal.
+
+AMENDMENT C1-b (2026-10-03, SCREENS.txt; before any S00x run): every run of this screen is EAGER (train.compile false),
+  paired with the shared eager BASE per seed; no S004 run compiles, and the compiled-Canon deterministic defect
+  above stays a finding for the flag's owner. Configs rebuilt; each carries the C6 eval.induction hook. Before
+  stage 2: the eager smoke (mem_fit, tok/s to replace the assumed x1.1) and this flag's CUDA tests.
+
+EAGER SMOKE (2026-10-04 12:00:38 to 12:01:34 EDT, the PC 5070 under gpu.lock; Claude; labelled smoke, never read; the
+method, the scratch tree and the batch table in SCREENS.txt "SMOKES RECORDED"; no S004 run queued, no config changed)
+  smoke_s004_canonac = s004_canonac_g1_s1.yaml with only name and out_dir changed (scratch planck_root), eager
+  (train.compile false resolved, no compile key in the start record), varlen, micro 16 x accum 1, 300 of 7,630 steps.
+  Passed: 300 steps, rc 0; 5,022,421 params; loss 8.814 at step 10 to 4.698 at step 300, all 30 logged losses finite.
+  mem_fit ok at micro 16: peak reserved 9.82 GiB, 0.94 GiB left at the peak (free before 10.76 of 11.94 GiB). The
+    smallest margin of the six smokes: it holds on an otherwise idle card, and another process holding about 0.5 GiB
+    more would make it "edge".
+  tok/s: 184,569 median, against the shared BASE smoke's 253,691 in the same session: x1.375 (assumed x1.1; the C1-a
+    parity's eager estimate x1.36). Hours per run by GPU HOURS' method with this factor: 0.429 h (0.344 h assumed).
+  Leak self-test (train.py startup, 12 checks, bf16 tolerance 3e-2): passed, largest ratio 0.0071.
+  The IND hook ran on CUDA (one reading at step 153, 0.19 s, 8 x 3 GATE values). Readings not read.
+  This settles this file's smoke line (mem_fit at micro 16, tok/s, leak self-test). screens_lib.py's S004 "mult"
+  still holds the assumed 1.1 (not edited here), so screens.py hours prints the assumed figure.
+
+HOURS (2026-10-05, SCREENS.txt STAGE 2 READINESS): screens_hours.py now estimates this arm at the EAGER SMOKE
+  factor above (x1.375, 0.429 h per run); screens_lib.py holds no assumed "mult".
+
+ONSET READING (2026-10-06, SCREENS.txt AMENDMENT BASE-DIAG; decided before any stage 2 onset is read): Q2's onset_half
+  at this screen's pick g 1 (matched LR, C6) against the shared BASE on seeds 101 and 102 is read with C7: SD_ref =
+  sqrt(2) x sigma_seed, sigma_seed the SD of BASE's onset_half over seeds 101 to 105 (df 4), thr = 2.776 x sigma_seed;
+  EARLIER if -dbar > thr and both d_s < 0, LATER mirrored, else UNRESOLVED, no EQUAL. onset_abs, final IND, HD and
+  SINK stay descriptive. The reading is reported beside the bpb verdict and changes no verdict.
+
+RESULT (2026-10-11, Claude; SCREENS.txt STAGE 2 VERDICTS. Mac CPU, no model; the PC read only: the seed runs' bpb.jsonl,
+diag.jsonl, log.jsonl and the C6 runner's JSON copied 2026-10-11 09:40 EDT, sha256 equal on both machines; nothing
+committed.) A 5M loss reading only (C8): no RC-12 split and no Tier 0 margin was scored; C8 reads them after the lock.
+  Runs: s004_canonac_g1_s101, s004_canonac_g1_s102 (pick g 1; plan stage2_seeds, commit d21df3d) against the shared
+  base_s101, base_s102 (stage1_seeds, 93bc10b; C4's pairing holds: no change under harness/, data_prep/, tokenizer/,
+  corpus/ or experiments/E2_lr_transfer between the commits), each rc 0 on the first try, done and scored, 763 logged
+  steps to 7,630, every loss, gnorm and bpb finite. results.json and tables.txt here hold every number below.
+  VERDICT S004.canonac: NOMINATE (raw C7). Class SIA: SD_ref = u x SD_d x BASE's mean = 0.00378 bpb (CHAT), df 7, k 2.
+  CHAT d -0.01137 / -0.00956 (Canon better at both seeds), dbar -0.01047 (-0.91% of BASE's mean), thr 0.00632: BETTER.
+  PROSE d -0.00854 / -0.01015, dbar -0.00934, thr 0.00458: BETTER (so not WORSE; cccc, gutenberg and wikimedia BETTER
+  too). Holm over the 9 contrasts of the batch so far: holds (p 0.0058). C4 pooled SIA check over the 7 SIA arms (df 7):
+  ok. At E3 arm A's mean (BASE LEVEL) the verdict is the same; BASE replay label: stable.
+  Registered consequence (PRE-REGISTRATION, verbatim): "NOMINATE Canon lowers chat bpb at 5M: a loss candidate; its
+  behaviour test is PLAN 3d at 30M (binding, LEDGER P-148's win condition), which this does not replace."
+  Now: P-148 is a 5M loss candidate. Nothing is adopted on it: PLAN 3's rule needs it to hold at 20-30M and survive 3f,
+  and its behaviour test is PLAN 3d's 30M test of binding (LEDGER P-148's same-type pair binding), not run. P-148
+  takes PLAN's must-run 30M slot only if the PLAN 3d toy favours it over P-022 (Must-run status, WHY above; cuts
+  audit S3); otherwise it ranks as an ordinary bet. The ledger row is W5's to write.
+  Q2, ONSET READING (AMENDMENT BASE-DIAG, at matched LR: pick g 1): onset_half 612 / 612 against BASE 612 / 459, d 0 /
+  +153 steps, thr 232.7 (sigma_seed 83.802 from BASE seeds 101 to 105, df 4): UNRESOLVED (p 0.413; Holm over the 3
+  onset contrasts does not hold). BASE replay label on the onset: stable.
+  C6 (AMENDMENT C6-DIAG READING RULE, E3 PART 4d SDs): final IND 11.555 / 11.509 nats against BASE 7.546 / 8.825, d
+  +4.008 / +2.684, thr 4.407: UNRESOLVED. HD_asst d -0.00817 / -0.00949 bpb: LOWER, read at the new-init SD (the pooled
+  SIA check failed on HD_asst, so every SIA arm is labelled "noise check failed (pooled SIA)"), Holm holds (p 0.0073).
+  That SD (0.00334) is SMALLER than the SIA SD whose check failed (0.00520), so the Holm reading comes only from the
+  less cautious SD: at the SIA SD (thr 0.00870) it is still LOWER but Holm does not hold (p 0.0475), and at the observed
+  pooled SD (thr 0.01786) it reads UNRESOLVED (reported, no rule; "underpowered", C4's label for a larger SD, is not
+  attached: SCREENS.txt STAGE 2 VERDICTS, AUDIT CORRECTIONS). HD_user UNRESOLVED. Read beside it (c6_tables.txt):
+  base_s101 and base_s102 have the two highest HD_asst of BASE's five seeds (0.09876, 0.09960) and sit above all 8 of E3
+  arm A's (0.08760 to 0.09423), and 6 of the 9 contrasts read LOWER on HD_asst; a high BASE draw at the screen seeds
+  would read the same way, which this rule cannot separate. Per-module: mean |w| per site over layers and taps A 0.101 /
+  0.097, C 0.110 / 0.113: NEAR ITS INIT does not fire. Clip rate 0.79% / 0.92% (BASE 0.66% / 1.18%); tok/s 184,908 /
+  185,007 against BASE's 254,081 / 253,648 (BASE's mean over Canon's, 1.37; tokens are matched, compute is not).
+  What it does NOT show: binding or any behaviour (loss is not a behaviour proxy for attention-side changes, arch.md
+  1.4); any RC-12 or Tier 0 reading (C8); anything beyond 5M, 250.0M slots, the starter mix, tok_v0_8k and 2 seeds;
+  whether the gain survives a compute-matched BASE (none is registered for S004).

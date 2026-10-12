@@ -1,0 +1,606 @@
+"""RC-12 machinery checks for runner.py, render.py, score.py, score_stats.py and hf_responder.py (no model).
+Each check returns a list of failure strings; main() writes logs/e2e_machinery.txt and exits 1 on any failure.
+  render     plain render string, the plain stop cut, the template stub, fit() and own_reply()
+  history    HISTCHECK sees exactly the user turns plus its OWN earlier replies (stripped), plain and template,
+             with and without truncation; IDEAL_ALT scores OWN 1.00 only because its replies are fed back
+  stops      CONTINUER: plain render cuts the fake user turn (stop "role", IDEAL scores); template render keeps it
+             (LEAK on every reply, R = 0); CAPPER: RUNAWAY on every reply, loop rate 0, R = 0
+  trunc      ctx 556 (proxy budget 300): some probes fail "trunc"; a probe fails iff a needed turn was dropped;
+             ctx 4096 gives the same rows as no limit
+  seeds      SAMPLER: runs keep their seed; sampling seeds are scored by default, greedy only on request
+  scoring    T0 / K / COMPOSE excluded from R; BIND unit = pair; nested seed means; Level A comparator and
+             claimability; K gap; the LOOKUP claim (Max, 2026-10-04; s10b): its value, P / X rates and cells, its
+             independence from R both ways, the 0.60 bar inclusive, claimable only with 3 training seeds, the
+             template render, sampled rows and T0 rows (the T0 gate itself: levelr)
+  stats      headroom floor / ceiling, paired bootstrap and the -3 non-inferiority test (score_stats.noninferior,
+             reported beside Level R since 2026-10-04), PERSIST base rates, sensitivity row; the LOOKUP claim's CI
+             (units, training seeds and sampling seeds resampled)
+  levelr     Level R since 2026-10-04 (Max: decisions 1 D and 4 a of rc12/DECISIONS_LEVEL_R_FOR_MAX.md): S7 over the
+             7 state families with the gated OWN, score.level_r's bars and claimability, score_stats.level_r reads the
+             CI's lower bound, s7_ci resamples units, training and sampling seeds and refuses without the cf rows, the
+             paired S7 difference reads only STATE7, the s12 clause, the LOOKUP claim's T0 gate
+  hf         hf_responder imports without torch and keeps HF_TESTED True (notes STEP 9b); runner refuses it
+             without --hf-untested-ok
+  owncf      the OWN counterfactual-history diagnostic (step 5 audit, own_cf.py); padded, blank-bulleted and
+             U+2028 lists are swapped too (LISTPAD, LISTBLANK, LISTLS: the list rule is G-DYN's)
+  owngate    OD1 (b): OWN counts in R only if right in the own-history AND the --own-cf run (score.py GATE); NEXT
+             (right only on the cf history) is 0; a cf run of another responder or render is no twin; seeds come
+             from the own-history rows; random per-unit outcomes with shuffled cf rows match a per-unit AND made
+             here; a rewrite that did not take (cf_unswapped) scores 0
+  ackrep     OD6 (iii): ACKER ("Got it." on every statement turn) has no LOOP, meets the Level A loop criterion,
+             and its ack-repeat rates equal a count made here from the records; IDEAL has none; --own-cf rows do
+             not move the rates (nor equality_only); PARROT (its last short answer again on statement turns) is
+             charged a LOOP on every such turn (F1, decided 2026-09-25), fails the Level A loop criterion, and its
+             loop and answer-repeat rates equal a count made here; F3 / strict case (d) measurement: RESTATE and
+             TERSE_VAL (a right answer repeating the model's own confirmation) fail every restated probe as a
+             LOOP, and score.equality_only counts per family exactly the ones that fail by equality alone;
+             TERSE_VAL_CTRL and IDEAL have none
+Without --own-cf rows R is None (OD1 b), so the checks of other machinery read R_ungated (the same composite with
+the own-history OWN); c_stats adds each fake's --own-cf OWN rows so the bootstrap and the sensitivity row run."""
+import argparse
+import os
+import sys
+from collections import Counter
+
+import fakes_family as FF
+import grade_text as T
+import own_cf as OC
+import render as RD
+import runner as RN
+import score as S
+import score_stats as ST
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+def run(recs, fake, render="plain", seeds=(None,), ctx=None, train_seed=0, own_cf=False):
+    return RN.run(recs, FF.make(fake), render, list(seeds), ctx, None, fake, train_seed, own_cf)
+
+
+def check(cond, msg, out):
+    if not cond:
+        out.append(msg)
+
+
+def c_render(recs):
+    out = []
+    m = [{"role": "user", "content": "u1"}, {"role": "assistant", "content": "a1"}, {"role": "user", "content": "u2"}]
+    check(RD.plain(m) == "User: u1\nAssistant: a1\nUser: u2\nAssistant:", "plain render string", out)
+    check(RD.template_stub(m).endswith("<|im_start|>assistant\n") and RD.template_stub(m).count("<|im_end|>") == 3,
+          "template stub", out)
+    for raw, want in [("Sure.\nUser: hi", "Sure."), ("Sure.\nuser: hi", "Sure."), ("Sure.\n  Human: x", "Sure."),
+                      ("A\nAssistant: B", "A"), ("A\nB", "A\nB"), ("The user: said hi", "The user: said hi"),
+                      ("A\nThe user: x", "A\nThe user: x")]:
+        check(RD.cut_plain(raw)[0] == want, f"cut_plain({raw!r})", out)
+    msgs = [{"role": "user" if k % 2 == 0 else "assistant", "content": "w " * 10} for k in range(9)]
+    kept, n = RD.fit(msgs, 60, RD.proxy_tokens)
+    check(n > 0 and kept == msgs[2 * n:] and RD.proxy_tokens(kept) <= 60 and kept[0]["role"] == "user",
+          "fit drops whole oldest pairs until it fits", out)
+    check(RD.fit(msgs, 1, RD.proxy_tokens)[0] == msgs[-1:], "fit keeps the current user turn", out)
+    check(RD.fit(msgs, None, RD.proxy_tokens) == (msgs, 0), "fit without a budget", out)
+    h = msgs[4:]
+    check(RD.first_turn(h, 5) == 3 and RD.own_reply(h, 5, 4) == h[3]["content"] and RD.own_reply(h, 5, 2) is None
+          and RD.own_reply(h, 5, 5) is None, "own_reply index", out)
+    return out
+
+
+def c_history(recs):
+    out = []
+    for render, ctx in (("plain", None), ("template", None), ("plain", 556), ("template", 556)):
+        f = FF.make("HISTCHECK")
+        bad, rows = [], []
+        for r in recs:
+            rows.append(RN.run_one(r, f, render, None, ctx))
+            bad += f.violations
+        check(not bad, f"HISTCHECK {render} ctx={ctx}: {len(bad)} bad histories {bad[:3]}", out)
+        if ctx is None:
+            check(S.summarize(rows)["R_ungated"] == 100, f"HISTCHECK {render}: padded IDEAL replies do not score 100",
+                  out)
+    s = S.summarize(run(recs, "IDEAL_ALT"))
+    check(s["keys"]["OWN"] == 1.0, "IDEAL_ALT OWN != 1.00 (gold not taken from the model's own reply)", out)
+    return out
+
+
+def c_stops(recs):
+    out = []
+    rows = run(recs, "CONTINUER", "plain")
+    s = S.summarize(rows)
+    check(s["R_ungated"] == 100 and all(t["stop"] == "role" and t["raw"] for r in rows for t in r["turns"]),
+          "CONTINUER plain: fake user turn not cut", out)
+    s = S.summarize(run(recs, "CONTINUER", "template"))
+    check(s["R_ungated"] == 0 and s["degenerate_rates"]["LEAK"] == 1.0, "CONTINUER template: leak not flagged", out)
+    s = S.summarize(run(recs, "CAPPER"))
+    check(s["R_ungated"] == 0 and s["loop_rate"] == 0 and s["degenerate_rates"]["RUNAWAY"] == 1.0,
+          f"CAPPER: R {s['R_ungated']}, loop {s['loop_rate']}, runaway {s['degenerate_rates']['RUNAWAY']}", out)
+    return out
+
+
+def c_trunc(recs):
+    out = []
+    f, rows, n_trunc, bad = FF.make("FORGETFUL"), [], 0, []
+    for r in recs:
+        row = RN.run_one(r, f, "plain", None, 556)
+        rows.append(row)
+        for p in row["probes"]:
+            n_trunc += "trunc" in p["fails"]
+            lost, forgot = bool(p.get("lost")), p["turn"] in f.forgot
+            if (not p["ok"]) != lost or lost != ("trunc" in p["fails"]) or lost != forgot:
+                bad.append((row["id"], p["turn"]))
+    check(n_trunc >= 50, f"ctx 556: only {n_trunc} truncated probes", out)
+    check(not bad, f"ctx 556: verdict, runner's lost turns and the fake's history disagree {bad[:3]}", out)
+    check(S.summarize(rows)["R_ungated"] < 100, "ctx 556: truncation does not lower the unit scores", out)
+    rows = run(recs, "IDEAL", ctx=556)
+    stale = [r["id"] for r in rows if (r["unit"] < 1) != any(not p["ok"] for p in r["probes"])]
+    check(any("trunc" in p["fails"] for r in rows for p in r["probes"]) and not stale,
+          f"ctx 556: units not recomputed after truncation {stale[:3]}", out)
+    a, b = run(recs, "IDEAL", ctx=4096), run(recs, "IDEAL")
+    check(a == b, "ctx 4096 differs from no limit", out)
+    return out
+
+
+def c_seeds(recs):
+    out = []
+    rows = run(recs, "SAMPLER", seeds=(None, 1))
+    check(sorted({str(r["seed"]) for r in rows}) == ["1", "None"] and len(rows) == 2 * len(recs), "seed labels", out)
+    first = S.summarize(run(recs, "FIRST"))["R_ungated"]
+    check(abs(S.summarize(rows)["R_ungated"] - first) < 1e-9, "default scoring did not select the sampling seed", out)
+    check(S.summarize(rows, seeds=[None])["R_ungated"] == 100, "greedy selection", out)
+    return out
+
+
+def c_scoring(recs):
+    out = []
+    s = S.summarize(run(recs, "T0WRONG"))
+    k = s["keys"]
+    check(s["R_ungated"] == 100 and k["T0"] == 0 and k["TWOHOP"] == 1 and k["TWOHOP:COMPOSE"] == 0 and k["K"] == 0,
+          f"T0/K/COMPOSE leak into R or TWOHOP (R {s['R_ungated']}, TWOHOP {k['TWOHOP']})", out)
+    check(not s["t0"]["met"] and len(s["t0"]["failures"]) == 48, "T0 gate / failure list", out)
+    s = S.summarize(run(recs, "BINDHALF"))
+    check(s["families"]["BIND"] == 0 and s["families"]["CORR"] == 1 and not s["level_a"]["BIND"]["met"],
+          f"BIND pair unit (got {s['families']['BIND']})", out)
+    check(S.nested({(0, 1): 1.0, (0, 2): 0.0, (1, 1): 1.0}) == 0.75, "nested seed means", out)
+    ideal = run(recs, "IDEAL")
+    si = S.summarize(ideal)
+    rep = S.summarize(run(recs, "L_REPEAT"), comparator=si)
+    check(S.summarize(ideal, comparator=rep)["level_a_met"] and not rep["level_a"]["LOOP_vs_comparator"]["met"],
+          "loop-vs-comparator criterion", out)
+    check(not si["level_a_met"], "Level A met without a comparator", out)
+    check(si["R"] is None and si["families"]["OWN"] is None and si["R_ungated"] == 100
+          and "OWN_GATED" not in si["keys"],
+          f"no --own-cf rows: R {si['R']}, OWN {si['families']['OWN']} (OD1 b: missing, never the ungated value)", out)
+    three = [dict(r, train_seed=ts) for ts in (0, 1, 2) for r in ideal]
+    check(not S.summarize(ideal, comparator=si)["level_a_claimable"] and
+          S.summarize(three, comparator=si)["level_a_claimable"], "claimable needs 3 training seeds", out)
+    check(si["k"]["gap"] == 0 and si["own_source_fail"] == 0, "K gap / OWN source-fail rate", out)
+    # Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 1: LOOKUP out of R, 9 equal
+    # families; item D: the four Level A content bars at 0.60, inclusive)
+    zero = lambda fam: [dict(r, unit=0.0) if r["family"] == fam else r for r in ideal]  # noqa: E731
+    lk, co = S.summarize(zero("LOOKUP")), S.summarize(zero("CORR"))
+    check(lk["R_ungated"] == 100 and lk["keys"]["LOOKUP"] == 0 and "LOOKUP" not in lk["families"]
+          and abs(co["R_ungated"] - 800 / 9) < 1e-9, f"LOOKUP out of R / 9 families: R with LOOKUP 0 "
+          f"{lk['R_ungated']}, with CORR 0 {co['R_ungated']} (want 100, 88.89)", out)
+    bar = {v: S.level_a(dict.fromkeys(S.LEVEL_A, v), 0.0, 0.0)[0]["CORR:U"]["met"] for v in (0.60, 0.5999)}
+    check(bar == {0.60: True, 0.5999: False}, f"Level A content bar is not 0.60 inclusive: {bar}", out)
+    # Max, 2026-10-04: LOOKUP is its own headline claim (prereg draft s10b), beside R and never in it
+    lc = si["lookup_claim"]
+    check(lc["value"] == 1 and lc["met"] and not lc["claimable"] and lc["P"] == 1 and lc["X"] == 1
+          and len(lc["why_not"]) == 3 and set(lc["cells"]) == {"rota", "tour", "menu"},
+          f"LOOKUP claim on IDEAL (plain, greedy, 1 training seed): {lc}", out)
+    only = S.summarize([r if r["family"] == "LOOKUP" else dict(r, unit=0.0) for r in ideal])
+    check(only["R_ungated"] == 0 and only["lookup_claim"]["met"] and lk["lookup_claim"]["value"] == 0
+          and not lk["lookup_claim"]["met"], f"LOOKUP claim reads R, or R reads LOOKUP: only LOOKUP right -> R "
+          f"{only['R_ungated']}, claim {only['lookup_claim']['value']}; LOOKUP 0 -> claim {lk['lookup_claim']['value']}",
+          out)
+    abr = run([r for r in recs if r["family"] == "LOOKUP"], "ABSTAIN")
+    ab = S.summarize(abr)["lookup_claim"]
+    want = {k: S.mean(p["ok"] for r in abr for p in r["probes"] if p["kind"] == k) for k in ("P", "X")}
+    check(ab["P"] == want["P"] == 0 and ab["X"] == want["X"] > 0 and ab["value"] == 0,
+          f"LOOKUP P / X probe rates (ABSTAIN): {ab}, counted here {want}", out)
+    tmpl = [dict(r, render="template", seed=1, train_seed=t) for t in (0, 1, 2) for r in ideal
+            if r["family"] in ("LOOKUP", "T0")]           # + T0 (IDEAL 1.00): the claim also asks T0 >= 0.90
+    claim = {k: S.summarize(rs)["lookup_claim"]["claimable"] for k, rs in (
+        ("3 seeds", tmpl), ("2 seeds", [r for r in tmpl if r["train_seed"] < 2]),
+        ("plain", [dict(r, render="plain") for r in tmpl]), ("greedy", [dict(r, seed=None) for r in tmpl]))}
+    check(claim == {"3 seeds": True, "2 seeds": False, "plain": False, "greedy": False},
+          f"LOOKUP claim claimable only with 3 training seeds, template, sampled: {claim}", out)
+    bar = {v: S.lookup_claim({"LOOKUP": v}, tmpl, 3)["met"] for v in (0.60, 0.5999)}
+    check(bar == {0.60: True, 0.5999: False}, f"LOOKUP claim bar is not 0.60 inclusive: {bar}", out)
+    k = S.summarize(run(recs, "WORDING"))["keys"]
+    check(k["CORR:U-diff"] != k["CORR:U-same"] and k["CORR:U"] == (k["CORR:U-diff"] + k["CORR:U-same"]) / 2,
+          "CORR:U is not U-diff and U-same pooled", out)
+    n = {x["key"]: x["n_units"] for x in S.score_lines(ideal)}
+    check(n["CORR:C_noupd"] == 16 and n["CORR:U"] == 32 and n["BIND"] == 30 and n["TWOHOP"] == 48,
+          f"unit counts {n}", out)
+    return out
+
+
+def c_stats(recs):
+    out = []
+    names = ["IDEAL", "IDEAL_ALT", "ECHO", "ABSTAIN", "DEFLECT", "FIRST"]
+    own = [r for r in recs if r["family"] == "OWN"]
+    base = {n: run(recs, n) for n in names}
+    rows = {n: base[n] + run(own, n, own_cf=True) for n in names}       # + the --own-cf OWN run (OD1 b)
+    sm = {n: S.summarize(rows[n]) for n in names}
+    check(sm["IDEAL"]["R"] == 100 and sm["IDEAL_ALT"]["R"] == 100, "IDEAL / IDEAL_ALT R != 100 with the cf rows", out)
+    h = ST.headroom({n: sm[n] for n in ("IDEAL", "IDEAL_ALT")})
+    check(all(v["reason"] == "ceiling" for v in h.values()), "headroom ceiling", out)
+    h = ST.headroom({n: sm[n] for n in ("ECHO", "ABSTAIN")})
+    check(all(v["reason"] == "floor" for k, v in h.items() if k != "LOOP") and not h["LOOP"]["fail"],
+          "headroom floor", out)
+    check(not any(v["fail"] for v in ST.headroom({n: sm[n] for n in ("IDEAL", "ECHO")}).values()),
+          "headroom spread", out)
+    h = ST.headroom({n: sm[n] for n in ("ECHO", "DEFLECT")})
+    check(h["PERSIST"]["reason"] == "floor" and 0 < sm["DEFLECT"]["families"]["PERSIST"] <= 0.05
+          and not h["LOOP"]["fail"], "headroom floor bar (DEFLECT PERSIST sits between 0 and 0.05)", out)
+    ci = ST.bootstrap_diff(rows["IDEAL"], rows["IDEAL"], n=200)
+    check(ci["D"] == 0 and ci["lo"] == 0 and ci["hi"] == 0, "bootstrap D(IDEAL, IDEAL)", out)
+    ci = ST.bootstrap_diff(rows["FIRST"], rows["FIRST"], n=200)
+    check(ci["lo"] == 0 and ci["hi"] == 0, f"bootstrap is not paired: D(FIRST, FIRST) CI {ci}", out)
+    ci = ST.bootstrap_diff(rows["IDEAL"], rows["FIRST"], n=200)
+    check(ci["lo"] > 0 and ci["lo"] <= ci["D"] <= ci["hi"] and ST.noninferior(ci), f"bootstrap IDEAL-FIRST {ci}", out)
+    ci = ST.bootstrap_diff(rows["FIRST"], rows["IDEAL"], n=200)
+    check(ci["hi"] < 0 and not ST.noninferior(ci), f"bootstrap FIRST-IDEAL {ci}", out)
+    rates = ST.persist_base_rates(rows["IDEAL"], ST.persist_rules(recs))
+    check(rates == ST.persist_base_rates(base["IDEAL"], ST.persist_rules(recs)), "cf rows in PERSIST base rates", out)
+    check(rates["first_word:Greetings"] == 0 and rates["one_sentence:None"] > ST.PERSIST_DROP,
+          f"PERSIST base rates {rates}", out)
+    check(ST.persist_drops({"IDEAL": rates}) == ["one_sentence:None"], "PERSIST drop list", out)
+    sens = ST.sensitivity(sm["IDEAL"], sm["FIRST"])
+    check(sorted(sens["dropped"]) == ["BIND", "OWN", "PERSIST"] and sens["R"] == 100, "sensitivity", out)
+    check(ST.sensitivity(sm["IDEAL"], sm["ECHO"])["R"] is None, "sensitivity with an all-floor comparator", out)
+    check(ST.sensitivity(S.summarize(base["IDEAL"]), sm["FIRST"])["R"] is None, "sensitivity without the cf rows", out)
+    # the LOOKUP claim's CI (Max, 2026-10-04; prereg draft s10b): units and both seed levels resampled
+    lkr = [r for r in recs if r["family"] == "LOOKUP"]
+    ci = ST.lookup_ci(rows["IDEAL"], n=200)
+    check(ci["lo"] == ci["hi"] == ci["value"] == 1 and ci["units"] == 48, f"LOOKUP CI on IDEAL {ci}", out)
+    oa = run(lkr, "ORDER_ABS")
+    ci = ST.lookup_ci(oa, n=2000)
+    check(ci["value"] == 0.5 and 0.30 <= ci["lo"] <= 0.42 and 0.58 <= ci["hi"] <= 0.70,
+          f"LOOKUP CI does not resample units (ORDER_ABS, 24 of 48 right; want about 0.36 to 0.64): {ci}", out)
+    mix = [dict(r, train_seed=t) for t, src in enumerate((run(lkr, "IDEAL"), oa, run(lkr, "ABSTAIN"))) for r in src]
+    ci = ST.lookup_ci(mix, n=2000)
+    check(ci["value"] == 0.5 and ci["lo"] <= 0.2 and ci["hi"] >= 0.8,
+          f"LOOKUP CI does not resample training seeds (rates 1.0 / 0.5 / 0.0): {ci}", out)
+    # one training seed, three sampling seeds at 1.0 / 0.5 / 0.0 (verifier, 2026-10-04): wide only if they are resampled
+    mix = [dict(r, seed=s) for s, src in enumerate((run(lkr, "IDEAL"), oa, run(lkr, "ABSTAIN")), 1) for r in src]
+    try:                 # sampled rows only: a scorer that drops them leaves nothing to resample (report, not crash)
+        ci = ST.lookup_ci(mix, n=2000)
+    except Exception as e:  # noqa: BLE001
+        ci = dict(value=None, lo=None, hi=None, error=f"{type(e).__name__}: {e}"[:120])
+    check(ci["value"] == 0.5 and ci["lo"] is not None and ci["lo"] <= 0.2 and ci["hi"] >= 0.8,
+          f"LOOKUP CI does not resample sampling seeds (one training seed, rates 1.0 / 0.5 / 0.0): {ci}", out)
+    try:
+        ST.bootstrap_diff(base["IDEAL"], base["IDEAL"], n=10)
+        out.append("bootstrap ran without the --own-cf rows (OD1 b)")
+    except Exception as e:  # noqa: BLE001 (the refusal must be the stated assertion, not a crash)
+        check(isinstance(e, AssertionError) and "['OWN']" in str(e), f"bootstrap refusal {type(e).__name__}: {e}", out)
+    return out
+
+
+def c_levelr(recs):
+    """Level R since Max, 2026-10-04 (rc12/DECISIONS_LEVEL_R_FOR_MAX.md decisions 1 D and 4 a; prereg draft s9, s12,
+    s10b): S7 over exactly the 7 STATE7 families with the gated OWN; score.level_r's bars (S7 CI lower bound 40,
+    PERSIST 0.40, both inclusive) and claimability (3 training seeds, T0 0.90); score_stats.level_r reads the CI's
+    lower bound, not the point; s7_ci resamples units, training seeds and sampling seeds; the paired S7 difference
+    reads only STATE7; the s12 clause (S7 point >= 40 and PERSIST >= 0.40); the LOOKUP claim asks T0 >= 0.90.
+    An exception inside is reported as a failure, not raised (mutants_e2e #21 drops the sampled rows, which leaves
+    s7_ci nothing to resample), as c_stats does for the LOOKUP CI."""
+    out = []
+    try:
+        _levelr(recs, out)
+    except Exception as e:  # noqa: BLE001
+        out.append(f"Level R checks raised {type(e).__name__}: {e}"[:300])
+    return out
+
+
+def _levelr(recs, out):
+    own = [r for r in recs if r["family"] == "OWN"]
+    names = ["IDEAL", "ABSTAIN", "FIRST", "P_NEVER", "P_UNIVERSAL", "P_OBEYALL"]
+    rows = {n: run(recs, n) + run(own, n, own_cf=True) for n in names}
+    sm = {n: S.summarize(rows[n]) for n in names}
+    check(sm["IDEAL"]["S7"] == 100 and S.summarize(run(recs, "IDEAL"))["S7"] is None
+          and S.summarize(run(recs, "IDEAL"))["S7_ungated"] == 100, "S7 on IDEAL: 100 with the cf rows, None without "
+          f"(OD1 b), S7_ungated 100: {sm['IDEAL']['S7']}", out)
+    got = {}
+    for f in S.COMPOSITE + ["LOOKUP", "T0", "K"]:
+        got[f] = S.summarize([dict(r, unit=0.0) if r["family"] == f and not r.get("own_cf") else r
+                              for r in rows["IDEAL"]])["S7"]
+    want = {f: 600 / 7 if f in ("RECALL", "CORR", "BIND", "TWOHOP", "OWN", "TOPIC", "ROLE") else 100.0 for f in got}
+    check(all(abs(got[f] - want[f]) < 1e-9 for f in got), f"S7 is not the 7 state families: one family at 0 -> {got}",
+          out)
+    cfz = S.summarize([dict(r, unit=0.0) if r.get("own_cf") else r for r in rows["IDEAL"]])
+    check(abs(cfz["S7"] - 600 / 7) < 1e-9 and cfz["S7_ungated"] == 100, f"S7 does not read the gated OWN (cf run 0): "
+          f"S7 {cfz['S7']}, S7_ungated {cfz['S7_ungated']}", out)
+    lr = S.level_r
+    v = {k: (lr(*a)["met"], lr(*a)["claimable"]) for k, a in (
+        ("bars", (40.0, 0.40, 0.90, 3)), ("S7 39.999", (39.999, 0.40, 0.90, 3)), ("PERSIST 0.3999", (40.0, 0.3999, 0.90, 3)),
+        ("T0 0.8999", (40.0, 0.40, 0.8999, 3)), ("T0 None", (40.0, 0.40, None, 3)), ("2 seeds", (40.0, 0.40, 0.90, 2)),
+        ("S7 None", (None, 0.40, 0.90, 3)), ("PERSIST None", (40.0, None, 0.90, 3)))}
+    check(v == {"bars": (True, True), "S7 39.999": (False, False), "PERSIST 0.3999": (False, False),
+                "T0 0.8999": (True, False), "T0 None": (True, False), "2 seeds": (True, False), "S7 None": (False, False),
+                "PERSIST None": (False, False)},
+          f"score.level_r bars (S7 lo 40, PERSIST 0.40 inclusive; T0 0.90 and 3 seeds for claimable): {v}", out)
+    three = lambda srcs, key="train_seed": [dict(r, **{key: k}) for k, n in enumerate(srcs, 1 if key == "seed" else 0)  # noqa: E731
+                                            for r in rows[n]]
+    ideal3 = three(["IDEAL"] * 3)
+    r3 = ST.level_r(ideal3, n=400)
+    check(r3["met"] and r3["claimable"] and r3["ci"]["lo"] == 100, f"Level R on IDEAL x 3 training seeds: {r3}", out)
+    mix = ST.level_r(three(["IDEAL", "IDEAL", "ABSTAIN"]), n=2000)
+    check(abs(mix["S7"] - 200 / 3) < 1e-9 and mix["ci"]["lo"] == 0 and not mix["met"]
+          and mix["crit"]["S7_lo"]["value"] == mix["ci"]["lo"],
+          f"Level R reads the point, not the CI lower bound (IDEAL, IDEAL, ABSTAIN: S7 66.7, lo 0): {mix}", out)
+    pv = {n: ST.level_r(three([n] * 3), n=50)["met"] for n in ("P_NEVER", "P_UNIVERSAL", "P_OBEYALL")}
+    check(pv == {"P_NEVER": False, "P_UNIVERSAL": False, "P_OBEYALL": True}, f"Level R PERSIST bar (0.08, 0.25 miss; "
+          f"0.67 meets): {pv}", out)
+    for key in ("train_seed", "seed"):
+        ci = ST.s7_ci(three(["IDEAL", "ABSTAIN", "ABSTAIN"], key), n=2000)
+        check(abs(ci["S7"] - 100 / 3) < 1e-9 and ci["lo"] == 0 and ci["hi"] == 100,
+              f"S7 CI does not resample {key}s (IDEAL, ABSTAIN, ABSTAIN: want lo 0, hi 100): {ci}", out)
+    # the 95% level (verifier, 2026-10-05): 3 IDEAL + 3 ABSTAIN training seeds put 1.6% of resamples at 0 and 1.6%
+    # at 100, so a 98% or 99% interval reads 0 and 100 here; the IDEAL, IDEAL, ABSTAIN case above (3.7% at 0) bounds
+    # the other side (a 90% interval reads 33.3 there)
+    ci = ST.s7_ci([dict(r, train_seed=k) for k, n in enumerate(["IDEAL", "ABSTAIN"] * 3) for r in rows[n]], n=10000)
+    check(abs(ci["lo"] - 100 / 6) < 1e-9 and abs(ci["hi"] - 500 / 6) < 1e-9,
+          f"S7 CI is not the 95% percentile interval (3 IDEAL + 3 ABSTAIN seeds: want lo 16.67, hi 83.33): {ci}", out)
+    ci = ST.s7_ci(rows["FIRST"], n=2000)
+    check(ci["lo"] < ci["S7"] - 1 < ci["S7"] + 1 < ci["hi"], f"S7 CI does not resample units (FIRST): {ci}", out)
+    rz = [dict(r, unit=0.0) if r["family"] == "ROLE" else r for r in rows["IDEAL"]]
+    ci = ST.s7_ci(rz, n=200)
+    check(abs(ci["lo"] - 600 / 7) < 1e-9 and abs(ci["hi"] - 600 / 7) < 1e-9 and sum(ci["units"].values()) > 0,
+          f"S7 CI is not over the 7 state families (ROLE at 0: want lo = hi = 85.71): {ci}", out)
+    try:
+        ST.s7_ci(run(recs, "IDEAL"), n=10)
+        out.append("S7 CI ran without the --own-cf rows (OD1 b)")
+    except Exception as e:  # noqa: BLE001
+        check(isinstance(e, AssertionError) and "['OWN']" in str(e), f"S7 CI refusal {type(e).__name__}: {e}", out)
+    d = ST.bootstrap_diff(rows["P_NEVER"], rows["IDEAL"], n=200, fams=S.STATE7)
+    dr = ST.bootstrap_diff(rows["P_NEVER"], rows["IDEAL"], n=200)
+    check(d["D"] == d["lo"] == d["hi"] == 0 and dr["D"] < 0, f"paired S7 difference reads more than STATE7 "
+          f"(P_NEVER vs IDEAL: S7 {d}, R {dr})", out)
+    d = ST.bootstrap_diff(rows["IDEAL"], rows["FIRST"], n=200, fams=S.STATE7)
+    check(abs(d["D"] - (sm["IDEAL"]["S7"] - sm["FIRST"]["S7"])) < 1e-9 and d["lo"] <= d["D"] <= d["hi"],
+          f"paired S7 difference IDEAL - FIRST {d}", out)
+    cl = {k: S.s12_clause(dict(S7=a, R=r, families=dict(PERSIST=b)))["passes"] for k, a, b, r in (   # R opposite
+        ("bars", 40.0, 0.40, 0.0), ("S7", 39.999, 0.40, 100.0), ("PERSIST", 40.0, 0.3999, 100.0), ("None", None, 1.0, 100.0),
+        ("PERSIST None", 40.0, None, 100.0))}
+    cl.update({n: sm[n]["s12_clause"]["passes"] for n in ("IDEAL", "P_NEVER", "FIRST")})
+    check(cl == {"bars": True, "S7": False, "PERSIST": False, "None": False, "PERSIST None": False, "IDEAL": True,
+                 "P_NEVER": False, "FIRST": False} and sm["P_NEVER"]["s12_clause"] == S.s12_clause(sm["P_NEVER"]),
+          f"s12 clause (S7 point >= 40 and PERSIST >= 0.40): {cl}", out)
+    ideal = run(recs, "IDEAL")
+    lk = [dict(r, render="template", seed=1, train_seed=t) for t in (0, 1, 2) for r in ideal if r["family"] == "LOOKUP"]
+    t0 = {n: [dict(r, render="template", seed=1, train_seed=t) for t in (0, 1, 2) for r in run(recs, n)
+              if r["family"] == "T0"] for n in ("IDEAL", "ECHO")}
+    lc = {k: S.summarize(rs)["lookup_claim"] for k, rs in (("no T0", lk), ("T0 1", lk + t0["IDEAL"]),
+                                                          ("T0 0", lk + t0["ECHO"]))}
+    bar = {x: S.lookup_claim({"LOOKUP": 1.0, "T0": x}, lk, 3)["claimable"] for x in (0.90, 0.8999)}
+    check({k: v["claimable"] for k, v in lc.items()} == {"no T0": False, "T0 1": True, "T0 0": False}
+          and all(v["met"] for v in lc.values()) and bar == {0.90: True, 0.8999: False},
+          f"LOOKUP claim without T0 >= 0.90 (decision 4): {[(k, v['claimable'], v['why_not']) for k, v in lc.items()]}, "
+          f"bar {bar}", out)
+
+
+def c_hf(recs):
+    out = []
+    import hf_responder as H
+    check(H.HF_TESTED is True and "torch" not in sys.modules and "transformers" not in sys.modules,
+          "hf_responder import is not light or lost the tested mark of notes STEP 9b", out)
+    try:
+        RN.make_responder("hf:none", argparse.Namespace(hf_untested_ok=False, render="template", dtype="bfloat16",
+                                                        device="cpu"))
+        out.append("runner accepted the untested HF responder without the flag")
+    except SystemExit as e:
+        check("UNTESTED" in str(e), "runner refusal message", out)
+    except Exception as e:  # noqa: BLE001 (it went on to load a model)
+        out.append(f"runner went past the refusal to load a model ({type(e).__name__})")
+    return out
+
+
+def c_owncf(recs):
+    """--own-cf (own_cf.py): readers of their own history keep OWN 1.00, the CONSIST re-deriver (1.00 without it)
+    drops to 0.00, every OWN Q reply is swapped, and nothing outside OWN changes."""
+    out = []
+    own = [r for r in recs if r["family"] == "OWN"]
+    mean = lambda rows: sum(r["unit"] for r in rows) / len(rows)  # noqa: E731
+    for fake in ("CONSIST", "LISTPAD", "LISTBLANK", "LISTLS"):
+        check(mean(run(own, fake)) == 1.0, f"{fake} no longer passes OWN without --own-cf (update notes)", out)
+    for fake, want in (("IDEAL", 1.0), ("IDEAL_ALT", 1.0), ("CONSIST", 0.0), ("LISTPAD", 0.0), ("LISTBLANK", 0.0),
+                       ("LISTLS", 0.0)):
+        rows = run(own, fake, own_cf=True)
+        check(mean(rows) == want, f"{fake} OWN under --own-cf = {mean(rows):.2f}, want {want}", out)
+        check(all(t["raw"] is not None for r in rows for t in r["turns"] if t["kind"] == "Q"),
+              f"{fake}: an OWN Q reply was not swapped under --own-cf", out)
+    other = [r for r in recs if r["family"] in ("RECALL", "PERSIST", "TOPIC")][:30]
+    check(run(other, "IDEAL", own_cf=True) == [dict(x, own_cf=True) for x in run(other, "IDEAL")],
+          "--own-cf changed a conversation outside OWN", out)
+    return out
+
+
+def c_owngate(recs):
+    """OD1 (b), ruled 2026-09-25: an OWN unit counts in R only if it is right in the own-history run AND the
+    --own-cf run. IDEAL and IDEAL_ALT stay 1.00, CONSIST (1.00 on its own history) drops to 0.00, and so does NEXT
+    (0.00 on its own history, 1.00 on the cf one: the gate needs both, not the cf run alone); OWN (own history) and
+    OWN_CF (cf run alone) are reported beside; the bootstrap and headroom use the gated units; a missing or partial
+    cf run, or one of another responder or render, makes the gated OWN missing, never the ungated value; cf rows
+    count in nothing else and never choose the seeds; heterogeneous units are joined per conversation (verifier
+    2026-09-25)."""
+    out = []
+    own = [r for r in recs if r["family"] == "OWN"]
+    sums = {}
+    for fake, h_want, cf_want in (("IDEAL", 1.0, 1.0), ("IDEAL_ALT", 1.0, 1.0), ("CONSIST", 1.0, 0.0),
+                                  ("NEXT", 0.0, 1.0), ("LISTPAD", 1.0, 0.0)):
+        want = min(h_want, cf_want)
+        hist, cf = run(own, fake), run(own, fake, own_cf=True)
+        s = sums[fake] = S.summarize(hist + cf)
+        check(s["families"]["OWN"] == want and s["own_gate"] == dict(OWN=h_want, OWN_CF=cf_want, OWN_GATED=want,
+                                                                     cf_unswapped=0)
+              and s["keys"].get("OWN_GATED:pick") == want and s["keys"].get("OWN_GATED:list") == want,
+              f"{fake}: gated OWN {s['families']['OWN']} {s['own_gate']}, want OWN_GATED {want}", out)
+        h = S.summarize(hist)
+        check(s["replies"] == h["replies"] and s["keys"]["OWN"] == h["keys"]["OWN"] and s["t0"] == h["t0"],
+              f"{fake}: --own-cf rows counted outside the gate (replies {s['replies']} vs {h['replies']}, OWN "
+              f"{s['keys']['OWN']} vs {h['keys']['OWN']})", out)
+        slot = ST.unit_table(hist + cf)[0][None]["OWN"]
+        check(len(slot) == len(own) and set(slot.values()) == {want}, f"{fake}: bootstrap OWN slot not gated", out)
+    hr = ST.headroom({n: sums[n] for n in ("IDEAL", "CONSIST")})["OWN"]
+    check(not hr["fail"] and hr["scores"] == {"IDEAL": 1.0, "CONSIST": 0.0}, f"headroom OWN not gated {hr}", out)
+    hist, cf = run(own, "IDEAL"), run(own, "IDEAL", own_cf=True)
+    for label, rows in (("no cf run", hist), ("cf rows for half the OWN units", hist + cf[:len(cf) // 2]),
+                        ("cf rows for 1 of 2 training seeds", hist + cf + [dict(r, train_seed=1) for r in hist]),
+                        ("cf run of another responder", run(own, "CONSIST") + cf),
+                        ("cf run in another render", hist + run(own, "IDEAL", "template", own_cf=True))):
+        s = S.summarize(rows)
+        check(s["families"]["OWN"] is None and s["own_gate"]["OWN_GATED"] is None and s["own_gate"]["OWN"] == 1.0
+              and not any(k.startswith("OWN_GATED") for k in s["keys"]),
+              f"{label}: gated OWN not missing ({s['own_gate']})", out)
+    s = S.summarize(hist + run(own, "IDEAL", seeds=(1,), own_cf=True))
+    check(s["replies"] == S.summarize(hist)["replies"] and s["own_gate"]["OWN"] == 1.0
+          and s["own_gate"]["OWN_GATED"] is None, f"greedy history + sampled cf rows: seeds taken from the cf rows "
+          f"(replies {s['replies']}, {s['own_gate']})", out)
+    out += owngate_units(hist, cf)
+    saved = OC._exchange
+    OC._exchange = lambda text, a, b: text          # a pick rewrite that does not take (own_cf.UNSWAPPED)
+    try:
+        cf_bad = run(own, "IDEAL", own_cf=True)
+    finally:
+        OC._exchange = saved
+    s = S.summarize(hist + cf_bad)
+    picks = [r for r in cf_bad if r["cell"] == "pick"]
+    check(all(r["cf_unswapped"] == (r["cell"] == "pick") for r in cf_bad)
+          and all(t.get("cf_unswapped") and t["raw"] is None for r in picks for t in r["turns"] if t["kind"] == "Q")
+          and s["keys"].get("OWN_CF:pick") == 1.0 and s["keys"].get("OWN_GATED:pick") == 0.0
+          and s["keys"].get("OWN_GATED:list") == 1.0 and s["own_gate"]["cf_unswapped"] == len(picks) > 0,
+          f"unswapped cf rows not scored 0 in OWN_GATED ({s['own_gate']}, pick {s['keys'].get('OWN_GATED:pick')})", out)
+    return out
+
+
+def owngate_units(hist, cf):
+    """per-unit AND on random outcomes (2 training seeds x 2 sampling seeds, cf rows shuffled), against a nested
+    mean of a per-(training seed, seed, id) AND computed here; mixed cells catch a misaligned join and a product of
+    rates that uniform fakes cannot (verifier 2026-09-25)."""
+    import random
+    rng, rows, want = random.Random(1212), [], {}
+    for tr in (0, 1):
+        for sd in (1, 2):
+            h = [dict(r, train_seed=tr, seed=sd, unit=float(rng.random() < 0.6)) for r in hist]
+            c = [dict(r, train_seed=tr, seed=sd, unit=float(rng.random() < 0.6), cf_unswapped=rng.random() < 0.1)
+                 for r in cf]
+            byid = {r["id"]: r for r in c}
+            for cell in ("pick", "list"):
+                ands = [float(r["unit"] == 1.0 and byid[r["id"]]["unit"] == 1.0 and not byid[r["id"]]["cf_unswapped"])
+                        for r in h if r["cell"] == cell]
+                want.setdefault(cell, {}).setdefault(tr, []).append(sum(ands) / len(ands))
+            rows += h + c
+    rng.shuffle(rows)
+    ks = S.summarize(rows)["keys"]
+    fails = []
+    for cell, per_tr in want.items():
+        w = sum(sum(v) / len(v) for v in per_tr.values()) / len(per_tr)
+        got = ks.get(f"OWN_GATED:{cell}")
+        if got is None or abs(got - w) > 1e-12:
+            fails.append(f"random units: OWN_GATED:{cell} {got}, per-unit AND {w:.4f}")
+    return fails
+
+
+def c_ackrep(recs):
+    """OD6 (iii), ruled 2026-09-25: an identical reply to a statement turn is an ack-repeat, not a LOOP. Expected
+    counts come from the records (every statement turn after a conversation's first repeats "Got it."), not from
+    grade_loop. Since F2 (decided 2026-09-25) a small-talk D turn (asks: false) is a statement turn for the loop
+    rule, so the per-statement rates count it in their denominator (nonask, read with fakes_family.asks_rec)."""
+    out = []
+    stated = [sum(t["kind"] in "SLCIOT" for t in r["turns"]) for r in recs]
+    nonask = sum(not FF.asks_rec(t) for r in recs for t in r["turns"])
+    n_turns = sum(r["n_turns"] for r in recs)
+    hits = sum(max(0, n - 1) for n in stated)
+    s = S.summarize(run(recs, "ACKER"))
+    check(s["R_ungated"] == 100 and s["loop_rate"] == 0 and not any(s["degenerate_rates"].values())
+          and s["level_a"]["LOOP"]["met"], f"ACKER: R {s['R_ungated']}, loop {s['loop_rate']}, "
+          f"degenerate {s['degenerate_rates']}, Level A loop criterion met {s['level_a']['LOOP']['met']}", out)
+    check(s["replies"] == n_turns and s["ack_repeat"] == hits / n_turns and s["ack_repeat_of_statements"]
+          == hits / nonask, f"ACKER ack-repeat {s['ack_repeat']} / {s['ack_repeat_of_statements']}, want "
+          f"{hits / n_turns} / {hits / nonask}", out)
+    check(s["ack_repeat_of_answers"] == 0, f"ACKER answer-repeat {s['ack_repeat_of_answers']}, want 0", out)
+    acker = run(recs, "ACKER")
+    for fake in ("ACKER", "PARROT"):       # PARROT: its OWN cf rows hold answer repeats, so they would move the rate
+        rows = acker if fake == "ACKER" else run(recs, fake)
+        a = S.summarize(rows)
+        c = S.summarize(rows + run([r for r in recs if r["family"] == "OWN"], fake, own_cf=True))
+        check([c[k] for k in ACK_KEYS] == [a[k] for k in ACK_KEYS], f"{fake}: --own-cf rows moved the ack-repeat "
+              f"or equality-only reports: {[c[k] for k in ACK_KEYS]} vs {[a[k] for k in ACK_KEYS]}", out)
+    i = S.summarize(run(recs, "IDEAL"))
+    check(i["ack_repeat"] == 0 and i["ack_repeat_of_statements"] == 0 and i["ack_repeat_of_answers"] == 0,
+          f"IDEAL ack-repeat {i['ack_repeat']} / {i['ack_repeat_of_answers']}", out)
+    rows = [{k: v for k, v in r.items() if k != "ack_repeat"} for r in run(recs[:5], "ACKER")]
+    check(S.ack_stats(rows) == (None, None), "rows without the ack_repeat record not reported as None", out)
+    rows = [{k: v for k, v in r.items() if k != "ack_of_answer"} for r in acker[:5]]
+    check(S.answer_repeat_stats(rows) is None, "rows without the ack_of_answer record not reported as None", out)
+    # PARROT (verifier 2026-09-25): its last short (< 12 words) answer again on each later statement turn. Under F1
+    # (decided 2026-09-25, prereg draft s17 OD6 follow-up) each is a LOOP (an answer parroted on a statement turn),
+    # so PARROT fails the Level A loop criterion; still an ack-repeat and an answer repeat (counts made here).
+    hits = sum(any(FF.asks_rec(u) and len(T.lwords(T.norm(u["ideal"]))) < 12 for u in r["turns"][:t["i"] - 1])
+               for r in recs for t in r["turns"] if t["kind"] in "SLCIOT")
+    p = S.summarize(run(recs, "PARROT"))
+    check(p["loop_rate"] == hits / n_turns > S.BARS["loop"] and not p["level_a"]["LOOP"]["met"]
+          and p["R_ungated"] == 100 and p["ack_repeat"] == hits / n_turns
+          and p["ack_repeat_of_answers"] == p["ack_repeat_of_statements"] == hits / nonask and hits > 0,
+          f"PARROT loop {p['loop_rate']} (want {hits / n_turns}), Level A loop criterion met "
+          f"{p['level_a']['LOOP']['met']}, R {p['R_ungated']}, answer-repeat {p['ack_repeat_of_answers']}, want "
+          f"{hits / nonask}", out)
+    # SMALLTALK (F2): one fixed reply on every small-talk D turn (asks: false). Those turns ask nothing, so the
+    # repeats are ack-repeats, not LOOPs (before F2 each was a LOOP); counts made here from the annotation.
+    hits = sum(max(0, sum(t["kind"] == "D" and t["asks"] is False for t in r["turns"]) - 1) for r in recs)
+    m = S.summarize(run(recs, "SMALLTALK"))
+    check(m["loop_rate"] == 0 and m["level_a"]["LOOP"]["met"] and m["R_ungated"] == 100 and hits > 0
+          and m["ack_repeat"] == hits / n_turns and m["ack_repeat_of_statements"] == hits / nonask
+          and m["ack_repeat_of_answers"] == 0, f"SMALLTALK loop {m['loop_rate']} (want 0), Level A loop criterion met "
+          f"{m['level_a']['LOOP']['met']}, R {m['R_ungated']}, ack-repeat {m['ack_repeat']} (want {hits / n_turns}), "
+          f"answer-repeat {m['ack_repeat_of_answers']}", out)
+    # F3 / strict case (d) (verifier 2026-09-25): a right answer equal to the model's own earlier confirmation is a
+    # LOOP in every value family, not only OWN. Expected counts made here from the records (FF.restated: the probes
+    # the fakes confirm): every restated probe fails; equality alone for a sentence under 12 words (RESTATE) and for
+    # the bare gold (TERSE_VAL); a longer sentence is a self-copy too, so not equality-only.
+    said = [(r["family"], p) for r in recs for p in FF.restated(r).values()]
+    n_probes = Counter(r["family"] for r in recs for _ in r["probes"])
+    for fake, want in (("RESTATE", Counter(f for f, p in said if len(T.lwords(T.norm(p["ideal"]))) < 12)),
+                       ("TERSE_VAL", Counter(f for f, _ in said)), ("TERSE_VAL_CTRL", Counter())):
+        rows = run(recs, fake)
+        e = S.summarize(rows)
+        eo = e["equality_only"] or {}
+        n_fail = sum(not p["ok"] for r in rows for p in r["probes"])
+        loops = 0 if fake == "TERSE_VAL_CTRL" else len(said)
+        check(e["loop_rate"] == loops / n_turns and n_fail == loops and len(said) > 0
+              and {f: v[0] for f, v in eo.items() if v[0]} == dict(want)
+              and {f: v[1] for f, v in eo.items()} == dict(n_probes)
+              and (e["R_ungated"] == 100) == (fake == "TERSE_VAL_CTRL"),
+              f"{fake}: loop {e['loop_rate']} (want {loops / n_turns}), failing probes {n_fail}, equality-only "
+              f"{eo}, want {dict(want)}, R {e['R_ungated']}", out)
+    check(i["equality_only"] == {f: [0, n] for f, n in n_probes.items()}, f"IDEAL equality-only {i['equality_only']}",
+          out)
+    return out
+
+
+ACK_KEYS = ("ack_repeat", "ack_repeat_of_statements", "ack_repeat_of_answers", "equality_only")
+
+
+CHECKS = [c_render, c_history, c_stops, c_trunc, c_seeds, c_scoring, c_stats, c_levelr, c_hf, c_owncf, c_owngate,
+          c_ackrep]
+
+
+def checks(recs=None):
+    recs = recs or RN.load()
+    return [f"{c.__name__[2:]}: {m}" for c in CHECKS for m in c(recs)]
+
+
+def main():
+    fails = checks()
+    text = "RC-12 machinery checks (validate_machinery.py), no model.\n" + (
+        "\n".join(f"FAIL {f}" for f in fails) if fails else f"ALL {len(CHECKS)} CHECK GROUPS PASS") + "\n"
+    os.makedirs(os.path.join(HERE, "logs"), exist_ok=True)
+    with open(os.path.join(HERE, "logs", "e2e_machinery.txt"), "w") as f:
+        f.write(text)
+    print(text)
+    return 1 if fails else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

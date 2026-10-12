@@ -1,0 +1,54 @@
+2026-10-10 17:33:53 queue start: exp SCREENS, plan plan1.txt (sha256 2a881dc90e064b52), code commit 6db5e6ad62ffdc164037949ddfde24d11ee767d9
+2026-10-10 17:33:53 waiting for gpu.lock
+2026-10-10 17:33:53 gpu.lock held; GPU memory in use 100 MiB
+2026-10-10 17:33:53 train base_s901.yaml --require-committed
+2026-10-10 17:33:54 done base_s901 rc 0
+2026-10-10 17:33:54 score base_s901/final_00007630
+2026-10-10 17:33:54 score base_s901/ckpt_00007344
+2026-10-10 17:33:54 score base_s901/ckpt_00007497
+2026-10-10 17:33:54 waiting for gpu.lock
+2026-10-10 17:33:54 gpu.lock held; GPU memory in use 100 MiB
+2026-10-10 17:33:54 train base_s902.yaml --require-committed
+2026-10-10 17:33:56 queue start: exp SCREENS, plan plan2.txt (sha256 fc8362364a0f2bce), code commit 6db5e6ad62ffdc164037949ddfde24d11ee767d9
+2026-10-10 17:33:56 skip base_s901 (already SCORED)
+2026-10-10 17:33:56 base_s902: the queue was cut while it trained: counted as its one crash; resuming once
+2026-10-10 17:33:56 waiting for gpu.lock
+2026-10-10 17:33:56 gpu.lock held; GPU memory in use 100 MiB
+2026-10-10 17:33:56 train base_s902.yaml --require-committed
+2026-10-10 17:33:57 done base_s902 rc 0
+2026-10-10 17:33:57 score base_s902/final_00007630
+2026-10-10 17:33:57 score base_s902/ckpt_00007344
+2026-10-10 17:33:57 score base_s902/ckpt_00007497
+2026-10-10 17:33:57 waiting for gpu.lock
+2026-10-10 17:33:57 gpu.lock held; GPU memory in use 100 MiB
+2026-10-10 17:33:57 train base_s903.yaml --require-committed
+2026-10-10 17:33:59 queue start: exp SCREENS, plan plan3.txt (sha256 8c31ba88ee6acab6), code commit 6db5e6ad62ffdc164037949ddfde24d11ee767d9
+2026-10-10 17:33:59 base_s903: the queue was cut while it trained: counted as its one crash; resuming once
+2026-10-10 17:33:59 waiting for gpu.lock
+2026-10-10 17:33:59 gpu.lock held; GPU memory in use 100 MiB
+2026-10-10 17:33:59 train base_s903.yaml --require-committed
+2026-10-10 17:34:00 GAP base_s903: second crash (rc 1)
+2026-10-10 17:34:00 waiting for gpu.lock
+2026-10-10 17:34:00 gpu.lock held; GPU memory in use 100 MiB
+2026-10-10 17:34:00 train base_s904.yaml --require-committed
+2026-10-10 17:34:01 done base_s904 rc 0
+2026-10-10 17:34:01 score base_s904/final_00007630
+2026-10-10 17:34:01 score base_s904/ckpt_00007344
+2026-10-10 17:34:01 score base_s904/ckpt_00007497
+2026-10-10 17:34:01 waiting for gpu.lock
+2026-10-10 17:34:01 gpu.lock held; GPU memory in use 100 MiB
+2026-10-10 17:34:01 train base_s905.yaml --require-committed
+2026-10-10 17:34:03 queue start: exp SCREENS, plan plan4.txt (sha256 3393fc1f9fc99b34), code commit 6db5e6ad62ffdc164037949ddfde24d11ee767d9
+2026-10-10 17:34:03 base_s905: the queue was cut while it trained: counted as its one crash; resuming once
+2026-10-10 17:34:03 waiting for gpu.lock
+2026-10-10 17:34:03 gpu.lock held; GPU memory in use 100 MiB
+2026-10-10 17:34:03 train base_s905.yaml --require-committed
+2026-10-10 17:34:05 queue start: exp SCREENS, plan plan5.txt (sha256 355696885b3ebcc2), code commit 6db5e6ad62ffdc164037949ddfde24d11ee767d9
+2026-10-10 17:34:05 GAP base_s905: second crash (a cut, counted as a crash)
+2026-10-10 17:34:05 waiting for gpu.lock
+2026-10-10 17:34:05 gpu.lock held; GPU memory in use 100 MiB
+2026-10-10 17:34:05 base_s906/bpb/final_00007630.json is not whole JSON (a cut write): moved aside, scoring again
+2026-10-10 17:34:05 score base_s906/final_00007630
+2026-10-10 17:34:05 score base_s906/ckpt_00007344
+2026-10-10 17:34:05 score base_s906/ckpt_00007497
+2026-10-10 17:34:05 plan finished: plan5.txt

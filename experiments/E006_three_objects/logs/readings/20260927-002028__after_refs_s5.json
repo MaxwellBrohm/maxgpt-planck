@@ -1,0 +1,273 @@
+{
+ "arm C": {
+  "label": "NOT_SCORED"
+ },
+ "arm P": {
+  "label": "NOT_SCORED"
+ },
+ "arm G": {
+  "label": "NOT_SCORED"
+ },
+ "arm e005w": {
+  "label": "PARTIAL-X",
+  "detail": "updating with a named limit: H5 (3 seeds pass everything else)",
+  "sub": [],
+  "any_seed": "PARTIAL-X",
+  "loo": {
+   "without s1": "PARTIAL-X",
+   "without s2": "FAIL",
+   "without s3": "FAIL",
+   "without s4": "PARTIAL-X",
+   "without s5": "FAIL"
+  },
+  "flips": [
+   2,
+   [
+    [
+     5,
+     "LIK",
+     "C_twoslot"
+    ]
+   ]
+  ],
+  "alias": {
+   "label": "DATA GAP",
+   "classes": [
+    "HIGH",
+    "HIGH",
+    "HIGH",
+    "HIGH",
+    "HIGH"
+   ],
+   "n_high": 5,
+   "n_low": 0,
+   "note": null
+  },
+  "stopping": {
+   "learned": true,
+   "seeds_stop": [
+    false,
+    true,
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "arm e004w": {
+  "label": "FAIL",
+  "detail": "no PASS, PARTIAL-G or PARTIAL-X condition holds",
+  "sub": [
+   "LIK < 0.8 on H1, H2 or a control on a majority of seeds (seeds failing LIK: H1 5, H2 5, C_noupd 0, C_twoslot 0)",
+   "ID LIK >= 0.8 (0.906-0.953) while H1 or H2 LIK < 0.8 on a majority of seeds",
+   "H1 LIK by the latest statement's reference form (range over seeds): alias 0.095-0.333, ell 0.762-0.857, pron 1.000-1.000",
+   "H2 LIK by the latest statement's reference form (range over seeds): alias 0.238-0.524, ell 0.667-0.905, pron 0.955-0.955",
+   "H1+H2 alias items by placement, LIK (range over seeds): adjacent 0.667-0.778 (n 9), filler 0.000-0.286 (n 14), B_sep 0.053-0.368 (n 19)",
+   "wrong LIK picks, H1/H2 alias, pooled over seeds: 147 wrong: A_prev 139, A_earlier 5, other_before 2, other_after 1; of them lures 57",
+   "wrong GEN picks, H1/H2 alias, pooled over seeds: 140 wrong: A_prev 133, A_earlier 5, other_after 1, other_before 1; of them lures 51",
+   "wrong LIK picks, H1/H2 not alias, pooled over seeds: 46 wrong: A_prev 39, other_after 7; of them lures 24",
+   "wrong GEN picks, H1/H2 not alias, pooled over seeds: 42 wrong: A_prev 37, other_after 5; of them lures 23",
+   "wrong LIK picks, H5, pooled over seeds: 78 wrong: other_after 49, A_prev 26, other_before 3; of them lures 0",
+   "wrong GEN picks, H5, pooled over seeds: 78 wrong: other_after 51, A_prev 24, other_before 3; of them lures 0",
+   "wrong LIK picks, C_noupd, pooled over seeds: 35 wrong: other_after 35; of them lures 0",
+   "wrong GEN picks, C_noupd, pooled over seeds: 41 wrong: other_after 38, none 3; of them lures 0",
+   "wrong LIK picks, C_twoslot, pooled over seeds: 50 wrong: A_prev 40, other_after 10; of them lures 4",
+   "wrong GEN picks, C_twoslot, pooled over seeds: 50 wrong: A_prev 38, other_after 12; of them lures 3"
+  ],
+  "any_seed": "FAIL",
+  "loo": {
+   "without s1": "FAIL",
+   "without s2": "FAIL",
+   "without s3": "FAIL",
+   "without s4": "FAIL",
+   "without s5": "FAIL"
+  },
+  "flips": [
+   null,
+   []
+  ],
+  "alias": {
+   "label": "REAL LIMIT",
+   "classes": [
+    "LOW",
+    "LOW",
+    "MID",
+    "LOW",
+    "LOW"
+   ],
+   "n_high": 0,
+   "n_low": 4,
+   "note": null
+  },
+  "stopping": {
+   "learned": false,
+   "seeds_stop": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ]
+  }
+ },
+ "Q-H5": {
+  "label": {
+   "label": "NOT READ",
+   "flags": [],
+   "suffix": null
+  },
+  "d": {
+   "LIK": null,
+   "GEN": null
+  },
+  "p_minus_l4": null,
+  "l4_minus_c_lik": null,
+  "dev_shift_lik": null,
+  "h5l": {},
+  "reported": {
+   "e004w BIG H5 reweighted to the D4004 intro mix": 0.7890914869122105,
+   "e005w BIG H5 reweighted to the D4004 intro mix": 0.656644013880856
+  }
+ },
+ "Q-chat": {
+  "label": {
+   "label": "NOT READ",
+   "failed": []
+  },
+  "measures": {
+   "TF": null,
+   "TF2": null,
+   "LOOP": null
+  },
+  "checks": null,
+  "knowledge": {
+   "label": "NOT READ",
+   "K": {
+    "unexposed (the reading)": null,
+    "all 441": null,
+    "unexposed, loose exposure": null
+   },
+   "n_exposed": 16
+  }
+ },
+ "cost G": {
+  "e004 H1 LIK plain": null,
+  "e004 H1 GEN plain": null,
+  "e004 H2 LIK plain": null,
+  "e004 H2 GEN plain": null,
+  "e004 H3 LIK plain": null,
+  "e004 H3 GEN plain": null,
+  "e004 H4 LIK plain": null,
+  "e004 H4 GEN plain": null,
+  "e004 H5 LIK plain": null,
+  "e004 H5 GEN plain": null,
+  "e004 H6 LIK plain": null,
+  "e004 H6 GEN plain": null,
+  "e004 H7 LIK plain": null,
+  "e004 H7 GEN plain": null,
+  "e004 C_noupd LIK plain": null,
+  "e004 C_noupd GEN plain": null,
+  "e004 C_twoslot LIK plain": null,
+  "e004 C_twoslot GEN plain": null,
+  "e004 ID LIK plain": null,
+  "e004 ID GEN plain": null,
+  "big H5 LIK plain": null,
+  "big H5 GEN plain": null,
+  "big C_noupd LIK plain": null,
+  "big C_noupd GEN plain": null,
+  "big C_twoslot LIK plain": null,
+  "big C_twoslot GEN plain": null,
+  "h5l H5L LIK plain": null,
+  "h5l H5L GEN plain": null,
+  "e004 H1 LIK chat": null,
+  "e004 H1 GEN chat": null,
+  "e004 H2 LIK chat": null,
+  "e004 H2 GEN chat": null,
+  "e004 H3 LIK chat": null,
+  "e004 H3 GEN chat": null,
+  "e004 H4 LIK chat": null,
+  "e004 H4 GEN chat": null,
+  "e004 H5 LIK chat": null,
+  "e004 H5 GEN chat": null,
+  "e004 H6 LIK chat": null,
+  "e004 H6 GEN chat": null,
+  "e004 H7 LIK chat": null,
+  "e004 H7 GEN chat": null,
+  "e004 C_noupd LIK chat": null,
+  "e004 C_noupd GEN chat": null,
+  "e004 C_twoslot LIK chat": null,
+  "e004 C_twoslot GEN chat": null,
+  "e004 ID LIK chat": null,
+  "e004 ID GEN chat": null,
+  "big H5 LIK chat": null,
+  "big H5 GEN chat": null,
+  "big C_noupd LIK chat": null,
+  "big C_noupd GEN chat": null,
+  "big C_twoslot LIK chat": null,
+  "big C_twoslot GEN chat": null,
+  "h5l H5L LIK chat": null,
+  "h5l H5L GEN chat": null
+ },
+ "cost P": {
+  "e004 H1 LIK plain": null,
+  "e004 H1 GEN plain": null,
+  "e004 H2 LIK plain": null,
+  "e004 H2 GEN plain": null,
+  "e004 H3 LIK plain": null,
+  "e004 H3 GEN plain": null,
+  "e004 H4 LIK plain": null,
+  "e004 H4 GEN plain": null,
+  "e004 H5 LIK plain": null,
+  "e004 H5 GEN plain": null,
+  "e004 H6 LIK plain": null,
+  "e004 H6 GEN plain": null,
+  "e004 H7 LIK plain": null,
+  "e004 H7 GEN plain": null,
+  "e004 C_noupd LIK plain": null,
+  "e004 C_noupd GEN plain": null,
+  "e004 C_twoslot LIK plain": null,
+  "e004 C_twoslot GEN plain": null,
+  "e004 ID LIK plain": null,
+  "e004 ID GEN plain": null,
+  "big H5 LIK plain": null,
+  "big H5 GEN plain": null,
+  "big C_noupd LIK plain": null,
+  "big C_noupd GEN plain": null,
+  "big C_twoslot LIK plain": null,
+  "big C_twoslot GEN plain": null,
+  "h5l H5L LIK plain": null,
+  "h5l H5L GEN plain": null,
+  "e004 H1 LIK chat": null,
+  "e004 H1 GEN chat": null,
+  "e004 H2 LIK chat": null,
+  "e004 H2 GEN chat": null,
+  "e004 H3 LIK chat": null,
+  "e004 H3 GEN chat": null,
+  "e004 H4 LIK chat": null,
+  "e004 H4 GEN chat": null,
+  "e004 H5 LIK chat": null,
+  "e004 H5 GEN chat": null,
+  "e004 H6 LIK chat": null,
+  "e004 H6 GEN chat": null,
+  "e004 H7 LIK chat": null,
+  "e004 H7 GEN chat": null,
+  "e004 C_noupd LIK chat": null,
+  "e004 C_noupd GEN chat": null,
+  "e004 C_twoslot LIK chat": null,
+  "e004 C_twoslot GEN chat": null,
+  "e004 ID LIK chat": null,
+  "e004 ID GEN chat": null,
+  "big H5 LIK chat": null,
+  "big H5 GEN chat": null,
+  "big C_noupd LIK chat": null,
+  "big C_noupd GEN chat": null,
+  "big C_twoslot LIK chat": null,
+  "big C_twoslot GEN chat": null,
+  "h5l H5L LIK chat": null,
+  "h5l H5L GEN chat": null
+ },
+ "Q-device": {
+  "n_ci": 0,
+  "n_clear": 0
+ }
+}

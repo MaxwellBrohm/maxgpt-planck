@@ -1,0 +1,7 @@
+# SCREENS BASE hook-off of base_s101 (AMENDMENT BASE-REPLAY; eval.induction off), LR5, seed 101 (screens.py)
+extends: screens_base.yaml
+name: base_s101_hookoff
+out_dir: ../../../planck_root/runs/SCREENS/base_s101_hookoff
+seed: 101
+optim: {lr: 0.003, embed_lr: 0.003, scalar_lr: 0.003}
+eval: {induction: null}

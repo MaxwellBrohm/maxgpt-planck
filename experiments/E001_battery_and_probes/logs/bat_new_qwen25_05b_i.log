@@ -1,0 +1,19 @@
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:00<01:01,  4.69it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 1283.42it/s]
+loaded Qwen/Qwen2.5-0.5B-Instruct {'params': 494032768, 'emb': 136134656, 'dtype': 'fp32', 'device': 'mps'} in 2.6s
+new/plain 0/1728 0s len=93
+new/plain 250/1728 26s len=92
+new/plain 500/1728 70s len=210
+new/plain 750/1728 138s len=503
+new/plain 1000/1728 188s len=163
+new/plain 1250/1728 225s len=293
+new/plain 1500/1728 281s len=413
+done new/plain: 1728 scored, 0 skipped, 353s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/Qwen__Qwen2.5-0.5B-Instruct__new__plain.jsonl
+new/chat 0/1728 0s len=136
+new/chat 250/1728 35s len=135
+new/chat 500/1728 90s len=278
+new/chat 750/1728 174s len=626
+new/chat 1000/1728 237s len=218
+new/chat 1250/1728 283s len=374
+new/chat 1500/1728 352s len=517
+done new/chat: 1728 scored, 0 skipped, 440s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/Qwen__Qwen2.5-0.5B-Instruct__new__chat.jsonl
+ALL DONE Qwen/Qwen2.5-0.5B-Instruct in 795s

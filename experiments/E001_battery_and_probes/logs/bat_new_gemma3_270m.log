@@ -1,0 +1,19 @@
+Loading weights:   0%|          | 0/236 [00:00<?, ?it/s]Loading weights:   0%|          | 1/236 [00:00<00:44,  5.31it/s]Loading weights: 100%|██████████| 236/236 [00:00<00:00, 1237.05it/s]
+loaded unsloth/gemma-3-270m-it {'params': 268098176, 'emb': 167772160, 'dtype': 'fp32', 'device': 'mps'} in 2.3s
+new/plain 0/1728 0s len=101
+new/plain 250/1728 16s len=100
+new/plain 500/1728 41s len=227
+new/plain 750/1728 78s len=538
+new/plain 1000/1728 106s len=171
+new/plain 1250/1728 127s len=312
+new/plain 1500/1728 158s len=441
+done new/plain: 1728 scored, 0 skipped, 198s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/unsloth__gemma-3-270m-it__new__plain.jsonl
+new/chat 0/1728 0s len=116
+new/chat 250/1728 17s len=115
+new/chat 500/1728 44s len=258
+new/chat 750/1728 87s len=605
+new/chat 1000/1728 119s len=194
+new/chat 1250/1728 141s len=352
+new/chat 1500/1728 176s len=496
+done new/chat: 1728 scored, 0 skipped, 221s -> /Users/brohm/Documents/Projects/maxgpt-planck/experiments/E001_battery_and_probes/out/unsloth__gemma-3-270m-it__new__chat.jsonl
+ALL DONE unsloth/gemma-3-270m-it in 421s

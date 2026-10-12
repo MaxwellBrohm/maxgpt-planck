@@ -1,0 +1,10 @@
+{
+ "name": "030_sample_tiny_cuda",
+ "cmd": ["bash", "-lc",
+         "$PLANCK_HOME/venv/bin/python make_fake_data.py runs/fake_data && exec $PLANCK_HOME/venv/bin/python train.py configs/sample_tiny/config.yaml --device cuda --require-committed"],
+ "cwd": "$PLANCK_HOME/repo/harness",
+ "prereg": "configs/sample_tiny/prereg.yaml",
+ "progress_log": "runs/sample_tiny/log.jsonl",
+ "max_hours": 0.5,
+ "max_attempts": 2
+}

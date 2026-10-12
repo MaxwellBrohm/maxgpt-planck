@@ -1,0 +1,143 @@
+== determinism
+PASS  seed 0 twice gives identical examples
+PASS  seed 1 differs from seed 0
+== pool level
+PASS  alias pools: sizes, training-only, disjoint from eval surnames/pairs/joins/templates, no 3-gram with an eval alias template, no pronoun/object word/value, no echo of a question/answer (0) []
+PASS  E004 pools and fillers still pass E004's pool checks
+== per-example checks: seed 0 first 2000 (all blocks)
+PASS  0 failing examples
+== seeds (1, 2, 3, 4, 5), first 6500 draws each
+PASS  seed 1: the 4567 E004-block examples are train_e004.stream(1)[:4567] unchanged, in order
+PASS  seed 1: 1933 ALIAS/IND examples, 0 failing
+PASS  seed 1: every surname, title, join and alias template used (missing [])
+PASS  seed 1: every training object in the new blocks (52)
+PASS  seed 2: the 4507 E004-block examples are train_e004.stream(2)[:4507] unchanged, in order
+PASS  seed 2: 1993 ALIAS/IND examples, 0 failing
+PASS  seed 2: every surname, title, join and alias template used (missing [])
+PASS  seed 2: every training object in the new blocks (52)
+PASS  seed 3: the 4541 E004-block examples are train_e004.stream(3)[:4541] unchanged, in order
+PASS  seed 3: 1959 ALIAS/IND examples, 0 failing
+PASS  seed 3: every surname, title, join and alias template used (missing [])
+PASS  seed 3: every training object in the new blocks (52)
+PASS  seed 4: the 4540 E004-block examples are train_e004.stream(4)[:4540] unchanged, in order
+PASS  seed 4: 1960 ALIAS/IND examples, 0 failing
+PASS  seed 4: every surname, title, join and alias template used (missing [])
+PASS  seed 4: every training object in the new blocks (52)
+PASS  seed 5: the 4567 E004-block examples are train_e004.stream(5)[:4567] unchanged, in order
+PASS  seed 5: 1933 ALIAS/IND examples, 0 failing
+PASS  seed 5: every surname, title, join and alias template used (missing [])
+PASS  seed 5: every training object in the new blocks (52)
+== shares vs notes.txt (seeds (1, 2, 3, 4, 5) pooled: 32500 examples, 6520 ALIAS, 3258 IND)
+PASS  block e004  0.699 (target 0.70)
+PASS  block alias 0.201 (target 0.20)
+PASS  block ind   0.100 (target 0.10)
+PASS  chat render in block e004: 0.500 (target 0.50)
+PASS  chat render in block alias: 0.500 (target 0.50)
+PASS  chat render in block ind: 0.494 (target 0.50)
+PASS  alias case latest  0.599 (target 0.60)
+PASS    placements {'adjacent': 1255, 'other_obj': 1297, 'filler': 1354} (1/3 each)
+PASS    both aliased 0.340 (target 0.333)
+PASS  alias case earlier 0.155 (target 0.15)
+PASS    placements {'adjacent': 354, 'filler': 329, 'other_obj': 330} (1/3 each)
+PASS    both aliased 0.346 (target 0.333)
+PASS  alias case other   0.246 (target 0.25)
+PASS    placements {'other_obj': 534, 'filler': 505, 'adjacent': 562} (1/3 each)
+PASS    both aliased 0.331 (target 0.333)
+PASS  B's corrections when A is aliased {0: 1232, 1: 2497, 2: 1190} (1/4, 1/2, 1/4)
+PASS  adjacent/filler, A aliased: B before A's original 0.519 (target 0.50)
+PASS  honorific titles 0.673 (target 0.667) {'Mr.': 1428, 'Dr.': 1491, 'Pastor': 737, 'Ms.': 1461, 'Chef': 710, 'Mrs.': 1496, 'Professor': 716, 'Captain': 690}
+PASS  alias corrections without a marker 0.350 (target 0.35)
+PASS  the alias correction is the gold in 0.120 of all examples (target 0.12)
+PASS  an alias lure (alias correction not the answer) in 0.080 (target 0.08)
+PASS  value types in the new blocks {'city': 2427, 'weekday': 2429, 'colour': 2471, 'month': 2451}
+PASS  IND asks X 0.754 (target 0.75)
+PASS  IND X's last correction {'ell': 2179, 'pron': 1079} (ellipsis 2/3, pronoun 1/3)
+PASS  IND Y's last correction indirect 0.671 (target 0.667) {'ell': 1447, 'head': 430, 'pron': 740, 'full': 641}
+PASS  IND Y's direct last: full/head 3:2
+PASS  question by full phrase in the new blocks 0.494
+PASS  d covers 0-10 in the new blocks
+PASS  new blocks have exactly 2 objects {2: 9778}
+PASS  pre-check of the stream rule (full oracles in oracles_e005.py): first-statement gold 0.201, last-statement gold 0.400 (<= 0.50)
+== sample
+User: We're hosting the training course that Mr. Zielinski is putting on in Oslo.
+Assistant: Noted, Oslo for that.
+User: Why do bees make honey?
+Assistant: Honey is their stored food for times when flowers are scarce.
+User: Our chess tournament is in Lisbon.
+Assistant: Noted, Lisbon for that.
+User: They moved it to Chicago.
+Assistant: Got it, Chicago then.
+User: How can I sleep on a noisy street?
+Assistant: Earplugs, a fan for steady background noise, and heavy drapes all help.
+User: How do I make a paper airplane fly farther?
+Assistant: Use crisp folds, keep the wings level, and add a small fold at the nose for weight.
+User: The training course moved to Seattle.
+Assistant: Thanks, switching to Seattle.
+User: Wait, we're taking the chess tournament to Rome instead.
+Assistant: Thanks, switching to Rome.
+User: Mr. Zielinski has booked a hall in Vienna.
+Assistant: No problem, Vienna.
+User: What's the best way to learn to type faster?
+Assistant: Use all ten fingers, keep your eyes on the screen, and do short drills each day.
+User: Why do cats purr?
+Assistant: Purring usually signals contentment, though they also do it to soothe themselves when stressed.
+User: Any tips for a long drive?
+Assistant: Plan rest stops every two hours, pack snacks, and download music before the signal drops.
+User: How can I help my houseplants grow?
+Assistant: Give them bright indirect light, water only when the soil feels dry, and feed them lightly in spring.
+User: How do I make scrambled eggs fluffier?
+Assistant: Whisk them well, cook over low heat, and stir gently until they are just set.
+User: Why is the ocean salty?
+Assistant: Rain slowly washes minerals out of rocks, and rivers carry them to the sea, where they build up.
+User: What's a good stretch after running?
+Assistant: A standing quad stretch and a calf stretch against a wall, each held for about thirty seconds.
+User: How do I keep my laptop from overheating?
+Assistant: Use it on a hard surface, keep the vents clear, and clean out the dust now and then.
+User: Why do stars twinkle?
+Assistant: Moving layers of air bend their light slightly, so the brightness flickers.
+User: How do I get candle wax off a tablecloth?
+Assistant: Harden it with an ice cube, scrape off what you can, then press the rest between paper towels with a warm iron.
+User: Where should I book travel for the tournament?
+Assistant: Rome, after the last change.
+   [alias_other other_obj both=False {0: 'Mr. Zielinski'} gold=Rome refs=['full', 'full', 'pron', 'full', 'full', 'alias'] render=plain]
+User: What's an easy way to learn new words?
+Assistant: Read widely, jot down unfamiliar words, and use each one in a sentence of your own.
+User: The trade show is being held in Seattle.
+Assistant: Noted, Seattle for that.
+User: What's a good stretch after running?
+Assistant: A standing quad stretch and a calf stretch against a wall, each held for about thirty seconds.
+User: How do I keep lettuce crisp?
+Assistant: Wrap the leaves loosely in a paper towel and store them in a sealed bag in the fridge.
+User: Never mind, they relocated the trade show to Boston.
+Assistant: Got it, Boston then.
+User: Wait, scratch that, Lisbon.
+Assistant: Understood, Lisbon.
+User: Actually, make that Rome.
+Assistant: All right, changed.
+User: How do I fold a fitted sheet?
+Assistant: Tuck the corners into each other, lay it flat, fold the edges in, and fold it into a neat square.
+User: We're hosting the reunion dinner in London.
+Assistant: Noted, London for that.
+User: It's going to Berlin instead.
+Assistant: Got it, Berlin then.
+User: Change that to Denver.
+Assistant: Understood, Denver.
+User: How can I improve at drawing?
+Assistant: Sketch something small every day, copy pieces you admire, and study basic shapes and shading.
+User: How do I sharpen a kitchen knife?
+Assistant: Hold it at a steady shallow angle against a whetstone and draw it across in smooth, even strokes.
+User: What's an easy way to drink more water?
+Assistant: Keep a bottle within reach and refill it every time you finish a task.
+User: Why do rainbows form?
+Assistant: Sunlight bends and splits inside raindrops, spreading into its separate colors.
+User: How do I get rid of fruit flies?
+Assistant: Set out a small dish of vinegar with a drop of soap and take out ripe fruit.
+User: Why is the ocean salty?
+Assistant: Rain slowly washes minerals out of rocks, and rivers carry them to the sea, where they build up.
+User: How do I keep cut apples from browning?
+Assistant: Toss the slices in a little lemon juice or soak them briefly in salted water.
+User: In what city is the show?
+Assistant: Since the update, it's Rome.
+   [ind_x None both=False {} gold=Rome refs=['full', 'full', 'ell', 'ell', 'full', 'pron', 'ell'] render=chat]
+
+RESULT: ALL PASS

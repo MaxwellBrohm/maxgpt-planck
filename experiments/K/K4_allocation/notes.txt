@@ -1,0 +1,109 @@
+K4: allocation. At fixed total parameters, does moving parameters from the MLP to attention heads raise in-context
+skill, and what does it cost in stored facts? (P-152)
+RTX 5070 (PC) only, one GPU job at a time. The Mac runs no model. World, mix, metrics, rule KR, seeds and hours:
+../SPEC.txt (SPEC n); base arm: ../K1_capacity/notes.txt (FH).
+
+PRE-REGISTRATION WRITTEN 2026-09-27 01:20 (before any K code, data, config or run exists. Run for this entry, no
+model: harness/budget.py count_analytic for the four shapes below. Nothing of K is queued or committed.)
+
+WHY
+  If skills live in attention and facts in MLPs, a Planck model should shift parameters toward attention. The fact
+  side is mostly known: Physics 3.3 (https://arxiv.org/abs/2404.05405, Results 5-7) finds a 1/4-size MLP has
+  "negligible impact" and removing all MLPs leaves capacity unchanged at 1000 exposures but costs more than 1.5x at
+  100 exposures, the regime K runs in (capacity.md). Attention stores facts too (arch.md F3: context-constrained
+  in-weights learning in 2-layer attention-only models, https://arxiv.org/abs/2503.05631). Loss is U-shaped in the
+  MLP/attention ratio r with an interior optimum near 1.03-1.06, fitted on 80M-297M and applied at 1B/3B (Bian et
+  al., https://arxiv.org/abs/2510.18245). TinyStories reports, anecdotally, that facts lean on width and context
+  tracking on depth (https://arxiv.org/abs/2305.07759). No published work scores the ratio on in-context skill and
+  fact accuracy at matched total parameters (arch.md U4; localize.md 3.2 (e)).
+
+QUESTIONS
+  Q1 At 5,010,133 +- 2% total parameters, fixed width d 192 and depth 8, does trading SwiGLU width for heads change
+     S_ID and stored fact bits on K1's FH mix?
+  Q2 (reported) Where is the frontier (S_ID against stored bits), and does bpb follow Bian et al.'s U-shape?
+
+THE ONE MANIPULATION
+  (n_heads, mlp_hidden), with d, depth, head_dim 64, n_kv_heads = n_heads, every block flag, the data (K1 FH's files)
+  and the schedule fixed. Shapes, count_analytic (harness/budget.py), 2026-09-27; m = SwiGLU width / d; r = MLP
+  params / attention projection params (W_q, W_k, W_v, W_o):
+    BASE  3 heads, SwiGLU 488, m 2.54, r 1.91   5,010,133            = K1 FH (its seed runs are reused)
+    H4    4 heads, SwiGLU 400, m 2.08, r 1.17   4,999,381  (-0.21%)
+    H6    6 heads, SwiGLU 232, m 1.21, r 0.45   5,014,741  (+0.09%)
+    H7    7 heads, SwiGLU 144, m 0.75, r 0.24   5,003,989  (-0.12%)
+  The asked grid (m 8/3, 2, 1.33, 0.67) is not reachable exactly with whole heads at fixed d and depth; these are the
+  nearest points (5 heads would give m 1.67). Depth stays fixed so the one change is the MLP-to-heads split: putting
+  the freed budget into layers moves depth, init scale and norm scaling together, which is why SCREENS dropped S008
+  and left depth to E9. Attention width h x 64 exceeds d from 4 heads up (256-448 vs 192); that is part of the arm.
+
+PER-ARM LEARNING RATE (PLAN 5 and SCREENS C3: a shape bet gets its own LR)
+  Each new shape: g in {0.5, 1, 2} x LR5 (ratio r_5 kept), the FH mix, 125M full schedule, seed 200, picked exactly
+  as K0-g (argmin K-DEV NLL, ties to the lower LR, one extension beyond an edge if the cap allows). BASE's g_K comes
+  from K0-g, the same protocol, so all four are picked alike. If K0-g carries LENGTH-RISK, so does K4.
+  New modules: none; every parameter is an existing matrix at its harness init and LR group.
+
+ARMS AND SEEDS
+  H4, H6, H7 at their picked g, seeds 201-203, B = 250.0M, FH mix. BASE = K1 FH, seeds 201-203 (same data files).
+  Class: new init (SCREENS C4): a different shape draws different init values, so pairs share data streams but not
+  init, and the bpb check uses sqrt(2) x sigma_init from E3 (SPEC 10).
+
+READINGS (KR, SPEC 10; per arm vs BASE; SD_ref per metric pooled over the three arms' residuals, df 6)
+  Skill on S_ID (delta 3 points): SKILL-UP (HIGHER), SKILL-DOWN (LOWER), SKILL-EQUAL, else skill UNRESOLVED.
+  Facts on expressed stored bits (delta 10% of BASE's mean): FACT-UP, FACT-DOWN, FACT-EQUAL, else UNRESOLVED.
+  Fact wording [K4-a]: the fact labels speak of storage of the fixed FH load. They speak of capacity only if BASE
+  stores less than 0.7 x FH's nominal value bits on every seed (the load then exceeds what BASE stores); otherwise
+  each fact label carries LOAD-BELOW-CAPACITY and a FACT-EQUAL does not show equal capacity.
+  Per arm, the pair of labels, and:
+    TRADE       SKILL-UP and FACT-DOWN: heads buy in-context skill at a fact cost. For Planck, where facts are meant
+                to live outside, this is the favourable direction, and the arm is nominated for a 20-30M check.
+    FREE-SKILL  SKILL-UP and FACT-EQUAL: nominated.
+    COSTLY      SKILL-EQUAL or SKILL-DOWN with FACT-DOWN: heads do not buy skill here.
+    NEUTRAL     SKILL-EQUAL and FACT-EQUAL.
+  A nomination is a 5M reading only; PLAN 3's adoption rule (hold at 20-30M, survive 3f) applies, and a
+  GENERAL-LANGUAGE COST label travels with it. Prior stated now: FACT-DOWN is expected at H7 (Physics 3.3's
+  more-than-1.5x at 100 exposures with no MLP; H7 keeps 30% of BASE's MLP width).
+  Monotone check (reported): S_ID and stored bits against r across BASE, H4, H6, H7.
+
+K4b (conditional, SPEC 13 order)
+  BASE shape, K1 FH mix, g_K, with the MLP matrices' weight decay x4 (0.4 instead of 0.1, cautious; attention,
+  embeddings and scalars unchanged). Singh et al. (https://arxiv.org/abs/2311.08360): weight decay on MLP layers kept
+  ICL from fading, on attention did not; Anand et al. (https://arxiv.org/abs/2406.00053): L2 did not keep structural
+  ICL. Seeds 201-203, KR vs K1 FH on S_ID and stored bits, class same init (E3 rule 1 lists weight decay). Needs the
+  per-group weight-decay flag (SPEC 14). A training-choice twin of shrinking the MLP (arch.md A6).
+
+EXTRA REPORTS (descriptive)
+  1 Per arm: per-family LIK, OOD columns, CONFLICT rates, QA-held extraction, TRANSIENT labels (K1's rule).
+  2 bpb CHAT and PROSE per arm against r (Bian's U-shape at 5M, loss only; K4 decides on accuracies).
+  3 tok/s per shape (the attention share of compute rises with heads) and the clip rate (SCREENS C5).
+  4 The g table per shape (does the LR optimum move with the head count?).
+
+KNOWN RISKS
+  - Facts are also stored in attention (arch.md F3), so shrinking the MLP cannot starve fact storage by itself;
+    a FACT-EQUAL at H7 is possible and would say where facts go at 5M.
+  - Init scale moves with the shape [K4-b]: model.py draws every linear at one init_std and W_o and W_down at
+    init_std / sqrt(2 x depth), so the attention sublayer's output variance at init grows with its fan-in h x 64
+    (7/3 of BASE at H7) and the MLP's shrinks with its width (144/488 at H7). Part of the arm, like the width.
+  - More heads also means a wider attention (h x 64 > d): the arm changes attention width and head count together;
+    a head_dim change instead would move RoPE and QK-norm geometry, a worse confound.
+  - At about 100 exposures the MLP-sensitive regime inflates any fact cost relative to the 1000-exposure ceiling.
+  - 125M g-checks applied to 250M runs (LENGTH-RISK).
+  - df 6 from three arms' residuals mixes noise across shapes; a shape much noisier than the others inflates every
+    threshold (each arm's own residual SD is reported).
+  - bpb is not behaviour (SCREENS, citing research/lanes/arch.md 1.4); Bian's optimum is on loss, at 1B/3B.
+
+DEPENDENCIES
+  K0 (g_K, the pick protocol), K1 FH seeds 201-203 (the BASE arm, same files), E3 (sigma_init for the bpb check).
+  No new harness code for H4-H7 (shape keys only; the C2 generator diff allows n_heads, n_kv_heads, mlp_hidden).
+  K4b needs a per-group weight-decay flag with tests (default off, bit-identical off).
+
+GPU HOURS (SPEC 13): 4.73 = 3 shapes x (3 x 125M g-check + 3 x 250M) x 0.31-per-250M x 1.13 (assumed attention
+  overhead; the smoke of each shape replaces it); K4b 0.93 if reached under the cap.
+
+CHANGES AFTER CRITIQUE (2026-09-27, adversarial critic; no model loaded. Run: the per-layer parameter arithmetic
+  of the four shapes, which reproduces count_analytic's totals and r values above)
+  Depth and d are fixed, so the MLP-ratio change does not move depth or residual width. It does move attention width
+  (h x 64), attention FLOPs per token and the init scale of both sublayers.
+  K4-a A FACT-EQUAL at a load below every shape's capacity says nothing about capacity; the fact labels now say
+     storage unless BASE is visibly capacity-limited.
+  K4-b The init-scale change with head count and MLP width is named as part of the arm.
+  Suggested, not applied (should): report analytic FLOPs per token per shape beside tok/s, since the arms are equal
+  in parameters and tokens but not in compute.

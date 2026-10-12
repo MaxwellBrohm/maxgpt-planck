@@ -1,0 +1,14 @@
+{
+ "name": "C1t",
+ "command": "~/planck/venv-hf/bin/python -B e006_ft_test.py HuggingFaceTB/SmolLM2-135M-Instruct --bs 4 --accum 4 --max-len 768 --grad-ckpt --arm C --seed 1 --lr 1.5e-04 --tf32 --sets eval,big,h5l --chat --save 1 --tag C1t",
+ "ceiling_s": 14400.0,
+ "killed": null,
+ "verdict": null,
+ "start": "2026-09-28 13:40:31",
+ "end": "2026-09-28 14:01:27",
+ "elapsed_s": 1256.3,
+ "exit": 0,
+ "peak_temp_c": 61.0,
+ "peak_gpu_mem_mib": 7713.0,
+ "weights_sha256": "3c892fa5ea6f534ab1f32d84996a52368892e795073cb56e85cba72429349b4d"
+}

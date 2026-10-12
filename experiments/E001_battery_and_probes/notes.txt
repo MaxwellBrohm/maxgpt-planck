@@ -1,0 +1,252 @@
+E001: battery fixes, correction controls, and probes on new models
+Date: 2026-09-24, runs 00:51-06:15. Mac M5 24 GB, one model process at a time through code/guard.py.
+Scope: REPORT 7.3 step 1 (subset) and step 2 a, b, e. Nothing under research/ was modified.
+
+WHAT CHANGED
+
+1. Likelihood battery: new control items (code/items_new.py)
+   Two item families (a dentist-appointment weekday, a new-car colour), 32 scenarios x d0/d4/d10
+   each, all variants built from the SAME random draw per scenario so they are paired:
+     same_k1/k2/k3  identical wording in the original and every correction (U_same), original in turn 1
+     pos            same_k1 with 3 unrelated exchanges before the original (position control)
+     keyorig        the answer key ("dentist appointment is on" / "color of my new car is") only in the original
+     keycorr        the key only in the correction (key-in-correction item)
+     neutral        keyorig wording with a question/prefix that shares no key n-gram ("That would be")
+     noupd          no-update twin of same_k1: the second statement is about another object (haircut / bike);
+                    gold = the original value
+     twoslot        same_k1, then another object's value comes last; gold = the corrected value
+   Paired metrics: upd_bind (same_k1 AND noupd), key_pair (keyorig AND keycorr), all5 (same_k1, noupd,
+   twoslot, keyorig, keycorr all right). Every item is rendered twice: plain "User:/Assistant:" (as the
+   old battery) and in the model's own chat template (format control). 1,728 items per render.
+   Scorer (code/lik.py) = the old scorer; it reproduces the old SmolLM2-135M-I scores to ~1e-6.
+
+   Item tests (code/validate_items.py, code/mutation_test_items.py):
+   - structural validators: no candidate value in the question or answer prefix, every candidate in
+     context, one statement per value, mention order, key placement per variant, 3 leading fillers in
+     pos, exactly d exchanges after the last statement, no filler mentions any value;
+   - five oracle "models" score every item from its text: first-mentioned, last-mentioned, key-matcher,
+     ideal, and an empty scorer that ties everything. Each lands exactly where the design says
+     (e.g. first-mentioned and last-mentioned both score 0 on upd_bind and all5; the key-matcher scores
+     0 on keyorig and 1 on keycorr; the empty scorer scores 0 everywhere because ties fail);
+   - 12 mutants (ties counted as right, gold compared only with the original, margin sign flipped,
+     a pair metric dropping the twin, noupd gold swapped, key in both statements of keycorr, gold leaked
+     into the question, pos without leading fillers, a filler carrying a value, twoslot's other object
+     keyed, a short tail, same_k1 gold set to the original): 12 of 12 killed.
+   - The old battery and khard items were also checked: 0 questions contain their own answer word.
+
+2. Chat-probe graders hardened (code/battery.py, copied from research/probe/battery.py; conversations unchanged)
+   - negation ("not", "n't", "never", "no longer", "without", "prevents", "avoid", "instead of", "rather than")
+   - questions (a gold inside a sentence ending in "?")
+   - guess lists: an "or" whose other side offers a capitalized word or a number ("Priya, Maria, or Anna",
+     "417 or 420", "3 pm, or 4 pm"); bare values on bullet lines in a reply with 3+ list lines;
+     plain enumerations ("burns, injuries, or even death") and labelled lines ("Apartment Number: 417") still count
+   - hedges ("maybe", "perhaps", "probably", "might", "could be", "not sure") and reply-level uncertainty
+     ("I'm not sure", "I don't know") on user-fact checks
+   - hypotheticals: examples ("for example", "e.g.", "such as") to the end of the sentence; conditionals
+     ("if", "suppose") up to the next comma or "then", so "If it moved to 4 pm, you should arrive at 4 pm" passes
+   - perspective: the nearest person marker before the gold decides ("You told me my name was Priya" fails,
+     "You told me your name is Priya" passes); fallback rule only for identity/possessive first person
+   - incidental numbers: any other asserted 2+ digit number fails a numeric answer ("building 417 is 12345"),
+     numbers the user gave are allowed, list markers ignored; units make a number incidental ("12 minutes")
+   - K_time: gold and stale are time expressions ("4 pm", "4:00", "at 4"); list numbering and "4 minutes" no longer count
+   - both values asserted in a correction reply: pass only if the reply ends on the corrected value AND it sits in
+     a change phrase ("moved to", "now", "actually", "the correct day is"); "was", "originally", "changed from"
+     mentions of the stale value are fine
+   - deflection phrases the audit found missing ("I don't have specific information", "could you share/tell me")
+   - truncation: a check decided by how a reply ENDS (end-with-a-question) is ungradable when the reply hit
+     the token cap; content checks keep their fail (and the number of fails on capped replies is reported)
+   - first person: "I <verb>" binds the fact to the speaker ("I live in Tucson", "I felt bored"), except
+     cognition, speech and modal verbs ("I remember", "I think", "I told you", "I would")
+   Tests: 591 self-test assertions (was 256), including adversarial fixtures built from the audit's real
+   false passes and legitimate variants that must pass. On the first 214 adversarial fixtures written, the
+   ORIGINAL graders passed 204; the hardened graders pass none. Mutation test: 43 mutants (the original 14,
+   one per new rule, one per false-fail fix), 43 killed, none by crash.
+   Known limits: a reply that restates the fact while ignoring the question ("Tucson is a lovely city")
+   still passes; Qwen3-0.6B's K_time "If the meeting was originally scheduled for 3 PM, and it was moved
+   to 4 PM, then ... confirm the new time" passes (the comma rule reads the second clause as main), which
+   matches the audit's hand call but is borderline.
+
+   Regrade check: on the 8 models' existing greedy transcripts the hardened graders match the audit's
+   hand regrade within 0.01 for 7 of 8 (set A: Falcon 0.46, LFM2-350M 0.59 vs 0.60, LFM2.5 0.62,
+   SmolLM2-360M 0.57, Qwen2.5 0.60, Qwen3 0.71; SmolLM2-135M 0.11 = set B). Gemma is 0.36 vs 0.31 because
+   a reply that restates the fact without answering still passes. All greedy flips were read; sampled
+   flips were counted but not all read. Three fail-to-pass flips remain, all borderline (listed in
+   chat_results.json "flips").
+
+3. Runner and safety (code/guard.py, code/queue_e001.sh, code/queue_e001b.sh)
+   One model process at a time; each job preflights (no other model job, LM Studio unloaded, ollama
+   empty), waits for >= 35% free memory, runs with PYTORCH_MPS_HIGH/LOW_WATERMARK_RATIO 0.7/0.6,
+   low_cpu_mem_usage, and is killed on its wall-clock ceiling, < 15% free memory or > 768 MB swap growth.
+   Dry runs (2-60 items) preceded every model type. No job was killed by the guard. Lowest free memory
+   in any job: 32% (free memory fell from 77% to 32% during Falcon-90M generation on MPS);
+   swap stayed at 0 MB throughout. One job was stopped BY HAND (see "What failed").
+
+RUNS
+   Likelihood battery, new items (plain + own chat template, 3,456 scorings each):
+     SmolLM2-135M-I, Gemma3-270M-it, LFM2-350M, LFM2.5-350M, SmolLM2-360M-I, Qwen2.5-0.5B-I, Qwen3-0.6B
+     (fp32, MPS); LFM2.5-230M, LFM2-700M, LFM2-1.2B (fp32, MPS; also old items + khard); Falcon-90M-I
+     (fp32, CPU, old items + khard too); MaxGPT-3 final.pt and final_sft.pt (fp32, MPS, plain and its own
+     USER:/ASSISTANT: format, old items + khard too). Extras: LFM2-2.6B (bf16, new items), SmolLM2-135M base
+     (plain only, it has no chat template).
+   Chat probe (53 conversations, greedy + sampled seeds 0 and 1): LFM2.5-230M (MPS) and Falcon-90M (MPS).
+   HF ids checked on the Hub: LiquidAI/LFM2.5-230M is the instruction-tuned model (the base is
+   LiquidAI/LFM2.5-230M-Base); card sampling T 0.1, top_k 50, repetition penalty 1.05.
+   Reproducibility: my scorer reproduces the old SmolLM2-135M-I battery scores to ~1e-6; Falcon greedy
+   transcripts reproduce the old run 149 of 149 replies, and sampled seed 0 149 of 149 (seed 1 is new).
+
+RESULTS: CHAT PROBE (hardened graders; macro over 7 multi-turn categories; old graders in brackets)
+   greedy                 recall follow instr  corr  own   role  topic  macro        deflect (final user-fact turns, multi-turn)
+   Falcon-90M             0.20   0.57   0.33   0.33  0.75  0.33  0.67   0.46 [0.49]  0/15
+   SmolLM2-135M           0.10   0.29   0.36   0.00  0.00  0.00  0.00   0.11 [0.15]  3/15
+   LFM2.5-230M (new)      0.20   1.00   0.86   0.00  0.75  0.00  0.33   0.45 [0.45]  10/15
+   Gemma3-270M            0.00   0.86   0.50   0.00  0.50  0.00  0.67   0.36 [0.36]  7/15
+   LFM2-350M              0.40   1.00   0.92   0.00  0.50  0.33  1.00   0.59 [0.65]  2/15
+   LFM2.5-350M            0.60   1.00   1.00   0.00  0.75  0.00  1.00   0.62 [0.62]  7/15
+   SmolLM2-360M           0.70   0.86   0.79   0.00  0.67  0.33  0.67   0.57 [0.57]  4/15
+   Qwen2.5-0.5B           0.10   0.86   0.57   0.00  1.00  0.67  1.00   0.60 [0.60]  10/15
+   Qwen3-0.6B             0.60   1.00   0.71   0.67  1.00  0.00  1.00   0.71 [0.71]  3/15
+   Sampled (2 seeds): Falcon 0.52 [0.56], LFM2.5-230M 0.50 [0.49]; the others as in logs/tables_chat.txt.
+   LFM2.5-230M: follow-ups and instructions are at the 350M level, but it deflects on 10 of 15 multi-turn
+   user-fact questions ("I'm a language model and don't have personal information about you"), tied with
+   Qwen2.5-0.5B for the highest rate. The fact is still there: from a forced answer prefix the gold beats a
+   never-seen foil on 7 of 7 recall items and greedy decoding emits it on 4 of 7. It fails all 3
+   corrections, both role items, and speaks as the user in RI_identity ("As a chef in a busy restaurant,
+   my primary role is ..."). Falcon's new sampled seed 1 moves its sampled macro from 0.49 to 0.52.
+   Hardening moved the greedy macros of LFM2-350M by -0.06, SmolLM2-135M -0.04, Falcon -0.03, the rest 0.00.
+
+RESULTS: LIKELIHOOD BATTERY, NEW CONTROL ITEMS
+   Accuracy = gold strictly above every other in-context candidate. d4 and d10 pooled, both families,
+   n = 128 per cell (64 per cell at d0). Chance: 0.50 for 2 candidates, 0.33 for 3, pairs 0.25, all5 ~0.02.
+
+   plain transcript, d4-d10   same_k1 pos   keyorig keycorr noupd twoslot | upd+noupd all5
+   Falcon-90M-I               0.39    0.62  0.52    0.34    0.71  0.22    | 0.10      0.02
+   SmolLM2-135M base          0.02    0.20  0.00    0.41    1.00  0.05    | 0.02      0.00
+   SmolLM2-135M-I             0.00    0.18  0.00    0.67    1.00  0.01    | 0.00      0.00
+   LFM2.5-230M                0.00    0.08  0.00    0.35    1.00  0.00    | 0.00      0.00
+   MaxGPT-3 base              0.42    0.50  0.13    0.90    0.72  0.30    | 0.14      0.00
+   MaxGPT-3 SFT               0.36    0.46  0.09    0.81    0.84  0.26    | 0.20      0.00
+   Gemma3-270M-it             0.00    0.20  0.00    0.58    1.00  0.00    | 0.00      0.00
+   LFM2-350M                  0.14    0.41  0.02    0.56    0.98  0.12    | 0.12      0.02
+   LFM2.5-350M                0.00    0.27  0.00    0.60    1.00  0.01    | 0.00      0.00
+   SmolLM2-360M-I             0.00    0.33  0.00    0.35    1.00  0.02    | 0.00      0.00
+   Qwen2.5-0.5B-I             0.01    0.27  0.17    0.09    1.00  0.00    | 0.01      0.00
+   Qwen3-0.6B                 0.27    0.83  0.00    0.52    1.00  0.22    | 0.27      0.00
+   LFM2-700M                  0.30    0.52  0.13    0.38    0.93  0.20    | 0.23      0.04
+   LFM2-1.2B                  0.00    0.25  0.00    0.41    1.00  0.00    | 0.00      0.00
+   LFM2-2.6B (bf16)           0.73    0.88  0.56    1.00    1.00  0.55    | 0.73      0.32
+
+   own chat template, d4-d10  same_k1 pos   keyorig keycorr noupd twoslot | upd+noupd all5
+   Falcon-90M-I               0.02    0.41  0.00    0.61    1.00  0.07    | 0.02      0.00
+   SmolLM2-135M-I             0.04    0.20  0.02    0.59    0.99  0.07    | 0.03      0.00
+   LFM2.5-230M                0.00    0.14  0.00    0.25    1.00  0.00    | 0.00      0.00
+   MaxGPT-3 base (USER:)      0.29    0.54  0.09    0.88    0.81  0.19    | 0.10      0.01
+   MaxGPT-3 SFT (USER:)       0.23    0.41  0.01    0.79    0.85  0.14    | 0.08      0.00
+   Gemma3-270M-it             0.00    0.28  0.00    0.94    1.00  0.01    | 0.00      0.00
+   LFM2-350M                  0.15    0.39  0.01    0.65    0.98  0.12    | 0.12      0.00
+   LFM2.5-350M                0.00    0.21  0.00    0.20    1.00  0.00    | 0.00      0.00
+   SmolLM2-360M-I             0.04    0.62  0.00    0.44    1.00  0.06    | 0.04      0.00
+   Qwen2.5-0.5B-I             0.02    0.29  0.08    0.41    1.00  0.02    | 0.02      0.01
+   Qwen3-0.6B                 0.16    0.77  0.02    0.24    0.98  0.19    | 0.13      0.01
+   LFM2-700M                  0.24    0.62  0.09    0.62    0.92  0.21    | 0.16      0.01
+   LFM2-1.2B                  0.02    0.09  0.04    0.56    1.00  0.01    | 0.02      0.01
+   LFM2-2.6B (bf16)           0.97    1.00  0.84    1.00    0.99  0.93    | 0.96      0.79
+
+   d0 (correction is the last exchange), same_k1 / keyorig, plain vs chat:
+     Falcon 0.42/0.48 vs 0.78/0.09; SmolLM2-135M-I 0.69/0.11 vs 0.80/0.03; LFM2.5-230M 0.14/0.20 vs 1.00/0.55;
+     Gemma 0.77/0.06 vs 0.72/0.00; LFM2-350M 0.22/0.06 vs 0.66/0.17; LFM2.5-350M 0.72/0.45 vs 0.97/0.95;
+     SmolLM2-360M-I 1.00/0.98 vs 1.00/0.91; Qwen2.5 1.00/1.00 vs 1.00/1.00; Qwen3 0.95/0.52 vs 1.00/0.66;
+     LFM2-700M 1.00/0.55 vs 0.92/0.73; LFM2-1.2B 0.39/0.72 vs 0.94/0.97; LFM2-2.6B 1.00/1.00 vs 1.00/1.00.
+   twoslot at d0 (only a filler and the other object's statement after the correction) already fails in
+   every instruct model below 2.6B (0.00-0.39), mostly by picking the ORIGINAL, not the latest value
+   (MaxGPT-3 0.53-0.58, LFM2-2.6B 0.52 plain / 0.83 chat).
+   U_same k = 1/2/3 at d4, plain: every sub-1B instruct model 0.00-0.44 at k=1 and 0.00-0.22 at k=2-3;
+   LFM2-2.6B 0.80/0.83/0.59.
+
+RESULTS: OLD BATTERY ITEMS ON THE NEWLY PROBED MODELS (REPORT 3.3 columns; pair chance 0.25)
+                     owner pair@10 one-hop pair@10 two-hop all-d persp pair@10 latest-wins@4-10 K closed khard closed/open
+   Falcon-90M-I      0.47          0.34            0.58         0.28           0.01             0.83     0.78 / 1.00
+   LFM2.5-230M       0.44          0.56            0.66         0.03           0.00             0.92     0.88 / 1.00
+   LFM2-700M         0.88          0.97            0.92         0.50           0.04             0.98     0.90 / 1.00
+   LFM2-1.2B         0.44          0.66            0.73         0.84           0.00             0.98     0.95 / 1.00
+   MaxGPT-3 base     0.03          0.12            0.48         0.12           0.09             0.60     0.68 / 1.00
+   MaxGPT-3 SFT      0.06          0.12            0.51         0.12           0.06             0.62     0.68 / 1.00
+   (for comparison, from research/: LFM2-350M 0.34 0.34 0.66 0.09 0.11; LFM2-2.6B 1.00 1.00 0.94 0.97 0.72)
+   The LFM2 ladder is not monotonic: 700M beats 1.2B on owner binding (0.88 vs 0.44), one-hop (0.97 vs
+   0.66) and new same_k1 (0.30 vs 0.00); only 2.6B updates. 1.2B's knowledge items are normal (0.98,
+   0.95/1.00), so the run itself looks healthy. One seed and one checkpoint per size: treat as a lead.
+
+MAXGPT-3 (235M, from scratch, final.pt step 2,440,000 and final_sft.pt step 300,000)
+   Adapter: code/maxgpt3.py reads the repo's model.py, tokenizer.py and checkpoints (mmap, weights only),
+   manual attention (the checkpoint's sdpa kernel list has no MPS/CPU kernel), right-padded batches.
+   Its byte BPE has no pre-tokenization (" Monday" alone is " M"+"on"+"day" but "on Monday" is
+   "on "+"Mon"+"day"), so candidates are scored on the CANONICAL tokenization of prompt + candidate after
+   the longest shared prefix (compares log P(prompt + candidate)). Longest prompt 611 tokens < 1024.
+   Binding: at or below chance (owner pair 0.03-0.06, one-hop 0.12, perspective 0.12, two-hop 0.48-0.51),
+   i.e. a first-mentioned heuristic; closed-book knowledge barely above chance (0.60 common, 0.68 long-tail);
+   reading works (open book 1.00). Its same_k1 0.36-0.42 is NOT updating: margins are near zero
+   (-0.18 nats), noupd is only 0.72-0.84, the pair metrics are at or below the 0.25 coin-flip level and
+   all5 is 0.00. It is less committed to the first value than the instruct models, not better at updates.
+   SFT changed almost nothing on these items. Own format vs plain: no gain.
+
+WHAT THE CONTROLS SHOWED ABOUT THE CORRECTION FAILURES
+   1. Genuine first-value-wins: yes, in every sub-1B instruct model tested (11 models, 5 families, both item
+      families). With identical wording (keys equal), after 4 or 10 unrelated exchanges the original beats
+      the correction: same_k1 0.00-0.24 in each model's own template, 0.00-0.30 in plain transcripts
+      (Falcon's plain 0.39 is near chance, see 4). The no-update twin passes (0.92-1.00 in the template) and,
+      with three candidates, twoslot picks the original 0.77-1.00 of the time (plain; Falcon 0.53), so this
+      is primacy among matching statements, not "latest wins" and not noise. Mean margins are large
+      (-1.9 to -6.4 nats; Qwen3 -0.8, LFM2-700M -0.9, Falcon plain -0.6).
+   2. Key match: a strong modulator, not the whole story. Moving the key from the original to the
+      correction (keycorr - keyorig, plain) adds +0.25 to +0.77 in 12 of 14 sub-1B models (Qwen2.5 -0.08,
+      Falcon plain -0.18), but keycorr stays at 0.09-0.67 in the instruct models: even when only the
+      correction matches the question, they still pick the original a third to nine tenths of the time. The key effect is item-family
+      dependent (Gemma keycorr: day 0.17, colour 0.98; LFM2-1.2B: day 0.70, colour 0.12). The old main U
+      items were confounded exactly as the review said: keyorig reproduces their d0 failures.
+   3. Position: partly. Putting 3 exchanges before the original (pos - same_k1) adds +0.08 to +0.56; Qwen3
+      goes 0.27 -> 0.83 and Falcon/LFM2-700M reach 0.5-0.6, but most models stay at 0.1-0.4. So turn 1 is
+      privileged, and "first among matches" survives when the original is not the first turn.
+   4. Format: not at distance, yes at d0. Own chat template vs plain changes same_k1 at d4-d10 by -0.11 to
+      +0.04 in the sub-1B instruct models (Falcon -0.38: plain Falcon is near chance, templated Falcon is a
+      clean first-value-wins model). At d0 the template rescues LFM2.5-230M (0.14 -> 1.00), LFM2-350M
+      (0.22 -> 0.66) and LFM2-1.2B (0.39 -> 0.94), so part of the "fails even at d0" finding was format; the
+      rest (SmolLM2-135M-I, Qwen3, LFM2.5-350M) was the key confound (their same_k1 at d0 is 0.69-0.95).
+   5. The bar is reachable: LFM2-2.6B in its template scores same_k1 0.97, noupd 0.99, twoslot 0.93, all5
+      0.79. The controls separate a model that updates from one that does not, and the template matters
+      for it (plain all5 0.32).
+   Net: the correction failure below 1B is real primacy among statements that match the question, amplified
+   by key overlap and by turn-1 position, and it sets in within 1-2 intervening exchanges (twoslot at d0).
+   Base vs instruct at 135M is the same (base same_k1 0.02 vs 0.00), so SFT/DPO neither caused nor fixed it.
+
+WHAT FAILED OR NEEDS A CAVEAT
+   - Falcon's first CPU battery job was too slow (~1.4 s per item at d0, RSS 4.2 GB, on course to exceed its
+     4 h ceiling). I stopped the queue and that job by hand at 04:35, wrote a batch-1 shared-prompt scorer,
+     verified it against the original scorer on 60 Falcon items in one process (max |diff| 1.5e-5 nats,
+     0 decision flips, logs/check_shared.json), and reran Falcon with it (48 + 24 min). The partial output
+     of the stopped job was discarded. Only Falcon used this scorer (meta "scorer": "shared").
+   - Falcon's "MPS crash on the Mamba path" in REPORT could not be confirmed: the saved logs show a
+     watermark configuration error (khard) and a skipped job, not a crash. Its chat probe ran on MPS
+     (as before); its likelihood battery ran on CPU as asked.
+   - LFM2-2.6B ran in bf16 (as in the original battery); every other model fp32. LFM2-700M and LFM2-1.2B
+     weights were moved to the macOS Trash after their runs (not deleted) to keep new downloads under 4 GB;
+     LFM2.5-230M (0.46 GB) is kept in the HF cache.
+   - The chat probe for LFM2.5-230M and Falcon uses the same token caps as before (120/160); content fails on
+     capped replies are counted as fails and reported (Falcon: 20 greedy, 33 sampled).
+   - Grader limits still open: restating the fact without answering passes (T_dragon style); conditionals
+     are scoped by commas, which lets Qwen3's K_time pass (matches the audit's call).
+   - Each new-item cell has n = 64-128 from one fixed item seed; family differences are large, so read
+     small differences (< ~0.1) as noise. No new model beyond these was loaded; nothing was fine-tuned.
+   - Another process edited research/ during this run: lanes/compute.md at 00:31, and about 19 markdown files
+     (REPORT.md, CRITIQUE.md, lanes/*, followup/*) at 01:09-01:10. E001 wrote nothing under research/ (it
+     only read files and imported research/probe/battery.py with bytecode writing off).
+
+FILES (all under experiments/E001_battery_and_probes/)
+   code/items_new.py, validate_items.py, mutation_test_items.py, metrics.py   new items, validators, scorer rules
+   code/battery.py, mutation_test_graders.py                                  hardened chat graders + tests
+   code/lik.py, run_battery.py, check_shared.py, maxgpt3.py                   scorer, runner, adapter
+   code/run_chat.py, analyze_chat.py, analyze_battery.py, make_results.py     chat runner and analysis
+   code/guard.py, queue_e001.sh, queue_e001b.sh                               memory guard and run queues
+   out/*.jsonl            raw likelihood scores (one file per model x item set x render; out/dry = dry runs)
+   transcripts/*.jsonl    chat-probe transcripts (LFM2.5-230M, Falcon; greedy and sampled)
+   battery_results.json   full likelihood summaries; chat_results.json full chat regrades incl. every flip
+   results.json           summary + self-test results + every guard verdict
+   logs/                  job logs, guard samples and verdicts, queue.txt, tables_battery.txt, tables_chat.txt

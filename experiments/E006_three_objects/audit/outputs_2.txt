@@ -1,0 +1,101 @@
+######## python a5_know_cost_device.py pc_exposure.out
+K unexposed (n 425): +0.057, CI +0.032 to +0.084 -> REDUCES THE COST
+K all 441: +0.056, CI +0.031 to +0.083; loose-unexposed (n 352): +0.057, CI +0.029 to +0.087
+accuracy all 441: base 0.848 C 0.773 G 0.829 P 0.776 e005w 0.773
+  G1 vs base: gained 15 lost 23 McNemar p 0.2559
+  G2 vs base: gained 7 lost 21 McNemar p 0.0125
+  G3 vs base: gained 11 lost 18 McNemar p 0.2649
+  G4 vs base: gained 10 lost 14 McNemar p 0.5413
+  G5 vs base: gained 4 lost 13 McNemar p 0.0490
+  broad exposure [pool, gold anywhere]: 180 exposed; K on the other 261: +0.057, CI +0.023 to +0.093; K on exposed: +0.056, CI +0.026 to +0.089 (missing ids 0)
+  broad exposure [pool, gold + entity in one thread]: 63 exposed; K on the other 378: +0.059, CI +0.030 to +0.089; K on exposed: +0.041, CI +0.006 to +0.092 (missing ids 0)
+  broad exposure [s1, gold anywhere]: 115 exposed; K on the other 326: +0.055, CI +0.024 to +0.087; K on exposed: +0.061, CI +0.023 to +0.104 (missing ids 0)
+  broad exposure [s1, gold + entity in one thread]: 25 exposed; K on the other 416: +0.056, CI +0.030 to +0.084; K on exposed: +0.056, CI +0.000 to +0.152 (missing ids 0)
+  broad exposure [s2, gold anywhere]: 131 exposed; K on the other 310: +0.052, CI +0.020 to +0.085; K on exposed: +0.067, CI +0.032 to +0.108 (missing ids 0)
+  broad exposure [s2, gold + entity in one thread]: 28 exposed; K on the other 413: +0.055, CI +0.029 to +0.083; K on exposed: +0.079, CI +0.007 to +0.186 (missing ids 0)
+  broad exposure [s3, gold anywhere]: 122 exposed; K on the other 319: +0.055, CI +0.024 to +0.088; K on exposed: +0.061, CI +0.023 to +0.103 (missing ids 0)
+  broad exposure [s3, gold + entity in one thread]: 36 exposed; K on the other 405: +0.058, CI +0.031 to +0.086; K on exposed: +0.039, CI +0.000 to +0.106 (missing ids 0)
+  broad exposure [s4, gold anywhere]: 120 exposed; K on the other 321: +0.053, CI +0.024 to +0.083; K on exposed: +0.065, CI +0.027 to +0.110 (missing ids 0)
+  broad exposure [s4, gold + entity in one thread]: 28 exposed; K on the other 413: +0.057, CI +0.031 to +0.084; K on exposed: +0.050, CI +0.000 to +0.136 (missing ids 0)
+  broad exposure [s5, gold anywhere]: 124 exposed; K on the other 317: +0.051, CI +0.021 to +0.083; K on exposed: +0.069, CI +0.029 to +0.115 (missing ids 0)
+  broad exposure [s5, gold + entity in one thread]: 29 exposed; K on the other 412: +0.056, CI +0.030 to +0.084; K on exposed: +0.055, CI +0.000 to +0.138 (missing ids 0)
+cost P - C: marks or d <= -0.025:
+   e004 C_noupd LIK plain -0.028, CI -0.103 to +0.044 [-]
+   e004 C_noupd LIK chat -0.037, CI -0.109 to +0.034 [-]
+   e004 C_noupd GEN chat -0.034, CI -0.097 to +0.025 [-]
+cost G - C: marks or d <= -0.025:
+   e004 C_twoslot LIK plain -0.025, CI -0.072 to +0.022 [-]
+   e004 H6 LIK chat -0.034, CI -0.097 to +0.019 [-]
+   e004 C_noupd LIK chat -0.025, CI -0.081 to +0.022 [-]
+Q-device: 55 intervals (chat probe's 4 not included here), clear of 0: 0; nonzero d: 29 (positive 21); largest |d|: ('H1', 'LIK', 'chat', (0.0125, 0.0, 0.0375))
+  e005w1 plain: LIK flips 0/640 max|diff| 1.04e-04; identical replies 640/640
+  e005w1 chat: LIK flips 0/640 max|diff| 1.01e-04; identical replies 640/640
+  e005w2 plain: LIK flips 0/640 max|diff| 6.96e-05; identical replies 640/640
+  e005w2 chat: LIK flips 0/640 max|diff| 8.63e-05; identical replies 640/640
+  e005w3 plain: LIK flips 0/640 max|diff| 8.15e-05; identical replies 640/640
+  e005w3 chat: LIK flips 0/640 max|diff| 7.15e-05; identical replies 640/640
+  e005w4 plain: LIK flips 0/640 max|diff| 9.42e-05; identical replies 640/640
+  e005w4 chat: LIK flips 0/640 max|diff| 8.73e-05; identical replies 640/640
+  e005w5 plain: LIK flips 0/640 max|diff| 6.78e-05; identical replies 640/640
+  e005w5 chat: LIK flips 0/640 max|diff| 1.11e-04; identical replies 640/640
+  base new/plain: 1723 shared prompts, flips 0
+  base new/chat: 1723 shared prompts, flips 0
+  base extra/plain: 192 shared prompts, flips 0
+  base extra/chat: 192 shared prompts, flips 0
+  base old/plain: 1116 shared prompts, flips 0
+  base uprobe/plain: 574 shared prompts, flips 0
+  base cross/plain: 384 shared prompts, flips 0
+  base cross/chat: 384 shared prompts, flips 0
+  twin C1t - C1 BIG H5 LIK: +0.021, CI -0.021 to +0.062, items differing 16
+  twin C1t - C1 BIG C_noupd LIK: +0.005, CI -0.021 to +0.031, items differing 7
+  twin C1t - C1 BIG C_twoslot LIK: -0.005, CI -0.042 to +0.031, items differing 13
+  twin C2t - C2 BIG H5 LIK: +0.005, CI -0.042 to +0.052, items differing 23
+  twin C2t - C2 BIG C_noupd LIK: +0.010, CI -0.016 to +0.042, items differing 8
+  twin C2t - C2 BIG C_twoslot LIK: +0.036, CI +0.005 to +0.073, items differing 11
+######## python a6_grader.py
+graded 57344 records; disagreements with stored strict: 0
+######## python a7_blind.py
+blind classes (before the key): Counter({'template': 16, 'other': 16, 'loop': 8})
+turns matching the keyed transcript turn: 40/40
+by arm: Counter({('G', 'other'): 12, ('G', 'template'): 8, ('C', 'template'): 8, ('C', 'loop'): 8, ('C', 'other'): 4})
+arms x seeds: Counter({('G', 3): 7, ('G', 5): 6, ('C', 1): 6, ('G', 2): 4, ('C', 3): 4, ('C', 2): 4, ('C', 5): 4, ('C', 4): 2, ('G', 1): 2, ('G', 4): 1})
+######## python a8_purity.py
+BIG+H5L 5-grams: 11011
+C s1: drawn 6600, examples sharing a 5-gram with BIG/H5L: 0 []
+C s2: drawn 6600, examples sharing a 5-gram with BIG/H5L: 0 []
+C s3: drawn 6600, examples sharing a 5-gram with BIG/H5L: 0 []
+C s4: drawn 6600, examples sharing a 5-gram with BIG/H5L: 0 []
+C s5: drawn 6600, examples sharing a 5-gram with BIG/H5L: 0 []
+P s1: drawn 6600, examples sharing a 5-gram with BIG/H5L: 0 []
+P s2: drawn 6600, examples sharing a 5-gram with BIG/H5L: 0 []
+P s3: drawn 6600, examples sharing a 5-gram with BIG/H5L: 0 []
+P s4: drawn 6600, examples sharing a 5-gram with BIG/H5L: 0 []
+P s5: drawn 6600, examples sharing a 5-gram with BIG/H5L: 0 []
+######## python a9_position.py
+P: GL2 0.4369 GL1 0.0832 GLX2 0.2080 (n2 22354; last-statement roles {'corr': 19583, 'orig': 2771})
+C: GL2 0.6658 GL1 0.0690 GLX2 0.2665 (n2 22354; last-statement roles {'corr': 19582, 'orig': 2772})
+E004: GL2 0.5586 GL1 0.0384 GLX2 0.2189 (n2 18239; last-statement roles {'corr': 14742, 'orig': 3497})
+  block alias P: GL2 0.185 GL1 0.153 GLX2 0.164 (n2 6409)
+  block alias C: GL2 0.763 GL1 0.170 GLX2 0.374 (n2 6409)
+  block ind P: GL2 0.449 GL1 0.125 GLX2 0.257 (n2 3208)
+  block ind C: GL2 1.000 GL1 0.000 GLX2 0.246 (n2 3208)
+######## python a10_c2_rerun.py pc_hashes.out
+differs: HuggingFaceTB__SmolLM2-135M-Instruct__C2__gen_al__plain.jsonl crashed bytes 0
+crashed attempt weights 641b454dc62056da
+crashed C2 out files byte-identical to the rerun's: 25; differing: 1
+######## python a11_loo.py
+without s1: chat (a) ratio True (TF G 160 vs half C 164.0; CI high -0.181) | Q-H5 NOT THE CAUSE (LIK -0.042, CI -0.116 to +0.029) | K +0.057, CI +0.028 to +0.087
+without s2: chat (a) ratio True (TF G 160 vs half C 163.0; CI high -0.181) | Q-H5 INCONCLUSIVE (LIK +0.033, CI -0.060 to +0.138) | K +0.058, CI +0.031 to +0.088
+without s3: chat (a) ratio False (TF G 170 vs half C 167.5; CI high -0.177) | Q-H5 INCONCLUSIVE (LIK +0.000, CI -0.112 to +0.126) | K +0.058, CI +0.029 to +0.088
+without s4: chat (a) ratio True (TF G 155 vs half C 160.5; CI high -0.176) | Q-H5 INCONCLUSIVE (LIK -0.004, CI -0.112 to +0.122) | K +0.051, CI +0.026 to +0.075
+without s5: chat (a) ratio True (TF G 163 vs half C 163.0; CI high -0.188) | Q-H5 INCONCLUSIVE (LIK +0.023, CI -0.082 to +0.137) | K +0.061, CI +0.034 to +0.090
+######## python a12_device_chat.py
+C - E005(Mac) chat TF: -0.005, CI -0.040 to +0.017
+C - E005(Mac) chat TF2: -0.007, CI -0.043 to +0.017
+C - E005(Mac) chat LOOP: +0.009, CI -0.028 to +0.077
+C - E005(Mac) chat CHECKS: -0.600, CI -2.400 to +0.400
+s1: e005w (CUDA) turns identical to E005 (Mac): 149/149; C1 turns identical to E005 s1: 51/149
+s2: e005w (CUDA) turns identical to E005 (Mac): 149/149; C2 turns identical to E005 s2: 145/149
+s3: e005w (CUDA) turns identical to E005 (Mac): 149/149; C3 turns identical to E005 s3: 147/149
+s4: e005w (CUDA) turns identical to E005 (Mac): 149/149; C4 turns identical to E005 s4: 149/149
+s5: e005w (CUDA) turns identical to E005 (Mac): 149/149; C5 turns identical to E005 s5: 135/149

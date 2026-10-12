@@ -1,0 +1,111 @@
+{
+ "bytes_per_token": 3.4849,
+ "code_sha256": {
+  "corpus/oodh.py": "b256d5554d531bd76c531a8bc59c287f57f60e94cc224e3f136add75594987d1",
+  "corpus/sample_plan.py": "a50209255798b4f50117208777cf4429e3d7994f3f37d687caa5aee4e27a9e57",
+  "data_prep/prep_common.py": "7c8fce2b5eccc466070e848e2e55f25cd3a3b247acfc6d66a06334536ac15ada",
+  "data_prep/pretok_worker.py": "616a8e41c5d265e35e7a8fcf9910c755b4d312004a6a0ff79eb9317057b0891a",
+  "data_prep/pretokenize.py": "ad16bf9b782fa0c40729735da5334a9113a8a6f63d2c06fd7c568da1a631ad82",
+  "harness/chat_template.py": "16f5aa51d6c94b01afa7324a8ed119cb585aae1d8122a92eeb99a3d919196774"
+ },
+ "counts": {
+  "chat_docs": 0,
+  "chat_over_2048": 0,
+  "chat_over_2048_tokens": 0,
+  "chat_over_4096": 0,
+  "chat_over_4096_tokens": 0,
+  "docs": 82080,
+  "docs_in": 83397,
+  "empty_docs": 0,
+  "excluded_docs": 1317,
+  "excluded_text_bytes": 4994979,
+  "max_doc_tokens": 171220,
+  "special_replaced_docs": 0,
+  "sup_tokens": 0,
+  "text_bytes": 310687902,
+  "text_docs": 82080,
+  "tokens": 89234882
+ },
+ "dtype": "uint16",
+ "format": "planck-pretok-v1",
+ "heldout": {
+  "dir": "~/planck/data/tok_sample_v0c/heldout",
+  "manifest_sha256": "d0fa0838a6aa4ee8a6c62d6ffe496f812e8335d90266d34689c97cd9e13cfa63",
+  "source_file": {
+   "docs": 1317,
+   "file": "wikimedia.jsonl",
+   "keys": 1317,
+   "sha256": "9c7b5f9425a853e3401019d7f5c12b5fd53d5d2a5a018b4d053091d9b2699509"
+  }
+ },
+ "input": {
+  "bytes": 378681218,
+  "dir": "~/planck/data/extracted/starter_v0c",
+  "extract_stats_sha256": "8d6452ae8c3be7b0c43e4ba149b273fcb5e59f4ab5c2bd33baaec0b1499872d9",
+  "files": [
+   "wikimedia/wikimedia-00000.jsonl",
+   "wikimedia/wikimedia-00001.jsonl"
+  ]
+ },
+ "kind": "tokens",
+ "n_shards": 3,
+ "seed": 0,
+ "shard_mb": 128,
+ "shards": [
+  {
+   "bytes": 59962260,
+   "docs": 27449,
+   "ids": "wikimedia/wikimedia-00000.ids",
+   "path": "wikimedia/wikimedia-00000.bin",
+   "sha256": "94d7a847ee948846f686605b60b77bf8b1eaee8e0242edb51e8c98a0f9c141cd",
+   "sup_tokens": 0,
+   "text_bytes": 104235573,
+   "tokens": 29981130
+  },
+  {
+   "bytes": 59635498,
+   "docs": 27231,
+   "ids": "wikimedia/wikimedia-00001.ids",
+   "path": "wikimedia/wikimedia-00001.bin",
+   "sha256": "26e3fe52ffc90b6e990fb138ceb7b3a80aca03e6d8faff4d8da589eeb7a808d3",
+   "sup_tokens": 0,
+   "text_bytes": 103841441,
+   "tokens": 29817749
+  },
+  {
+   "bytes": 58872006,
+   "docs": 27400,
+   "ids": "wikimedia/wikimedia-00002.ids",
+   "path": "wikimedia/wikimedia-00002.bin",
+   "sha256": "43e7f6811a8d1e7232e9e17fa58f5d8dffa87a780aecb99c451fac258e5bae06",
+   "sup_tokens": 0,
+   "text_bytes": 102610888,
+   "tokens": 29436003
+  }
+ ],
+ "source": "wikimedia",
+ "tokenizer": {
+  "control_ids": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "end_id": 5,
+  "eot_id": 1,
+  "file": "tok_v0_8k.json",
+  "n_special": 15,
+  "pad_id": 0,
+  "role_ids": {
+   "assistant": 4,
+   "system": 2,
+   "tool": 6,
+   "user": 3
+  },
+  "sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5",
+  "vocab": 8192
+ }
+}

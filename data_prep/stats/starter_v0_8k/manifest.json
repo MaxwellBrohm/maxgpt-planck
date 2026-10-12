@@ -1,0 +1,183 @@
+{
+ "format": "planck-pretok-v1",
+ "harness_data": {
+  "chat": {
+   "end_id": 5,
+   "loss": "assistant",
+   "role_ids": {
+    "assistant": 4,
+    "system": 2,
+    "tool": 6,
+    "user": 3
+   }
+  },
+  "pad_id": 0,
+  "sources": [
+   {
+    "eot_id": 1,
+    "kind": "tokens",
+    "name": "cccc",
+    "paths": [
+     "cccc/cccc-*.bin"
+    ]
+   },
+   {
+    "kind": "chat",
+    "name": "dolly",
+    "paths": [
+     "dolly/dolly-*.jsonl"
+    ]
+   },
+   {
+    "eot_id": 1,
+    "kind": "tokens",
+    "name": "gutenberg",
+    "paths": [
+     "gutenberg/gutenberg-*.bin"
+    ]
+   },
+   {
+    "eot_id": 1,
+    "kind": "tokens",
+    "name": "irc",
+    "paths": [
+     "irc/irc-*.bin"
+    ]
+   },
+   {
+    "kind": "chat",
+    "name": "oasst2",
+    "paths": [
+     "oasst2/oasst2-*.jsonl"
+    ]
+   },
+   {
+    "eot_id": 1,
+    "kind": "tokens",
+    "name": "stackexchange",
+    "paths": [
+     "stackexchange/stackexchange-*.bin"
+    ]
+   },
+   {
+    "eot_id": 1,
+    "kind": "tokens",
+    "name": "wikimedia",
+    "paths": [
+     "wikimedia/wikimedia-*.bin"
+    ]
+   }
+  ]
+ },
+ "heldout_manifest_sha256": "d0fa0838a6aa4ee8a6c62d6ffe496f812e8335d90266d34689c97cd9e13cfa63",
+ "seed": 0,
+ "sources": {
+  "cccc": {
+   "bytes_per_token": 3.1968,
+   "docs": 674327,
+   "excluded_heldout_docs": 878,
+   "kind": "tokens",
+   "manifest_sha256": "00d17db89705d37e78352be896d99dc78bb54d714250ef30326e6789ac8b76f3",
+   "shards": 31,
+   "sup_tokens": 0,
+   "text_bytes": 3644540509,
+   "tokens": 1140729672
+  },
+  "dolly": {
+   "bytes_per_token": 3.5764,
+   "docs": 8208,
+   "excluded_heldout_docs": 2854,
+   "kind": "chat",
+   "manifest_sha256": "e3aa97c1214003024f864b15f54da5aed91e096a84a2f964ebce71cbbb3b2fc7",
+   "shards": 1,
+   "sup_tokens": 1026535,
+   "text_bytes": 8319448,
+   "tokens": 2326192
+  },
+  "gutenberg": {
+   "bytes_per_token": 3.2688,
+   "docs": 4534,
+   "excluded_heldout_docs": 31,
+   "kind": "tokens",
+   "manifest_sha256": "0fa7e1487318283d8e34e4e46ca1970168f5f648c0691eaf71b3fc37d144aef3",
+   "shards": 6,
+   "sup_tokens": 0,
+   "text_bytes": 733440461,
+   "tokens": 224378050
+  },
+  "irc": {
+   "bytes_per_token": 2.6863,
+   "docs": 31063,
+   "excluded_heldout_docs": 242,
+   "kind": "tokens",
+   "manifest_sha256": "8a2e3950e002438ae47b64a4dc9a883786aa9811d1321c96eb04872baefcd2d8",
+   "shards": 6,
+   "sup_tokens": 0,
+   "text_bytes": 659153929,
+   "tokens": 245404478
+  },
+  "oasst2": {
+   "bytes_per_token": 3.7176,
+   "docs": 3338,
+   "excluded_heldout_docs": 1094,
+   "kind": "chat",
+   "manifest_sha256": "000476f8694280509f7c7a8a5d173878567ec81ad630c1a059d1c7801bf94fe9",
+   "shards": 1,
+   "sup_tokens": 1545199,
+   "text_bytes": 6516154,
+   "tokens": 1752781
+  },
+  "stackexchange": {
+   "bytes_per_token": 3.7434,
+   "docs": 323868,
+   "excluded_heldout_docs": 1308,
+   "kind": "tokens",
+   "manifest_sha256": "acdbe368a7391d1d50aa7a77138231f7dccb769214f5980558ad866f6bb4a05d",
+   "shards": 11,
+   "sup_tokens": 0,
+   "text_bytes": 1217410000,
+   "tokens": 325539386
+  },
+  "wikimedia": {
+   "bytes_per_token": 3.4849,
+   "docs": 82080,
+   "excluded_heldout_docs": 1317,
+   "kind": "tokens",
+   "manifest_sha256": "4d57f7481828c5f39f455976f53ffec9b63ea7cc56b646c2d9d1064b918c4d49",
+   "shards": 3,
+   "sup_tokens": 0,
+   "text_bytes": 310687902,
+   "tokens": 89234882
+  }
+ },
+ "tokenizer": {
+  "control_ids": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "end_id": 5,
+  "eot_id": 1,
+  "file": "tok_v0_8k.json",
+  "n_special": 15,
+  "pad_id": 0,
+  "role_ids": {
+   "assistant": 4,
+   "system": 2,
+   "tool": 6,
+   "user": 3
+  },
+  "sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5",
+  "vocab": 8192
+ },
+ "totals": {
+  "docs": 1127418,
+  "sup_tokens": 2571734,
+  "text_bytes": 6580068403,
+  "tokens": 2029365441
+ }
+}

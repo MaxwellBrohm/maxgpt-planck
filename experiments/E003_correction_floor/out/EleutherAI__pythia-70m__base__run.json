@@ -1,0 +1,75 @@
+{
+ "model": "EleutherAI/pythia-70m",
+ "seed": 0,
+ "steps": 0,
+ "lr": 5e-05,
+ "bs": 4,
+ "accum": 4,
+ "eff_batch": 16,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "mps",
+ "dry": false,
+ "tag": "base",
+ "sets": [
+  "dev",
+  "eval"
+ ],
+ "params": 70426624,
+ "checks": {
+  "params_config": {
+   "total": 70426624,
+   "embedding": 51511296,
+   "body": 18915328,
+   "tok_emb": 25755648,
+   "out_head": 25755648,
+   "pos_emb": 0,
+   "layers": 6,
+   "d": 512,
+   "vocab": 50304,
+   "n_ctx": 2048
+  },
+  "params_model": 70426624,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": false,
+  "config_says_tied": false,
+  "sanity_nll": 3.2192
+ },
+ "trained_ctx": 2048,
+ "torch": "2.13.0",
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "train_stats": {
+  "n": 0,
+  "rejected_long": 0,
+  "kinds": {},
+  "len_sum": 0,
+  "len_max": 0,
+  "split": 0,
+  "mean_len": null
+ },
+ "losses": [],
+ "loss_finite": true,
+ "probe": [],
+ "lock_in_step": null,
+ "eval_s": 106.2,
+ "eval_counts": {
+  "new/plain": 1728,
+  "extra/plain": 192,
+  "old/plain": 1116,
+  "uprobe/plain": 576,
+  "khard/plain": 80,
+  "kbig/plain": 441,
+  "cross/plain": 384,
+  "dev/plain": 320
+ },
+ "peak_mps_driver_gb": 1.13,
+ "peak_mps_alloc_gb": 0.262,
+ "total_s": 107.8
+}

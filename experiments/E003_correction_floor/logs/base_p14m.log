@@ -1,0 +1,11 @@
+Loading weights:   0%|          | 0/76 [00:00<?, ?it/s]Loading weights: 100%|██████████| 76/76 [00:00<00:00, 13349.27it/s]
+loaded EleutherAI/pythia-14m params=14,067,712 (config 14,067,712, body 1,189,888) sanity_nll=3.8286 in 1.6s mps_alloc=0.05G driver=1.02G peak_driver=1.02G
+scored new/plain: 1728 items in 16s mps_alloc=0.05G driver=1.11G peak_driver=1.11G
+scored extra/plain: 192 items in 2s mps_alloc=0.05G driver=1.04G peak_driver=1.11G
+scored old/plain: 1116 items in 12s mps_alloc=0.05G driver=1.12G peak_driver=1.12G
+scored uprobe/plain: 576 items in 6s mps_alloc=0.05G driver=1.08G peak_driver=1.12G
+scored khard/plain: 80 items in 1s mps_alloc=0.05G driver=1.04G peak_driver=1.12G
+scored kbig/plain: 441 items in 2s mps_alloc=0.05G driver=1.03G peak_driver=1.12G
+scored cross/plain: 384 items in 5s mps_alloc=0.05G driver=1.11G peak_driver=1.12G
+scored dev/plain: 320 items in 4s mps_alloc=0.05G driver=1.07G peak_driver=1.12G
+DONE EleutherAI/pythia-14m base total 48s peak_driver=1.122G lock_in_step=None loss_finite=True

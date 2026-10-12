@@ -1,0 +1,12 @@
+# grid20m (e2plan.py). train = preflight, train, then score if it is a branch
+wait_mark E3 E3 PART 1 DONE
+train 20m_e1.5_r1_trunk
+train 20m_e1.5_r1_b250M
+train 20m_e1.5_r1_b500M
+train 20m_e3_r1_trunk
+train 20m_e3_r1_b250M
+train 20m_e3_r1_b500M
+train 20m_e6_r1_trunk
+train 20m_e6_r1_b250M
+train 20m_e6_r1_b500M
+mark E2 20M DONE

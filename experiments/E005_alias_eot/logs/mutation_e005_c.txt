@@ -1,0 +1,21 @@
+baseline: 40 checks, 0 failing []
+KILLED alias HIGH uses >: 1 failing checks, first: alias HIGH needs both >= 0.8, LOW both <= 0.5
+KILLED alias majority over results: 1 failing checks, first: 2 HIGH + 3 missing of 5 planned -> INCONCLUSIVE
+KILLED stopping tolerance 0.2: 1 failing checks, first: a seed stops iff |chat - plain| <= 0.10 on every pass family (literal 'within')
+KILLED stopping one-sided: 1 failing checks, first: a seed stops iff |chat - plain| <= 0.10 on every pass family (literal 'within')
+KILLED adjacency off by one: 2 failing checks, first: alias items 42, placement counts {'adjacent': 7, 'filler': 16, 'B_sep': 19} = step 1's 9/14/19
+KILLED no B-separated: 2 failing checks, first: alias items 42, placement counts {'adjacent': 9, 'filler': 33, 'B_sep': 0} = step 1's 9/14/19
+KILLED H5 split pronoun only: 1 failing checks, first: H5 with / without another indirect after [0.6454799999999999, 0.81426] = .67/.84
+KILLED no A_prev class: 3 failing checks, first: H1/H2 alias wrong LIK picks 147 {'A_earlier': 144, 'other_after': 1, 'other_before': 2} lures 57 = audit (81 +
+KILLED other before/after swapped: 2 failing checks, first: H5 wrong LIK picks 78 {'other_before': 49, 'A_prev': 26, 'other_after': 3} = audit (52 other object, 49 after;
+KILLED lure flag dropped: 2 failing checks, first: H1/H2 alias wrong LIK picks 147 {'A_prev': 139, 'other_after': 1, 'other_before': 2, 'A_earlier': 5} lures 0 =
+KILLED LIK tie counted as gold: 1 failing checks, first: LIK tie -> tie; a foil on top -> that foil
+KILLED first line = whole reply: 2 failing checks, first: E004 s1 chat H1: capped 1.0, strict 0.0, first line 0.0
+KILLED continuity flips by position: 2 failing checks, first: flips_by_hash {'n_a': 3, 'n_b': 2, 'matched': 2, 'flips': 1, 'only_a': 1, 'only_b': 0, 'max_abs_score_diff': 0
+KILLED join unchecked: 1 failing checks, first: a record that does not match its item must raise
+KILLED E004 fixed sub-readings: 2 failing checks, first: E004's fixed sub-reading strings are replaced (present in E004's analyzer, absent here)
+KILLED alias items H1 only: 2 failing checks, first: alias items 42, placement counts {'adjacent': 9, 'filler': 14, 'B_sep': 19} = step 1's 9/14/19
+KILLED E005 - E004 sign flipped: 1 failing checks, first: family_diff is E005 minus E004 (a missing seed is skipped)
+KILLED McNemar p rounded: 1 failing checks, first: 0.797 printed as 0.797 and a small McNemar p in scientific notation
+KILLED chat strict = first line: 1 failing checks, first: E004 s1 chat H1: capped 1.0, strict 0.6094, first line 0.6094
+19/19 mutants killed

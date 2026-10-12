@@ -1,0 +1,89 @@
+{
+ "checkpoint": "final_00007630.pt",
+ "checkpoint_sha256": "db902706e8996854218047e09aaa9c7ce40c2ba248f3c387b677aba41ce9332a",
+ "code_sha256": {
+  "data_prep/bpb.py": "7367071e460e0039760b22a48091ad267746ec1341008ab87ad15bd20cfad1f2",
+  "data_prep/bpb_hd.py": "31e8514785f3d98ca01948ad525fcf13d37be8e67c8201c81084aaaa61d5534f",
+  "data_prep/evalwin.py": "e31107725df257719a5696b4125f6bef402c0d8c28d8d00dfb818c4f5af27169",
+  "experiments/screens/diag_lib.py": "b933c83aaf58d2478f64e34ef4eaa20044dad6af4faf1f0d9028c191c63341eb",
+  "experiments/screens/diag_runner.py": "cb3bfdd8928ecfbd1ef5fe0ddaa1144e3a35a260f9f41664aea97974ba66d6e6",
+  "harness/attn_diag.py": "aa9631c77b34d0722adfe4b756f3a437cf2bff2f334ef3670f2d833e7da9af55",
+  "harness/blocks.py": "f1962a5cb7ead3d307a57f4877d186e206236d208ce3ad29b44f13aa6727698f",
+  "harness/induction.py": "c15701d31417c3e24d9fec7bd48b600f078eb4c65ed31c5f31e403d9898b97e4",
+  "harness/model.py": "f4e61556ee9ece8a01a2e9f36808c8ca161c393bc1836e0a542408a911cd14b6"
+ },
+ "device": "cuda",
+ "evalset_sha256": "fe1b55bbe3612d0c968934cbad831a17fd3d73d84aa8f1b7cb2f4523cf4d505b",
+ "exp": "SCREENS",
+ "group": "stage1",
+ "job": "attn",
+ "result": {
+  "check_max_rel_err": 2.2986658932759815e-06,
+  "check_ok": true,
+  "gate_mean": null,
+  "layers": 8,
+  "pad_id": 0,
+  "set": "oasst2",
+  "sink": [
+   [
+    0.011494570585839154,
+    0.006005724581198713,
+    0.0027197312716057886
+   ],
+   [
+    0.0027913288435303272,
+    0.0016008658060610982,
+    0.0004914481550919076
+   ],
+   [
+    0.007579494735422384,
+    4.770266776580908e-05,
+    0.0009554988152915338
+   ],
+   [
+    0.0009684031627491176,
+    0.00894257173895043,
+    0.0003868345653882762
+   ],
+   [
+    0.0010628764903900178,
+    0.000107241564205745,
+    0.0075664732787794516
+   ],
+   [
+    0.018425375173328686,
+    0.00032869125871591353,
+    0.0007645209140878224
+   ],
+   [
+    0.00040907030050688016,
+    0.0009010445800100605,
+    0.0015858928570711764
+   ],
+   [
+    0.004113506926203219,
+    0.0008651534625484903,
+    0.00517802307474898
+   ]
+  ],
+  "sink_from": 64,
+  "sink_queries": [
+   53826,
+   53826,
+   53826,
+   53826,
+   53826,
+   53826,
+   53826,
+   53826
+  ],
+  "tokenizer_sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5",
+  "truncated": 0,
+  "windows": 200
+ },
+ "run": "s001_nogate_g1_s102",
+ "seconds": 0.3,
+ "step": 7630,
+ "tokenizer_sha256": "078b24c4b0755d81985ebc122e912d7c70ff204d335519721235a405756fcfb5",
+ "torch": "2.13.0+cu130"
+}

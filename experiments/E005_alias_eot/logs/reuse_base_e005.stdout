@@ -1,0 +1,17 @@
+PASS  1 copies and E004 sources match the step-1 sha256 list: 64/64
+PASS  1 every E004 .py file predates 2026-09-24 22:07:38: newer [] (queue .sh files are not imported)
+PASS  1 e005_sets.lik_sets/gen_sets are e004_sets'
+PASS  2 base_135m: exit 0 killed None cmd e004_ft_test.py HuggingFaceTB/SmolLM2-135M-Instruct --bs 4 --accum 4 --max-len 768 --grad-ckpt --seed 0 --steps 0 --sets eval,cont,know --chat --tag base
+PASS  2 chat_135m_base: exit 0 killed None cmd run_chat.py HuggingFaceTB/SmolLM2-135M-Instruct --mode greedy --out ../transcripts/HuggingFaceTB__SmolLM2-135M-Instruct__base__greedy.jsonl
+PASS  2 base run.json {'model': 'HuggingFaceTB/SmolLM2-135M-Instruct', 'steps': 0, 'tag': 'base', 'dry': False, 'chat': True, 'sets': ['cont', 'eval', 'know'], 'max_new': 48} fatal=None
+PASS  3 base files = plan: 16 files (15 sets + run.json)
+PASS  3 run.json eval_counts = plan set sizes
+PASS  3 line counts = plan (9797 records)
+PASS  3 untouched chat-probe transcript: 53 conversations
+PASS  4 E004 code directory unchanged by its set-building process
+PASS  4 set hashes E005 = E004: 15/15
+PASS  5 LIK records whose prompt hash or keys differ from the E005 item: 0 of 8101
+PASS  5 GEN records whose report keys differ from the E005 item: 0 of 1696
+PASS  6 one snapshot ['12fd25f77366fa6b3b4b768ec3050bf629380bac'] = refs/main 12fd25f77366, files newer than the base run: []; model.safetensors 5af571cbf074e6d21a03528d2330792e532ca608f24ac70a143f6b369968ab8c
+
+REUSE OK: 17 files copied, sha256 source = copy (logs/base_reuse_sha256.txt)

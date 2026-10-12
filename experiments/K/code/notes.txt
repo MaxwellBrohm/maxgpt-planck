@@ -1,0 +1,1528 @@
+Track K code (SPEC 14, Build phase). Written 2026-09-27. Nothing here was trained, queued or committed; no language
+model was loaded. Tests: tiny CPU models only. No harness file was changed (K4 needs none: harness/budget.py already
+solves an MLP width at a fixed total through attn_mult, fixed_d, fixed_layers and fit_mlp).
+
+MODULES
+  kcommon.py   SPEC constants, tagged seeds (default_rng([W = 7, tag])), sha256 and jsonl helpers, tokenizer check
+  pools.py     SPEC 1 pools by rule (CAP 714 and LOW 3,656 left after the drops), K-EVAL-S triples (11,056 in
+               1,382 cube cells since K3 round 2; 11,059 loose triples before)
+  world.py     SPEC 2-3 fact base (N_CAP drawn once; FB_low and FB_high are prefixes), filler, slot plans, bio docs
+  lookup.py    SPEC 6 hit and miss lines, K5 chats and K5 layout
+  items.py     SPEC 4 item structure, rendering to id-carrying chat records, the generator-side world rule
+  fams.py      families R, U, B, F, A, P;  skill.py  names per split, exact per-block flags, OOD columns, B eval
+               cube groups (K3 round 3; reversed twins before); K3 round 4: earlier questions ask bystanders only,
+               R and U reserve one; U's foil rank, R's, F's, P's (k, rank) and A's context kind block flags; P a
+               foil in every item and a bystander entity (fams.fam_R by)
+  oracles.py   SPEC 5 token-level parser, IDEAL and every shortcut oracle (O1-O10, O3_S, O5n, T, O9|10; R-1: O11-O14
+               and the SURF, SURFe, SURFa pattern views; K3 round 2: B-CENTER, B-TOKFREQ, B-MAJOR, F-INTRO, F-DEFX,
+               A1H; K3 round 3: B-ADAPT, B-FRAME, reported A-MANYFREE, A-QNEW, A-QREPEAT, F-ANTE)
+  purity.py    SPEC 5 acceptance (oracle thresholds with C5 tolerance, balance rules, purity, round trip; K3 round 4:
+               early_name, all_free_asked, U's foil rank and R's, F's, P's rank per block, the B group count)
+  evalsets.py  SPEC 8 files;  check_k.py  the acceptance over a whole data root, fact-stream purity included (K3
+               round 4: a K-EVAL B set must score 3n/16 groups)
+  gen.py       CLI writing pretokenize-format shards (uint16 .bin for TokenShardSource, id chat .jsonl for
+               ChatJsonlSource), manifests with sha256s, the run config data: block per arm
+  probes.py    SPEC 9 scorer (LIK with tie credit, CE_C, strict GEN, P marker, latent and expressed bits)
+  ablate.py    K2/K3 hooks: unit, head and sublayer ablation (zero or mean), collect_means, prune_mlp (units
+               removed, still trainable), reset_units (K3), trace (M4), unit_effects (M3), grad_x_act
+  masks.py     K2 M1 HardConcrete masks (KF, SF, KS, SS; fit also returns p_drop, each unit's final P(closed);
+               penalty, per budget unit since K3 round 1; K3 round 3: the better of 2 restarts by the exact
+               objective, no warmup: a penalty warmup was tried and dropped), random_matched (M2, K3 P-R with
+               skill-effect strata)
+  cues.py      K3 round 1: the fitted cue model's non-resolution features per candidate (item_features; round 2:
+               NAMES columns, and f_item_features, the F model's closed column list; round 3: its alias windows;
+               round 4: _q_cols, the question-to-question columns, 164 pooled columns)
+  cuegate.py   K3 round 1: its learners (logit, mlp, set), 2-fold cross-fit, bars; run() is gen.py check's gate
+               (round 2: the pooled model, then the F model on F items; draw(), per-set tolerance; round 3: B cube
+               groups for twin pairs)
+  k4_shapes.py K4 shapes via budget.solve; wrote ../K4_allocation/configs/model_H{4,6,7}.yaml
+  tests/       120 tests; tests/mutation_k.py holds 139 mutants (22 killed 2026-09-27 at build, 2 at review, 20 for
+               R-1, 9 for R-2, 19 for K3 round 1, 27 for K3 round 2, 22 for K3 round 3, 20 for K3 round 4, 6 of the
+               older ones retargeted to round 4's code; mask_init_one retired for
+               mask_init_three in round 1, bind_foils_miss_a_subset for b_small_items_star in round 2,
+               b_pair_bars_o3_only and cue_pair_n_256 for b_group_bars_o3_only and cue_group_n_256 in round 3: see
+               K3 ROUND 1 to 3). plantfix.py is K2's planted-set fixture, mask_sweep.py the mask-default sweep (R-2;
+               K3 added --per-budget, round 3 --restarts), mutation_k.py --why prints each failing assert
+
+COMMANDS ON THE PC (from experiments/K/code, planck_root linked at the code root as for E2; D below is the data root
+the data: blocks point at)
+  D=../../../planck_root/data/k
+  python gen.py skill $D --workers 8
+  for a in F0 FL FH CAP; do python gen.py fact $D --arm $a; done
+  for a in L0 L50 L100; do python gen.py k5 $D --arm $a; done
+  python gen.py evals $D
+  python gen.py check $D          # exit 0 only if SPEC 5 acceptance passes (the K3 cue gate included; set
+                                  # torch threads to 4 or fewer on a shared machine); report in $D/check.json
+  python gen.py data $D --arm FH  # the data: block (also F0 FL CAP L0 L50 L100 CONT); LANG = E2's pinned shares
+  python probes.py --ckpt RUN/final.pt --items $D/evals/k_eval_id.jsonl $D/evals/fb_probe.jsonl --out S.jsonl \
+      --device cuda
+  Measured on the Mac (load average about 77 from other work): gen.py fact --arm FH at full scale 45 s wall,
+  204 MB of .bin and 225 MB of .jsonl, every FB entity 100 bio exposures; a 1/10-scale skill stream (163,840
+  items, 12.3M tokens) 26 s with 8 workers and its check 48 s, pass. Full-scale skill, K5 and check times were
+  not measured.
+
+BUILD DEVIATIONS (numbered; each is a generator or check rule, never an item by hand; for the FIXED log)
+  BD-1 B's statement order is uniform, so its follow rate is chance (1 - 1/k), not section 4's 1/2. Measured on one
+       512 block with the 1/2 rule: B last-statement rate 0.348 vs chance 0.181, O3_12/13/23 0.72-0.73 (limit
+       0.65 + 3 SE = 0.713). Uniform order: 0.162 vs 0.191, O3_S two-token subsets 0.56-0.58, eval twin pairs
+       <= 0.20. Every O3_S foil is before the key in half the items by symmetry.
+  BD-2 The last-statement rule passes at max(0.05, 3 binomial SE): eval families of 128-512 items made 0.05 about
+       1.4-2 SE (C5's noise rule applied to this rule too).
+  BD-3 Last-statement rate at chance in U and F: F always has one foil; U has a foil whenever k >= 2, stated 1..m
+       times in update items and m times in two-slot controls; U's asked entity has 2-3 attributes (T on U was
+       0.648 at n 41K, limit 0.657; now about 0.48). Measured U bias over 12 blocks: -0.005.
+  BD-4 P's statements use R's design (foil and follow flags); SPEC 4 left P's value structure open.
+  BD-5 U's 1/2 update rule is checked from tokens as "no-update controls exactly 1/4" (update and two-slot items
+       look alike in tokens).
+  BD-6 K5's FACT share is one chat source (K5 chats plus SPEC 3 fact-QA filler chats), no bio filler: at p = 1
+       the K5 chats are 114.4M of the 123.6M FACT draw, and a separate bio source would leave no room to hold every
+       K5 chat inside the drawn part of its own source. Filler tokens by arm: lookup.layout5.
+  BD-7 Eval B items carry only the final question (a twin reversed the statements; since K3 round 3 a group's copies
+       share them; an earlier question would change a gold). Training B items keep 1-3 questions.
+  BD-8 K-EVAL-S B foils are K-EVAL-S triples too, so no trained name triple enters K-EVAL-S.
+  BD-9 FB-PROBE, CONFLICT entity picks and K5 sets draw from seed 7201/7401/7501 streams; SPEC 8 names no FB-PROBE
+       seed. Fact candidate sets have one size, round(mean |C|) of K-EVAL-ID, for every fact file (K2 notes say per
+       split; the K2 splits use the same generator, so the sizes should agree, not checked).
+  BD-10 The skill stream is written to at least 1.03 x its expected draw and overshoots by up to one pool round
+       (8 rounds, about 6M tokens at full scale).
+  BD-11 masks.fit defaults lr 0.05, Adam eps 1e-6 (the default 1e-8 turned float32 round-off gradients of about
+       1e-9 into full steps on idle units); since K3 round 1 (R-5), 2,000 steps, lam 6 per budget unit (the penalty
+       lam x relu(E[dropped] - b) / b), gate init 0.0 (R-2: 1,000 steps, lam 1 per unit; built: 300 steps, init
+       1.0). K2 still fixes lam on seed 201's SPLIT A, from {4, 6, 10}, checked on the fixture (K2 notes K2-f).
+  BD-12 F (R-1 redesign): orders whose last statement is the key's latest are kept at fams.LAST_KEEP = 0.5 (0.35 since
+       K3 round 2, BD-21); without
+       it F's last-statement rate read 0.261 against a chance 0.198, with it 0.201 against 0.199 (4 fresh training
+       blocks, 2,048 items each way, final design; SPEC 4's limit is +-0.05). Every F item's order
+       also puts each alias after its definition by a unit swap (fams._defs_first) before the order is checked.
+  BD-13 SURF, SURFe, SURFa (purity.surf): per pattern the gold index most often right among fitted items, ties share
+       the credit, an unseen pattern takes the latest statement; the training stream is 2-fold cross-fitted (even
+       items fit the odd ones and back: leave-one-out reads low on exactly balanced patterns, in-sample high), and
+       every eval set is scored with the training stream's fit (report["surf_counts"], per family and view).
+  BD-14 F's key and foil state the asked attribute in one reference kind (2026-09-27, second pass on R-1). Flags:
+       follow exact, the kind nested in it with the tie order flipped between the follow groups, so kind 1/2, follow
+       1/2 and follow-with-alias 1/4 are all exact even in the 2-item K-DEV and K-PROBE F blocks.
+  BD-15 (K3 R-4) No earlier question asks the final question's attribute, except U's lure (the final key), asked
+       only where a later statement of that key follows (skill._questions); P redraws an item left with fewer than
+       2 questions (PLONG 5). Checked on every item (purity: early_attr).
+  BD-16 (K3 R-3) F keeps orders ending with the foil's reference statement at LAST_KEEP too; checked over a set
+       (purity: F.ref_last, the key's and the foil's counts within 3 SE).
+  BD-17 (K3 gate) U's key and foil are exchangeable (SPEC 4 U), k 2-4, and U's (k, intro rank) are exact block
+       flags (drawn per item, the fixed K-EVAL-ID draw failed SPEC 5's rank rule at 3.0 SE in one cell).
+  BD-18 (K3 gate) A's both-items are R or U contexts (1/2 each) asking an entity without the asked attribute; the
+       context keeps its source key's d range (skill._in_range).
+  BD-19 (K3 gate) gen.py check fits the cue model on a seeded draw of 81,920 training items (cuegate.CAP, the size
+       measured here); the oracle, balance and purity checks still read every kept item (SPEC 12).
+  BD-20 (K3 R-5) masks.fit: per-budget penalty and the defaults of BD-11.
+  BD-21 (K3 round 2, F-INTRO-DEFX) F: the key's and the foil's reference statements, an ellipsis with its antecedent,
+       come after both entities' first explicit mention and definition (fams.fam_F ok()); LAST_KEEP 0.35 (0.5 read
+       F.last 0.228 vs chance 0.192 once BD-21 pushed the references later; 0.35 reads 0.196 vs 0.192).
+  BD-22 (K3 round 2, B-CENTER) B: names from one cube {a, a'} x {b, b'} x {c, c'} (skill.Gen.cube): all 8 in 3/4
+       of items, 2-4 of them otherwise, the asked name uniform among them; K-EVAL-S is a seeded 10% of the cube
+       cells that pair each S position's tokens (pools.build: 1,382 cells, 11,056 triples; a random 10% of triples
+       held about 14 whole cubes, so K-EVAL-S B items could not be all held-out names, BD-8). B's (k, intro rank)
+       exact per block (per item, test_gen's gen.py sample failed SPEC 5's rank rule at 3.2 and 3.0 SE in two cells).
+  BD-23 (K3 round 2, the gate) cues.py NAMES columns; cuegate.run fits the F model on F items after the pooled
+       model, F's ceiling the larger; B pairs at C5's tolerance for the set's own pair count; cuegate.draw.
+  BD-24 (K3 round 2, REVIEW 3b T-1, D-1) purity: question counts on every set (1-3, P 2-4, PLONG 5-7, rules or not);
+       U's no-update cell (1, 2, follow) and its mirror (2, 1, no follow) exactly 1/4 per block, every (key, foil,
+       follow) cell as often as its mirror (3 SE), U's and B's k and intro rank exact per block.
+  BD-25 (K3 round 3, REVIEW 4a S-2) skill._in_range: in an F item the key's and the foil's aliases of the asked
+       attribute sit 1-10 exchanges after BOTH their definitions (each alias 1-10 after its own before). purity:
+       every F item's attribute aliases in both windows (alias_win), and F.xnear (on reference items with two
+       aliases, the alias nearer after the asked name's definition is the key's as often as the foil's, 3 SE).
+  BD-26 (K3 round 3, REVIEW 4a S-1) B eval blocks (K-EVAL-ID, K-EVAL-S) replace reversed twins with cube groups
+       (skill.group): of n items (a multiple of 32), 3n/16 cube items each followed by 3 copies asking the asked
+       name's two-token neighbours (meta grp 0-3), n/4 items of 2-4 names; frames exact within the cube and the small
+       items (block_flags ncube). purity and cuegate score a group as all 4 right (the product of the gate's credits),
+       bar oracles.GROUP_TH 0.125; the per-block shares count the copies, the intro-rank rules do not. evalsets
+       gives a B block with groups at least 32 items (gen.py evals --small: 32).
+  BD-27 (K3 round 3, REVIEW 4b M-1; wording K3 round 4, REVIEW 5a D-1 and 5b D-a) masks.fit keeps the better of 2
+       restarts (gate noise seeds s and s + 7919) by the exact objective, its weights included, with the hardened set
+       ablated ("hard"); the penalty is lam x relu(E[dropped] - b) / b from step 0 (a linear warmup of lam over 500 or
+       1,000 steps was tried and dropped: MX-KF single runs stuck in 13 of 104 with it against 2 of 200 without);
+       tests/mask_sweep.py reads fit's own result for one step count (restarts included, per restart found or not)
+       and needs --restarts 1 to read several step counts inside one run.
+  BD-28 (K3 round 4, REVIEW 5a S-1) skill._questions: earlier questions ask bystanders' keys only (never the final
+       entity or a holder of the final attribute; U's lure aside); make_item: R and U items reserve one bystander,
+       drawn uniformly, that no question asks (A's both-items are R and U contexts whose asked entity is never
+       asked); skill._pad: a DFAR pad states the asked attribute only for a holder. purity: early_name and
+       all_free_asked on every item. B items (every entity a holder) hold one question.
+  BD-29 (K3 round 4, REVIEW 5a S-2) U: the (key, foil) intro-rank pair is a block flag (skill.rank_pairs: each role's
+       rank within one of n/k per k, every ordered pair within one of its share); purity k{k}_frank{j} per block.
+       fam_A's U contexts draw k and the rank pair the same way (per item).
+  BD-30 (K3 round 4) P: R's design plus a bystander entity (fams.fam_R by: the last slot, 1-3 attributes, never the
+       asked one) and a foil in every item (follow 1/2): 3-5 entities, PLONG 3-5.
+  BD-31 (K3 round 4) R's, F's and P's (k, intro rank) exact per block (skill.ranks; purity k{k}_rank{j} per block);
+       OOD ENTS and PLONG keep their own k and a per-item rank (fl k_ood); A's both-item context kind (R or U) a
+       block flag.
+  BD-32 (K3 round 4, REVIEW 5b O-1) purity.group_count_fails: every B cube item (grp 0) opens a scored group;
+       check_k: K-EVAL-ID's and K-EVAL-S's B sets score 3n/16 groups.
+  BD-33 (K3 round 4, REVIEW 5a S-1; SPEC 5's ruling) cues._q_cols: the final name among earlier questions' names
+       (times asked, the latest, distinct attributes asked of it), distinct names asked, the item's names stating
+       nothing of the asked attribute that no question named; 149 -> 164 pooled columns.
+
+NOT BUILT HERE (SPEC 14 items outside this build's scope)
+  harness eval.k_probe (the in-training hook), a weights-only start with fresh optimizer state for K3
+  continuations (harness/train.py's init_from also loads the optimizer and loader state), train.grad_route (K3-R),
+  a per-group weight-decay flag (K4b), analyze_k.py (rule KR, Holm, readings.jsonl). The ablation tools wrap a
+  model by hooks and prune.py's reset is ablate.reset_units: a K3 continuation needs the weights-only start.
+
+REVIEW 2026-09-27 (independent reviewer; Mac CPU only, no language model, nothing trained, queued or committed)
+  Ran: pytest (60 passed), all 22 build mutants (killed) and the baseline copy (green); small samples of every arm
+  (skill, F0, FL, FH, CAP, L0, L50, L100, evals --small) with gen.py check (pass), 30 decoded items per arm read by
+  hand; extra shortcut oracles; a planted-unit check of ablate.py and masks.py on a tiny scrambled model.
+  FIXED HERE: check_k.fact_purity read only the bio docs, so a fact QA leak passed gen.py check. The mutant
+  qa_e[qa_e >= keep] -> qa_e[qa_e > keep] (entity N_LOW's 60 QA records in FL) survived test_pools_world and
+  test_gen. Now the fact_qa records are read too (keys qa_fb_name_in_F0, qa_non_low_name_in_FL), the FL QA plan is
+  asserted in test_arm_plans_share_slots, the QA plant in test_fact_purity_catches_planted_leaks, and two mutants
+  (fl_qa_keeps_one_high_entity, qa_purity_off) are killed.
+  REPORTED (each needs a person; R-1 and R-2 were since fixed as pre-registration changes, see CHANGES BEFORE
+  FIRST RUN):
+  R-1 Family F has a reference shortcut outside SPEC 5's oracle list: "the latest statement of the asked attribute
+      that does not name another entity" (ellipsis, alias or the asked name) scores 0.908 on 6,144 training F items
+      and 0.900 on a full-size K-EVAL-ID F block (512); "latest ellipsis or alias statement of the attribute" alone
+      0.684 / 0.674. Cause: other entities never use ellipsis, and a foil's alias statement of the attribute after
+      the key's latest is rare (follow 1/2 x aliased 1/3 x alias form 1/2). SPEC 5 passes (O4 0.25, T 0.47).
+  R-2 masks.fit defaults (300 steps, lam 1) found a single planted unit every time, but on a two-fact plant (one
+      unit per fact, both silent on every other prompt) SF budget 2 recovered both units on 1 of 3 seeds, KF budget 2
+      on 2 of 3; 1,000 steps or lam 5 recovered 3 of 3. K2 notes ask for a planted SET fixture; test_ablate plants one.
+  Checked and fine: K1 arms' fact streams have equal token counts and document lengths (sample and full layout);
+  skill items hold only S (train) or T (eval) names and V values, no F or Z token; fact streams hold no S, T, AL,
+  MK, VH or AH token; K5 golds and hit lines equal the FB record on every sampled chat; pack fill of K data (skill
+  plus fact, no LANG) measured 1.00 drawn tokens per slot, above SPEC 7's 0.9885, so the FB region stays drawn.
+
+CHANGES BEFORE FIRST RUN (2026-09-27; no K run has started. Mac CPU only, no language model loaded, nothing
+  trained, queued or committed. Evidence and tables: ../SPEC.txt section 16 R-1)
+  R-1 fixed in two passes. First: fams.fam_F rebuilt (every entity one reference statement; the key and one foil
+     state the asked attribute that way; a foil alias after the key's latest in exactly 1/4; stale named statements
+     before both reference statements; the foil never restated; LAST_KEEP, BD-12), oracles O11-O14 and SURF
+     (BD-13), F block rules follow_ref, follow_alias, key_named, tests/test_reference.py and 15 mutants. Second:
+     with independently drawn kinds, resolving one kind named the key by elimination in every mixed item (SURFe
+     0.904, SURFa 0.908 on 24,576 fresh training items, against O13's 0.75 bar), so the key and the foil now share
+     one kind (skill.block_flags, BD-14); oracles.form_pattern takes a resolved kind (VIEWS: SURF, SURFe, SURFa,
+     bars 0.65, 0.85, 0.85 on F) and purity reports SURFr; F block rules key_alias (1/2) and same_kind (every
+     item); report["surf_counts"] is now per family and view. Tests added: SURFe/SURFa patterns on a hand-made
+     item, the one-kind bars on 512-item blocks, one kind per item from tokens, exact flags down to 2-item blocks,
+     and test_mixed_kinds_reproduce_elimination_and_fail (foil kind flipped: SURFe and SURFa 1.000, both bars and
+     same_kind fail). Mutants added (killed, reasons read from the failing asserts): f_kinds_independent (SURFe
+     0.916, same_kind, follow_alias), f_kind_tie_not_flipped (2-item flags), surfe_view_unresolved (SURFe 0.60 on
+     a block), surfe_bar_loose, same_kind_check_off; surf_in_sample retargeted. Samples regenerated with
+     `gen.py skill D --slots 12500000 --workers 8`, `gen.py evals D`, `gen.py check D`: exit 0, no fails.
+  R-2 fixed (second change the same day; evidence and tables: ../K2_localize/notes.txt K2-e). The review's two-fact
+     failure needs a saturated unit (CE flat until its gate is nearly shut): on a fixture where every plant is
+     graded, every setting tried found every set. New fixture tests/plantfix.py (F1-F4 one unit per fact, S1-S2
+     one per skill, X shared by fact F5 and skill S3; F1, F3, S1 saturated) with 10 cases (SF and KF on sets of 1, 2
+     and 4 fact units, and SF, KF, SS, KS on the mixed plant) on two floor conventions; sweep tests/mask_sweep.py.
+     The build defaults missed on 7 of 10 cases (K2's floors, seeds 0-2); new defaults 1,000 steps, lam 1, gate
+     init 0.0 (masks.fit; BD-11) found 120 of 120 (10 cases x seeds 0-5 x both conventions), no other unit above
+     P(closed) 0.351, every planted unit 0.459 or more, and the reviewer's plant on 3 of 3 seeds for SF and KF.
+     fit returns p_drop. Tests: tests/test_masks.py (fixture clean and saturated; KF2 seed 1 on the default floors
+     and MX-SF seed 0 on K2's, both missed by the build defaults; the 120-fit sweep is too slow for the suite).
+     test_ablate's single-unit plant no longer asserts masks: its units are the whole block output, so a gate sees
+     CE move only under 0.01; the build defaults picked them on P(closed) margins of 0.00-0.03, the new ones miss
+     its SS unit on seed 1 (K2 KNOWN RISKS; M3's scan finds both). Mutants added: mask_defaults_build,
+     mask_init_one (KF2 seed 1 on the default floors), mask_steps_300 (MX-SF planted P(closed) 0.11),
+     mask_harden_most_open, mask_penalty_off, mask_p_drop_is_p_open, sf_ignores_skill (X taken), plant_unsaturated,
+     plant_not_silent (F2 reads F1's gold);
+     mask_objective_flipped moved from test_ablate to test_masks. All killed, reasons read from the failing asserts.
+     mutation_k's baseline timeout raised from 110 s to 400 s (it runs every file; it took 112 s).
+
+REVIEW 2 2026-09-27 (second independent reviewer, of R-1 and R-2 as fixed; Mac CPU only, no language model, nothing
+  trained, queued or committed; scripts and outputs in the session scratchpad, rev3/)
+  Ran: pytest (73 passed, 84.7 s at load 150-220); mutation_k --baseline (exit 0, 75 s) and all 53 mutants (killed;
+  the failing asserts of o12_blind_to_refs, surf_in_sample, plant_unsaturated and plant_not_silent read: as named);
+  gen.py check on the R-1 samples (pass; F rows equal SPEC 16's table); 30 fresh F items (20 train, 10 eval) decoded
+  and read by hand: every gold is the world rule, the flags match the tokens, each ellipsis follows its antecedent,
+  each alias is defined 1-10 exchanges before use, key and foil share one kind. Fine as recorded otherwise.
+  REPORTED (each changes F's or K2's design and the SPEC 16 tables, so not fixed here):
+  R-3 F keeps a positional shortcut outside SPEC 5's list. LASTSKIP: O4's part (a named statement of the asked key's
+      attribute after the first reference statement: the "full after" quarter), else of the two reference statements
+      of the attribute the later one, unless it is the item's last statement, then the earlier one. It resolves no
+      reference and reads 0.681 on 24,576 fresh training F items, 0.691 on 8,192 fresh eval-split items and 0.685 on
+      8,192 K-EVAL-S-split items (R-1 samples: 0.688 / 0.670 / 0.625, train / K-EVAL-ID / K-EVAL-S), against SURF's
+      bar 0.65 and K1's "0.625 resolves nothing" mark. Cause: BD-12 thins only orders whose last statement is the
+      key's latest, so on the reference items the foil's reference statement is the item's last statement in 0.272
+      of items and the key's in 0.192 (R-1 train sample, 9,216 items). Prototype on a scratch copy (fams.fam_F thins
+      at LAST_KEEP when the last statement is the key's latest OR the foil's reference statement): LASTSKIP 0.504 on
+      the reference items, F.last 0.198 vs chance 0.197 (16,384 items), every SPEC 5 F bar and balance rule passed
+      on 8,192 fresh items (SURF 0.632, SURFe 0.821, SURFa 0.811).
+  R-4 Earlier questions carry the resolution. EXCL: O4's part, else a reference value already answered for the asked
+      key wins, one already answered for another name is excluded, a coin on the rest: 0.686 on fresh train and
+      eval-split items (samples 0.685 / 0.683 / 0.682). Its repeat half is SPEC 16's reported 0.086; exclusion adds
+      about as much (1,470 of 18,432 reference items). EXCL with LASTSKIP as fallback: 0.732 / 0.742 fresh (samples
+      0.737 / 0.717 / 0.695); one kind resolved plus EXCL+LASTSKIP on the other kind 0.859-0.870 (bar 0.85). A
+      cross-fitted rule on SURF's pattern, the last-statement flag, both distances and these flags reads 0.68-0.73.
+      F's K1 marks (0.625 / 0.81 / 1.00) do not hold while either cue is in the data.
+  R-5 masks.fit's new defaults on seeds not used by R-2 (tests/mask_sweep.py, both floor conventions): seeds 6-8 57 of
+      60, seeds 9-11 59 of 60. All 4 misses leave out the saturated skill unit S1 (MX-SS seed 6 both conventions,
+      MX-KS seed 6 default floors, MX-SS seed 11 default floors; S1's P(closed) 0.001-0.034) and take unplanted
+      unit (0, 11) at P(closed) 0.27-0.33, which the 0.5 false-positive rule does not flag. Seed 6, MX-SS on K2's
+      floors: lam 1 still misses at 3,000 steps (S1 at 0.000); lam 3 finds both cases from 1,000 steps (K2's floors)
+      and 2,000 (default floors). The first review's two-fact plant at the new defaults: SF and KF at budget 2 found
+      both units on seeds 3-5 (P(closed) 0.97-0.99, others 0.07 or less).
+
+K3 ROUND 1 2026-09-27 (fixes of REVIEW 2's R-3 to R-5 and a fitted cue-model acceptance gate; pre-registration
+  changes, no K run has started. Mac CPU only: no language model loaded, tiny CPU test models only, nothing trained,
+  queued or committed. Scripts and outputs: the session scratchpad, k3/)
+  Environment: the Mac venv ~/.venvs/planck had no tokenizers (every K module needs it through pools.get); installed
+  tokenizers 0.23.2 there with uv (with huggingface-hub, httpx, tqdm). The gate needs only torch and numpy.
+  GATE (SPEC 5 [K3]; cues.py, cuegate.py, check_k.run). 132 columns, all listed in check.json cue_gate.features; no
+     column compares a statement's name with the question's or resolves an ellipsis or alias (test_cues holds every
+     other column fixed when the question names another entity). Learners logit, mlp, set; families pooled at the
+     stream's shares; 2-fold cross-fit on at most 81,920 training items; eval sets scored by the fit on all of them.
+  BEFORE (build design with R-1 and R-2, 24,576-item draw of the 1/20-scale stream; best learner; train / K-EVAL-ID /
+     K-EVAL-S): R 0.715 / 0.695 / 0.742, U 0.871 / 0.875 / 0.859, B 0.491 / 0.297 / 0.312, F 0.720 / 0.715 / 0.719,
+     A 0.901 / 0.922 / 0.941, P 0.804 / 0.816 / 0.824: R, U, F, A and P failed. Causes (MLP refit with one feature
+     group zeroed): earlier answers (R 0.654 -> 0.495, P 0.802 -> 0.625, B 0.485 -> 0.326, F 0.703 -> 0.666, U 0.860
+     -> 0.805; R-4's EXCL in every family); U's repeat counts (0.860 -> 0.751, with entity sizes 0.691); A's
+     " none" a prior, not a detection (first fixed sample, set learner: " none" on 0.88-1.00 of both-items and on
+     0.83-0.96 of the R items whose key alone states the attribute, k 2-4).
+  CHANGES (each sample: gen.py skill D --slots 25000000 --workers 4, SPEC 16's 8 rounds; K-EVAL-ID and K-EVAL-S at
+     gen.py's seeds): R-4 in every family (BD-15); R-3 (BD-16); U (BD-17); A (BD-18; A's train ceiling by step: own
+     both-items 0.863, their count matched to R's 0.632, R contexts 0.522 at 40,960 items and 0.551 at 81,920, R and
+     U contexts 0.500); the gate in gen.py check (BD-19). The reviewer's F rules on fresh blocks (new_rules.py, tag
+     9931, 8,192 train and 8,192 eval items): LASTSKIP 0.681 / 0.691 -> 0.632 / 0.632 (reference items 0.509 /
+     0.510), EXCL 0.686 / 0.686 -> 0.625 / 0.625 (same-key repeats and excluded foil values 1,573 and 1,470 of
+     18,432 -> 0 and 0 of 6,144), EXCL+LASTSKIP 0.732 / 0.742 -> 0.632 / 0.632, POSFIT 0.714 / 0.734 -> 0.625 /
+     0.625; the item ends with the key's reference statement in 1,130 and the foil's in 1,208 of 6,144.
+  AFTER (gen.py check on the final sample, 81,920 items, 4 min 50 s with torch at 4 threads; check.json pass, no
+     fails; cue ceiling train / K-EVAL-ID / K-EVAL-S, bar): R 0.646 / 0.652 / 0.641 (0.65), U 0.577 / 0.607 / 0.615
+     (0.65), B 0.344 / 0.293 / 0.309 (0.65; pairs 0.035 / 0.062, bar 0.30), F 0.630 / 0.607 / 0.621 (0.65), A 0.500 /
+     0.500 / 0.500 (0.50), P 0.643 / 0.656 / 0.652 (0.65). R and P sit at their bar by design: the no-foil fifth is
+     free to a cheap rule and O2 <= 0.50 puts the key before a foil in 5/8 of the foil items (O1, train: R 0.605, P
+     0.608). A reads 0.50 at SPEC 4's shares; at equal R, U, A shares it read 0.96 (test_cues' first version, one
+     512-item block each, k3/pytest1.log; K3 ROUND 2 D-4). 128-wide learners at 24 epochs read no higher (earlier
+     sample: R 0.642, F 0.630, P 0.640, U 0.565, A 0.511, B 0.338). Every SPEC 5 oracle and balance rule passes;
+     F's rows: ../SPEC.txt section 16 K3 (SURF 0.625 / 0.615 / 0.602; T moved most, 0.490 / 0.480 / 0.418 -> 0.479 /
+     0.488 / 0.488); F.ref_last, the key's and the foil's share of reference items that end with their statement,
+     0.193 / 0.196 (train). Every family's items changed (R-4), so SPEC 16's "records outside F identical" no longer
+     holds.
+  R-5 (masks.fit, BD-20; K2 notes K2-f): per-budget penalty, 2,000 steps, lam 6, init 0.0. Choosing seeds 0-11:
+     240 of 240; fresh seeds 12-31: 400 of 400 at 2,000 steps (max other P(closed) 0.364, min planted 0.577), 399 of
+     400 at 1,500. init 1.0 at these values found 120 of 120 on seeds 0-5 at 2,000 steps (4 misses at 1,000), so
+     mutant mask_init_one (init 1.0) survived and is retired; mask_init_three (init 3.0) replaces it (killed on
+     MX-SS seed 6). lam 6 per unit also passes RUN (fixture budgets are 1-5), so the per-budget price is pinned by
+     test_penalty_is_per_budget_unit_and_defaults_are_the_verified_ones (mutants mask_per_budget_off and
+     mask_penalty_per_unit).
+  TESTS 88 (73 + 15: test_cues 7; test_skill 4: R-4 rule on every family, a planted copy fails acceptance, U's
+     exchangeability from tokens, A's both-items; test_reference 2: F.ref_last on 4 blocks and on a planted
+     imbalance; test_masks 2: RUN MX-SS seed 6, the penalty and defaults). pytest 88 passed in 211 s. Mutants 72, all
+     killed on the final code with the failing assert read (mutation_k.py --why; baseline green): see the list in
+     the K3 report; the per-mutant limit is 300 s since this round.
+
+REVIEW 3a 2026-09-27 (fresh adversarial reviewer, lens SHORTCUTS, of K3 ROUND 1; Mac CPU only, no language model,
+  nothing trained, queued or committed; no file changed but this block, so pytest and the mutants were not rerun.
+  Scripts and outputs: the session scratchpad, k3/rev3a/; at most 4 processes, torch at 3 threads, load 50-200 from
+  other sessions)
+  SAMPLES: fresh blocks from the current generator at unused seeds (gen_fresh.py): train split tag 7373 (R 20, U 20,
+     B 12, F 24, A 8, P 8 blocks of 512: 47,104 items), eval split tag 7374 (R, U, A, P 4, B 4 with twins, F 8:
+     14,336), K-EVAL-S split tag 7375 (half of those: 7,168); gen.py's K-EVAL-ID and K-EVAL-S (k3/r6/evals); and B
+     and F of the K3 training sample (k3/r6/skill, 12,288 each). Figures: fresh train / fresh eval split / fresh
+     K-EVAL-S split / K-EVAL-ID / K-EVAL-S unless marked. C5 limits at 0.65: 0.663 (n 12,288), 0.668 (6,144), 0.672
+     (4,096), 0.682 (2,048), 0.713 (512), 0.739 (256); at 0.50: 0.523 (4,096), 0.533 (2,048); pairs 0.386.
+  NEW CHEAP RULES (none is in SPEC 5 or cues.py; no rule compares the final question's name with a statement's name,
+     except on F, where the attribute's named statements are matched as O4 and SURF do; no ellipsis or alias resolved)
+     B, blind to the question's name (only its attribute is read):
+       B-CENTER  the name sharing the most tokens, position-wise, summed over the item's other names; its latest value
+                 of the attribute: 0.919 / 0.915 / 0.918 / 0.916 / 0.919, pairs 0.878 / 0.880 / 0.882 / 0.881 (bars
+                 0.65 and 0.30); K3 sample 0.918. Struct items (3/4 of B): 1.000 on every set, the asked name the
+                 unique centre in every one; the other quarter 0.66-0.68.
+       B-TOKFREQ the attribute's statement whose name tokens occur most often per position: 0.891-0.905, pairs
+                 0.870-0.876. B-MAJOR the name holding the most per-position majority tokens: 0.904-0.911, pairs
+                 0.848-0.850.
+       Cause: in SPEC 4's struct B the asked name shares 2 tokens with each of its 3 foils and each foil 1 with the
+       others (6 shared tokens against 4), so the key is read off the names alone. cues.py cannot see it: `shares`
+       counts other names sharing any token, capped at 2 (every struct name reads 2), and `ovl` is item-level.
+     F (the key's named quarter by O4; only the choice between the two reference statements differs):
+       F-NEARN (the reference nearer after an asked-name statement, never the one just before) 0.565-0.580; F-TURNN
+       (an asked-name statement in its turn) 0.568-0.593; F-RANK (asked name introduced in the first half: the
+       earlier reference) 0.621 / 0.619 / 0.625 / 0.586 / 0.598; F-DEFNEAR (alias items: the alias nearer after the
+       asked name's definition) 0.653-0.660.
+       INTRO  a reference before the asked name's first explicit mention (named statement or definition) cannot be
+              the asked entity's: 0.654 / 0.656 / 0.654 / 0.652 / 0.646; K3 sample 0.655. It fires on 7.6-8.2% of the
+              reference items (13.1-14.3% of the ellipsis ones) and never on the gold.
+       DEFX   INTRO, and on alias items an alias before the asked name's definition is excluded (8.9-9.4% of alias
+              items, always the foil's), else the alias nearer after it (the key's in 0.550-0.553): 0.684 / 0.686 /
+              0.684 / 0.679 / 0.674; K3 sample 0.685. Over C5 on the three fresh sets and the K3 sample.
+       FITX   2-fold cross-fitted lookup (f_more.py) over SURF's forms, INTRO's and DEFX's flags, which reference ends
+              the item and the definition-gap order: 0.708 / 0.697 / 0.715 / 0.676 / 0.703 (evals: training fit);
+              K3 sample 0.708.
+       None resolves a reference: they read where the asked name first appears. SPEC 16's K1 mark "0.625 resolves
+       nothing" does not hold.
+     R and P, blind: R-SLOTS (one statement of the attribute: it; two: the first; more: the last) R 0.609-0.633, P
+       0.613-0.656; R-FEWEST (the holder with the fewest statements) R 0.553-0.606, P 0.545-0.592; R-RANKMIX R
+       0.541-0.584, P 0.555-0.602; P-SINCEQ (the only statement after the latest earlier question) 0.586-0.629.
+     U, blind: U-MOSTREP 0.491-0.512, U-FEWREP 0.488-0.509, U-FIRSTINTRO 0.460-0.496, U-LATESTFIRST 0.496-0.520.
+     A (O9|10's cues first): A-ABS+SLOTS and A-ABS+CENTER 0.500 everywhere. A-ONEHOLDER (" none" when one name
+       states the attribute among 3 or more names) 0.540 / 0.542 / 0.544 / 0.557 / 0.531: over C5 on the fresh train
+       and eval split, but it says " none" on 5.8-7.0% of R, U, P items (R and P 0.633 -> 0.533 on fresh train), so
+       at SPEC 4's shares it loses 0.031 of all skill items; dominated in the mix. Reference only: " none" when no
+       statement of the attribute shares the question's first name token (O3_1's cue) 0.963-0.980, the same fact as
+       O3_1 0.99 on R, which SPEC 5 accepts outside B.
+  FITTED MODEL (fit_gate.py: cuegate.gate's learners and cross-fit; fresh train pooled at the stream's shares, 40,960
+     items; best learner, train / fresh eval / fresh K-EVAL-S / K-EVAL-ID / K-EVAL-S):
+     base (cues.py's 132 columns): R 0.641 / 0.652 / 0.650 / 0.639 / 0.629, U 0.564-0.597, B 0.302-0.332 (pairs
+       0.060-0.086), F 0.617-0.641, A 0.500, P 0.639 / 0.642 / 0.667 / 0.656 / 0.668: the fixer's table on fresh
+       data, every figure within C5.
+     +NAMES (14 columns blind to the question: the candidate name's centrality, its rank and uniqueness, its tokens'
+       positional frequency and rank, its distinct attributes, the value-id rank): B 0.923 / 0.918 / 0.918 / 0.926 /
+       0.938, pairs 0.877-0.898; R, U, F, A, P within 0.03 of base.
+     F only, closed columns (f_model.py; candidates the attribute's statements; kind, N or O on the attribute's named
+       statements only, position and turn columns, neighbour kinds, INTRO and DEFX flags, definition-gap buckets,
+       asked name's intro rank, names, statements, earlier questions; no per-entity column): 0.714 (cross-fit) /
+       0.728 / 0.717 / 0.680 / 0.727; alias reference items 0.51-0.62, ellipsis 0.59-0.67. Over C5 on fresh sets.
+     Not counted, they resolve: the same F model with asked-name counts before and after a reference or an
+       asked-name statement in its turn read ellipsis items 0.92-1.00 (f_model_cur_LEAKY*.txt), and cues.py's columns
+       plus an asked-name flag on every statement read F 0.746-0.766: an ellipsis refers to the statement just
+       before it, so the asked name's position around a reference, or a per-entity column (ent_rank, ent_named)
+       joined to an asked-name flag, is the resolution. An F column set for the gate must keep the flag to the
+       attribute's statements and carry no per-entity column.
+  LINK (not a shortcut; reported because the gate's wording admits it): an earlier question with the final name (for
+     U also an identical one, the lure) was answered from a statement; answer that statement's name's latest value
+     of the asked attribute, " none" if it has none. Only cues.py's allowed pieces (question-to-question identity,
+     an earlier answer's value, statement-to-statement name identity); the final question is never compared with a
+     statement. It applies to 21-44% of R, U, P, A items and is right on all of them: R 0.738-0.766, P 0.849-0.869,
+     U 0.741-0.828, A 0.648-0.664 (F 0.51); fitted +NAMES+LINK R 0.781-0.797, U 0.778-0.820, A 0.660-0.690, P
+     0.882-0.902. Each hop is a full-name match, so a model using it has the skill; but "no feature compares a
+     statement's name with the question's" is not closed under composition, and the gate's ceiling is the ceiling of
+     its columns only. (A first +NAMES run had "an earlier question asked this name" and read U 0.565 -> 0.608-0.642.)
+  GATE CODE: no gold leak: on 6,315 items (every third of the fresh eval split, K-EVAL-ID, K-EVAL-S) X is identical
+     when the final answer turn carries another value; only the gold index moves (leak_check.py). Cross-fitting is
+     right (even and odd halves; evals by the full fit); cross-fitted train figures sit within 0.03 of fresh held-out
+     sets. Gaps: centrality invisible (above); no asked-name column at all, so on F the gate cannot see O4, SURF's N
+     and O, INTRO or DEFX, which SPEC 5 counts as cheap there; LINK; the pair tolerance uses n 256 on every set
+     (K-EVAL-S has 128 pairs): stricter than C5, harmless.
+  PROTOTYPE, F (scratch copy k3/rev3a/proto/code only: fams.fam_F's ok() also requires both reference statements
+     after both entities' first explicit mention, definitions included, so both aliases follow both definitions):
+     train tag 7383 (8,192 items) / eval split tag 7384 (4,096): INTRO 0.625 / 0.625, DEFX 0.622 / 0.622, FITX 0.633
+     / 0.624 (0.646 / 0.648 with the asked name's intro rank), F-RANK 0.636 / 0.608, closed F model 0.636 / 0.655;
+     purity.accept on both: no fails, SURF 0.617 / 0.616, SURFe 0.811 / 0.806, SURFa 0.806 / 0.810, O13e and O13a
+     0.750, F.last 0.211 (chance 0.195) / 0.207 (0.195), F.ref_last 0.210 and 0.204 / 0.206 and 0.202. Residual: the
+     intro rank still orders the references a little (0.646-0.655 with it). Not run on it: pytest, mutants, gen.py
+     check, the pooled gate.
+  B, no prototype: with 4 names and every proper subset of the asked name held by a foil, the asked name is the
+     unique centre (each foil is 1 token from it, 2 from each other), so the fix is a design choice: the 8-name cube
+     {a, a'} x {b, b'} x {c, c'} (every name equally central, every proper subset of each held by another; k 8,
+     beyond SPEC 4's 1-4), a second centre with its own 3 variants sharing no token with the first, or dropping the
+     full-subset property. B-CENTER belongs in SPEC 5 beside the O3_S bars (0.65, pairs 0.30), NAMES in cues.py.
+  VERDICT: not clean. B fails every set by 0.27 per item and 0.58 on pairs with a rule blind to the question's name;
+     F's DEFX, FITX and the closed F model exceed C5 on every fresh set and DEFX on the K3 sample (the fixed K-EVAL
+     files pass by their size); A-ONEHOLDER exceeds A's bar on A items alone (a net loss in the mix). R, U, P: no new
+     cheap rule or column took them over their bars.
+
+REVIEW 3b 2026-09-27 (fresh adversarial reviewer, lens TESTS AND MASKS, of K3 ROUND 1; Mac CPU only, no language
+  model loaded, tiny CPU test models only, nothing trained, queued or committed; no file changed but this block.
+  Scripts and outputs: the session scratchpad, k3/rev3b/. At most 4 processes of mine at once, load 50-220 from other
+  sessions; the mask sweep was stopped at 17:29 while E003 neared its swap limit and resumed after the mutation run)
+  RAN
+    pytest -q: 88 passed in 165.6 s. mutation_k.py --baseline: exit 0 (181 s). mutation_k.py --why: 72 of 72 killed.
+      The failing asserts of the 20 K3 mutants read as described: f_foil_not_thinned (302, 400) on the F.ref_last
+      test; mask_defaults_r2 and mask_init_three harden {(0, 9), (0, 11)} on MX-SS seed 6 (S1 left out);
+      mask_steps_300 leaves a planted gate at P(closed) 0.094 (MX-SF seed 0); a_both_own_structure A 0.852 / 0.707;
+      questions_ask_final_attr 1,040 early_attr items; u_rank_not_exact on the exact-flags test.
+    Three new mutants (my_mutants.py, scratch copies through mutation_k's copy() and run(); mutation_k.py not
+      edited), each killed for the intended reason:
+      f_foil_thinned_less (fam_F keeps orders ending with the foil's reference at 0.7, the key's latest at 0.5):
+        test_f_key_and_foil_references_end_items_equally, (292, 371), a gap of 79 against its 3 SE limit of 77.
+        test_f_blocks_meet_the_bars (512-item blocks through purity.accept) passed it before that.
+      early_rule_ignores_staleness (item_facts' early rule exempts every same-name earlier question, stale or not):
+        test_planted_early_question_fails_acceptance (early_attr False on the planted copy of the final question).
+      u_sym_key_more_repeated (fam_U gives the key the larger count in every upd "sym" item):
+        test_u_key_and_foil_are_exchangeable, (3, 2, True) 52 items against (2, 3, False) 0.
+    Probes of the round's code (not required to die): cue_ceiling_weakest_learner (min over learners) was killed by
+      test_planted_cue_is_found_and_fails_the_bar (the logit reads the planted cue at 0.641 / 0.680, under its 0.75);
+      p_redraw_off, cue_draw_first_items, set_learner_unpooled and u_sym_key_more_repeated on test_cues alone
+      SURVIVED (T-1 to T-3).
+    Mask sweep on seeds nobody used, 60-79 (32-51 left for K2-f's check of the SPLIT A pick), masks.fit's defaults,
+      10 cases x both floor conventions (tests/mask_sweep.py OUT --seeds 60 ... 79 --floors k2 default --steps 1500
+      2000 --procs 3; 2,296 s for the resumed 360 jobs, median fit 18.5 s; sweep_summary.py):
+        2,000 steps: 400 of 400 found. Other units' P(closed) at most 0.369 (default floors) / 0.187 (K2's); planted
+        units at least 0.438 (default) / 0.600 (K2's). The 0.438 is S1 on MX-SS seed 74, default floors; next
+        lowest 0.585 (MX-KS seed 65).
+        1,500 steps: 399 of 400. MX-SS seed 74 on the default floors hardened {(0, 9), (0, 11)}, S1 at 0.032; one
+        other unit at 0.501 (MX-SF seed 65, default floors).
+      With seeds 12-31: 800 of 800 at 2,000 (95% upper bound on the miss rate 0.37% per fit), 798 of 800 at 1,500.
+      The saturated S1 still turns late (under 0.04 at 1,500, 0.44 at 2,000 on seed 74), so K3's "every planted
+      unit 0.577 or more" holds on seeds 12-31 only; the test floor TP_FLOOR 0.3 still holds.
+    F by hand: 20 fresh items (skill.block tag 6203: 14 training, 6 eval split; decode_f.py, decoded_f.txt). Every
+      gold is the world rule; kref = fref, klate, kstale, fstale, follow, k and intro rank match the tokens; each
+      ellipsis follows a statement of its entity with no question between; each alias is used 1-5 exchanges after
+      its definition; every stale named statement precedes both reference statements; the foil is never restated
+      after its reference; no earlier question asks the final attribute; d as rendered. The parser's follow_ref,
+      follow_alias, key_alias, key_named, same_kind and ref_last agree with the tokens on all 20.
+  FINDINGS
+    T-1 BD-15's P rule has no test and no check. skill.make_item redraws a P item left with fewer than 2 questions
+      (PLONG 5); mutant p_redraw_off (the redraw removed) survives test_skill and test_cues. Without it 113 of 1,886
+      P draws (6.0%, p_qcount.py, tag 6204) keep only the final question, against SPEC 4's 2-4. No purity rule
+      counts P's questions.
+    T-2 Two parts of the gate have no test. cuegate.run's seeded draw ("never its first items"): mutant
+      cue_draw_first_items survives test_cues and test_gen (no test runs run() above CAP). The DeepSets pooling:
+      set_learner_unpooled survives, so nothing shows the set learner catches a comparative cue the per-candidate
+      learners miss, which is why SPEC 5 lists it.
+    T-3 (sensitivity, not a failure) The gate at test scale does not catch a cue confined to a quarter of a family.
+      u_sym_key_more_repeated on test_cues alone survives: on test_gate_passes_r_u_a_at_stream_shares' data
+      (gate_probe.py) U reads 0.604 / 0.613 against 0.520 / 0.594 unmutated, bar 0.65; test_skill's generator test
+      kills it. Likewise one 512 block through purity.accept passed f_foil_thinned_less.
+    D-1 SPEC 4's balance list (headed "checked on every kept training item and every eval item") includes "U: (key
+      count, foil count, follow) as often as (foil count, key count, no follow); U's k and intro rank exact per
+      block [K3]". purity.balance, so gen.py check, has neither: U gets only no_update 1/4 and the pooled 3 SE
+      intro-rank rule. test_train_blocks_pass_acceptance passed the U blocks of u_sym_key_more_repeated and of
+      u_pair_one_not_mirrored (both killed later in test_skill by the generator test), so a data file without the
+      mirror passes gen.py check. Either add the rule to purity.balance or take it out of SPEC 4's checked list.
+    D-2 K2 notes M1: "(lam per budget unit [K2-f], so it prices an extra unit the same at every b)" is not what
+      masks.penalty does: one unit over budget costs lam / b (6/78 at b 78, 6/781 at b 781). What is the same at
+      every b is an overshoot of a fixed share of b, as K2-f, BD-11 and penalty's docstring say.
+    D-3 K2-f against k3/mask/choose.jsonl: "28 of its MX-KS runs were cut" (the file holds 8 of 24 lam-10 MX-KS fits
+      per step count: 16 cut); "missed MX-SF once on K2's floors, a planted gate at 0.02" (the missed fit, seed 5,
+      has its lowest planted gate at 0.040; 0.018 is on a found SF1 fit, seed 1); "every planted unit's 0.57 or
+      more" (min 0.566; masks.fit's docstring rounds it the same way).
+    D-4 code/notes K3 ROUND 1: "at equal R, U, A shares it read 0.96 (test_cues)". No test computes it; only
+      test_gate_passes_r_u_a_at_stream_shares' docstring states it. At that test's scale with equal shares (5 : 5 :
+      5 blocks of 256, eval seed 6; gate_probe.py) A read 0.791 (train, logit) / 0.520 (eval): over the bar on
+      train, so the direction holds; 0.96 is not reproduced there, and the note does not say where it was read.
+    D-5 mask_sweep.check_equivalence, which the sweep's docstring cites, is stale since R-2: it compares masks.fit
+      at the current defaults (init 0.0, lam 6 per budget) with one() at init 1.0, lam 1 per unit (same set,
+      E[dropped] off by 0.030). At matching settings (MX-SF, K2's floors, seeds 1 and 2, 120 steps read inside a
+      200-step run) set and E[dropped] agree (6e-8), so the sweep's 1,500-step readings stand.
+    D-6 fams.py: LAST_KEEP's comment and fam_F's docstring still say only orders ending with the key's latest are
+      thinned; the code (BD-16) thins orders ending with the foil's reference statement too.
+  CHECKED AND FINE
+    SPEC 16 K3's gate and F tables equal k3/r6/check.json (pass, 132 columns, 81,920 training items; O1 R 0.605, P
+    0.608; F.ref_last 0.193 / 0.196), and K1 READINGS' K-EVAL-ID ceilings. Counts: 88 tests (test_cues 7, test_skill
+    +4, test_reference +2, test_masks +2) and 72 mutants (22 + 2 + 20 + 9 + 19). masks.fit's defaults (2,000 steps,
+    lam 6 per budget, init 0.0, lr 0.05, eps 1e-6) as in BD-11, BD-20, K2 M1 and K2-f; P(closed) 0.168 at init
+    0.0. k3/mask: seeds 12-31 400 of 400 at 2,000 (other units at most 0.364, planted at least 0.577), 399 at 1,500
+    (MX-SS seed 17, K2's floors, S1 0.077); probe 4 / 5 / 6 and 7 / 8 / 8 of 8; init 1.0 all found at 2,000 and 4
+    misses at 1,000 on seeds 0-5; lam 6 at 1,000 missing MX-SS seed 6 on the default floors, as masks.fit says. The
+    harness: 300 s per mutant, 400 s baseline, --why. No code file changed during these runs (mtimes).
+  VERDICT: not clean (T-1, T-2, D-1 to D-6; T-3 is a sensitivity note). The round's claims about its tests, mutants
+    and mask defaults hold as stated, and the defaults found every planted set on 20 more fresh seeds.
+
+K3 ROUND 2 2026-09-27 (fixes of REVIEW 3a and 3b; pre-registration changes, no K run has started. Mac CPU only: no
+  language model loaded, tiny CPU test models only, nothing trained, queued or committed; at most 4 processes, load
+  40-300 from other sessions. Scripts and outputs: the session scratchpad, k3/round2/)
+  SAMPLES: gen.py's (k3/round2/g: `gen.py skill D --slots 25000000 --workers 4`, 8 rounds, 81,920 items;
+     `gen.py evals D`; `gen.py check D`, pass, no fails, 364 s wall, 2.6 GB peak) and fresh blocks at unused seeds
+     (gen_fresh.py; REVIEW 3a's sizes: train tag 8373, 47,104 items; eval split tag 8374, 14,336 with B twins; K-EVAL-S
+     split tag 8375, 7,168). REVIEW 3a's rule scripts (rv.py, rules.py, f_more.py, f_model.py) ran unchanged on them.
+     Figures read train / fresh eval split / fresh K-EVAL-S split / K-EVAL-ID / K-EVAL-S unless marked.
+  B-CENTER (BD-22, SPEC 4 B [K3r2]). The asked name cannot be the unique centre of 4 names that hold every subset
+     of it (REVIEW 3a); the smallest name set where every name's every proper subset is held by another name is the
+     cube {a, a'} x {b, b'} x {c, c'} (each name needs a neighbour along each position, so each 2-position projection
+     has rows and columns of 2 or more: at least 4 cells, 8 names), and in the cube every name is equally central.
+     B's struct items (3/4) name the whole cube, the rest 2-4 of it (k 2, 3, 4 in thirds), the asked name uniform
+     among them, (k, intro rank) exact per block. K-EVAL-S B items need whole held-out cubes, and a random 10% of
+     triples holds about 14 of them, so K-EVAL-S is now a seeded 10% of the cube cells that pair each S position's
+     tokens (pools.build; 1,382 cells, 11,056 triples, was 11,059 loose triples). New oracles B-CENTER, B-TOKFREQ,
+     B-MAJOR with O3_S's bars (0.65; pairs 0.30), NAMES columns in cues.py. Build design (k3/r6, the round-1 sample,
+     read with the new oracles; train / K-EVAL-ID): B-CENTER 0.918 / 0.916, B-TOKFREQ 0.902 / 0.893, B-MAJOR 0.916 /
+     0.922, pairs 0.852 / 0.852 / 0.871. Now (single-answer oracles, gen.py sample; train / K-EVAL-ID / K-EVAL-S):
+     0.181 / 0.180 / 0.211, 0.184 / 0.199 / 0.234, 0.183 / 0.184 / 0.199; pairs 0.031 / 0.125 / 0.039 and 0.047 /
+     0.133 / 0.070 (K-EVAL-ID, K-EVAL-S); REVIEW 3a's tie-sharing versions on the fresh sets and evals 0.179-0.227,
+     pairs 0.038-0.172. O3_S two-token subsets 0.574-0.602, one-token 0.310-0.355, pairs <= 0.203; O2 0.17-0.19; T
+     0.75. The gate with NAMES reads B 0.17-0.23; on the build design (test_cues.test_gate_catches_the_old_b_design)
+     over 0.8. Per item (k, rank) draws failed SPEC 5's rank rule on test_gen's small sample (k 2 rank 0 at 0.602, n
+     251; k 4 rank 2 at 0.171, n 275), so BD-22 makes them block flags, as BD-17 did for U. Costs: B items name 8
+     entities (SPEC 4's
+     range 1-4 now excepts them), B's mean |C| on K-EVAL-ID 9.71 -> 14.21 (fact_cand_size stays 12: mean |C| 11.60
+     -> 12.38), and OOD ENTS (R with 5-6 entities) is no longer the only place many entities occur.
+  F-INTRO-DEFX (BD-21, SPEC 4 F [K3r2]). Oracles F-INTRO and F-DEFX (bar 0.65 on F; of the references left, the
+     earliest: when nothing is dropped the key's reference is the earlier one more often) read 0.682 / 0.680 and
+     0.708 / 0.703 on the build design (k3/r6 train / K-EVAL-ID). First fix (REVIEW 3a's prototype: both reference
+     statements after both first mentions): INTRO 0.625, DEFX 0.624-0.626 on the fresh sets, but REVIEW 3a's FITX
+     with the asked name's intro rank read 0.641 / 0.634 / 0.636 (ellipsis reference items 0.538 / 0.536 / 0.525) and
+     its closed F model 0.637 / 0.653 / 0.645: on ellipsis reference items P(gold is the earlier reference) was 0.439
+     (asked name introduced last, the later reference ends the item; n 947, 3.7 SE), 0.595 (last, neither ends; n
+     546, 4.5 SE), 0.408 (introduced in the middle, it ends; n 368, 3.5 SE) (f_resid.py). Cause: an ellipsis whose
+     antecedent was its entity's first mention sits right after that mention, so with the asked name introduced last
+     the key's reference had to come first unless the key had another first mention; with follow fixed per item,
+     the positions differed between the follow halves. Final: the reference units (an ellipsis with its antecedent)
+     after both first mentions and definitions (prototype A, tags 8383 / 8384: FITX with rank 0.628 / 0.617, no cell
+     over 3 SE; closed F model 0.641 / 0.633). BD-21 pushed references later: F.last 0.228 vs chance 0.192 at
+     LAST_KEEP 0.5, 0.204 vs 0.193 at 0.4, 0.196 vs 0.192 (eval split 0.189 vs 0.190) at 0.35 (tags 8393 / 8394),
+     kept. Now: F-INTRO and F-DEFX 0.622 / 0.625 / 0.613 (gen.py sample), 0.625 on every fresh set (INTRO; DEFX
+     0.615-0.626), FITX 0.605-0.627 (with rank 0.623-0.637), SURF 0.627 / 0.609 / 0.602, SURFe 0.809-0.812, SURFa
+     0.793-0.815, T 0.537-0.543 (was 0.48-0.49: references later, so the key's reference is its last statement more
+     often; bar 0.65), F.last 0.192 vs 0.192 (train), F.ref_last 0.187 / 0.188. SPEC 16's K1 mark 0.625 holds again.
+  GATE-F-BLIND (BD-23). cues.f_item_features, 89 columns (REVIEW 3a's closed list of 85, plus the frame match, the
+     question's form and an absent cell for the intro rank): candidates the attribute's statements; the asked name
+     only as N or O on them, the INTRO and DEFX flags, the definition gap and the asked name's intro rank; no
+     per-entity column. cuegate.run fits it on the F items of its draw after the pooled model; F's ceiling is the
+     larger. test_cues holds every other column
+     fixed when the question names another entity (mutant f_model_turn_leak: an asked-name statement in the turn,
+     REVIEW 3a's leak). Readings: 0.634 / 0.631 / 0.633 (gen.py check), 0.622 / 0.638 / 0.633 / 0.629 / 0.637 (fresh).
+  A-ONEHOLDER. Oracle A1H, reported: A 0.542 / 0.557 / 0.531, R 0.90 (O4 1.00), P 0.89-0.91; REVIEW 3a's rule says
+     " none" on 5.9-7.0% of R, U, P items (rules_final.txt); against the same rule without it (A-ABS+SLOTS), at SPEC 4's
+     shares, -0.031 of all skill items on R, U, P and A, -0.055 with F (fresh train; fresh eval split -0.056). SPEC 9
+     splits A's LIK by that context; not barred.
+  LINK. SPEC 5 now says the ceiling covers check.json's columns only and that chained full-name identity is the
+     skill. Final sets: LINK R 0.738-0.778, P 0.854-0.869, U 0.732-0.828, A 0.648-0.664, F 0.504-0.520.
+  GATE-CODE. B pairs pass at C5's tolerance for the set's own pair count (cuegate.gate n_pairs; test and mutant
+     cue_pair_n_256).
+  T-1, D-1 (BD-24). purity.qcount_fails on every set (1-3, P 2-4, PLONG 5-7 from check_k); U's cells and k, rank in
+     purity.balance; B's k and rank too. Tests test_p_items_hold_two_to_four_questions, test_u_balance_rules_catch_
+     planted_breaks, test_b_k_and_rank_rules_catch_per_item_draws.
+  T-2. test_run_draws_a_seeded_sample_not_the_first_items (cuegate.draw); test_set_learner_finds_an_odd_one_out (a
+     column marks the odd candidate, which value is odd flips per item: set 0.989 / 1.000, logit 0.272 / 0.232, mlp
+     0.284 / 0.242, set without pooling 0.243 / 0.233).
+  T-3. Mutant f_foil_thinned_less (the foil's ending kept at 1.4 x LAST_KEEP, REVIEW 3b's 0.7 / 0.5 scaled) SURVIVED
+     the F.ref_last test at 8 blocks (first mutation run): key 607, foil 673, a gap of 66 against the 3 SE limit
+     107; the unmutated code reads 612 / 535 there (t3probe.py). At LAST_KEEP 0.35 fewer items end with a reference,
+     so the same ratio moves fewer counts. At 16 blocks: 1,195 / 1,365 (gap 170, limit 152) mutated, 1,209 / 1,121
+     unmutated, so the key-versus-foil test pools 16 blocks (NB_REF) and the last-statement test 8 (NB; 4 before).
+     The 1.4 x mutant moves the 16-block gap by about 260 counts against a limit of 152, so a smaller imbalance can
+     still pass (not measured): SPEC 5 now says the gate is a ceiling check with its bar's slack and that the
+     generator tests and balance rules pin the designed symmetries.
+  D-2, D-3, D-5, M-1: K2 notes K2-g (M1 wording, K2-f's figures from k3/mask/choose.jsonl, check_equivalence at fit's
+     defaults, the planted minimum 0.44 over 40 fresh seeds with M3's scan as the backstop); masks.fit's docstring.
+  D-4: the 0.96 was test_cues' first version of the gate test (one 512-item block each of R, U, A, training seed 5,
+     eval seed 6; k3/pytest1.log: A 0.963 train, 0.789 eval), not the current test (5 : 5 : 5 blocks of 256: 0.791 /
+     0.520, REVIEW 3b); the test's docstring and the notes say so. On the round-2 code at that scale (REVIEW 3b's
+     gate_probe.py, gate_probe_r2.log): equal shares A 0.768 train / 0.625 eval (fails), stream shares 0.469 / 0.500.
+  D-6: fams.py LAST_KEEP's comment and fam_F's docstring name both thinned endings.
+  AFTER (gen.py check, k3/round2/g; cue ceiling train / K-EVAL-ID / K-EVAL-S, bar): R 0.648 / 0.643 / 0.633 (0.65),
+     U 0.576 / 0.607 / 0.613 (0.65), B 0.226 / 0.193 / 0.203 (0.65; pairs 0.023 / 0.031, bar 0.30), F 0.634 / 0.631 /
+     0.633 (0.65; F model 0.634 / 0.631 / 0.633), A 0.500 (0.50), P 0.649 / 0.688 / 0.688 (0.65; C5 limits 0.713 at
+     512, 0.739 at 256). Fresh sets (run_gate2.py; 40,960 training items pooled at the stream's shares): R 0.634 /
+     0.666 / 0.648 / 0.652 / 0.637, U 0.576-0.596, B 0.168-0.225 (pairs 0.004-0.029), F 0.627-0.664, A 0.500, P
+     0.623 / 0.658 / 0.667 / 0.629 / 0.656; no fails.
+     Records: K-EVAL-ID R, U, A, P turns equal round 1's (A's and P's candidates differ), B and F new; K-EVAL-S all
+     new (names from the new cells); training items nearly all changed (names redrawn against the new K-EVAL-S set).
+  TESTS 103 (88 + 15: test_cues 6, test_skill 5, test_reference 2, test_masks 1, test_pools_world 1). pytest 103
+     passed (374 s at load 100-160, after the NB_REF change). Mutants 99 (72 + 27; bind_foils_miss_a_subset retired,
+     its target gone, for b_small_items_star; f_last_not_thinned retargeted to LAST_KEEP 0.35). First run (3 groups
+     in parallel, mutation_k.py --why --id ...): 98 killed, f_foil_thinned_less SURVIVED (T-3 above); after NB_REF 16
+     every test_reference mutant (29) was rerun: all killed. Baseline (mutation_k.py --baseline, alone): exit 0,
+     273 s (a run beside the 2 mutant groups hit the 400 s limit). Failing asserts read (mut_group*.log, mut_rf_*.log):
+     b_small_items_star, B-* over 0.3 on the train block; b_cue_bars_loose and b_pair_bars_o3_only, the build
+     design's B-CENTER fail missing per item and on pairs; b_k_rank_per_item, B.b0 k2 22 of 128 (train blocks);
+     b_k_rank_rule_off, no k8_rank fail on per-item draws; kevs_not_whole_cubes, 5,528 K-EVAL-S triples;
+     u_mirror_block_rule_off, u_mirror_pooled_rule_off and u_k_rank_rule_off, the planted U breaks without their
+     message; p_redraw_off, 27 P items outside 2-4 (train blocks); p_qcount_rule_off, no fail on the planted
+     one-question item; plong_range_ignored, gen.py check exit 1 (at 2-4 all 256 OOD-PLONG items of k3/round2/g
+     fail the count); cue_names_off, the build design's B at 0.28 / 0.33;
+     cue_draw_first_items, the drawn ids are the first 48; set_learner_unpooled, set 0.243 / 0.233; cue_pair_n_256,
+     the 2,048-pair set passes; f_model_turn_leak, F.b0.i1's columns move; f_model_off_in_run, no f_model;
+     f_model_fails_dropped, no F-model fail; f_model_ceiling_not_merged, F 0.56 / 0.64; sweep_equivalence_stale,
+     gap 0.030; f_intro_rule_off, F-DEFX 0.723 on one 512 block; f_ell_unit_rule_off, F.b0.i3's ellipsis unit
+     starts at a first mention; f_last_keep_half, F's last-statement rate 0.262 vs 0.187 on one block;
+     f_foil_thinned_less, (1,195, 1,365); f_intro_oracle_blind and f_defx_oracle_blind, the hand-made items;
+     f_intro_bars_loose, F-INTRO's row passes at 0.75. No code file changed during the mutation runs.
+
+REVIEW 4a 2026-09-27 (fresh adversarial reviewer, lens SHORTCUTS, of K3 ROUND 2; Mac CPU only, no language model,
+  tiny CPU learners only, nothing trained, queued or committed; no repo file changed but this block, so pytest and the
+  mutants were not rerun. Scripts and outputs: the session scratchpad, k3/rev4a/; at most 4 worker processes, torch at
+  3 threads, load 30-130 from other sessions; the fitted-model run peaked at 3.1 GB RSS, memory_pressure 46% free
+  before it)
+  SAMPLES: fresh blocks from the current generator at unused seeds (REVIEW 3a's gen_fresh.py): train tag 9473 (R 20,
+     U 20, B 12, F 32, A 8, P 8 blocks of 512: 51,200 items), eval split tag 9474 (R, U, A, P 4, B 4 with twins, F 8:
+     14,336), K-EVAL-S split tag 9475 (half: 7,168); gen.py's K-EVAL-ID, K-EVAL-S and training stream (k3/round2/g).
+     Figures: fresh train / fresh eval split / fresh K-EVAL-S split / K-EVAL-ID / K-EVAL-S unless marked; ties share
+     credit (LIK). C5 limits at 0.65: 0.661 (n 16,384), 0.664 (10,240), 0.672 (4,096), 0.682 (2,048), 0.695 (1,024),
+     0.713 (512), 0.739 (256); pairs at 0.30: 0.343 (1,024 pairs), 0.361 (512), 0.386 (256), 0.422 (128).
+  NEW CHEAP RULES (rules_f.py, rules_rest.py, rules_b.py, rules_len.py, f_fit4.py; none is in SPEC 5, cues.py or
+     REVIEW 2 / 3a's lists)
+     F (every rule takes O4's quarter, then picks between the two reference statements; no reference resolved):
+       F-WINK    skill._in_range puts an alias 1-10 exchanges after ITS definition, so an alias of the attribute
+                 in the asked name's definition turn is the foil's: 0.634 / 0.635 / 0.636 / 0.631 / 0.645. It
+                 fires on 4.7-5.4% of alias reference items and is right on every one (291 of 291, 83 of 83); two
+                 decoded items read by hand (the foil's alias shares the turn of "asked name = X"). The 11+
+                 exchange end never fired.
+       F-WIN2    F-WINK, then prefer an alias no other name's 1-10 window holds: 0.640 / 0.641 / 0.641 / 0.637 /
+                 0.648.
+       F-XNEAR   the alias nearer in exchanges after the asked name's definition: 0.643 / 0.644 / 0.643 / 0.628 /
+                 0.654 (alias reference items 0.549 / 0.552 / 0.548 / 0.508 / 0.577).
+       F-RX      F-XNEAR on alias items, REVIEW 3a's F-RANK on ellipsis items: 0.643 / 0.649 / 0.645 / 0.623 / 0.676;
+                 gen.py's stream (12,288 F items, its two shards) 0.647 / 0.640. F-RANK's ellipsis items 0.487-0.558.
+       F-FIT4    2-fold cross-fitted lookup (SURF's pattern, each reference's exchange gap from the asked definition
+                 and other-window flag, which ends the item, same turn, the asked name's intro rank, k; 2,783 keys):
+                 0.641 / 0.645 / 0.647 / 0.647 / 0.648 (shorter keys 0.633-0.666).
+       Every F figure above is within C5 of 0.65. By SPEC 9's halves (the key's kind, late quarter included),
+       F-XNEAR on the alias half reads 0.662 / 0.667 / 0.666 / 0.629 / 0.680 (n 8,192 / 2,048 / 1,024 / 256 /
+       128), the ellipsis half 0.620-0.629: SPEC 16's K1 marks "0.625 resolves nothing" and "within each half 0.625
+       without that kind resolved" are low for the alias half by about 0.04 (7 SE on fresh train) and for F by about
+       0.02.
+       Not counted (they use the reference's own link): F-ANTEATTR, an ellipsis whose preceding statement carries an
+       attribute the asked name states in another named statement is not the asked entity's (each entity states each
+       other attribute once): 0.690 / 0.689 / 0.693 / 0.688 / 0.684, ellipsis items 0.658-0.680, firing on 34-35%
+       of them and right every time (2,140 of 2,140; 522 of 522). It needs the ellipsis's antecedent and a question-
+       to-statement name match, the two pieces of the resolution. F-QANTE (an earlier question with the final name,
+       the statement answering it, the ellipsis right after it: LINK plus adjacency) 0.639-0.649.
+     B (partial keys, O3_S's class; pairs are the gate's product of the twins' credits; pair n 1,024 / 512 / 256 /
+       128 on the fresh eval split / fresh K-EVAL-S split / K-EVAL-ID / K-EVAL-S):
+       B-ADAPT   the proper position subset with the fewest matching holders, a tie among them: item 0.621-0.624,
+                 pairs 0.435 / 0.436 / 0.435 / 0.432, over the pair limit on every set (cube pairs 0.250: a coin in
+                 each twin; 2-4-name pairs 0.977-0.994).
+       B-FRAME   B-ADAPT, then the holder whose statement uses the question's frame: item 0.598-0.631, pairs 0.535 /
+                 0.528 / 0.527 / 0.502.
+       O3_12 with a tie-break the twin keeps: a tie, pairs 0.382 / 0.380 / 0.394 / 0.361; the frame, 0.487 / 0.477 /
+                 0.489 / 0.451; the smaller value token id, 0.589 / 0.607 / 0.602 / 0.648 (item the same). B-ADAPT by
+                 value id: item and pairs 0.622 / 0.648 / 0.629 / 0.680.
+       B-ADAPTF (tie broken toward the first-introduced name) pairs 0.312-0.340, within C5; B-EXTRA (blind, the names
+       stating a second attribute) item 0.178-0.202; LENFIT B 0.179-0.192.
+       Per item every B rule stays within C5 of 0.65 (a partial key is a coin on cube items).
+     U (lure rules read only question-to-question identity): U-LUREAFTER (the only holder stating the attribute after
+       an identical earlier question) 0.525-0.537, U-LURECNT (a lure means the key was stated twice) 0.520-0.522,
+       U-LUREBOTH 0.532-0.541, U-LURELAST 0.526-0.543; LENFIT 0.483-0.502; LINK's lure chain 0.570-0.575.
+     R: R-DWIN (drop statements more than 12 exchanges back, then R-SLOTS) 0.632 / 0.638 / 0.618 / 0.621 / 0.609;
+       R-FIRSTMEN 0.547-0.572, R-BIGENT 0.527-0.561, R-QGAP 0.578-0.603; LENFIT (cross-fitted lookup on the counts of
+       statements, attribute statements, holders, earlier questions and exchanges) 0.631 / 0.647 / 0.626 / 0.620 /
+       0.613.
+     P: R-DWIN 0.640 / 0.632 / 0.624 / 0.613 / 0.656; P-AFTERQ2 0.592-0.625; P-QNAMED (prefer holders no earlier
+       answer came from) 0.573-0.604; P-QASKED 0.551-0.593; LENFIT 0.641 / 0.633 / 0.616 / 0.625 / 0.662.
+     A (after O9|10's cues): A-QREPEAT (" none" when an earlier question asked the final name) 0.648-0.667,
+       A-MANYFREE (" none" when two or more names make no statement of the attribute) 0.712-0.750, A-QNEW
+       0.662-0.680 on A items; they say " none" on 20-59% of R, U and P items, and against the same rule without the
+       A cue at SPEC 4's shares they lose 0.112-0.153 of all skill items (fresh train and eval split): A1H's class,
+       reported, not a bar failure.
+  FITTED MODEL (run4.py, feats4.py, learn4.py; fit_main.json): cuegate's learners and a new one, att (2 layers of
+     self-attention over the item's candidates, 64 wide, 15 epochs: each candidate compared with every other), each
+     on cues.py's columns (base) and with new columns (plus); cuegate.gate's cross-fit, evals by the full fit. Pooled:
+     fresh train at the stream's shares (40,960 items); F model: all 16,384 fresh F items.
+     59 new pooled columns, blind to the final question's name (only an identical earlier question is compared with
+       it): raw position, reverse position and exchange distance, outside d's 0-12 window, after the latest earlier
+       question, after the latest identical one, earlier questions after it; its entity's first and last mention,
+       statement count, distinct attributes, statements before and after it, last-mention rank; for holders of the
+       attribute their statement count of it, rank from the end, rank by first and by last statement; per item the
+       holders, a lure, earlier questions, statements, exchanges. Left out on purpose: "its entity answered an
+       earlier question" (with same_q_before it rebuilds LINK on lure items) and any family label (A's gold is
+       always " none").
+     22 new F columns: the exchange gap from the asked name's definition (raw, one-hot 0-11), inside its 1-10 window,
+       inside another name's window (flag, count), the nearest preceding definition is the asked name's, the nearer of
+       the two references; per item definitions, the asked definition and its exchange, exchanges.
+     Ceilings, best learner (base -> plus):
+       R  0.635 / 0.664 / 0.661 / 0.641 / 0.652 -> 0.639 / 0.676 / 0.667 / 0.650 / 0.641
+       U  0.570 / 0.586 / 0.599 / 0.588 / 0.609 -> 0.578 / 0.591 / 0.608 / 0.613 / 0.602
+       B  0.212 / 0.195 / 0.216 / 0.209 / 0.231 -> 0.223 / 0.202 / 0.209 / 0.209 / 0.188 (pairs 0.027-0.047)
+       F  pooled 0.640 / 0.635 / 0.628 / 0.643 / 0.606 -> 0.631 / 0.638 / 0.630 / 0.621 / 0.648
+          F model 0.634 / 0.631 / 0.636 / 0.664 / 0.633 -> 0.641 / 0.652 / 0.647 / 0.664 / 0.644
+       A  0.500-0.501 -> 0.500-0.505
+       P  0.643 / 0.661 / 0.662 / 0.672 / 0.644 -> 0.644 / 0.663 / 0.661 / 0.670 / 0.656
+     All within C5 (closest: R plus 0.676 on the fresh eval split against 0.682). att on base matched cuegate's
+     learners (R 0.621-0.647, F 0.606-0.640, P 0.631-0.666), so the 12-epoch learners are not what holds the ceiling
+     down. The new columns move a ceiling by -0.043 to +0.043, the large moves only on K-EVAL-S's 256 items; on
+     the fresh sets at most +0.012 (R), +0.010 (U), +0.021 (F model).
+  GATE CODE
+     No gold leak (leak4.py): on 6,315 records (every third of the fresh eval split, K-EVAL-ID, K-EVAL-S) the columns
+       of cues.item_features and cues.f_item_features are identical with "qs" and "meta" stripped and with the final
+       answer carrying " none" or another item value (17,993 variants; the gold index moved on 11,678).
+     No repeated item body in gen.py's 81,920-item stream and none shared with K-EVAL-ID or K-EVAL-S.
+     Cross-fit (perm4.py): golds redrawn uniformly among each item's candidates (16,384 stream items), cuegate.gate
+       with mlp and set at 40 epochs: cross-fit 0.1258 and 0.1262 against chance 0.1277, while the same learners
+       fitted and scored in-sample read 0.360 and 0.358, so the train figure is out-of-fold and the check could see a
+       leak. draw(), the even and odd halves, the full fit for evals, the per-set pair counts and the F-model merge
+       read as documented.
+     Gap (not a code bug): the gate has no partial-name column (SPEC 5 leaves B's partial keys to O3_S), and O3_S and
+       check.json's pairs use the latest match only, so nothing in gen.py check sees S-1.
+  FINDINGS
+     S-1 B twin pairs (SPEC 5's pair bar 0.30 fails on every set with twins): a partial key with a tie-break the
+       reversal keeps gets the same name in both twins (B-ADAPT 0.432-0.436, O3_12 by frame 0.451-0.489, by value id
+       0.589-0.648; limits 0.343-0.422). The twin rules out recency tie-breaks only (SPEC 5's own wording), and a
+       trained model has order-free ones (a per-token value prior, the frame); the 2-4-name quarter alone adds about
+       0.25. Per item every B rule stays within C5 of 0.65. Fix hint, measured on scratch records (b_quad.py: each
+       cube original plus copies asking its three two-token neighbours on the same statements, a group right only if
+       all 4 are): every partial-key rule above scores 0.000-0.062 per group (0.5^4 for a tie), IDEAL 1.000, on all
+       four eval sets (768 / 384 / 192 / 96 cube items). Or keep the twins and drop the pair bar, stating that pairs
+       read recency only.
+     S-2 F alias window (no bar failed; K1's marks are off): the key's alias never shares a turn with the asked name's
+       definition while the foil's can (skill._in_range's lower bound, per alias), so F-WINK, F-WIN2 and F-XNEAR
+       lift the alias half to 0.66-0.68 and F to 0.643-0.649 with no reference resolved. Fix hint, prototyped on a
+       scratch copy (rev4a/proto/code/skill.py only: an F item's two aliases of the attribute at least one exchange
+       after BOTH the key's and the foil's definitions), fresh F blocks tag 9483 (16,384) / 9484 (4,096): F-WINK and
+       F-WIN2 0.625 / 0.625 (alias items 0.500), F-XNEAR 0.624 / 0.623; the F model with the 22 new columns, its
+       four learners, 0.623-0.627 / 0.616-0.629 (on this review's fresh sets 0.637-0.641 / 0.642-0.652);
+       purity.accept on both: no fails, SURF 0.627 / 0.617, SURFe 0.812 / 0.802, SURFa 0.815 / 0.815, F-INTRO 0.624 /
+       0.620, F.last 0.198 vs 0.193 / 0.183 vs 0.192. Not run on it: pytest, mutants, gen.py check, the pooled gate.
+       Otherwise SPEC 16's marks should be the measured values (about 0.645 for F, 0.665 for the alias half).
+     S-3 (reported) F-ANTEATTR decides a third of ellipsis items through the antecedent's attribute (0.66-0.68 on
+       them); not counted, since it uses the ellipsis link and a name match, but K2 and K3 readers should know an
+       ellipsis can be read through its antecedent's attribute, not only its name.
+  VERDICT: not clean (S-1: B pairs over 0.30 on every set with twins). Per item, no new rule or column took any
+     family over its bar's C5 limit; F's best cheap figures sit at its bar (F-RX 0.643-0.649 on the fresh sets,
+     the fitted F model 0.641-0.664, all within C5), and S-2's prototype removes what the alias window adds. R, U,
+     P, A and the gate code hold.
+
+REVIEW 4b 2026-09-27 (fresh adversarial reviewer, lens TESTS AND MASKS, of K3 ROUND 2; Mac CPU only, no language
+  model loaded, tiny CPU test models only, nothing trained, queued or committed; no repo file changed but this block:
+  the sha256 of every K file before and after the runs differ only in this file, by REVIEW 4a's block. Scripts and
+  outputs: the session scratchpad, k3/rev4b/. At most 4 processes of mine at once; load 22-357 from other sessions,
+  swap 6.4-10.2 GB used and not growing with my runs; pytest peaked at 1.2 GB RSS)
+  RAN
+    pytest -q (alone, torch 4 threads): 103 passed in 278.9 s. mutation_k.py --baseline (alone): exit 0 (293 s).
+      mutation_k.py --why (serial, one pytest at a time, 20:48-21:37): 99 of 99 killed. The failing asserts of the
+      28 round-2 mutants (the 27 new, b_small_items_star, f_last_not_thinned retargeted) read as K3 ROUND 2 lists
+      them, with its figures: f_foil_thinned_less (1,195, 1,365); set_learner_unpooled set 0.2425 / 0.233, logit
+      0.272 / 0.232, mlp 0.2835 / 0.242; f_model_ceiling_not_merged F 0.5625 / 0.6406; cue_names_off B 0.28 / 0.33;
+      p_redraw_off 27 P items; kevs_not_whole_cubes 5,528; f_intro_rule_off F-DEFX 0.723; f_last_keep_half 0.262 vs
+      0.187; sweep_equivalence_stale gap 0.030.
+    Three new mutants (my_mutants.py, scratch copies through mutation_k's copy() and run(); mutation_k.py not
+      edited), each killed for the intended reason:
+      f_defs_rule_off (fams.fam_F ok(): max([intro] + defs) -> max([intro]), BD-21 without the definitions):
+        test_f_reference_units_follow_both_first_mentions, F.b0.i10, the "reference units start after the
+        definitions" assert (49 s).
+      kevs_cube_from_train (skill.Gen.cube draws K-EVAL-S cubes as it draws training ones):
+        test_splits_use_their_name_pools, K-EVAL-S names not all K-EVAL-S triples (10 s).
+      f_model_leak_pre_intro (cues.f_item_features' pre_intro reads "a reference of another entity", a resolution
+        leak inside an allowed column): test_cues passes it (the column-freeze test exempts pre_intro by design) and
+        test_gen's gen.py check exits 1 (69 s). On F blocks (tag 4474, 2,048 train, 512 eval split; leak_reason.py)
+        the F model read 0.750 / 1.000 with the leak, both fails, against 0.541 / 0.627 unmutated: the gate kills it.
+    Probes (not required to die), all SURVIVED: b_small_rule_off and b_small_k_rules_off (T-1 below);
+      f_foil_thinned_1p2 (the foil's ending kept at 1.2 x LAST_KEEP): key 1,204 / foil 1,224 on the test's tag 91,
+      1,177 / 1,241 on fresh tag 4473, limit 148 (t3_mut.py); unmutated on tag 4473 (16 blocks) 1,156 / 1,145,
+      limit 144, F.last 0.1923 vs 0.1922, no balance fail (ref_last_fresh.py). A 1.2 x imbalance moves the gap by
+      75-110 counts and passes; it would lift LASTSKIP on reference items by about 0.005, far under F's bar, so this
+      is the sensitivity SPEC 5 states, not a failure.
+    Mask sweep on seeds nobody used, 80-99 (32-51 left for K2's freeze check; 0-31 and 60-79 used before):
+      tests/mask_sweep.py OUT --seeds 80 ... 99 --floors k2 default --steps 1500 2000 --procs 3 (400 fits, 2,837 s,
+      median fit 20.5 s; sweep80.jsonl):
+        2,000 steps: K2's floors 200 of 200 (other units at most 0.189, planted at least 0.590); fit's default floors
+        199 of 200 (others at most 0.427, MX-SF seed 85; planted units of the found sets at least 0.523, MX-SS seed
+        98). The miss: MX-KF seed 98 hardened {(0, 1), (0, 20), (1, 11), (1, 17), (2, 27)}, the saturated fact unit
+        F1 (2, 5) left at P(closed) 0.001 and the unplanted (0, 1) taken at 0.334.
+        1,500 steps: K2's 200 of 200 (0.172 / 0.517); default 197 of 200 (MX-KF seed 98 as above; MX-SS seeds 86 and
+        98 took {(0, 9), (0, 11)}, S1 at 0.049 and 0.071, both found by 2,000).
+      masks.fit called directly on MX-KF seed 98 (kf98.py): at the defaults on the default floors the same set, F1
+      0.001; 4,000 steps F1 0.000 ((0, 1) 0.402); lam 10 F1 0.006; lam 4 found (F1 0.985); K2's floors at the
+      defaults found (F1 0.987, others at most 0.045). MX-KF alone on 40 more seeds, 100-139, at the defaults
+      (kf_extra.jsonl): K2's floors 40 of 40 (planted at least 0.784); default floors 39 of 40, seed 101 the same set
+      (F1 0.011, (0, 1) 0.300).
+    F by hand: 20 fresh items (skill.block tag 4471: 14 training from a 64-item block, 6 eval split; decode_f.py,
+      decoded_f.txt, each statement printed from its token classes). Every gold is the world rule; kref = fref,
+      klate, kstale, fstale, follow, k, intro rank, qform and d match the tokens; each ellipsis follows a statement
+      of its entity in the same or the previous turn; every alias is used 1-9 exchanges after its definition; each
+      entity makes exactly one reference statement; on all 20 both reference units start after both entities' first
+      explicit mention and definitions (BD-21), and no reference ellipsis has its entity's first mention as its
+      antecedent; stale named statements precede both references; the foil is never restated after its reference;
+      no earlier question asks the final attribute. The parser's follow, follow_ref, follow_alias, key_alias,
+      key_named, same_kind, ref_last, is_last, rank, k and n_q agree on all 20.
+    Docs against code and outputs: SPEC 16 K3 round 2's gate, F-model and oracle rows (B, F, A, pairs), F.last, mean
+      |C| (B 14.21, all 12.38) and fact_cand_size 12 equal k3/round2/g/check.json and its evals; that sample's
+      manifest code hashes equal the current generator files, and cues.py, cuegate.py and check_k.py predate its
+      check.json. K1-g's ranges and K-EVAL-ID ceilings, K3 ROUND 2's fresh-gate figures (gate_fresh.json), D-4
+      (gate_probe_r2.log, pytest1.log), K2-g's seeds 60-79 figures (REVIEW 3b's sweep files) and K2-f's choose.jsonl
+      figures reproduce. Code as documented: LAST_KEEP 0.35, NB 8, NB_REF 16, CAP 81,920, 149 pooled and 89 F-model
+      columns, 1,382 cells and 11,056 K-EVAL-S triples, masks.fit's defaults (2,000 steps, lam 6 per budget, init
+      0.0, lr 0.05, eps 1e-6). Tests 103 (88 + 15 per file as listed), mutants 99 (22 + 2 + 20 + 9 + 19 + 27).
+  FINDINGS
+    M-1 masks.fit's defaults miss on fresh seeds, and not the way K2's KNOWN RISKS describes. MX-KF on fit's default
+      floors missed the saturated FACT unit F1 on seeds 98 and 101 (2 of 60 MX-KF fits on 80-139; 2 of 100 with
+      12-31 and 60-79), and the miss is stuck, not late: 4,000 steps leave F1 at 0.000, lam 10 at 0.006. KNOWN RISKS
+      and K2-g speak of the saturated skill unit turning late; K2-f's and K2-g's "0 of 800" (95% upper bound 0.37%
+      per fit) now reads 1 of 1,200 at 2,000 steps on seeds 12-31, 60-79 and 80-99. K2's own floors found every set
+      (600 of 600, and MX-KF 40 of 40 on 100-139). For the prereg: M1 freezes the SPLIT A lam only if the sweep on
+      seeds 32-51 finds every set on both floor conventions; at the measured MX-KF rate (2 of 100) that sweep misses
+      at least once with probability about 1/3, and then "the grid value nearest the pick that does" applies (lam 4
+      found seed 98, lam 10 did not). M3's scan covers the miss (F1's single-unit effect is large). Fix hint: put the
+      stuck fact-unit case and these counts in KNOWN RISKS and K2-g, and decide before seed 201 whether M1's freeze
+      check reads fit's default floors at all (K2 reads its own) or allows a stated miss rate; test_masks' RUN could
+      pin MX-KF seed 98 on the default floors as a known miss.
+    T-1 B's cube share and 2-4-name quarter rules have no test that watches them fail. Mutants removing
+      purity.balance's b_small rule, or the small quarter's k2/k3/k4 share and k 2-4 intro-rank rules, survive
+      test_skill (18 s, 24 s). The rules work (b_small_plant.py, one 512-item B block, tag 4472): with the cube in 1/2
+      of the block the only fail is "B.b0: b_small 256 of 512, not exactly 1/4"; with the small quarter all k 4 only
+      "k2 0 of 128", "k3 0 of 128" and "k4 128 of 128". Under either mutant a data file whose B cube share or small-
+      quarter k drifted passes gen.py check, so BD-24's "B's k and intro rank exact per block" is checked but half
+      unwatched (test_b_k_and_rank_rules_catch_per_item_draws asserts only ": k8_rank"). Fix hint: plant the two
+      blocks above in that test (": b_small ", ": k2 ") and add both mutants.
+    D-1 (nits) masks.fit's docstring cites K2-f for seeds 60-79 (K2-g holds them). K2-g's "no other unit's above
+      0.281 (was 0.28)": choose.jsonl's maximum is 0.28045, 0.280 to three places, so the old 0.28 was right and 0.281
+      is a loose bound.
+  VERDICT: not clean (M-1, T-1). The round's own claims hold: 103 tests pass, 99 of 99 mutants die for the stated
+    reasons, the baseline is green, three new mutants of the round's changes die as intended, the 20 hand-read F
+    items are right, and SPEC 16, K1-g, K2-g and code/notes match the code and the round's outputs but for D-1.
+
+K3 ROUND 3 2026-09-27/28 (fixes of REVIEW 4a S-1, S-2, S-3, A-mix and REVIEW 4b M-1, T-1, D-1; pre-registration
+  changes, no K run has started. Mac CPU only: no language model loaded, tiny CPU test models and learners only,
+  nothing trained, queued or committed; at most 4 worker processes per sweep or generation, load 60-260 from other
+  sessions. Scripts and outputs: the session scratchpad, k3/round3/)
+  SAMPLES: gen.py's (k3/round3/g: `gen.py skill D --slots 25000000 --workers 2`, 8 rounds, 81,920 items; `gen.py evals
+     D`; `gen.py check D`, pass, no fails, 507 s wall, 2.8 GB peak) and fresh blocks at unused seeds (gen_fresh.py,
+     REVIEW 4a's sizes: train tag 10573, 51,200 items; eval split tag 10574, 14,336 with B groups; K-EVAL-S split tag
+     10575, 7,168). REVIEW 4a's rule scripts (rules_f.py, f_fit4.py, rules_rest.py, rules_b.py through rules_b3.py for
+     groups) and k3/new_rules.py ran unchanged on them. Figures: fresh train / fresh eval split / fresh K-EVAL-S split
+     / K-EVAL-ID / K-EVAL-S unless marked.
+  S-1 (BD-26, SPEC 4 B [K3r3]). Reversed twins caught only latest- or earliest-match tie-breaks. Each K-EVAL cube item
+     now carries 3 copies of its statements asking the asked name's 3 two-token neighbours (same attribute and frame),
+     scored as a group (all 4 right). A rule that reads a proper subset S of the question's name positions answers the
+     asked name and the neighbour that agrees with it on S alike, with any tie-break, so it gets no group (1/16 with
+     tie credit). Eval B blocks: 3n/16 cube items with their copies and n/4 items of 2-4 names (96 groups and 128
+     items on K-EVAL-ID, 48 and 64 on K-EVAL-S), frames exact within both parts, every item one question; the
+     per-block shares count the copies, the intro-rank rules do not. Group bar 0.125 (twice a coin's 1/16), for O3_S,
+     B-CENTER, B-TOKFREQ, B-MAJOR and the new B-ADAPT and B-FRAME (REVIEW 4a's partial keys with order-free
+     tie-breaks, the smallest value id; per item bar 0.65). Now: every one of those 11 oracles 0.000 on K-EVAL-ID's
+     and K-EVAL-S's groups (IDEAL, O4 1.000), the gate 0.000 on every set's groups; REVIEW 4a's tie-sharing rules
+     (rules_b3.py) 0.000-0.062 per group on the four eval sets (ADAPT and O3_12 with tie 0.062, with frame
+     0.029-0.039, with value id 0.000; B-ADAPTF 0.000), IDEAL 1.000. Per item: B-ADAPT 0.633 / 0.639 / 0.629 and
+     B-FRAME 0.625 / 0.631 / 0.629 (gen.py sample), O3_12 0.581-0.602. On the same K-EVAL cube items as reversed pairs
+     B-ADAPT got both of a pair on more than 0.3 (test_eval_groups_defeat_partial_keys).
+  S-2 (BD-25, SPEC 4 F [K3r3]). REVIEW 4a's prototype, both ways: the key's and the foil's aliases of the asked
+     attribute 1-10 exchanges after BOTH definitions (the lower bound was F-WINK's, the upper one never fired). purity
+     checks it on every item (alias_win) and F.xnear over a set (on reference items with two aliases, the one nearer
+     after the asked definition is the key's as often as the foil's, 3 SE; the late quarter is left out: there the
+     key's alias precedes its later named statement, so it is the earlier one by design; mutant
+     xnear_counts_late_quarter, 105 vs 60 on a block). The F model gains REVIEW 4a's 22 alias-window columns (cues
+     f_item_features y_*: 111 columns). Now (rules_f.py; alias reference items in brackets): F-WINK, F-WIN2 0.625 on
+     every set (0.500; they no longer fire), F-XNEAR 0.623 / 0.624 / 0.623 / 0.618 / 0.623 (0.496 / 0.496 / 0.494 /
+     0.482 / 0.495), F-RX 0.624 / 0.620 / 0.617 / 0.627 / 0.645, F-FIT4 (full key) 0.626 / 0.613 / 0.634 / 0.630 /
+     0.590, other keys 0.616-0.641; the reviewer's F-XNEAR on the alias half was 0.662 on fresh train. F.xnear on
+     gen.py's stream 1,453 vs 1,433. So F's K1 marks hold again (0.625 resolves nothing, within each half 0.625). R-3
+     and R-4's rules (new_rules.py): LASTSKIP 0.625 / 0.628 / 0.646 / 0.631 / 0.617 (the 0.646: the foil's reference
+     ends 326 and the key's 287 of 1,536 reference items, inside 3 SE), EXCL 0.625 on every set (no same-key repeat,
+     no excluded foil value), POSFIT 0.621-0.645.
+  S-3 (reported). F-ANTE (REVIEW 4a F-ANTEATTR) is an oracle row now, no bar: 0.696 / 0.666 / 0.715 (gen.py sample),
+     REVIEW 4a's tie-sharing version 0.692 / 0.691 / 0.690 / 0.683 / 0.699, on ellipsis reference items 0.654-0.700.
+     SPEC 5 and K1 READINGS say what it uses (an ellipsis's antecedent and a question-to-statement name match) and
+     that a model between 0.625 and about 0.70 on the ellipsis half may be doing that partial resolution.
+  A-mix (reported). A-MANYFREE, A-QNEW, A-QREPEAT are oracle rows (else O4, as A1H): on A 0.722 / 0.670 / 0.656
+     (gen.py train), on R, U, P 0.44-0.79; against O9|10 at SPEC 4's shares over all six families -0.155 to -0.161,
+     -0.212 to -0.296 and -0.187 to -0.205 of all skill items (A1H -0.043 to -0.045; train, K-EVAL-ID, K-EVAL-S).
+     REVIEW 4a's versions (R-SLOTS fallback) on the fresh sets: on A 0.657-0.741, " none" on 22-57% of R, U, P items.
+     test_reported_a_rules_lose_in_the_mix pins it.
+  GATE (the fitted cue model; SPEC 5; cues.py, cuegate.py, run by gen.py check). Columns: pooled 149 (check.json
+     cue_gate.features: candidate kind, frame match, positions, recency and exchange-distance buckets, turn layout,
+     neighbouring event kinds, the asked attribute's statements (ranks from either end, counts), repeats and entity
+     order between statements, entity rank and statement counts, name structure between the item's names (NAMES),
+     earlier questions and their answers, O9's and O10's absence cues, the question's frame; never a statement's name
+     against the question's, never a reference's entity); F model 111 (the attribute's statements as candidates; the
+     asked name only as N or O, F-INTRO's and F-DEFX's flags, the definition gap, its intro rank and the alias
+     windows). Learners logit, mlp, set; pooled at the stream's shares; 2-fold cross-fit; evals by the full fit.
+     gen.py check (81,920 training items; train / K-EVAL-ID / K-EVAL-S, best learner): R 0.648 / 0.658 / 0.637, U
+     0.579 / 0.625 / 0.606, B 0.226 / 0.205 / 0.238 (groups 0.000 / 0.000), F 0.628 / 0.652 / 0.641 (the F model;
+     pooled lower), A 0.500, P 0.654 / 0.680 / 0.680; K-DEV, K-PROBE, K2-A, K2-B (77-256 per family) each within C5.
+     Fresh (run_gate3.py: 40,960 training items at the stream's shares, F model on their 6,144 F items): R 0.645 /
+     0.643 / 0.636 / 0.644 / 0.633, U 0.566 / 0.554 / 0.598 / 0.600 / 0.613, B 0.210 / 0.187 / 0.197 / 0.219 / 0.207
+     (groups 0.000 on 384 / 192 / 96 / 48), F pooled 0.626 / 0.628 / 0.644 / 0.619 / 0.656, F model 0.631 / 0.626 /
+     0.635 / 0.625 / 0.637, A 0.500-0.502, P 0.631 / 0.664 / 0.651 / 0.658 / 0.641; no fails. Bars confirmed: R, U, B,
+     F, P 0.65, A 0.50 (C5 tolerance), B groups 0.125 (new). R and P sit at their bar by design (O1 0.61, the no-foil
+     fifth), as since K3 round 1.
+  Records: every non-F training item equals round 2's (gen.py stream: 11,878 of 12,288 F items changed); K-EVAL-ID and
+     K-EVAL-S: R and U unchanged (turns and candidates), A and P turns unchanged (candidates redrawn), B and F new;
+     K-DEV, K-PROBE, K2-A, K2-B, OOD: only F items changed.
+  M-1 (BD-27; K2 notes K2-h). A single fit can leave a saturated unit stuck open: its gate sees no gain until nearly
+     shut while the budget penalty pushes every gate open, and more steps or a larger lam do not free it (REVIEW 4b:
+     MX-KF seed 98, default floors, F1 at 0.001 at the defaults, 0.000 with 4,000 steps, 0.006 at lam 10 [corrected
+     K3 round 4, REVIEW 5b D-c]). The stuck set's exact objective
+     (its units ablated) is lower than the planted set's (KF, default floors 3.827 vs 4.949; K2's 0.773 vs 1.000; (0,
+     1) alone 0.008), so masks.fit now keeps the better of 2 restarts (gate noise seeds s and s + 7919) by that
+     objective. Tried first and dropped: a linear penalty warmup (lam from 0 over 500 or 1,000 steps). On the 10 hard
+     cases (every miss or thin margin so far) warm 500, warm 1000, lam 4 and 2 restarts each found 10 of 10 (old
+     defaults 8 of 10); on seeds 0-11 (240 fits each) warm 500 found 239 and warm 1000 238 (MX-KF seed 7, the same
+     stuck set, K2's and the default floors); with 2 restarts on fresh seeds 140-159 warm 1000 kept the set in 400 of
+     400 fits, but its single runs missed 14 of 800, 11 on MX-KF (11 of 80 MX-KF runs, and 2 of 24 on seeds 0-11: 13
+     of 104, against 2 of 200 MX-KF runs without the warmup on seeds 12-31 and 60-139), so the warmup made the stuck
+     mode about 12 times as common and is not used. Final: no warmup, 2 restarts (12 of 12 hard cases, the first run
+     stuck on MX-KF seeds 98 and 101 and the second on MX-KF seed 7, each time the other kept). Verification on fresh
+     seeds 160-179 (never used; 10 cases x 2 floor conventions, 400 fits; tests/mask_sweep.py OUT --seeds 160 ... 179
+     --floors k2 default; 4,153 s, median fit of 2 runs 40 s at load 90-260): 400 of 400 sets found; single runs 796
+     of 800 (K2's floors 400 of 400; the default floors missed MX-KF seed 177 and MX-SS seeds 164, 167 and 173 in one
+     run each, the other run kept); planted units 0.541 or more (K2's floors) and 0.535 (default), other units at most
+     0.188 and 0.375. Single runs at these values over seeds 12-31, 60-139 and 160-179: 6 misses in 2,080 (MX-KF on
+     the default floors 3 of 140 runs, every other case 3 of 1,940). lam grid (the SPLIT A pick's candidates, 2
+     restarts, fresh seeds 180-184, 100 fits each; 2,228 s): lam 4 100 of 100 (single runs 199 of 200: MX-SS seed 184
+     on K2's floors), planted 0.580 or more, others 0.191 or less; lam 10 100 of 100 (199 of 200: MX-SS seed 184 on
+     the default floors), 0.530 and 0.180. (masks.fit's docstring was rewritten while this ran: text only.) M1's
+     freeze check stays (K2 notes M1): the SPLIT A pick is frozen only if the sweep on seeds 32-51 finds every set at
+     it; both floor conventions stay in it, since with restarts both found every set here.
+  T-1. test_b_k_and_rank_rules_catch_per_item_draws plants REVIEW 4b's two blocks: the cube in 1/2 of a block fails
+     "B.b0: b_small 256 of 512" (and B-ADAPT's per-item bar, 0.734), the small quarter all k 4 fails "k2 0 of 128" and
+     "k4 128 of 128". Mutants b_small_rule_off and b_small_k_rules_off killed there.
+  D-1. masks.fit's docstring cites K2-g for seeds 60-79; K2-g's 0.281 is back to 0.280 (0.2805).
+  OTHER CHANGES: test_reference NB_REF 16 -> 32 (after BD-25 changed F's draws, mutant f_foil_thinned_less read 1,192
+     vs 1,323 on 16 blocks, limit 150, and survived the first mutation run; 2,375 vs 2,638 on 32, limit 212; unmutated
+     2,264 vs 2,346); test_masks RUN adds MX-KF seed 98 on the default floors and the stuck-run test; mutation_k's
+     limits 600 s per mutant and 1,200 s for the baseline (test_masks alone takes about 4 min now).
+  TESTS 110 (103 + 7: test_skill 2, the group bars on twin-built groups and the reported A rules, and the group test
+     replacing the twin test; test_reference 3, the alias windows from tokens, their planted breaks and F-ANTE on a
+     hand-made item; test_masks 2, RUN MX-KF seed 98 on the default floors and the stuck-run test; test_cues' pair
+     tolerance test became the group one). pytest 110 passed in 458 s (alone, load about 130). mutation_k.py
+     --baseline: exit 0, 371 s (alone).
+  MUTANTS 119 (99 - 2 + 22: b_pair_bars_o3_only and cue_pair_n_256 retired for b_group_bars_o3_only and
+     cue_group_n_256; mask_warm_off and mask_warm_500 were written for the warmup and removed with it). Runs
+     (mutation_k.py --why, one pytest at a time): the 102 outside test_masks (test_ablate's 3 among them and run again
+     among the 20 [corrected K3 round 4, REVIEW 5b D-c]), 101 killed and
+     f_foil_thinned_less SURVIVED (NB_REF 16, above); after NB_REF 32 all 34 test_reference mutants again, killed
+     (f_foil_thinned_less (2,375, 2,638)); the 20 of test_masks and test_ablate on the final code, killed. Failing
+     asserts read: f_alias_window_own_def, 25 F items outside a definition's window; alias_win_rule_off and
+     xnear_rule_off, the planted breaks pass; xnear_counts_late_quarter, 105 vs 60; f_model_window_off, the F model's
+     columns; b_groups_ask_base, O3_12 0.500 and B-ADAPT 0.583 on groups; b_group_form_flipped, a group rule above 0
+     (the frame tells a group's questions apart); b_group_ranks_counted, k8_rank0 30 of 192; b_group_frames_not_
+     nested, form 119 of 256; b_group_bars_o3_only and group_bar_loose, no B-ADAPT group fail on twin-built groups;
+     b_part_uses_whole_name, B-ADAPT 1.000 per item; groups_not_found, no group scored; cue_group_n_256, 0.1875 fails
+     at n 256; cue_group_base_only, the gate 0.083-0.125 on groups; b_small_rule_off, no b_small fail on the half-cube
+     block; b_small_k_rules_off, no k2 fail; a_manyfree_blind, A-MANYFREE 0.500 on A; f_ante_keeps_all, F-ANTE picks
+     the foil's ellipsis; mask_restarts_one, mask_restart_keeps_worst, mask_hard_unablated, MX-KF seed 98's stuck set
+     {(0, 1), (0, 20), (1, 11), (1, 17), (2, 27)}. Retargeted to the new signature and killed as before:
+     mask_defaults_build and mask_harden_most_open (KF2 seed 1), mask_defaults_r2 and mask_init_three (MX-SS seed 6,
+     {(0, 9), (0, 11)}, both restarts), mask_per_budget_off (the defaults pin), sweep_equivalence_stale,
+     ref_last_rule_off, b_cue_bars_loose, b_k_rank_rule_off. During the runs only test_reference.py (NB_REF, then its
+     mutants rerun), masks.py, test_masks.py, mask_sweep.py and mutation_k.py's mask entries changed (their mutants
+     ran after).
+
+REVIEW 5a 2026-09-28 (fresh adversarial reviewer, lens SHORTCUTS, of K3 ROUND 3; Mac CPU only, no language model,
+  tiny CPU learners only, nothing trained, queued or committed; no repo file changed but this block (sha256 of every
+  K file before and after: the scratchpad's k3/rev5a/before.sha and after.sha), so pytest and the mutants were not
+  rerun. Scripts and outputs: the session scratchpad, k3/rev5a/; at most 3 worker processes per generation, torch at
+  2-3 threads, load 75-215 from other sessions; fits peaked at 2.0-2.9 GB RSS, memory_pressure 48-53% free before each)
+  SAMPLES: fresh blocks from the current generator at unused seeds (REVIEW 3a's gen_fresh.py): train tag 12573 (R 20,
+     U 20, B 12, F 40, A 8, P 8 blocks of 512: 55,296 items), eval split tag 12574 (R, U, A, P 4, B 4 with cube
+     groups, F 8: 14,336), K-EVAL-S split tag 12575 (half: 7,168); gen.py's K-EVAL-ID, K-EVAL-S and training stream
+     (k3/round3/g; the repo's files hash as round 3's after.sha). Figures: fresh train / fresh eval split / fresh
+     K-EVAL-S split / K-EVAL-ID / K-EVAL-S unless marked; ties share credit. C5 limits at 0.65: 0.661 (n 16,405),
+     0.664 (10,240), 0.668 (6,525), 0.672 (4,096), 0.682 (2,048), 0.695 (1,024), 0.713 (512), 0.739 (256); at 0.50:
+     0.523 (4,096), 0.533 (2,048), 0.547 (1,024), 0.566 (512); B groups at 0.125: 0.176 (384) to 0.268 (48).
+  NEW CHEAP RULES (rules5_f.py, rules5_f2.py, rules5_rup.py, rules5_ab.py, rules5_qs.py, rules5_qfit.py; none is in
+     SPEC 5, cues.py or REVIEW 2, 3a, 4a; none compares a statement's name with the final question's, none follows an
+     ellipsis to the statement before it or an alias to its definition, none follows an earlier answer to its statement)
+     F (O4's quarter, then between the two reference statements; alias / ellipsis reference items in brackets):
+       F-DWIN (a reference more than 12 exchanges back is the foil's) 0.625 on every set: it never fires. F-FOILORD
+       (the foil's name seen in its stale statement: references in the two names' intro order) 0.629 / 0.632 / 0.618 /
+       0.622 / 0.604 (0.454-0.514 / 0.489-0.505). F-STALEORD (references in the stale statements' order) 0.594-0.654.
+       F-QSPLIT (an earlier question between the references: the later) 0.625-0.637. F-DEFORD (asked definition first
+       of those before the aliases: the earlier alias, last: the later) 0.594-0.630. F-TURNEND 0.619-0.626. F-VALID
+       (smaller value id) 0.602-0.639. F-TURNLOAD (fuller turn) 0.622-0.630. F-ANSREUSE (an earlier answer's statement
+       between the references: the later) 0.623-0.627. F-FIT5 (2-fold cross-fitted lookup over those flags, the asked
+       name's intro rank and the definition rank, 3,121 keys) 0.624 / 0.625 / 0.620 / 0.633 / 0.637; F-FIT6 (value-id
+       order, turn sizes, answered statements) 0.619-0.660. gen.py's stream (12,288 F items; the second batch on its
+       first shard, 9,827): every rule 0.613-0.635.
+       REVIEW 2's LASTSKIP re-measured 0.625 / 0.626 / 0.620 / 0.631 / 0.617 (key vs foil reference ending the item
+       2,836 vs 2,890 on fresh train); earlier questions on the final attribute: only U lures, identical to the final
+       question and followed by a key statement (1,651 fresh train, 81 K-EVAL-ID, 41 K-EVAL-S), so EXCL cannot fire.
+       DIAG (diag_f.py, reads the gold): on 15,360 fresh-train reference items, P(key's reference is the later) given
+       each value of 40 item features (both names' intro ranks, the foil's intro and definition order, stale order,
+       d, gaps, turn layout, earlier questions between or after, definition rank and count, statements around): no
+       alias-item value 2.5 SE off 0.5 (the three fresh sets, K-EVAL-ID, gen.py stream); on ellipsis items only
+       "asked-name mentions after the first reference" (0: key later 0.000, 1: 0.875), the later ellipsis's antecedent.
+     R, U, P: LATEINTRO (holder introduced last) R 0.543-0.598, U 0.504-0.546, P 0.555-0.575; LATEFIRST (latest first
+       statement) R and P 0.500, U 0.496-0.529; SOLONEAR R 0.533-0.551, U 0.481-0.520, P 0.529-0.555; QS-UNASKED
+       (holders no earlier question named) R 0.590-0.605, U 0.440-0.452, P 0.584-0.597; FEWATTR R 0.566-0.627, P
+       0.565-0.590; PATFIT5 (cross-fitted lookup: counts, intro and first-statement ranks, sizes, d, a question after)
+       R 0.617-0.637, U 0.510-0.554, P 0.597-0.628. All within C5.
+     THE ASKED NAME AMONG EARLIER QUESTIONS (question to question, the class of cues.py's same_q_before and the fixer's
+       A-QREPEAT; entity sizes statement to statement, the class of cues.py's n_attrs and ent_named):
+       QSIZE: if earlier questions named the final name with m attributes, drop holders whose name states fewer than
+         m + 1 attributes, then R-SLOTS: R 0.660 / 0.651 / 0.658 / 0.654 / 0.652, gen.py stream 0.654; P 0.688 /
+         0.677 / 0.677 / 0.670 / 0.719, stream 0.679 (over C5 on fresh train, n 4,096, and the stream, n 6,525).
+       QFIT: cross-fitted lookup on (times the final name was asked, its distinct attributes, earlier questions, per
+         holder its name's attributes and statements, ends the item): R 0.683 / 0.672 / 0.680 / 0.676 / 0.650, stream
+         0.678; P 0.707 / 0.700 / 0.693 / 0.675 / 0.732, stream 0.705; U 0.525-0.545. Over C5: R on fresh train
+         (10,240) and the stream (16,405), P on fresh train, the fresh eval split (2,048) and the stream. The same
+         lookup without the three question keys (QFIT-NOQ): R 0.606-0.642, P 0.604-0.640.
+       Mechanism (DIAG, fresh train, items with 2+ holders and an earlier question; share of the key's name / other
+       holders' names stating 1, 2, 3 attributes): the final name asked earlier R 0.000 0.430 0.570 / 0.312 0.365
+       0.323, P 0.000 0.445 0.555 / 0.324 0.336 0.339; earlier questions, none naming it R 0.413 0.325 0.262 / 0.179
+       0.369 0.452, P 0.453 0.308 0.240 / 0.173 0.369 0.458. skill._questions asks a uniformly drawn stated key of
+       another attribute, so whether and how often the final name is asked tells the asked entity's size, and the
+       holders' sizes are read off the statements.
+       QATTR (holders whose name states every attribute the final name was asked about; one hop short of LINK,
+       reported): R 0.676-0.709, U 0.565-0.602, P 0.750-0.793.
+     A (" none" when O9|10's cue or the rule's fires, else O4; on A, then the mix gain against O9|10 at SPEC 4's shares,
+       fresh train): A-QTWICE (the final name asked twice) 0.520-0.531, -0.042; A-USHAPE (two holders, each 2+
+       times, 3+ names) 0.621-0.662, -0.069; A-QLAST (the latest earlier question named the final name) 0.547-0.569,
+       -0.092; A-HOLDFIRST (every holder introduced before every non-holder, 3+ names) 0.641-0.652, -0.100. A1H's
+       class: each loses in the mix (every set -0.037 to -0.107), reported, not a bar failure (SPEC 5).
+     B (partial keys; per item, cube items, groups): B-EARLY 0.621-0.634, 0.495-0.513, 0.000; B-TWOATTR 0.621-0.633,
+       0.496-0.511, 0.033-0.039; B-FRAMESUB (the pair next to the question's attribute token) 0.588-0.596, 0.500,
+       0.062; B-LASTTURN 0.611-0.633, 0.484-0.513, 0.005-0.008. Groups n 384 / 192 / 96 / 48; all within C5.
+     Token identity, every family (fresh eval split): the gold is the smallest value id of the attribute's values at
+       chance (R 0.463 vs 0.447 expected, U 0.265 vs 0.262, B 0.188 vs 0.184, F 0.335 vs 0.339, P 0.454 vs 0.447).
+  U EXCHANGEABILITY (diag_u.py; rules above): SPEC 4 says U's key and foil are exchangeable to a rule blind to the
+     question's name. On non-lure U items the holder introduced last is the key in 0.541 (16 fresh U blocks, tag
+     12583, n 6,986; LATEINTRO on all U 0.504-0.546 above); at k 4 on fresh train the rank-3 holder is the key in
+     0.618 (n 1,201), the rank-0 one in 0.440 (n 1,598). Cause, measured on scratch copies (proto/code, 16 U blocks
+     each, tag 12583): the key's intro rank is exact per block while the foil, the other entity stating 2-3
+     attributes and the asked one 1-4 times, keeps a big entity's early intro (k 4 foil ranks 828 / 798 / 706 / 388,
+     key 688 / 688 / 672 / 672). Dropping the d range changes nothing (0.543; it never binds on U: key and foil
+     d > 12 in 0.000); dropping the rank flag: 0.503; the foil's rank drawn uniform among the other ranks: 0.514.
+     U's gate stays under 0.65 (0.571-0.602 here).
+  FITTED MODEL (feats5.py, run5.py, run5q.py; fit5_base_pooled.log, fit5b.json, fit5q.json). Learners: cuegate's
+     logit, mlp, set (unchanged) and att5 (2 layers of self-attention over the candidates, 64 wide, 16 epochs).
+     Pooled: fresh train at the stream's shares (40,960, cross-fit), evals by the full fit; F model: 20,480 F items.
+     24 new pooled columns (none in cues.py or feats4.py): the final name among earlier questions' names (count 0/1/2+,
+       whether the latest earlier question named it; 4 columns) and the distinct names earlier questions named (the
+       question features, 5 columns), gaps to the neighbouring statements of the attribute in statements and
+       exchanges, names stated after it, its name's first mention distance, introduced before the attribute's first
+       statement, first and last holder by intro, the only statement of the attribute within 12 exchanges and their
+       count, value-id parity (a null column), another statement of the attribute in its turn, previous and next
+       statement by the same name, holders per name.
+     33 new F columns: the foil's name seen (its stale statement), its first mention before the asked name's, the stale
+       order, an earlier question between the references, the references in one turn and statements between them,
+       asked-name statements in all and before the first reference's unit (item level only), the asked definition's
+       rank among the definitions before the references and their count; per reference d > 12, a question right after
+       it and questions after it, a definition in its turn, and for aliases the exchange gap after the foil's
+       definition (window flag, one-hot 0-11).
+     Base (cues.py's columns; logit, mlp, set, att5 not run): R 0.642 / 0.648 / 0.644 / 0.650 / 0.644, U 0.571-0.602,
+       B 0.198-0.224, F 0.621-0.642, A 0.500-0.501, P 0.641-0.654, groups 0.000. F model, best of 4 learners: base
+       0.627 / 0.627 / 0.622 / 0.637 / 0.609, plus 0.628 / 0.632 / 0.620 / 0.639 / 0.633. All within C5.
+     Plus (every new column): only the question features lift anything (ablate5.py, set learner, one group at a time
+       on R 8, U 8, P 4, A 4 blocks: base R 0.645 P 0.631 on the eval split; question features R 0.701 P 0.727;
+       every other group within 0.025 of base). cues.py's columns plus those 5 only (run5q.py, cuegate.gate as is):
+       mlp (scores each candidate alone, so it cannot chain an earlier answer to its statement's name) R 0.697 / 0.708
+       / 0.708 / 0.715 / 0.668, P 0.752 / 0.752 / 0.750 / 0.748 / 0.777, U 0.586-0.620, A 0.514-0.522, F 0.613-0.646:
+       R over C5 on four sets, P on all five. set (it compares candidates, pooled over entity-rank columns) R 0.693-
+       0.747, U 0.597-0.734, A 0.521-0.558, P 0.763-0.840; att5 with every column R 0.731-0.793, U 0.755-0.836, A
+       0.625-0.658, P 0.853-0.869: REVIEW 3a's LINK figures (R 0.738-0.766, U 0.741-0.828, A 0.648-0.664, P
+       0.849-0.869), the chain SPEC 5 calls the skill; not counted. B groups 0.000 for every learner and column set.
+  GATE CODE (gatecheck5.py, gatecheck5_mut.py, power5.py)
+     GOLD: 2,100 records (every 9th of the fresh eval split, 1,500; every 5th of K-EVAL-ID, 600) with the final answer
+       set to 2 other item values or " none" (5,905 variants, the gold index moved on all): no column of
+       cues.item_features or cues.f_item_features moves; a planted "value equals the final answer" column is caught on
+       840 of 840 variants (300 K-EVAL-ID records).
+     NAME: the final question asks another name of the item (same attribute and frame): no pooled column outside
+       same_q_before, ans_same_q*, ans_attr_other_q, name_absent moves, no F column outside its closed list; a planted
+       "statement name equals the question's" column is caught (511 variants); the swap moved allowed columns on 19
+       of 300 pooled records and the F rows of all 51 F records (the check is not vacuous).
+     FOLD: cuegate.gate's halves are disjoint and cover the list; evals use the full fit. POWER: a planted F column,
+       1 on the gold reference in a seeded 20% of reference items, lifts the F model to 0.701 / 0.708 (0.625 + 0.075
+       expected) and fails the gate; without it 0.629 / 0.627. No leak or cross-fit mistake found.
+  OTHER (outside this lens, seen in passing): code/notes.txt MODULES (masks.py line) and BD-27 say masks.fit has a
+     1,000-step penalty warmup; masks.py, SPEC 16, K2 notes K2-h and K3 ROUND 3 say it was tried and dropped, and the
+     code has none.
+  FINDINGS
+     S-1 R and P: the asked name among earlier questions tells the asked entity's size (skill._questions draws earlier
+       questions from the stated keys), and the holders' sizes are read off the statements. QFIT reads R 0.678-0.683
+       and P 0.700-0.707 on the large sets (over C5), the gate's own mlp with five item-level question columns R
+       0.697-0.715 and P 0.748-0.777; no statement is compared with the final question and no answer is followed.
+       SPEC 5 is split on this cue: same_q_before and A-QREPEAT treat question-to-question name identity as cheap,
+       the LINK paragraph calls every full-name match the skill. Either decide it is cheap (then R and P fail and
+       cues.py needs the columns) or state that it is skill and that A-QREPEAT, A-QNEW and same_q_before use it.
+       Fix hint, prototyped (proto/code skill._questions, PROTO_Q=bystander: earlier questions name neither the
+       final entity nor any holder of the final attribute, U's lure kept; 8 R, 8 P, 4 A blocks, tag 12593, same-size
+       cross-fits): R QSIZE 0.657 -> 0.627, QFIT 0.654 -> 0.612; P QSIZE 0.683 -> 0.635, QFIT 0.683 -> 0.631;
+       A-QREPEAT 0.660 -> 0.500. Cost: R's earlier questions per item 0.91 -> 0.49 (P kept at 1.78 by its redraw).
+       Not run on it: purity.accept, the gate, pytest, mutants.
+     S-2 (claim, no bar) U's key and foil are not exchangeable to a question-blind rule (0.541, above); the foil's
+       intro rank drawn like the key's (exact per block) is the prototyped direction.
+     D-1 (docs) BD-27 and MODULES describe a warmup the code does not have.
+  VERDICT: not clean (S-1: R and P over their bars with question-to-question name identity and entity sizes, a cue
+     class SPEC 5 admits elsewhere). F: no new rule, column or learner beat its bar (rules 0.594-0.660, F models
+     0.609-0.639, pooled with every column 0.613-0.678, the top on K-EVAL-ID's 512, limit 0.713), and the diagnostic
+     finds no alias-item asymmetry. B, U, A: within their bars except through LINK (set, att5); A's new rules win on
+     A alone and lose in the mix (A1H's class). Gate code: no leak, cross-fit right, power to see a 0.075 cue.
+
+REVIEW 5b 2026-09-28 (fresh adversarial reviewer, lens TESTS AND MASKS, of K3 ROUND 3; Mac CPU only, no language
+  model loaded, tiny CPU test models only, nothing trained, queued or committed; no repo file changed but this block.
+  The sha256 of every K file before the runs equals round 3's after.sha (40 of 40); during the runs only this file
+  changed, by REVIEW 5a's block (its first 930 lines hash as before). Scripts and outputs: the session scratchpad,
+  k3/rev5b/. At most 4 processes of mine at once (3 sweep workers and one pytest); load 42-200 from other sessions,
+  swap 6.5-6.6 GB and not growing; pytest peaked at 1.1 GB RSS)
+  RAN
+    pytest -q (alone): 110 passed in 507 s, past the 400 s this review was given (load 42-190; run in the background,
+      not cut). mutation_k.py --baseline (alone): exit 0 (529 s). mutation_k.py --why (serial, one pytest at a time,
+      02:07-03:05): 119 of 119 killed. The failing asserts of the 22 round-3 mutants and f_foil_thinned_less read as
+      K3 ROUND 3 lists them: mask_restarts_one, mask_restart_keeps_worst and mask_hard_unablated MX-KF seed 98's
+      stuck set {(0, 1), (0, 20), (1, 11), (1, 17), (2, 27)}; f_alias_window_own_def "25 F items: an alias outside a
+      definition's window"; xnear_counts_late_quarter 105 vs 60; b_groups_ask_base O3_12 0.500 and B-ADAPT 0.583 on
+      groups; b_group_ranks_counted k8_rank0 30 of 192; b_group_frames_not_nested form 119 of 256;
+      b_group_bars_o3_only and group_bar_loose no B-ADAPT group fail; b_small_rule_off no b_small fail (B-ADAPT's
+      0.734 left); b_small_k_rules_off no fail; a_manyfree_blind A-MANYFREE 0.500 on A; f_ante_keeps_all the foil's
+      ellipsis; cue_group_base_only the gate 0.083 / 0.125 on groups; f_foil_thinned_less (2,375, 2,638).
+    Three new mutants of round 3's changes (my_mutants.py, scratch copies through mutation_k's copy() and run();
+      mutation_k.py not edited):
+      b_group_one_token_relatives (skill.group: the copies ask the 3 cube names sharing ONE token with the asked
+        name, so a partial key answers the 4 questions from 4 disjoint holder pairs): killed (10 s) by
+        test_eval_groups_defeat_partial_keys, O3_12 0.104 on the 48 groups, the intended reason. purity's group bar
+        passed the same block (0.104 against the limit 0.268 at 48 groups): only this generator test pins that the
+        copies are two-token neighbours.
+      alias_win_own_def (purity.item_facts: alias_win reads each alias against its own definition only, the
+        pre-round-3 rule): SURVIVED test_reference, test_purity and test_skill (189 s). T-a.
+      mask_hard_weights_dropped (masks._hard returns gf + gs, the objective's weights dropped from the restart
+        pick): SURVIVED test_masks (175 s). T-b.
+    Mask sweep on seeds nobody used, 300-319 (none of 0-184 or K2's 32-51): tests/mask_sweep.py OUT --seeds 300 ...
+      319 --floors k2 default --procs 3 at fit's defaults (2,000 steps, lam 6 per budget, init 0.0, 2 restarts); 400
+      fits, 3,880 s, median fit 27.9 s (sweep300.jsonl): 400 of 400 planted sets found; single runs 798 of 800 (K2's
+      floors 400 of 400; default floors MX-SF seed 300 run 0 and MX-KS seed 309 run 1 missed, the other run kept
+      each time); MX-KF 80 of 80 runs; planted units at least 0.608 (K2's floors) and 0.572 (default), other units at
+      most 0.173 and 0.297. M-1 holds on fresh seeds.
+    F by hand: 20 fresh items (skill.block tag 5571, the first 14 of a 64-item training block; tag 5572, the first 6
+      of a 32-item eval split block; decode_f.py, decoded_f.txt, names lettered by first appearance in the tokens):
+      14 alias and 6 ellipsis items, 3 late, follow in 8. Every gold is the world rule (read by hand); kref = fref,
+      klate, kstale, fstale, follow, k, intro rank, qform and d (0-4) match the tokens; every ellipsis follows a
+      statement of its entity in the same or the previous user turn; both aliases of the asked attribute sit 1-6
+      exchanges after both definitions on all 14 alias items (BD-25), other aliases 1-7 after their own; each entity
+      makes one reference statement; both reference units start after both entities' first explicit mention and
+      definitions (BD-21); stale named statements precede both references; the foil is never restated after its
+      reference; no earlier question asks the final attribute. The parser's follow, follow_ref, follow_alias,
+      key_alias, key_named, same_kind, ref_last, is_last, rank, k, n_q, alias_win and xnear agree on all 20 (xnear
+      set on 6 alias items, None on 6 ties and the 2 late ones).
+    Docs against code and outputs: SPEC 16 K3 round 3's gate table, pooled and F-model F, the B, F and A oracle rows,
+      the groups (96 and 48, all 0.000; IDEAL and O4 1.000) and F.xnear 1,453 vs 1,433 equal k3/round3/g/check.json;
+      its manifests' code hashes equal the current generator files, and cues.py, cuegate.py, check_k.py predate it;
+      149 pooled and 111 F-model columns; F-XNEAR, F-RX, LASTSKIP, EXCL, POSFIT and F-ANTE equal rules_f_out.txt and
+      new_rules_out.txt; K2-h's and M1's mask figures equal verify160.jsonl (400 of 400, 796 of 800, 0.541 / 0.535,
+      0.188 / 0.375), grid180.jsonl (lam 4 and 10: 100 of 100 and 199 of 200 each) and probe3.jsonl (12 of 12 hard
+      cases), and the 6 single-run misses in 2,080 recount from the sweep files; code as documented: GROUP_TH 0.125,
+      NB_REF 32, mutation limits 600 / 1,200 s, fit's defaults (2,000 steps, lam 6, init 0.0, lr 0.05, eps 1e-6, 2
+      restarts, seeds s + 7919 i), 119 mutants. Except D-a to D-c.
+  FINDINGS
+    T-a BD-25's per-item alias window rule is never watched failing from tokens. test_f_aliases_sit_in_both_
+      definition_windows checks the window with its own token code and asserts purity's alias_win only on passing
+      items; test_alias_window_rules_catch_planted_breaks sets the flag by hand; alias_win_rule_off mutates only the
+      aggregate. So alias_win_own_def survives, and under it a data file built on the pre-round-3 window passes
+      gen.py check's purity: on F blocks from f_alias_window_own_def's generator (demo_alias.py; eval split tag 5581,
+      512 items; training tags 5580 and 5582, 1,024) the real purity fails "24 F items" and "49 F items: an alias
+      outside a definition's window", the mutant fails nothing, and F.xnear (81 vs 53, 156 vs 113) stays inside 3 SE,
+      so on an eval-sized set the per-item rule is S-2's only guard. Fix hint: a test that feeds item_facts such an
+      item (hand-built, or a block from the old window by monkeypatch, as test_old_b_design_fails_the_name_structure_
+      bars does) and asserts alias_win False and the fail line; add alias_win_own_def to mutation_k.
+    T-b M-1's restart pick is watched only on KF. RUN's one case whose restarts differ is MX-KF seed 98 (skill weight
+      0), and test_a_stuck_run_is_outscored_by_its_restart calls _hard with (1, 0), so the objective's weights in the
+      pick are unwatched and mask_hard_weights_dropped survives. It changes a fixture fit: this review's sweep found
+      MX-SF seed 300 on fit's default floors with run 0 {(0, 20), (1, 17), (2, 5), (2, 27)} (the shared unit X for
+      F2), SF objective 3.392 against run 1's planted set 4.015 (kept); with gf + gs run 0 scores 4.482 against
+      4.015, so the mutant keeps the set holding X (demo_hard.py). Of the 4-unit sets from {F1-F4, X, S1, S2}, 34 on
+      K2's floors and 19 on the default ones rank below the planted set by SF and above it by gf + gs. In K2, SF and
+      SS are the selective objectives and at b 78-781 the two restarts will seldom harden one set, so the pick
+      decides most reported sets. Fix hint: RUN adds ("MX-SF", 300, "default"), or a test of _hard's weights on
+      those two sets; add mask_hard_weights_dropped.
+    D-a code/notes.txt MODULES (masks.py: "a 1,000-step penalty warmup and the better of 2 restarts") and BD-27 ("the
+      penalty's lam ramps from 0 over the first 1,000 steps (warm)") describe a warmup masks.fit does not have
+      (masks.py, its docstring, K3 ROUND 3 M-1, K2-h and SPEC 16 say it was tried and dropped). BD-27 is FIXED-log
+      text. REVIEW 5a D-1 saw the same.
+    D-b SPEC 16 K3 round 3 ("B-ADAPT: ..., then the smallest value id: 0.432-0.436 on pairs; by value id
+      0.589-0.648") and K1-h ("the smallest value id among them: 0.43-0.44 on pairs; by value id 0.59-0.65") put
+      REVIEW 4a's tie-sharing B-ADAPT figure on the code's value-id rule. The code's B-ADAPT reads 0.613 and 0.621 on
+      reversed pairs of fresh eval and K-EVAL-S split B blocks built without groups (tags 5591, 5592; its tie-break
+      survives the reversal, so pairs equal items), the tie-sharing version 0.436 on both (demo_badapt.py); REVIEW
+      4a's value-id figure was 0.622-0.680, and 0.589-0.648 is O3_12 by value id. The conclusion (pairs beaten)
+      stands.
+    D-c nits. SPEC 16 K3 round 3 ("F1 at 0.001 with 4,000 steps or lam 10") and K3 ROUND 3 M-1 ("F1 at 0.001 with
+      4,000 steps"): REVIEW 4b read 0.000 at 4,000 steps, 0.001 at the defaults and 0.006 at lam 10 (K2-h has it
+      right). K3 ROUND 3 MUTANTS "the 102 outside test_masks and test_ablate": the 102 outside test_masks
+      (mut_non.log holds the 3 test_ablate mutants, run again among the 20).
+  OTHER: gen.py check does not require a number of B groups. K-EVAL-ID's B records in reverse order score no group
+    and pass (purity.accept; demo_grouporder.log: groups None, fails [] against 96 as written), so a writer that
+    reordered records would skip every group bar silently. Not a fail today (evalsets writes each group in order).
+  VERDICT: not clean (T-a, T-b: two of three new mutants of round 3's changes survive, each shown to pass data or
+    keep a set the real code rejects; D-a, D-b). The round's own claims hold: 110 tests pass, the baseline is green,
+    119 of 119 mutants die for the stated reasons, the planted-set sweep on fresh seeds finds 400 of 400 with 2
+    restarts, the 20 hand-read F items are right, and the numbers in SPEC 16, K1-h, K2-h and K3 ROUND 3 match the
+    code and round 3's outputs but for D-a to D-c.
+
+K3 ROUND 4 2026-09-28 (fixes of REVIEW 5a S-1, S-2, D-1 and REVIEW 5b T-a, T-b, D-a, D-b, D-c, O-1; pre-registration
+  changes, no K run has started. Mac CPU only: no language model loaded, tiny CPU test models and learners only,
+  nothing trained, queued or committed; at most 3 worker processes per generation and 2 per sweep, load 24-114 from
+  other sessions, memory_pressure 39-63% free before each heavy step. Scripts and outputs: the session scratchpad,
+  k3/round4/; the reviewers' rule scripts ran there unchanged but for their set paths, rules/rv5.py)
+  SAMPLES: gen.py's (k3/round4/g: `gen.py skill D --slots 25000000 --workers 2` (81,920 items, 50 s), `gen.py evals
+     D`, `gen.py check D` (pass, no fails, 321 s wall, 3.2 GB peak)) and fresh blocks at unused seeds
+     (k3/round4/gen_fresh.py, REVIEW 5a's sizes: train tag 14573, R 20, U 20, B 12, F 40, A 8, P 8 blocks, 55,296
+     items; eval split tag 14574, 14,336 with B groups; K-EVAL-S split tag 14575, 7,168). The fresh gate
+     (k3/round4/run_gate4.py): the repo's cuegate.gate on 40,960 of the fresh training items at the stream's shares,
+     the F model on its 6,144 F items, evals by the full fit. Figures: train / K-EVAL-ID / K-EVAL-S for gen.py's
+     sample, fresh train / fresh eval split / fresh K-EVAL-S split for the fresh sets, unless marked.
+  S-1 RULING (SPEC 5, on its LINK paragraph's principle). The skill R, U, B and A test is joining the final
+     question's name to the statements that carry it. LINK makes that join through full-name matches (the final
+     question to an earlier one, its answer's statement, that statement's name), so it is the skill and no column.
+     REVIEW 5a's QFIT and QSIZE make no join: question to question (the final name among earlier questions' names)
+     and statement to statement (holders' sizes) never meet at a name, only through a count the generator correlated.
+     Both classes are cheap (same_q_before, A-QREPEAT and A-QNEW already used the first; n_attrs, ent_named and
+     own_cnt the second), so the cue is cheap: the gate carries its columns and the generator must not feed it. No
+     column compares a candidate's name with any question's, the final one's or an earlier one's (with question-to-
+     question identity that is LINK's join); ans_same_q (the copy cue) stays, a join carried on purpose (it can only
+     raise the ceiling, and SPEC 4 makes its value stale). SPEC 5's LINK paragraph, cues.py's docstring and the new
+     "Ruling on name identity" paragraph say so.
+     Columns (BD-33, cues._q_cols; 149 -> 164 pooled): qn_asked 0/1/2+, qn_last, qn_attrs 0/1/2+ (the final name among
+     earlier questions' names), q_names 0-3+ (distinct names asked), q_free_unasked 0-3+ (names stating nothing of the
+     asked attribute that no question named). Power: the round-4 gate on REVIEW 5a's round-3 fresh sets (train12573,
+     eval12574, evals12575; k3/round4/gate_old.log): R 0.695 / 0.709 / 0.706, A 0.662 / 0.690 / 0.686, P 0.776 /
+     0.772 / 0.781, 9 fails (U 0.576-0.608, B 0.195-0.276, F 0.625-0.636, F model 0.626-0.629 pass); round 3's gate
+     read 0.642-0.654 there (REVIEW 5a's base run).
+     Generator (BD-28, SPEC 4): earlier questions ask bystanders only. Three designs were run before the kept one:
+       v1 (skill._questions: no question names the final entity or a holder; P redrawn until it had a bystander):
+         gen.py check failed A 0.536 (limit 0.517 at n 8,192) and P 0.675 (0.666). A: in R and U items every
+         bystander could be asked, in an A both-item (an R or U context) the asked entity never is, so of R and U
+         items with a bystander 0.350 had every bystander asked against 0.000 of A's (diag_a4.py; one bystander,
+         none asked, no question: A 0.549 against R and U 0.244; after v2 0.562 against 0.554, the largest cell
+         difference 0.023, 2-3 SE on 2,048 A items). P: drawn until it had a bystander, P kept fewer
+         holders; R-SLOTS on P 0.637-0.644 and PATFIT5 0.635-0.664 against REVIEW 5a's 0.604-0.640 and 0.597-0.628.
+       v2 (R and U reserve one bystander, drawn uniformly, that no question asks; P gets its own bystander entity;
+         fam_A's U contexts draw the rank pair as U items do): pass; A 0.500; P 0.649 / 0.678 / 0.707 (R-SLOTS on P
+         0.630-0.639).
+       v3 (+ R's, F's and P's (k, rank) exact per block, below): P 0.670 train (limit 0.666), a fail; fresh 0.633 /
+         0.652 / 0.648. P sat at its bar: R's no-foil fifth is free and 5/8 of foil items put the key's latest first.
+       v4, kept (BD-30): P has a foil in every item (follow 1/2) besides its bystander entity: P 0.574 / 0.613 / 0.559,
+         fresh 0.532 / 0.564 / 0.565; R-SLOTS on P 0.469-0.493, PATFIT5 0.491-0.514. SPEC 4 leaves P's value
+         structure open; P's reading is persistence (the marker), K1 reads its LIK beside its ceiling as before.
+     Rules on v4 (fresh train / fresh eval / fresh K-EVAL-S split / K-EVAL-ID / K-EVAL-S; gen.py stream):
+       QSIZE equals R-SLOTS (the final name was never asked with another attribute: fire rate 0.000 on every set):
+       R 0.619 / 0.626 / 0.625 / 0.611 / 0.656, stream 0.629; P 0.483 / 0.471 / 0.475 / 0.486 / 0.469, stream 0.493.
+       QFIT R 0.625 / 0.619 / 0.619 / 0.615 / 0.620, stream 0.630 (QFIT-NOQ 0.617-0.633); P 0.458-0.501; U 0.527-0.566
+       (the lure: same_q_before's cue, within the bar). QS-UNASKED equals R-SLOTS on R; A-QREPEAT, A-QTWICE, A-QLAST
+       0.500 on A (never fire outside U's lures); A-USHAPE 0.617-0.629 and A-HOLDFIRST 0.625-0.645 on A lose
+       0.068-0.103 in the mix (A1H's class, reported). LATEINTRO R 0.553-0.580, P 0.461-0.496, PATFIT5 R 0.630-0.653.
+       B (rules5_ab.py) per item 0.586-0.636, groups 0.000-0.062; F (rules5_f.py, rules5_f2.py) 0.566-0.650 (the 0.650
+       F-FOILORD on K-EVAL-S's 256, limit 0.739; fresh sets 0.614-0.635); new_rules.py: LASTSKIP 0.602-0.662 (0.662
+       on K-EVAL-ID's 512: the foil's reference ends 85 of its 384 reference items, the key's 66, 1.5 SE), EXCL 0.625
+       on every set (no same-key repeat, no excluded foil value), POSFIT 0.619-0.653.
+     Cost: earlier questions per item on gen.py's stream (round 3 -> round 4): R 0.904 -> 0.174, U 0.967 -> 0.394,
+       B 0.819 -> 0.000, F 0.922 -> 0.530, A 0.895 -> 0.467, P 1.816 -> 1.789 (2-4 questions kept).
+  S-2 (BD-29, SPEC 4 U). U's (key, foil) intro-rank pair is a block flag (skill.rank_pairs), each role's rank exact.
+     The holder introduced last is the key in 0.500 of U items on the fresh sets, 0.502 and 0.496 on K-EVAL-ID and
+     K-EVAL-S (REVIEW 5a: 0.504-0.546), and in 0.509 of the stream's non-lure U items (n 17,478, 2.3 SE; REVIEW 5a
+     0.541 on 6,986). purity checks the foil's rank per k
+     per block; test_u_foil_rank_is_a_block_flag plants the round-3 draw (fails k{k}_frank only).
+  R, F, P RANKS (BD-31). v2's K-EVAL-sized eval blocks failed SPEC 5's set-level rank rule once: R k 3 rank 1 at 0.506
+     (n 83, 3.3 SE) in test_eval_groups_defeat_partial_keys; over 16 fresh R blocks the per-item draw was uniform
+     (largest cell 1.5 SE), so it was the draw's noise. R's, F's and P's (k, rank) are now block flags like U's and
+     B's (skill.ranks), checked per block; A's both-item context kind too (drawn per item, R contexts, which fail
+     more, were redrawn into U contexts: 93 against 163 of 256 on test_skill's block after fam_U's tries rose).
+  O-1 (BD-32). purity fails a set whose B cube items do not all open a scored group ("B groups: 0 scored of 48 cube
+     items" on K-EVAL-S's B records reversed); check_k fails a K-EVAL B set without 3n/16 groups ("k_eval_id: B groups
+     0 of 32 records, not 3n/16" for a set written without groups, which purity alone passes).
+  T-a. test_alias_window_reads_both_definitions_from_tokens: a hand-built F item whose aliases sit 5 and 4 exchanges
+     after their own definitions, the foil's 12 after the asked one's: alias_win False from tokens and the balance
+     check's fail line; the same item with both definitions first passes. Mutant alias_win_own_def added.
+  T-b. test_masks RUN adds ("MX-SF", 300, "default") (its first run hardens X for F2; fit keeps the second), and
+     test_the_restart_pick_weighs_the_objective: {F1, F3, F4, X} scores 3.39 by SF against the planted set's 4.02,
+     4.48 by g_fact + g_skill; _hard is linear in the weights for every objective. Mutant mask_hard_weights_dropped.
+  D-1, D-a (BD-27, MODULES), D-b (SPEC 16 K3 round 3, K1-h: B-ADAPT by value id 0.62-0.68 on pairs, its tie-sharing
+     version 0.43-0.44, O3_12 by value id 0.589-0.648), D-c (SPEC 16, K3 ROUND 3 M-1: F1 0.001 at the defaults,
+     0.000 at 4,000 steps, 0.006 at lam 10; MUTANTS: the 102 outside test_masks): corrected in place, marked.
+  MASKS (K2 notes K2-i): no code change. Fresh seeds 400-411 (tests/mask_sweep.py OUT --seeds 400 ... 411 --floors k2
+     default --procs 2; 240 fits, 5,972 fit-seconds, median 24 s): 240 of 240 sets; single runs 479 of 480 (MX-KF
+     seed 408, default floors, second run); planted 0.589 / 0.581 or more, others 0.183 / 0.275 or less (K2's /
+     default floors). Never-used seeds so far with 2 restarts: 1,040 of 1,040 fits; single runs 7 of 2,080 missed.
+  GATE TABLE (gen.py check on k3/round4/g, the final code; train n R 20,480, U 20,480, B 12,288, F 12,288, A 8,192,
+     P 8,192; K-EVAL-ID 512 per family, K-EVAL-S 256; train / K-EVAL-ID / K-EVAL-S; ceiling = the best learner, F the
+     larger of the pooled and F models):
+                 logit                  mlp                    set                    CEILING (bar, C5 limit on train)
+       R   0.605 0.592 0.633    0.648 0.646 0.652    0.651 0.641 0.668    0.651 0.646 0.668 (0.65, 0.660)
+       U   0.500 0.521 0.527    0.549 0.560 0.578    0.550 0.586 0.562    0.550 0.586 0.578 (0.65, 0.660)
+       B   0.175 0.184 0.172    0.228 0.201 0.231    0.226 0.195 0.219    0.228 0.201 0.231 (0.65, 0.663)
+       F   0.529 0.527 0.570    0.617 0.639 0.644    0.617 0.648 0.637    0.623 0.648 0.644 (0.65, 0.663)
+         F model 0.623 0.623 0.621    0.615 0.629 0.602    0.618 0.639 0.606
+       A   0.278 0.283 0.273    0.500 0.500 0.500    0.500 0.500 0.500    0.500 0.500 0.500 (0.50, 0.517)
+       P   0.482 0.457 0.500    0.573 0.602 0.547    0.569 0.604 0.566    0.573 0.604 0.566 (0.65, 0.666)
+       B groups (96 / 48): every learner 0.000 / 0.000 (bar 0.125). K-DEV, K-PROBE, K2-A, K2-B (51-256 per family):
+       R 0.648-0.680, U 0.582-0.602, B 0.214-0.305, F 0.630-0.662, A 0.500-0.510, P 0.569-0.647, each within C5.
+       The set learner is not reproducible run to run: the same records and code (the sample regenerated after the
+       comment-only edits, every record file byte-identical, every oracle equal) moved its figures by up to 0.059
+       (K-DEV P, 102 items; K2-A F 0.052; K-EVAL-ID U 0.606 -> 0.586, K-EVAL-S R 0.684 -> 0.668); logit and mlp
+       repeated exactly. Both runs passed. (Seen in passing; the gate's code is round 1's, unchanged here.)
+     Oracles (train / K-EVAL-ID / K-EVAL-S; check.json holds every row):
+       R  O1 0.607 / 0.609 / 0.613  O2 0.500  O4 1.000  O5_3 0.548 / 0.539 / 0.488  O6 0.185 / 0.182 / 0.141  O7 0.169
+          / 0.160 / 0.129  O8 0.203 / 0.207 / 0.258  T 0.603 / 0.578 / 0.566  A1H 0.902 (reported)  IDEAL 1.000
+       U  O1 0.128 / 0.123 / 0.137  O2 0.500  O4 1.000  O5_3 0.492 / 0.484 / 0.438  T 0.487 / 0.477 / 0.477  A-QREPEAT
+          0.853 / 0.842 / 0.832 (reported: the lure)  IDEAL 1.000
+       B  O3_1-O3_3 0.328-0.367  O3_12 0.583 / 0.602 / 0.582  O3_13 0.578 / 0.594 / 0.582  O3_23 0.582 / 0.604 / 0.609
+          O5_3 0.568 / 0.562 / 0.574  B-CENTER 0.180 / 0.164 / 0.195  B-TOKFREQ 0.187 / 0.176 / 0.199  B-MAJOR 0.184 /
+          0.174 / 0.184  B-ADAPT 0.620 / 0.639 / 0.629  B-FRAME 0.620 / 0.631 / 0.629  IDEAL 1.000; groups (96 / 48):
+          every O3_S and B-* rule 0.000, O4 and IDEAL 1.000
+       F  O2 0.500  O4 0.250  T 0.534 / 0.535 / 0.527  O11 0.378 / 0.375 / 0.387  O12, O12p 0.500  O13e, O13a 0.750
+          O14e 0.627 / 0.623 / 0.621  O14a 0.623 / 0.627 / 0.629  SURF 0.622 / 0.629 / 0.594  SURFe 0.812 / 0.812 /
+          0.809  SURFa 0.810 / 0.816 / 0.785  SURFr 0.496 / 0.505 / 0.458  F-INTRO, F-DEFX 0.622 / 0.625 / 0.613
+          F-ANTE 0.691 / 0.693 / 0.715 (reported)  IDEAL 1.000; F.xnear 1,432 vs 1,479, F.ref_last 0.191 vs 0.182
+       A  O9 0.250  O10 0.250  O9|10 0.500  A1H 0.547 / 0.533 / 0.574  A-MANYFREE 0.726 / 0.727 / 0.727  A-QNEW 0.632 /
+          0.613 / 0.656  A-QREPEAT 0.500 (reported)  IDEAL 1.000
+       P  O1 0.419 / 0.414 / 0.410  O2 0.500  O4 1.000  O5_3 0.564 / 0.562 / 0.539  T 0.628 / 0.625 / 0.578  IDEAL 1.000
+     Bars confirmed: R, U, B, F, P 0.65, A 0.50, B groups 0.125, each with C5's tolerance. R sits at its bar by
+     design (0.651 against a limit of 0.660; O1 0.61, its no-foil fifth), as since K3 round 1.
+  Records: every family's training and eval records changed (earlier questions; U's, R's, F's, P's rank flags; A's
+     context flag; P's design). K-EVAL-ID and K-EVAL-S keep their size and seeds.
+  TESTS 121 (110 + 11): test_skill 5 (test_earlier_questions_ask_bystanders_only: no earlier question names the
+     final name or a holder on train, eval, DFAR, PLONG and ENTS blocks, R and U keep a bystander unasked, P's k 3-5,
+     and the pre-round-4 draw, a holder-only draw and a no-reserve draw each fail acceptance; test_u_foil_rank_is_a_
+     block_flag; test_b_groups_are_counted; test_r_f_p_rank_rules_catch_per_item_draws; test_p_holders_keep_r_design:
+     k 4 P items with 3 holders 0.357 against 1/3, k 5 with 3 or more 0.541 against 5/9), test_cues 2 (the question
+     columns on a hand-built item; test_gate_catches_the_old_question_draw: R, U, A, P blocks of 512, mlp at batch
+     128: the old draw fails A (0.557 / 0.650 in the scratch run) and lifts R plus P, the bystander draw passes),
+     test_reference 1 (T-a), test_masks 2 (T-b: RUN MX-SF seed 300, the weights test), test_gen 1 (O-1's check_k
+     rule). test_block_flags_are_exact covers U's foil rank and R's, P's, F's ranks; test_a_both_items_are_r_or_u_
+     contexts now needs exactly 128 of each; test_reported_a_rules_lose_in_the_mix: A-QREPEAT reads O9|10 outside U.
+     Shared helper: kfix.old_questions (the round-3 draw). Runs on the final code, one pytest at a time (K_TEST_THREADS
+     2, timeout 400 s each): test_skill 31 passed (187 s); test_cues, test_purity, test_pools_world, test_probes,
+     test_k4 46 (72 s); test_reference 18 (80 s); test_gen 8 (99 s); test_masks, test_ablate 18 (138 s). The whole
+     suite in one invocation takes longer than 400 s here and was not run as one.
+  MUTANTS 139 (119 + 20): q_pool_holders, early_name_rule_off, early_name_misses_holders, q_cols_blind, q_cols_off,
+     r_u_reserve_off, all_free_rule_off, p_bystander_off, rfp_rank_rules_off, rp_rank_per_item,
+     dfar_pad_makes_holders, u_foil_rank_free, u_frank_rule_off, u_rank_pairs_per_item, a_ctx_per_item,
+     alias_win_own_def (T-a), mask_hard_weights_dropped (T-b), group_count_rule_off, check_group_count_off (O-1),
+     b_group_one_token_relatives (REVIEW 5b's third). Retargeted to round 4's code, same bug: questions_ask_final_attr,
+     follow_not_balanced, u_one_follows, u_rank_not_exact, a_both_own_structure, a_both_r_only. Runs (mutation_k.py,
+     serial, one pytest at a time): --baseline exit 0 (605 s); --why 04:46-06:08, 138 killed, p_bystander_off
+     SURVIVED (P's k comes from the flags, so no test saw the missing bystander entity); test_p_holders_keep_r_design
+     added, and p_bystander_off then killed (105 s: k 5 P items with 3 or more holders 0.741 against 5/9). Failing
+     asserts read: q_pool_holders "1524 items: an earlier question names the final name or a holder" (and 119 R or U
+     items with every bystander asked); early_name_rule_off and early_name_misses_holders: the old draw and the
+     holder-only draw pass that rule (only "every bystander asked" left); q_cols_blind qn_asked2 0.0; q_cols_off
+     KeyError qn_asked2; r_u_reserve_off "219 R or U items: every bystander asked"; all_free_rule_off the no-reserve
+     draw passes; rfp_rank_rules_off no R rank fail on per-item draws; rp_rank_per_item "R.b0: k2_rank0 81 of 155";
+     dfar_pad_makes_holders a DFAR item with every bystander asked; u_foil_rank_free "U.b0: k3_frank0 60 of 171";
+     u_frank_rule_off no frank fail on the planted block; u_rank_pairs_per_item "U.b0: k2_rank0 75 of 171";
+     a_ctx_per_item contexts 149 U against 107 R; a_both_r_only 256 R; a_both_own_structure the gate A 0.934 / 0.852;
+     alias_win_own_def alias_win True on the hand-built item; mask_hard_weights_dropped RUN MX-SF seed 300 keeps
+     {(0, 20), (1, 17), (2, 5), (2, 27)}; group_count_rule_off no fail on reversed records; check_group_count_off no
+     fail on a set without groups; b_group_one_token_relatives O3_12 0.104 on groups. After the run only comments
+     changed in skill.py and fams.py (fix_comments.py: two figures in a comment and a docstring) and test_skill.py
+     gained the P test; the final code's baseline: below.
+     Final code: mutation_k.py --baseline exit 0 (672 s); the tests above ran on it.
+  CHANGED FILES: SPEC.txt (sections 4 and 5 [K3r4], 16: round 3's D-b and D-c figures, K3 round 4), K1 notes (K1-h
+     D-b, K1-i, the READINGS ceilings), K2 notes (K2-i), this file (MODULES, BD-27 wording, BD-28 to BD-33, K3 ROUND 3's
+     D-c phrases, this block); code: skill.py, fams.py, purity.py, cues.py, check_k.py; tests: kfix.py, test_skill.py,
+     test_cues.py, test_reference.py, test_masks.py, test_gen.py, mutation_k.py. Not changed: masks.py, cuegate.py,
+     oracles.py, items.py, gen.py, evalsets.py and the rest.
+
+REVIEW 6a 2026-09-28 (fresh adversarial reviewer, lens SHORTCUTS, of K3 ROUND 4; Mac CPU only, no language model,
+  tiny CPU learners only, nothing trained, queued or committed; no repo file changed but this block: the sha256 of
+  every K file before the runs equals round 4's after.sha (40 of 40), and after them only this file differs
+  (k3/rev6a/before.sha, after.sha), so pytest and the mutants were not rerun. Scripts and outputs: the session
+  scratchpad, k3/rev6a/; at most 3 worker processes, torch at 2 threads, load 31-92 from other sessions,
+  memory_pressure 42-68% free before each heavy step, 1.65 GB RSS the most seen for the pooled fit)
+  SAMPLES: fresh blocks at unused seeds (REVIEW 3a's gen_fresh.py, unchanged): train tag 16673 (R 20, U 20, B 12,
+     F 40, A 8, P 8 blocks of 512: 55,296 items), eval split tag 16674 (R, U, A, P 4, B 4 with cube groups, F 8:
+     14,336), K-EVAL-S split tag 16675 (7,168), an R-only train set tag 16676 (80 R blocks: 40,960); gen.py's
+     K-EVAL-ID, K-EVAL-S and training stream (k3/round4/g, 81,920 items in two shards). Figures: fresh train / fresh
+     eval split / fresh K-EVAL-S split / K-EVAL-ID / K-EVAL-S, then the stream's two shards, unless marked; ties
+     share credit. C5 limits at 0.65: 0.657 (n 40,960), 0.660 (20,480), 0.661 (16,405), 0.663 (12,288), 0.664
+     (10,240), 0.668 (6,144), 0.672 (4,096 and 4,075), 0.682 (2,048), 0.695 (1,024), 0.713 (512), 0.739 (256); at
+     0.50: 0.523 (4,096), 0.533 (2,048), 0.547 (1,024), 0.566 (512), 0.594 (256).
+  NEW CHEAP RULES (rules6_f.py, rules6_rup.py, rules6_ab.py, rules6_extra.py, an inline A script whose output is
+     rules6_a2_out.txt, diag_f6r.py, bayes_r.py, bayes_b.py, bayes_b2.py; none is in SPEC 5, cues.py or REVIEW 2, 3a,
+     4a, 5a unless marked (variant); none compares a statement's name with the final question's (F: only O4's
+     quarter and SURF's N and O forms), none reads the name before an ellipsis or an alias's definition, none follows
+     an earlier answer to its statement)
+     F (O4's quarter, then one of the two reference statements):
+       F-DEFBTW (a definition between the references: the later) 0.626 / 0.625 / 0.624 / 0.627 / 0.613, 0.624 /
+       0.614. F-BYSTREF (another attribute's reference between them: the earlier) 0.616-0.641. F-TENDONLY (the only
+       reference ending its turn; variant of 5a's F-TURNEND) 0.604-0.626. F-ANTECROSS (the ellipsis whose antecedent
+       is in its own turn) 0.619-0.626. F-NAMESBTW (2+ names between: the earlier) 0.615-0.660 (0.660 on K-EVAL-S's
+       256). F-ALIASID (token identity: the smaller alias id) 0.623-0.649. F-LENTURN (length: the reference in the
+       shorter turn; variant of 5a's F-TURNLOAD) 0.619-0.639. F-FIT7 (2-fold cross-fitted lookup over 12 of these
+       flags, 2,208 keys) 0.624 cross-fit, evals 0.607-0.633. F-RANKFIT (3a's F-RANK as a cross-fitted lookup on the
+       asked name's intro rank, k, its statement count and first-mention place, the reference kind: where SPEC 4's
+       rank flag could reach) 0.630 cross-fit, 0.598-0.636.
+       DIAG (diag_f6.py, reads the gold): on 15,360 fresh-train reference items, P(the key's reference is the later)
+       in 146 cells of 40 new token-level features (turn places and sizes, statements, exchanges, names, definitions
+       and other references between the two, the antecedent's turn and form, alias and value id order, stale gap,
+       earlier questions before, between and after): no cell 3 SE off 0.5 but the asked name between the references
+       (ellipsis items 0.000 / 0.960: the antecedent, the resolution); k 2 ellipsis items 0.469 (z -3.2) on fresh
+       train only, not flagged on the 6 other sets. diag_f6r.py: no rank cell 3 SE off 0.5 (34 cells with n >= 150).
+     R (holders = names with a named statement of the attribute; blind to the question's name): R-VOTE4 (first
+       holder, first mention, not in the last turn, not ending its turn) 0.605-0.617; R-GAPFIRST 0.588-0.608;
+       R-NOTLASTTURN 0.594-0.612; R-TOKID (token identity) 0.545-0.613; R-HFIT (cross-fitted lookup, 14 holder
+       features, 702 keys) 0.636 cross-fit, 0.628-0.672. R-BAYES: over the bar, S-1 below.
+     U: U-NOLUREFEW (3a's U-FEWREP without an identical earlier question, 4a's U-LURECNT with one) 0.539-0.559;
+       U-QUIET (a non-lure earlier question: holders silent after it) 0.539-0.561; U-OPENER 0.521-0.547; U-LENTOK
+       (length) 0.479-0.512; U-HFIT 0.545 cross-fit, 0.508-0.564. DIAG: on non-lure U items with 2 holders the
+       holder stating the attribute 2+ times is the key in 0.450 (n 4,652): the lure asks only the key, so without
+       one the key is the less repeated (U-NOLUREFEW); within the bar.
+     P: P-NOTOPENER 0.465-0.527, P-NOTSOLO 0.441-0.474, P-SMALLEST (variant of 3a's R-FEWEST) 0.460-0.493,
+       P-LASTTOK 0.431-0.478, R-VOTE4 0.408-0.436, P-HFIT 0.509 cross-fit, 0.465-0.522; P-BAYES (bayes_r.py with P's
+       follow 1/2) 0.612 / 0.604 / 0.605 / 0.592 / 0.551, 0.609 / 0.606.
+     B (per item, then cube groups on the 4 eval sets): B-NOATTR2 (B-ADAPT's subset, tie to a name with one
+       statement; 5a's B-TWOATTR mirrored) 0.617-0.637, groups 0.029-0.035; B-TURNEND 0.612-0.629, 0.025-0.035;
+       B-BIGTURN 0.620-0.656, 0.026-0.030; B-TOKID (tie by the candidates' own token id) 0.598-0.633, 0.000;
+       B-BLINDMID 0.156-0.187. B-SURPRISE and B-BAYESTIE: over the per-item bar on training items, S-2 below.
+     A (" none" when O9|10's or the rule's cue fires, else O4; on A, then the mix change against O9|10 at SPEC 4's
+       shares): A-QNOLURE (an earlier question, none identical to the final one, a holder stating the attribute 2+
+       times: a U context without U's lure) 0.572-0.578, stream 0.578 / 0.558, fires on 15-16% of U items and 0.000 of
+       R, B, F, P items, mix -0.030 to -0.034; A-Q2NAMES 0.491-0.512, -0.024 to -0.031; A-REPNOLURE (a holder
+       stating the attribute 2+ times, no identical earlier question) 0.736-0.754, fires on 83-87% of U, -0.183 to
+       -0.193; A-QLATE (an earlier question after the attribute's last statement) 0.551-0.594, fires on 69-72% of P,
+       17-20% of F, 7-10% of R and U, -0.110 to -0.118; A-HOLDLATE (5a's A-HOLDFIRST mirrored) 0.607-0.636, -0.088 to
+       -0.094. A1H's class: those over A's bar on A alone lose in the mix; reported, not counted.
+  S-1 R-BAYES (bayes_r.py). fams.fam_R keeps a uniform order among those in which the key has the block's intro rank
+     AND the block's follow status (arrange + _rank_follow), so under "holder h is the key" the observed order has
+     probability 1 / (n! frac(h)), frac(h) the share of random orders of the same statements giving h its observed
+     rank and follow status. R-BAYES scores each holder by prior(follow: 5/8 or 3/8) x (1 / n_h) x sum over the other
+     holders f of 1 / n_f (the key and the foil draw 1-3 attributes with the asked one forced, other names 1-3 of
+     all 6) / frac(h) (Monte Carlo, 4,000 orders) and the d range. Reads only the named statements' order grouped by
+     name, the names' intro order, which statements carry the attribute and each holder's exchange distance; the
+     question's name never. 0.6717 / 0.6609 / 0.6797 / 0.6777 / 0.6602, stream 0.6721 / 0.6788 (whole stream
+     0.673); tag 16676 0.6734. Over C5 on fresh train (limit 0.664), both stream shards (0.661, 0.672), the whole
+     stream (0.660) and tag 16676 (0.657: 9.9 SE over 0.65); under the smaller eval sets' limits (0.682-0.739).
+     Ablation (bayes_abl.py; tag 16676 / fresh train / stream shards): the follow prior alone 0.619 / 0.619 / 0.616 /
+     0.627; with sizes 0.623-0.636; with frac over the rank alone 0.625-0.637; over the follow status alone
+     0.630-0.644; the joint frac 0.671-0.679; the d range adds 0.000; frac over the rank with nothing else
+     0.585-0.599. So the cue is the joint condition: rank and follow are drawn independently per block, while in
+     random orders an early-introduced holder tends to state early and be followed, and the key carries the pairs
+     random orders rarely make. SPEC 16's "R sits at its bar by design" understates it: the design's cheap ceiling
+     is about 0.673, and K1 reads R's LIK against its ceiling.
+     Fitted, R items only (run6r.py; cues.py's 164 columns, cuegate's learners unchanged, fitted on tag 16676's
+     40,960 R items; cross-fit / fresh train / stream (20,480)): mlp 0.651 / 0.667 / 0.664, set 0.644 / 0.663 /
+     0.667, att6 0.659 / 0.671 / 0.667 (its cross-fit over 0.657 too); the four small eval sets 0.646-0.684, under
+     their limits. With feats6's columns: mlp 0.650 / 0.666 / 0.665, att6 0.651 / 0.668 / 0.665, gbdt6 0.648 / 0.659
+     / 0.664. The same mlp and set fitted on 10,240 R items read 0.643 / 0.645 and 0.641 / 0.642 (tag 16676, stream),
+     0.631 / 0.634 cross-fitted on 5,120: the gate's columns carry the cue, its training size hides it (G-1).
+  S-2 B-SURPRISE (bayes_b2.py; B-ADAPT's proper subset of the question's name positions, O3_S's class, the tie
+     broken toward the name whose intro rank is least expected for its statement count: rank / (k - 1) with 2
+     statements, 1 - rank / (k - 1) with 1). fams.fam_B keeps orders in which the asked name has the block's intro
+     rank, whatever its statement count, and a name with 2 statements is usually introduced early. Training items:
+     fresh train 0.6805 (limit 0.668), stream 0.6758 (0.664) / 0.6783 (0.679, under), the whole stream 0.676
+     (0.663), cube items 0.570-0.576; B-BAYESTIE (the tie by 1 / frac(rank), bayes_b.py) 0.6875, stream 0.6807 /
+     0.6771, whole 0.680. SPEC 5 bars O3_S's class per item on every kept training item. Eval sets pass: per item
+     0.621-0.632 (B-BAYESTIE 0.614-0.630), cube originals 0.557 / 0.594 / 0.573 (their copies carry no rank flag),
+     groups 0.000-0.021; B-BAYESBLIND (question-blind) 0.244 / 0.240 / 0.248 on training, 0.191-0.201 on evals,
+     chance about 0.18.
+  FITTED MODEL (feats6.py, learners6.py, gbdt_fast.py, run6.py). Learners: cuegate's logit, mlp, set (code unchanged)
+     and this review's att6 (2 self-attention layers over the question's candidates, 64 wide, 16 epochs) and gbdt6
+     (boosted trees on the choice loss: softmax over the question's candidates, depth 5, 200 rounds, 32 bins). New
+     columns, none in cues.py or REVIEW 4a's and 5a's lists: pooled 48 (per candidate: its name's first and last
+     mention, gap from the first mention, after the latest earlier question, its name after it, after the lure,
+     states the attribute on both sides of an earlier question, one-turn name, named before the attribute's first
+     statement, alone in its turn, turn index from the end, a question just before or after its turn, the name's
+     size rank, first-mention rank and count rank among holders, next to or in a turn with another holder; nulls:
+     value-id bucket, exchange parity, the asked attribute's identity; per item turns, holders, a lure, a question
+     after the attribute's last statement); F model 18 (a definition in its turn, another attribute's reference
+     between the two, the ellipsis's antecedent in its own turn, the two references in one turn, value and alias id
+     ranks, stale gap, questions after, parity, turn place, d, position; per item names, definitions and statements
+     between). Pooled (fresh train at the stream's shares, 40,960, cross-fit; evals by the full fit; the stream held
+     out), best of the five learners per set, cues.py's columns -> with feats6's; train / fresh eval / fresh
+     K-EVAL-S split / K-EVAL-ID / K-EVAL-S / stream:
+       R  0.645 / 0.645 / 0.663 / 0.664 / 0.680 / 0.657 -> 0.643 / 0.646 / 0.661 / 0.660 / 0.688 / 0.654
+       U  0.554 / 0.564 / 0.550 / 0.594 / 0.602 / 0.554 -> 0.569 / 0.570 / 0.574 / 0.606 / 0.582 / 0.571
+       B  0.215 / 0.203 / 0.201 / 0.213 / 0.211 / 0.230 -> 0.222 / 0.201 / 0.208 / 0.217 / 0.211 / 0.232
+       F  0.626 / 0.619 / 0.637 / 0.631 / 0.660 / 0.628 -> 0.625 / 0.624 / 0.636 / 0.644 / 0.641 / 0.630
+       A  0.503 / 0.503 / 0.504 / 0.508 / 0.512 / 0.503 -> 0.509 / 0.512 / 0.509 / 0.512 / 0.512 / 0.511
+       P  0.560 / 0.585 / 0.592 / 0.574 / 0.562 / 0.583 -> 0.546 / 0.585 / 0.583 / 0.568 / 0.543 / 0.580
+       B groups 0.000 for every learner. Every figure within C5 (stream n R, U 20,480, B, F 12,288, A, P 8,192);
+       " none" on A's both-items at most 0.024 (plus, set). On R's stream att6 and gbdt6 read 0.657 and 0.655 against
+       mlp's 0.648 (base); the pooled fit has 10,240 R items and stays under 0.660 (G-1).
+     F model (20,480 fresh F items, cross-fit; evals by the full fit): base 0.594-0.668, plus 0.606-0.656 over the
+       5 sets and the stream (0.668: gbdt6 on K-EVAL-S's 256); stream 0.620-0.632 (limit 0.663). Within C5.
+  GATE CODE (leak6.py and an order check)
+     GOLD: 4,608 records (every 4th of the fresh eval split, every 3rd of K-EVAL-ID), final answer set to other item
+       values, " none" and an out-of-item value, "qs" and "meta" stripped: 18,331 variants, X of cues.item_features
+       moved on 0 (gold index on 17,643); cues.f_item_features 686 variants, moved on 0.
+     NAME: the final question renamed to another holder (same attribute and frame), 2,290 records: columns moved on
+       137, none outside same_q_before, ans_same_q*, ans_attr_other_q, name_absent and the qn_ / q_free_unasked ones.
+     ORDER: candidate rows reversed (" none" kept last) on K-EVAL-ID after a fit on the fresh eval split: logit, mlp
+       and set credits identical (0.440, 0.499, 0.505; largest per-question difference 0).
+     FOLDS: gate()'s halves are disjoint and cover the list, evals use the full fit (read). No leak, no fold error.
+     G-1 (design, not a bug): the ceiling is a finite-sample fit. gen.py check fits 81,920 pooled items (R 20,480),
+       its train figure on halves (10,240 R); the R cue above needs about 40,960 R items to show (mlp 0.631
+       cross-fit on 5,120, 0.643-0.645 on 10,240, 0.664-0.667 on 40,960, cuegate's own columns and learner), and
+       gen.py's sample is written at --slots 25,000,000, a tenth of SPEC 7's 250M. A gate that fits one family at a
+       time with more items, or carries an exact-posterior oracle like R-BAYES where a generator conditions the asked
+       entity's order, would have caught S-1.
+  PROTOTYPES (scratch copies only; not run on them: pytest, mutants, gen.py check, the gate)
+     B (proto/code fams.fam_B: a uniform order, then the name at the block's intro rank is the asked one, swapped
+       into slot 0): tag 16677 (16 B training blocks, 8,192) / 16678 (4 eval B blocks with groups, 2,048):
+       B-SURPRISE 0.621 / 0.626 (cube 0.497 / 0.503), B-BAYESTIE 0.620 / 0.626, B-BAYESBLIND 0.182 / 0.183;
+       purity.accept passes both (no fails; IDEAL 1.000, O3_12 0.591 / 0.579, B-ADAPT 0.626 / 0.626, B-CENTER 0.192 /
+       0.177, groups O3_12 and B-ADAPT 0.000 on 384); every asked name's intro rank equals its flag (k 8: 768 each).
+     R, 40 R blocks each, scored by each generator's own posterior:
+       proto (key and foil drawn alike; a uniform order in which either meets the (rank, follow) flags, that one
+         made the key), tag 16680: R-BAYES2 0.6626 (limit 0.660): not enough.
+       proto3 (foil items: a uniform order, rank and follow read as they fall), tag 16681: sizes-only posterior
+         0.5725, O1 0.556, O2 0.557; asked intro ranks k 2 0.489 / 0.511, k 3 0.335 / 0.328 / 0.337, k 4 0.253 /
+         0.237 / 0.252 / 0.258 (no longer exact per block); follow 0.443 (SPEC 4 wants 1/2 in R).
+       proto4 (the rank flag kept, no follow condition), tag 16682: posterior (sizes, 1 / frac over the rank)
+         0.6058; follow 0.450.
+  FINDINGS
+     S-1 R over its bar with a question-blind cheap rule: R-BAYES 0.671-0.679 on every large set (fresh train,
+       stream shards, 40,960 fresh R items; limits 0.657-0.672); cues.py's columns with cuegate's mlp and set read
+       0.663-0.667 (att6 0.667-0.671) when fitted on 40,960 R items. Cause: fams.fam_R conditions the order on the
+       key's rank and follow flags jointly (S-1 ablation). Fix direction: condition the order on nothing
+       key-specific that random orders tie to the key's statements (proto3 0.573, proto4 0.606), then decide SPEC
+       4's R follow share (0.44-0.45 natural) and rank exactness; choosing the key between key and foil after the
+       order (proto) is not enough (0.663).
+     S-2 B per item on training items over O3_S's bar with a partial key and a question-blind tie-break (B-SURPRISE
+       0.676-0.681, B-BAYESTIE 0.677-0.688); eval sets and groups hold. Fix prototyped: ask the name at the flagged
+       rank of a free order (0.621 / 0.626, purity passes).
+     G-1 the gate's ceiling is a finite-sample estimate that missed S-1 (above).
+     Checked and within their bars: F (9 rules, two DIAGs, F models 0.594-0.668, pooled 0.619-0.660), U, P
+       (P-BAYES, which carries P's rank normalisation, 0.551-0.612), A (A1H's class only), B groups. No rank-flag
+       effect over a bar elsewhere: F's is symmetric (diag_f6r.py), U's key and foil ranks are flags together.
+  VERDICT: not clean (S-1: R over its bar with R-BAYES on every large set; S-2: B's per-item O3_S bar on training
+     items). F, U, P, A, B groups and the gate code hold.

@@ -1,0 +1,33 @@
+# E3 pre-registration for the harness gate (train.py refuses a run without it; the queue passes
+# --require-committed, so it must be committed unchanged). The full pre-registration is
+# experiments/E3_seed_noise/notes.txt AT THE SAME COMMIT; where this summary and notes.txt differ, notes.txt
+# governs. PLAN Phase 3a; LEDGER "Measure seed noise first and pair arms".
+id: E3
+hypothesis: >-
+  Measurement, not a bet: per metric and size, the seed SD, the SD of a paired arm difference under common
+  random numbers (A and B at one seed share init and token stream), the parts due to init, data order and GPU
+  nondeterminism, the minimum detectable effect at 80% power for 1-5 seeds, and the seeds a screen needs.
+  Arms from E2: A = E2's final 5M pick, B = its runner-up on the stage C axis; A20, B20 likewise at 20M.
+  Part 1: 5M A_s, B_s for s = 1..8 (full WSD, 7,630 steps) plus two replays of A1; Part 2: 20M A20_s, B20_s
+  for s = 1..3 (15,259 steps); Part 3 (only with the data_seed harness change committed and tested): 5M arm A,
+  init seeds 2..5 at data seed 1 and data seeds 2..5 at init seed 1.
+metric: >-
+  F(CHAT) and F(PROSE), E2's definitions (final-checkpoint data_prep/bpb.py bits per byte; CHAT = oasst2,
+  PROSE = cccc + gutenberg + wikimedia pooled; fp32, batch 16384 tokens, all windows); each also gets its own
+  MDE: M (mean of the last 3 checkpoints), CHAT user and assistant turns, PROSE per source, stackexchange, irc,
+  dolly, and the mean training loss over the last 2% of steps.
+decision_rule: >-
+  Statistics fixed in notes.txt: sigma_seed (df N - 1), SD_d (df N - 1), sigma_rep (df 2), sigma_init and
+  sigma_data (df 4); MDE_p(k) = (t(0.975, df) + t(0.80, df)) * SD_d / sqrt(k) (factor 3.261 at df 7, 5.363 at
+  df 2); k_needed for 0.5%, 1%, 2%. E2 re-check: paired t on F(CHAT) over seeds 2..8 (df 6); if B is lower
+  with two-sided p < 0.05 the 5M LR becomes B. A diverged run is a GAP and its pair leaves every SD. No run is
+  rerun because its value looks odd.
+engine_settings: >-
+  Exactly E2's: every E3 config extends E2's base5m.yaml or base20m.yaml, which extend E2's configs/engine.yaml,
+  so the engine settings (train.compile and its backend, train.doc_attn, train.ce_chunk_rows, optim.batched,
+  train.lazy_metrics, train.cuda_mem_cap_gib, train.auto_micro_on_oom false, precision bf16, data.mode,
+  window_tokens, max_item_len) are FIXED before the first scored run (engine_fixed set) and recorded in every
+  run config, its config_sha256 in runs.jsonl and every checkpoint. preflight.py --strict refuses otherwise.
+  E3 adds no engine or data setting.
+seeds: [1, 2, 3, 4, 5, 6, 7, 8]
+arms: "written by e3plan.py from E2's recorded picks: configs/e3_5m_{A,B}_s{1..8}.yaml, e3_5m_A_s1_R{2,3}, e3_20m_{A,B}_s{1..3}, e3_5m_A_{init,data}{2..5}"

@@ -1,0 +1,7 @@
+# SCREENS S007 arm smear, g 1 x LR5, seed 1: C3 g-check (screens.py)
+extends: ../../screens/configs/screens_base.yaml
+name: s007_smear_g1_s1
+out_dir: ../../../planck_root/runs/SCREENS/s007_smear_g1_s1
+seed: 1
+optim: {lr: 0.003, embed_lr: 0.003, scalar_lr: 0.003}
+model: {smear_key: true}

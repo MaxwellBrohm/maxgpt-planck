@@ -1,0 +1,18 @@
+{
+ "decided": "2026-10-04, rc12/notes.txt STEP 11, ITEM 14 (card row)",
+ "rule": "Decoding rows reported beside a model's panel row (NOVELTY_2026-10 s6). Each entry is the main engines.json entry plus 'decode' (dev_batch.DECODE_KEYS). Runs go to their own root (~/planck/runs/rc12_dev_card), never into the panel's rc12_dev; verify_dev_runs.py --engines engines_card.json then expects this decoding. The main engines.json carries no 'decode' (s4: plain decoding for every scored row).",
+ "models": {
+  "VertexResearch/Vertex-0.6-15M-Instruct": {
+   "engine": "vllm",
+   "family": "Vertex",
+   "parity": "fp32 NEAR_TIE",
+   "dtype": "float32",
+   "decode": {
+    "top_p": 0.9,
+    "repetition_penalty": 1.3
+   },
+   "reason": "Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 14). Item 14 card row (NOVELTY_2026-10 s6: 'For Vertex, also run the card's recommended sampling so the score cannot be dismissed'; notes STEP 11, ITEM 14). A REPORTED decoding row, never the model's panel row: the model card at the pinned revision (rc12/pins.json) says 'Sampling strongly recommended' with temperature 0.6, top_p 0.9, repeat_penalty 1.3. temperature 0.6 is already the s4 value; top_p and repetition_penalty are set here (dev_batch.decode_override; vLLM only). repetition_penalty is vLLM's, which (like transformers' generate) penalizes every token already in the prompt or the reply, so the whole conversation history; llama.cpp's repeat_penalty, the name the card uses, looks only at the last 64 tokens by default, so this row is the transformers reading of the card. Engine, dtype and parity are the main engines.json entry's."
+  }
+ },
+ "not_run": {}
+}

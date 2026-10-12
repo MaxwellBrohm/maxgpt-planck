@@ -1,0 +1,128 @@
+S002 STAGE 1 VERDICT TABLES (analyze.py verdicts on the copied seed runs, 2026-10-06; SCREENS.txt STAGE 1 VERDICTS)
+A 5M loss reading only (C8): bpb at 5M, 250.0M slots, starter mix, tok_v0_8k. No RC-12 or Tier 0 score.
+Class SIA, k 2, seeds 101 102, pick g 1 for each arm (C3 g-check, seed 1).
+SD_ref = u x SD_d, u 1.3533 (E3 ub80 at df 7), times BASE's mean F; df 7. d = arm - BASE (bpb; negative = arm better).
+
+C7 READINGS
+arm          metric     d s101    d s102    dbar      thr      delta    SD_ref   df  p (two-sided, 3 significant digits)  label
+nonormscale  CHAT       -0.00230  +0.00119  -0.00055  0.00632  0.01154  0.00378  7   0.842  EQUAL
+nonormscale  PROSE      -0.00128  -0.00048  -0.00088  0.00458  0.01387  0.00274  7   0.663  EQUAL
+nonormscale  cccc       -0.00096  -0.00188  -0.00142  0.00521  0.01319  0.00312  7   0.539  EQUAL
+nonormscale  gutenberg  -0.00254  +0.00123  -0.00065  0.00383  0.01500  0.00229  7   0.7  EQUAL
+nonormscale  wikimedia  -0.00032  -0.00082  -0.00057  0.00596  0.01342  0.00356  7   0.827  EQUAL
+noqknorm     CHAT       +0.00199  -0.00090  +0.00054  0.00632  0.01154  0.00378  7   0.844  EQUAL
+noqknorm     PROSE      +0.00341  -0.00044  +0.00149  0.00458  0.01387  0.00274  7   0.468  EQUAL
+noqknorm     cccc       +0.00177  -0.00227  -0.00025  0.00521  0.01319  0.00312  7   0.913  EQUAL
+noqknorm     gutenberg  +0.00468  +0.00375  +0.00421  0.00383  0.01500  0.00229  7   0.0353  WORSE
+noqknorm     wikimedia  +0.00377  -0.00285  +0.00046  0.00596  0.01342  0.00356  7   0.861  EQUAL
+novres       CHAT       +0.01566  +0.01877  +0.01721  0.00632  0.01154  0.00378  7   0.000355  WORSE
+novres       PROSE      +0.01331  +0.01469  +0.01400  0.00458  0.01387  0.00274  7   0.000174  WORSE
+novres       cccc       +0.01360  +0.01493  +0.01426  0.00521  0.01319  0.00312  7   0.000342  WORSE
+novres       gutenberg  +0.01089  +0.01104  +0.01097  0.00383  0.01500  0.00229  7   0.000258  WORSE
+novres       wikimedia  +0.01547  +0.01814  +0.01680  0.00596  0.01342  0.00356  7   0.000286  WORSE
+
+VERDICT S002.nonormscale: TIE; labels none; Holm (family of 5 so far): does not hold (p 0.84)
+VERDICT S002.noqknorm: TIE; labels none; Holm (family of 5 so far): does not hold (p 0.84)
+VERDICT S002.novres: REJECT; labels none; Holm (family of 5 so far): holds (p 0.00036)
+C4 pooled SIA check CHAT: SD 0.1943% of BASE vs limit 0.5289% (df 3, 3 arms): ok
+C4 pooled SIA check PROSE: SD 0.1227% of BASE vs limit 0.3190% (df 3, 3 arms): ok
+
+C5 REPORTED, NO RULE (d s101, d s102; F = final checkpoint, M = mean of the last 3 checkpoints)
+nonormscale  CHAT assistant      +0.00044  -0.00164  mean -0.00060  BASE 1.11105 1.11742
+nonormscale  CHAT user           -0.02344  +0.02301  mean -0.00022  BASE 1.47237 1.45449
+nonormscale  F(CHAT)             -0.00230  +0.00119  mean -0.00055  BASE 1.15250 1.15609
+nonormscale  F(PROSE)            -0.00128  -0.00048  mean -0.00088  BASE 1.38621 1.38848
+nonormscale  M(CHAT)             -0.00280  +0.00089  mean -0.00095  BASE 1.15685 1.15978
+nonormscale  M(PROSE)            -0.00080  -0.00058  mean -0.00069  BASE 1.39089 1.39299
+nonormscale  PROSE cccc          -0.00096  -0.00188  mean -0.00142  BASE 1.31693 1.32074
+nonormscale  PROSE gutenberg     -0.00254  +0.00123  mean -0.00065  BASE 1.50080 1.49935
+nonormscale  PROSE wikimedia     -0.00032  -0.00082  mean -0.00057  BASE 1.33930 1.34380
+nonormscale  dolly               +0.00176  -0.01482  mean -0.00653  BASE 1.34102 1.35854
+nonormscale  irc                 +0.00041  -0.00479  mean -0.00219  BASE 1.56033 1.57182
+nonormscale  stackexchange       -0.00035  +0.00009  mean -0.00013  BASE 1.36194 1.36354
+nonormscale  train loss last 2%  -0.00383  -0.00254  mean -0.00318  BASE 3.17695 3.20989
+noqknorm     CHAT assistant      +0.00277  -0.00273  mean +0.00002  BASE 1.11105 1.11742
+noqknorm     CHAT user           -0.00408  +0.01326  mean +0.00459  BASE 1.47237 1.45449
+noqknorm     F(CHAT)             +0.00199  -0.00090  mean +0.00054  BASE 1.15250 1.15609
+noqknorm     F(PROSE)            +0.00341  -0.00044  mean +0.00149  BASE 1.38621 1.38848
+noqknorm     M(CHAT)             +0.00117  -0.00103  mean +0.00007  BASE 1.15685 1.15978
+noqknorm     M(PROSE)            +0.00350  -0.00048  mean +0.00151  BASE 1.39089 1.39299
+noqknorm     PROSE cccc          +0.00177  -0.00227  mean -0.00025  BASE 1.31693 1.32074
+noqknorm     PROSE gutenberg     +0.00468  +0.00375  mean +0.00421  BASE 1.50080 1.49935
+noqknorm     PROSE wikimedia     +0.00377  -0.00285  mean +0.00046  BASE 1.33930 1.34380
+noqknorm     dolly               +0.00004  -0.01994  mean -0.00995  BASE 1.34102 1.35854
+noqknorm     irc                 +0.00370  +0.00058  mean +0.00214  BASE 1.56033 1.57182
+noqknorm     stackexchange       +0.00150  +0.00050  mean +0.00100  BASE 1.36194 1.36354
+noqknorm     train loss last 2%  +0.00652  -0.00103  mean +0.00274  BASE 3.17695 3.20989
+novres       CHAT assistant      +0.01841  +0.01727  mean +0.01784  BASE 1.11105 1.11742
+novres       CHAT user           -0.00560  +0.03033  mean +0.01236  BASE 1.47237 1.45449
+novres       F(CHAT)             +0.01566  +0.01877  mean +0.01721  BASE 1.15250 1.15609
+novres       F(PROSE)            +0.01331  +0.01469  mean +0.01400  BASE 1.38621 1.38848
+novres       M(CHAT)             +0.01528  +0.01864  mean +0.01696  BASE 1.15685 1.15978
+novres       M(PROSE)            +0.01370  +0.01483  mean +0.01427  BASE 1.39089 1.39299
+novres       PROSE cccc          +0.01360  +0.01493  mean +0.01426  BASE 1.31693 1.32074
+novres       PROSE gutenberg     +0.01089  +0.01104  mean +0.01097  BASE 1.50080 1.49935
+novres       PROSE wikimedia     +0.01547  +0.01814  mean +0.01680  BASE 1.33930 1.34380
+novres       dolly               +0.02108  +0.02039  mean +0.02074  BASE 1.34102 1.35854
+novres       irc                 +0.01496  +0.01466  mean +0.01481  BASE 1.56033 1.57182
+novres       stackexchange       +0.01051  +0.01176  mean +0.01113  BASE 1.36194 1.36354
+novres       train loss last 2%  +0.03191  +0.03421  mean +0.03306  BASE 3.17695 3.20989
+
+C6 DIAGNOSTICS (descriptive: no E3 Part 4d SD; paired mean and seeds per sign)
+IND onset: read (every pick g 1 = BASE's g)
+IND final nonormscale: arm 3.901 7.885  BASE 7.546 8.825  d -3.645 -0.939  mean -2.292  seeds d<0 2, d>0 0
+IND final noqknorm: arm 6.528 8.765  BASE 7.546 8.825  d -1.019 -0.060  mean -0.540  seeds d<0 2, d>0 0
+IND final novres: arm 4.965 7.096  BASE 7.546 8.825  d -2.582 -1.729  mean -2.155  seeds d<0 2, d>0 0
+IND onsets base_s101                  onset_half 612  onset_abs n/a (BASE; its L_s onset is onset_half)
+IND onsets base_s102                  onset_half 459  onset_abs n/a (BASE; its L_s onset is onset_half)
+IND onsets s002_nonormscale_g1_s101   onset_half 612  onset_abs 1071 (L_s 3.773)
+IND onsets s002_nonormscale_g1_s102   onset_half 612  onset_abs 612 (L_s 4.412)
+IND onsets s002_noqknorm_g1_s101      onset_half 765  onset_abs 765 (L_s 3.773)
+IND onsets s002_noqknorm_g1_s102      onset_half 918  onset_abs 918 (L_s 4.412)
+IND onsets s002_novres_g1_s101        onset_half 612  onset_abs 612 (L_s 3.773)
+IND onsets s002_novres_g1_s102        onset_half 612  onset_abs 612 (L_s 4.412)
+clip base_s101                  5/763 logged steps over 1.0 = 0.0066; steps <= 160 0.312; max gnorm 2.03
+clip base_s102                  9/763 logged steps over 1.0 = 0.0118; steps <= 160 0.500; max gnorm 2.06
+clip s002_nonormscale_g1_s101   6/763 logged steps over 1.0 = 0.0079; steps <= 160 0.375; max gnorm 3.04
+clip s002_nonormscale_g1_s102   7/763 logged steps over 1.0 = 0.0092; steps <= 160 0.375; max gnorm 3.17
+clip s002_noqknorm_g1_s101      6/763 logged steps over 1.0 = 0.0079; steps <= 160 0.375; max gnorm 3.33
+clip s002_noqknorm_g1_s102      8/763 logged steps over 1.0 = 0.0105; steps <= 160 0.438; max gnorm 2.27
+clip s002_novres_g1_s101        5/763 logged steps over 1.0 = 0.0066; steps <= 160 0.312; max gnorm 2.03
+clip s002_novres_g1_s102        9/763 logged steps over 1.0 = 0.0118; steps <= 160 0.500; max gnorm 2.06
+loss 60-160 base_s101                  6.175 6.074 5.871 5.590 5.403 5.377 5.543 5.007 5.040 5.213 4.976
+loss 60-160 base_s102                  6.374 5.963 5.830 5.468 5.731 5.172 5.351 5.371 5.373 4.778 5.138
+loss 60-160 s002_nonormscale_g1_s101   6.005 5.988 5.811 5.553 5.395 5.354 5.563 5.022 5.053 5.221 5.002
+loss 60-160 s002_nonormscale_g1_s102   6.244 5.869 5.746 5.415 5.683 5.132 5.320 5.365 5.388 4.756 5.172
+loss 60-160 s002_noqknorm_g1_s101      6.277 6.141 5.925 5.645 5.477 5.481 5.674 5.195 5.228 5.401 5.204
+loss 60-160 s002_noqknorm_g1_s102      6.502 6.068 5.877 5.528 5.788 5.258 5.444 5.502 5.565 4.993 5.352
+loss 60-160 s002_novres_g1_s101        6.176 6.075 5.873 5.592 5.407 5.380 5.547 5.011 5.044 5.215 4.979
+loss 60-160 s002_novres_g1_s102        6.374 5.964 5.831 5.469 5.733 5.175 5.351 5.370 5.374 4.780 5.138
+NOT COMPUTED HD: not run: bpb.py --hd on each final checkpoint loads a model; the queue scores plain bpb only
+NOT COMPUTED SINK: not run: attn_diag.py on each final checkpoint loads a model
+
+HOURS AND SPEED (reported; lock = gpu.lock held to the status line, train = train to done; median tok/s
+over log.jsonl records 3 to 763: the first two records (steps 10 and 20; the first holds the start-up) are skipped; tok_per_s_median_all_records gives the median over all 763)
+base_s101                  lock 0.305 h  train 0.276 h  median tok/s 254,081
+base_s102                  lock 0.305 h  train 0.276 h  median tok/s 253,648
+s002_nonormscale_g1_s101   lock 0.302 h  train 0.273 h  median tok/s 255,822
+s002_nonormscale_g1_s102   lock 0.302 h  train 0.273 h  median tok/s 255,882
+s002_noqknorm_g1_s101      lock 0.262 h  train 0.234 h  median tok/s 301,306
+s002_noqknorm_g1_s102      lock 0.262 h  train 0.234 h  median tok/s 301,559
+s002_novres_g1_s101        lock 0.293 h  train 0.265 h  median tok/s 264,790
+s002_novres_g1_s102        lock 0.293 h  train 0.265 h  median tok/s 265,174
+
+k = max(2, k_needed(1%)) = 2: k_needed for class SIA, CHAT 2, PROSE 1
+
+BASE LEVEL AGAINST E3 PART 1 ARM A (reported, no rule; results.json base_level_vs_e3_part1 has the checks)
+F(CHAT) E3 A seeds 1-8 mean 1.14674 (1.14038 to 1.15126); BASE 1.15250 1.15609; gap +0.00755 (+0.66%); t 3.26, p 0.014 (df 7); BASE above all 8: yes
+F(PROSE) E3 A seeds 1-8 mean 1.38141 (1.37851 to 1.38514); BASE 1.38621 1.38848; gap +0.00594 (+0.43%); t 3.66, p 0.008 (df 7); BASE above all 8: yes
+verdicts with SD_ref and delta at E3 A's mean instead of BASE's: S002.nonormscale TIE, S002.noqknorm TIE, S002.novres REJECT
+same seed (seed 1, S002's SIA arms minus dbar, against E3 A_s1 and 2 replays): CHAT +0.00221 (+0.19%), PROSE +0.00270 (+0.20%); rough se 0.00220 / 0.00146 (results.json same_seed_check_seed1)
+cause: not separated (seed draw, the eval.induction hook, or what the start record does not hold)
+
+IF A LATER SIA ARM FAILS THE POOLED CHECK (analyze.py verdicts --earlier this results.json):
+S002.nonormscale: TIE, labels ['noise check failed later', 'underpowered'] (CHAT thr 0.00697)
+S002.noqknorm: TIE, labels ['noise check failed later', 'underpowered'] (CHAT thr 0.00697)
+S002.novres: REJECT, labels ['noise check failed later', 'underpowered'] (CHAT thr 0.00697)
+
+CONSEQUENCE: Value residual stays in the baseline and no 30M arm removing it alone is queued under row 19 (row 19's 30M check of the block and optimizer still runs as the ledger states it). QK-norm and norm scaling stay in the baseline; row 19's 30M check decides whether they stay.

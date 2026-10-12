@@ -1,0 +1,192 @@
+PASS  pools: 0 problems
+PASS  fillers: 0 problems
+PASS  eval draw items (640): failing {}
+PASS  dev draw items (320): failing {}
+PASS  probe draw items (160): failing {}
+PASS  draws: sizes, B balance, no prompt shared between eval/dev/probe
+
+Structure summary, eval draw (per family: k values, latest-correction reference forms, d, objects, candidates)
+  H1         k {2: 32, 3: 32}  latest {'ell': 21, 'pron': 22, 'alias': 21}  d [10]  objs [2]  cands {4: 16, 5: 32, 6: 16}
+  H2         k {1: 22, 2: 21, 3: 21}  latest {'alias': 21, 'pron': 22, 'ell': 21}  d [10]  objs [2]  cands {3: 12, 4: 21, 5: 19, 6: 12}
+  H3         k {4: 32, 5: 32}  latest {'full': 16, 'pron': 16, 'head': 16, 'ell': 16}  d [10]  objs [2]  cands {6: 16, 7: 38, 8: 10}
+  H4         k {1: 22, 2: 21, 3: 21}  latest {'head': 16, 'ell': 16, 'full': 16, 'pron': 16}  d [20]  objs [2]  cands {3: 9, 4: 24, 5: 22, 6: 9}
+  H5         k {0: 16, 1: 23, 2: 17, 3: 8}  latest {'pron': 13, 'full': 23, 'head': 9, 'ell': 19}  d [10]  objs [3]  cands {3: 1, 4: 1, 5: 7, 6: 12, 7: 17, 8: 12, 9: 10, 10: 3, 11: 1}
+  H6         k {1: 22, 2: 21, 3: 21}  latest {'ell': 16, 'head': 16, 'full': 16, 'pron': 16}  d [10]  objs [2]  cands {3: 9, 4: 28, 5: 14, 6: 13}
+  H7         k {1: 22, 2: 21, 3: 21}  latest {'pron': 16, 'head': 16, 'ell': 16, 'full': 16}  d [10]  objs [2]  cands {3: 12, 4: 20, 5: 21, 6: 11}
+  C_noupd    k {0: 64}  latest {'full': 64}  d [10, 20]  objs [2, 3]  cands {3: 11, 4: 25, 5: 14, 6: 6, 7: 7, 8: 1}
+  C_twoslot  k {1: 18, 2: 22, 3: 16, 4: 4, 5: 4}  latest {'pron': 18, 'ell': 18, 'alias': 4, 'full': 12, 'head': 12}  d [10, 20]  objs [2, 3]  cands {3: 3, 4: 15, 5: 17, 6: 15, 7: 8, 8: 5, 9: 1}
+  ID         k {0: 21, 1: 18, 2: 11, 3: 14}  latest {'full': 36, 'pron': 7, 'head': 10, 'ell': 11}  d [10]  objs [1, 2]  cands {2: 16, 3: 17, 4: 18, 5: 7, 6: 5, 7: 1}
+
+Sample items (eval draw, rendered as in the likelihood eval: plain render + forced prefix)
+
+--- H1 item 0 cell=None gold=Wednesday candidates=['Tuesday', 'Friday', 'Monday', 'Wednesday'] meta={'b_after': False, 'latest_ref': 'ell', 'orig_lure': True}
+User: How do I clean a cast iron pan?
+Assistant: Rinse it with hot water, scrub with a brush, dry it well and rub in a thin layer of oil.
+User: Mark down Tuesday for the notary signing.
+Assistant: Sure thing.
+User: How do I keep herbs fresh longer?
+Assistant: Trim the stems, stand them in a glass of water in the fridge, and loosely cover the leaves.
+User: The guitar recital is scheduled to take place on Friday.
+Assistant: Sure, Friday is noted.
+User: What's a simple way to make a room feel bigger?
+Assistant: Use a large mirror, keep the floor clear, and choose light curtains that let in daylight.
+User: How do I remove sticker residue?
+Assistant: Rub a little vegetable oil into it, leave it for a few minutes, then wipe it off with soap.
+User: One more change: the guitar recital is now scheduled to take place on Monday.
+Assistant: Done, I have Monday down now.
+User: Let's go with Wednesday.
+Assistant: Alright, now Wednesday.
+User: What's a good way to warm up before lifting weights?
+Assistant: Do a few minutes of light cardio, then some easy sets with lighter loads.
+User: What makes popcorn pop?
+Assistant: Water inside each kernel turns to steam and builds pressure until the hull bursts.
+User: How can I fall asleep faster?
+Assistant: Keep the room cool and dark, and get up briefly if you lie awake for too long.
+User: Is it bad to crack my knuckles?
+Assistant: It is mostly harmless: the sound is just gas bubbles collapsing in the joint fluid.
+User: What's a fun thing to do on a rainy afternoon?
+Assistant: You could try a new recipe, start a puzzle, or pick a film series and watch it in order.
+User: How do I make my phone battery last longer?
+Assistant: Lower the screen brightness, close apps you are not using, and turn off location when you do not need it.
+User: Why do some cheeses have holes?
+Assistant: Bacteria in the curd release gas bubbles that get trapped as the cheese ages.
+User: What's an easy houseplant for beginners?
+Assistant: A snake plant is hard to kill: it likes indirect light and only needs water every couple of weeks.
+User: How can I learn a new language faster?
+Assistant: Practice a little every day, speak out loud early, and learn the most common words first.
+User: Why do windows fog up in the morning?
+Assistant: Warm, moist indoor air meets cold glass and the water vapor condenses on it.
+User: Which day is the recital scheduled to take place on?
+Assistant: The recital is scheduled to take place on
+
+--- H2 item 0 cell=None gold=black candidates=['yellow', 'white', 'red', 'blue', 'black'] meta={'b_after': False, 'latest_ref': 'alias', 'orig_lure': 'only'}
+User: How do I remove sticker residue?
+Assistant: Rub a little vegetable oil into it, leave it for a few minutes, then wipe it off with soap.
+User: Why does bread go hard in the fridge?
+Assistant: Cold air speeds up how the starch recrystallizes, so it firms up faster than at room temperature.
+User: How can I make houseplants grow fuller?
+Assistant: Pinch off the growing tips so the plant branches out, and turn the pot now and then.
+User: The laptop sleeve from Mrs. Tanaka is going to be delivered in yellow.
+Assistant: Sure, yellow is noted.
+User: Correction: white would look better.
+Assistant: Done, I have white down now.
+User: Paint it red instead.
+Assistant: Thanks for the heads-up, red.
+User: How can I remember people's names better?
+Assistant: Repeat the name when you are introduced, and link it to something about the person.
+User: Can you give me a tip for sleeping better?
+Assistant: Try to keep a regular schedule and avoid screens for an hour before bed.
+User: Blue is the color for the water bottle.
+Assistant: Alright, I have blue down.
+User: How do I keep avocados from browning?
+Assistant: Leave the pit in, squeeze on some lemon juice, and press plastic wrap against the surface.
+User: How can I keep my desk tidy?
+Assistant: Give every item a home, clear the surface at the end of each day, and keep only what you use daily.
+User: Hold on, Mrs. Tanaka is sending the black version after all.
+Assistant: Revised on my end.
+User: Why do candles flicker?
+Assistant: Small drafts and uneven melting change how much fuel reaches the flame.
+User: How do I keep bread from going stale?
+Assistant: Store it in a paper bag at room temperature, or freeze slices you will not eat within two days.
+User: What's a quick healthy lunch idea?
+Assistant: A wrap with beans, rice, salsa and some vegetables is fast, filling and cheap.
+User: What's a good way to warm up before lifting weights?
+Assistant: Do a few minutes of light cardio, then some easy sets with lighter loads.
+User: How do I get better at public speaking?
+Assistant: Practice out loud, record yourself, and start with small groups before larger ones.
+User: How can I make my mornings less rushed?
+Assistant: Lay out clothes the night before, and keep your keys in one spot by the entrance.
+User: Why does metal feel colder than wood?
+Assistant: Metal pulls heat away from your skin much faster, even when both are at the same temperature.
+User: How do I start saving money?
+Assistant: Set up an automatic transfer on payday, even a small one, and track where your spending goes for a month.
+User: How should I store fresh berries?
+Assistant: Keep them dry and unwashed in the fridge, and rinse them just before eating.
+User: Is it bad to crack my knuckles?
+Assistant: It is mostly harmless: the sound is just gas bubbles collapsing in the joint fluid.
+User: Which color is the laptop sleeve going to be delivered in?
+Assistant: The laptop sleeve is going to be delivered in
+
+--- H6 item 0 cell=None gold=5 candidates=['4', '8', '2', '3', '5'] meta={'b_after': False, 'latest_ref': 'ell'}
+User: Is it better to stretch before or after running?
+Assistant: Do gentle movement to warm up before, and save longer stretches for after the run.
+User: How long should I boil an egg for a soft yolk?
+Assistant: About six minutes in boiling water, then move it to cold water to stop the cooking.
+User: The ticket says locker number 4.
+Assistant: Sure thing.
+User: Why do onions make you cry?
+Assistant: Cutting them releases a gas that reacts with the moisture in your eyes and irritates them.
+User: What's a simple way to make a room feel bigger?
+Assistant: Use a large mirror, keep the floor clear, and choose light curtains that let in daylight.
+User: Our train platform is number 8.
+Assistant: Alright, I have 8 down.
+User: Why is exercise good for mood?
+Assistant: It releases chemicals that reduce stress and it usually improves sleep, which also helps mood.
+User: We were reassigned to platform number 2.
+Assistant: Done, I have 2 down now.
+User: They moved us to platform number 3.
+Assistant: Thanks for the heads-up, 3.
+User: 5, sorry.
+Assistant: Alright, now 5.
+User: Can you give me a tip for sleeping better?
+Assistant: Try to keep a regular schedule and avoid screens for an hour before bed.
+User: What helps a sunburn heal?
+Assistant: Cool compresses, aloe, plenty of water and keeping the skin out of the sun while it recovers.
+User: What should I pack for a day hike?
+Assistant: Water, snacks, sunscreen, a light jacket, a small first aid kit and a charged phone.
+User: How can I fall asleep faster?
+Assistant: Keep the room cool and dark, and get up briefly if you lie awake for too long.
+User: Why do we get hiccups?
+Assistant: A sudden spasm of the diaphragm makes you breathe in sharply, and the vocal cords snap shut.
+User: How do I clean a cast iron pan?
+Assistant: Rinse it with hot water, scrub with a brush, dry it well and rub in a thin layer of oil.
+User: How do I stop my glasses from fogging up?
+Assistant: Wash them with a drop of dish soap, let them air dry, and make sure your mask fits snugly over your nose.
+User: How can I make a small balcony feel cozy?
+Assistant: Add outdoor cushions, some potted herbs and warm string lights.
+User: What's a good way to stay focused while studying?
+Assistant: Work in short blocks with small breaks, and keep your phone in another room.
+User: Why do dogs tilt their heads?
+Assistant: They may be trying to hear better or to see your face around their muzzle.
+User: What number is our train platform?
+Assistant: Find train platform number
+
+--- C_noupd item 0 cell=H1 gold=May candidates=['May', 'October', 'April', 'December', 'August'] meta={'a_first': True}
+User: The citizenship ceremony kicks off in May.
+Assistant: Sure, May is noted.
+User: What's a fun thing to do on a rainy afternoon?
+Assistant: You could try a new recipe, start a puzzle, or pick a film series and watch it in order.
+User: Our anniversary cruise lands in October.
+Assistant: I'll keep that in mind.
+User: Let's go with April.
+Assistant: Thanks for the heads-up, April.
+User: How do I keep bread from going stale?
+Assistant: Store it in a paper bag at room temperature, or freeze slices you will not eat within two days.
+User: Now the anniversary cruise is expected to happen in December.
+Assistant: Sure, December from here on.
+User: The cruise is now in August.
+Assistant: Okay, I've changed that to August.
+User: What's a good way to start journaling?
+Assistant: Write a few lines each evening about one thing that happened and how it made you feel.
+User: How do I soften hard brown sugar?
+Assistant: Seal it in a container with a slice of bread overnight and it absorbs the moisture.
+User: Why do onions make you cry?
+Assistant: Cutting them releases a gas that reacts with the moisture in your eyes and irritates them.
+User: What helps a sunburn heal?
+Assistant: Cool compresses, aloe, plenty of water and keeping the skin out of the sun while it recovers.
+User: How should I store fresh berries?
+Assistant: Keep them dry and unwashed in the fridge, and rinse them just before eating.
+User: Why do some cheeses have holes?
+Assistant: Bacteria in the curd release gas bubbles that get trapped as the cheese ages.
+User: How can I remember people's names better?
+Assistant: Repeat the name when you are introduced, and link it to something about the person.
+User: Why do cats purr?
+Assistant: Cats purr when they are relaxed, but also to calm themselves when they are stressed or hurt.
+User: What's a quick healthy lunch idea?
+Assistant: A wrap with beans, rice, salsa and some vegetables is fast, filling and cheap.
+User: How can I fall asleep faster?
+Assistant: Keep the room cool and dark, and get up briefly if you lie awake for too long.
+User: Which month is the citizenship ceremony expected to happen in?
+Assistant: The citizenship ceremony is expected to happen in
+
+RESULT: ALL PASS

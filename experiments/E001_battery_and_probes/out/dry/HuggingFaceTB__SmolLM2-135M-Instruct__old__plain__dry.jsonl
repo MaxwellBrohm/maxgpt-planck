@@ -1,0 +1,4 @@
+{"meta": true, "model": "HuggingFaceTB/SmolLM2-135M-Instruct", "set": "old", "render": "plain", "n_items": 3, "dry": 3, "params": 134515008, "emb": 28311552, "dtype": "fp32", "device": "mps"}
+{"task": "R1_owner", "cond": "mine", "d": 0, "fam": null, "var": null, "sid": null, "k": null, "render": "plain", "scores": {"gold": -0.39230960607528687, "foil": -6.308645725250244}, "ntok": {"gold": 1, "foil": 1}, "split": false, "seq_len": 61}
+{"task": "R1_owner", "cond": "sister", "d": 0, "fam": null, "var": null, "sid": null, "k": null, "render": "plain", "scores": {"gold": -4.6112284660339355, "foil": -3.2242202758789062}, "ntok": {"gold": 1, "foil": 1}, "split": false, "seq_len": 65}
+{"task": "R2_twohop", "cond": "sister", "d": 0, "fam": null, "var": null, "sid": null, "k": null, "render": "plain", "scores": {"gold": -3.2975106239318848, "foil": -3.9047188758850098}, "ntok": {"gold": 1, "foil": 1}, "split": false, "seq_len": 85}

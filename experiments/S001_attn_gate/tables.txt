@@ -1,0 +1,66 @@
+S001 STAGE 1 VERDICT TABLES (analyze.py verdicts on the copied seed runs, 2026-10-06; SCREENS.txt STAGE 1 VERDICTS)
+A 5M loss reading only (C8): bpb at 5M, 250.0M slots, starter mix, tok_v0_8k. No RC-12 or Tier 0 score.
+Class new init, k 2, seeds 101 102, pick g 1 (C3 g-check, seed 1).
+SD_ref = sqrt(2) x sigma_seed (E3 Part 3 not run), times BASE's mean F; df 7. d = arm - BASE (bpb; negative = arm better).
+
+C7 READINGS
+arm          metric     d s101    d s102    dbar      thr      delta    SD_ref   df  p (two-sided, 3 significant digits)  label
+nogate       CHAT       +0.00366  +0.00415  +0.00390  0.00697  0.01154  0.00417  7   0.227  EQUAL
+nogate       PROSE      -0.00003  +0.00184  +0.00091  0.00487  0.01387  0.00291  7   0.673  EQUAL
+nogate       cccc       +0.00098  +0.00091  +0.00094  0.00546  0.01319  0.00327  7   0.695  EQUAL
+nogate       gutenberg  -0.00222  +0.00400  +0.00089  0.00406  0.01500  0.00243  7   0.621  EQUAL
+nogate       wikimedia  +0.00118  +0.00060  +0.00089  0.00637  0.01342  0.00381  7   0.75  EQUAL
+
+VERDICT S001.nogate: TIE; labels none; Holm (family of 5 so far): does not hold (p 0.23)
+
+C5 REPORTED, NO RULE (d s101, d s102; F = final checkpoint, M = mean of the last 3 checkpoints)
+nogate       CHAT assistant      +0.00061  -0.00177  mean -0.00058  BASE 1.11105 1.11742
+nogate       CHAT user           +0.02722  +0.04984  mean +0.03853  BASE 1.47237 1.45449
+nogate       F(CHAT)             +0.00366  +0.00415  mean +0.00390  BASE 1.15250 1.15609
+nogate       F(PROSE)            -0.00003  +0.00184  mean +0.00091  BASE 1.38621 1.38848
+nogate       M(CHAT)             +0.00316  +0.00416  mean +0.00366  BASE 1.15685 1.15978
+nogate       M(PROSE)            +0.00027  +0.00172  mean +0.00099  BASE 1.39089 1.39299
+nogate       PROSE cccc          +0.00098  +0.00091  mean +0.00094  BASE 1.31693 1.32074
+nogate       PROSE gutenberg     -0.00222  +0.00400  mean +0.00089  BASE 1.50080 1.49935
+nogate       PROSE wikimedia     +0.00118  +0.00060  mean +0.00089  BASE 1.33930 1.34380
+nogate       dolly               +0.01191  -0.00477  mean +0.00357  BASE 1.34102 1.35854
+nogate       irc                 -0.00222  -0.00185  mean -0.00203  BASE 1.56033 1.57182
+nogate       stackexchange       +0.00212  +0.00293  mean +0.00252  BASE 1.36194 1.36354
+nogate       train loss last 2%  +0.00222  +0.00431  mean +0.00326  BASE 3.17695 3.20989
+
+C6 DIAGNOSTICS (descriptive: no E3 Part 4d SD; paired mean and seeds per sign)
+IND onset: read (pick g 1 = BASE's g)
+IND final nogate: arm 11.198 10.700  BASE 7.546 8.825  d +3.651 +1.875  mean +2.763  seeds d<0 0, d>0 2
+IND onsets base_s101                  onset_half 612  onset_abs n/a (BASE; its L_s onset is onset_half)
+IND onsets base_s102                  onset_half 459  onset_abs n/a (BASE; its L_s onset is onset_half)
+IND onsets s001_nogate_g1_s101        onset_half 612  onset_abs 459 (L_s 3.773)
+IND onsets s001_nogate_g1_s102        onset_half 612  onset_abs 612 (L_s 4.412)
+clip base_s101                  5/763 logged steps over 1.0 = 0.0066; steps <= 160 0.312; max gnorm 2.03
+clip base_s102                  9/763 logged steps over 1.0 = 0.0118; steps <= 160 0.500; max gnorm 2.06
+clip s001_nogate_g1_s101        5/763 logged steps over 1.0 = 0.0066; steps <= 160 0.312; max gnorm 2.21
+clip s001_nogate_g1_s102        8/763 logged steps over 1.0 = 0.0105; steps <= 160 0.312; max gnorm 2.74
+GATE base_s101 mean/min/max over 24 heads: step 153 0.802/0.410/1.313; step 1530 0.755/0.043/1.340; step 3060 0.710/0.034/1.254; step 6120 0.691/0.024/1.155; step 7630 0.662/0.025/1.136
+GATE base_s101 step 7630 per layer (3 heads): 0.031 0.025 0.054 | 0.486 0.485 0.413 | 0.721 0.696 0.719 | 0.494 0.531 0.499 | 0.762 0.740 1.011 | 0.833 0.996 1.033 | 0.672 1.015 0.994 | 0.980 0.549 1.136
+GATE base_s102 mean/min/max over 24 heads: step 153 0.801/0.373/1.322; step 1530 0.682/0.050/1.386; step 3060 0.672/0.043/1.244; step 6120 0.672/0.031/1.147; step 7630 0.651/0.032/1.112
+GATE base_s102 step 7630 per layer (3 heads): 0.034 0.032 0.052 | 0.339 0.417 0.505 | 0.749 0.534 0.615 | 0.582 0.632 0.826 | 0.513 0.713 0.724 | 0.916 0.630 0.600 | 1.083 1.112 1.004 | 0.813 1.096 1.111
+NOT COMPUTED GATE_200_windows_p10_p90: not run (attn_diag.py); the 32-window hook curve above is reported instead
+NOT COMPUTED HD: not run: bpb.py --hd on each final checkpoint loads a model; the queue scores plain bpb only
+NOT COMPUTED SINK: not run: attn_diag.py on each final checkpoint loads a model
+
+HOURS AND SPEED (reported; lock = gpu.lock held to the status line, train = train to done; median tok/s
+over log.jsonl records 3 to 763: the first two records (steps 10 and 20; the first holds the start-up) are skipped; tok_per_s_median_all_records gives the median over all 763)
+base_s101                  lock 0.305 h  train 0.276 h  median tok/s 254,081
+base_s102                  lock 0.305 h  train 0.276 h  median tok/s 253,648
+s001_nogate_g1_s101        lock 0.293 h  train 0.265 h  median tok/s 263,083
+s001_nogate_g1_s102        lock 0.293 h  train 0.265 h  median tok/s 262,979
+
+k = max(2, k_needed(1%)) = 2: k_needed for class new init, CHAT 2, PROSE 1
+
+BASE LEVEL AGAINST E3 PART 1 ARM A (reported, no rule; results.json base_level_vs_e3_part1 has the checks)
+F(CHAT) E3 A seeds 1-8 mean 1.14674 (1.14038 to 1.15126); BASE 1.15250 1.15609; gap +0.00755 (+0.66%); t 3.26, p 0.014 (df 7); BASE above all 8: yes
+F(PROSE) E3 A seeds 1-8 mean 1.38141 (1.37851 to 1.38514); BASE 1.38621 1.38848; gap +0.00594 (+0.43%); t 3.66, p 0.008 (df 7); BASE above all 8: yes
+verdicts with SD_ref and delta at E3 A's mean instead of BASE's: S001.nogate TIE
+same seed (seed 1, S002's SIA arms minus dbar, against E3 A_s1 and 2 replays): CHAT +0.00221 (+0.19%), PROSE +0.00270 (+0.20%); rough se 0.00220 / 0.00146 (results.json same_seed_check_seed1)
+cause: not separated (seed draw, the eval.induction hook, or what the start record does not hold)
+
+CONSEQUENCE: The baseline keeps the attention gate. P-021's 30M primacy test still runs (must-run; its target is primacy, not loss). The ledger record "loss-neutral at 5M" is not written in this step (SCREENS.txt names no step that writes ledger rows now).

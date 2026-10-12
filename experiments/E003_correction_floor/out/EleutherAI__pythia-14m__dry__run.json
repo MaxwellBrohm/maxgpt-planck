@@ -1,0 +1,118 @@
+{
+ "model": "EleutherAI/pythia-14m",
+ "seed": 0,
+ "steps": 5,
+ "lr": 5e-05,
+ "bs": 4,
+ "accum": 4,
+ "eff_batch": 16,
+ "max_len": 768,
+ "grad_ckpt": true,
+ "dtype": "fp32",
+ "device": "mps",
+ "dry": true,
+ "tag": "dry",
+ "sets": [
+  "dev",
+  "eval"
+ ],
+ "params": 14067712,
+ "checks": {
+  "params_config": {
+   "total": 14067712,
+   "embedding": 12877824,
+   "body": 1189888,
+   "tok_emb": 6438912,
+   "out_head": 6438912,
+   "pos_emb": 0,
+   "layers": 6,
+   "d": 128,
+   "vocab": 50304,
+   "n_ctx": 2048
+  },
+  "params_model": 14067712,
+  "params_match": true,
+  "missing_param_keys": [],
+  "unexpected_keys": [],
+  "mismatched_keys": [],
+  "head_tied_to_input_embedding": false,
+  "config_says_tied": false,
+  "sanity_nll": 3.8286
+ },
+ "trained_ctx": 2048,
+ "torch": "2.13.0",
+ "watermarks": [
+  "0.7",
+  "0.6"
+ ],
+ "loss_selfcheck": {
+  "hf": 3.918079376220703,
+  "answer_only": 3.918079376220703
+ },
+ "loss_mutants": {
+  "no_shift": 12.965137481689453,
+  "prompt_labelled": 4.134945392608643
+ },
+ "train_s": 2.6,
+ "s_per_step": 0.52,
+ "train_stats": {
+  "n": 84,
+  "rejected_long": 0,
+  "kinds": {
+   "noupd_incid": 4,
+   "noupd_b": 2,
+   "persp": 15,
+   "upd": 14,
+   "bind": 9,
+   "noupd": 11,
+   "twohop": 14,
+   "mid": 3,
+   "revert": 1,
+   "twoslot": 7,
+   "twoslot_b": 3,
+   "upd_incid": 1
+  },
+  "len_sum": 25515,
+  "len_max": 646,
+  "split": 0,
+  "mean_len": 303.8
+ },
+ "losses": [
+  3.27819,
+  3.17377,
+  3.58404,
+  2.56227,
+  2.76969
+ ],
+ "loss_finite": true,
+ "probe": [
+  {
+   "step": 0,
+   "LW": 0.5,
+   "TS": 0.0,
+   "NU": 1.0
+  },
+  {
+   "step": 5,
+   "LW": 0.0,
+   "TS": 0.0,
+   "NU": 1.0
+  }
+ ],
+ "lock_in_step": null,
+ "eval_s": 0.5,
+ "eval_counts": {
+  "new/plain": 2,
+  "extra/plain": 2,
+  "old/plain": 2,
+  "uprobe/plain": 2,
+  "khard/plain": 2,
+  "kbig/plain": 2,
+  "cross/plain": 2,
+  "dev/plain": 2
+ },
+ "selftest_fail": [],
+ "peak_mps_driver_gb": 1.107,
+ "peak_mps_alloc_gb": 0.264,
+ "total_s": 5.4
+}

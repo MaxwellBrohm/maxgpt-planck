@@ -1,0 +1,22 @@
+E004 purity: 20000 training dialogues (seeds (1, 2, 3, 4, 5), first 4000 of each stream)
+
+PASS  H1/H2 echo   training examples with it: 0
+PASS  H1/H2 alias  training examples with it: 0
+PASS  eval marker  training examples with it: 0
+PASS  H3 k45       training examples with it: 0
+PASS  H4 d20       training examples with it: 0
+PASS  H5 obj3      training examples with it: 0
+PASS  H6 object    training examples with it: 0
+PASS  H6 value     training examples with it: 0
+PASS  H7 filler    training examples with it: 0
+PASS  H7 genre     H7 filler 5-grams found in training text: 0 []
+
+Training ranges actually covered (held-out values must lie outside):
+  k (asked)                        {0: 6455, 1: 4440, 2: 4683, 3: 4422}
+  max corrections of any object    {0: 2456, 1: 4898, 2: 6592, 3: 6054}
+  d                                {0: 1902, 1: 1802, 2: 1779, 3: 1814, 4: 1802, 5: 1799, 6: 1815, 7: 1816, 8: 1769, 9: 1841, 10: 1861}
+  objects                          {1: 8611, 2: 11389}
+  value statements                 {2: 4149, 3: 4433, 4: 5375, 5: 3872, 6: 1573, 7: 598}
+  held out: k 4-5 (H3), d 20 (H4), 3 objects (H5), value types sport/number and 48 H6 objects (H6), small-talk/creative fillers (H7), frame echoes and aliases (H1/H2)
+
+RESULT: ALL PASS

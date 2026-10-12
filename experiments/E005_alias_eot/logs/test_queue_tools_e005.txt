@@ -1,0 +1,18 @@
+ok   validate baseline: rc=0
+ok   validate shift limit 0: rc=1 (wants 'drawn-vs-kept shift')
+ok   validate oracle limit 0.30: rc=1 (wants 'oracle:')
+ok   validate one purity violation: rc=1 (wants 'purity')
+ok   reuse baseline (scratch copy): rc=0 (wants 'REUSE OK')
+ok   reuse one LIK prompt hash: rc=1 (wants 'FAIL  5 LIK')
+ok   reuse one GEN family: rc=1 (wants 'FAIL  5 GEN')
+ok   reuse a missing base file: rc=1 (wants 'FAIL  3 base files')
+ok   reuse a killed guard verdict: rc=1 (wants 'FAIL  2 base_135m')
+ok   reuse run.json steps 400: rc=1 (wants 'FAIL  2 base run.json')
+ok   reuse a .py newer than the base run: rc=1 (wants 'FAIL  1 every E004 .py')
+ok   reuse a set builder that drops one item: rc=1 (wants 'FAIL  4 set hashes')
+ok   reuse a 52-line chat transcript: rc=1 (wants 'FAIL  3 untouched')
+ok   reuse copy mode (16 files in out/, sha256 equal True): rc=0 (wants 'REUSE OK')
+ok   reuse copy mode again (idempotent): rc=0 (wants 'REUSE OK')
+ok   reuse refuses an existing copy with other bytes: rc=1 (wants 'exists with other bytes')
+
+RESULT: ALL PASS (16 cases)
