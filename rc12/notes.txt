@@ -3488,3 +3488,9 @@ STEP 14L, CONTINUED (2026-10-11, from 09:00 EDT, Claude, W4 commit agent; the at
     *.partial are skipped. New test_dev_regrade.py (fake:IDEAL_ALT, no model; fails on HEAD's dev_regrade.py in its
     files, json, leftover and skip checks) and mutation_regrade.py: 15 / 15 killed (logs/mutation_regrade.txt). NOT
     COMMITTED: it waits for an independent review (Max's rule); no regrade has run with it.
+  PHASE C END (22:14:55): queue "end; complete 16 of 16 runs"; launcher "=== end: complete 48 of 48 runs; complete 8 of
+    8 runs; complete 16 of 16 runs; complete 16 of 16 runs" and rc12x_C.DONE. All 80 cRia shard processes exit 0, none
+    non-zero; holds 839 to 1,293 s (27 sessions); peak 7.55 GiB; 8 template and 8 plain run dirs with DONE, 640 rows
+    each dev run and 48 each twin, no .shards dir left. verify_dev_runs C1 to C5 (PC, as above; log
+    ~/planck/logs/w4c_verify_C.log): VERIFY PASS (0 failures) on template and on plain. Every extras phase (A, B, D, C)
+    is now run and verified; none is pulled or scored (dev_extras14.py, the s12 numbers: the next step).
