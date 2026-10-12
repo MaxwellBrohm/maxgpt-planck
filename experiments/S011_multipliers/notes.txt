@@ -1,0 +1,85 @@
+S011: learnable per-row and per-column multipliers on every block matrix (LEDGER P-173, rank 173, known-apply;
+PLAN Appendix B slot "SCREENS batch 2 at 5M"; cuts audit row 23)
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION, DRAFT WRITTEN 2026-10-11 (Claude, W5), before the flag, any S011 config, run or result exists; nothing
+committed. Read for it: Velikanov et al., arXiv 2601.04890 (the HTML full text, 2026-10-11). Run, no model: arithmetic.
+SCREENS2.txt B1-B9 are part of this entry.
+
+WHY
+  P-173 (LEDGER): "Learnable per-row/column multipliers"; prior art Velikanov 2601.04890 (Falcon-H1-Tiny, 90M); limit
+  #4; "Default: loss gain beyond paired noise". The paper's form: W_bar_ij = r_i x W_ij x c_j, a learnable
+  generalisation of muP multipliers that frees each matrix's scale from the weight-decay/noise equilibrium norm. It
+  reports gains with Adam and with Muon (Table 2: downstream average +1.10 with Muon) at 0.5B and 30-240 GT, and TII
+  uses it in every Falcon-H1-Tiny model (arch.verify.md 72). Planck's matrices train with NorMuon and cautious weight
+  decay, the setting the paper names. Nothing at 5M.
+
+QUESTION (decided, B7)
+  Do learnable row and column multipliers on every block matrix change held-out chat bpb at 5M, 250M slots?
+
+THE CHANGE (one flag)
+  model.multipliers: true (new field; default false). In every block, for each of the seven matrices q_proj, k_proj,
+  v_proj, o_proj, gate_proj, up_proj, down_proj (out x in), a row vector r (out) and a column vector c (in); the forward
+  uses W_bar = r[:, None] x W x c[None, :] (the paper's index form, computed each forward; no merge during training).
+  Not on: the tied embedding and head (the paper leaves the projector unchanged and its preceding RMSNorm already acts
+  as column multipliers; tied, a multiplier on the embedding would also move the head), the attention gate projection
+  (192 x 3), norms and scalars. Both vectors on every matrix, as the paper's experiments ("both row and column
+  multipliers on all matrices", symmetries handled by weight decay), not its symmetry-free subset.
+  Init: ones (constant: no RNG draw), so the arm starts as the exact BASE function and keeps every BASE draw.
+  Parameters per layer: 4 x (192 + 192) + 3 x (192 + 488) = 3,576; x 8 = 28,608; total 5,038,741 (+0.57%), inside 2%.
+  Optimizer: r and c go to the "scalar" group (AdamW at scalar_lr = r_5 x eta at g 1), routed by name, with weight decay
+  2e-3 on them only (the paper: "We converged to applying a small weight decay lambda_lrm = 2x10^-3 to multipliers"; the
+  scalar group otherwise has none). NorMuon and its cautious decay on W are unchanged. Fixed 2026-10-11 while
+  writing the code, before any value: r and c form their own AdamW group ("mult": scalar_lr, decay 2e-3, decoupled
+  and NOT cautious, as the paper's AdamW decay), so no other scalar decays (a test).
+
+WHAT STAYS IDENTICAL  B1 (engine varlen). LRs by the g pick (B3); the multipliers' LR moves with g (scalar_lr).
+BUDGET  B1.  LEARNING RATE  B3.
+
+SEEDS AND PAIRING
+  Seeds 101-105, paired with base2_s<seed>. Class SIA if the init-isolation test passes (the vectors draw nothing), else
+  NEW INIT.
+
+METRIC AND DECISION RULE (B5, B7; "learnable multipliers")
+  P-173's own test is a 30M A/B (LEDGER); this screen decides only whether it runs now (critique R11, B7 OWN-SIZE).
+  NOMINATE      lower chat bpb: the 30M A/B runs, with Tier 0 after the lock.
+  REJECT        higher chat bpb: P-173 recorded "costs loss at 5M in this form" (all seven matrices, both vectors,
+                decay 2e-3, scalar LR), never "failed" at 30M; the 30M A/B is recorded "not run" and listed to Max.
+  TIE           nothing adopted; the 30M A/B runs (a loss-neutral 5M reading says nothing about the paper's regime),
+                with this 5M TIE beside it.
+  GUARD-FAIL, INCONCLUSIVE   as C7.
+
+DIAGNOSTICS (B6; reported)  IND, onset at matched LR, HD, SINK. Per module (CPU, from the state dict): per matrix kind
+  and layer, the mean, 10th and 90th percentile of r and of c, and the norm of W_bar against BASE's W norm at the same
+  seed (does the effective scale leave the equilibrium the paper describes). Clip rate (the multipliers change the
+  gradient scale).
+
+AFTER THE LOCK (B8)  as C8.
+
+KNOWN RISKS
+  - The symmetries the paper names: Q and K meet only in their product, so scale can drift between q_proj's and
+    k_proj's multipliers, and QK-norm after q and k divides out much of their row scale, so those r vectors are partly
+    redundant; redundant multipliers can "lead to NaN values". A divergence scores +inf (C7), never dropped.
+  - The multiplier LR is BASE's scalar LR (no own multiplier, as batch 1's new-module rule); the paper tuned LRs per
+    configuration.
+  - 250M slots at 5M is short of the paper's regime (30-240 GT).
+  - Starter mix and tok_v0_8k only.
+
+HARNESS CODE NEEDED (W1's; default off; each test watched failing on its mutant)
+  - config.py multipliers (bool, dropped from to_dict when false); blocks.py: a Linear wrapper (or parametrization)
+    holding r and c as bare Parameters of ones, applied in Attention and SwiGLU; count_analytic adds the 3,576 per
+    unique block (shared W_q/W_k under qk_share: one pair of vectors per shared module, a test). optim.split_params:
+    names ".mult_r" / ".mult_c" to "scalar", and a weight decay of 2e-3 for exactly those (a fourth group or a per-param
+    decay; a test that no other scalar decays and that NorMuon's matrices are unchanged).
+  - Tests: off equals absent and the pre-flag commit (20 CPU steps); init isolation (BASE draws bitwise, step-0 logits
+    equal on doc=None, mask and varlen stand-in); the forward equals a reference with W_bar formed explicitly; packed
+    equals alone; leak probes; resume 20 + 20 = 40; KVDecoder; attn_diag rebuilt-output with the multipliers.
+  - Mutants: r applied to columns; c on the embedding; multipliers in "matrix"; no decay on them; decay on every scalar;
+    init not ones; drawn from the RNG; gate projection given multipliers; count missing the MLP vectors.
+
+COST (est.)  8 runs at about 0.31 h, plus up to 5 IND-only runs. About 2.5 h registered.
+
+EAGER SMOKE (2026-10-12, the PC 5070 under gpu.lock, labelled smoke, never read; SCREENS2 BATCH 2 CODE AND SMOKES):
+  s011_mult g 1, seed 1, varlen micro 16: pass; loss 8.815 -> 4.725; 5,038,741 params; 202,282 tok/s (x1.245 of
+  base2); peak 9.99 GiB, 0.77 GiB left (mem_fit ok, the smallest margin of the batch: above the 0.5 GiB edge rule);
+  leak self-test max 0.0067.

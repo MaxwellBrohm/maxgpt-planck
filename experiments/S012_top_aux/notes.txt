@@ -1,0 +1,103 @@
+S012: TOP, a token-order-prediction auxiliary loss with a training-only head (LEDGER P-174, rank 174, known-apply;
+PLAN Appendix B slot "SCREENS batch 2 at 5M"; cuts audit row 23)
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION, DRAFT WRITTEN 2026-10-11 (Claude, W5), before the flag, any S012 config, run or result exists; nothing
+committed. Read for it: Zuhri et al., arXiv 2508.19228 (the HTML full text, 2026-10-11). SCREENS2.txt B1-B9 are part
+of this entry. S006 (one t+2 MTP head) read REJECT at 5M (STAGE 2 VERDICTS); that was read before this was written.
+
+WHY
+  P-174 (LEDGER): "TOP auxiliary loss"; prior art TOP 340M; limit #4. arch.md 1.10: "TOP is the only cheap variant
+  with an in-scale positive": at 340M on 52B tokens, LAMBADA PPL 30.34 to 28.76 (exact MTP 35.31 and DeepSeek MTP 40.99
+  hurt there). TOP asks the model to rank upcoming tokens by how soon they appear, a softer target than exact t+2.
+  S006's exact t+2 head cost loss at 5M (+1.5% CHAT); TOP is the paper's answer to that failure mode, so this is the
+  natural next reading, but a different bet, not S006 rerun.
+
+QUESTION (decided, B7)
+  Does adding TOP's listwise ranking loss through a training-only head change held-out chat bpb (read from the
+  next-token head alone) at 5M, 250M slots?
+
+THE CHANGE (one flag; its parameters are fixed here)
+  train.top: true (new key; default false). As the paper (Algorithm 1, its loss):
+  - Target at position t, window W: for each vocabulary token v whose next occurrence after t is at distance d, 0 < d
+    <= W, the score is W - d; every other token scores -inf. W = 2,048, the sequence length (the paper sets W to its
+    sequence length, 4,096). Planck's additions, needed by packing and the chat loss mask: only occurrences in t's own
+    document count (doc ids; doc=None: the row), and position t has a TOP target only where its next-token target is
+    supervised (not -100), the rule S006 used. OCCURRENCES (critique R8): written on the target array, an occurrence
+    of v is a position t' >= t in t's document with tgt[t'] = v and tgt[t'] supervised (not -100), at distance d =
+    t' - t + 1 (d 1 is the next-token target itself). So a token whose next appearance is inside a later user or
+    system turn (no loss under chat loss assistant) does not count there; its first supervised appearance after it
+    does, if within W. Reason: the chat loss never trains the model to predict user or system text, and TOP would
+    otherwise train it to rank that text.
+  - Loss: ListNet, L_TOP = - sum over targeted t of softmax(y_t) . log_softmax(U_TOP(z_t)), z_t the final hidden state
+    after the final norm (the hidden state the next-token head reads). Total per step = (sum of next-token losses + sum
+    of TOP losses) / n_sup, n_sup the step's next-token supervised count: the paper's unweighted sum, weight 1 at every
+    step (no schedule; S006's decaying weight is not used, since TOP's main results use none).
+  - Head: U_TOP, one bare (8,192 x 192) matrix, not a module of the model (as S006's head): the model's state_dict,
+    model_cfg and deployed count stay BASE's (5,010,133), 1,572,864 training-only parameters (reported, as S006's).
+    Init: a copy of the tied embedding at step 0 (draws nothing: the paper does not state its init, and a copy keeps
+    every BASE draw and starts TOP's scores at the next-token logits). Optimizer: the "embed" group (AdamW at embed_lr,
+    the group of the tied head it copies), routed by name.
+  The target never needs the dense T x V tensor: softmax(y_t) is nonzero on at most W distinct tokens; the loss is
+  computed from log_softmax(U_TOP z_t) gathered at those tokens (a test against the dense form on small sizes).
+  BAND (fixed 2026-10-11 while writing the code, before any value): p_v = exp(-(d_v - 1)) / Z_t, and exp(-(d - 1)) is
+  below fp32's smallest subnormal for d > 104, so in fp32 those weights are exactly 0; the code sums distances up to
+  min(W, 128), equal to the full W = 2,048 window in fp32 (tests: the full window and a brute-force fp64 reference).
+
+WHAT STAYS IDENTICAL  B1. bpb.py, the IND hook and every eval read the next-token logits only (a test, S006's rule).
+  Engine varlen at micro 16 if the smoke's mem_fit is ok (a second logits tensor; S006 fit with 1.47 GiB left); else
+  micro 8 x accum 2 with its own BASE at that setting at every seed (B4 (4)), decided by the smoke before any g-check.
+BUDGET  B1.  LEARNING RATE  B3 (g scales U_TOP's LR with the embed group).
+
+SEEDS AND PAIRING  Seeds 101-105, paired with base2_s<seed> (or its own BASE, above). Class SIA if the init-isolation
+  test passes, else NEW INIT.
+
+METRIC AND DECISION RULE (B5, B7; "TOP auxiliary loss")
+  P-174's own test is a 30M A/B (LEDGER); this 5M screen decides only whether it runs now (B7 OWN-SIZE).
+  NOMINATE      lower chat bpb from the next-token head: the 30M A/B runs (P-174's own size) with Tier 0 after the
+                lock; compute exposure reported (below).
+  REJECT        higher chat bpb: P-174 recorded "costs loss at 5M in this form (W 2,048, weight 1, copied init)",
+                never "TOP failed"; with S006's REJECT, both auxiliary objectives tested at 5M cost loss there. The 30M
+                A/B is recorded "not run" and listed to Max.
+  TIE           nothing adopted (a training-time cost for no loss gain); Tier 0 after the lock decides whether the 30M
+                A/B runs; if it does not, it is recorded "not run" and listed to Max.
+  GUARD-FAIL, INCONCLUSIVE   as C7.
+
+DIAGNOSTICS (B6; reported)  IND (TOP rewards knowing which earlier-seen tokens come next, close to copying), onset at
+  matched LR, HD, SINK; the TOP loss and next-token loss over the last 2% of steps against BASE's next-token loss; tok/s
+  and the BASE-equivalent hours (compute exposure, as S006 registered it).
+
+AFTER THE LOCK (B8)  as C8.
+
+KNOWN RISKS
+  - The paper's smallest model is 340M on 52B tokens; at 5M the head is 31% of the deployed parameter count again in
+    training-only weights, and the representation it shapes is small.
+  - W = 2,048 makes softmax(y_t) nearly all on the next one or two distinct tokens (scores fall by 1 per position), so
+    TOP is close to a softened next-token target; the paper's window ablation (4 to 4,096) found every W better than
+    NTP at 340M. One W is tested.
+  - Starter mix and tok_v0_8k only.
+
+HARNESS CODE NEEDED (W1's; default off; each test watched failing on its mutant)
+  - harness/top.py (S006's mtp.py pattern): TOPHead (bare Parameter, copied from tok_emb at build, no RNG draw),
+    top_targets(idx, tgt, doc, W) as sparse (index, score) lists or an equivalent masked form, loss_sum; train.top
+    settings (bool, default false; W fixed at seq_len); trainer.py adds the sum and logs top_loss and top_n; checkpoints
+    keep the head's state under "top"; resume refuses a mismatch; split_params extra="top" routes the head to "embed".
+  - Tests: off equals absent and equals the pre-flag commit (20 CPU steps); targets against a brute-force reference on
+    random rows with packed documents and masked targets (first occurrence, distance, window edge, other document
+    excluded, -100 positions excluded as t and as occurrences: a rendered chat whose token recurs first in a user turn
+    and then in the next assistant turn); the sparse loss equals the dense ListNet form; init isolation (BASE draws
+    bitwise, head equal to the embedding at step 0); bpb and IND read the next-token logits (mutant: they read the TOP
+    logits); resume 20 + 20 = 40 with the head; budget reports the head as training-only.
+  - Mutants: last occurrence instead of next; score d instead of W - d; occurrences across documents; targets at
+    unsupervised positions; occurrences at unsupervised positions counted; head tied to the embedding (shared
+    tensor) instead of copied; head drawn from the RNG; loss
+    divided by the TOP count instead of n_sup; weight schedule applied; head in the model's state_dict.
+
+COST (est.)  8 runs at about 0.37 h (x1.2 assumed), plus up to 5 IND-only runs and 5 own-BASE runs. About 3 h registered.
+
+EAGER SMOKE (2026-10-12, the PC 5070 under gpu.lock, labelled smoke, never read; SCREENS2 BATCH 2 CODE AND SMOKES):
+  s012_top g 1, seed 1: at varlen micro 16 it trained 300 steps but mem_fit was "over" (peak reserved 11.29 GiB of
+  11.94; 142,896 tok/s while spilling), so by B4 (4) the arm runs at varlen micro 8 x accum 2 (setting v8) with its own
+  BASE base2v8_s<seed> at every seed (screens2_lib.ENGINE2, logged before any g-check). At v8: pass; loss 8.818 ->
+  4.678; deployed 5,010,133 plus 1,572,864 training-only; top_w 1.0, top_n 32,693 per step (every supervised target);
+  198,897 tok/s (x1.361 of base2v8's 270,703); peak 5.78 GiB (4.98 left); leak max 0.0076.

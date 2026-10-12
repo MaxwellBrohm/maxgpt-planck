@@ -1,0 +1,98 @@
+S016: a mixture-of-softmaxes output with 2 components, lifting the output's rank bound at d 192 (LEDGER P-113, rank 112,
+tweak-of-known; PLAN Appendix B slot "SCREENS batch 2 at 5M (bpb decides; P-113 also reports its repetition rate)").
+Added to batch 2 from PLAN Appendix B (SCREENS2.txt, marked (+)); not in the workflow's list.
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION, DRAFT WRITTEN 2026-10-11 (Claude, W5), before the flag, any S016 config, run or result exists; nothing
+committed. Run, no model: arithmetic. SCREENS2.txt B1-B9 are part of this entry.
+
+WHY
+  P-113 (LEDGER): "Raise output-head rank (factorized 128/256/384, mixture-of-softmaxes)"; prior art Godey et al.
+  (<= 410M), 2608.16671 (harm not shown); limits #10 and #5; "Default: repetition rate falls at higher rank". At 5M the
+  head is tied and d is 192, so the log-probability matrix over 8,192 tokens has rank at most 193 (192, plus one for
+  the normaliser: the softmax bottleneck). A factorized 128 head would lower the rank, and an untied 256 or 384 head
+  costs 2.1M to 3.1M parameters
+  (40-60% of the model), far outside 2%. A mixture of softmaxes (MoS, Yang et al. 2017) with K 2 components is not
+  bound at rank d: log(sum_k pi_k softmax(h_k E^T)) is nonlinear in the contexts, so its log-probability matrix can
+  be high rank (Yang et al.'s argument; corrected after critique R7, which struck an earlier "rank up to 384"). It is
+  not a match to the ledger's factorized 128/256/384 values; it is the head-rank form that fits one change at 2%
+  (74,112 parameters).
+
+QUESTION (decided, B7)
+  Does a 2-component mixture of softmaxes over the tied head change held-out chat bpb at 5M, 250M slots? The repetition
+  rate is reported beside it (the ledger's own reading), no rule.
+
+THE CHANGE (one flag)
+  model.mos: 2 (new; default 0 = off). From the final hidden state z (after the final norm): prior pi = softmax(W_pi z)
+  over 2 components; component k's context h_k = tanh(W_k z); p(v) = sum over k of pi_k softmax(h_k E^T)(v), E the tied
+  embedding. The model returns log p as its logits (softmax(log p) = p), so the loss, bpb.py, the IND hook and decoding
+  read the mixture with no change on their side (a test). No biases (Planck's linears have none). Init: W_pi zero (an
+  even prior); W_1 and W_2 = identity plus normal(0, init_std), drawn after every BASE draw (registered last), so the two
+  components differ from step 0 and every BASE parameter keeps its draw. Parameters 2 x 192 x 192 + 192 x 2 = 74,112;
+  total 5,084,245 (+1.48%), inside 2%. Optimizer: W_1, W_2 in "matrix" (NorMuon, as block matrices), W_pi in "scalar"
+  (a 2 x 192 prior), routed by name.
+  Engine varlen at micro 16 if the smoke's mem_fit is ok (two full logit tensors and their log-softmaxes); else micro 8 x
+  accum 2 with its own BASE at that setting at every seed (B4 (4)), logged here before any g-check.
+
+WHAT STAYS IDENTICAL  B1. LRs by the g pick (B3).
+BUDGET  B1 (two output projections over 8,192 tokens per position: the slowest new forward of the batch, x1.3 assumed).
+
+SEEDS AND PAIRING  Seeds 101-105, paired with base2_s<seed> (or the own BASE, B4 (4)). Class NEW INIT (critique R2):
+  W_1 and W_2 are drawn from the torch RNG per seed, and the arm starts away from BASE's function (KNOWN RISKS), so
+  C4's SIA loosening does not hold. The init-isolation test is still required (BASE parameters bitwise; the training
+  loop draws nothing after build): it keeps the pairing's draws common. SD_ref sqrt(2) x sigma_init with B4 (3).
+
+METRIC AND DECISION RULE (B5, B7; "MoS K 2 with tanh contexts on a tied head")
+  P-113's own test is its "5-10M proxy, loss plus repetition rate": this screen is its 5M half on every verdict.
+  NOMINATE      lower chat bpb: its 10M half runs (the ledger's proxy), then a 20M confirmation for the curve's head
+                question, with Tier 0 and the repetition rate after the lock.
+  REJECT        higher chat bpb: recorded "MoS with tanh contexts on a tied head costs loss at 5M (K 2)", never "MoS
+                failed"; the rank question stays open at sizes where an untied head fits; the 10M half is recorded
+                "not run" and listed to Max (B7 OWN-SIZE).
+  TIE           nothing adopted; the repetition-rate reading (below) is reported as the ledger's own default reading,
+                still with no rule; the 10M half is recorded "not run" and listed to Max (B7 OWN-SIZE).
+  GUARD-FAIL, INCONCLUSIVE   as C7.
+
+DIAGNOSTICS (B6; reported)  IND, onset at matched LR, HD, SINK. Per module: the mean prior entropy and the share of
+  positions with pi_max > 0.9 on the 200 CHAT windows. REPETITION RATE (P-113's reading, fixed now): greedy
+  continuation of 128 tokens after the first 256 tokens of each of the 200 lowest-h oasst2 windows (KVDecoder, fp32),
+  rate = share of generated 4-grams that repeat an earlier 4-gram of the same continuation; arm and BASE at each seed,
+  paired difference and the seeds per sign reported, no rule. It reads only CHAT eval windows, never RC-12.
+  Fixed 2026-10-11 with the tool (experiments/screens/rep_rate.py), before any value: a window shorter than 256 tokens
+  uses all of its tokens as the prompt (counted, reported as short_prompts); the 4-grams counted are those ending at
+  generated positions 4..128 (125 of them), searched within the continuation only.
+
+AFTER THE LOCK (B8)  as C8; the repetition rate again with T 0.6 sampling (PLAN's decoding) if the lock-time decoding
+  rule names it.
+
+KNOWN RISKS
+  - The tanh contexts start compressed against BASE's z, so the arm starts off BASE's function (not an identity
+    init); the g-check covers the LR, not that.
+  - tanh(W_k z) lies in [-1, 1]^192, so every logit h_k . E_v is bounded by ||E_v||_1: a sharp next-token
+    distribution needs the tied embedding rows to grow, which also rescales the input stream (tied). This is part of
+    the form tested, named in the REJECT wording (critique R7); per-module, the mean ||E_v||_1 of arm and BASE at the
+    final checkpoint is reported.
+  - Two softmaxes per position double the output cost and memory; a micro 8 x 2 setting moves the arm to its own BASE.
+  - Repetition at 5M under greedy decoding is a crude reading of limit #5.
+  - Starter mix and tok_v0_8k only.
+
+HARNESS CODE NEEDED (W1's; default off; each test watched failing on its mutant)
+  - config.py mos (0 or an int >= 2; 1 refused; dropped from to_dict at 0); model.py: the MoS output after the final
+    norm, on the full-logits path and on train.ce_chunk_rows' chunked path (or a refusal of ce_chunk_rows with mos, a
+    test); count_analytic adds K d^2 + K d; split_params routing; KVDecoder returns log p.
+  - A repetition tool in experiments/screens (or harness/): the greedy continuation and the 4-gram rate above, with
+    fixtures (a model that loops scores near 1; a model that never repeats scores 0) and diag_runner wiring.
+  - Tests: off equals absent and the pre-flag commit (20 CPU steps); logits are normalised log-probabilities (logsumexp
+    0) and equal a loop reference; numerical rank of the log-probability matrix above 192 on a random batch (a
+    fixture: MoS can exceed d, the property the flag exists for; not a bound); packed equals alone; leak probes;
+    init isolation; resume 20 + 20 = 40; bpb.py on a MoS checkpoint equals
+    the loss path.
+  - Mutants: prior drawn as uniform constant with no gradient; tanh dropped; mixing logits instead of probabilities;
+    W_k drawn before the BASE draws; components initialised equal (identity with no noise); bpb reading one component.
+
+COST (est.)  8 runs at about 0.40 h (x1.3 assumed), plus up to 5 IND-only and 5 own-BASE runs. About 3.2 h registered.
+
+EAGER SMOKE (2026-10-12, the PC 5070 under gpu.lock, labelled smoke, never read; SCREENS2 BATCH 2 CODE AND SMOKES):
+  s016_mos g 1, seed 1: at micro 16 mem_fit "over" (peak 15.83 GiB of 11.94; 18,975 tok/s while spilling), so the arm
+  runs at varlen micro 8 x accum 2 with its own BASE base2v8_s<seed> (B4 (4), logged before any g-check). At v8: pass;
+  loss 8.876 -> 4.891; 5,084,245 params; 159,278 tok/s (x1.700 of base2v8); peak 8.02 GiB (2.74 left); leak max 0.0093.

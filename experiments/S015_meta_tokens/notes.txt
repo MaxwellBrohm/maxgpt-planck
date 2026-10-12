@@ -1,0 +1,97 @@
+S015: 128 learnable meta tokens prepended to every document (LEDGER P-175, rank 175, known-apply; PLAN Appendix B slot
+"SCREENS batch 2 at 5M"). Added to batch 2 from PLAN Appendix B (SCREENS2.txt, marked (+)); not in the workflow's list.
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION, DRAFT WRITTEN 2026-10-11 (Claude, W5), before the flag, any S015 config, run or result exists; nothing
+committed. Read for it: Hymba, arXiv 2411.13676 (HTML full text, 2026-10-11). SCREENS2.txt B1-B9 are part of this entry.
+
+WHY
+  P-175 (LEDGER): "Learnable meta tokens"; prior art Hymba 300M (its family is 125M to 1.5B); limits #2 and #1;
+  "Default: recall/binding gain beyond noise". Hymba prepends "a set of 128 pretrained embeddings" to every input; in its
+  ablation (Table 1, rows D to E) recall accuracy rose 48.04 to 51.79 and commonsense 45.16 to 45.59. Learned prefix
+  tokens give every query a place to put attention it does not need (a learned sink), which batch 1's SINK readings and
+  S001's gate also touch. Recall is the reason it is a Planck bet; recall needs RC-12 (after the lock), so at 5M bpb is
+  read first.
+
+QUESTION (decided, B7)
+  Do 128 learned meta tokens, prepended to every document, change held-out chat bpb at 5M, 250M slots?
+
+THE CHANGE (one flag)
+  model.meta_tokens: 128 (new; default 0 = off). A table M (128 x 192). Because the meta tokens come first and attend
+  only to each other (causal), their hidden states at every layer do not depend on the input: each forward runs M once
+  through the blocks as a 128-token sequence (positions 0..127, causal) and keeps each layer's meta keys and values
+  (after that layer's own transforms: QK-norm, RoPE, the value residual from layer 0). Every document's tokens then
+  attend to the 128 meta keys of their layer plus their own document's causal keys, and the document's positions start
+  at 128 (RoPE tables extended to seq_len + 128). This is exactly "prepend M to every document" (Hymba's form) without
+  spending row slots, so the token stream and the packing stay BASE's. Meta tokens have no targets; bpb counts only the
+  document's targets. On the doc=None path (bpb.py, the IND hook) the row is one document with M before it.
+  Init: normal(0, init_std), drawn after every BASE draw (registered last, so every BASE parameter keeps its draw;
+  Hymba states no init). Parameters 24,576; total 5,034,709 (+0.49%), inside 2%. Optimizer: "embed" group (AdamW at
+  embed_lr), routed by name.
+  Engine: varlen (BASE's) if the flag's varlen path (each document's keys = its own plus the 128 meta keys) passes the
+  parity and leak tests (as written 2026-10-11: each document becomes [its 128 meta keys, its tokens] in the same
+  causal varlen kernel BASE uses, with zero queries at the meta slots whose outputs are dropped, so no new kernel
+  mode is used; CPU tests against the mask path and leak probes pass, CUDA parity is the smoke's); otherwise the mask
+  engine with its own BASE at micro 8 x accum 2 at every seed (S005's setting, B4 (4)). Decided by the code and the
+  smoke, logged here before any g-check.
+
+WHAT STAYS IDENTICAL  B1 apart from the engine rule above. LRs by the g pick (B3).
+BUDGET  B1 (the meta stream adds 128 positions of compute per layer per forward, once per micro-batch, plus 128 extra
+  keys per query).
+
+SEEDS AND PAIRING  Seeds 101-105, paired with base2_s<seed> (or the own mask BASE, B4 (4)). Class NEW INIT (critique
+  R2): M is drawn from the torch RNG per seed, so a per-seed random module adds init noise to d_s, which is the term
+  C4's SIA loosening rests on being absent. The init-isolation test is still required (every BASE parameter bitwise
+  at build, the training loop draws nothing after build): it keeps the pairing's draws common; it does not make the
+  arm SIA. SD_ref sqrt(2) x sigma_init with B4 (3)'s per-arm check.
+
+METRIC AND DECISION RULE (B5, B7; "meta tokens")
+  P-175's own test is its 30M A/B on recall and binding (LEDGER), a behavioural win condition; loss is not a
+  behaviour proxy for an attention change (arch.md 1.4), so, as S014, this screen gates nothing (critique R11).
+  NOMINATE      lower chat bpb: P-175's 30M A/B runs, with this 5M loss gain beside it.
+  REJECT        higher chat bpb: the ledger row says "costs loss at 5M (128 tokens, this init)"; the 30M A/B still runs,
+                and its pre-registration carries this 5M loss cost as a named guard. Not "failed" on loss alone.
+  TIE           loss-neutral: the 30M A/B runs as planned.
+  GUARD-FAIL, INCONCLUSIVE   as C7.
+
+DIAGNOSTICS (B6; reported)  IND, onset at matched LR, HD, and SINK extended: per layer and head, the attention mass on
+  the 128 meta keys and on each document's first token (batch 1's SINK), side by side with BASE's first-token mass.
+  attn_diag's rebuilt-output check must include the meta keys.
+
+AFTER THE LOCK (B8)  Tier 0 margins with C7 (Tier 0 is recall: P-175's own target).
+
+KNOWN RISKS
+  - 128 meta tokens against windows of up to 2,048 tokens and documents often far shorter: a large learned prefix for
+    a 5M model; one count is tested (Hymba's).
+  - If the mask engine is needed, the arm and its own BASE run slower (S005's forget arm took x2.26) and the arm is read
+    against that BASE (B4 (4)); the shared BASE is not used.
+  - Starter mix and tok_v0_8k only.
+
+HARNESS CODE NEEDED (W1's; default off; each test watched failing on its mutant)
+  - config.py meta_tokens (int >= 0, dropped from to_dict at 0); model.py: the meta pass and the per-layer meta K/V,
+    passed to Attention as extra keys on every path (doc=None, mask; varlen if built); RoPE positions offset by
+    meta_tokens; count_analytic adds meta_tokens x d; split_params routes "meta_tok" to "embed"; KVDecoder starts each
+    sequence's cache with the 128 meta K/V (the paper's precomputed cache).
+  - Tests: off equals absent and the pre-flag commit (20 CPU steps); the shortcut equals literally prepending M to each
+    document and dropping its outputs (a reference on small sizes, every path); packed equals alone; leak probes (no
+    document sees another's tokens; meta states independent of the input: a changed input leaves them bitwise equal);
+    init isolation; resume 20 + 20 = 40; KVDecoder; attn_diag with meta keys.
+  - Mutants: meta keys without RoPE or at document positions 0..127 (positions not offset); meta tokens attending the
+    document (non-causal); meta keys shared across layers; meta stream recomputed with the document (input-dependent);
+    table drawn before the BASE draws; meta given targets; varlen path silently dropping the meta keys.
+
+COST (est.)  8 runs at about 0.34 h (x1.1 assumed; more on the mask engine), plus up to 5 IND-only and 5 own-BASE runs.
+  About 2.7 h registered on varlen.
+
+EAGER SMOKE (2026-10-12, the PC 5070 under gpu.lock, labelled smoke, never read; SCREENS2 BATCH 2 CODE AND SMOKES):
+  s015_meta g 1, seed 1, varlen micro 16: pass; loss 8.765 -> 4.697; 5,034,709 params; 208,098 tok/s (x1.210 of
+  base2); peak 8.70 GiB (2.06 left); leak max 0.0105. ENGINE: varlen (logged before any g-check): the [meta keys,
+  document] varlen path passed harness/test_screen2_cuda.py on CUDA (bf16 varlen no further from the fp32 mask
+  reference than bf16 mask, incl. a 2,048-token 5M-width case with 128 meta tokens; leak probes on both engines), so the
+  mask engine and its own BASE are not needed.
+
+VERIFY FINDING D1 (2026-10-12, Claude, W5 commit step; SCREENS2 VERIFY FINDINGS): attn_diag's META mass and SINK under
+  meta keys had no test. harness/test_screen2_diag.py now reads both against the literal [meta, document] sequence (rows
+  longer than SINK_FROM, one shorter), and mutants_batch2.py group b2_diag (SINK on meta key 0, META over every real
+  query, META not carried across batches, the meta pass read as document calls) is 4 of 4 killed. The readings did not
+  change.

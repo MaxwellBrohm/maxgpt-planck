@@ -1,0 +1,344 @@
+SCREENS2: the second Phase 3 screening batch at 5M (S009-S018). DRAFT, NOT FROZEN.
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model for these screens: it writes configs and reads JSON.
+
+WRITTEN 2026-10-11 (Claude, workflow W5), before any batch 2 config, flag, run or result exists. Nothing is committed or
+queued. Read for this entry: experiments/SCREENS.txt (batch 1, every entry through BATCH 1 CLOSED), the S001-S008 notes,
+experiments/T001_mqrar_toy (PREREG, RESULTS), E3_seed_noise/notes.txt (PART 3 REOPENED, PART 3 RESULT), PLAN.md (3d,
+the GPU and quality policy of 2026-10-11, Appendix B), LEDGER.md, research/CUTS_AUDIT_2026-10.md, research/lanes/arch.md,
+research/followup/archfp.md, and the papers each notes.txt names. Run for it, no model: harness/budget.py
+count_analytic for the shapes, arithmetic with E3's
+committed noise numbers (t quantiles typed in: t(0.975, 7) 2.3646, t(0.975, 4) 2.7764). Batch 1's verdicts, onsets and
+C6 readings were read before this was written (they are committed, ede95ce); no batch 2 bet has any result anywhere.
+This file is the batch overview AND the COMMON block (B1-B9) that every S0xx/notes.txt names as part of its
+pre-registration. B1-B9 are SCREENS.txt's C1-C9 with the amendments that batch 1 accumulated, adapted; where a clause
+here says "as C<n>", SCREENS.txt's text applies unchanged. Each notes.txt states only what differs.
+FREEZE: not before an independent critique round (recorded at the end as CHANGES AFTER CRITIQUE) and Max's sight of
+the four additions marked (+) below. Until then this is a draft: the generated configs and prereg.yaml files may
+name it (they hold no value), but none may be queued or run, and no batch 2 value may exist, before the freeze is
+committed (VERIFY FINDINGS, D2, below).
+
+WHY THIS BATCH, AND WHY THESE BETS
+  research/CUTS_AUDIT_2026-10.md LATER rows 5, 23 and 48 put a batch 2 after the stage 2 verdicts were read: S008's
+  clean 8-layer sharing contrast, P-172, P-173, P-174, P-112 and P-023. PLAN.md Appendix B (2026-10-10) also slots
+  P-175, P-113 and P-108 into "SCREENS batch 2 at 5M", and T001's R3 YES fired the toy's half of the trigger for S007's
+  depth-reduced arm (T001 PREREG: "S007's Q2 is reported beside it and does not block it"). Under Max's rule (never drop
+  an experiment for budget alone) those four are here too, marked (+); none of them was in the workflow's list.
+  The constraints of batch 1 still hold: the training data is the starter corpus (chat-kind tokens 2.8%), so data bets
+  wait for the pool; bpb at 5M only NOMINATES (PLAN 3: adopted only if it passes at 5M AND holds at 20-30M AND survives
+  3f), because loss is not a behaviour proxy for attention changes (arch.md 1.4).
+
+  id    ledger, source                     the one change                                  code to land     class (B4)
+  S009  P-110 (8-layer contrast), S008     qk_share 2 with SwiGLU 552 (exactly 5,010,133)  registry only    new init
+  S010  P-172                              ReLU-squared plain MLP, hidden 732 (equal)      model flag       new init
+  S011  P-173                              learnable row/column multipliers on block       model flag       SIA
+                                           matrices
+  S012  P-174                              TOP auxiliary loss (training-only head)         head + loss      SIA
+  S013  P-112                              two arms: DenseFormer DWA; hyper-connections    model flags      SIA
+                                           (dynamic, n 4)
+  S014  P-023                              learned role segment embeddings (from role      model flag       SIA
+                                           tokens)
+  S015  P-175 (+)                          128 learnable meta tokens per document          model flag       new init
+  S016  P-113 (+)                          mixture-of-softmaxes output, K 2 (tanh contexts) model flag      new init
+  S017  P-108 (+)                          attention span 1,024 for the first half, then   trainer flag     same init
+                                           2,048 (same token stream)
+  S018  P-024 depth half (+)               7 layers, smear off and on (S007's flag)        none (configs)   new init / SIA
+  SIA = same-init architecture (C4's loosened class). Every "SIA" holds only if the flag's init-isolation test passes
+  in the committed harness; otherwise the arm is NEW INIT (as C4). SIA is given only to a flag whose new parameters
+  are constants that draw nothing from the torch RNG (C4's membership rule); S015 and S016 draw their new modules
+  from the RNG, so they are NEW INIT even though every BASE draw is kept (critique R2).
+
+CONSIDERED AND NOT IN THIS BATCH (nothing here is dropped for hours; each has its place)
+  S006 follow-up (curriculum, 2 heads, 20M): its trigger did not fire (S006 RESULT: Q2 UNRESOLVED), so none is
+  pre-registered (its FOLLOW-UP TRIGGER). New-module LR multiplier arms (audit row 8): NEAR ITS INIT fired for none of
+  S004, S005, S007 (STAGE 2 VERDICTS), so its trigger did not fire. Canon-ACD and S007's variants (rows 31, 32): their
+  trigger is "their screens' verdicts", now read (S004 NOMINATE, S007 TIE). FLAG TO MAX (critique R14): the freeze
+  records his answer or a decision, never "undecided". Proposal: both join this batch as S019 (Canon-ACD) and S020
+  (S007's two variants), by a dated amendment written before any batch 2 g-check value, which adds their contrasts to
+  B7's family; until then neither is dropped, and neither is run. P-022 and P-148 at 30M, P-020 (sb) at 30M: PLAN 3d
+  under their own pre-registrations (T001). P-110's 9-layer arm and K = V, P-109, plain_block: KEEP DROPPED for the
+  scientific reasons in the cuts audit. P-104: needs eval past 2k. Data bets, P-056, P-101: the pool or E7.
+
+B1 SETTING (as C1, with C1-b: every run eager)
+  BASE = batch 1's BASE, key for key: E3 arm A's config (5M: d 192, 8 layers, 3 heads, head_dim 64, SwiGLU 488, vocab
+  8192, tied, every block flag on, 5,010,133 parameters), tok_v0_8k, E2's pinned starter shares, pack mode, window
+  131,072, max_item_len 2,048, chat loss assistant, micro 16 x 2,048, full WSD 7,630 steps (warmup 76, decay from
+  6,104), ckpt_every 153, keep_last 2 plus final, the C6 eval.induction hook, train.compile false, every other engine
+  flag at E2's FIXED 1 values, no data_seed key. Why unchanged: the stage 2 verdicts are committed (ede95ce: "SCREENS:
+  STAGE 2 VERDICTS (S004 NOMINATE, S005 NOMINATE flagged, S006 REJECT, S007 TIE)"), and their CONSEQUENCES adopt
+  nothing ("a 5M loss candidate ... nothing adopted"); stage 1 kept every BASE switch (S002 novres REJECT, the rest
+  TIE). So no committed verdict changes BASE. If a later committed entry adopts anything into the 5M baseline before
+  this file freezes, this clause is rewritten before the freeze.
+  B1 FROZEN 2026-10-12 01:20 EDT (Claude, W5), before any batch 2 value: W1's commits after the stage 2 verdicts
+  (198d0cd: AMENDMENT CAP-REMOVED, AMENDMENT SEEDS-103-105, E3 PART 3 CUDA PARITY; read for this line) adopt nothing
+  ("nothing is adopted or dropped on that reading alone"); configs/screens_base.yaml and E2's base5m.yaml and
+  engine.yaml at 198d0cd equal ede95ce's (git diff empty; 3541744 touched them and be00549 restored them), and
+  harness/ at 198d0cd equals 77ab43f's. So BASE is
+  batch 1's BASE key for key, as written above; base2_s101..105 extend configs/screens_base.yaml unchanged
+  (screens2_lib.check2 allows them no key but name, out_dir, seed and the LRs, a test).
+  LR5 = (3e-3, r 1) and B = 250,019,840 slots: SCREENS FIXED and FIXED REFILL, unchanged (E2 b08062c8..., E3
+  1f017ecb...); refilled and pinned again in batch 2's FIXED log. E3's rule 5 refresh: not triggered by this file's
+  reading (same tokenizer, mix, engine and BASE config; every batch 2 flag defaults off, and the data_seed patch is off
+  when absent, tested against 93bc10b in harness/test_data_seed.py); the cross-batch BASE report below is the check.
+  FRESH BASE RUNS: batch 2 runs its own BASE at every screen seed (base2_s<seed>), from batch 2's launch commit, in the
+  same seed sets as its arms. Batch 1's base_s101..base_s105 (93bc10b) are not paired with any batch 2 arm; each batch 2
+  BASE seed is read beside batch 1's same-seed BASE (same token stream, days apart; read like AMENDMENT BASE-REPLAY's D
+  with E3's sigma_rep). Reason: the PLAN policy of 2026-10-11 (below), and the harness has moved since 93bc10b (the
+  data_seed patch, the batch 2 flags). REPLAY GATE (critique R14): a base2 outside the replay bar contradicts the
+  flag-off guarantee every pairing rests on, so it is a FLAG. The bar (fixed 2026-10-12 with analyze2_lib.replay_gate,
+  before any value): per reading F(CHAT) and F(PROSE), D_s = base2_s - base_s, SD_rep = E3's sigma_rep_rel (df 2) x
+  batch 1's mean, t = mean(D) / (sqrt(2) SD_rep / sqrt(k)); outside when |t| > t(0.975, 2) = 4.303 for either
+  reading; each seed's t is reported, no rule. A FLAG: the step stops before any arm verdict is
+  read, diagnoses it (code digest diff, the flag-off equivalence tests at the launch commit, a rerun of that seed),
+  and brings Max the diagnosis; no arm verdict is read until it is resolved in a dated entry.
+  Setting scope and the starter-corpus exception: as C1.
+
+B2 ONE CHANGE, ENFORCED (as C2, including the RC-12 GUARD on every config and run directory)
+  Each arm differs from its BASE by exactly the keys its notes.txt names, plus name, out_dir, seed and the arm's g-scaled
+  LRs; the generator refuses any other difference. Parameter matching within 2% of BASE's total, with two registered
+  exceptions: S012's TOP head is training-only (deployed count = BASE's, as S006's head), and S018's arms are 7 layers
+  by design (its question is a layer fewer, 4,580,498 and 4,580,519 parameters, -8.6%). Two-key allowances, each the
+  equal-total fit of its one change (S008 CHANGES AFTER CRITIQUE named the 8-layer row's two keys): S009 qk_share and
+  mlp_hidden; S010 mlp_act and mlp_hidden; S018 smear7 n_layers and smear_key (against BASE; one key against base7).
+
+B3 PER-ARM LEARNING RATE (as C3). Every arm except BASE runs the g-check at seed 1, g in {0.5, 1, 2} x LR5, E2's pick,
+  PROSE guard, tie rule and at most 2 extensions. S018's base7 is an arm here (a new shape). Each notes.txt names the LR
+  group of its new parameters.
+
+B4 SEEDS, PAIRING, REFERENCE NOISE (as C4, changed in four places, each fixed before any batch 2 value)
+  (1) k = 5 for every arm and class: seeds 101, 102, 103, 104, 105. C4's rule (max(2, k_needed(1%)), at most 5) gives 2
+      with E3's numbers; 5 is C4's maximum, chosen because PLAN's GPU and quality policy (2026-10-11, Max: "we prefer
+      quality over speed 100 percent of the time") makes the thorough option win where a choice trades it for time.
+      Est. thresholds at k 5 (CHAT, % of BASE): same init 0.256 (SD_d, df 7), SIA 0.347 (u x SD_d, df 7; 0.3466),
+      new init 0.356 (B4 (2), df 4); at k 2 batch 1 read 0.405, 0.548 and 0.603 (new init then sqrt(2) x sigma_seed). C7's
+      every-seed clause now needs all five d_s on one side. WHY SEEDS 101-105 AGAIN (critique R13): they replay batch
+      1's token streams and init draws, so each base2_s<seed> can be checked against base_s<seed> (B1's REPLAY GATE),
+      and S018's arms share S007's streams. Stage 2 flagged this draw as high on BASE's F(CHAT) (+0.54% above E3 arm
+      A, "the seed draw is not excluded"); paired contrasts cancel the level, but levels, HD readings and any
+      cross-batch comparison (S018 beside S007) inherit it and say so when reported.
+  (2) E3 PART 3 RESULT is committed (77ab43f, before this file; E3 notes USE AND SCOPE: "A later batch that reads them
+      names them in its own pre-registration"). So NEW INIT reads sqrt(2) x sigma_init, df 4 (F(CHAT) 0.287%, F(PROSE)
+      0.210% of BASE's mean; E3 results_part3.json 17b1614d...), and "same init, new stream" sqrt(2) x sigma_data, df 4
+      (no batch 2 arm is in that class: S017 keeps BASE's stream). SIA stays u x SD_d (df 7), which at 0.328% is above
+      the new-init 0.287%; both are used as registered, neither replaced by the other.
+  (3) NOISE CHECKS, every class (k 5 gives every arm df 4; bound sqrt(chi2(0.95, 4) / 4) = 1.540, scipy 2026-10-11):
+      same init: as C4, against SD_d. SIA: C4's pooled check, plus a per-arm check against u x SD_d. NEW INIT (critique
+      R9; batch 1 had none, and sqrt(2) x sigma_init is a df-4 estimate below batch 1's sqrt(2) x sigma_seed): the
+      arm's own SD of d_s against sqrt(2) x sigma_init. A failed check (per metric) re-reads at the LARGER of the
+      new-init SD and the observed SD of the failed check (STAGE 2 VERDICTS AUDIT CORRECTIONS (1): C6-DIAG's re-read
+      fell below the SD that failed on HD_asst; this clause is the amendment it asked for, dated before any batch 2
+      value), labelled "underpowered" as C4 says (a null reads "not resolved").
+  (4) Each arm pairs with batch 2's BASE at its seed (B1). An arm that must leave BASE's engine or micro setting pairs
+      with an OWN BASE at that setting at every seed (as S005), ONE PER SETTING, shared by every arm at that setting
+      (as base2 is shared; critique R5b): at most two settings can arise, varlen at micro 8 x accum 2 (S012, S013 hc4,
+      S016, if their smoke's mem_fit fails at 16) and the mask engine at micro 8 x accum 2 (S015, if its varlen path
+      fails), so 10 own-BASE runs at most, plus 5 per setting if an arm needs S005's fallback micro 4 x accum 4. Each
+      notes.txt says when; the smoke decides, logged before any g-check.
+  (5) INCONCLUSIVE AT k 5 IS FINAL at 5M (critique R10): no seeds are added after any batch 2 value is read (that
+      would be optional stopping). It reads "not resolved at 5M, k 5", and B7's OWN-SIZE rule says what follows: the
+      own-size test runs where the notes run it on every verdict (S014, S015; S017 and S018 are their own tests),
+      else it goes to Max's list as "not run (5M INCONCLUSIVE)". A sequential extension would have to be registered
+      here, with its stage-1 thresholds adjusted, before the freeze; none is (put to Max at the freeze, OPEN (a)).
+
+B5 METRICS (as C5). F(CHAT) decides, F(PROSE) guards, final checkpoint; CCCC-ONLY; the reported list; clip rate.
+
+B6 DIAGNOSTICS (as C6 with AMENDMENT C6-DIAG's runner and READING RULE, and AMENDMENT BASE-DIAG's ONSET RULE)
+  IND every 153 steps by the hook; final IND, HD_asst, HD_user read by C6-DIAG's READING RULE (SDs from E3 PART 4d) with
+  B4 (3) for its noise checks; SINK, GATE and per-module readings reported. ONSET: sigma_seed from batch 2's five BASE
+  seeds (df 4), thr = 2.776 x sqrt(2) x sigma_seed / sqrt(5) = 1.756 x sigma_seed; EARLIER / LATER / UNRESOLVED as
+  BASE-DIAG, Holm over the onset contrasts read. MATCHED LR, widened: every arm whose pick is not g 1 also runs at g 1
+  on its five seeds as IND-only runs (never in a bpb verdict), so every onset is read at matched LR; batch 1 ran them
+  only where onset was the win condition. Onset is a win condition only for S018. diag_runner.py must learn each
+  batch 2 flag (its flag checks and attn_diag's rebuilt-output check) before any batch 2 diagnostic is read.
+
+B7 DECISION RULE (as C7: BETTER, WORSE, EQUAL, UNRESOLVED per metric; NOMINATE, REJECT, TIE, GUARD-FAIL, INCONCLUSIVE;
+  DIVERGENCE as +inf, never dropped). MULTIPLICITY: batch 2's own Holm family over its 13 bpb contrasts (S009 1, S010 1,
+  S011 1, S012 1, S013 2, S014 1, S015 1, S016 1, S017 1, S018 3; critique R4 corrected 14), plus each contrast's
+  Tier 0 margin test after the lock (B8); raw verdicts decide, Holm is reported beside each, and a NOMINATE that does
+  not hold under Holm says so in its ledger row.
+  OWN-SIZE RULE (critique R11). Each notes.txt names its bet's own test size (its LEDGER row's cheapest test) and says,
+  for every verdict, whether that test runs. A verdict that leaves it unrun records the bet "own-size test not run
+  (5M <verdict>)", and the list of such bets goes to Max with each test's cost and what it would decide (PLAN
+  2026-10-10, audit row 84), never presented as a result and never "failed" at a size it did not run at. Where the
+  bet's own size is 5M (P-024's depth half, P-108, P-113's 5-10M proxy, P-110's 5-10M proxies), this screen is
+  that test, and its larger size is a confirmation.
+
+B8 AFTER THE RC-12 LOCK (as C8). The lock window is Oct 11-14, so batch 2 may run after it: Tier 0 margins are then
+  scored on every batch 2 final checkpoint by a post-lock addendum per screen, written before that screen's scoring,
+  and the combined reading (CONFLICT, NOMINATE-MARGIN) applies as C8. Before the lock, nothing changes from C8.
+  E4 NO-SIGNAL (critique R3; PLAN 2026-10-10 "now works one way" and audit row 84): if E4 reports no multi-turn signal
+  at 5M, the batch 2 queue PAUSES after the run in progress (no run is killed), and Max gets the list of every
+  unrun batch 2 screen, each with its cost, what it would decide, and the proposal PLAN names (its re-registration
+  at 20M); nothing is dropped, and nothing resumes or moves, before his answer, quoted in a dated entry.
+
+B9 FIXED LOG, DEVIATIONS, OUTPUTS (as C9, with DEVIATION 1's durable scoring and crash counting). Outputs under
+  experiments/S0xx_<slug>/ and the PC's runs/SCREENS2/. Every final checkpoint is kept and registered in
+  models/registry.jsonl (Max's keep-every-model rule), selection runs included.
+
+ENGINE: eager for every run (C1-b's reasons; E3's noise numbers were measured eager). Compile is not used in batch 2
+  (cuts audit row 25's "compile for batch 2" is decided here: no, since compiled Canon failed deterministic mode and a
+  per-flag gate adds a forking path for speed only). Engine and micro setting per arm: each notes.txt.
+
+ORDER (no cap; priority only orders the queue)
+  0 Preconditions: this file frozen after critique and committed; each screen's flag code committed with its tests
+    watched failing on mutants (CODE below); one eager smoke per flag (labelled smoke, never read: mem_fit, tok/s, leak
+    self-test, finite falling loss); S017's switch at until_step run once on CUDA in an eager smoke, and the CUDA
+    flag-off parity run (harness/default_parity.py --device cuda, the launch commit's harness against 77ab43f's, as
+    E3 PART 3 CUDA PARITY) (both VERIFY FINDINGS N1); diag_runner.py and analyze.py extended to batch 2 and tested;
+    no E4 no-signal pause in force (B8); the FIXED log written.
+  1 Selection (seed 1): every arm's g-check, in the order its code lands; S009 and S018 first (no new model code).
+  2 Seed sets, seed-major: for seed 101: base2_s101, then every ready arm (and its own BASE, its IND-only runs); then
+    102, ... 105. A stopped queue leaves whole seed sets. A screen whose code lands late runs its seed sets after the
+    others, keeping seed-major order inside itself (C4 pairs by seed and code, not time; its BASE pairing needs the
+    commits' flag-off equivalence test, as C4).
+  NO CAP. PLAN.md, GPU and quality policy, 2026-10-11 (Max, verbatim there): "no Planck experiment on it has a GPU-hour
+  cap, budget or cut order any more"; hour figures are planning estimates only. So batch 2 has no cap and no cut order.
+  Max's rule as the cap reading: nothing in this batch is ever cut, shrunk or deferred for hours. If anything other than
+  a registered scientific gate (a divergence, a failed test, B1's REPLAY GATE) would stop, shrink or defer a screen,
+  the step stops and brings Max a FLAG (what, why, the proposal); a screen changes only on his answer, quoted verbatim
+  in a dated entry before any run it affects. E4's no-signal reading is not such a gate: it pauses and goes to Max
+  (B8). A run past its estimate is reported, never a reason to cut.
+
+GPU HOURS (est., planning only; 0.31 h per BASE-speed run at factor 1 in every notes.txt, batch 1's measured eager
+  lock time 0.306 h; assumed factors, replaced by each smoke: TOP x1.2, MoS x1.3, HC x1.2, meta tokens x1.1 (mask
+  engine, if needed, x1.3 more), others x1.0; 7 layers x0.89; the 12 arms' factors sum to 12.58, critique R5 corrected
+  12.68): selection 12 arms x 3 = 36 runs, about 11.7 h (up to 24 extension runs, about 7.8 h); seed sets 5 x (1 BASE
+  + 12 arms) = 65 runs, about 21.0 h; matched-LR IND-only runs up to 60 (about 19.5 h, only for picks other than g 1);
+  own-BASE runs up to 10 by B4 (4) (about 3.7 h at 0.33 h varlen micro 8 and 0.41 h mask engine). About 33 h
+  registered, up to about 64 h with every conditional run. Not in these figures (each measured and reported): 10
+  eager smokes, diag_runner passes on every final checkpoint, S016's repetition decoding, post-lock Tier 0 scoring.
+
+CODE THAT MUST LAND FIRST (harness/ and experiments/screens/ are W1's paths; batch 2 code goes there only when W1 has
+  no uncommitted hunks in them, under the COMMON RULES of 2026-10-10). Each flag
+  default off; off equals absent and equals the pre-flag commit (20 CPU steps, bitwise); doc=None equals the packed mask
+  path (and varlen where the arm runs varlen) on scrambled weights; leak probes; count_analytic equals the meta build;
+  the init-isolation test (BASE draws bitwise, torch RNG compared) for every arm that keeps BASE's draws (SIA and
+  S015, S016); split_params routing; resume 20 + 20
+  equals 40; KV decode equals the full forward; attn_diag's rebuilt-output check and diag_runner's flag check; each
+  test watched failing on its named mutants. Per screen: its notes.txt HARNESS CODE NEEDED.
+  Shared (experiments/screens): a batch 2 registry (arms, allowed keys, classes, k 5, seeds 1 and 101-105, the
+  base2_s<seed> and own-BASE names, run root SCREENS2), the config generator and its B2 refusals, analyze.py with B4
+  (1)-(5) (per-arm noise checks for every class, each watched failing on a mutant that skips it), B6's widened matched
+  LR and batch-2 onset sigma, B7's 13-contrast Holm family and OWN-SIZE list, B1's REPLAY GATE (no arm verdict printed
+  while a replay is out of its bar), S018's depth reading; no cap code (cap_check must not run for batch 2: a test).
+
+FILES: experiments/S009_qk_share8, S010_relu2, S011_multipliers, S012_top_aux, S013_hyperconn, S014_role_emb,
+  S015_meta_tokens, S016_mos_head, S017_seqlen_curr, S018_smear_depth (each notes.txt).
+
+OPEN BEFORE THE FREEZE: (a) Max sees the (+) additions (S015-S018), k 5 and B4 (5) (INCONCLUSIVE final at k 5);
+  (b) Max's answer on Canon-ACD and S007's variants (CONSIDERED: the proposal is S019, S020); (c) a second critique
+  round on the CHANGES AFTER CRITIQUE and BATCH 2 CODE AND SMOKES below; (d) the code and smokes: done 2026-10-12
+  (below) except the queue's batch 2 mode, analyze2.py's I/O, diag_runner.py's flag checks and S017's sampler, plus
+  the two CUDA checks ORDER 0 gained from VERIFY FINDINGS N1 (below; D1 and D2 there are fixed).
+
+CHANGES AFTER CRITIQUE (round 1, 2026-10-11; an independent critique read this file, the ten notes.txt, SCREENS.txt
+C4, C7, C8 and STAGE 2 VERDICTS, PLAN and the audit; verdict CHANGES REQUIRED, 14 findings; no batch 2 value exists)
+  R1 (high) S018's HOLDS now also needs D2 NOMINATE; D1 REJECT + D3 TIE/NOMINATE without it reads COST SMALL (NOT
+     RESOLVED); a fixture of the critique's worked case and a mutant (HOLDS without D2) are in S018's spec.
+  R2 (high) S015 and S016 are NEW INIT (their modules draw from the RNG; S016 also starts off BASE's function); the
+     overview table and both notes say so, and their init-isolation tests stay (they keep the pairing's draws common).
+  R3 (high) B8: an E4 no-signal reading pauses the queue and goes to Max with the 20M re-registration proposal;
+     nothing is dropped; E4 is out of NO CAP's list of gates; ORDER 0 reads "no E4 no-signal pause in force".
+  R4 Holm family: 13 contrasts (B7, CODE THAT MUST LAND).
+  R5 Hours: factors 12.58; selection 11.7 h, seed sets 21.0 h; own BASE one per (engine, micro) setting, at most 10
+     (B4 (4)); uncounted items named; 0.31 h per factor-1 run in every notes.txt.
+  R6 S014: the none row is a fixed zero buffer (768 learned parameters, 5,010,901), with a test and a mutant.
+  R7 S016: the rank text is corrected (MoS is not bound at K x d; the tied head's own bound is 193), the tanh logit
+     bound is a named risk, and REJECT reads "MoS with tanh contexts on a tied head".
+  R8 S012: occurrences count only at supervised targets in t's document; a brute-force case and a mutant.
+  R9 B4 (3): a per-arm noise check for NEW INIT (and per-arm for SIA beside the pooled one), bound 1.540 at df 4.
+  R10 B4 (5): INCONCLUSIVE at k 5 is final at 5M; no seeds are added after a value; put to Max (OPEN (a)).
+  R11 B7 OWN-SIZE rule; every notes.txt states, per verdict, whether its bet's own-size test runs; S014 and S015
+     gate nothing (both behavioural); S013's 5M readings never close P-112; S011's TIE runs the 30M A/B.
+  R12 S017: Q2 reads per-stage median tok_per_s from log.jsonl as a magnitude per seed; lock-held hours beside it;
+     non-lock GPU processes recorded.
+  R13 B4 (1): why seeds 101-105 are reused (the replay check; S018 beside S007), and what inherits the high draw.
+  R14 CONSIDERED: Canon-ACD and S007's variants go to Max with a proposal (S019, S020 by amendment before any value);
+     B1's replay is a gate (FLAG and diagnosis before any arm verdict); PLAN Appendix B's P-024 row cites T001 PREREG.
+
+BATCH 2 CODE AND SMOKES (2026-10-12, Claude, W5; written after W1's 198d0cd left harness/ and experiments/screens clean;
+nothing committed, no batch 2 run queued; the smokes are labelled smoke and never read)
+  HARNESS (default off, one batch 2 flag per arm, refused otherwise): config.py fields mlp_act, multipliers, dwa,
+    hyper_connections, role_segments (the 4 ids), meta_tokens, mos; arch2.py (MultLinear, ReluSquaredMLP, HyperConn,
+    DWA, role segments, the meta pass and meta_attend, mos_logprobs); top.py (S012), span.py (S017); wiring in
+    blocks.py, model.py, budget.py (count_analytic, count_top), optim.py (routing; S011's "mult" group), decode.py,
+    attn_diag.py (meta keys; META mass), docattn.py (meta keys through the same causal varlen kernel), trainer.py and
+    train.py (train.top, train.span_curriculum; refusals: top with mtp, span with either). Choices fixed while writing,
+    each in its notes.txt: S013's output reads the rows' mean; S014's ids are a config list checked against the
+    tokenizer; S011's decay is decoupled, not cautious; S012's BAND 128 equals the full window in fp32; S015's varlen
+    path; S016's repetition-rate details.
+  TESTS (CPU, the real tree): harness suite 1,113 passed, 104 skipped (all CUDA-only); new test_screen2_{model,
+    semantics,semantics2,top,span,run,cuda}.py; flag off == absent and == the pre-flag commit 198d0cd (9 of 9 run with
+    git); test_screen_smear_key.py gains a 7-layer arm (S018 D2's SIA case). mutation_check.py: 241 of 241 mutants
+    behave as expected (168 earlier, 73 new, by group with GIT_DIR so the pre-flag tests run in the copies). Screens
+    suite: 1,070 passed, 4 skipped, 1 failed: W1's test_screens_robust_code.py guard, by design while plans/CURRENT
+    names robustness_k5 (harness/ must equal 77ab43f's; this step's harness changes are uncommitted).
+    mutation_screens2.py (batch 1's runner on MUTANTS_SCREENS2 alone, so batch 1's mutant counts are untouched): 38 of
+    38 killed.
+  TOOLS (experiments/screens): screens2_lib.py and screens2.py (registry, check2, configs, plans), analyze2_lib.py
+    (B4 (2)-(5), B7's 13-name Holm, S018's depth reading, B1's REPLAY GATE, OWN-SIZE), rep_rate.py (S016). Configs: 41
+    (base2_s101..105, 36 g-checks) pass check2; plans2/screens2_select.txt (36 runs, ORDER 1). Not built yet: the
+    queue's batch 2 mode, analyze2.py's I/O, diag_runner.py's batch 2 flag checks, S017's non-lock GPU sampler (R12).
+  SMOKES (PC 5070, torch 2.13.0+cu130, driver 596.49; scratch tree ~/planck/dev/screens2_smoke from this working tree,
+    data linked read only, nothing under ~/planck/runs; 300 eager steps of each g 1 seed 1 config; pass = batch 1's
+    rule: rc 0, finite and falling loss, compile off, leak self-test passed, mem_fit ok). Holds: A 01:33:14-01:38:26,
+    B 01:55:35-02:10:41, C 02:29:02-02:33:27 (each behind W1's robustness runs; flock -w 7200, hold capped at 2,000 s).
+    run (engine)        tok/s   x own BASE  peak GiB  left  leak max   | run (engine)       tok/s   x own BASE  peak
+    base2 (v16)       251,838   1          8.28      2.47  0.0076     | s013_dwa (v16)   216,054   1.166      8.47
+    base2v8 (v8)      270,703   1          4.27      6.49  0.0076     | s013_hc4 (v8)     94,021   2.879      6.74
+    s009_qkshare      247,549   1.017      8.41      2.35  0.0071     | s014_role        232,810   1.082      8.28
+    s010_relu2        220,770   1.141      7.76      3.00  0.0000     | s015_meta        208,098   1.210      8.70
+    s011_mult         202,282   1.245      9.99      0.77  0.0067     | s016_mos (v8)    159,278   1.700      8.02
+    s012_top (v8)     198,897   1.361      5.78      4.98  0.0076     | s017_span        259,722   0.970      8.28
+    s018_base7        279,324   0.902      7.82      2.94  0.0074     | s018_smear7      270,015   0.933      7.90
+    At micro 16, S012 top, S013 hc4 and S016 mos trained but mem_fit was "over" (peak 11.29, 12.29, 15.83 GiB of 11.94):
+    B4 (4) moves exactly those three arms to v8 with own BASE base2v8_s<seed> (screens2_lib.ENGINE2, logged here before
+    any g-check; S013 dwa stays at micro 16). CUDA tests on the PC: 42 passed (test_screen2_cuda.py, incl. S015's meta
+    varlen parity at 5M width, and test_s3_docattn's CUDA cases): S015 runs varlen, no mask engine.
+  HOURS (planning only, replacing the assumed factors by the smokes'): about 14.1 h selection and 26.5 h seed sets
+    (40.7 h registered, the v8 BASE included), up to about 9.4 h of extensions and 23.6 h of IND-only runs more.
+  FOR MAX AND THE NEXT STEP: OPEN (a)-(c) above; the second critique round reads this entry too; committing the harness
+    code waits until plans/CURRENT no longer names robustness_k5 (W1's guard), and then needs an export of the index.
+
+VERIFY FINDINGS (2026-10-12 03:25 EDT, Claude, W5's commit step; an independent verify of BATCH 2 CODE AND SMOKES re-ran
+the suites, a bitwise flag-off digest against 198d0cd on 24 arm shapes and 132 batch 1 configs, every config and count,
+the smoke logs on the PC and 20 mutants of its own: not CONFIRMED, D1 medium, D2 low, N1 notes; no batch 2 value)
+  D1 attn_diag's S015 readings (SINK on the document's first key, META on the meta keys, queries >= SINK_FROM) had no
+     test: two of the verifier's mutants survived. FIXED: harness/test_screen2_diag.py reads both against the literal
+     [meta, document] sequence (rows 128, 90, 40, 65; one row per forward and all in one batch) and shows its fixture
+     tells each wrong reading apart; mutants_batch2.py group b2_diag (SINK on meta key 0; META over every real query;
+     META not carried across batches; the meta pass read as document calls): 4 of 4 killed. The readings did not change.
+  D2 the header said no config may cite this draft, while the 41 configs and 11 prereg.yaml files cite it. FIXED by
+     rewording the clause (configs may name the draft; nothing is queued or run, and no batch 2 value exists, before the
+     freeze is committed); "the three additions" corrected to four (S015-S018). configs2/prereg.yaml named this file
+     twice: screens2.py now names it once there (the ten arm prereg.yaml files are byte-identical), and
+     test_screens2.py's test_prereg_names_each_source_once is watched failing on mutant s2_prereg_base_twice (the old
+     text); check2 passes on all 41 configs.
+  N1 (a) 198d0cd's commit time is 00:56:53 EDT (the build report said about 01:07; this file did not). (b) S017's smoke
+     never reached until_step (its notes say so), so the switch has not run on CUDA. (c) Flag off equals 198d0cd is
+     shown bitwise on CPU only (mask and doc=None paths; 9 train.main cases); VarlenDocs.attend's flag-off path is
+     unchanged in the diff. (b) and (c) are now ORDER 0 preconditions. (d) The new files under experiments/screens
+     (screens2.py, screens2_lib.py, analyze2_lib.py, rep_rate.py, configs2/, plans2/, tests/*screens2*, test_analyze2,
+     test_rep_rate) are new files in W1's path; no W1 file is edited; the code commit names them knowingly.
+  AFTER THE FIXES (the real tree): harness suite 1,117 passed, 104 skipped (CUDA-only); screens suite 1,071 passed,
+     4 skipped, 1 failed (W1's test_screens_robust_code.py guard, by design while plans/CURRENT names robustness_k5);
+     mutation_screens2.py 39 of 39 killed.
+
+COMMIT AND LAUNCH STATUS (2026-10-12, W5's commit step)
+  COMMITTED as the DRAFT (git log names the commit): this file, PLAN.md's P-024 row and the ten notes.txt, suites
+    green on an export of that index. NOT COMMITTED, and why: harness/ (14 edited files; arch2.py, top.py, span.py,
+    mutants_batch2.py and test_screen2_{model,semantics,semantics2,top,span,run,cuda,diag}.py new), experiments/screens
+    (the files in N1 (d)) and each S0xx configs/: W1's guard requires harness/ to equal 77ab43f's while plans/CURRENT
+    names robustness_k5, and that plan was running on the PC at 03:14 EDT (its queue on S005 base_s103). That commit
+    waits until CURRENT moves on, then stages exactly those paths and runs the suites on an export of the index.
+  LAUNCHED: nothing; no mark written. ORDER 0 is not met (OPEN (a)-(d), the queue's batch 2 mode not built), and this
+    file does not let Claude record it: batch 1's mark was a person's ("preconditions OK recorded on Max's
+    authorization", 94bb1bb).
+  QUESTIONS FOR MAX (the freeze records each answer, quoted, in a dated entry):
+    Q1 Run the four screens added beyond the original list: S015 meta tokens, S016 mixture-of-softmaxes head, S017
+       short attention span for the first half, S018 seven layers with and without the smear? (yes or no, per screen)
+    Q2 Five seeds (101-105) for every arm: about 40.7 GPU h registered, up to about 74 h with every conditional run?
+    Q3 A 5-seed INCONCLUSIVE is final at 5M (no seeds added after any value is read)? A no needs a sequential rule
+       registered before the freeze.
+    Q4 Canon-ACD and S007's two variants join this batch as S019 and S020, by a dated amendment before any batch 2
+       value? (yes, no, or later)
+    Q5 When ORDER 0 is logged as met: do you record the mark yourself, as in batch 1, or may Claude record it?

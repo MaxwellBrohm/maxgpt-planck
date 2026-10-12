@@ -1,0 +1,98 @@
+S013: two residual-stream arms, DenseFormer depth-weighted averaging and dynamic hyper-connections, in a non-looped
+5M model (LEDGER P-112, rank 111, tweak-of-known; PLAN Appendix B slot "SCREENS batch 2 at 5M"; cuts audit row 23)
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION, DRAFT WRITTEN 2026-10-11 (Claude, W5), before either flag, any S013 config, run or result exists;
+nothing committed. Read for it: Zhu et al., arXiv 2409.19606 and Pagliardini et al., arXiv 2402.02622v2 (HTML full
+texts, 2026-10-11). Run, no model: arithmetic. SCREENS2.txt B1-B9 are part of this entry.
+
+WHY
+  P-112 (LEDGER): "Add hyper-connections or DenseFormer averaging to a non-looped 10-20M model"; prior art
+  hyper-connections (>= 1B), DenseFormer (378M); limit #10 (head rank and depth); "Default: loss and battery gain
+  beyond seed noise". archfp.md L15: hyper-connections are measured at >= 1B, and at small scale only inside loops
+  (the looped law's phi 0.46 to 0.65 with 2 lanes). Max's own sweep found hyper-connection-style residual variants
+  strongly negative at 1.2B (AttnRes z -29.47) and diverging at 3B (arch.md); this screen tests the two named forms at
+  5M with their papers' identity inits. The ledger names two forms; each is one change, so each is its own arm (as
+  S002's three), and each its own contrast against BASE.
+
+QUESTIONS (decided, B7)
+  Q-dwa  Does DWA after every block change held-out chat bpb at 5M, 250M slots?
+  Q-hc   Do dynamic hyper-connections with 4 streams change it?
+
+THE CHANGES
+  Arm s013_dwa: model.dwa: true (new; default false). DenseFormer's form: X_0 is the embedding, X_j block j's output;
+  after block i a DWA gives Y_i = sum over j = 0..i of alpha_ij X_j, and block i + 1 reads Y_i; the final norm reads
+  Y_8. Dense (dilation 1, period 1: 8 layers is short of the paper's 24-48 blocks, so no sparsification). Init
+  alpha_ii = 1, others 0 (the paper's; each DWA starts as the identity, so the arm starts as the exact BASE function).
+  Parameters: 8 x 11 / 2 = 44; total 5,010,177.
+  Arm s013_hc4: model.hyper_connections: 4 (new; default 0 = off). The paper's dynamic hyper-connections (DHC), its
+  default and best-reported rate n 4 ("n = 1 does not improve"): the residual becomes H (4 x d), H_0 = 4 copies of the
+  embedding; each of the 16 sublayers (attention and MLP of 8 blocks) is wrapped: h_in = A_m(H)^T H, out = sublayer(h_in)
+  (the sublayer keeps its own pre-norm and norm scaling), H <- B(H)^T out + A_r(H)^T H, with H_bar = norm(H) and
+  B(H) = s_beta . tanh(H_bar W_beta)^T + B, A_m(H) = s_alpha . tanh(H_bar W_m) + A_m, A_r(H) = s_alpha . tanh(H_bar W_r)
+  + A_r. Init (the paper's Pre-Norm-equivalent init): W_beta, W_m, W_r zero, s_alpha = s_beta = 0.01 (its pseudocode),
+  B = ones, A_m = e_(k mod 4) for sublayer k, A_r = identity; norm a parameter-free RMS norm. The final norm reads the
+  MEAN of the 4 rows (the paper's row sum divided by 4; fixed 2026-10-11 while writing the code, before any value: the
+  two are identical after a scale-free norm, but RMSNorm's eps would act at eps/16 on the sum, which moved the tiny
+  test model's step-0 logits by about 1%; with the mean, the 4 rows equal at init give BASE's step-0 logits exactly,
+  a test). Parameters (the paper's count per hyper-connection, d(n + 2) + n(n + 2) + 2 =
+  1,178): 16 x 1,178 = 18,848; total 5,028,981 (+0.38%), inside 2%. The value residual still reads effective layer 0's
+  values (unchanged).
+  Optimizer, both arms: every new parameter goes to "scalar" (AdamW at scalar_lr, no decay), routed by name (the 2-D
+  W_beta, W_m, W_r too: they start at zero and are mixing weights, not block matrices). None draws from the RNG.
+
+WHAT STAYS IDENTICAL  B1 (engine varlen). LRs by each arm's own g pick.
+BUDGET  B1.  LEARNING RATE  B3, per arm.
+
+SEEDS AND PAIRING  Seeds 101-105, both arms paired with base2_s<seed>. Class SIA per arm if its init-isolation test
+  passes, else NEW INIT.
+
+METRIC AND DECISION RULE (B5, B7; per arm, two contrasts in B7's family)
+  P-112's own test is a non-looped 10-20M model (LEDGER; its 5-10M proxy is this screen). Per arm (critique R11):
+  NOMINATE      lower chat bpb: that form's 10-20M test runs, with Tier 0 after the lock.
+  REJECT        higher chat bpb: that form recorded "costs loss at 5M" (s013_dwa: dense DWA; s013_hc4: DHC n 4); its
+                10-20M test is recorded "not run" and listed to Max (B7 OWN-SIZE).
+  TIE           nothing adopted; Tier 0 after the lock decides whether that form's 10-20M test runs; if it does not,
+                it is recorded "not run" and listed to Max.
+  P-112 itself stays open until a 10-20M test has run in some form: a 5M reading never closes it, so two REJECTs
+  send both 10-20M tests to Max's list, not to "failed". P-111's looped hyper-connection bet keeps its own gate
+  (E10), unaffected by either arm.
+  GUARD-FAIL, INCONCLUSIVE   as C7. No rule compares the two arms with each other (reported side by side).
+
+DIAGNOSTICS (B6; reported)  IND, onset at matched LR, HD, SINK. Per module: the final alpha matrix (dwa), and for hc4
+  the static A_m, A_r, B and the mean magnitude of the dynamic terms on the 200 CHAT windows; the spread between the 4
+  streams' norms (do the streams separate). Clip rate.
+
+AFTER THE LOCK (B8)  as C8.
+
+KNOWN RISKS
+  - Both papers' smallest language models are 378M (DWA) and 1.2B (HC); at 8 layers DWA has little depth to average.
+  - Max's 1.2B and 3B results were negative for this family; a divergence scores +inf, never dropped.
+  - The mHC constraint (arXiv 2512.24880) is not applied: one form per arm; it is the next arm if hc4 is UNSTABLE.
+  - hc4 keeps 4 residual copies: activation memory rises; the smoke's mem_fit decides micro 16, else 8 x 2 with its own
+    BASE (B4 (4)).
+  - Starter mix and tok_v0_8k only.
+
+HARNESS CODE NEEDED (W1's; default off; each test watched failing on its mutant)
+  - config.py dwa (bool) and hyper_connections (0 or an int >= 2; 1 refused), both dropped from to_dict when off; model.py
+    and blocks.py: the DWA stack (alphas as bare Parameters) and the HC wrappers around each sublayer, built only when on;
+    count_analytic for both; split_params routes ".dwa_" and ".hc_" to "scalar".
+  - Tests: off equals absent and the pre-flag commit (20 CPU steps); init isolation and step-0 logits equal to BASE's
+    (dwa exactly; hc4 within 1e-5 relative) on doc=None, mask and the varlen stand-in; each forward equals a plain loop
+    reference written from the papers' equations; packed equals alone on scrambled weights; leak probes (no stream or
+    average mixes positions or documents); resume 20 + 20 = 40; KVDecoder (HC carries 4 streams per position); attn_diag
+    rebuilt-output check reading the HC input h_in; diag_runner flag checks.
+  - Mutants: DWA excluding the embedding; DWA init uniform; HC A_m = e_0 for every sublayer; A_r init zero; dynamic W
+    drawn from the RNG; output reading one stream instead of the sum; tanh dropped; HC parameters in "matrix"; value
+    residual read after HC mixing instead of from layer 0's attention values.
+
+COST (est.)  dwa 8 runs at about 0.31 h; hc4 8 runs at about 0.37 h (x1.2 assumed); plus up to 10 IND-only runs. About
+  5.4 h registered.
+
+EAGER SMOKE (2026-10-12, the PC 5070 under gpu.lock, labelled smoke, never read; SCREENS2 BATCH 2 CODE AND SMOKES):
+  s013_dwa g 1, seed 1, varlen micro 16: pass; loss 8.809 -> 4.711; 5,010,177 params; 216,054 tok/s (x1.166 of
+  base2); peak 8.47 GiB (2.29 left); leak max 0.0060.
+  s013_hc4 g 1, seed 1: at micro 16 mem_fit "over" (peak 12.29 GiB, 58,817 tok/s while spilling), so hc4 alone runs
+  at varlen micro 8 x accum 2 with its own BASE base2v8_s<seed> (B4 (4); dwa stays at micro 16 and pairs with base2).
+  At v8: pass; loss 8.805 -> 4.669; 5,028,981 params; 94,021 tok/s (x2.879 of base2v8); peak 6.74 GiB (4.02 left);
+  leak max 0.0249 (bf16 tolerance 3e-2: the closest of the batch, reported).

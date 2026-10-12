@@ -1,0 +1,92 @@
+S018: does a smeared-key model work with one layer fewer? 7-layer arms with smeared keys off and on, against the
+8-layer BASE (LEDGER P-024's depth half; S007's flag; PLAN Appendix B gate "S007's Q2 and the PLAN 3d toy"; cuts audit
+row 10). Added to batch 2 because its trigger fired (SCREENS2.txt, marked (+)); not in the workflow's list.
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION, DRAFT WRITTEN 2026-10-11 (Claude, W5), before any S018 config, run or result exists; nothing committed.
+Run, no model: harness/budget.py count_analytic. SCREENS2.txt B1-B9 are part of this entry. Read before writing (all
+committed): S007's RESULT (TIE at 8 layers; Q2 UNRESOLVED) and T001's RESULTS (R3 YES). The trigger was registered
+before either: T001 PREREG R3, "YES or PARTIAL is the toy's half of PLAN Appendix B's trigger for S007's depth-reduced
+arm (its own pre-registration); S007's Q2 is reported beside it and does not block it". So this entry is owed, and its
+design does not depend on the size of either result.
+
+WHY
+  P-024's win (LEDGER): "induction forms with one layer fewer, or earlier in training, at 5M on 2 seeds". S007 read the
+  timing half (UNRESOLVED) and left this half open ("would change the shape and is not tested here"). T001 R3: one-layer
+  smeared-key recall 1.000 on 5/5 seeds against 0.074 for one-layer base. T001's caveat goes with it: plain attention
+  never learned the toy at any depth, so R3's "as good as 2 layers" half was met against a 2-layer base that never
+  learned. At 5M the question becomes: can the smear pay for one of BASE's 8 layers.
+
+QUESTIONS (decided, B7; three contrasts in B7's family)
+  D1  base7 vs BASE: what one layer fewer costs at 5M (n_layers 7; one key).
+  D2  smear7 vs base7: the smear at 7 layers (one key, smear_key; base7 is this contrast's BASE, paired per seed).
+  D3  smear7 vs BASE: P-024's depth claim (two keys by design, the bet's own combination; B2's allowance).
+
+THE ARMS
+  s018_base7: model.n_layers 7. count_analytic (2026-10-11): 4,580,498 (-8.6%; B2's registered exception: the question
+    is a layer fewer, so the shape is not re-solved to equal total). cfg.depth 7 moves the o_proj/down_proj init std and
+    the norm scaling with it, as "one layer fewer" means.
+  s018_smear7: model.n_layers 7, model.smear_key true (S007's flag as committed, alpha per KV head, zero init):
+    4,580,519.
+
+WHAT STAYS IDENTICAL  B1 otherwise (engine varlen). Each arm at its own g pick (B3: both run the g-check at seed 1).
+BUDGET  B1 (7 layers: about x0.89 of BASE's time per run, est.).
+
+SEEDS AND PAIRING  Seeds 101-105. D1 and D3 pair with base2_s<seed>: class NEW INIT (a block fewer shifts every later
+  draw). D2 pairs smear7 with base7 at each seed: class SIA if S007's init-isolation test passes at 7 layers (it is
+  S007's flag; a 7-layer case is added to its test), else NEW INIT.
+
+METRIC AND DECISION RULE (B5, B7 per contrast, then the bet's reading)
+  Each contrast gets its C7 verdict (NOMINATE, REJECT, TIE, GUARD-FAIL, INCONCLUSIVE) and Holm reading.
+  ONSET (B6): D1 and D3 by the ONSET RULE with batch 2's BASE sigma_seed; D2 with base7's own five seeds' onset_half
+  sigma (df 4, thr = 1.756 x sigma at k 5), all at matched LR (B6's IND-only runs at g 1 where a pick is not 1). Final
+  IND by C6-DIAG's READING RULE.
+  P-024's depth half, read from them (fixed now):
+    HOLDS            D3 is TIE or NOMINATE, D3's onset is not LATER and its final IND is not LOWER, D1 is REJECT,
+                     AND D2 is NOMINATE (one layer fewer costs loss without the smear, the smear's own effect at 7
+                     layers is resolved and helps, and the 7-layer smeared model matches BASE): the ledger row says
+                     "smeared keys replace one of 8 layers at 5M on loss"; a 20M check (8 vs 7 layers there) and Tier 0
+                     after the lock come before anything is adopted. (D2 added after critique R1: without it HOLDS
+                     could fire with the smear's effect EQUAL to zero.)
+    COST SMALL       D1 REJECT and D3 TIE or NOMINATE, with D2 not NOMINATE: the layer's cost is small enough that the
+                     7-layer smeared model sits within 1% of BASE, and the smear is not shown to pay it; read NOT
+                     RESOLVED for P-024's depth half.
+    LAYER FREE       D3 TIE or NOMINATE and D1 TIE or NOMINATE: one layer fewer costs nothing measurable at 5M with or
+                     without the smear; the smear is not shown to buy the layer (that is E9's depth question, reported
+                     to it).
+    FAILS AT 5M      D3 REJECT: the 7-layer smeared model is worse than BASE; P-024's depth half recorded as failed at 5M
+                     in this form; D2 says whether the smear helped at 7 layers at all.
+    NOT RESOLVED     every other combination (INCONCLUSIVE or GUARD-FAIL in D1 or D3, a LATER onset or LOWER final IND
+                     with a D3 TIE or NOMINATE, or COST SMALL).
+  OWN-SIZE (B7)  P-024's own test is "5M with/without, 2 seeds": this screen is that test for the depth half, on every
+    verdict. The 20M check runs only on HOLDS; on any other reading it is recorded "not run" and listed to Max (B7).
+  D2 alone: NOMINATE = the smear helps at 7 layers (S007 read TIE at 8); REJECT = it hurts there; TIE = neutral.
+
+DIAGNOSTICS (B6; reported)  IND curves of all three runs per seed; HD; SINK; alpha per layer and KV head (S007 saw a
+  few heads far from the rest: alpha 10.98 and 16.04), and the NEAR ITS INIT rule of C6-DIAG reported for smear7.
+
+AFTER THE LOCK (B8)  Tier 0 margins on all three contrasts; Tier 0 is recall, the mechanism the toy measured.
+
+KNOWN RISKS
+  - 8 layers to 7 is a different question from the toy's 2 to 1: induction needs two layers, and both 5M shapes have
+    far more; the bet's reading here is loss and induction at a smaller body, not the minimum depth for induction.
+  - D3 moves two things by design; D1 and D2 are there so its reading can be split.
+  - T001's caveat above; S007's TIE at 8 layers.
+  - Starter mix and tok_v0_8k only.
+
+HARNESS CODE NEEDED (W1's)
+  - None in harness/ for training: n_layers and smear_key exist and are tested. Add a 7-layer case to S007's
+    init-isolation and doc=None tests (test_screen_smear_key.py), and n_layers 7 to diag_runner's shape checks.
+  - experiments/screens: the batch 2 registry (s018_base7 with n_layers; s018_smear7 with n_layers and smear_key; D2's
+    pairing of smear7 with base7 per seed; the 8.6% parameter exception for these two arms only, a test that any other
+    arm 2% off is refused); analyze.py's three contrasts, base7's own onset sigma for D2 and the depth-half reading
+    above (fixtures for each of its five outcomes, including R1's worked case: base7 +0.40%, smear7 +0.20% on every
+    seed reads COST SMALL, not HOLDS; mutants: HOLDS without D1's REJECT, HOLDS without D2's NOMINATE, D2 against
+    BASE, onset sigma from BASE for D2, the exception granted to every arm).
+
+COST (est.)  2 arms x 8 runs at about 0.28 h, plus up to 10 IND-only runs. About 4.4 h registered.
+
+EAGER SMOKE (2026-10-12, the PC 5070 under gpu.lock, labelled smoke, never read; SCREENS2 BATCH 2 CODE AND SMOKES):
+  s018_base7 g 1, seed 1, varlen micro 16: pass; loss 8.844 -> 4.733; 4,580,498 params; 279,324 tok/s (x0.902 of
+  base2); peak 7.82 GiB (2.94 left); leak max 0.0074. s018_smear7: pass; loss 8.844 -> 4.716; 4,580,519 params;
+  270,015 tok/s (x0.933); peak 7.90 GiB (2.85 left); leak max 0.0063.

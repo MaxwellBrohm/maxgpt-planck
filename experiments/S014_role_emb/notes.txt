@@ -1,0 +1,90 @@
+S014: learned role (speaker) segment embeddings on every token, derived from the role tokens, at 5M (LEDGER P-023,
+rank 23, tweak-of-known; PLAN 3d at 30M; this is the ledger's "5M proxy"; cuts audit rows 23 and 48)
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION, DRAFT WRITTEN 2026-10-11 (Claude, W5), before the flag, any S014 config, run or result exists; nothing
+committed. Run, no model: arithmetic. SCREENS2.txt B1-B9 are part of this entry.
+
+WHY
+  P-023 (LEDGER): "Add learned speaker/role segment embeddings on every token"; prior art TransferTransfo (117M),
+  Speaker-Aware BERT (110M), Instructional Segment Embedding (LLM scale); limit #2 (perspective, role capture); cheapest
+  test "5M proxy then 30M +/- embeddings, 3 seeds; perspective and role-leak items"; win "Perspective >= 0.85, role
+  capture halved on all seeds". Its win condition is behavioural and needs RC-12-type items, which PLAN 3d reads at 30M
+  after the lock. This screen is the 5M proxy: whether the flag costs or buys loss, before 30M time is spent.
+  Role tokens already mark turns (tok_v0_8k ids 2 system, 3 user, 4 assistant, 6 tool, 5 end; harness/chat_template.py);
+  a segment embedding repeats the role on every token of the turn, so attention need not look back to the role token.
+
+QUESTION (decided, B7)
+  Do role segment embeddings change held-out chat bpb (oasst2, scored per window as bpb.py does) at 5M, 250M slots?
+  Prose bpb is the guard: prose tokens carry segment "none" and should not move.
+
+THE CHANGE (one flag)
+  model.role_segments: [2, 3, 4, 6] (new; default [] = off): the [system, user, assistant, tool] token ids, written
+  into the config by the batch 2 generator from tokenizer/spec.py's control tokens and checked against it there,
+  so the model holds no hard-coded id (fixed 2026-10-11 while writing the code, before any value).
+  A table S (5 x 192): none, system, user, assistant, tool. Row 0
+  ("none") is a fixed zero buffer, never trained (critique R6: a trainable none row would be a learned bias on every
+  prose token, about 97% of the stream, a second change); rows 1-4 are the learned Parameter. The input
+  is tok_emb(idx) + S[seg], seg computed inside the model from idx alone: seg_t = the role of the latest role token
+  (ids 2, 3, 4, 6) at or before t within t's document, "none" if there is none; <|end|> (id 5) keeps its turn's role, so
+  a turn's role token, content and end share one segment. Documents are doc's runs (packed rows); on the doc=None path
+  (bpb.py, the IND hook) the row is one document. The token ids come from the tokenizer's control-token ids, read
+  from tokenizer.spec at build and pinned in a test (never hard-coded in the model). The head is unchanged (tied to
+  tok_emb only). Init: zeros (constant, no RNG draw): the arm starts as the exact BASE function and keeps every BASE
+  draw. Parameters 4 x 192 = 768; total 5,010,901 (+0.02%). Optimizer: "embed" group (AdamW at embed_lr), routed by
+  name (a 2-D table, like tok_emb).
+
+WHAT STAYS IDENTICAL  B1 (engine varlen: the segment ids are a function of idx and doc, computed before the blocks).
+  The data, the loader and bpb.py are unchanged: no segment ids are passed from outside (a test).
+BUDGET  B1.  LEARNING RATE  B3.
+
+SEEDS AND PAIRING  Seeds 101-105, paired with base2_s<seed>. Class SIA if the init-isolation test passes, else NEW INIT.
+
+METRIC AND DECISION RULE (B5, B7; "role segment embeddings")
+  This screen GATES NOTHING (critique R11): P-023's own test is PLAN 3d's 30M +/- embeddings A/B on perspective and
+  role-leak items, and it runs on every verdict below; the 5M reading only travels with it.
+  NOMINATE      lower chat bpb at 5M: P-023 enters PLAN 3d's 30M test with a 5M loss gain beside it; nothing adopted
+                (its win condition is behavioural).
+  REJECT        higher chat bpb: PLAN 3d's 30M test still runs (its target is perspective and role capture, not loss),
+                and its pre-registration must carry this 5M loss cost as a named guard. The ledger row says "costs loss
+                at 5M"; P-023 is not recorded as failed on loss alone.
+  TIE           loss-neutral: PLAN 3d's 30M test runs as planned.
+  GUARD-FAIL    as C7 (a prose cost from a flag that only touches chat tokens is itself a finding to report).
+  INCONCLUSIVE  as C7.
+
+DIAGNOSTICS (B6; reported)  IND (the IND sequences carry no role token: seg "none" throughout, so IND should not move),
+  onset at matched LR; HD_asst and HD_user by the READING RULE (the role bet's nearest continuous reading); SINK. Per
+  module: the norm of each segment row and the cosine between the user and assistant rows, at the final checkpoint.
+  F(CHAT) split by user and assistant target turns (reported in C5's list) is read beside the verdict.
+
+AFTER THE LOCK (B8)  Tier 0 margins with C7; the E004 adapter's items and any perspective or role-leak dev family
+  RC-12 carries are reported for this arm in the post-lock addendum, never decided on at 5M.
+
+KNOWN RISKS
+  - Chat-kind tokens are 2.8% of the starter stream (dolly, oasst2), so the table trains on few tokens at 5M; the 30M
+    test on a pool mix is where the bet is judged.
+  - Windows that start mid-turn (the loader cuts items longer than max_item_len; bpb windows can enter a turn mid-way)
+    give "none" until the next role token, in training and in scoring alike.
+  - The segment repeats information the role token already carries; a gain, if any, is in how cheaply it is used.
+  - Starter mix and tok_v0_8k only.
+
+HARNESS CODE NEEDED (W1's; default off; each test watched failing on its mutant)
+  - config.py role_segments (bool, dropped from to_dict when false); model.py: segment_ids(idx, doc) by a cumulative
+    max over role-token positions reset at document starts, and the table as a bare zero Parameter; count_analytic
+    adds 4 x d (the none row is a buffer); split_params routes "role_seg" to "embed"; KVDecoder carries the current
+    segment per sequence.
+  - Tests: off equals absent and the pre-flag commit (20 CPU steps); segment_ids against a plain loop reference on
+    rendered chats, packed rows with several documents, a document opening mid-turn and prose documents; the doc=None
+    path equals the packed path for one document; init isolation and step-0 logits equal to BASE's; leak probes (a
+    later role token never changes an earlier segment); resume 20 + 20 = 40; KVDecoder equals the full forward across
+    a turn boundary; the control-token ids read from tokenizer.spec; the none row stays exactly zero after 20 steps
+    of training (no gradient reaches it, not in parameters()).
+  - Mutants: segment carried across a document start; <|end|> given segment "none"; segment looked up from the next
+    role token (a future leak); ids hard-coded off by one; table drawn from the RNG; table in "matrix"; segment added to
+    the head's logits too; the none row trainable (a Parameter, or in parameters()).
+
+COST (est.)  8 runs at about 0.31 h, plus up to 5 IND-only runs. About 2.5 h registered.
+
+EAGER SMOKE (2026-10-12, the PC 5070 under gpu.lock, labelled smoke, never read; SCREENS2 BATCH 2 CODE AND SMOKES):
+  s014_role g 1, seed 1, varlen micro 16: pass; loss 8.814 -> 4.724; 5,010,901 params; 232,810 tok/s (x1.082 of
+  base2); peak 8.28 GiB (2.47 left); leak max 0.0085.

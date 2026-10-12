@@ -1,0 +1,81 @@
+S009: share W_q and W_k between consecutive layer pairs and spend the saving on MLP width, at 8 layers and exactly
+BASE's parameter count (LEDGER P-110, rank 109; S008's clean 8-layer contrast; cuts audit row 5, PLAN Appendix B)
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION, DRAFT WRITTEN 2026-10-11 (Claude, W5), before any S009 config, run or result exists; nothing committed.
+Run for this entry, no model: harness/budget.py count_analytic. experiments/SCREENS2.txt B1-B9 are part of this entry.
+
+WHY
+  P-110 (LEDGER): "Share W_q/W_k across 2-4 layers or tie K=V, and reinvest in depth"; prior art MASA (100-700M), CLA
+  (1B/3B). At 5M the embedding is 31% of the total, so every body parameter is scarce, and the harness already has the
+  switch (config.py qk_share; blocks.py reuses the owner's modules, so parameters() counts them once). S008 was dropped
+  from batch 1 because its 9-layer arm moved four things at once; its critique left this 8-layer row as "the sharing
+  contrast", with depth left to E9. Here depth, init std and norm scaling stay BASE's: only the sharing and the width
+  it pays for move. It moves 294,912 attention parameters (W_q and W_k of four layers) into MLP width, the direction
+  where bpb and behaviour can disagree (SCREENS.txt 22-25), so the post-lock Tier 0 reading (B8) matters here.
+
+QUESTION (decided, B7)
+  At exactly BASE's total, does sharing W_q/W_k between layer pairs (owners 0 0 2 2 4 4 6 6), with the saving spent on
+  SwiGLU width 488 to 552, change held-out chat bits per byte at 5M, 250M slots?
+
+THE CHANGE (one idea, two keys: B2's allowance)
+  model.qk_share: 2, model.mlp_hidden: 552. budget.py count_analytic (2026-10-11): 5,010,133, equal to BASE exactly
+  (BASE 5,010,133; embedding 1,572,864, body 3,437,269 in both). d 192, 8 layers, 3 heads, head_dim 64 unchanged, so
+  cfg.depth, the o_proj/down_proj init std and the norm scaling are BASE's. The width is the equal-total fit of the
+  sharing (S008's solver row), not a second bet: the generator allows exactly these two keys for this arm (a test: a
+  third key refused; a test: qk_share 2 with mlp_hidden 488 refused, it is not this arm).
+
+WHAT STAYS IDENTICAL
+  Everything in B1, engine varlen (BASE's). LRs move only by the g pick (B3). Shared W_q/W_k stay in the NorMuon
+  "matrix" group; each receives gradients from two layers (named in KNOWN RISKS).
+
+BUDGET  B1: 250.0M slots, 7,630 steps, WSD decay from step 6,104.
+LEARNING RATE  B3 g-check at seed 1.
+
+SEEDS AND PAIRING
+  Seeds 101-105 (B4 (1)), paired with base2_s<seed>. Class NEW INIT: fewer W_q/W_k modules and wider MLP matrices shift
+  every later draw. SD_ref per B4 (2).
+
+METRIC AND DECISION RULE (B5, B7; "shared W_q/W_k, width reinvested")
+  NOMINATE      lower chat bpb at equal total: a candidate. It goes to the post-lock Tier 0 reading and a 20M
+                confirmation with its own solver shape and g-check (at 20M the attention share of the body differs).
+                Nothing is adopted at 5M.
+  REJECT        higher chat bpb: at 5M, unshared W_q/W_k are worth more than the MLP width they would buy. P-110's
+                ledger row says "8-layer sharing contrast failed at 5M"; its depth form stays E9's question.
+  TIE           loss-neutral at equal total: the baseline keeps unshared W_q/W_k (nothing is adopted on a tie); Tier 0
+                after the lock (B8) decides whether a 20M confirmation runs.
+  GUARD-FAIL, INCONCLUSIVE   as C7.
+  OWN-SIZE (B7)  P-110's own test is "5-10M proxies, 3 seeds" (LEDGER): this screen is its 5M proxy on every verdict.
+                A 20M confirmation not run (REJECT, or a TIE that Tier 0 does not send on) is recorded "not run" and
+                listed to Max; the depth form stays E9's.
+
+DIAGNOSTICS (B6; reported)
+  IND curve, onset at matched LR, final IND; HD_asst, HD_user by the READING RULE; SINK per layer read in sharing pairs
+  side by side (layers 2u and 2u + 1 use one W_q/W_k); attn_diag's rebuilt-output check must pass on the shared modules.
+
+AFTER THE LOCK (B8)  Tier 0 margins with C7; E004 item pick shares reported.
+
+KNOWN RISKS
+  - A shared W_q/W_k gets gradients from two layers, so its effective step differs: the g-check covers the LR, but one
+    LR scales the whole matrix group.
+  - One share width (2); the ledger's range is 2-4 layers. A 2-layer share says little about 3-4.
+  - New-init noise: SD_ref sqrt(2) x sigma (B4 (2)).
+  - Starter mix and tok_v0_8k only (C1 scope).
+
+HARNESS CODE NEEDED (W1's; default-off code already exists for qk_share)
+  - None in harness/ for training: qk_share is built and tested (testutil.ARMS "qk_share2"; test_budget.py's module reuse
+    and count; test_s3_optim.py's single optimizer entry; leak tests). To check before the smoke: qk_share 2 with
+    mlp_hidden 552 through test_model_mask.py's packed-equals-alone on scrambled weights, the varlen CPU stand-in, and
+    KVDecoder against the full forward (an arm of these values, added to testutil.ARMS if absent).
+  - experiments/screens: the batch 2 registry entry (arm s009_qkshare, keys model.qk_share and model.mlp_hidden with
+    those values, class new init); diag_runner.py's flag check reads qk_share; attn_diag.py with qk_share 2 (rebuilt
+    output equals the module's, a test).
+  - Mutants: the registry accepting a third key; qk_share without the width; attn_diag reading layer 2u + 1's own
+    (absent) W_q.
+
+COST (est.)  g-check 3 x 0.31 h; 5 seeds x 0.31 h; up to 5 IND-only runs if the pick is not g 1. About 2.5 h registered.
+
+EAGER SMOKE (2026-10-12, the PC 5070 under gpu.lock, labelled smoke, never read; SCREENS2 BATCH 2 CODE AND SMOKES):
+  s009_qkshare g 1, seed 1, varlen micro 16: pass; 300 steps, loss 8.828 -> 4.717, finite and falling; 5,010,133
+  params; median 247,549 tok/s (x1.017 of base2's 251,838); peak reserved 8.41 GiB (2.35 left, mem_fit ok); startup leak
+  self-test 12 checks, max ratio 0.0071.

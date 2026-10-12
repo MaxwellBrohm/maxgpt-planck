@@ -1,0 +1,85 @@
+S017: a sequence-length curriculum, attention span 1,024 for the first half of training, then 2,048, on BASE's own
+token stream (LEDGER P-108, rank 107, tweak-of-known; PLAN Appendix B slot "SCREENS batch 2 at 5M (... P-108 its wall
+time)"). Added to batch 2 from PLAN Appendix B (SCREENS2.txt, marked (+)); not in the workflow's list.
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION, DRAFT WRITTEN 2026-10-11 (Claude, W5), before the flag, any S017 config, run or result exists; nothing
+committed. Run, no model: arithmetic. SCREENS2.txt B1-B9 are part of this entry.
+
+WHY
+  P-108 (LEDGER): "Sequence-length curriculum (T=1024 then 2048)"; prior art Dataset Decomposition (1B); limit #4;
+  cheapest test "Two 5M arms"; "Default: same final loss and battery in less wall time". The bet is speed at no loss
+  cost. At 5M with document-masked varlen attention, attention cost already follows document lengths, so the time saved
+  is only what documents longer than 1,024 tokens cost; this screen measures both the loss and that saving.
+
+QUESTIONS
+  Q1 (decided, B7) Does the curriculum change held-out chat bpb at the final checkpoint (scored at 2,048, as every arm)?
+  Q2 (reported, the bet's own reading; fixed after critique R12) Training speed: the median tok_per_s of each stage
+  from log.jsonl (steps 1..3,814 and 3,815..7,630; the trainer logs tok_per_s per log interval), and from them the
+  training hours T = stage-1 tokens / median_1 + stage-2 tokens / median_2, arm against its BASE at each seed. The
+  saving is reported as a magnitude: per-seed T_BASE - T_arm in hours and in % of T_BASE, their mean and the seeds
+  per sign. Lock-held hours (which include scoring) are reported beside it, not used for the reading. Every GPU
+  process seen during the run that does not hold gpu.lock (the queue samples nvidia-smi each log interval) is
+  recorded against that seed.
+
+THE CHANGE (one flag)
+  train.span_curriculum: {short: 1024, until_step: 3815} (new key; default absent = off). For steps 0..3,814 (the first
+  half of 7,630) the trainer splits every packed document at the row's column 1,024: tokens at columns >= 1,024 get a
+  new document id, so attention and RoPE positions (restarting there) treat the two halves as separate documents, as
+  two 1,024-token rows would; from step 3,815 the rows are BASE's. The loader, the rows, the token order, the
+  targets and the loss mask are BASE's at every step (the same token stream as BASE: common random numbers hold), and
+  the init is BASE's. Choices fixed here: the split at one fixed column (Dataset Decomposition buckets documents by
+  length, which would change the stream and the packing); the switch at half the steps (the ledger names no point).
+  Parameters: BASE's (5,010,133). Engine varlen: the split only relabels doc ids, which varlen reads.
+
+WHAT STAYS IDENTICAL  B1 and the token stream. LRs by the g pick (B3).
+BUDGET  B1: the same 250.0M slots; only the attention span of the first half changes.
+
+SEEDS AND PAIRING  Seeds 101-105, paired with base2_s<seed>. Class SAME INIT: identical draws and identical token stream,
+  the only difference a training-time attention limit, nearest E3 rule 1's first row ("loss masks"); SD_ref = SD_d with
+  the same-init noise check (C4, B4 (3)).
+
+METRIC AND DECISION RULE (B5, B7; "span curriculum")
+  NOMINATE      lower chat bpb: a candidate (loss gain beyond the ledger's speed claim); Q2 reported beside it.
+  TIE           P-108's default win if Q2's training hours T are lower on every seed: "same final loss in less wall
+                time at 5M, saving <mean>% (per-seed values)"; recorded as a speed option for the curve's re-plan
+                rule, never adopted on 5M alone. A TIE without a saving on every seed is recorded "no loss difference
+                and no consistent speed difference at 5M", with the per-seed savings. A seed with a non-lock GPU
+                process recorded during either run of its pair is reported with Q2's reading both with and without it.
+  REJECT        higher chat bpb: the curriculum costs loss at 5M; P-108 recorded as failed in this form.
+  OWN-SIZE (B7)  P-108's own test is "two 5M arms" (LEDGER): this screen is that test on every verdict; a larger size
+                would be a new bet (the curve's re-plan rule), not a missing run.
+  GUARD-FAIL, INCONCLUSIVE   as C7.
+
+DIAGNOSTICS (B6; reported)  IND, onset at matched LR (onset may land in the short half: IND is scored on 256-token
+  sequences, inside both spans), HD, SINK; the share of training documents longer than 1,024 tokens in the first half
+  (how many documents the split touched); Q2's times.
+
+AFTER THE LOCK (B8)  as C8.
+
+KNOWN RISKS
+  - At 5M the saving is small if few documents exceed 1,024 tokens; Q2 reports it as measured.
+  - The token after each split sees only its own half as context in the first half of training (as any shorter-context
+    stage); the targets are still scored.
+  - Wall time on a shared GPU varies with the other jobs on the card; Q2 reads logged tok/s per stage (lock-held time
+    includes scoring and is exposed to jobs that do not take the lock), and records any such job seen.
+  - Starter mix and tok_v0_8k only.
+
+HARNESS CODE NEEDED (W1's; default off; each test watched failing on its mutant)
+  - train.py / trainer.py: span_curriculum settings (short >= 2 and < seq_len, until_step within the schedule; refused
+    otherwise), the doc-id split applied to every micro-batch before the forward while step < until_step; the start
+    record carries it; resume keeps it (the step decides, so resume before and after the switch is exact).
+  - Tests: off equals absent and the pre-flag commit (20 CPU steps); the split relabels exactly the documents that cross
+    the column, and only before until_step (a 30-step CPU run with until_step 15); the token stream and targets equal
+    BASE's (hashes per step); resume across the switch (10 + 20 = 30 with until_step 15); leak probes on split rows;
+    scoring is unchanged (bpb.py never sees the flag).
+  - Mutants: the split kept after until_step; the split never applied; split by position in the document instead of the
+    row column; targets masked at the split; positions not restarted at the split; the loader rebuilt at 1,024 (a
+    changed stream).
+
+COST (est.)  8 runs at about 0.31 h, plus up to 5 IND-only runs. About 2.5 h registered.
+
+EAGER SMOKE (2026-10-12, the PC 5070 under gpu.lock, labelled smoke, never read; SCREENS2 BATCH 2 CODE AND SMOKES):
+  s017_span g 1, seed 1, varlen micro 16: pass; loss 8.818 -> 4.713; 5,010,133 params; start record carries
+  span_curriculum {short 1024, until_step 3815}; 259,722 tok/s over these 300 steps, all in the short-span stage
+  (x0.970 of base2: 3% faster, a smoke figure, not Q2); peak 8.28 GiB (2.47 left); leak max 0.0076.

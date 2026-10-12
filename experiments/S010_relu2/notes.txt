@@ -1,0 +1,70 @@
+S010: a ReLU-squared plain MLP in place of SwiGLU, at equal total parameters (LEDGER P-172, rank 172, known-apply;
+PLAN Appendix B slot "SCREENS batch 2 at 5M"; cuts audit row 23)
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION, DRAFT WRITTEN 2026-10-11 (Claude, W5), before the flag, any S010 config, run or result exists; nothing
+committed. Run for this entry, no model: arithmetic from count_analytic. SCREENS2.txt B1-B9 are part of this entry.
+
+WHY
+  P-172: "Compare a ReLU-squared plain MLP with SwiGLU"; prior art Physics of LMs 3.3, MobileLLM (125M), Physics 4.1;
+  limits #4 and #7; "Default: settles the conflicting evidence at this size". Primer's search found squared ReLU one of
+  its two main wins (arch.md: 500M, 1.9B), and modded-nanogpt carries ReLU-squared (record 5, a bundle). SwiGLU is
+  Max's validated block's MLP, chosen at 124M. Nothing in the repo measures the two at 5M on equal total.
+
+QUESTION (decided, B7)
+  At equal total parameters, does down(relu(up(x))^2) with hidden 732 change held-out chat bpb against SwiGLU 488?
+
+THE CHANGE (one idea, two keys: B2's allowance)
+  model.mlp_act: "relu2" (new field; default "swiglu" = BASE, absent from the dict when default) and model.mlp_hidden:
+  732. The MLP becomes up_proj (192 x 732) and down_proj (732 x 192), no gate, no bias: 2 x 192 x 732 = 281,088
+  parameters per layer, equal to SwiGLU's 3 x 192 x 488 = 281,088, so the total is 5,010,133, BASE's exactly (by this
+  arithmetic; count_analytic must agree once it learns the field, a test). The width is the equal-total fit of the
+  change (the generator allows exactly these two keys; relu2 at 488 is refused: it is 15% light). Init: as BASE's
+  linears (normal 0.02; down_proj at 0.02 / sqrt(2 x depth)). FLOPs per token equal BASE's MLP to within the gate's
+  elementwise product.
+
+WHAT STAYS IDENTICAL  B1 (engine varlen); the two MLP matrices stay in NorMuon's "matrix" group. LR by the g pick.
+BUDGET  B1.  LEARNING RATE  B3 (ReLU-squared's activation scale differs from SiLU-gated, so the g-check matters here).
+
+SEEDS AND PAIRING
+  Seeds 101-105, paired with base2_s<seed>. Class NEW INIT: the MLP draws two matrices per layer instead of three, of
+  other shapes, so every later draw moves.
+
+METRIC AND DECISION RULE (B5, B7; "ReLU-squared MLP")
+  P-172's own test is a "5M/30M A/B" (LEDGER): this screen is its 5M half on every verdict (B7 OWN-SIZE).
+  NOMINATE      lower chat bpb: its 30M half runs (with Tier 0 after the lock); SwiGLU stays until then.
+  REJECT        higher chat bpb: SwiGLU stays; P-172's row says "ReLU-squared worse than SwiGLU at 5M, equal total";
+                the 30M half is recorded "not run" and listed to Max.
+  TIE           SwiGLU stays (nothing adopted on a tie); P-172's question reads "no loss difference resolved at 5M",
+                which settles the ledger's "conflicting evidence" only for loss at this size; the 30M half runs (the
+                ledger's A/B has both sizes, and a 5M tie does not answer the 30M one).
+  GUARD-FAIL, INCONCLUSIVE   as C7.
+
+DIAGNOSTICS (B6; reported)  IND, onset at matched LR, HD, SINK. Per module: the share of MLP hidden units with zero
+  output on the 200 CHAT windows (dead units), per layer, at the final checkpoint.
+
+AFTER THE LOCK (B8)  as C8.
+
+KNOWN RISKS
+  - Width and activation move together by construction (the equal-total rule); a NOMINATE says "this MLP at equal
+    total", not "ReLU-squared at any width".
+  - ReLU-squared can leave dead units; the dead-unit share is reported, not ruled on.
+  - New-init noise; starter mix and tok_v0_8k only.
+
+HARNESS CODE NEEDED (W1's; default off; each test watched failing on its mutant)
+  - config.py: mlp_act in {"swiglu", "relu2"}, default "swiglu"; to_dict drops it at the default (the S004-S007 rule,
+    so older checkpoints load). blocks.py: a ReluSquaredMLP (up, down; no gate) built when mlp_act is "relu2".
+    model.py reset_parameters: down_proj keeps the depth-scaled std (its name ends in down_proj.weight).
+    budget.count_analytic: d + 2 x d x hidden for relu2 (a test: analytic equals the meta build).
+  - Tests: off equals absent and equals the pre-flag commit (20 CPU steps); relu2 forward equals a plain loop
+    reference (relu then square, not square of the pre-activation sign); packed equals alone on scrambled weights
+    (doc=None, mask, varlen stand-in); leak probes; KVDecoder; split_params (both matrices in "matrix"); attn_diag and
+    diag_runner accept the arm; testutil.ARMS gains "relu2".
+  - Mutants: relu without the square; square without the relu (x^2); gate kept; down_proj init not depth-scaled;
+    mlp_act left in to_dict at the default; count_analytic using 3 matrices.
+
+COST (est.)  3 + 5 runs at about 0.31 h, plus up to 5 IND-only runs. About 2.5 h registered.
+
+EAGER SMOKE (2026-10-12, the PC 5070 under gpu.lock, labelled smoke, never read; SCREENS2 BATCH 2 CODE AND SMOKES):
+  s010_relu2 g 1, seed 1, varlen micro 16: pass; loss 8.772 -> 4.729; 5,010,133 params; 220,770 tok/s (x1.141 of
+  base2); peak 7.76 GiB (3.00 left, ok); leak self-test max 0.0000.
