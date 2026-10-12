@@ -187,6 +187,11 @@ MUTANTS = [   # name, file, old, new, test file
     ("res_no_censor_star", "results.py", "{'*' if tab[a][s]['censored'] else ''}", ""),
     ("res_no_distance_line", "results.py", '    rows.append("  Accuracy by distance (registered as reported only): NOT RECORDED.', '    rows.append("'),
     ("res_write_skipped", "results.py", "            f.write(text)", "            pass"),
+]] + [(n, f, o, w, "tests/test_results_real.py") for n, f, o, w in [
+    # RESULTS.txt against the committed raw outputs (2026-10-11)
+    ("real_results_number", "RESULTS.txt", "  base     423040   0.067", "  base     423040   0.068"),
+    ("real_sha_list", "runs.sha256", "cd129565e854fff7", "0d129565e854fff7"),
+    ("real_picks_line", "RESULTS.txt", 'PICKS {"R1": "P-022"', 'PICKS {"R1": "P-148"'),
 ]]
 
 

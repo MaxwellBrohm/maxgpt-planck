@@ -1,0 +1,203 @@
+T001 RESULTS: the PLAN 3d 2-layer toy (MQRAR), read by PREREG.txt's pick rules with amendments A1 and A2
+
+Written 2026-10-11 17:05-22:30 EDT by Claude (W5's commit-and-run step). Mac CPU only for this reading; no model loaded.
+  Runs: 115 on the PC 5070 (10-10 18:22 to 10-11 16:55 EDT), every rc 0, none diverged, all 12,000 steps (but the
+    6,000-step C0 run), 38 gpu.lock holds, the longest 1,191 s. Code: the files of 2eed1dd, then of 097bef5 (the files
+    that train and score are byte-identical in both). Rules applied by metrics.py through results.py, committed in
+    b71beeb before any verdict-seed result was read; the TABLES below are its output, verbatim.
+  Raw outputs: runs.tgz here (the 115 run JSONs, copied from the PC 2026-10-11 17:00; runs.sha256 is the PC's list,
+    and every copied file matches it).
+  C0: (a) fired (base dev acc at n 8 = 0.124 after 6,000 steps, under 0.5), so every run used 12,000 steps; at
+    12,000 base's dev acc at n 8 was 0.127, so (b) did not fire (grid 8-96).
+
+PICKS (the registered rules, applied exactly)
+  R1 (the 30M must-run slot): P-022, by the registered tie default. Both arms help: gdn LWO - base mean +0.767
+     (positive 5/5), cap ratio gm 12.71 (above base 4/5), AR32 guard +0.745; canon LWO +0.940 (5/5), cap gm 24.00
+     (5/5), AR32 +0.930. Head to head (gdn - canon): LWO d -0.868 / -0.001 / 0 / 0 / 0, mean -0.174, negative on only
+     2/5 seeds, so neither direction holds; cap ratio gm 0.530, below 1 on 1/5, neither. So "else P-022".
+  R2 (the P-020 variant): sb (stick-breaking), the only passing variant: LWO >= 0.8 on 4/5 seeds (0.798 at seed 3),
+     cap ratio gm 12.71 (4/5) and LWO gain +0.900 (5/5), AR32 guard +0.929. fg, alibi and sa neither pass nor help.
+  R3 (P-024, 1 vs 2 layers): YES. smear1 AR32 1.000 on 5/5 seeds; base1 0.074; base 0.070; smear1 - base1 +0.926
+     (>= 0.2 on 5/5).
+  Re-derived on the raw counts by rederive.py (committed before the read) and by a third reading written from
+  PREREG.txt's text in this step (it also checks each file name against the JSON's own fields; not committed): all
+  three agree on C0, every LR pick, every per-run cap, LWO, LW and AR32, every helps and passes flag, and R1-R3.
+  Every run scored the same eval sets (equal query, updated, outvoted and tied counts per split, family and n).
+
+WHAT THE NUMBERS SAY BESIDE THE PICKS (reported; no rule is changed by it)
+  1. Plain softmax attention never learned the task. base stayed near chance at every LR (seed-0 dev score
+     0.044-0.050 at all four) and on every verdict seed (test acc 0.041-0.126 by n, AR32 0.070), after C0 (a) had
+     doubled training. fg, alibi, gdn_nc and base1 did the same. sa learned once, at seed 0 and LR 3e-3 (dev 0.967),
+     and stayed at chance on all five verdict seeds. Every other arm that learned has a previous-token path (Canon's
+     conv, the smeared key, gdn's short conv) or is stick-breaking. First logged step with train loss under 1.0
+     (seeds 0-5): smear 1,300-1,600; smear1 1,200-1,700; canon 2,800-3,500; canon1 1,900-5,600; gdn 1,800-4,100
+     (never at seed 1); sb 5,900-8,500; never for base, fg, alibi, gdn_nc or base1. So each comparison with base
+     sets a learner against a non-learner: at this size and budget the toy measured which arms learn recall at all,
+     not latest-wins given recall, and helps and pass assume a base that learns. The rules stand as registered;
+     this is the caveat that goes with them.
+  2. R1 does not separate P-022 from P-148. On seeds 2-5 both sit at the ceiling (LWO 0.999-1.000, cap 96
+     censored); gdn failed to train at seed 1 (final loss 2.51, LWO 0.132, AR32 0.078); canon trained on all five.
+     gdn without its conv (gdn_nc) did not learn (LWO 0.138), so nothing here credits the delta rule rather than the
+     short conv, which is Canon's own mechanism (PREREG KNOWN RISKS; R1 reads gdn as P-022's published form).
+  3. R3's "as good as 2 layers" half is met against a 2-layer base that never learned; the 1-layer gap (smear1 vs
+     base1) is the informative half.
+  4. sb at seed 3: cap 4 (outvoted-query accuracy under 0.9 at n 8) though cap_all is 64; LWO 0.798. The only
+     learner whose vote-proof capacity fails.
+  5. Tracking (enters no rule): tracked-query accuracy, mean of seeds 1-3, n 8 / n 96: canon 0.882 / 0.772 (learned
+     on 3/3 seeds), gdn 0.433 / 0.136 (learned on 1/3, seed 2), base 0.201 / 0.058 (0/3).
+  6. Not recorded (NOTES.txt): accuracy by distance (no per-distance counts kept) and weights (train.py saves none).
+
+BESIDE R1 AND R3 (PREREG: reported, changes nothing)
+  S004.canonac at 5M: NOMINATE (CHAT dbar -0.01047 bpb, -0.91% of BASE; S004 notes RESULT 2026-10-11), Q2 onset
+  UNRESOLVED. S007.smear at 5M: TIE, Q2 onset UNRESOLVED (S007 notes); a null Q2 does not block R3 (PREREG R3).
+
+REGISTERED CONSEQUENCES (PREREG WHAT THE TOY DECIDES; for the PLAN and LEDGER owners to record, not decided here)
+  - P-022 takes PLAN 3d's must-run 30M slot. P-148 is not dropped: it takes the next PLAN 3d architecture slot after
+    the must-run list, and goes to Max's deferral list if the Nov 22 checkpoint cannot hold it.
+  - R2 picked sb, not fg, so the 30M P-020 test runs stick-breaking under its own new pre-registration (S005 notes).
+  - R3 YES is the toy's half of PLAN Appendix B's trigger for S007's depth-reduced arm (its own pre-registration).
+  - PaTH: not run (PREREG NOT IN T001); still Max's question.
+
+TABLES (results.py --out <runs.tgz extracted>, verbatim)
+RUNS: 115 JSON files; total train+eval wall 7.89 h; diverged: none
+C0: steps 12000, n_hi 96, grid [8, 16, 24, 32, 48, 64, 96]; rule (a) fired: True; rule (b) fired: False
+
+LEARNING RATE (seed 0, dev; score = mean over the grid of (acc + acc_ov) / 2; A1)
+  base    pick 0.0003   0.0001 0.050; 0.0003 0.050; 0.001 0.046; 0.003 0.044
+  gdn     pick 0.0003   0.0001 0.990; 0.0003 0.996; 0.001 0.995; 0.003 0.947
+  canon   pick 0.001   0.0003 0.076; 0.001 1.000; 0.003 0.049
+  fg      pick 0.0001   0.0001 0.066; 0.0003 0.065; 0.001 0.042; 0.003 0.040
+  sb      pick 0.0001   0.0001 0.999; 0.0003 0.058; 0.001 0.055; 0.003 0.057
+  sa      pick 0.003   0.0003 0.075; 0.001 0.048; 0.003 0.967; 0.01 0.034
+  alibi   pick 0.0003   0.0001 0.074; 0.0003 0.087; 0.001 0.047; 0.003 0.047
+  smear   pick 0.001   0.0003 0.987; 0.001 1.000; 0.003 0.988
+  gdn_nc  pick 0.0001   0.0001 0.095; 0.0003 0.088; 0.001 0.082; 0.003 0.077
+  base1   pick 0.0001   0.0001 0.057; 0.0003 0.053; 0.001 0.052; 0.003 0.048
+  smear1  pick 0.001   0.0003 0.993; 0.001 1.000; 0.003 0.998
+  canon1  pick 0.003   0.0003 0.079; 0.001 1.000; 0.003 1.000; 0.01 0.987
+
+PER ARM, verdict seeds 1-5 at the picked LR (test sets). cap and LWO are A1's rule metrics; cap_all and LW
+the registered ones, reported only. * = censored cap (a lower bound); D = diverged
+  arm      cap per seed          cap_all per seed      LWO mean | per seed             LW mean  AR32 mean
+  base     4 4 4 4 4             4 4 4 4 4             0.060 | 0.049 0.053 0.083 0.057 0.057  0.073    0.070
+  gdn      4 96* 96* 96* 96*     4 96 96 96 96         0.826 | 0.132 0.999 1.000 1.000 1.000  0.824    0.816
+  canon    96* 96* 96* 96* 96*   96 96 96 96 96        1.000 | 1.000 1.000 1.000 1.000 1.000  1.000    1.000
+  fg       4 4 4 4 4             4 4 4 4 4             0.081 | 0.087 0.091 0.065 0.060 0.104  0.087    0.075
+  sb       96* 96* 4 96* 96*     96 96 64 96 96        0.960 | 1.000 1.000 0.798 1.000 1.000  0.980    0.999
+  sa       4 4 4 4 4             4 4 4 4 4             0.055 | 0.063 0.062 0.048 0.059 0.041  0.054    0.039
+  alibi    4 4 4 4 4             4 4 4 4 4             0.107 | 0.099 0.109 0.096 0.120 0.111  0.096    0.078
+  smear    96* 96* 96* 96* 96*   96 96 96 96 96        0.999 | 1.000 1.000 0.999 1.000 0.998  1.000    1.000
+  gdn_nc   4 4 4 4 4             4 4 4 4 4             0.138 | 0.135 0.137 0.155 0.134 0.129  0.119    0.077
+  base1    4 4 4 4 4             4 4 4 4 4             0.049 | 0.053 0.048 0.047 0.049 0.047  0.070    0.074
+  smear1   96* 96* 96* 96* 96*   96 96 96 96 96        1.000 | 1.000 1.000 1.000 1.000 0.998  1.000    1.000
+  canon1   96* 96* 96* 96* 96*   96 96 96 96 96        0.999 | 0.998 0.998 1.000 1.000 0.998  0.999    1.000
+
+PER n, means over seeds 1-5 (test). Block 1: acc / acc_ov (outvoted). Block 2: LW (updated) / acc_tie.
+Block 3: plain recall (family ar) acc. A diverged run is left out of these means (it counts worst in rules).
+  arm     n=8          n=16         n=24         n=32         n=48         n=64         n=96         
+  base    0.126/0.085  0.092/0.054  0.072/0.050  0.070/0.051  0.052/0.035  0.046/0.035  0.041/0.027  
+  gdn     0.828/0.832  0.821/0.828  0.815/0.820  0.815/0.825  0.811/0.814  0.807/0.810  0.794/0.797  
+  canon   1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  
+  fg      0.138/0.120  0.098/0.078  0.076/0.060  0.069/0.068  0.055/0.046  0.049/0.043  0.042/0.036  
+  sb      0.993/0.958  0.992/0.956  0.992/0.958  0.990/0.967  0.987/0.963  0.983/0.966  0.969/0.969  
+  sa      0.081/0.077  0.056/0.061  0.042/0.037  0.037/0.043  0.030/0.036  0.026/0.032  0.023/0.031  
+  alibi   0.134/0.159  0.098/0.102  0.078/0.078  0.075/0.089  0.057/0.050  0.050/0.053  0.043/0.046  
+  smear   1.000/0.999  1.000/0.999  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  0.999/0.998  
+  gdn_nc  0.144/0.180  0.104/0.143  0.081/0.105  0.078/0.124  0.060/0.085  0.051/0.072  0.044/0.052  
+  base1   0.126/0.066  0.095/0.045  0.073/0.039  0.070/0.046  0.055/0.033  0.047/0.026  0.043/0.027  
+  smear1  1.000/0.999  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  1.000/0.999  0.999/0.998  
+  canon1  0.999/0.996  1.000/1.000  1.000/1.000  1.000/0.999  0.999/0.999  1.000/0.999  0.999/0.998  
+  arm     n=8          n=16         n=24         n=32         n=48         n=64         n=96         
+  base    0.096/0.052  0.083/0.064  0.054/0.045  0.061/0.053  0.042/0.038  0.040/0.034  0.037/0.032  
+  gdn     0.831/0.830  0.826/0.825  0.817/0.816  0.820/0.819  0.813/0.813  0.809/0.808  0.797/0.796  
+  canon   1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  
+  fg      0.119/0.079  0.094/0.077  0.065/0.055  0.069/0.056  0.049/0.042  0.048/0.041  0.041/0.036  
+  sb      0.980/0.983  0.979/0.983  0.980/0.984  0.979/0.980  0.979/0.981  0.979/0.979  0.979/0.980  
+  sa      0.073/0.074  0.060/0.059  0.042/0.042  0.042/0.039  0.034/0.032  0.031/0.028  0.028/0.026  
+  alibi   0.127/0.098  0.102/0.088  0.074/0.067  0.080/0.073  0.056/0.054  0.058/0.054  0.047/0.045  
+  smear   0.999/1.000  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  0.999/0.999  
+  gdn_nc  0.152/0.132  0.129/0.118  0.093/0.092  0.100/0.089  0.077/0.074  0.065/0.061  0.056/0.054  
+  base1   0.085/0.044  0.077/0.056  0.053/0.044  0.063/0.053  0.047/0.040  0.044/0.037  0.041/0.037  
+  smear1  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  1.000/1.000  0.999/0.999  
+  canon1  0.998/0.998  1.000/1.000  0.999/0.998  0.999/0.999  0.999/0.998  0.999/0.999  0.998/0.998  
+  arm     n=8          n=16         n=24         n=32         n=48         n=64         n=96         
+  base    0.158        0.104        0.082        0.070        0.059        0.052        0.042        
+  gdn     0.833        0.824        0.818        0.816        0.812        0.811        0.806        
+  canon   1.000        1.000        1.000        1.000        1.000        1.000        1.000        
+  fg      0.157        0.107        0.084        0.075        0.061        0.054        0.045        
+  sb      1.000        1.000        0.999        0.999        0.998        0.997        0.991        
+  sa      0.098        0.065        0.050        0.039        0.033        0.027        0.024        
+  alibi   0.159        0.115        0.088        0.078        0.062        0.055        0.045        
+  smear   1.000        1.000        1.000        1.000        1.000        1.000        1.000        
+  gdn_nc  0.162        0.116        0.088        0.077        0.059        0.053        0.041        
+  base1   0.155        0.104        0.083        0.074        0.059        0.053        0.045        
+  smear1  1.000        1.000        1.000        1.000        1.000        1.000        1.000        
+  canon1  1.000        1.000        1.000        1.000        1.000        1.000        1.000        
+
+REPORTED ONLY (PREREG METRICS; no rule). Means over seeds 1-5; a diverged run is left out of these means.
+  STALE / FIRST: wrong answers that name an earlier value of the key / its moved first value, as a share of
+  updated queries pooled over n 8-32 (test). loss: the last logged train loss. wall: s per run (train+eval).
+  arm      params   STALE   FIRST   loss    wall_s
+  base     423040   0.067   0.052   3.620   220
+  gdn      425156   0.014   0.010   0.528   306
+  canon    425088   0.000   0.000   0.001   234
+  fg       423556   0.069   0.052   3.770   245
+  sb       423040   0.020   0.013   0.152   336
+  sa       423040   0.044   0.031   4.133   288
+  alibi    423044   0.076   0.055   3.620   235
+  smear    423044   0.000   0.000   0.001   224
+  gdn_nc   423620   0.073   0.050   3.590   304
+  base1    226176   0.068   0.052   3.796   173
+  smear1   226178   0.000   0.000   0.004   175
+  canon1   227200   0.001   0.000   0.001   180
+  Accuracy by distance (registered as reported only): NOT RECORDED. train.py's score() keeps no
+  per-distance counts and no run saved its weights, so it cannot be recomputed from these runs.
+
+R1 (P-022 vs P-148)
+  gdn    helps=True  
+      LWO - base: mean +0.767 [+0.083 +0.947 +0.917 +0.943 +0.943]; cap / base: gm 12.711 [1.00 24.00 24.00 24.00 24.00]
+      AR32 - base: mean +0.745 [+0.010 +0.931 +0.927 +0.929 +0.930]
+  canon  helps=True  
+      LWO - base: mean +0.940 [+0.951 +0.947 +0.917 +0.943 +0.943]; cap / base: gm 24.000 [24.00 24.00 24.00 24.00 24.00]
+      AR32 - base: mean +0.930 [+0.931 +0.931 +0.927 +0.929 +0.930]
+  head to head, gdn vs canon:
+      LWO - canon: mean -0.174 [-0.868 -0.001 +0.000 +0.000 +0.000]; cap / canon: gm 0.530 [0.04 1.00 1.00 1.00 1.00]
+      AR32 - canon: mean -0.184 [-0.922 +0.000 +0.000 +0.000 +0.000]
+  R1 PICK: P-022 (both help and tie: the bet untested at this size first (P-148 has its 5M screen))
+R2 (the P-020 variant; candidates fg, sb, sa, alibi)
+  fg     pass=False helps=False LWO>=0.8 on 0/5  
+      LWO - base: mean +0.021 [+0.038 +0.038 -0.018 +0.003 +0.046]; cap / base: gm 1.000 [1.00 1.00 1.00 1.00 1.00]
+      AR32 - base: mean +0.005 [+0.006 +0.008 +0.001 +0.002 +0.008]
+  alibi  pass=False helps=False LWO>=0.8 on 0/5  
+      LWO - base: mean +0.047 [+0.050 +0.057 +0.013 +0.064 +0.054]; cap / base: gm 1.000 [1.00 1.00 1.00 1.00 1.00]
+      AR32 - base: mean +0.008 [+0.010 +0.010 +0.004 +0.010 +0.005]
+  sa     pass=False helps=False LWO>=0.8 on 0/5  
+      LWO - base: mean -0.005 [+0.014 +0.010 -0.035 +0.002 -0.016]; cap / base: gm 1.000 [1.00 1.00 1.00 1.00 1.00]
+      AR32 - base: mean -0.031 [-0.027 -0.028 -0.036 -0.029 -0.035]
+  sb     pass=True helps=True LWO>=0.8 on 4/5  
+      LWO - base: mean +0.900 [+0.951 +0.947 +0.715 +0.943 +0.943]; cap / base: gm 12.711 [24.00 24.00 1.00 24.00 24.00]
+      AR32 - base: mean +0.929 [+0.931 +0.931 +0.924 +0.929 +0.929]
+  R2 PICK: sb (passing variants: sb)
+R3 (P-024, 1 vs 2 layers; AR32 per seed)
+  base    0.069 0.069 0.073 0.071 0.070  mean 0.070
+  base1   0.073 0.073 0.077 0.073 0.075  mean 0.074
+  smear1  1.000 1.000 1.000 1.000 1.000  mean 1.000
+  canon1  1.000 1.000 1.000 1.000 1.000  mean 1.000
+  smear1 - base1 per seed [+0.927 +0.927 +0.923 +0.927 +0.925], mean +0.926; seeds with gap >= 0.2: 5
+  R3 READING: YES
+DIAGNOSTIC ARMS (reported only; no rule)
+  smear  helps=True  
+      LWO - base: mean +0.940 [+0.951 +0.947 +0.916 +0.943 +0.941]; cap / base: gm 24.000 [24.00 24.00 24.00 24.00 24.00]
+      AR32 - base: mean +0.930 [+0.931 +0.931 +0.927 +0.929 +0.930]
+  gdn_nc helps=True  
+      LWO - base: mean +0.078 [+0.086 +0.084 +0.072 +0.077 +0.071]; cap / base: gm 1.000 [1.00 1.00 1.00 1.00 1.00]
+      AR32 - base: mean +0.006 [+0.005 +0.009 +0.005 +0.005 +0.007]
+  canon1 vs base1:
+      LWO - base1: mean +0.950 [+0.944 +0.950 +0.952 +0.951 +0.952]; cap / base1: gm 24.000 [24.00 24.00 24.00 24.00 24.00]
+      AR32 - base1: mean +0.926 [+0.927 +0.927 +0.923 +0.927 +0.925]
+
+TRACKING (family track, seeds 1-3, test; enters no rule): track acc overall / on tracked queries, by n
+  base   8:0.163/0.201  16:0.108/0.140  24:0.079/0.090  32:0.074/0.087  48:0.058/0.074  64:0.052/0.062  96:0.046/0.058
+  gdn    8:0.444/0.433  16:0.408/0.403  24:0.383/0.362  32:0.373/0.335  48:0.349/0.278  64:0.324/0.220  96:0.286/0.136
+  canon  8:0.974/0.882  16:0.978/0.889  24:0.976/0.872  32:0.973/0.861  48:0.969/0.833  64:0.963/0.812  96:0.956/0.772
+PICKS {"R1": "P-022", "R2": "sb", "R3": "YES"}

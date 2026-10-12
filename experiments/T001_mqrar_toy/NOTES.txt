@@ -25,3 +25,7 @@ at about 22:55; nothing it had done was redone):
       recover them would give replays, not the same models (CUDA training here is not bit-exact), at about the
       queue's own GPU hours; that is Max's call, so it is put to him, not done. The queue is not restarted mid-way
       to add a save.
+
+2026-10-11 16:55 EDT: the queue wrote DONE (115 runs, every rc 0, none diverged, 38 gpu.lock holds, the longest
+  1,191 s). RESULTS.txt (22:30 EDT) holds the picks, every number and the caveats; runs.tgz and runs.sha256 hold the
+  raw outputs it was read from; tests/test_results_real.py checks that RESULTS.txt's tables are reproduced from them.
