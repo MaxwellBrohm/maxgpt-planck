@@ -1022,3 +1022,7 @@ hold; nothing committed when written)
   CONSEQUENCE: on CUDA the default path at these trees trains bitwise as at e39112a in this test; the remaining difference
     is fsync before rename (D4). Part 1b pools with Part 1 under that reading. A later change to these trees needs its own
     check before Part 1b runs: e3p1b_waiter.sh refuses any other tree.
+LAUNCHED (2026-10-12 23:12 EDT): e3p1b_waiter.sh started on the PC from planck_e3p1b.bundle at b0abab5; it said LAUNCH and
+  queue_e3.sh began part1b_p3at20m.txt (sha256 17c939a5e86f3d63) at 23:12:34, training e3_5m_A_s12 under gpu.lock.
+  Queued: Part 1b's 10 5M runs (about 3.3 GPU h), then Part 3 at 20M's 9 runs (about 13.6 GPU h). No value has been read;
+  the copy-back, the checks-only runs, the real-data mutants and the readings wait for a later session.
