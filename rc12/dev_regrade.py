@@ -6,7 +6,11 @@ re-run on the regraded copy.
 Per run dir with DONE (<model>/<render>/<seed>[_owncf]): each row -> runner.make_row(its record, the STORED turns,
 render, seed, responder, train_seed, own_cf): the stored replies, stops and dropped counts, nothing replayed. Written
 to the same path under --dst: transcripts.jsonl, scores.jsonl (= score.score_lines(rows)), meta.json (copied), DONE
-last. The source is only read. Reported per run: rows whose probes, unit, flags, leaks or ack marks changed, every
+last, all in <run>.partial, then dev_batch.publish_run (every file and the dir fsynced, the rename, the parent fsynced;
+cuts audit row 143, 2026-10-11), so a power cut never leaves a DONE beside empty or cut files; a rerun replaces an
+earlier copy (moved aside to <run>.old.partial in one rename, removed after the publish), and <dst>/regrade.json is
+written the same way, after the earlier one is removed at the start of a rerun. Run dirs named *.partial are never
+read. The source is only read. Reported per run: rows whose probes, unit, flags, leaks or ack marks changed, every
 changed probe (id, turn, old and new failing clauses), and EXPECTED: True when every change is of the kind the
 change being regraded can make (--expect):
   item3   (default; 2026-10-02) every change is a probe that lost exactly the clause v3_other and nothing else moved
@@ -21,6 +25,7 @@ import shutil
 import sys
 from multiprocessing import Pool
 
+import dev_batch as DB
 import runner as RN
 import score as S
 
@@ -54,7 +59,7 @@ def run_dirs(src):
             if not os.path.isdir(d):
                 continue
             out += [os.path.join(model, render, x) for x in sorted(os.listdir(d))
-                    if os.path.exists(os.path.join(d, x, "DONE"))]
+                    if not x.endswith(".partial") and os.path.exists(os.path.join(d, x, "DONE"))]
     return out
 
 
@@ -75,13 +80,21 @@ def regrade(job):
                                 probes=probes))
         new_rows.append(n)
     out = os.path.join(dst, rel)
-    os.makedirs(out, exist_ok=True)
-    with open(os.path.join(out, "transcripts.jsonl"), "w") as f:
+    tmp, aside = out + ".partial", out + ".old.partial"
+    shutil.rmtree(tmp, ignore_errors=True)       # a cut regrade's leftovers
+    shutil.rmtree(aside, ignore_errors=True)
+    os.makedirs(tmp)
+    with open(os.path.join(tmp, "transcripts.jsonl"), "w") as f:
         f.writelines(json.dumps(x) + "\n" for x in new_rows)
-    with open(os.path.join(out, "scores.jsonl"), "w") as f:
+    with open(os.path.join(tmp, "scores.jsonl"), "w") as f:
         f.writelines(json.dumps(x) + "\n" for x in S.score_lines(new_rows))
-    shutil.copy2(os.path.join(src, rel, "meta.json"), os.path.join(out, "meta.json"))
-    open(os.path.join(out, "DONE"), "w").write("regraded by dev_regrade.py\n")
+    shutil.copy2(os.path.join(src, rel, "meta.json"), os.path.join(tmp, "meta.json"))
+    with open(os.path.join(tmp, "DONE"), "w") as f:
+        f.write("regraded by dev_regrade.py\n")
+    if os.path.exists(out):                      # a rerun: the earlier copy goes aside in one rename, so a cut never
+        os.replace(out, aside)                   # leaves a half-deleted run beside its DONE
+    DB.publish_run(tmp, out)
+    shutil.rmtree(aside, ignore_errors=True)
     expected = all(EXPECT[expect](c) for c in changed)
     return dict(run=rel, rows=len(rows), changed=changed, expected=expected)
 
@@ -96,6 +109,10 @@ def main():
     src, dst = os.path.abspath(args.src), os.path.abspath(args.dst)
     assert src != dst and not dst.startswith(src + os.sep), "the regraded copy must not sit inside the source"
     jobs = [(src, dst, rel, args.expect) for rel in run_dirs(src)]
+    stale = os.path.join(dst, "regrade.json")
+    if os.path.exists(stale):                    # a rerun: the earlier summary goes first, so a cut never leaves it
+        os.remove(stale)                         # describing a --dst that is half redone
+        DB.fsync_path(dst, is_dir=True)
     with Pool(args.procs) as pool:
         res = pool.map(regrade, jobs, chunksize=1)
     rows = sum(r["rows"] for r in res)
@@ -111,9 +128,13 @@ def main():
             by[k] = by.get(k, 0) + 1
     for k, v in sorted(by.items()):
         print("  ", " ".join(k), v)
-    with open(os.path.join(dst, "regrade.json"), "w") as f:
+    path = os.path.join(dst, "regrade.json")
+    with open(path + ".tmp", "w") as f:
         json.dump(dict(src=src, expect=args.expect, runs=len(res), rows=rows, rows_changed=len(ch), per_run=res), f,
                   indent=0)
+    DB.fsync_path(path + ".tmp")
+    os.replace(path + ".tmp", path)
+    DB.fsync_path(dst, is_dir=True)
     return 0 if all(r["expected"] for r in res) else 1
 
 

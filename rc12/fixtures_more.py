@@ -4,7 +4,8 @@ import re
 
 import common as C
 import fam_persist as FP
-from fixtures_graders import fx, generic_degenerate, cap, vfix, SELF
+import grade_fmt_dyn as FD
+from fixtures_graders import fx, generic_degenerate, cap, vfix, SELF, sub_word
 
 BASE = "The kettle hums while the house sleeps."
 
@@ -49,7 +50,8 @@ def ffix(rec, p):
     if extra:
         out.append(fx(rec, p, extra[0], extra[1], False))
     if rule == "word":            # step 5 audit: every include-word stuffed in
-        out.append(fx(rec, p, "word_stuffed", ideal + " Splendid, nifty, dandy and groovy.", False))
+        w = FP.WORDS                             # the split's own include words, never dev's by name
+        out.append(fx(rec, p, "word_stuffed", ideal + f" {w[0].capitalize()}, {w[1]}, {w[2]} and {w[3]}.", False))
     if rule == "caps":
         half = len(ideal) // 2
         out.append(fx(rec, p, "caps_half", ideal[:half].upper() + ideal[half:].lower(), False))
@@ -178,7 +180,7 @@ def rfix(rec, p):
     uf, own = p["user_facts"], p.get("aname")
     name, job, town = uf["name"], uf["job"], uf["town"]
     lure = next(c for c in p["candidates"] if c not in (name, own))
-    other_aname = "Nova" if own != "Nova" else "Juno"
+    other_aname = C.V.ANAME[1] if own != C.V.ANAME[1] else C.V.ANAME[0]      # dev: Nova, else Juno
     out = [fx(rec, p, "ideal", p["ideal"], True),
            fx(rec, p, "about_user_ok", f"You're {name}, {an(job)} from {town}, and I'm your assistant"
               + (f", {own}." if own else "."), True)]
@@ -208,14 +210,17 @@ def dpick(rec, p):
     src = gf["src_turn"]
     gold = p["ideal_gold"]
     alt = next(o for o in gf["options"] if o != gold)
+    o0, o1 = gf["options"][:2]                       # options order, as g_pick lists its picks
     out = vfix(rec, p, gold=gold, avoid=(src,))
     out = [f for f in out if f["label"] != "plain"]
     out += [fx(rec, p, "plain_pick", f"I went with {gold}.", True),
             fx(rec, p, "own_pick_ok", f"I picked {alt} for that.", True, patch={src: f"Let's go with {alt}."}),
             fx(rec, p, "own_pick_ignored", p["ideal"], False, patch={src: f"Let's go with {alt}."}),
             fx(rec, p, "source_all", p["ideal"], False, patch={src: "All three are great: " + ", ".join(gf["options"]) + "."}),
-            fx(rec, p, "source_or", p["ideal"], False, patch={src: f"Maybe {gold} or {alt}?"})]
-    return out
+            fx(rec, p, "source_or", p["ideal"], False, patch={src: f"Maybe {gold} or {alt}?"}),
+            fx(rec, p, "source_two", sub_word(p["ideal"], gold, o0), False,   # two picks asserted: the source check
+               patch={src: f"{cap(o0)} is great. {cap(o1)} is great too."})]     # must refuse (reply: the first, so a
+    return out                                                                   # check of picked[0] alone passes it)
 
 
 def dlist(rec, p):
@@ -232,7 +237,8 @@ def dlist(rec, p):
            fx(rec, p, "source_prose", p["ideal"], False, patch={src: f"How about {first}, {gold} or {third}?"}),
            fx(rec, p, "source_dup", p["ideal"], False, patch={src: f"1. {gold}\n2. {gold}\n3. {third}"}),
            fx(rec, p, "source_four", p["ideal"], False, patch={src: f"1. {first}\n2. {gold}\n3. {third}\n4. A picnic"}),
-           fx(rec, p, "partial_gold", f"It was the {gold.split()[-1]}.", False)]
+           ] + ([fx(rec, p, "partial_gold", f"It was the {gold.split()[-1]}.", False)]
+                if len(FD.stems(gold)) >= 2 else [])     # a one-stem gold ("a sandbox") has no partial form
     out += generic_degenerate(rec, p, p["ideal"], avoid=(src,))
     out += [fx(rec, p, "first_item", f"The second idea was {first}.", False),
             fx(rec, p, "third_item", f"It was {third}.", False), fx(rec, p, "lure_item", f"It was {lure}.", False),

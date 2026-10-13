@@ -48,7 +48,8 @@ def main():
     ks = [k for k in range(len(MUTANTS)) if k % n == i - 1]
     t0 = time.time()
     ctx = mp.get_context("spawn")
-    with ctx.Pool(min(9, len(ks) + 1), maxtasksperchild=1) as pool:
+    cap = int(os.environ.get("RC12_MAX_WORKERS", "9"))       # the Mac's 4-process rule: sealed_kit sets 4
+    with ctx.Pool(min(cap, len(ks) + 1), maxtasksperchild=1) as pool:
         results = dict((k, (v, f)) for k, v, f in pool.map(job, [-1] + ks, chunksize=1))
     _, base = results.pop(-1)
     base_set = set(base)

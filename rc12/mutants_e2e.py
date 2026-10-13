@@ -244,8 +244,8 @@ MUTANTS = [
      "S7 CI averages 6 families"),
     ("score_stats", "fams = S.COMPOSITE if fams is None else fams\n    ta,", "fams = S.COMPOSITE\n    ta,",
      "paired S7 difference reads the 9 composite families"),
-    ("validate_e2e", "s7=40.0, lookup=0.60)", "s7=36.0, lookup=0.60)",
-     "G3 Level R bar at 36: the shortcut ceiling (36.7) must trip it"),
+    ("validate_e2e", "s7=40.0, lookup=0.60)", "s7=30.0, lookup=0.60)",
+     "G3 Level R bar at 30: the shortcut ceiling (dev 36.7; 34.3 to 41.5 on fresh seeds) must trip it"),
     ("validate_e2e", 'if s["families"][f] is not None and s["families"][f] > best.get(f, (-1.0, None))[0]:\n'
      '                best[f] = (s["families"][f], n)',
      'if s["keys"][f] > best.get(f, (-1.0, None))[0]:\n                best[f] = (s["keys"][f], n)',

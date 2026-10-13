@@ -14,12 +14,13 @@ import random
 import re
 
 import pools_vals as V
+import split_content as SC
 from pools_fill_a import FILLERS_A
 from pools_fill_b import FILLERS_B
 
 FILLERS = FILLERS_A + FILLERS_B          # (user turn, IDEAL reply, label) entries
 ASKING = {"question": True, "request": True, "statement": False}     # filler label -> the D turn's asks field (F2)
-SEED = 1212
+SPLIT, SEED = SC.SPLIT, SC.SEED     # dev and 1212 unless sealed_kit.py sets another split (split_content.py)
 N_TURNS = 12
 REPLY_WORDS = 50          # SPEC s1 budget: every reply counted as 50 words
 TOKENS_PER_WORD = 1.35
@@ -27,8 +28,8 @@ TOKENS_PER_MSG = 4
 MAX_TOKENS = 1800
 
 
-def stream(family, seed=SEED):
-    return random.Random(f"RC12:dev:{family}:{seed}")
+def stream(family, seed=None):
+    return random.Random(f"RC12:{SPLIT}:{family}:{SEED if seed is None else seed}")
 
 
 def nwords(text):
@@ -135,14 +136,15 @@ class Conv:
             q, a, label = pool.pop()
             self.put(i, "D", q, ideal=transform(a) if transform else a, asks=ASKING[label])
 
-    def record(self, seed=SEED):
+    def record(self, seed=None):
+        seed = SEED if seed is None else seed
         assert not self.free(), f"{self.rid}: unfilled turns {self.free()}"
         turns = []
         for i in range(1, self.n + 1):
             t = dict(self.turns[i])
             t["vals"] = V.scan(t["text"], V.ALL_VALUES)
             turns.append(t)
-        return dict(id=self.rid, split="dev", family=self.family, cell=self.cell, seed=seed,
+        return dict(id=self.rid, split=SPLIT, family=self.family, cell=self.cell, seed=seed,
                     knowledge=self.knowledge, n_turns=self.n, turns=turns,
                     probes=sorted(self.probes, key=lambda p: p["turn"]), meta=self.meta)
 
@@ -165,4 +167,4 @@ def pick(rng, seq, k=None, exclude=()):
 
 
 def rid(family, n, suffix=""):
-    return f"rc12-dev-{family.lower()}-{n:03d}{suffix}"
+    return f"rc12-{SPLIT}-{family.lower()}-{n:03d}{suffix}"

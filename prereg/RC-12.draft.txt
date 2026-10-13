@@ -232,11 +232,16 @@ becomes training text). The two share the label D8 by accident.
   Decoding (every model, Planck included): temperature 0.6, top-p 1.0, top-k off, repetition penalty 1.0 (off),
     max_new_tokens 256. All are passed explicitly, so a model's generation_config.json cannot change them (Qwen ships
     top_p 0.8, top_k 20, repetition 1.05). 3 sampling seeds per model; per-reply seed = md5(seed, conversation id,
-    turn). Greedy is reported as a secondary result.
+    turn). Greedy is reported as a secondary result. No panel model is decoded any other way in its own row: no DRY
+    sampler, no repetition penalty, no card settings. A row decoded otherwise (Vertex-0.6-15M-Instruct's card
+    sampling, s12) is reported separately, beside the model's own row and never in its place (NOVELTY_2026-10
+    s6.1; recorded 2026-10-11, rc12/notes.txt STEP 15).
   Engines: vLLM in WSL2 on the 5070 wherever the architecture is supported; batched HF transformers for Doge,
     MaxGPT-3 and anything vLLM rejects. Conversations advance in lockstep batches (turn t of every conversation in one
-    batch). A greedy HF-vs-vLLM parity check on 20 conversations per model family runs before any scored run. The
-    locked file names one engine per model (OPEN, s16).
+    batch). A greedy HF-vs-vLLM parity check on 20 conversations per model family runs before any scored run. One
+    engine per model, with its dtype and options, is named in rc12/engines.json (the card row's in
+    rc12/engines_card.json), from the parity reads of rc12/notes.txt STEP 9b, 9c, 13a and 14X; both files are
+    hashed in the lock manifest (s13 S9; settled 2026-10-11, formerly an open line of s16).
   Rerun check of stored runs (rc12/verify_dev_runs.py --rerun N, rc12/rerun_tie.py; Max, 2026-10-02: took all
     recommendations in rc12/DECISIONS_FOR_MAX.md (item 2)): R1 replays the first N conversations of a sampled run with
     its seed, R2 the same N greedy in lockstep against the same N played one at a time and against the stored greedy
@@ -307,12 +312,15 @@ becomes training text). The two share the label D8 by accident.
     by more than 0.01 nats in fp32 (0.25 in bf16) or a matched verdict flips. First model runs (2026-10-10 and 11,
     PC, 6d8fcd8's code, --selfcheck 48; rc12/notes.txt STEP 14L): 12 of the 13 passed (largest move 0.000131 nats, 0
     flips); LFM2-2.6B in bf16 failed (0.571 nats on template, 0.348 on plain, 0 flips), so its row is not reported
-    under this rule; dropping it or changing the rule is for the lock. lik_run prints each family's accuracy in its
-    log, and those lines (LFM2-2.6B's too) were seen when the run was checked, so a rule change now comes after that
-    look. Pulled 2026-10-11 (rc12/notes.txt STEP 14N; md5 manifest equal on both sides; logs/lik_rows_20261011.jsonl):
-    each of the 24 stored summaries (12 models x 2 renders) equals lik_score.summarize recomputed on the Mac and an
-    independent re-derivation from the rows (rc12/rederive14.py), and every model's matched, all-equal and
-    common-foil counts equal the tokenizer-only measurement above (rc12/test_numbers14.py). Read as a diagnostic
+    under this rule. lik_run prints each family's accuracy in its log, and those lines (LFM2-2.6B's too) were seen
+    when the run was checked, so a rule change now would come after that look. DECIDED 2026-10-11 by Claude under
+    Max's standing permission (rc12/notes.txt STEP 15; reversible only before the lock): the rule stands as recorded
+    on 2026-10-10, before any model run, and LFM2-2.6B has no likelihood row (template or plain); a later run in
+    fp32 on a larger card would be a labelled post-lock diagnostic. Pulled 2026-10-11 (rc12/notes.txt STEP 14N; md5
+    manifest equal on both sides; logs/lik_rows_20261011.jsonl): each of the 24 stored summaries (12 models x 2
+    renders) equals lik_score.summarize recomputed on the Mac and an independent re-derivation from the rows
+    (rc12/rederive14.py), and every model's matched, all-equal and common-foil counts equal the tokenizer-only
+    measurement above (rc12/test_numbers14.py). Read as a diagnostic
     (template, acc_matched against its chance): LOOKUP is far above chance for models whose generated LOOKUP is at
     most 0.014 (Qwen3-0.6B 0.74 against 0.22, Qwen3.5-0.8B 0.72 against 0.23, LFM2-1.2B 0.72 against 0.19), CORR
     stays near chance for every model (0.11 to 0.29 against 0.18 to 0.24), and OWN is high, as its copying cue
@@ -587,8 +595,9 @@ becomes training text). The two share the label D8 by accident.
         run) stays below 40: dev S7 36.73 (RECALL 0.650, BIND 0.233, TOPIC 0.417 and ROLE 0.604 from MYONLY, CORR
         0.312 WORDING, TWOHOP 0.354 ANTI_WORDING, OWN 0.000), 40.00 with OWN at the best own-history OWN outside
         CONSIST (POS2 0.229). The ceiling is reported beside Level R (the sealed one on the sealed records), never a
-        gate on a model (validate_e2e shortcut_ceiling; mutants_e2e #124, the bar at 36, and #125, the ceiling with the
-        ungated OWN, which puts CONSIST's 1.00 in and reads 51.01, are both killed). (The fixed ack alone gives every
+        gate on a model (validate_e2e shortcut_ceiling; mutants_e2e #124, the bar at 30 (36 until 2026-10-12, when a
+        fresh seed's ceiling of 35.95 let it survive, STEP 15), and #125, the ceiling with the ungated OWN, which puts
+        CONSIST's 1.00 in and reads 51.01, are both killed). (The fixed ack alone gives every
         generic cheater a loop rate far above the bar, so
         Level A as a whole is not enough: 0.58 to 0.82 for the 12 generic cheaters under the original equality
         clause; 0.51 to 0.61 under OD6 (iii), audit cheaters up to 0.67, because the fixed ack also answers D
@@ -753,10 +762,11 @@ becomes training text). The two share the label D8 by accident.
     strongest panel models do, 0.07 at worst). The riddle frame named in DECISIONS item 5 opens only 2 of the 48
     items (LFM2-2.6B 0.522 without them) and is not the cause. The gate stays 0.90 (the audit's recommendation): T0
     measures what it says, and lowering it now would pick a number after seeing dev with no rule behind it.
-  Sealed size: 600, kept under the 2026-10-04 Level R (decision 1, D: "Sealed size under D: stays 600, because n
-    barely matters for this bar"; the true S7 needed for 80% power is about 45.7, 45.1 and 44.6 at n 600, 700 and 900,
-    the decision's options pass, not re-run here). The rule below and its result were written for the old
-    non-inferiority test, which is now reported beside; they are kept as the record of how 600 was chosen.
+  Sealed size: 600 (built as dev's 640-record layout, s13 S3 (iii)), kept under the 2026-10-04 Level R (decision 1, D:
+    "Sealed size under D: stays 600, because n barely matters for this bar"; the true S7 needed for 80% power is about
+    45.7, 45.1 and 44.6 at n 600, 700 and 900, the decision's options pass, not re-run here). The rule below and its
+    result were written for the old non-inferiority test, which is now reported beside; they are kept as the record of
+    how 600 was chosen.
   Sizing rule as run (PLAN sizing rule): from dev runs of Qwen2.5-0.5B-Instruct and the two baselines nearest to it,
     estimate the within-conversation correlation and the paired disagreement rate, simulate this analysis, and take
     the smallest count in steps of 100 (minimum 600, cap 1,500) with >= 80% power to show non-inferiority at -3 when
@@ -877,7 +887,8 @@ becomes training text). The two share the label D8 by accident.
   (0.30 confirmed: Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 16)). The draft
   expected one_sentence to drop (plain replies comply); on the template render it did not (below). On the plain
   render, which is not read, one_sentence is above 0.30 for 4 core models: LFM2.5-350M 0.602, Qwen3.5-0.8B 0.403,
-  Doge-160M 0.387, LFM2.5-230M 0.367 (rc12/notes.txt STEP 10e). The drop list is written here at the lock.
+  Doge-160M 0.387, LFM2.5-230M 0.367 (rc12/notes.txt STEP 10e). The drop list at the lock: empty (no rule above 0.30
+  for any core baseline on the template render; results below, regraded 2026-10-04).
   Result (measured 2026-10, before the lock; dev, core panel, template render, mean of 3 sampling seeds; the script
     rc12/dev_s11.py, rc12/notes.txt STEP 10b). HEADROOM: LOOKUP fails at the floor: every core baseline scores 0.000
     to 0.014 (on each seed and greedy too). Its X probe asks for a key that only the other table holds, and the
@@ -1052,10 +1063,22 @@ becomes training text). The two share the label D8 by accident.
      banks and slot pools for every family; D8 provenance rule: a Claude-written gold set, never training text. It
      shares no template and no slot pool with dev (value pools included), and 0 word 5-grams of user text with dev
      (confirmed: Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 16)). PERSIST gets its
-     own include-word pool, added to grade_fmt_dyn.STUFF_POOL for sealed scoring.
+     own include-word pool, which is grade_fmt_dyn.STUFF_POOL for sealed scoring (the content hook of S3 puts the
+     sealed words in place of dev's; a dev word is never asked for on sealed).
+     Checked as (rc12/sealed_overlap.py, 2026-10-11 and 12, rc12/notes.txt STEP 15): (a) every value pool, the holder
+     lists and the PERSIST rule words disjoint from dev's, case-insensitive, except the closed natural classes
+     WEEKDAY, MONTH and LANGUAGE (7 weekdays exist, dev uses 11 months, K answers are world knowledge), which a sealed
+     split cannot avoid sharing; (b) 0 word 5-grams of user text shared with dev (every turn of every record); (c) no
+     content string of 5+ words identical to a dev one; (d) no short content string (1 to 4 words: objects, aliases,
+     topics, nouns, short frames, even ROLE's "What's my name?") identical to a dev one, so the sealed split rewords
+     its questions too. Exempt from (d): identifier fields, the closed classes, the fillers' hand labels (F2), BIND's
+     name-probe object words, and the avoid lists of BIND, OWN and LOOKUP (each names its own items' object words,
+     which a filler may not contain; test_gens checks each list against the sealed templates). The check prints counts,
+     and examples only inside the session.
      Inflected forms (s6, 2026-10-04; an obligation): the sealed weekday, instrument, food and project pools join
      grade_text.INFLECT for sealed scoring, as dev's do, and hold no value whose plural or singular is another
-     common word (as "mechanics" is for mechanic, the reason jobs are not inflected).
+     common word (as "mechanics" is for mechanic, the reason jobs are not inflected); at least one of them ends in
+     s, as dev's "drums" does, so the singular-form branch is exercised (test_gens, 2026-10-12, STEP 15).
      Filler labels (F2, s17 OD6 follow-up (2); an obligation, not a proposal): every sealed filler gets the same hand
      label as dev's, "question", "request" or "statement" (asks nothing), set by reading each one in the sealed
      session and stored with the filler as data, and the sealed build copies it onto every D turn as asks (false
@@ -1064,7 +1087,9 @@ becomes training text). The two share the label D8 by accident.
      grading (grade_loop.loop_kind asserts it; tested by mutation_graders asks_missing_refused), and the S4 gates
      include the test_gens asks and filler-label checks. test_gens pins the dev counts (50 question, 20 request, 20
      statement fillers; 3,106 / 904 D turns) only when every record is a dev record: the sealed session pins its own
-     label and asks counts in test_gens (test_fillers, test_asks) before S4.
+     label and asks counts in test_gens (test_fillers, test_asks) before S4. Since 2026-10-11 it pins them without
+     editing test_gens: a non-dev build fails test_gens unless RC12_EXPECT names a JSON file with its label and asks
+     counts (expect.json, archived and hashed in S5), so the code stays the code hashed in S9.
   S2 Isolation. The sealed session does not read pipeline/ banks, templates, teacher renders or lookup-line format
      (OD5: it picks its own LOOKUP table format), so sealed stays out of the training distribution. No pipeline,
      harness, corpus or training session ever reads sealed plaintext.
@@ -1075,31 +1100,96 @@ becomes training text). The two share the label D8 by accident.
   S3 Build. The same generator code (fam_*.py with the sealed pool modules), families, cells, layouts, graders and
      gates as dev; size from the sizing rule (s9); a fresh generator seed drawn in the sealed session. The banks may
      be written early; the items are generated only after the sizing rule has run on the dev baselines.
+     How (built and dry-run 2026-10-11 and 12, before any sealed item exists, rc12/notes.txt STEP 15; decided by Claude
+     under Max's standing permission, reversible before the lock): (i) Content. Dev wording sat in the fam_*.py
+     builders as well as the pool modules, so every module holding wording or values names it in CONTENT and calls
+     split_content.apply; on the sealed split that replaces those constants with the session's content_<module>.py
+     files, which must keep every name, type, dict key, list length and {placeholder} (shape-checked) and the
+     identifier fields that cells key on (split_content.PINS), so wording and values change and code, layouts,
+     counts and balances do not. A content file is data: only NAME = <literal> lines are read, never run. The dev
+     split refuses to run where a work copy or a content file sits, and runner.load refuses records of another
+     split, so sealed items are never graded with dev pools. Dev is unchanged byte for byte (sha256
+     3e543f8d above). The table row format of LOOKUP is content (OD5: the session picks its own format). (ii) Work
+     copy. rc12/sealed_kit.py makes a git archive of one commit under sealed/, installs the content files, and
+     checks that every other file equals that commit; the items are built and gated there with the split name
+     "sealed" and the seed from the environment. (iii) Size. Dev's layout exactly (s5: 640 records, 608 twelve-turn
+     conversations and 32 one-turn K controls), at or above the rule's 600, which keeps every balance of G9 exact
+     with no new generator code or tests; the sizing simulation scaled every family by n / 640 records, so 640
+     records give at least the power it computed at 600. (iv) Seed draws. A fresh seed's items can miss the tight item
+     gates by chance alone (dry run, rc12/logs/lock_dryrun_seeds.txt: two sweeps of 30 and 12 fresh seeds on dev
+     content; 10 of the 42 passed test_gens, G10 and G1-G4; most failures were G2, most often CORR:C_noupd's cell bar
+     or TOPIC's or TWOHOP's family bar; the shortcut ceiling ran from 34.27 to 41.53, at or above 40 on 4 of 42,
+     median 38.13 in the first sweep; dev's own seed gives 36.73). So rc12/sealed_search.py draws seeds in order:
+     build, run the seed-sensitive gates in the kit's order (test_gens, audit_rules G10, validate_e2e G1-G4,
+     mutation_graders, whose fixtures come from the items, and mutation_audit, whose detectors are gate rates too: on
+     the dry run's first accepted seed, undoing CORR's gold length balance left SHORTEST and LONGEST under the bars;
+     fake responders only, never a model), stop at the first failure, discard a failing seed and draw the next, up to
+     200 draws (mutation_graders takes 4 records per family and cell plus every record giving a fixture kind the
+     chosen ones lack, 2026-10-12: on the renamed-content dry run G6 failed 3 of the 4 draws that reached it; the two
+     logs kept show the 10 voice mutants that only assistant-name fixtures kill surviving (one draw also a DYN source
+     mutant), the first 4 BIND perspective records having asked the user's name; in 4 further seeds the old rule built
+     no such fixture on 2; under the new rule 6 of 6 seeds had them and G6 killed 226 of 226 on the one run; the
+     rehearsal search after it lost G6 on 2 of 14 draws, the one log kept showing that DYN source mutant, which the
+     source fixtures killed only when the gold was the first option, so a fixture asserting the first two options was
+     added, which kills it on all 32 dev OWN pick records; with both changes G6 killed 226 of 226 on 8 of 8 fresh
+     renamed-content seeds; rc12/logs/lock_dryrun_seeds.txt); the first seed that passes is the sealed seed and then
+     every S4 gate runs on it (if one fails, or no seed passes in 200, the session stops and reports; a fix to code or
+     content restarts the build from a new work copy, and the draw log continues). Every draw is logged (gate verdicts
+     and shortcut ceiling, never a seed or item text) in SEED_ATTEMPTS.txt, published with the lock. The draws keep
+     items on which the fixed-rule cheaters do worse, so they can only make the sealed split harder to pass by
+     shortcuts; the sealed shortcut ceiling is reported beside Level R with the draw count.
   S4 Gates. The sealed session runs G1-G11 and the generator, grader and audit mutation tests on the sealed items
-     with fake responders only (no model). Only the gate tables leave the session, never item text.
+     with fake responders only (no model). Only the gate tables leave the session, never item text. The list as run
+     (sealed_kit.py gates; at most 4 worker processes on the Mac): the build reproduced from the seed, test_gens,
+     audit_rules (G10), audit_graders (G11), validate_e2e (G1-G4), validate_machinery, mutation_graders (G6),
+     mutation_gens, mutation_audit (2 parts), mutation_e2e (8 parts); its table GATES.txt is archived, hashed in S5
+     and published as rc12/lock/SEALED_GATES.txt. OOD-H's gate (oodh/gate.py) is re-run in the same session for the
+     record (s14 (d)).
   S5 Hash. SHA-256 of every sealed file (items JSONL, pool and template modules, banks) and of the generator seed,
-     written into the locked file.
+     written into the locked file. As built (sealed_pack.py): rc12/lock/SEALED_HASHES.txt holds the work
+     copy's commit, the split and its S1 verdict, and the sha256 of the items (rc12_sealed.jsonl), the 11 content
+     modules, expect.json, the seed file, GATES.txt (which itself records the sha256 of every input the S4 gates ran
+     on), OVERLAP.txt (the S1 counts), SEED_ATTEMPTS.txt, the S6 list, OOD-H Part 1 (equal to oodh/HASHES.txt), the
+     plaintext archive and, after S7, the ciphertext, plus the sha256 of the seed's hex string; every one of them is
+     copied into this file's lock record. rc12/sealed_pack.py refuses to pack unless the inputs are the gated ones,
+     the seed rebuilds the items byte for byte, the draw log's last run accepted that seed and S1 passed.
   S6 Decontamination list (confirmed: Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item
      16); the OD5 condition was ruled before): the sealed session also writes the SHA-256 of every normalized word
      13-gram of sealed user text, so training data can be decontaminated against sealed without anyone reading it.
      Under OD5 (ruled, not a proposal) that decontamination also covers the pipeline's program-written lookup lines.
+     As built (sealed_crypto.py ngrams): words are re.findall(r"[a-z0-9']+", text.lower()) joined by one space; the
+     list also covers OOD-H Part 1 (user turns, probe turns and the thread's own assistant replies, which every
+     model sees). The list stays outside git (gzip, in the gitignored private/ folder and in the archive); its
+     sha256 and count are public in S5. The pipeline must normalize the same way (rc12/LOCK_STEPS.md).
   S7 Encrypt. At once, in the same session: AES-256 with a random 256-bit key generated by a script that writes the
-     key to a file outside any repository and never prints it (tool and exact command named at the lock). Only
-     ciphertext sits in the working tree; sealed/ and private/ are gitignored (checked 2026-09-25).
+     key to a file outside any repository and never prints it. Tool and exact command (named 2026-10-11): the key
+     is "openssl rand -hex 32" written by rc12/sealed_crypto.py keygen (mode 600; refused inside any git work tree;
+     only a fingerprint, the first 16 hex of the key file's sha256, is printed); the archive is the deterministic
+     tar of S5's files, encrypted by sealed_crypto.py encrypt as "openssl enc -aes-256-cbc -salt -pbkdf2 -iter
+     600000 -md sha256 -pass file:<key> -in RC-12-sealed.tar -out rc12/lock/RC-12-sealed.tar.enc" (OpenSSL 3), and
+     sealed_crypto.py verify decrypts it into a temporary folder and checks every file against S5. Only ciphertext
+     sits in the working tree; sealed/ and private/ are gitignored (checked 2026-09-25, and by rc12/lock_check.py).
   S8 Key. Kept outside any repository in two places, the Mac and the PC; Max may add a third copy in his password
      manager. Never in a repo, a MEMORY.md, a notes file or a transcript.
   S9 Publish. One commit holds this file (locked), the encrypted sealed archive, the dev split in the clear, the
      SHA-256 values of S5, the generator-seed hash, and the SHA-256 of every rc12/*.py file (so the graders and
      scoring code cannot change unseen). It is timestamped outside git by a GitHub release and a Software Heritage
      snapshot, because git author dates can be edited. The public repo is created only after Max says yes (PLAN).
+     As built (2026-10-11): the public repo exists; the code hashes are rc12/lock/MANIFEST.txt (rc12/lock_check.py
+     manifest: every tracked .py, .sh, .json and .jsonl file under rc12/ and the E001 and E004 code it imports, the
+     OOD-H code and HASHES.txt, this file and the sealed outputs), and lock_check.py check --final must pass on the
+     lock commit before it is pushed. The release and the snapshot are publishing, so each waits for Max's yes.
   S10 Use. The archive is decrypted only for scoring runs after the push (baselines on sealed, then Planck curve
-     points). The key and the sealed split are published at submission.
+     points). The key and the sealed split are published at submission. Scoring reads the sealed content modules
+     (the graders take the value pools from them), so a sealed scoring run works in a work copy of the lock commit
+     with the archived content installed; sealed transcripts are never committed or pushed before submission.
 
 14. OOD-H (PLAN Phase 0; the Level R wording rule depends on it)
   Part 1, fixed at the lock: 150 held-out, knowledge-light English multi-turn OASST2 threads; their IDs hashed into
   this file; removed by thread ID from every training corpus, the tokenizer's included; graded probe turns appended
   (Claude-written, a gold set), asking about what the human user said; the same graders as RC-12. BUILT 2026-09-26
-  (Part 1 BUILT paragraph below); not committed, not locked.
+  (Part 1 BUILT paragraph below); reviewed by Max and fixed 2026-10-10 (REVIEWED paragraph below); its items stay
+  in sealed/ and enter the lock's encrypted archive (s13 S5), its hashes this file.
   DECIDED 2026-09-26 by Claude under Max's standing permission (reversible before the lock): (a) the two grader
   bugs the OOD-H review found (oodh/DESIGN.txt s11: "You told me it was X" failed every user-held value probe, and
   "I said X" passed them) are fixed in the RC-12 graders before any dev baseline is scored (s6 v4, D23; generation
@@ -1135,8 +1225,23 @@ becomes training text). The two share the label D8 by accident.
   build, the replacement at the review; tree ids, message ids, 50-char user snippets, against every text artifact
   under data/ except raw/, with positive controls that hit) found 0 contamination. oodh_part1.jsonl sha256
   f6163981e6af04bfef130e7416ef13d00bf81cad8228c639eb9c3c45a8315270; sorted tree-id list sha256
-  4c3f60e3c1c79121982326ca430f9e26b37f4f2037ab17c501903dd179a69eb7. Marked LOCK CANDIDATE; the lock (s15) fixes
-  these hashes only after Max's review.
+  4c3f60e3c1c79121982326ca430f9e26b37f4f2037ab17c501903dd179a69eb7. Marked a candidate for the lock, to be fixed only
+  after Max's review. These counts and this file hash are superseded by the REVIEWED paragraph.
+  Part 1 REVIEWED (2026-10-10; oodh/DESIGN.txt s15; commits d13c542 and a171b52): Max's own review of a 30-thread
+  sample drawn by a fixed hash rule (85 of 85 probes "looks right"; his 3 notes concern original OASST2 wording and
+  change nothing); a third agent review of all 150 threads, each finding tested by 2 skeptics (45 confirmed, fixed
+  by a patch script that asserts every old value: 2 probes dropped, among them the one H-ASK probe that failed G1
+  under the 2026-10-04 graders, plus reworded questions, replaced guessable and abstain probes, accepted forms and 2
+  kind labels); and Max's re-check of the 11 sample threads the review changed (11 of 11 conversations and 32 of
+  32 probes "looks right"), so every probe of his sample was read by him in its final form. DECISIONS_FOR_MAX
+  item 13 is DONE. Part 1 at the lock: 150 threads, 415 probes (H-FACT 226, H-ASK 96, H-CORR 1, H-ABS 92), the same
+  150 trees; oodh_part1.jsonl sha256 40d2a76d1315d3cbfaf5e7b899183b7b04fe2561ab2717396782a316e4b268e7; sorted
+  tree-id list sha256 4c3f60e3c1c79121982326ca430f9e26b37f4f2037ab17c501903dd179a69eb7 (unchanged; both in
+  oodh/HASHES.txt). Gate (gate.py on the new file, graders with v3_shotgun on): PASS on every gating check; reported,
+  not gating (c): G2 129 findings, G4 45 threads, type matchers 0.72-0.75, SHOTGUN 0.59, USERVOICE and ROLECAP 0.01,
+  ECHO, DEFLECT and ABSTAIN 0.00; the 2+-value subset is 44 of 323 VAL probes. The review also counted grader
+  limits on natural OOD-H replies without changing the graders (oodh/DESIGN.txt s15 "Grader findings"; their
+  handling before the lock: rc12/LOCK_STEPS.md).
   Part 2, collected in January: 50-60 short scripts written by the human-test raters before they see any model
   output (6-12 user turns, 2+ personal facts, one correction, a later question; the rater marks the golds). Only the
   protocol is pre-registered (those scripts cannot have leaked into training).
@@ -1198,13 +1303,14 @@ becomes training text). The two share the label D8 by accident.
   Likelihood rows (s4): BUILT 2026-09-26 (rc12/notes.txt STEP 11, stubs only; fix round the same day: matched
     foils, BIND lead-ins per pair, fp32, Gemma 3 eager, the Tier 0 guard's non-finite and tie counts, lik_compare,
     token counts measured with 9 of the 13 panel tokenizers); the 4 missing tokenizers (Qwen3.5-0.8B, LFM2-700M,
-    LFM2-1.2B, Doge-160M) measured 2026-10-10 (s4; notes STEP 14S). The first model run is open: planned on the PC
-    GPU under gpu.lock, one model per hold, before the lock (notes STEP 14S); if it has not run by the lock, s4 says
-    so and the rows stay a post-lock diagnostic.
-  OOD-H Part 1: BUILT 2026-09-26 (s14; not locked). The OOD-H wording rule (s1): BUILT 2026-09-26
+    LFM2-1.2B, Doge-160M) measured 2026-10-10 (s4; notes STEP 14S). First model runs DONE 2026-10-10 and 11 on the PC
+    GPU under gpu.lock, one model per hold (notes STEP 14L, 14N): 12 of the 13 models have rows; LFM2-2.6B has none
+    (its bf16 self-check failed; the rule stands, decided 2026-10-11, s4).
+  OOD-H Part 1: BUILT 2026-09-26, reviewed by Max and fixed 2026-10-10 (s14 REVIEWED; 415 probes, sha256 40d2a76d).
+    The OOD-H wording rule (s1): BUILT 2026-09-26
     (rc12/oodh_wording.py, imported by score_stats as OW; rc12/notes.txt STEP 11, OOD-H WORDING RULE; synthetic
     per-thread scores only; fix round the same day: comparator, decoding, render and Part 2 checks, the refusal
-    matcher; s1 status). Open: its first use needs both models' OOD-H runs, and OOD-H Part 2 (January).
+    matcher; s1 status). After the lock: its first use needs both models' OOD-H runs, and OOD-H Part 2 (January).
   The sealed split (s13) and every hash of S5 and S9.
   DONE 2026-09-25: Max ruled OD1-OD8 (s17) and the code for the picks is written (OD1 option b: an AND over the two
     OWN runs in score.py and score_stats.py, mutants_e2e #50-#60; OD6 (iii): grade_loop plus fixtures, 7 grader
@@ -1484,8 +1590,8 @@ becomes training text). The two share the label D8 by accident.
 19. LOCK CHECKLIST (in order)
   1 DONE 2026-09-25: Max ruled OD1-OD8 (every recommended pick, s17); the picks are implemented (code for OD1 and
   OD6) and the mutant files updated. Check order re-run: see rc12/notes.txt STEP 7. F1 and F2 (s17 OD6 follow-up)
-  decided and implemented, check order re-run: notes F1 and STEP 8; F3 open (widened 2026-09-26, its measurement
-  built: notes STEP 8 round 2).
+  decided and implemented, check order re-run: notes F1 and STEP 8; F3 (widened 2026-09-26, its measurement built:
+  notes STEP 8 round 2) decided 2026-10-02, kept strict (s17 (3)).
   2 Parity check and engines (s16): DONE (notes STEP 9b, 9c); the GPU rerun check (s4) ran 2026-10-04 (STEP 11c: R2
   passes, R1 fails on both engine families; R2 gates and R1 is reported: Max, 2026-10-04, decision 3 (a), s4). 3 Dev
   baselines: every panel model, template and plain, 3 seeds and greedy; OWN also under --own-cf (required by OD1:
@@ -1495,7 +1601,14 @@ becomes training text). The two share the label D8 by accident.
   report); results written here; any rebuild re-runs every gate: DONE 2026-10-02 (s10, s11, s17; Max took every
   recommendation of rc12/DECISIONS_FOR_MAX.md; no rebuild). 4b Level R and the last lock decisions: DONE (Max,
   2026-10-04: took all recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md; s1, s4, s8, s9, s10b, s12, s17, s18;
-  notes STEP 12). 5 Sizing rule: DONE, 600 (s9; kept under the 2026-10-04 Level R). 6 Sealed session (s13
-  S1-S8). 7 OOD-H Part 1 (IDs hashed), after Max's review of its 150 threads (DECISIONS item 13, still his). 8 Final
-  pass on this file: every (proposal) resolved, every OPEN closed, DRAFT
-  removed. 9 Push, release, Software Heritage snapshot, key copies checked in both places.
+  notes STEP 12).
+  5 Sizing rule: DONE, 600 (s9; kept under the 2026-10-04 Level R; built as dev's 640-record layout, s13 S3 (iii)).
+  6 Sealed session (s13 S1-S8): its kit built and dry-run on 2026-10-11 and 12 without sealed content (s13 S3;
+    rc12/notes.txt STEP 15; the steps in rc12/LOCK_STEPS.md); the session itself not yet run.
+  7 OOD-H Part 1 (IDs hashed), after Max's review of its 150 threads: DONE 2026-10-10 (s14 REVIEWED; DECISIONS
+    item 13).
+  8 Final pass on this file: every (proposal) resolved, every OPEN closed, DRAFT removed: the text settled before
+    the lock is written (2026-10-11 and 12, STEP 15); the lock-day edits are the fixed list in rc12/lock_finalize.py,
+    checked by rc12/lock_check.py check --final.
+  9 Push, release, Software Heritage snapshot, key copies checked in both places (the release and the snapshot
+    need Max's yes).

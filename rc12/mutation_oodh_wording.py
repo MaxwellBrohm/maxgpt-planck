@@ -12,7 +12,9 @@ import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PREREG = os.path.join(os.path.dirname(HERE), "prereg", "RC-12.draft.txt")
+PREREG = next((p for p in (os.path.join(os.path.dirname(HERE), "prereg", "RC-12.md"),
+                   os.path.join(os.path.dirname(HERE), "prereg", "RC-12.draft.txt")) if os.path.exists(p)),
+              os.path.join(os.path.dirname(HERE), "prereg", "RC-12.draft.txt"))      # the locked file once it exists
 O, SS, T = "oodh_wording.py", "score_stats.py", ("test_oodh_wording.py", "test_oodh_pairing.py")
 MUTANTS = [
     (O, "OODH_MARGIN = -5.0", "OODH_MARGIN = -3.0", "bar at -3 points"),

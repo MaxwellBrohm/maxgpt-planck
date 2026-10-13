@@ -8,6 +8,7 @@ import tempfile
 
 import build_dev
 import common as C
+import fam_twohop as FT
 import test_gens as T
 import test_gens_fam as TF
 
@@ -37,7 +38,7 @@ def m_candidate_in_question(recs):
     r = first(recs, "TWOHOP", "door")
     p = main_p(r)
     other = [c for c in p["candidates"] if c != p["gold"]][0]
-    p["question"] = r["turns"][p["turn"] - 1]["text"] = p["question"].replace("color", f"{other} or other color")
+    p["question"] = r["turns"][p["turn"] - 1]["text"] = p["question"][:-1] + f", {other} or another?"   # any wording
 
 
 def m_drop_record(recs):
@@ -102,7 +103,7 @@ def m_echo_on_gold(recs):     # a second echoing statement: the gold's, in an it
          and main_p(x)["echo_value"] != main_p(x)["gold"]][0]
     p = main_p(r)
     t = r["turns"][p["src"][0] - 1]
-    t["text"] = f"The day for the {t['facts'][0]['object']} is {p['gold']}."
+    t["text"] = FT.TWOHOP_SCHEMAS["day"]["echo"].format(key=t["facts"][0]["object"], v=p["gold"])   # the split's own
 
 
 def m_persist_breaks_rule(recs):
@@ -196,8 +197,9 @@ def filler_mutants():
     """the filler pool checks: a pool value, a digit, a name, a 2-sentence IDEAL, an E001 5-gram."""
     out = []
     q = "question"
-    bad = [(("Why is the ocean teal on sunny days?", "Light scatters in the water, which is what you see.", q),
-            "contains 'teal'"),
+    col = C.V.COLOUR[-1]                         # a value of the split's own colour pool (dev: teal)
+    bad = [((f"Why is the ocean {col} on sunny days?", "Light scatters in the water, which is what you see.", q),
+            f"contains '{col}'"),
            (("How do I fix a squeak in the stairs?", "Drive a screw near the nail, about 2 inches away.", "question"),
             "digit"),
            (("Is it true Marcus likes rain?", "Some people love rain for the calm it brings.", "question"), "name-like"),

@@ -41,6 +41,7 @@ import graders as G
 import own_cf as OC
 import render as RD
 import score as S
+import split_content as SC
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEV = os.path.join(HERE, "dev", "rc12_dev.jsonl")
@@ -49,6 +50,9 @@ NEEDED_KINDS = ("S", "C", "I", "O", "Q", "T")
 
 def load(path=DEV, families=None, limit=None):
     recs = [json.loads(line) for line in open(path)]
+    bad = sorted({r["split"] for r in recs} - {SC.SPLIT, "oodh"})
+    if bad:                                      # graders read the split's own pools (split_content), so a record
+        raise SystemExit(f"{path}: split {bad} records under RC12_SPLIT={SC.SPLIT}")   # of another split never runs
     if families:
         recs = [r for r in recs if r["family"] in families]
     return recs[:limit] if limit else recs

@@ -3710,3 +3710,92 @@ STEP 14N (2026-10-11, 22:30 to about 23:15 EDT, Claude, W4; nothing under sealed
   FILES: rc12/rederive14.py, tables14.py, test_numbers14.py, mutation_numbers14.py (new); rc12/logs/
     extras14_20261011.jsonl, panel_20261011.jsonl, lik_rows_20261011.jsonl, mutation_numbers14.txt (new);
     rc12/notes.txt; prereg/RC-12.draft.txt (s4, s10b, s12).
+
+STEP 15 (2026-10-11 23:13 EDT to 2026-10-13 03:30 EDT, Claude, W4; nothing under sealed/ read, listed or built in
+  this repo; no model loaded; GPU not used; the PC used only for openssl and python checks, dummy-key copies and the
+  dry-run decryptions, each key removed after): THE LOCK PACKAGE. Max's OOD-H review is DONE (2026-10-10,
+  oodh/DESIGN.txt s15, d13c542 and a171b52), so lock step 7 is done; this step readies steps 6, 8 and 9
+  (rc12/LOCK_STEPS.md, rc12/LOCK_FOR_MAX.md). Prereg still DRAFT, NOT LOCKED.
+  WHY CODE WAS NEEDED (found while planning the sealed session): dev wording lived in the fam_*.py builders and
+    balance.py as well as the pool modules (BIND frames and intros, TWOHOP schemas, PERSIST instructions, the LOOKUP
+    row format, avoid lists, the neutral statement tails), so s13 S3's "same generator code with the sealed pool
+    modules" and S1's "no shared template" could not both hold; the pool modules hold code beside content; split
+    name, seed and ids were fixed to dev; and test_gens pinned sealed counts only by editing code.
+  CODE (dev builds byte-identically, sha256 3e543f8d, checked after every change):
+    split_content.py: SPLIT and SEED from RC12_SPLIT / RC12_GEN_SEED, dev by default; apply() replaces a module's
+      CONTENT constants on a non-dev split with content_<module>.py, read as data (only NAME = <literal> lines),
+      shape-checked (names, types, dict keys, list lengths, {placeholders}) with identifier fields pinned (PINS); the
+      dev split refuses to run beside a work copy or a content file. CONTENT plus apply in pools_vals, pools_slots,
+      pools_misc, pools_fill_a/_b, balance (TAILS), fam_bind (BIND_NAME, BIND_AVOID, BIND_INTRO hoisted; the "is I"
+      grammar fix made generic), fam_persist, fam_twohop, fam_own_topic (OWN_AVOID), fam_role_lookup (ROW, ROW_SEP,
+      LOOKUP_AVOID). common.py and runner.py (stream, ids, record split and seed from split_content; runner.load
+      refuses records of another split); build_dev.py (a non-dev split only inside a work copy); test_gens.py (a
+      non-dev build needs RC12_EXPECT counts; content rules: PROJECTS keys, K answers, an s-ending value, and each
+      avoid list its own items' object words); mutation_e2e.py (RC12_MAX_WORKERS, default 9 as before).
+    Gate code that named dev values instead of reading the live pools (found by the renamed-content dry run):
+      validate_machinery, fixtures_more (word_stuffed, own_alt; partial_gold only for golds of 2+ stems),
+      mutation_gens (the 'teal' filler mutant), fakes_family (P_UNIVERSAL), mutants_e2e (#124 bar S7 30). Every dev
+      output unchanged.
+    G6 made seed-independent (found by the renamed-content searches, rc12/logs/lock_dryrun_seeds.txt):
+      mutation_graders takes 4 records per family and cell plus every record giving a fixture kind the chosen ones
+      lack (the first-4 rule lost the assistant-name fixtures on some seeds: G6 failed 3 of the 4 draws of search A
+      that reached it); fixtures_more source_two (the first two options asserted, the reply naming the first; the
+      two-picks source mutant was killed only when the gold was the first option and survived search B's draw 11).
+      Dev: 124 records, 9,075 fixtures (9,071 before source_two), 226 of 226; 8 fresh renamed-content seeds 226 of
+      226 each.
+    The kit: sealed_kit.py (work copy, install, a check refusing changed files, extras, bytecode and links, build,
+      gates with stop and the sha256 of every gated input), sealed_public.py (public gate and draw lines: plain
+      summaries only; quoted text and the sealed content's own words withheld, fixed words kept), sealed_overlap.py
+      (skeletons; S1 (a) to (d) with the code-fixed slots exempt from (d); counts to OVERLAP.txt), sealed_search.py
+      (the seed-draw rule; an external draw log; failed builds, timeouts and kit refusals logged; restarts only by
+      --supersede with a plain published reason), sealed_pack.py (S5; refuses ungated inputs, a seed that does not
+      rebuild the items, an unaccepted seed, a failed S1), sealed_crypto.py (seed, keygen, ngrams, encrypt appending
+      the ciphertext's hash to S5, verify), lock_check.py (manifest; draft and final checks), lock_finalize.py
+      (lock-day edits and s20), dryrun_content.py (renamed-value content; --templates adds "just", a stopword).
+  DECIDED by Claude under Max's standing permission, each reversible before the lock and dated in the prereg:
+    (a) the content hook (s13 S3 (i)); (b) dev's 640-record layout for sealed (S3 (iii), s9); (c) the seed-draw
+    rule (S3 (iv)): fresh seeds until test_gens, G10, G1-G4, G6 and mutation_audit pass (fakes only), up to 200 per
+    run, every draw published; (d) S1 as checked (a) to (d), WEEKDAY, MONTH and LANGUAGE shared, filler labels,
+    avoid lists and BIND's name-probe words exempt from (d); (e) LFM2-2.6B has no likelihood row (s4); (f) S7's tool
+    and command; (g) the S6 list covers OOD-H Part 1 too, stays out of git, count and sha256 public; (h) OOD-H Part 1
+    goes into the encrypted archive; (i) sealed plaintext is removed after both decryption checks; (j) no panel model
+    is decoded any other way in its own row (NOVELTY s6.1, s4).
+  DRY RUNS (no sealed text; scratch clones with the remote removed, never pushed; a stand-in OOD-H file, its hash
+    patched into the clone only; throwaway keys):
+    SWEEPS: 42 fresh seeds on dev content, 10 pass test_gens, G10 and G1-G4; ceiling 34.27 to 41.53, 4 of 42 at or
+      above 40 (dev's seed 36.73).
+    DEV-CONTENT REHEARSAL (clone of 787a3cc): B0 to B14 and D, PASS on the Mac and the PC (OpenSSL 3.5.5).
+    FINAL REHEARSAL (search B, clone cc9dfc96, renamed values and reworded templates, split dryrun; the code before
+      source_two and its tests): B0 ok; 14 draws (G10 6, mutation_audit 5, G6 2 failed), draw 14 accepted, ceiling
+      36.89; S1 (a) 0, (b) 1853, (c) 38, (d) 296 (dev templates kept, as expected); B6 18 of 18 PASS (28 min, 4
+      workers); 1,573 13-grams; pack, encrypt, verify PASS on the Mac; on the PC the B10 key pipe gave the Mac's
+      fingerprint and mode 600, verify PASS, a tampered archive FAIL, the key removed; finalize, manifest, check
+      --final --dryrun PASS and without --dryrun FAIL on the split as it must; the lock commit's worktree passed
+      check --final and test_lock, _b, _c, _d, test_numbers14, test_oodh_wording and test_gens.
+  REVIEWS (fresh read-only claude sessions without context, sealed/ denied): dev_regrade's durability fix, APPROVE
+    twice, mutation_regrade 17 of 17; LOCK_STEPS.md against a fresh reading of the prereg, twice, every finding fixed
+    or answered; the lock machinery code, twelve rounds (round 1: 1 blocker, gate code naming dev values, and 6
+    majors; round 2: 1 blocker, S1 (d) flagging the code-fixed slots, 1 major; rounds 3 and 4: 1 major each, the PC
+    verify needing sealed_public.py and a malformed mutant; rounds 5 to 7: avoid-list rules, redaction and missing
+    mutants, rounds 6 and 7 APPROVE; rounds 8 to 12, the G6 changes: majors on the prereg note's evidence and on
+    source_two killing only first-option golds, both fixed, round 9 APPROVE), every finding fixed or answered.
+  TESTS: test_lock.py, test_lock_b.py, test_lock_c.py, test_lock_d.py (fixtures in lockfix.py): PASS.
+    mutation_lock.py: 120 of 120 killed (rc12/logs/mutation_lock.txt). CHECK ORDER (LOCK_STEPS A3) on an export of
+    HEAD 6f478ef plus this commit's files (the commits after it touch only experiments/E3_seed_noise): 74 steps, every
+    exit 0: the build byte-identical; test_gens, audit_rules, audit_graders, validate_e2e, validate_machinery; every
+    test_*.py and the extras test; mutation_graders 226 of 226, mutation_gens, mutation_lock 120 of 120,
+    mutation_regrade 17 of 17, mutation_numbers14, mutation_oodh_wording, mutation_lik, mutation_verify, test_near_dup
+    --mutate, mutation_queue, mutation_s14, mutation_step14x, mutation_rerun_ws, mutation_hf_batched, mutation_audit 7
+    of 7 and 6 of 6, mutation_step9 3 parts, mutation_e2e 8 parts (4 workers); oodh tests; harness 10 passed; pc 172
+    passed (about 88 min).
+  PREREG (DRAFT; dated 2026-10-11, 12 or 13, this step): s4 decoding note, engines (closed), likelihood rows
+    (LFM2-2.6B); s9 sealed size note; s11 drop list (empty); s13 S1 (as checked, (a) to (d), exemptions), S3 (i) to
+    (iv) (the G6 note), S4, S5, S6, S7 (tool and command), S9, S10 as built; s14 REVIEWED (415 probes, 40d2a76d; 417
+    / f6163981 superseded); s16 likelihood rows and OOD-H; s19 steps 1 and 5 to 9. lock_check.py check: PASS.
+  PC HELPERS for track B: pcwsl.sh (in the Mac's planck-e2chain support folder: copies a script to the PC and runs it
+    in WSL) and pc/local.env (gitignored; PLANCK_PC_KEY, PLANCK_PC_HOST).
+  FOR OTHER WORKFLOWS (not edited here): W5, PLAN.md's RC-12 lines (417 probes awaiting review, the lock checklist)
+    are stale: 415 probes reviewed, sealed size 640, steps in rc12/LOCK_STEPS.md. W2, the pipeline's decontamination
+    must normalize 13-grams as the S6 list does: re.findall(r"[a-z0-9']+", text.lower()) joined by one space.
+  NOT DONE, OPEN: A2 (the OOD-H reviews' grader findings: fix or record, before C); A3 at the final C; the sealed
+    session (B); Max's yes (M2, M3); the lock (D); release and snapshot (E).

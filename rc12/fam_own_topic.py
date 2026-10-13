@@ -12,6 +12,11 @@ import balance as B
 import common as C
 import pools_vals as V
 import pools_misc as M
+import split_content as SC
+
+OWN_AVOID = ["boat", "puppy", "band", "quiz", "team"]     # words no filler of an OWN pick item may contain
+CONTENT = ("OWN_AVOID",)
+SC.apply(globals(), CONTENT)      # dev: no-op; sealed: its own wording (prereg s13 S3, split_content.py)
 
 
 def _own_turns(rng, p):
@@ -32,7 +37,7 @@ def build_own(n_pick=32, n_list=16):
         num += 1
         P = M.OWN_PICK[cat]
         conv = C.Conv("OWN", "pick", C.rid("OWN", num), rng)
-        conv.avoid.update(["boat", "puppy", "band", "quiz", "team"])
+        conv.avoid.update(OWN_AVOID)
         a, b, c, x, y = rng.sample(V.POOLS[cat], 5)
         q, after = _own_turns(rng, p)
         g = [a, b, c][gi]

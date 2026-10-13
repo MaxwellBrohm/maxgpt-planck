@@ -1,0 +1,84 @@
+RC-12 lock dry runs, 2026-10-11 and 12 (rc12/notes.txt STEP 15): two seed sweeps, the seed searches and G6 on
+renamed content (sections below). First sweep: 30 fresh generator seeds on DEV content (no sealed text exists),
+split name dryrun, each built in a sealed_kit work copy and run through test_gens, audit_rules (G10) and
+validate_e2e (G1-G4) with fake responders only. One line per seed: worker and draw, overall exit, the shortcut
+ceiling S7 (G3 bar 40), and every G2 / G3 failure line. Seeds were throwaway and are not recorded. The ceiling and
+G2 / G3 lines come from validate_e2e.
+w1 1 rc=1    ceiling 37.49  G2 EXL_OVERLAP: family TOPIC=0.44
+w1 2 rc=1    ceiling 36.98  G2 EXL_OVERLAP: family TOPIC=0.44
+w1 3 rc=1    ceiling 37.50  G2/G3 pass
+w1 4 rc=1    ceiling 36.85  G2 SHORTEST: family TWOHOP=0.44; G2 SHORTEST: cell TWOHOP:city=0.58
+w1 5 rc=1    ceiling 39.64  G2/G3 pass
+w1 6 rc=1    ceiling 38.39  G2 SHORTEST: family TWOHOP=0.44; G2 SHORTEST: cell TWOHOP:door=0.67
+w1 7 rc=1    ceiling 36.73  G2 EXL_OVERLAP: family TOPIC=0.42
+w1 8 rc=1    ceiling 39.15  G2 WORDING: cell CORR:C_noupd=0.56; G2 EXL_WORDING: cell CORR:C_noupd=0.56
+w1 9 rc=1    ceiling 37.60  G2/G3 pass
+w1 10 rc=0   ceiling 37.19  G2/G3 pass
+w2 1 rc=1    ceiling 34.27  G2 WORDING: cell CORR:C_noupd=0.56; G2 EXL_WORDING: cell CORR:C_noupd=0.56 GA
+w2 2 rc=1    ceiling 39.35  G2 OVERLAP_A: family TOPIC=0.42; G2 OVERLAP_B: family TOPIC=0.42; G2 ANTI
+w2 3 rc=1    ceiling 38.74  G2 WORDING: cell CORR:C_noupd=0.56; G2 EXL_WORDING: cell CORR:C_noupd=0.56 GATE
+w2 4 rc=1    ceiling 39.99  G2/G3 pass
+w2 5 rc=1    ceiling 39.58  G2 EXL_OVERLAP: family TOPIC=0.42
+w2 6 rc=1    ceiling 38.20  G2 WORDING: cell CORR:C_noupd=0.56; G2 ANTI_WORDING: cell TWOHOP:door=0.58
+w2 7 rc=1    ceiling 41.53  G2 ANTI_WORDING: family TWOHOP=0.44; G2 SHORTEST: family TWOHOP=0.42 FAI
+w2 8 rc=1    ceiling 38.32  G2 POS2: family ROLE=0.42; G2 ANTEPENULT: family ROLE=0.42
+w2 9 rc=1    ceiling 39.87  G2 LONGEST: family TWOHOP=0.46; G2 LONGEST: cell TWOHOP:city=0.67
+w2 10 rc=1   ceiling 38.04  G2 EXL_OVERLAP: family TOPIC=0.42
+w3 1 rc=0    ceiling 38.21  G2/G3 pass
+w3 2 rc=1    ceiling 37.43  G2 EXL_OVERLAP: family TOPIC=0.42
+w3 3 rc=0    ceiling 36.24  G2/G3 pass
+w3 4 rc=1    ceiling 38.12  G2 WORDING: cell CORR:C_noupd=0.56; G2 SHORTEST: family TWOHOP=0.46; G2
+w3 5 rc=0    ceiling 36.01  G2/G3 pass
+w3 6 rc=1    ceiling 36.41  G2 WORDING: cell CORR:C_noupd=0.56; G2 EXL_WORDING: cell CORR:C_noupd=0.56
+w3 7 rc=1    ceiling 40.76  G2 ANTI_WORDING: cell TWOHOP:city=0.58; G2 LONGEST: family TWOHOP=0.46 F
+w3 8 rc=1    ceiling 37.32  G2 SHORTEST: cell TWOHOP:day=0.58
+w3 9 rc=0    ceiling 38.15  G2/G3 pass
+w3 10 rc=1   ceiling 39.75  G2 WORDING: cell CORR:C_noupd=0.56; G2 EXL_OVERLAP: family TOPIC=0.42; G2 EXL_
+SUMMARY: 5 of 30 seeds pass all three; 21 miss G2; ceiling >= 40 on 2; ceiling min 34.27, median 38.13, max 41.53 (dev's own seed: 36.73). The worker log kept only the first 400 characters of each gate summary, so G10 verdicts were cut off: 4 seeds exit 1 with neither a G2 nor a G3 line, and which gate failed for them (G10 most likely, or another check) was not kept. "FAI" at a line end is a cut-off G3 line.
+
+SECOND SWEEP (the code of this commit, after the content hook's last change; same three gates, 12 fresh seeds; the worker
+log again kept only the first 400 characters, so G10 verdicts are cut off as above):
+w1 1 rc=0    ceiling 39.23  G2/G3 pass
+w1 2 rc=1    ceiling 40.07  G2 SHORTEST: family TWOHOP=0.46; G2 SHORTEST: cell TWOHOP:city=0.58
+w1 3 rc=1    ceiling 40.28  G2 ANTI_WORDING: cell TWOHOP:door=0.58; G2 EXL_WORDING: cell TWOHOP:door=0.
+w1 4 rc=1    ceiling 39.11  G2 SHORTEST: family TWOHOP=0.48; G2 SHORTEST: cell TWOHOP:door=0.58
+w2 1 rc=1    ceiling 37.78  G2 WORDING: cell CORR:C_noupd=0.56; G2 EXL_WORDING: cell CORR:C_noupd=0.56
+w2 2 rc=0    ceiling 36.32  G2/G3 pass
+w2 3 rc=1    ceiling 39.02  G2 WORDING: cell CORR:C_noupd=0.56; G2 EXL_WORDING: cell CORR:C_noupd=0.56 GATE
+w2 4 rc=0    ceiling 39.03  G2/G3 pass
+w3 1 rc=0    ceiling 35.89  G2/G3 pass
+w3 2 rc=0    ceiling 37.34  G2/G3 pass
+w3 3 rc=1    ceiling 37.35  G2 LONGEST: cell TWOHOP:door=0.58
+w3 4 rc=1    ceiling 38.07  G2 WORDING: cell CORR:C_noupd=0.62; G3 WORDING: CORR:C_noupd=0.62 meets its Level
+SUMMARY 2: 5 of 12 seeds pass all three; ceilings 35.89 to 40.28, at or above 40 on 2; one seed fails G3 (WORDING meets
+the C_noupd Level A content bar at 0.62).
+
+SEED SEARCHES (sealed_search.py, the draw rule as committed: test_gens, G10, G1-G4, then mutation_audit, stop at
+the first failure): an earlier version without mutation_audit accepted its draw 3 (ceiling 38.20), whose full S4 run
+then failed mutation_audit part 1 (6 of 7: "CORR gold length rank off" survived, SHORTEST and LONGEST under the bars),
+which is why mutation_audit joined the draw gates. With it, three independent searches each accepted draw 1 (ceilings
+35.94, 35.65 and 37.68; mutation_audit 7 of 7 and 6 of 6 on each). Over every draw run with the three item gates (48),
+14 passed them.
+
+G6 on RENAMED content (2026-10-12; rc12/dryrun_content.py --templates: all 221 S1 (a) values renamed, every sentence
+reworded; split dryrun; search A, the first final rehearsal, stopped at draw 12 for the fix below). Draws 1 to 11:
+test_gens failed 1, G10 failed 6, mutation_graders G6 failed 3 (draws 4, 9, 11: 216, 215 and 215 of 226 killed),
+passed 1 (draw 3, 226 of 226, which then failed mutation_audit part 1 at 6 of 7). The G6 logs of draws 4 and 11 (the
+others were overwritten) show the same 10 survivors: the grade_voice / graders "given" mutants, which only the
+assistant-name VAL fixtures kill (only BIND perspective records asking "what did I call you" give them); draw 11 also
+grade_fmt_dyn 'len(picked) != 1'. Probe of 4 further fresh seeds with the old first-4 selection: assistant-name
+fixtures 26, 0, 26, 0. With the new selection (4 per family and cell plus every record giving a missing fixture kind):
+6 fresh seeds all had them (13 to 26) and source_all (4), 9,043 to 9,140 fixtures; mutation_graders on the 6th: 226 of
+226 killed, 0 survived, 0 crashed. (The 6 were new seeds: a failing draw's seed is deleted by the search, so draws 4,
+9 and 11 and the 4 probe seeds cannot be rerun.) On dev the selection is unchanged (124 records, 9,071 fixtures
+before source_two below).
+The DYN survivor ('len(picked) != 1' -> '< 1') recurred under the new selection in search B (the rehearsal rerun):
+draw 11 of 14 (225 of 226, its log kept; draw 5 also 225 of 226, log overwritten). Its cause, shown on dev: the
+mutant grades the reply against the first pick in options order, so the source fixtures kill it only on records
+whose gold is the first option, and G6's first 4 OWN pick records can all have another gold. Fixture source_two
+(source "<first option> is great. <second option> is great too.", reply the IDEAL naming the first option) kills it
+on all 32 dev OWN pick records, golds first, second and third (test_lock_d t_g6_coverage; the gold-and-alt form
+kills it on 11 of 32). With it, 8 fresh seeds on the same renamed content (work copy of search B, mutation_graders
+and fixtures_more replaced by the new ones): G6 killed 226 of 226 on all 8, no fixture miss. Dev fixtures 9,075.
+An earlier attempt of this search with --templates adding "really" failed test_gens on every draw (16 U-diff questions
+sharing the content word "really" with their corrections); dryrun_content now adds "just", a content-word stopword.

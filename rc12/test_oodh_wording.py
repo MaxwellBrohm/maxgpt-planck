@@ -13,7 +13,9 @@ import oodh_wording as OW
 import score_stats as ST
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PREREG = os.path.join(os.path.dirname(HERE), "prereg", "RC-12.draft.txt")
+PREREG = next((p for p in (os.path.join(os.path.dirname(HERE), "prereg", "RC-12.md"),
+                   os.path.join(os.path.dirname(HERE), "prereg", "RC-12.draft.txt")) if os.path.exists(p)),
+              os.path.join(os.path.dirname(HERE), "prereg", "RC-12.draft.txt"))      # the locked file once it exists
 FAILS = []
 
 

@@ -5,6 +5,8 @@ MONTH on purpose (modal "may"). Capitalized values match case-sensitively, lower
 (E004 text_e004.value_re rule)."""
 import re
 
+import split_content as SC
+
 COLOUR = ["red", "blue", "green", "yellow", "purple", "orange", "black", "white", "pink", "brown", "silver", "teal"]
 WEEKDAY = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 MONTH = ["January", "February", "March", "April", "June", "July", "August", "September", "October", "November",
@@ -42,6 +44,23 @@ CAPITAL = ["Madrid", "Vienna", "Oslo", "Dublin", "Nairobi", "Ottawa", "Lima", "B
            "Prague", "Santiago", "Havana", "Hanoi", "Seoul", "Budapest", "Paris", "Rome", "Berlin", "Tokyo",
            "Lisbon", "Athens", "Stockholm", "Warsaw", "Helsinki", "Cairo", "Moscow", "Ankara", "Amsterdam"]
 
+# holders: gendered relatives (pronoun-bound BIND statements need his/hers) and neutral others
+HOLDER_F = ["sister", "aunt", "grandmother", "niece"]
+HOLDER_M = ["brother", "uncle", "grandfather", "nephew"]
+HOLDER_N = ["cousin", "neighbor", "coworker", "roommate", "boss", "best friend", "landlord", "teammate"]
+
+# IDEAL acknowledgements for non-graded statement turns (distinct after normalization; drawn without
+# replacement inside one conversation so the IDEAL never trips the loop rule)
+ACKS = ["Got it.", "Noted, thanks.", "Okay, I'll keep that in mind.", "Thanks for letting me know.",
+        "Understood.", "Sure, I've got that.", "Good to know.", "All right, noted.", "Thanks, I'll remember that.",
+        "Okay, that's clear.", "Makes sense, thanks.", "Great, thanks for telling me.", "I see, thanks.",
+        "Okay, sounds good.", "Right, understood.", "Thanks, that's helpful."]
+CONTENT = ("COLOUR", "WEEKDAY", "MONTH", "PETNAME", "PERSON", "ANAME", "CITY", "TOWN", "JOB", "INSTRUMENT", "FOOD",
+           "PROJECT", "BOAT", "PUPPY", "BAND", "QUIZTEAM", "LANGUAGE", "CAPITAL", "HOLDER_F", "HOLDER_M", "HOLDER_N",
+           "ACKS")
+SC.apply(globals(), CONTENT)      # dev: no-op; sealed: its own values (prereg s13 S3, split_content.py)
+# everything below is derived from the content above
+
 POOLS = {"colour": COLOUR, "weekday": WEEKDAY, "month": MONTH, "petname": PETNAME, "person": PERSON,
          "aname": ANAME, "city": CITY, "town": TOWN, "job": JOB, "instrument": INSTRUMENT, "food": FOOD,
          "project": PROJECT, "boat": BOAT, "puppy": PUPPY, "band": BAND, "quizteam": QUIZTEAM,
@@ -51,20 +70,10 @@ GUESS_POOL = {"name": PERSON + ANAME}
 KNOWLEDGE_POOLS = {"language", "capital"}
 ALL_VALUES = sorted({v for vs in POOLS.values() for v in vs})
 
-# holders: gendered relatives (pronoun-bound BIND statements need his/hers) and neutral others
-HOLDER_F = ["sister", "aunt", "grandmother", "niece"]
-HOLDER_M = ["brother", "uncle", "grandfather", "nephew"]
-HOLDER_N = ["cousin", "neighbor", "coworker", "roommate", "boss", "best friend", "landlord", "teammate"]
 HOLDERS = HOLDER_F + HOLDER_M + HOLDER_N
 PRONOUN = {h: "she" for h in HOLDER_F} | {h: "he" for h in HOLDER_M}
 POSSESSIVE = {h: "hers" for h in HOLDER_F} | {h: "his" for h in HOLDER_M}
 
-# IDEAL acknowledgements for non-graded statement turns (distinct after normalization; drawn without
-# replacement inside one conversation so the IDEAL never trips the loop rule)
-ACKS = ["Got it.", "Noted, thanks.", "Okay, I'll keep that in mind.", "Thanks for letting me know.",
-        "Understood.", "Sure, I've got that.", "Good to know.", "All right, noted.", "Thanks, I'll remember that.",
-        "Okay, that's clear.", "Makes sense, thanks.", "Great, thanks for telling me.", "I see, thanks.",
-        "Okay, sounds good.", "Right, understood.", "Thanks, that's helpful."]
 
 _WRE = {}
 

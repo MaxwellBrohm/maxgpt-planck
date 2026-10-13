@@ -119,7 +119,9 @@ def fresh(tmp):
         shutil.copy(os.path.join(HERE, f), os.path.join(d, "rc12", f))
     for f in LOGS:
         shutil.copy(os.path.join(HERE, "logs", f), os.path.join(d, "logs", f))
-    shutil.copy(os.path.join(HERE, "..", "prereg", "RC-12.draft.txt"), os.path.join(d, "prereg"))
+    src = next((p for p in (os.path.join(HERE, "..", "prereg", f) for f in ("RC-12.md", "RC-12.draft.txt"))
+                if os.path.exists(p)), None)       # the locked file once it exists
+    shutil.copy(src, os.path.join(d, "prereg", "RC-12.draft.txt"))     # the scratch name the mutants use
     return d
 
 

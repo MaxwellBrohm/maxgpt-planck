@@ -9,6 +9,7 @@ COMPOSE: two stated numbers compared ("Which of my two pets is older?"); the gol
 question does not contain."""
 import common as C
 import pools_vals as V
+import split_content as SC
 
 TWOHOP_SCHEMAS = {
     "door": dict(vtype="colour", hop1="My {h} runs the {key}.",
@@ -54,6 +55,8 @@ COMPOSE_SETS = {
                   ideal="Your trip to {x} is {comp}."),
 }
 NUMBER_WORDS = ["two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"]
+CONTENT = ("TWOHOP_SCHEMAS", "COMPOSE_SETS")      # NUMBER_WORDS is the language, kept
+SC.apply(globals(), CONTENT)      # dev: no-op; sealed: its own wording (prereg s13 S3, split_content.py)
 
 
 def build_twohop(n=48, n_compose=16):

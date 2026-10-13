@@ -8,10 +8,12 @@ perspective (10): "You can call me Marcus." vs "Your name is Juno from now on.";
 I call you?" alternate; the two statements tie on words shared with the question and on length (step 5 audit).
 Twins differ ONLY in the order of the two value statements (same turns, fillers, question)."""
 import random
+import re
 
 import balance as BL
 import common as C
 import pools_vals as V
+import split_content as SC
 
 # value type -> (intro for "my {h} and I" / "my {h1} and my {h2}", frames, question, IDEAL)
 # frames use {Mine} (Mine/Hers/His) or {I} (I/She/He); {mine} lowercase variant
@@ -40,6 +42,13 @@ BIND_TYPES = {
 # each question's words and balance.choose() makes the two statements tie on echo and on length
 USER_NAME_FRAMES = ["You can call me {n}.", "Everyone calls me {n}.", "Friends call me {n}.", "I go by the name {n}."]
 ANAME_FRAMES = ["Your name is {a} from now on.", "I'll name you {a}, if that's okay.", "I'll call you {a}."]
+# perspective probes (question, IDEAL) by whose name is asked, and their object words
+BIND_NAME = {"user": ("What's my name?", "Your name is {n}."),
+             "assistant": ("What did I call you?", "You called me {a}."), "objw": ["name", "call"]}
+BIND_AVOID = ["bike", "kitten", "instrument", "trip", "name"]      # words no filler of a BIND pair may contain
+BIND_INTRO = {"owner": "My {other} and I", "third-party": "My {h1} and my {h2}"}     # the intro's subject
+CONTENT = ("BIND_TYPES", "USER_NAME_FRAMES", "ANAME_FRAMES", "BIND_NAME", "BIND_AVOID", "BIND_INTRO")
+SC.apply(globals(), CONTENT)      # dev: no-op; sealed: its own wording (prereg s13 S3, split_content.py)
 
 
 def _forms(holder):
@@ -54,8 +63,8 @@ def _forms(holder):
 
 
 def _q_fix(q, holder):
-    # "Which instrument is I learning?" -> "Which instrument am I learning?"
-    return q.replace("is I learning", "am I learning")
+    # "Which instrument is I learning?" -> "Which instrument am I learning?" (any verb: the sealed questions differ)
+    return re.sub(r"\bis I\b", "am I", q)
 
 
 def _pair_turns(rng, p):
@@ -83,9 +92,9 @@ def _pair(rng, cell, pnum, p, ask_first):
     if cell == "perspective":
         n, a = rng.choice(V.PERSON), rng.choice(V.ANAME)
         if ask_first:
-            q, gold, ideal, holder = "What's my name?", n, f"Your name is {n}.", "user"
+            q, gold, ideal, holder = BIND_NAME["user"][0], n, BIND_NAME["user"][1].format(n=n), "user"
         else:
-            q, gold, ideal, holder = "What did I call you?", a, f"You called me {a}.", "assistant"
+            q, gold, ideal, holder = BIND_NAME["assistant"][0], a, BIND_NAME["assistant"][1].format(a=a), "assistant"
         opts = [[x for f in USER_NAME_FRAMES for x in BL.tailed(f.format(n=n))],
                 [x for f in ANAME_FRAMES for x in BL.tailed(f.format(a=a))]]
         tu, ta = BL.choose(rng, opts, [0 if ask_first else 1], "none", question=q, values=V.ALL_VALUES)
@@ -93,19 +102,19 @@ def _pair(rng, cell, pnum, p, ask_first):
         s_asst = (ta, [dict(holder="assistant", object="name", value=a, role="assistant_name")])
         stmts = [s_user, s_asst]
         intro = None
-        vtype, objw, pool = "name", ["name", "call"], "name"
+        vtype, objw, pool = "name", list(BIND_NAME["objw"]), "name"
     else:
         vtype = rng.choice(list(BIND_TYPES))
         B = BIND_TYPES[vtype]
         if cell == "owner":
             other = rng.choice(V.HOLDER_F + V.HOLDER_M)
             h1, h2 = "user", other
-            intro_a = f"My {other} and I"
+            intro_a = BIND_INTRO["owner"].format(other=other)
         else:
             h1, h2 = rng.choice(V.HOLDER_F), rng.choice(V.HOLDER_M)
             if rng.random() < 0.5:
                 h1, h2 = h2, h1
-            intro_a = f"My {h1} and my {h2}"
+            intro_a = BIND_INTRO["third-party"].format(h1=h1, h2=h2)
         frame = rng.choice(B["frames"])
         v1, v2 = rng.sample(V.POOLS[vtype], 2)
         stmts = [(frame.format(v=v, **_forms(h)), [dict(holder=h, object=B["obj"], value=v, role="bound")])
@@ -120,7 +129,7 @@ def _pair(rng, cell, pnum, p, ask_first):
     ti, t1, t2 = _pair_turns(rng, p)
     if intro is None:
         t1, t2 = sorted(rng.sample(range(1, 7), 2))
-    state = dict(acks=[x for x in V.ACKS], avoid={"bike", "kitten", "instrument", "trip", "name"})
+    state = dict(acks=[x for x in V.ACKS], avoid=set(BIND_AVOID))
     rng.shuffle(state["acks"])
     fill_seed = rng.random()
     pair_id = f"bind-{pnum:02d}"

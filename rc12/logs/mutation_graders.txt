@@ -1,4 +1,4 @@
-RC-12 mutation_graders.py  (records 124, fixtures 9071, must-pass 2725, must-fail 6346)
+RC-12 mutation_graders.py  (records 124, fixtures 9075, must-pass 2725, must-fail 6350)
 ABS questions holding an abstain cue (must be 0): 0
 IDEAL on all 640 records: failing probes + flagged replies + leak events (must be 0): 0
 BASELINE fixture misses 0, conversation-test misses 0
@@ -19,7 +19,7 @@ BASELINE fixture misses 0, conversation-test misses 0
   killed  CLAUSE f3_short  (24 fixtures, 0 conv; e.g. short/FMT)
   killed  CLAUSE f4_rule  (46 fixtures, 0 conv; e.g. violate/FMT)
   killed  CLAUSE f5_old  (2 fixtures, 0 conv; e.g. old_kept/FMT)
-  killed  CLAUSE d0_source  (20 fixtures, 0 conv; e.g. source_all/DYN)
+  killed  CLAUSE d0_source  (24 fixtures, 0 conv; e.g. source_all/DYN)
   killed  CLAUSE d1_degen  (27 fixtures, 0 conv; e.g. runaway/DYN)
   killed  CLAUSE d2_gold  (8 fixtures, 0 conv; e.g. own_list_ignored/DYN)
   killed  CLAUSE d3_other  (4 fixtures, 0 conv; e.g. gold_or_lure/DYN)
@@ -69,7 +69,7 @@ BASELINE fixture misses 0, conversation-test misses 0
   killed  OFF short  (24 fixtures, 0 conv; e.g. short/FMT)
   killed  OFF rule  (46 fixtures, 0 conv; e.g. violate/FMT)
   killed  OFF old  (2 fixtures, 0 conv; e.g. old_kept/FMT)
-  killed  OFF source  (10 fixtures, 0 conv; e.g. source_all/DYN)
+  killed  OFF source  (14 fixtures, 0 conv; e.g. source_all/DYN)
   killed  OFF other  (4 fixtures, 0 conv; e.g. gold_or_lure/DYN)
   killed  OFF assert  (12 fixtures, 0 conv; e.g. question/DYN)
   killed  OFF listvoice  (4 fixtures, 0 conv; e.g. voice/DYN)
@@ -162,7 +162,7 @@ BASELINE fixture misses 0, conversation-test misses 0
   killed  SOURCE grade_fmt_dyn: 'return n_sentences(text) == 1' -> 'return n_sentences(text) <= 2'  (2 fixtures, 0 conv; e.g. violate/FMT)
   killed  SOURCE grade_fmt_dyn: 'return arg.lower() in T.lwords(text)' -> 'return arg.lower() in text.low'  (4 fixtures, 0 conv; e.g. word_substring/FMT)
   killed  SOURCE grade_fmt_dyn: 'return s.startswith("[") and s.endswith("]")' -> 'return s.startswith("[")'  (2 fixtures, 0 conv; e.g. bracket_open/FMT)
-  killed  SOURCE grade_fmt_dyn: 'len(picked) != 1' -> 'len(picked) < 1'  (3 fixtures, 0 conv; e.g. source_all/DYN)
+  killed  SOURCE grade_fmt_dyn: 'len(picked) != 1' -> 'len(picked) < 1'  (7 fixtures, 0 conv; e.g. source_all/DYN)
   killed  SOURCE grade_fmt_dyn: 'shape_ok = len(items) == 3' -> 'shape_ok = len(items) >= 3'  (4 fixtures, 0 conv; e.g. source_four/DYN)
   killed  SOURCE grade_fmt_dyn: 'all(s in have for s in gold_st)' -> 'any(s in have for s in gold_st'  (4 fixtures, 0 conv; e.g. partial_gold/DYN)
   killed  SOURCE grade_fmt_dyn: 'stems(items[1])[:4] if' -> 'stems(items[0])[:4] if'  (16 fixtures, 4 conv; e.g. ideal/DYN)
@@ -228,4 +228,4 @@ BASELINE fixture misses 0, conversation-test misses 0
   killed  SOURCE grade_text: 'low_alt = {f.lower() for a in altvals for f in [a]' -> 'low_alt = {a.lower() for a in '  (9 fixtures, 0 conv; e.g. inflect_alt/VAL)
   killed  SOURCE graders: 'gold_ok = any(T.asserted_hits(text, g, pool, gold=' -> 'gold_ok = any(T.asserted_hits('  (60 fixtures, 0 conv; e.g. inflect_generic/VAL)
   killed  SOURCE grade_voice: 'for m in T.value_hits(text, v):' -> 'for m in [x for x in T.value_h'  (30 fixtures, 0 conv; e.g. inflect_voice/VAL)
-MUTANTS killed 226/226, survived 0, crashed 0; 94s
+MUTANTS killed 226/226, survived 0, crashed 0; 83s

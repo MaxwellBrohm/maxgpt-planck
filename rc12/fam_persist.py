@@ -7,6 +7,7 @@ Deviation from SPEC (notes.txt): two rules (lowercase, brackets) are added to SP
 conversations balance exactly."""
 import common as C
 import pools_vals as V
+import split_content as SC
 
 FIRST_WORDS = ["Indeed", "Behold", "Ahoy", "Greetings"]
 CLOSINGS = ["over and out", "stay curious", "that is all", "until next time"]
@@ -39,6 +40,8 @@ OVERRIDE = {
     "lowercase": "Change of plan: no more capital letters. From now on, write every reply in lowercase letters "
                  "only.",
 }
+CONTENT = ("FIRST_WORDS", "CLOSINGS", "WORDS", "QUESTION_TAILS", "ACK_I", "ACK_O", "INSTR", "OVERRIDE")
+SC.apply(globals(), CONTENT)      # dev: no-op; sealed: its own wording (prereg s13 S3, split_content.py)
 
 
 def rule_arg(rule, rng, exclude=()):

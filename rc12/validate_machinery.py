@@ -43,6 +43,7 @@ import sys
 from collections import Counter
 
 import fakes_family as FF
+import fam_persist as FPW        # the split's own rule words (split_content: dev or sealed)
 import grade_text as T
 import own_cf as OC
 import render as RD
@@ -242,7 +243,7 @@ def c_stats(recs):
     check(ci["hi"] < 0 and not ST.noninferior(ci), f"bootstrap FIRST-IDEAL {ci}", out)
     rates = ST.persist_base_rates(rows["IDEAL"], ST.persist_rules(recs))
     check(rates == ST.persist_base_rates(base["IDEAL"], ST.persist_rules(recs)), "cf rows in PERSIST base rates", out)
-    check(rates["first_word:Greetings"] == 0 and rates["one_sentence:None"] > ST.PERSIST_DROP,
+    check(rates[f"first_word:{FPW.FIRST_WORDS[3]}"] == 0 and rates["one_sentence:None"] > ST.PERSIST_DROP,
           f"PERSIST base rates {rates}", out)
     check(ST.persist_drops({"IDEAL": rates}) == ["one_sentence:None"], "PERSIST drop list", out)
     sens = ST.sensitivity(sm["IDEAL"], sm["FIRST"])

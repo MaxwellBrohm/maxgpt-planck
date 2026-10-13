@@ -16,7 +16,11 @@ import os
 import re
 import sys
 
+import split_content as SC
+
 TAILS = [", by the way.", ", just so you know.", ", in case it matters.", ", for what it's worth."]
+CONTENT = ("TAILS",)          # the neutral tails are user text, so the sealed split writes its own (s13 S3)
+SC.apply(globals(), CONTENT)
 TARGETS = ["long", "mid", "short"]
 _TE = None
 

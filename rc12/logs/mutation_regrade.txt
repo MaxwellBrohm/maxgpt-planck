@@ -1,0 +1,19 @@
+baseline: pass
+KILLED    dev_regrade.py: renamed with no fsync | test_dev_regrade.py: FAIL files: greedy/transcripts.jsonl not fsynced before the .partial rename
+KILLED    dev_regrade.py: published by a copy, no rename | test_dev_regrade.py: FAIL /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmp8y9a3bz0/dst/IDEAL_ALT/plain/greedy: never renamed into place
+KILLED    dev_regrade.py: a cut .partial not cleared | test_dev_regrade.py: FAIL leftover: a cut .partial or .old.partial made the regrade raise FileExistsError
+KILLED    dev_regrade.py: a cut .old.partial not cleared | test_dev_regrade.py: FAIL leftover: a cut .partial or .old.partial made the regrade raise OSError
+KILLED    dev_regrade.py: a rerun cannot replace | test_dev_regrade.py: FAIL checks raised OSError: [Errno 66] Directory not empty: '/var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmp92q9q41
+KILLED    dev_regrade.py: the earlier copy deleted in place (a cut can leave DONE without files) | test_dev_regrade.py: FAIL rerun: IDEAL_ALT/plain/greedy not moved aside in one rename before the publish (1 renames)
+KILLED    dev_regrade.py: the earlier copy left aside | test_dev_regrade.py: FAIL rerun: IDEAL_ALT/plain/greedy.old.partial left behind
+KILLED    dev_regrade.py: no DONE | test_dev_regrade.py: FAIL files: /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmpu3fllut0/dst/IDEAL_ALT/plain/greedy/DONE missing
+KILLED    dev_regrade.py: DONE written after the rename | test_dev_regrade.py: FAIL files: greedy/DONE not fsynced before the .partial rename
+KILLED    dev_regrade.py: regrade.json not fsynced | test_dev_regrade.py: FAIL json: regrade.json not fsynced before its rename into place
+KILLED    dev_regrade.py: an earlier regrade.json kept while a rerun runs | test_dev_regrade.py: FAIL json: the earlier regrade.json was still there when the rerun's runs began ([True])
+KILLED    dev_regrade.py: the earlier regrade.json's removal not fsynced | test_dev_regrade.py: FAIL json: the earlier regrade.json's removal was not fsynced before the rerun's runs began
+KILLED    dev_regrade.py: --dst not fsynced after regrade.json's rename | test_dev_regrade.py: FAIL json: --dst not fsynced after regrade.json's rename
+KILLED    dev_regrade.py: regrade.json in place | test_dev_regrade.py: FAIL rerun: main() over an existing --dst raised FileNotFoundError: [Errno 2] No such file or directory: '/var/folders/z
+KILLED    dev_regrade.py: a .partial source read | test_dev_regrade.py: FAIL skip: a *.partial source dir is read as a run (['IDEAL_ALT/plain/greedy', 'IDEAL_ALT/plain/greedy.partial', 'IDEAL_
+KILLED    dev_regrade.py: meta.json not the source's | test_dev_regrade.py: FAIL content: IDEAL_ALT/plain/greedy/meta.json is not the source's
+KILLED    dev_regrade.py: a score line lost | test_dev_regrade.py: FAIL content: IDEAL_ALT/plain/greedy/scores.jsonl differs from the stored run (same graders)
+MUTANTS killed 17/17

@@ -1,5 +1,7 @@
 """Build the RC-12 DEV split (SPEC s9): every family from its own seeded stream Random("RC12:dev:<family>:1212"),
 written to dev/rc12_dev.jsonl (one record per line, stable key order). Pure stdlib, no model.
+A split other than dev (common.SPLIT, from RC12_SPLIT) is built only inside a work copy made by sealed_kit.py (the
+marker file .rc12_workcopy beside rc12/), where dev/rc12_dev.jsonl holds that split's items so every gate reads them.
 
   python3 -B build_dev.py            build and write, print counts per family and cell
   python3 -B build_dev.py --stdout   print the JSONL instead of writing (used by the determinism test)"""
@@ -8,6 +10,7 @@ import os
 import sys
 from collections import Counter
 
+import common as C
 import fam_bind
 import fam_corr
 import fam_loop_k
@@ -41,7 +44,12 @@ def dumps(recs):
     return "".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in recs)
 
 
+MARKER = os.path.join(os.path.dirname(HERE), ".rc12_workcopy")
+
+
 def main():
+    if C.SPLIT != "dev" and not os.path.isfile(MARKER):
+        sys.exit(f"split {C.SPLIT!r} is built only inside a sealed_kit work copy (no {MARKER})")
     recs = build_all()
     text = dumps(recs)
     if "--stdout" in sys.argv:

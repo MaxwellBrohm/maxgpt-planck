@@ -154,6 +154,10 @@ def test_fillers(recs):
     labels = Counter(lab for *_, lab in C.FILLERS)          # F2 hand labels, pinned for the dev pools only
     if all(r["split"] == "dev" for r in recs):                 # (a sealed build pins its own counts, s13 S1)
         check(labels == {"question": 50, "request": 20, "statement": 20}, f"filler labels count {dict(labels)}")
+    else:                                                      # pinned by the sealed session in RC12_EXPECT
+        want = expect()
+        check(want is not None and {k: labels.get(k, 0) for k in C.ASKING} == want["filler_labels"],
+              f"filler labels count {dict(labels)}")
     old = set()
     for s in _e_fillers():
         old |= grams(s)
@@ -195,6 +199,21 @@ def test_asks(recs):
                   f"{r['id']} u{t['i']} D asks differs from the filler label")
     if all(r["split"] == "dev" for r in recs):                 # the dev counts; a sealed build pins its own
         check((n[True], n[False]) == (3106, 904), f"D asks counts {dict(n)}, want 3106 / 904")
+    else:
+        want = expect()
+        check(want is not None and [n[True], n[False]] == want["asks"], f"D asks counts {dict(n)}, want {want}")
+
+
+def expect():
+    """a non-dev build's own pinned counts (s13 S1): the JSON file named by RC12_EXPECT, {"filler_labels":
+    {"question": q, "request": r, "statement": s}, "asks": [asking D turns, statement D turns]}; None (a failure)
+    when it is not set, so a sealed build cannot pass without pinning them."""
+    path = os.environ.get("RC12_EXPECT")
+    if not path:
+        FAILS.append("a non-dev split needs RC12_EXPECT (its pinned filler-label and asks counts)")
+        return None
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
 
 
 def test_pools():
@@ -204,6 +223,25 @@ def test_pools():
             both = set(x.lower() for x in V.POOLS[a]) & set(x.lower() for x in V.POOLS[b])
             check(not both, f"pools {a}/{b} share {both}")
     check("May" not in V.MONTH, "May must stay out of MONTH")
+    import pools_misc as M                       # cross-module content rules the shape check cannot see
+    check(sorted(M.PROJECTS) == sorted(V.PROJECT), "PROJECTS keys are not the PROJECT pool")
+    check(all(set(k[2]) <= set(V.LANGUAGE + V.CAPITAL) for k in M.K_ITEMS), "a K answer is not a LANGUAGE or CAPITAL")
+    check(any(v.endswith("s") for v in V.INSTRUMENT + V.FOOD + V.PROJECT),    # (dev: drums) the inflection rule's
+          "no instrument, food or project value ends in s: the singular-form rule goes untested")   # minus-s branch
+    import fam_bind as FB, fam_own_topic as FO, fam_role_lookup as FL   # avoid lists name their items' object words
+    words = lambda *ts: set(re.findall(r"[a-z]+", re.sub(r"\{[^}]*\}", " ", " ".join(ts)).lower()))  # no {fields}
+    low = lambda xs: {x.lower() for x in xs}                          # the build lowercases avoid words too
+    objs = {d["obj"].lower() for d in FB.BIND_TYPES.values()} | low(FB.BIND_NAME["objw"])
+    check(low(FB.BIND_AVOID) <= objs, "a BIND_AVOID word is no BIND object word (a stale avoid list)")
+    for avoid, items, parts in ((FO.OWN_AVOID, M.OWN_PICK, ("q", "before", "after", "probe")),
+                                (FL.LOOKUP_AVOID, M.LOOKUP_SHAPES, ("intro", "q", "ideal", "abst"))):
+        runs = [set.intersection(*(words(P[k]) for k in parts)) for P in items.values()]   # words through an item
+        check(low(avoid) <= set().union(*(words(P[k]) for P in items.values() for k in parts)),
+              f"an avoid word of {avoid} is in no template (a stale avoid list)")
+        check(all(low(avoid) & r for r in runs),
+              f"an item's {'/'.join(parts)} share no word of its avoid list {avoid}")
+        check(all(sum(w in r for r in runs) <= 1 for w in low(avoid)),      # an object word is its item's own
+              f"an avoid word of {avoid} runs through several items (a common word, not an object word)")
 
 
 def test_determinism(recs):

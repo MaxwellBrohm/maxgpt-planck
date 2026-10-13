@@ -15,6 +15,13 @@ import balance as B
 import common as C
 import pools_vals as V
 import pools_misc as M
+import split_content as SC
+
+ROW = "{k}: {v}"          # one table row (OD5: the sealed session picks its own table format)
+ROW_SEP = ", "
+LOOKUP_AVOID = ["rota", "menu", "tour"]     # words no filler of a LOOKUP item may contain
+CONTENT = ("ROW", "ROW_SEP", "LOOKUP_AVOID")
+SC.apply(globals(), CONTENT)      # dev: no-op; sealed: its own wording (prereg s13 S3, split_content.py)
 
 
 def build_role(n=48):
@@ -76,7 +83,7 @@ def build_role(n=48):
 
 
 def _rows(keys, vals):
-    return ", ".join(f"{k}: {v}" for k, v in zip(keys, vals))
+    return ROW_SEP.join(ROW.format(k=k, v=v) for k, v in zip(keys, vals))
 
 
 def build_lookup(n=48):
@@ -130,6 +137,6 @@ def _lookup_one(rng, num, shape, old_first, asked, p, x):
                    gold=None, candidates=cands, pool=S["vals"], holder=f"table:{asked}", object_words=[absent],
                    src=[], key=absent, other_value=tab[other][absent])
     conv.meta.update(unit="all", old_first=old_first, asked=asked, table_turns=turn_of, x_first=x < p)
-    conv.avoid.update(["rota", "menu", "tour"])
+    conv.avoid.update(LOOKUP_AVOID)
     conv.fill()
     return conv.record()

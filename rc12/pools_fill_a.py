@@ -6,6 +6,8 @@ label (F2, decided 2026-09-25, prereg draft s17 OD6 follow-up (2)): the hand cla
 "question", "request" or "statement" (asks nothing). It is data: the builders copy it onto each D turn as
 asks = label != "statement" (common.ASKING), and the loop rule reads that field, never the text or its
 punctuation. Every part A entry was read and labeled "question"."""
+import split_content as SC
+
 
 FILLERS_A = [
     ("What is it about chopping onions that stings so much?",
@@ -99,3 +101,5 @@ FILLERS_A = [
     ("Stiff new boots are hurting my feet, what should I do?",
      "Wear them around the house with thick socks in short stretches before any long walk outside.", "question"),
 ]
+CONTENT = ("FILLERS_A",)
+SC.apply(globals(), CONTENT)      # dev: no-op; sealed: its own wording (prereg s13 S3, split_content.py)

@@ -1,4 +1,6 @@
 """RC-12 DEV content for OWN, TOPIC, ROLE, LOOKUP, LOOP and K (SPEC s3). Dev-only wording."""
+import split_content as SC
+
 
 # ---------------- OWN ----------------
 # pick: {q} offers three options; before = a same-type value bound to someone else at u1; after = someone
@@ -177,3 +179,10 @@ K_REF = ["I'm flying to {c} next month.", "My sister just moved to {c}.", "I've 
 K_Q = {"language": "What language do they speak there?", "capital": "What's the capital city there?"}
 K_CTRL = {"language": "What language do they speak in {c}?", "capital": "What's the capital city of {c}?"}
 K_IDEAL = {"language": "They speak {g} there.", "capital": "The capital is {g}."}
+CONTENT = ("OWN_PICK", "OWN_LIST*", "OWN_LIST_Q", "OWN_LIST_BEFORE", "OWN_LIST_AFTER", "OWN_LIST_PROBES", "PROJECTS*",
+           "TOPIC_OPEN", "TOPIC_CLOSED_INLINE", "TOPIC_CLOSED_INTRO", "TOPIC_ADDITIVE", "TOPIC_CLOSED_LATER",
+           "TOPIC_OPEN_LATER", "TOPIC_PROBES", "TOPIC_IDEAL", "TOPIC_IDEAL_SHORT", "ROLE_NAME", "ROLE_JOB", "ROLE_TOWN",
+           "ROLE_LURE_HOLDERS", "ROLE_LURE", "ROLE_ANAME", "ROLE_P", "ROLE_X", "ROLE_X_IDEAL", "LOOKUP_SHAPES",
+           "LOOP_TOPICS", "LOOP_START", "LOOP_PROMPTS", "STORY_SENTENCES", "K_ITEMS", "K_REF", "K_Q", "K_CTRL",
+           "K_IDEAL")
+SC.apply(globals(), CONTENT)      # dev: no-op; sealed: its own wording (prereg s13 S3, split_content.py)

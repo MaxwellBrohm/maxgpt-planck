@@ -6,6 +6,8 @@ frames bind a value of the same type to another holder. Step 5 audit: frames tha
 that do not exist on BOTH sides, and balance.choose() never lets the gold be the unique most or least echoing
 statement (the old "lures always echo" design made ANTI_OVERLAP / ANTI_WORDING a gold finder).
 CORR object: phrase, head noun, alias (defined only in an alias-form original), and per-type frames."""
+import split_content as SC
+
 
 RECALL_SLOTS = [
     dict(key="car", vtype="colour", obj=["car"],
@@ -54,7 +56,6 @@ RECALL_SLOTS = [
          q=["What color is my bike?", "Remind me, what color is my bike?"],
          prefix="Your bike is", ideal="Your bike is {v}.", abst="You haven't told me what color your bike is."),
 ]
-SLOT = {s["key"]: s for s in RECALL_SLOTS}
 
 # ---------------- CORR ----------------
 # per value type: how a value follows the object, the question frames, answer prefix and IDEAL
@@ -116,3 +117,7 @@ CORR_FORMS = {
                "Actually, my {o} got changed to {v}, but nothing changes for my {oa}."],
 }
 INDIRECT_FORMS = ("pronoun", "ellipsis", "demonstrative")   # must directly follow the statement they correct
+CONTENT = ("RECALL_SLOTS", "CORR_TYPES", "CORR_LURE_PLAIN", "CORR_LURE_MARKED", "CORR_LURE_ZERO", "CORR_OBJECTS",
+           "CORR_FORMS")
+SC.apply(globals(), CONTENT)      # dev: no-op; sealed: its own wording (prereg s13 S3, split_content.py)
+SLOT = {s["key"]: s for s in RECALL_SLOTS}      # derived, after the content

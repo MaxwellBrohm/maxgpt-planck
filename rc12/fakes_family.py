@@ -82,7 +82,8 @@ class Persist(F.Fake):
         i = t["i"]
         base = FP.ACK_I if t["kind"] == "I" else FP.ACK_O if t["kind"] == "O" else BASE[t["text"]]
         if self.policy == "universal":           # step 5 audit: obey as many rules as possible without reading any
-            return f"GREETINGS, SPLENDID NIFTY DANDY GROOVY: {base.rstrip('.!?').upper()}, THAT IS ALL."
+            return (f"{FP.FIRST_WORDS[3].upper()}, {' '.join(FP.WORDS).upper()}: {base.rstrip('.!?').upper()}, "
+                    f"{FP.CLOSINGS[2].upper()}.")            # the split's own rule words (dev: Greetings ... that is all)
         active = [r for r in self.rules if r[0] <= i]
         if not active or self.policy == "never":
             return base

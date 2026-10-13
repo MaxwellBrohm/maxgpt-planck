@@ -3,6 +3,8 @@
 single sentences too. Labels read and set by hand (F2, 2026-09-25): the 20 small-talk entries are "statement" (they
 ask nothing, so a D turn built from one has asks: false and the loop rule treats it like a statement turn), 20 are
 "request" (imperatives without a question mark still ask), 5 are "question"."""
+import split_content as SC
+
 
 FILLERS_B = [
     ("I finally repotted all my succulents this afternoon.",
@@ -96,3 +98,5 @@ FILLERS_B = [
     ("What's a good habit to build this year?",
      "A short walk every day is simple to keep and pays off in mood and energy.", "question"),
 ]
+CONTENT = ("FILLERS_B",)
+SC.apply(globals(), CONTENT)      # dev: no-op; sealed: its own wording (prereg s13 S3, split_content.py)

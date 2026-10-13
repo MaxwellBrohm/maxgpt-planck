@@ -1,6 +1,9 @@
 """RC-12 grader fixtures and mutants (SPEC L3, G6). Run: python3 -B mutation_graders.py [--quick]
-1. Fixtures from REAL dev items (fixtures_graders.py, fixtures_more.py): 4 records per family x cell; every probe
-   of a record (PERSIST and LOOP: the first probe and the one with the shortest question). Every fixture must get
+1. Fixtures from REAL dev items (fixtures_graders.py, fixtures_more.py): 4 records per family x cell, then every
+   record whose fixtures carry a (label, grader) none of the chosen ones carries (so which fixture kinds exist does
+   not hang on a build's record order: on a fresh seed the first 4 BIND perspective records can all ask the user's
+   name, and the assistant-name fixtures that kill the "given" voice mutants vanished; STEP 15); every probe of a
+   record (PERSIST and LOOP: the first probe and the one with the shortest question). Every fixture must get
    its stated verdict from the real graders (correct replies pass; empty, loop, copy, leak, cap, hedge, negation,
    question, guess list, shotgun, user voice, wrong candidate, stale, echo fail).
 2. Conversation tests: unit scores (mean / all), the role-leak scan and the OD6 (iii) loop / ack-repeat flags
@@ -59,6 +62,15 @@ def build(recs):
         index[r["id"]] = r
         for p in pick_probes(r):
             fixtures += [dict(f, grader=p["grader"], family=r["family"]) for f in BUILD[p["grader"]](r, p)]
+    kinds = {(f["label"], f["grader"]) for f in fixtures}
+    for r in recs:                                  # coverage: every fixture kind the items can give is present
+        if r["id"] in index:
+            continue
+        new = [dict(f, grader=p["grader"], family=r["family"]) for p in pick_probes(r) for f in BUILD[p["grader"]](r, p)]
+        if any((f["label"], f["grader"]) not in kinds for f in new):
+            index[r["id"]] = r
+            fixtures += new
+            kinds |= {(f["label"], f["grader"]) for f in new}
     return fixtures, index
 
 

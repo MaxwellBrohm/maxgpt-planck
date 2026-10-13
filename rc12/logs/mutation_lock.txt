@@ -1,0 +1,122 @@
+baseline: pass 
+KILLED    split_content.py: hook never applies | test_lock.py: FAIL apply: content not applied before DERIVED: ['a {v}', 'b', 'z'] {'k': 'x {v}'}
+KILLED    split_content.py: dev runs beside sealed content | test_lock.py: FAIL apply: dev ran beside a content file: ['a {v}', 'b', 'z'] {'k': 'x {v}'}
+KILLED    split_content.py: code accepted in a content file | test_lock.py: FAIL apply: a content file with code runs: line 102, in load_literals
+KILLED    split_content.py: identifier pins not checked | test_lock.py: FAIL propagate: a pinned vtype changed
+KILLED    split_content.py: shape not enforced | test_lock.py: FAIL apply: a changed placeholder passes: ['c {w}', 'd', 'z'] {'k': 'y {v}'}
+KILLED    split_content.py: extra or missing names allowed | test_lock.py: FAIL apply: an extra name passes: ['c {v}', 'd', 'z'] {'k': 'y {v}'}
+KILLED    split_content.py: placeholders unchecked | test_lock.py: FAIL shape: a changed placeholder passes
+KILLED    split_content.py: list lengths unchecked | test_lock.py: FAIL shape: a shorter list passes
+KILLED    split_content.py: dict keys unchecked | test_lock.py: KeyError: 'a'
+KILLED    split_content.py: numbers unchecked | test_lock.py: FAIL shape: a changed number passes
+KILLED    split_content.py: short seed accepted | test_lock.py: FAIL split: a short seed accepted
+KILLED    split_content.py: missing content tolerated | test_lock.py: FAIL apply: a missing content module passes: ['a {v}', 'b', 'z'] {'k': 'x {v}'}
+KILLED    common.py: streams ignore the split | test_lock.py: FAIL propagate: the split name does not reach the random streams
+KILLED    common.py: ids ignore the split | test_lock.py: FAIL propagate: records do not carry the split, its ids and the seed
+KILLED    common.py: records say dev | test_lock.py: FAIL propagate: records do not carry the split, its ids and the seed
+KILLED    common.py: records carry the dev seed | test_lock.py: FAIL propagate: records do not carry the split, its ids and the seed
+KILLED    pools_vals.py: pools applied after derivation | test_lock.py: FAIL propagate: derived values stale: False True False True False True False True
+KILLED    pools_slots.py: SLOT derived before the content | test_lock.py: FAIL propagate: derived values stale: True False True True False True True False
+KILLED    build_dev.py: no work-copy guard | test_lock.py: FAIL propagate: built without the work-copy marker
+KILLED    test_gens.py: no s-ending value passes | test_lock_d.py: FAIL s-value: pools without an s-ending value pass
+KILLED    test_gens.py: sealed asks counts unchecked | test_lock.py: FAIL expect hook: asks [3106, 903] gave []
+KILLED    fam_role_lookup.py: LOOKUP row format hardcoded | test_lock.py: FAIL propagate: LOOKUP rows do not use the content ROW
+KILLED    sealed_overlap.py: a closed class checked | test_lock_c.py: FAIL overlap (a): ['pools_vals.COLOUR: red', 'pools_vals.COLOUR: red (a dev value of another pool)', 'pools_va
+KILLED    sealed_overlap.py: 6-grams | test_lock_c.py: FAIL overlap (b): []
+KILLED    sealed_overlap.py: (d) dropped | test_lock_c.py: FAIL overlap (d): [] (want the kept question, the K countries and capitals only)
+KILLED    sealed_overlap.py: (d) flags closed classes | test_lock_c.py: FAIL overlap (d): ['arabic', 'austria', 'bangkok', 'belgium', 'brazil', 'brussels'] (want the kept question, t
+KILLED    sealed_overlap.py: (d) flags pinned identifiers | test_lock_c.py: FAIL overlap (d): ['austria', 'bangkok', 'belgium', 'brazil', 'brussels', 'budapest'] (want the kept question,
+KILLED    sealed_overlap.py: (c) dropped | test_lock_c.py: FAIL overlap: dev against itself not caught: [442, 2, 0]
+KILLED    sealed_overlap.py: cross-pool values allowed | test_lock_c.py: FAIL overlap (a): ['pools_vals.COLOUR: red']
+KILLED    sealed_kit.py: changed files pass | test_lock_b.py: FAIL kit: a changed or extra file passes
+KILLED    sealed_kit.py: extra files pass | test_lock_b.py: FAIL kit: a changed or extra file passes
+KILLED    sealed_kit.py: work copy anywhere | test_lock_b.py: FAIL kit: a work copy inside the repo outside sealed/ passes
+KILLED    sealed_kit.py: prepare into a used folder | test_lock_b.py: FAIL kit: prepare into a non-empty folder passes
+KILLED    sealed_kit.py: gates never stop early | test_lock_b.py: FAIL kit: gates did not stop early
+KILLED    sealed_crypto.py: key inside a repo | test_lock_b.py: FAIL crypto: a key inside a git work tree accepted
+KILLED    sealed_crypto.py: private file overwritten | test_lock_b.py: FileExistsError: [Errno 17] File exists: '/var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12lock_yzqo6_w4/s
+KILLED    sealed_crypto.py: world-readable key | test_lock_b.py: FAIL crypto: seed form
+KILLED    sealed_crypto.py: per-file hashes unchecked | test_lock_b.py: FAIL crypto: verify against a wrong S5 hash passes
+KILLED    sealed_crypto.py: missing archived files pass | test_lock_b.py: FAIL crypto: a file named in S5 but not archived passes
+KILLED    sealed_crypto.py: ciphertext hash not appended to S5 | test_lock_b.py: FAIL crypto: the ciphertext's hash was not appended to S5
+KILLED    sealed_crypto.py: an unnamed tar encrypted | test_lock_b.py: sealed_crypto: /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12lock_mv_02l53/a.enc exists
+KILLED    sealed_crypto.py: 13-grams not normalized | test_lock_b.py: FAIL crypto: 13-gram hashes differ from the known answer
+KILLED    sealed_crypto.py: 12-grams | test_lock_b.py: FAIL crypto: 13-gram hashes differ from the known answer
+KILLED    sealed_crypto.py: OOD-H assistant replies left out | test_lock_b.py: FAIL crypto: 13-gram hashes differ from the known answer
+KILLED    sealed_search.py: failed seeds kept | test_lock_b.py: FAIL search: the accepted seed not kept or a discarded seed left
+KILLED    sealed_search.py: a failed build stops the draws | test_lock_b.py: builder refused
+KILLED    sealed_search.py: free-text restart reasons | test_lock_b.py: FAIL search: a restart reason with quoted text accepted
+KILLED    sealed_search.py: draw log inside the work copy | test_lock_b.py: sealed_kit: /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12lock__6zl0vqm/accepted.txt exists; the accept
+KILLED    sealed_search.py: draw cap off by one | test_lock_b.py: FAIL search: the draw cap, the numbering or the supersede line is wrong
+KILLED    lock_check.py: lock markers ignored | test_lock_c.py: FAIL lock_check: a marker: failures []
+KILLED    lock_check.py: S5 hashes not required in the prereg | test_lock_c.py: FAIL lock_check: a missing S5 hash: failures []
+KILLED    lock_check.py: failing gates accepted | test_lock_c.py: FAIL lock_check: a failing gate table: failures []
+KILLED    lock_check.py: code changes after the build pass | test_lock_c.py: FAIL lock_check: rc12/a.py changed after the build: failures []
+KILLED    lock_check.py: stale manifest passes | test_lock_c.py: FAIL lock_check: a stale manifest: failures []
+KILLED    lock_check.py: public copies unlike the archived files pass | test_lock_c.py: FAIL lock_check: a public gate table unlike the archived one: failures []
+KILLED    lock_check.py: OOD-H counts unchecked | test_lock_c.py: FAIL lock_check: stale OOD-H counts pass
+KILLED    lock_check.py: tracked sealed files pass | test_lock_c.py: FAIL lock_check: a tracked sealed file passes
+KILLED    lock_finalize.py: drifted draft edited | test_lock_c.py: FAIL finalize: a second run (a drifted draft) is not refused unchanged
+KILLED    lock_finalize.py: restarts not honored | test_lock_c.py: FAIL finalize: markers left ['\\bDRAFT\\b', '\\(proposal', 'proposals? until the push', '\\bOPEN\\b', 'NOT LOC
+KILLED    sealed_public.py: build output published | test_lock_b.py: FAIL kit: the build's output (the items) reaches the public table
+KILLED    sealed_public.py: unplain gate output published | test_lock_b.py: FAIL kit: a public gate line with braces or brackets is published
+KILLED    sealed_public.py: sealed words in gate output published | test_lock_b.py: FAIL kit: a sealed content word reaches a public line
+KILLED    sealed_public.py: sealed words in the draw log | test_lock_b.py: FAIL kit: a sealed content word reaches a public line
+KILLED    sealed_search.py: a gate timeout stops the draws unlogged | test_lock_b.py: subprocess.TimeoutExpired: Command 'gate' timed out after 1 seconds
+KILLED    sealed_pack.py: plaintext tar anywhere | test_lock_d.py: FAIL pack: a plaintext tar inside the repo outside sealed/: None
+KILLED    test_gens.py: PROJECTS keys unchecked | test_lock_d.py: FAIL content rules: PROJECTS keys unlike PROJECT pass
+KILLED    split_content.py: pins compared by position | test_lock.py: FAIL pins: reordered keys refused
+KILLED    sealed_kit.py: bytecode or links in a work copy | test_lock_b.py: FAIL kit: bytecode or a symlink passes the copy check (['extra rc12/link.py'])
+KILLED    sealed_kit.py: gate inputs not recorded | test_lock_b.py: FAIL kit: the gate table lacks its inputs
+KILLED    sealed_search.py: second acceptance allowed | test_lock_b.py: FAIL search: a new run on a log with draws allowed without --supersede
+KILLED    sealed_search.py: cut trial seeds kept | test_lock_b.py: FAIL search: a cut search's trial seed left
+KILLED    sealed_search.py: draw numbers restart | test_lock_b.py: FAIL search: a new run on a log with draws allowed without --supersede
+KILLED    sealed_public.py: quoted text in the draw log | test_lock_b.py: FAIL search: quoted text not withheld
+KILLED    sealed_pack.py: a failing gate table packed | test_lock_d.py: FAIL pack: a failing gate table: None
+KILLED    sealed_pack.py: S6 count not published | test_lock_d.py: FAIL pack: tar hash, S6 count, S1 or commit missing
+KILLED    sealed_pack.py: ungated inputs packed | test_lock_d.py: FAIL pack: content changed after the gates: None
+KILLED    sealed_pack.py: items the seed does not rebuild packed | test_lock_d.py: FAIL pack: rebuild: None
+KILLED    sealed_pack.py: an unaccepted seed packed | test_lock_d.py: FAIL pack: a draw log without this acceptance: None
+KILLED    sealed_pack.py: an S1 file of other items packed | test_lock_d.py: FAIL pack: an S1 file of other items: None
+KILLED    sealed_pack.py: a failed S1 packed | test_lock_d.py: FAIL pack: a failed S1: None
+KILLED    sealed_pack.py: a gate table of another commit packed | test_lock_d.py: FAIL pack: a gate table of another commit: None
+KILLED    sealed_pack.py: a changed work copy packed | test_lock_d.py: FAIL pack: a work copy unlike its commit: None
+KILLED    lock_check.py: OOD-H code changes pass | test_lock_c.py: FAIL lock_check: oodh/gate.py changed after the build: failures []
+KILLED    lock_check.py: corpus/oodh.py changes pass | test_lock_c.py: FAIL lock_check: corpus/oodh.py changed after the build: failures []
+KILLED    sealed_kit.py: a quick-gates-only table passes | test_lock_c.py: FAIL lock_check: a quick-gates-only table: failures []
+KILLED    lock_finalize.py: no ceiling required | test_lock_c.py: FAIL finalize: an accepted draw without its shortcut ceiling is not refused by name
+KILLED    lock_check.py: S6 count not required | test_lock_c.py: FAIL lock_check: an S5 file without the S6 count: failures []
+KILLED    lock_check.py: a ciphertext S5 does not name passes | test_lock_c.py: FAIL lock_check: a ciphertext S5 does not name: failures []
+KILLED    lock_check.py: a dry-run split passes | test_lock_c.py: FAIL lock_check: a dry-run split without --dryrun: failures []
+KILLED    lock_check.py: different commits pass | test_lock_c.py: FAIL lock_check: a gate table of another commit: failures []
+KILLED    lock_check.py: another seed passes | test_lock_c.py: FAIL lock_check: a draw log accepting another seed: failures []
+KILLED    lock_check.py: tracked content files pass | test_lock_c.py: FAIL lock_check: a tracked content file: failures []
+KILLED    runner.py: runner loads another split's records | test_lock.py: FAIL split: runner loads sealed records under the dev split
+KILLED    lock_finalize.py: an edit dropped | test_lock_c.py: FAIL finalize: markers left ['\\(proposal'] (prereg/RC-12.md: 10 edits and the s20 lock record written
+KILLED    lock_check.py: code named rc12/lock* exempt | test_lock_c.py: FAIL lock_check: rc12/lockstep.py changed after the build: failures []
+KILLED    sealed_overlap.py: (d) flags BIND's object words | test_lock_c.py: FAIL overlap: a valid sealed set (only the fixed slots kept) fails S1: [[], [], [], ['call', 'name']]
+KILLED    sealed_overlap.py: (d) flags filler labels | test_lock_c.py: FAIL overlap: a valid sealed set (only the fixed slots kept) fails S1: [[], [], [], ['question']]
+KILLED    sealed_overlap.py: (d) flags an avoid list | test_lock_c.py: FAIL overlap: a valid sealed set (only the fixed slots kept) fails S1: [[], [], [], ['band', 'boat', 'puppy']]
+KILLED    sealed_public.py: no content word withheld | test_lock_b.py: FAIL kit: content_words is not the content's own non-dev words: set()
+KILLED    test_gens.py: stale BIND_AVOID passes | test_lock_d.py: FAIL content rules: BIND_AVOID with 'zorvex' not judged by its own rule: []
+KILLED    sealed_search.py: mutation_graders not a draw gate | test_lock_b.py: FAIL search: the draw gates are not prereg s13 S3 (iv)'s: {'test_gens', 'validate_e2e_G1_G4', 'mutation_audit_
+KILLED    sealed_search.py: a stopped draw unlogged | test_lock_b.py: FAIL search: a stopped draw is not logged or its trial seed is left
+KILLED    test_gens.py: a stale avoid word passes | test_lock_d.py: FAIL content rules: OWN_AVOID with 'zorvex' not judged by its own rule: []
+KILLED    test_gens.py: an item without its avoid word passes | test_lock_d.py: FAIL content rules: OWN_AVOID with 'puppy' not judged by its own rule: []
+KILLED    sealed_search.py: G10 detail unredacted | test_lock_b.py: FAIL summary: test_gens not run; ceiling S7 36.4; e2e fails: G2 (withheld) family 0.31; G10 FAIL zorvex row; m
+KILLED    sealed_search.py: G10 verdict redacted | test_lock_b.py: FAIL summary: test_gens not run; ceiling S7 36.4; e2e fails: G2 (withheld) family 0.31; G10 (withheld) (withhe
+KILLED    sealed_search.py: e2e FAIL lines unredacted | test_lock_b.py: FAIL summary: test_gens not run; ceiling S7 36.4; e2e fails: G2 zorvex family 0.31; G10 FAIL (withheld) row; m
+KILLED    test_gens.py: a {field} name counts as an object word | test_lock_d.py: FAIL content rules: LOOKUP_AVOID with 'age' not judged by its own rule: ["an avoid word of ['age', 'menu', 'to
+KILLED    test_gens.py: avoid words compared case-sensitively | test_lock_d.py: FAIL content rules: BIND_AVOID with 'Bike' not judged by its own rule: ['a BIND_AVOID word is no BIND object w
+KILLED    test_gens.py: OWN/LOOKUP stale check case-sensitive | test_lock_d.py: FAIL content rules: OWN_AVOID with 'Boat' not judged by its own rule: ["an avoid word of ['Boat', 'puppy', 'ba
+KILLED    test_gens.py: OWN/LOOKUP item check case-sensitive | test_lock_d.py: FAIL content rules: OWN_AVOID with 'Boat' not judged by its own rule: ["an item's q/before/after/probe share n
+KILLED    test_gens.py: OWN/LOOKUP own-word check case-sensitive | test_lock_d.py: FAIL content rules: OWN_AVOID with 'My' not judged by its own rule: []
+KILLED    mutation_graders.py: G6 fixture kinds hang on record order | test_lock_d.py: FAIL G6: the assistant-name fixtures vanish when such records come after the first four of their cell
+KILLED    mutation_graders.py: G6 takes every record | test_lock_d.py: FAIL G6: dev's fixture set changed: 640 records, 46924
+KILLED    fixtures_more.py: no two-picks source fixture | test_lock_d.py: FAIL G6: source_two does not kill the two-picks source mutant on every OWN pick record (gold first, second and
+KILLED    fixtures_more.py: two-picks fixture kills only when the gold is the first option | test_lock_d.py: FAIL G6: source_two does not kill the two-picks source mutant on every OWN pick record (gold first, second and
+KILLED    fixtures_more.py: two-picks fixture replies with the other option | test_lock_d.py: FAIL G6: source_two does not kill the two-picks source mutant on every OWN pick record (gold first, second and
+KILLED    fixtures_more.py: two-picks fixture with one asserted pick (real graders pass it) | test_lock_d.py: FAIL G6: source_two gets the wrong verdict from the real graders on ['rc12-dev-own-001', 'rc12-dev-own-002', '
+KILLED    test_gens.py: a common word in a spare slot passes | test_lock_d.py: FAIL content rules: OWN_AVOID with ['my', 'my', 'my', 'my', 'team'] not judged by its own rule: []
+KILLED    sealed_search.py: fixed summary words redacted | test_lock_b.py: FAIL summary: test_gens not run; (withheld) S7 36.4; e2e fails: G2 (withheld) family 0.31; G10 (withheld) (wit
+MUTANTS killed 120/120

@@ -23,6 +23,9 @@ import rederive14 as RD
 import tables14 as T
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+PREREG = next((p for p in (os.path.join(os.path.dirname(HERE), "prereg", "RC-12.md"),
+                   os.path.join(os.path.dirname(HERE), "prereg", "RC-12.draft.txt")) if os.path.exists(p)),
+              os.path.join(os.path.dirname(HERE), "prereg", "RC-12.draft.txt"))      # the locked file once it exists
 NINE, SEVEN = RD.NINE, RD.SEVEN
 NEW = {"Falcon-H1-Tiny-90M-Instruct-Curriculum": "-Instruct-Curriculum", "minimind-3": "minimind-3",
        "Falcon-H1-Tiny-90M-Instruct-pre-DPO": "-Instruct-pre-DPO", "cRia-LM-75M-Instruct": "cRia-LM-75M-Instruct",
@@ -208,7 +211,7 @@ def main():
     for a in ("raw", "panel", "lik"):
         ap.add_argument("--" + a)
     ap.add_argument("--logs", default=T.LOGS)
-    ap.add_argument("--prereg", default=os.path.join(HERE, "..", "prereg", "RC-12.draft.txt"))
+    ap.add_argument("--prereg", default=PREREG)
     ap.add_argument("--notes", default=os.path.join(HERE, "notes.txt"))
     ap.add_argument("--pins", default=os.path.join(HERE, "pins.json"))
     ARGS = ap.parse_args()
