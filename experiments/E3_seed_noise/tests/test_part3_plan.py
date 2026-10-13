@@ -65,26 +65,26 @@ def test_plan_and_current():
     for k in (2, 3, 4, 5):                                             # each pair (init k, data k) adjacent
         assert ORDER.index(f"e3_5m_A_data{k}") == ORDER.index(f"e3_5m_A_init{k}") + 1
     cur = [ln.strip() for ln in open(os.path.join(PLANS, "CURRENT")) if not ln.startswith("#")]
-    assert cur == ["part3"]
+    assert cur == ["part1b_p3at20m"]     # part3 until it ended at its mark; the next plan since ADDENDUM 2026-10-12
 
 
 def test_e3plan_writes_every_config_and_plan_byte_for_byte(tmp_path):
     r = subprocess.run([sys.executable, os.path.join(E3, "e3plan.py"), "--a5", "0.003,1", "--b5", "0.0015,1",
-                        "--a20", "0.003,1", "--b20", "0.0015,1", "--part3", "--out-dir", str(tmp_path)],
+                        "--a20", "0.003,1", "--b20", "0.0015,1", "--part3", "--addendum1", "--out-dir", str(tmp_path)],
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     made = sorted(os.listdir(tmp_path))
     have = sorted(os.path.basename(p) for p in glob.glob(os.path.join(CONF, "*.yaml")) if not p.endswith("prereg.yaml"))
-    assert made == sorted(have + ["part1.txt", "part2.txt", "part3.txt"]) and len(have) == 33
+    assert made == sorted(have + ["part1.txt", "part1b_p3at20m.txt", "part2.txt", "part3.txt"]) and len(have) == 52
     for f in have:
         assert (tmp_path / f).read_text() == text(f[:-5]), f
-    for f in ("part1.txt", "part2.txt", "part3.txt"):
+    for f in ("part1.txt", "part1b_p3at20m.txt", "part2.txt", "part3.txt"):
         assert (tmp_path / f).read_text() == open(os.path.join(PLANS, f)).read(), f
 
 
 def test_parts_1_and_2_are_unchanged():
     names = sorted(os.path.basename(p) for p in glob.glob(os.path.join(CONF, "e3_*.yaml"))
-                   if "data_seed:" not in open(p).read())
+                   if "data_seed:" not in open(p).read() and ", Part 1b (" not in open(p).readline())   # Part 1b: 2026-10-12
     assert len(names) == 24
     rows = "".join(f"{n} {sha(os.path.join(CONF, n))}\n" for n in names)
     rows += "".join(f"{f} {sha(os.path.join(PLANS, f))}\n" for f in ("part1.txt", "part2.txt"))

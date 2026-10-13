@@ -34,14 +34,14 @@ MUTANTS = [
     ("plan_shared_member_dropped", PL, "train e3_5m_A_s1_P3\n", "", TP),
     ("plan_waits_on_part1", PL, "wait_mark E3 E3 PART 2 DONE", "wait_mark E3 E3 PART 1 DONE", TP),
     ("plan_no_end_mark", PL, "mark E3 PART 3 DONE\n", "", TP),
-    ("current_left_at_part2", CUR, "\npart3\n", "\npart2\n", TP),
+    ("current_left_at_part2", CUR, "\npart1b_p3at20m\n", "\npart2\n", TP),     # re-anchored 2026-10-12 (ADDENDUM)
     ("cfg_init3_wrong_data_seed", CF + "e3_5m_A_init3.yaml", "data_seed: 1\n", "data_seed: 3\n", TP),
     ("cfg_data4_wrong_seed", CF + "e3_5m_A_data4.yaml", "seed: 1\ndata_seed", "seed: 4\ndata_seed", TP),
     ("cfg_rerun_without_data_seed", CF + "e3_5m_A_s1_P3.yaml", "data_seed: 1\n", "", TP),
     ("cfg_rerun_into_a1s_dir", CF + "e3_5m_A_s1_P3.yaml", "runs/E3/e3_5m_A_s1_P3\n", "runs/E3/e3_5m_A_s1\n", TP),
     ("cfg_init5_other_lr", CF + "e3_5m_A_init5.yaml", "{lr: 0.003,", "{lr: 0.0015,", TP),
     ("cfg_part2_edited", CF + "e3_20m_B_s2.yaml", "seed: 2\n", "seed: 3\n", TP),
-    ("gen_rerun_moved", GEN, "            if k == 4:", "            if k == 2:", TP),
+    ("gen_rerun_moved", GEN, "            if k == 4:     # A1 at Part 3", "            if k == 2:     # A1 at Part 3", TP),
     ("gen_data_seed_not_written", GEN, '        txt += f"data_seed: {data_seed}\\n"\n', "        pass\n", TP),
     ("preflight_guard_gone", "experiments/E2_lr_transfer/preflight.py",
      'if "data_seed" in cfg and "data_seed" not in reads:', "if False:", TP),     # (a scratch copy of E2's file)

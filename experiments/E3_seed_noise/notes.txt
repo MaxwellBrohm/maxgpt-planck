@@ -840,3 +840,185 @@ parity step; the PC 5070 for one gpu.lock hold; nothing committed when written)
     torch and CUDA RNG together only while both are compared): 8 more cases, 32 tests in all. Seven hand mutants of the
     new checks (each removed or blinded), on scratch copies: 7 of 7 killed. E3 and models suites: 98 passed;
     mutation_e3.py: 38 of 38 killed.
+
+ADDENDUM 2026-10-12: PART 1b AND PART 3 AT 20M (written 2026-10-12 21:35 EDT, Claude, the E3 addendum workflow; Mac CPU,
+no model on the Mac; on the PC the five queue logs, marks, run directory sizes and processes were read, and one CUDA parity
+hold ran (PART 1b PARITY below); nothing committed, nothing launched. Written before any Part 1b or Part 3 at 20M value
+exists: no run named here has started, E3 has no seed 12 to 21 run and no 20M run with data_seed anywhere.)
+  ALREADY KNOWN WHEN THIS IS WRITTEN (read before this entry, so the design is not blind to them): PART 1 RESULT (5M, 8
+    pairs; results.json 1f017ecb), PART 2 RESULT (20M, 3 pairs; results_part2.json e8256d57), PART 3 RESULT (5M families,
+    sigma_data above sigma_init on all 13 metrics, not resolved at df 4; results_part3.json 17b1614d), PART 4d RESULT,
+    PART 3 CUDA PARITY, SCREENS STAGE 2 VERDICTS' BASE LEVEL (seeds 101 to 105 above E3 Part 1 arm A on F(CHAT) by +0.54%,
+    "the seed draw is not excluded"; the hook and a day shift "not separated from replay noise") and e3_5m_A_s1_P3 below
+    A1 and its replays (-1.26 and -2.40 Part 1 sigma_rep). What each reading below may move is fixed here, before its values.
+  PART 1b (5M arm A, 10 more seeds)
+    ESTIMATES: arm A's seed SD at the current commit (df 9) and, pooled with Part 1's arm A, a sharper sigma (df 16); arm A's
+      level at the current commit from 10 seeds, beside Part 1's arm A (seeds 1 to 8 at e39112a) and the screens' BASE
+      (seeds 101 to 105, eval.induction on): the BASE level question above, with the seed draw spread over 10 new seeds.
+    RUNS: e3_5m_A_s12 to e3_5m_A_s21, arm A (3e-3, r 1), seeds 12 to 21. Each is configs/e3_5m_A_s1.yaml with only its
+      comment, name, out_dir and seed changed (e3plan.py --addendum1): Part 1's arm A config, no data_seed line, so each
+      run's init and stream come from its seed as in Part 1. Seeds: Part 1 used 1 to 8 and rule 5 reserves 9, 10 and 11
+      for a refresh (SCREENS C4 counts E3's seeds as 1 to 11), so Part 1b continues at 12; the screens use 101 and up.
+    CODE AND PARITY: Part 1b runs at the commit that adds this entry, whose harness/, data_prep/, tokenizer/, corpus/ and
+      experiments/E2_lr_transfer/ must be the git trees pinned in e3p1b_waiter.sh (equal at HEAD 6f478ef and at Part 3's
+      commit 4962426). Between e39112a and those trees the default training path differs, by code reading, only in
+      data_seed_of (absent gives the seed), the induction hook (off without eval.induction) and runio.py's fsync (D4). Shown
+      on CUDA, PART 1b PARITY below: log, checkpoint and start record identical; the one new import is durable (D4).
+    STATISTICS (e3analyze_p1b.py), per metric of METRICS, e3analyze.py's value(): Part 1b alone (n 10, df 9): mean, SD as a
+      fraction of its mean, 95% chi-square interval, 80% upper bound. POOLED with Part 1's arm A (seeds 1 to 8, df 7):
+      sigma_A = sqrt((SS_1 + SS_1b) / 16), each part's squares about its own mean, so a level shift between the two commits
+      does not enter; df 16; as a fraction of the mean of all 18. Beside it, unchanged: Part 1's sigma_seed (arms A and B,
+      df 7) and Part 1's arm A alone (df 7). The unpaired MDE from sqrt(2) x sigma_A (factor 2.985 at df 16) for k = 1, 2,
+      3, 5 and k_needed for 0.5%, 1% and 2%, beside Part 1's (factor 3.261 at df 7).
+      LEVEL (descriptive, no rule): Part 1b's mean minus Part 1 arm A's, t on sigma_A (df 16) with p and 95% CI; Part 1b's
+      mean minus the BASE mean over seeds 101 to 105 (S001_attn_gate/out/base_s101 and base_s102, screens/base_out/base_s103
+      to 105, bpb.jsonl, sha256 pinned), t on the pooled SD of Part 1b and BASE (df 13). Every bpb metric; training loss has
+      no BASE record.
+      GAP: a diverged or second-crash run leaves Part 1b; with fewer than 6 runs left Part 1b gives no SD and Part 1's
+      numbers stand alone.
+    HOW IT IS READ: no verdict reads Part 1b. sigma_A is reported beside Part 1's sigma_seed and replaces no number any
+      read verdict used. Later use: only a verdict read after PART 1b RESULT is recorded, whose own pre-registration (dated
+      before its values) names results_part1b.json by its sha256, may read sqrt(2) x sigma_A (df 16) where rule 1 reads
+      sqrt(2) x sigma_seed ("both differ") or where rule 4 reads the 5M side of that class. SD_d (paired) is not re-estimated:
+      Part 1b has no B arm. The LEVEL lines are reported; a level comparison read later may cite them. No E2, E3 or SCREENS
+      reading already recorded is re-read.
+  PART 3 AT 20M
+    WHY: rule 4 sets a 20M confirmation's reference as the larger of the 20M and 5M relative SDs. For the new-init and
+      new-stream classes the 5M side has been sqrt(2) x sigma_init and sqrt(2) x sigma_data since PART 3 RESULT, but the
+      20M side is only sqrt(2) x sigma_seed from 3 seeds (df 2), which mixes both sources. 20M screening of architecture
+      bets (new init) and data bets (new stream), and the 30M tests PLAN puts after them, need the split at 20M, the
+      largest size where E3 measures noise; no 30M noise is measured.
+    RUNS: 9, Part 3's design at 20M from Part 2's arm A config (configs/e3_20m_A_s1.yaml: A20 = (3e-3, r 1), 15,259 steps,
+      decay from 12,207, ckpt_every 305), each with only its comment, name, out_dir, seed and an added data_seed line changed:
+      INIT family, data_seed 1: e3_20m_A_s1_P3 (seed 1), e3_20m_A_init2, init3, init4, init5 (seeds 2 to 5)
+      DATA family, seed 1:      e3_20m_A_s1_P3 (data_seed 1), e3_20m_A_data2, data3, data4, data5 (data seeds 2 to 5)
+      e3_20m_A_s1_P3 is A20 s1 again at this part's commit (Part 2's ran at 3c102f7), member 1 of both families, as at 5M.
+    STATISTICS (e3analyze_p3_20m.py): e3analyze_p3.py's family() and rule1(), unchanged, on e3analyze_p2.py's 20M value()
+      (final 15,259; M over 14,945, 15,250, 15,259; D6's 31 tail records): sigma_init and sigma_data (df 4) as fractions of
+      the family mean, 95% chi-square interval, 80% upper bound; sqrt(2) x each with MDE_u (factor 3.717), k_needed for
+      0.5%, 1% and 2% and rule 2's k.
+      RULE 4 AT 20M (registered here): for "same stream, new init" the reference is the larger of sqrt(2) x sigma_init at
+      20M and at 5M (results_part3.json), relative, with the df of the one used; for "same init, new stream" the same with
+      sigma_data. MDE, k_needed and k from that reference, above 5 "underpowered". The other two classes keep PART 2
+      RESULT's rule 4 (with sigma_A in place of sigma_seed only where a pre-registration names Part 1b, as above).
+      Descriptive, no rule: each 20M family SD against its 5M one (95% F interval, df 4 and 4) and against Part 2's 20M
+      sigma_seed (df 4 and 2); sqrt(sigma_init^2 + sigma_data^2) against that sigma_seed; e3_20m_A_s1_P3 beside Part 2's
+      e3_20m_A_s1 (same seed and, by counts, the same stream; another commit).
+      GAP: a run with a GAP or DIVERGED mark leaves its family (df down by one); with fewer than 4 runs left the family gives
+      no SD and this part sets no 20M reference for that class.
+    HOW IT IS READ: RULE 4 AT 20M applies only to verdicts read after PART 3 AT 20M RESULT is recorded. No verdict read
+      before it (SCREENS stages 1 and 2, the robustness stage, any E2 or E3 reading) is re-read. A 30M pre-registration
+      that reads these SDs names results_part3_20m.json by its sha256 and says so, dated before its values.
+  CONFIGS (sha256; e3plan.py --a5 0.003,1 --b5 0.0015,1 --a20 0.003,1 --b20 0.0015,1 --part3 --addendum1 rewrote the 33
+    earlier configs and part1, part2 and part3.txt byte for byte, compared on a dry run to a scratch directory first):
+      0e26246756996c607ae06179ec5b2d6765a7e403ee8a8cc961f979b7c47aabda e3_5m_A_s12.yaml
+      1b9682c4534c9c28493b2724583bdf67159fd86ef476eaa9ee23e9aa3f37f0f9 e3_5m_A_s13.yaml
+      f990526f0f4ace45bb5fbb344ee654ec9ffbe6866f345e85c3fecfb61f16f520 e3_5m_A_s14.yaml
+      30f725d70f3177c1beb2052033b692f32f18ce19b15a8684a87cd14406db49ab e3_5m_A_s15.yaml
+      3852bd9903557b9d648fda3d7f6e6436cf60d6334fec3f7c0f70916767b5d178 e3_5m_A_s16.yaml
+      3f11ddb21f75fae1d0b6b7f2f67020ea2aa29e9aa6ecfdf84c2d6e1e0967e783 e3_5m_A_s17.yaml
+      cd57645e99d6ccc486f46117eafd77882be411f6f890a628037f7755c8b89cae e3_5m_A_s18.yaml
+      3a7870e9cef76afa2a0b0ae598b140e10482fae49b0518232b8ce31765854ee3 e3_5m_A_s19.yaml
+      c6018058d2f8d300256830c0a283f502afdc6dc85f8641896cf8add8ee5d6a58 e3_5m_A_s20.yaml
+      31c6dddf5268af7f0d3a64fc5b513fe43a7cb8aeb77d95e2e34e5b2b96d6a218 e3_5m_A_s21.yaml
+      b5e32c5a5b4b7b6038a988a072a97e1cb20d7c26eacfa219983c2c519f23a62c e3_20m_A_init2.yaml
+      6248a748e26a8407f103170a56cc88e341edb32bf004a0eacc034c331f17f9e7 e3_20m_A_data2.yaml
+      48542f67e263b6bf1443fcaa5454e6471a9c63da7f21cc6cfdbbb0a3e299257d e3_20m_A_init3.yaml
+      61874f53f7694309afbf3b66ae1aca29b7ef0deeb809f2aa332a15260ceab9f0 e3_20m_A_data3.yaml
+      7aef1ba48a07df190e02b966fbd1911063fd184ee36aeef7f6288d7c2d0ad76e e3_20m_A_s1_P3.yaml
+      b22014058ec65034715b84e38b165511c4ac83d57abe48e0accb8a0e2b7990d2 e3_20m_A_init4.yaml
+      c3fdfce857641a7f764110460d08a4dd44d9d28e69f924ca359e9c42fd2931f0 e3_20m_A_data4.yaml
+      a794bdaaa2077dfb7502e30a2133775096c927e12535849927cad76659422ed3 e3_20m_A_init5.yaml
+      4e65e3fc4ef4616bdb7ee70db66e4f21853e4dc175f39fbe4c5d50d2fa986733 e3_20m_A_data5.yaml
+  ORDER (plans/part1b_p3at20m.txt, sha256 17c939a5e86f3d63f08ef88bbde6c85e780bab9635d6252f224f1026774a38e0): "wait_mark E3
+    E3 PART 3 DONE" and "wait_mark SCREENS SCREENS ROBUSTNESS K5 DONE"; the 5M seeds first, s12 to s21, then "mark E3 PART
+    1B DONE"; then 20M init2 data2 init3 data3 s1_P3 init4 data4 init5 data5 (Part 3's interleave: a stopped queue leaves
+    balanced families and the shared member at the time centre), then "mark E3 PART 3 AT 20M DONE". plans/CURRENT names
+    part1b_p3at20m.
+  QUEUE: queue_e3.sh (E2's engine, unchanged: PAUSE, STOP, 75 C, gpu.lock per run for training plus scoring, preflight
+    --strict, train.py --require-committed, final plus two rolling checkpoints scored), from its own bundle, planck-kit/
+    planck_e3p1b.bundle, started by e3p1b_waiter.sh with pcdetach.sh (planck.bundle and send_kit.sh are not used). The
+    waiter waits while any E3 queue, launcher, waiter or E3 train.py runs, while a SCREENS queue or launcher, robust_waiter.sh,
+    chain_waiter.sh or the C6 runner (diag_queue.sh, diag_runner.py) runs, until marks/SCREENS_ROBUSTNESS_K5_DONE exists
+    with the SCREENS log's clean robustness_k5 end and robust_waiter.log carries its DONE line for the C6 robust group, and
+    while under 41 GB are free. Then it clones the bundle, checks CURRENT, the plan's sha256 and the five code trees, and
+    runs the queue with QUEUE_MIN_FREE_GB=41 (queue_lib's own knob: a run starts only with 41 GB free, and one run writes
+    under 0.6 GB, so 40 GB stay free). It relaunches after a 2 h gpu.lock wait or a 30 min GPU memory wait (at most 24 times)
+    without waiting on SCREENS again, gives up on any other end, and never runs twice (its flock and the queue's
+    queue.lock). Nothing on the PC starts it after a reboot or a power cut (boot.d has no E3 entry, and pc/wsl/boot.d is
+    not E3's to change): the same pcdetach.sh command, by a person or a later session, starts it again, and it resumes (the
+    queue skips scored runs; train.py resumes from latest.json). Until then the GPU sits idle for E3.
+    The PC at 21:00 EDT: robustness_k5 ended at its mark 17:32:46, robust_waiter.log's DONE line 17:38:46, no queue, waiter
+    or train.py running, GPU 41 C and 0% busy. At 21:31 the waiter's --decide on the real state (read only) printed "LAUNCH
+    robustness_k5 and the C6 robust group ended; OK E3's last queue (part3.txt) ended cleanly; 167 GB free".
+  GPU AND DISK (planning figures, not caps): Part 2's 20M runs held gpu.lock 1.51 h each (86 min training, 4.4 min scoring;
+    logs/part2), Part 3's 5M runs 18.4 to 20.7 min: about 3.3 h for Part 1b and 13.6 h for Part 3 at 20M, 17 h of holds
+    before waits. A 20M hold is above the 35 min other chains keep to and under the 2 h after which a waiting SCREENS queue
+    stops (its own waiter relaunches it). Run directories measured on the PC: 0.13 GB per 5M run, 0.49 GB per 20M run, about
+    5.8 GB in all; 167 GB free at 21:00.
+  COPY-BACK (as PART 3 ANALYZER's): out/<run>/ (bpb.jsonl; preflight.json; train_tail.jsonl, steps above 7,477.4 at 5M and
+    above 14,953.82 at 20M; run_records.json without config, out_dir, time, checkpoint and env.host; a GAP or DIVERGED
+    mark), logs/part1b/ after "MARK E3 PART 1B DONE" and logs/part3_20m/ after the plan's end (queue_e3.txt, status.jsonl,
+    every code_sha256_* of this plan's starts, e3p1b_waiter.log). sha256 of each copied file compared on both machines.
+  ANALYZERS (with this entry, before any value): e3analyze_p1b.py, e3analyze_p3_20m.py and e3add1_lib.py, importing
+    e3analyze.py, e3analyze_p2.py and e3analyze_p3.py unchanged (e3add1_lib.py memoizes their quantile functions in its own
+    process: the same values, computed once). Checks: e3analyze_p3.py's per run at each size; this plan's starts, order and
+    marks; each start's code list equal to Part 3's outside experiments/E3_seed_noise/ (so the FIXED 2 checks fail on Part
+    3's five and nothing else) and holding these configs, the plan and the analyzers as on disk; Part 1b's 10 streams
+    pairwise different and none a Part 1 seed's; the 20M split and s1_P3 drawing Part 2's s1 stream; the earlier results
+    files and the five BASE records by sha256. Results go to results_part1b.json, tables_part1b.txt, results_part3_20m.json
+    and tables_part3_20m.txt; results.json, results_part2.json, results_part3.json and results_part4d.json stay as they are.
+  DEVIATIONS POLICY unchanged. A run cut by a power cut or a reboot and resumed (resumed_from set, a third run record,
+    a second train line in queue_e3.txt) fails run_checks by design (records, run setting, queue): neither analyzer reads
+    past that. Before any value is read, a person records it as a deviation with its resumed_from and the cut's log lines;
+    it is then read as a GAP run (it leaves its part or family), registered here before any value exists.
+  TESTS (2026-10-12, this step; Mac CPU, no model, on an export of HEAD 6f478ef plus this step's 39 files unless marked;
+    the PC only where named): tests/test_add1_plan.py 8 (the 19 configs against Part 1's A1 and Part 2's A20 s1 line by
+    line; the plan and CURRENT; e3plan.py writing them, with the 33 earlier configs and part1, part2 and part3.txt pinned
+    unchanged; the pins in e3add1_lib.py and the waiter; this entry's hashes and phrases; PART 1b PARITY's log line by
+    line; no private identifier and no dash character in any new file), tests/test_e3p1b_waiter.py 35 (the waiter whole
+    on a fixture home and bundle: each WAIT, LAUNCH, RELAUNCH and GIVEUP above, a relaunch not waiting on SCREENS again,
+    --decide reading only, an inherited GIT_DIR never written; the five tree pins equal HEAD's and 4962426's trees by git),
+    tests/test_e3analyze_add1.py 13 (both analyzers on tests/add1fixture.py's synthetic records, built from Parts 1 and 2's
+    copies: the checks fail on exactly Part 3's five; every statistic recomputed by another route, with scipy 1.18.1
+    quantiles typed in and p from a t density integrated numerically; GAPs). Mutants, each watched failing: e3analyze_add1_
+    mutants.py --fixture 46 of 46 DATA mutants killed (each by the check it targets) and --code 23 of 23 statistics mutants;
+    tests/mutation_add1.py 52 of 52 (plan, CURRENT, configs, e3plan.py, this entry, the parity log, the lib's pins, the
+    waiter, the fixture's git guard). Changed for this entry: tests/test_part3_plan.py (CURRENT now names this plan;
+    e3plan.py's run adds --addendum1 and 52 configs; the Part 1 and 2 pin skips Part 1b's configs) and tests/
+    mutation_e3.py (current_left_at_part2 re-anchored on the new CURRENT; gen_rerun_moved on Part 3's own "if k == 4:" line,
+    since e3plan.py now has two): 38 of 38 killed. The E3 suite, models/tests and the two screens test files that read E3's notes, on the export (the repository's git
+    dir passed to the git-reading tests as an argument): 161 passed, none skipped. On the PC
+    (WSL, bash 5.3, real flock, pgrep, sha256sum, df and git), in a scratch directory with a stub queue: the waiter waited
+    while a SCREENS-pattern process ran, launched, relaunched after a 2 h lock wait, ended DONE; started again it said DONE
+    from the mark; a second waiter beside a running one exited at the real flock; a wrong harness tree gave GIVEUP before
+    any launch; the scratch directory was removed. preflight.py (not --strict, the configs being uncommitted) of the 19
+    configs from a scratch code root on the PC: 19 ok, no refusal; one engine dict, equal to FIXED 1; shares and n_files
+    equal FIXED; n_params 5,010,133 and 20,001,511.
+
+PART 1b PARITY (2026-10-12, written 21:35 EDT after the run it reports, Claude, the E3 addendum workflow; one PC gpu.lock
+hold; nothing committed when written)
+  WHY: Part 1b pools with Part 1's arm A, which ran at e39112a; the pool reads one computation only if the default path
+    trains alike at both commits. PART 3 CUDA PARITY covered 27d8cb7 against 77ab43f, not e39112a.
+  TREES: ref = git archive of e39112a (Part 1's queue commit), new = git archive of HEAD 6f478ef, whose harness/, data_prep/,
+    tokenizer/ and corpus/ equal 4962426's and the trees e3p1b_waiter.sh pins. harness/train.py sha256 805bf5f85cdfb07c (ref)
+    and aa07b64c7a4e3089 (new). Tarballs p1bpar_ref.tgz fddd2aa2c03ec2de..., p1bpar_new.tgz 27a0f88b22b63b5f...
+    (logs/parity_p1b/p1bpar.sha256), checked by sha256sum -c on the PC before the lock.
+  RUN: parity_p1b_cuda.sh (this folder), started by pcdetach.sh; one gpu.lock hold 21:14:52 to 21:15:16 (GPU 41 C, 650 MiB
+    in use at the start; 43 C after), Python 3.14.4, torch 2.13.0+cu130, CUDA 13.0; harness/default_parity.py of the new tree,
+    --device cuda (bf16, deterministic algorithms, 24 steps, its tiny CUDA model, varlen and batched; log records, the final
+    checkpoint with the CUDA RNG, the start record and the imported modules compared with no tolerance).
+  RESULT:
+    A  ref against new (registered): log, checkpoint and start record identical, 24 records, final loss 3.07388 for each tree; the
+       only module the new tree imports and the old does not is durable (D4), so default_parity printed FAIL for that import
+       alone, which is the wanted result.
+    B  mutant of new, data_seed absent gives seed + 1: FAIL as wanted (the log and the checkpoint differ, final loss 2.93466).
+    C  ref against ref: PASS as wanted (one tree, two processes, bitwise).
+    Log logs/parity_p1b/e3p1b_parity_cuda.log, sha256 d85dd6ac64949b5f5bfe261122116ed879466f683c444b6886203acf9aafb452, equal
+    on both machines ("DONE ok").
+  REHEARSED before the run, on the PC with --device cpu and a scratch lock (A as wanted, B FAIL, C PASS; "DONE ok"), and
+    with the three runs swapped in a scratch copy of the driver (A, B and C each "NOT the wanted" result, "DONE NOT OK"), so
+    the driver's verdict lines can fail. Both scratch work directories were removed.
+  CONSEQUENCE: on CUDA the default path at these trees trains bitwise as at e39112a in this test; the remaining difference
+    is fsync before rename (D4). Part 1b pools with Part 1 under that reading. A later change to these trees needs its own
+    check before Part 1b runs: e3p1b_waiter.sh refuses any other tree.

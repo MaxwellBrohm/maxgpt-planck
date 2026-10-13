@@ -1,0 +1,43 @@
+2026-10-12 21:14:50 parity_p1b start; kit planck-kit; work e3p1b_parity_20261012_211450; device cuda
+p1bpar_ref.tgz: OK
+p1bpar_new.tgz: OK
+2026-10-12 21:14:50 ref commit e39112adf08811a852b06c162b4bcefaae287855; new commit 6f478ef69d302d4ad92f1ddf9565239ea026160b
+python 3.14.4 torch 2.13.0+cu130 cuda 13.0
+2026-10-12 21:14:51 tree ref train.py sha256 805bf5f85cdfb07c
+2026-10-12 21:14:51 tree new train.py sha256 aa07b64c7a4e3089
+2026-10-12 21:14:51 tree mut_b train.py sha256 69c6d13513c3357c
+2026-10-12 21:14:51 waiting for gpu.lock
+2026-10-12 21:14:52 gpu.lock held (GPU 41 C, 650 MiB in use)
+2026-10-12 21:14:52 run A: --ref ref/harness --new new/harness --device cuda
+[default_parity] cuda: 24 log records, final loss 3.07388 vs 3.07388; start varlen batched; work <work>/work_A
+[default_parity] log: identical
+[default_parity] checkpoint: identical
+[default_parity] start: identical
+[default_parity] new_imports: ['durable']
+[default_parity] modules only the reference imported: []
+[default_parity] FAIL
+2026-10-12 21:15:00 run A rc 1
+2026-10-12 21:15:00 run B: --ref ref/harness --new mut_b/harness --device cuda
+[default_parity] cuda: 24 log records, final loss 3.07388 vs 2.93466; start varlen batched; work <work>/work_B
+[default_parity] log: ['[0]/loss', '[0]/gnorm', '[0]/tokens', '[0]/sup_tokens', '[0]/drawn_chat', '[1]/loss', '[1]/gnorm', '[1]/tokens']
+[default_parity] checkpoint: ['/model/tok_emb.weight', '/model/blocks.0.attn_norm.weight', '/model/blocks.0.attn.q_proj.weight', '/model/blocks.0.attn.k_proj.weight', '/model/blocks.0.attn.v_proj.weight', '/model/blocks.0.attn.o_proj.weight', '/model/blocks.0.attn.q_norm.weight', '/model/blocks.0.attn.k_norm.weight']
+[default_parity] start: identical
+[default_parity] new_imports: ['durable']
+[default_parity] modules only the reference imported: []
+[default_parity] FAIL
+2026-10-12 21:15:08 run B rc 1
+2026-10-12 21:15:08 run C: --ref ref/harness --new ref/harness --device cuda
+[default_parity] cuda: 24 log records, final loss 3.07388 vs 3.07388; start varlen batched; work <work>/work_C
+[default_parity] log: identical
+[default_parity] checkpoint: identical
+[default_parity] start: identical
+[default_parity] new_imports: identical
+[default_parity] modules only the reference imported: []
+[default_parity] PASS
+2026-10-12 21:15:16 run C rc 0
+43, 651 MiB
+2026-10-12 21:15:16 gpu.lock released
+2026-10-12 21:15:16 RESULT A rc 1: log, checkpoint and start record identical; new imports ['durable'] only (D4), as wanted
+2026-10-12 21:15:16 RESULT B rc 1 FAIL as wanted (log and checkpoint differ: mutant killed)
+2026-10-12 21:15:16 RESULT C rc 0 PASS as wanted (one tree, two processes)
+2026-10-12 21:15:16 DONE ok

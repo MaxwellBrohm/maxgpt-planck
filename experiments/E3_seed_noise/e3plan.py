@@ -1,6 +1,6 @@
 """Write E3 run configs and queue plans from E2's recorded picks (stdlib; Mac or PC, no torch).
 
-  python e3plan.py --a5 ETA,R --b5 ETA,R [--a20 ETA,R --b20 ETA,R] [--part3] [--out-dir DIR]
+  python e3plan.py --a5 ETA,R --b5 ETA,R [--a20 ETA,R --b20 ETA,R] [--part3] [--addendum1] [--out-dir DIR]
 
 ETA = optim.lr, R = embed_lr / lr = scalar_lr / lr, exactly as E2's result lines give A, B, A20 and B20 (E3
 notes, ARMS). Nothing is run. Configs go to configs/ (or --out-dir, for a dry look), plans to plans/:
@@ -13,6 +13,11 @@ notes, ARMS). Nothing is run. Configs go to configs/ (or --out-dir, for a dry lo
              shared member sits mid-queue; marks "E3 PART 3 DONE" (notes.txt PART 3 REOPENED). Every Part 3 config
              writes data_seed, which harness/train.py reads since that entry (data_seed_of): preflight.py refuses a
              data_seed the harness does not read, so an older commit stops there instead of running a wrong Part 3.
+  part1b_p3at20m.txt  (with --addendum1 and --a20; notes.txt ADDENDUM 2026-10-12) waits for "E3 PART 3 DONE" and
+             SCREENS' "SCREENS ROBUSTNESS K5 DONE"; Part 1b: 5M arm A seeds 12..21 (Part 1's arm A config, seed
+             changed; 9..11 stay rule 5's refresh seeds), marks "E3 PART 1B DONE"; then Part 3 at 20M: Part 3's design
+             from A20's config (init2 data2 init3 data3 e3_20m_A_s1_P3 init4 data4 init5 data5); marks "E3 PART 3 AT
+             20M DONE".
 Schedules (E3 notes): full WSD, warmup 76, 20% linear decay; 5M 7,630 steps (decay from 6,104), 20M 15,259
 steps (decay from 12,207); ckpt_every = round(2% of total) = 153 / 305, keep_last 2 (base), plus final.
 The joint order with E2 comes from the marks: E2's 20M plan starts with "wait_mark E3 E3 PART 1 DONE".
@@ -61,6 +66,7 @@ def main(argv=None) -> int:
     ap.add_argument("--a20", default=None)
     ap.add_argument("--b20", default=None)
     ap.add_argument("--part3", action="store_true")
+    ap.add_argument("--addendum1", action="store_true", help="Part 1b and Part 3 at 20M (needs --a20)")
     ap.add_argument("--out-dir", default=None, help="write configs and plans here instead (dry look)")
     a = ap.parse_args(argv)
     conf = a.out_dir or os.path.join(HERE, "configs")
@@ -105,6 +111,26 @@ def main(argv=None) -> int:
                 files[n] = config(n, "5m", "A", *arms["A"], seed, dseed, f", data_seed {dseed}")
                 p3.append(f"train {n}")
         out_plans["part3"] = p3 + ["mark E3 PART 3 DONE"]
+    if a.addendum1:
+        assert a.a20, "--addendum1 needs --a20 (Part 3 at 20M uses A20's config)"
+        a20 = lr_pair(a.a20)
+        pa = ["# E3 Part 1b, then Part 3 at 20M (e3plan.py; notes.txt ADDENDUM 2026-10-12)",
+              "wait_mark E3 E3 PART 3 DONE", "wait_mark SCREENS SCREENS ROBUSTNESS K5 DONE"]
+        for s in range(12, 22):          # Part 1b: Part 1's arm A config at new seeds (9..11 are rule 5's refresh)
+            n = f"e3_5m_A_s{s}"
+            files[n] = config(n, "5m", "A", *arms["A"], s, None, ", Part 1b")
+            pa.append(f"train {n}")
+        pa.append("mark E3 PART 1B DONE")
+        for k in range(2, 6):            # Part 3's design and order at 20M
+            if k == 4:
+                n = "e3_20m_A_s1_P3"
+                files[n] = config(n, "20m", "A", *a20, 1, 1, ", data_seed 1, A20 s1 again at this part's commit")
+                pa.append(f"train {n}")
+            for fam, seed, dseed in (("init", k, 1), ("data", 1, k)):
+                n = f"e3_20m_A_{fam}{k}"
+                files[n] = config(n, "20m", "A", *a20, seed, dseed, f", data_seed {dseed}")
+                pa.append(f"train {n}")
+        out_plans["part1b_p3at20m"] = pa + ["mark E3 PART 3 AT 20M DONE"]
     for n, txt in files.items():
         p = os.path.join(conf, n + ".yaml")
         if os.path.exists(p) and open(p).read() != txt:
