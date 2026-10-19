@@ -29,6 +29,11 @@ BUDGET  B1.  LEARNING RATE  B3 (ReLU-squared's activation scale differs from SiL
 SEEDS AND PAIRING
   Seeds 101-105, paired with base2_s<seed>. Class NEW INIT: the MLP draws two matrices per layer instead of three, of
   other shapes, so every later draw moves.
+  LOOK 2 (round 3, 2026-10-12, N7 (b)): seeds 101-105 are look 1 of SCREENS2's SEQUENTIAL RULE (B4 (5)), which
+  governs every verdict below: F(CHAT) at c1, the PROSE guard at t(0.975, df); a contrast INCONCLUSIVE at look 1
+  runs seeds 106-110 for its arm and its reference and is read once more at k 10, final ("not resolved at 5M, k
+  10"); a SIA contrast is read only after the complete-pool check (POOLED SIA CHECK ACROSS LOOKS); Tier 0 (B8) is
+  read once on seeds 101-105 and paired with the final verdict only (TIER 0 UNDER TWO LOOKS).
 
 METRIC AND DECISION RULE (B5, B7; "ReLU-squared MLP")
   P-172's own test is a "5M/30M A/B" (LEDGER): this screen is its 5M half on every verdict (B7 OWN-SIZE).

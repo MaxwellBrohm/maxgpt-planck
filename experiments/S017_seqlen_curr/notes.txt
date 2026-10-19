@@ -5,6 +5,10 @@ RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and
 
 PRE-REGISTRATION, DRAFT WRITTEN 2026-10-11 (Claude, W5), before the flag, any S017 config, run or result exists; nothing
 committed. Run, no model: arithmetic. SCREENS2.txt B1-B9 are part of this entry.
+AMENDED 2026-10-12 (round 3 critique, SCREENS2.txt CHANGES AFTER CRITIQUE (ROUND 3)), before any batch 2 value and
+before any S017 g-check or seed run: N6 moves the class from SAME INIT to SIA (SEEDS AND PAIRING), with the
+init-isolation test that needs (HARNESS CODE NEEDED); N7 (b) adds the LOOK 2 line. The text before it is in git
+history (6f478ef).
 
 WHY
   P-108 (LEDGER): "Sequence-length curriculum (T=1024 then 2048)"; prior art Dataset Decomposition (1B); limit #4;
@@ -35,9 +39,19 @@ THE CHANGE (one flag)
 WHAT STAYS IDENTICAL  B1 and the token stream. LRs by the g pick (B3).
 BUDGET  B1: the same 250.0M slots; only the attention span of the first half changes.
 
-SEEDS AND PAIRING  Seeds 101-105, paired with base2_s<seed>. Class SAME INIT: identical draws and identical token stream,
-  the only difference a training-time attention limit, nearest E3 rule 1's first row ("loss masks"); SD_ref = SD_d with
-  the same-init noise check (C4, B4 (3)).
+SEEDS AND PAIRING  Seeds 101-105, paired with base2_s<seed>. Class SIA (round 3, N6; it read SAME INIT before, SD_ref
+  SD_d): identical draws and identical token stream, the only difference a training-time attention limit. E3 rule 1's
+  first row ("loss masks") is its nearest row, but the limit changes what attention computes for half of training,
+  which is closer to an architecture change than to a loss mask, so it is read at SIA's u x SD_d, the stricter
+  reading (as C4 put S006 in SIA), with B4 (3)'s per-arm check against it, and it joins C4's pooled SIA check
+  (SCREENS2 POOLED SIA CHECK ACROSS LOOKS). SIA only if its init-isolation test passes in the committed harness (the
+  flag draws nothing; HARNESS CODE NEEDED), else NEW INIT.
+  LOOK 2 (round 3, 2026-10-12, N7 (b)): seeds 101-105 are look 1 of SCREENS2's SEQUENTIAL RULE (B4 (5)), which
+  governs every verdict below: F(CHAT) at c1, the PROSE guard at t(0.975, df); a contrast INCONCLUSIVE at look 1
+  runs seeds 106-110 for its arm and its reference and is read once more at k 10, final ("not resolved at 5M, k
+  10"); a SIA contrast is read only after the complete-pool check (POOLED SIA CHECK ACROSS LOOKS); Tier 0 (B8) is
+  read once on seeds 101-105 and paired with the final verdict only (TIER 0 UNDER TWO LOOKS). Q2 reads seeds
+  101-105 only; at 106-110 its times are reported.
 
 METRIC AND DECISION RULE (B5, B7; "span curriculum")
   NOMINATE      lower chat bpb: a candidate (loss gain beyond the ledger's speed claim); Q2 reported beside it.
@@ -72,10 +86,11 @@ HARNESS CODE NEEDED (W1's; default off; each test watched failing on its mutant)
   - Tests: off equals absent and the pre-flag commit (20 CPU steps); the split relabels exactly the documents that cross
     the column, and only before until_step (a 30-step CPU run with until_step 15); the token stream and targets equal
     BASE's (hashes per step); resume across the switch (10 + 20 = 30 with until_step 15); leak probes on split rows;
-    scoring is unchanged (bpb.py never sees the flag).
+    scoring is unchanged (bpb.py never sees the flag); init isolation for the SIA class (round 3, N6): with the flag
+    on, every parameter at build and the torch RNG state after build and after the first step equal BASE's, bitwise.
   - Mutants: the split kept after until_step; the split never applied; split by position in the document instead of the
     row column; targets masked at the split; positions not restarted at the split; the loader rebuilt at 1,024 (a
-    changed stream).
+    changed stream); a torch RNG draw in the split path (round 3, N6).
 
 COST (est.)  8 runs at about 0.31 h, plus up to 5 IND-only runs. About 2.5 h registered.
 

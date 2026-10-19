@@ -16,6 +16,11 @@ and before any S020 flag, config or run: M1 adds s020_raw (S007's form re-run in
 against it (V2) as well as the KV form against BASE (V3); L3 makes the REJECT wording depend on Q2's reading; the
 combinations of V2 and V3 are fixed (L7 (c)'s kind); TIE now names its 20M trigger (Q2 EARLIER, or Tier 0 BETTER as
 C8), which the OWN-SIZE line already implied. The draft before it is in git history (92f2ca8).
+AMENDED again 2026-10-12 (round 3 critique, SCREENS2.txt CHANGES AFTER CRITIQUE (ROUND 3)), before any batch 2 value
+and any S020 flag, config or run: N7 (a) fixes the arm names to their run-name stems, s020_raw, s020_post and s020_kv
+(WHY and COST said smear_post and smear_kv); N2: the TIE's Tier 0 trigger is read once on seeds 101-105 and paired
+with the final verdict only (SCREENS2 TIER 0 UNDER TWO LOOKS); N5: before a contrast's first look-2 run, its arm's
+s101 replay, and s020_raw's when V2 extends (SCREENS2 ARM REPLAYS). The text before it is in git history (6f478ef).
 
 WHY
   S007 read the registered form (raw key, before QK-norm and RoPE, keys only) as loss-neutral at 8 layers. Two choices in
@@ -23,15 +28,15 @@ WHY
   smear can only turn the key, not add the previous token's key at a learned weight (S007 KNOWN RISKS); after QK-norm
   the previous key is added at its normalised size and alpha sets its weight directly; (2) values unsmeared: KV-shifting
   attention shifts both, so a head can copy the previous token's value as well as match on its key. Each form is a
-  one-flag change of S007's arm. smear_post is one mechanism against BASE (a smear of the normalised key), so V1 reads
-  it against BASE. smear_kv is two mechanisms against BASE (S007's key smear and a value smear), so the value smear's
+  one-flag change of S007's arm. s020_post is one mechanism against BASE (a smear of the normalised key), so V1 reads
+  it against BASE. s020_kv is two mechanisms against BASE (S007's key smear and a value smear), so the value smear's
   own effect needs S007's form in the same batch: s020_raw (round 2, M1, for the reason S019 re-runs Canon-AC: without
   it the question would compare across batches and harness commits).
 
 QUESTIONS (decided, B7; three contrasts in B7's family)
   V1  s020_post vs base2: the smear after QK-norm (before RoPE), keys only (two keys against BASE, one mechanism).
   V2  s020_kv vs s020_raw: the value smear added to S007's key smear (one key, smear_value; s020_raw is this contrast's
-      BASE, paired per seed, as S018's base7 for D2 and S019's canon_ac for E1).
+      BASE, paired per seed, as S018's base7 for D2 and S019's s019_ac for E1).
   V3  s020_kv vs base2: the KV form as a whole (two keys against BASE; the form a NOMINATE carries to 20M).
   Q2 (P-024's own question, B6 ONSET RULE): does induction form earlier (onset_half at matched LR) for either form?
   Reported, no rule, not in the family: s020_raw vs base2 (batch 2's replication of S007's contrast; S007's verdict
@@ -130,7 +135,7 @@ HARNESS CODE NEEDED (default off; each test watched failing on its mutant; nothi
     engine setting and one commit for all three), analyze2's V1, V2, V3 and the two reported contrasts, OWN-SIZE rows,
     onset sigma for V2.
 
-COST (est., planning only)  3 arms x (3 g-check + 5 seed runs): s020_raw and smear_post 0.32 h per run (S007's measured
-  x1.027), smear_kv 0.33 h (assumed x1.05): about 7.7 h registered, plus up to 15 IND-only runs (about 4.8 h) and
+COST (est., planning only)  3 arms x (3 g-check + 5 seed runs): s020_raw and s020_post 0.32 h per run (S007's measured
+  x1.027), s020_kv 0.33 h (assumed x1.05): about 7.7 h registered, plus up to 15 IND-only runs (about 4.8 h) and
   look-2 seeds if the SEQUENTIAL RULE extends a contrast (the arm and its reference, 5 runs each). Before round 2: 2
   arms, about 5.2 h and 3.2 h.

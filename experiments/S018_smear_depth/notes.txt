@@ -35,6 +35,12 @@ BUDGET  B1 (7 layers: about x0.89 of BASE's time per run, est.).
 SEEDS AND PAIRING  Seeds 101-105. D1 and D3 pair with base2_s<seed>: class NEW INIT (a block fewer shifts every later
   draw). D2 pairs smear7 with base7 at each seed: class SIA if S007's init-isolation test passes at 7 layers (it is
   S007's flag; a 7-layer case is added to its test), else NEW INIT.
+  LOOK 2 (round 3, 2026-10-12, N7 (b)): seeds 101-105 are look 1 of SCREENS2's SEQUENTIAL RULE (B4 (5)), which
+  governs every verdict below: F(CHAT) at c1, the PROSE guard at t(0.975, df); a contrast INCONCLUSIVE at look 1
+  runs seeds 106-110 for its arm and its reference and is read once more at k 10, final ("not resolved at 5M, k
+  10"); a SIA contrast is read only after the complete-pool check (POOLED SIA CHECK ACROSS LOOKS); Tier 0 (B8) is
+  read once on seeds 101-105 and paired with the final verdict only (TIER 0 UNDER TWO LOOKS).
+  The depth reading below (P-024's depth half) combines D1, D2 and D3's final verdicts.
 
 METRIC AND DECISION RULE (B5, B7 per contrast, then the bet's reading)
   Each contrast gets its C7 verdict (NOMINATE, REJECT, TIE, GUARD-FAIL, INCONCLUSIVE) and Holm reading.
