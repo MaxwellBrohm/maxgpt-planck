@@ -1,0 +1,190 @@
+S021: PaTH attention at 5M, in place of RoPE in every layer (LEDGER P-020's fifth variant, "PaTH"; T001 PREREG, NOT
+IN T001, and T001 RESULTS: "PaTH: not run (PREREG NOT IN T001); still Max's question"; arXiv 2505.16381, "PaTH
+Attention: Position Encoding via Accumulating Householder Transformations", Yang et al. 2025).
+Added to batch 2 on 2026-10-19 by Claude under Max's delegation of 2026-10-06 (SCREENS2.txt S021 (2026-10-19) quotes
+it); not in the workflow's first list and not one of Max's 2026-10-12 answers.
+RTX 5070 (PC) only, under gpu.lock. The Mac runs no model: it writes configs and reads result JSON.
+
+PRE-REGISTRATION, DRAFT WRITTEN 2026-10-19 (Claude, W5), before the flag, any S021 config, run or result exists, and
+before any batch 2 value (no batch 2 run has been queued); nothing queued. Run, no model: parameter and hours
+arithmetic (BASE's count reproduced to 5,010,133 first from the committed shapes) and a numpy check of the product's
+order and UT form (HARNESS CODE NEEDED). SCREENS2.txt B1-B9 (with its SEQUENTIAL RULE) are part of this entry. Read
+before writing: T001 PREREG (NOT IN T001) and RESULTS; LEDGER P-020; S005's notes and RESULT (the forget gate, P-020's
+first variant: NOMINATE, FLAGGED for lower HD; SIA, k 2, the mask engine at micro 8 x accum 2); harness/blocks.py
+Attention and model.py's init at HEAD; the paper (arXiv HTML) and the authors' released code in flash-linear-attention
+(MIT): fla/layers/path_attn.py, fla/models/path_attn (config and model), fla/modules/causal_conv1d/ops.py and
+fla/ops/path_attn/naive.py. These were read on 2026-10-19 through a web fetch that returns summaries, so no exact
+source line was seen; REGISTERED CHECKS below is what binds the form.
+
+WHY
+  P-020 (LEDGER, rank 20, on PLAN's must-run list): a recency path in attention; its variants are the forget gate,
+  stick-breaking, PaTH, Selective Attention and learned ALiBi slopes. T001's toy picked stick-breaking for the 30M test
+  from four of them; PaTH was never built, for a build cost (T001 PREREG: "so under Max's rule it goes to Max as a
+  question, not a silent cut"). S005 screened the forget gate at 5M. PaTH is the only P-020 variant with no reading
+  anywhere in the repo. It replaces RoPE's fixed rotation with a data-dependent product of Householder-like transforms
+  between each key and query, so a head can learn where to stop looking back (a recency path is one thing it can
+  express; the paper reports gains over RoPE in language modelling at 760M and on synthetic recall and state tracking).
+  This screen asks the 5M loss question for it, as S005 did for the forget gate.
+
+QUESTION (decided, B7; one contrast in B7's family)
+  H1  s021_path vs base2m8: does PaTH in place of RoPE, in every layer, change held-out chat bpb at 5M, 250M slots?
+      (two keys against its BASE, model.path_attn and model.mlp_hidden: B2's equal-total fit, THE CHANGE.)
+  Q2 (reported, B6): onset at matched LR, and what the transforms learn (DIAGNOSTICS).
+
+THE CHANGE (one flag, with B2's equal-total fit)
+  model.path_attn: true (new field; default false, omitted from to_dict when false). Registered form: the released
+  layer at its defaults (low-rank w, the short conv on w with kernel 3, no conv bias, no forget gate). In every layer,
+  per KV head h and token t, from the attention sublayer input a_t (after attn_norm and norm scaling, as S005's a_t):
+    w_t = L2Norm_h(SiLU(DWConv3(U_w D_w a_t))): D_w 192 -> 32 and U_w 32 -> 192, no bias; DWConv3 a depthwise causal
+      conv of kernel 3 over the 192 channels, no bias, whose taps read zero across a document start (and before the
+      row start on the doc=None path); L2Norm over each KV head's 64 channels, in fp32;
+    beta_(t,h) = 2 x sigmoid(v_h . a_t + b_h), in fp32, so beta lies in (0, 2) (one projection v, b per KV head);
+    H_t = I - beta_t w_t w_t^T (per KV head, 64 x 64);
+    logit(i, j) = q_i^T H_i H_(i-1) ... H_(j+1) k_j / sqrt(64) for j <= i in i's document (the empty product, I, at
+      j = i); softmax over j; values, the value residual and the attention gate as BASE.
+  q and k are BASE's after QK-norm (kept: the released layer's use_qk_norm option, so the one change is the position
+  encoding); RoPE is applied to neither (PaTH replaces it). The order is the paper's equation (attention proportional
+  to exp(k_j^T (product over s = j+1..i of H_s) q_i), each H symmetric) and the released decoding step (each new
+  token's H updates every cached key in place, and its own key is cached untransformed).
+  INIT: D_w, U_w, v and the conv taps normal(0, 0.02), b zero (the released model's _init_weights; 0.02 is also the
+  harness's init_std), drawn after every BASE draw (registered last), so every BASE parameter keeps its draw. At init
+  v . a_t has SD about 0.28, so beta is about 1 and each H_t is close to a projection: distant keys start attenuated,
+  and with no RoPE the arm starts away from BASE's function.
+  PARAMETERS per layer 6,144 (D_w) + 6,144 (U_w) + 576 (conv) + 579 (v, b) = 13,443; 8 layers 107,544, so PaTH alone
+  is 5,117,677 (+2.15%, outside B2's 2%). B2's equal-total fit, S009's and S010's kind: model.mlp_hidden 465 (from
+  488; 23 x 4,608 = 105,984 fewer), total 5,011,693 (+1,560, +0.03%); arithmetic, count_analytic must equal it.
+  OPTIMIZER (split_params): D_w, U_w and v are 2-D, so "matrix" (NorMuon), as attn_gate_proj; b "scalar"; the conv
+  taps (3-D) "scalar" by name, as Canon's kernels. The authors train every parameter with AdamW; NorMuon for block
+  matrices is the harness's rule and is kept (one change).
+  PRECISION: w, beta and every Householder product in fp32 under bf16 autocast (the paper names bf16 instability of
+  the cumulative product); logits and softmax in fp32; values at the autocast dtype. No beta clipping (the released
+  layer has none). A non-finite or non-falling smoke is a FLAG before any g-check, and any fix (for example the
+  paper's clipping) is a dated amendment before any S021 config.
+  REGISTERED CHECKS, BEFORE THE FLAG IS WRITTEN (as S019's site D): the flag's author reads the raw source of the
+  released layer and of its naive reference (fla/layers/path_attn.py, fla/ops/path_attn/naive.py) and records, value
+  by value, whether this clause matches: rank 32 and no bias; the conv's kernel 3, SiLU and no bias, reset at
+  sequence starts; the L2 norm per KV head; beta = 2 x sigmoid with a bias, per KV head; no RoPE; the product range
+  s = j+1..i with H_i next to q_i; the scale 1/sqrt(64); the init. Any difference is amended into this clause by a
+  dated entry before any S021 config exists, with the parameter count. Optional, recorded either way: the naive
+  reference (plain torch) run on CPU in an isolated directory against the flag's three forms on small inputs.
+
+ENGINE (S005's precedent, applied to BOTH runs of the contrast)
+  Each PaTH logit needs a transform that depends on its (i, j) pair, so the logits cannot go through the flash varlen
+  kernel. The flag runs the mask engine (train.doc_attn mask: the bool causal same-document mask the model builds;
+  doc=None builds the plain causal mask) and refuses varlen (a startup assertion; mutant: varlen silently runs RoPE
+  and flash). Its own BASE runs the same engine at the same micro at every seed (B4 (4); E2 FIXED 1: no comparison
+  mixes engine settings). REGISTERED PLAN, as S005's: both at micro 8 x accum 2 (setting m8, base2m8_s<seed>); if the
+  smoke's mem_fit is not ok there, both at micro 4 x accum 4 (m4, base2m4_s<seed>). The smoke decides, logged by an
+  ENGINE2 edit before any S021 g-check. Memory, arithmetic only: one layer's fp32 logits at micro 8 are 8 x 3 x
+  2,048^2 x 4 B = 384 MiB, and the chunk scan keeps a transformed copy of q per key chunk (32 chunks of 64: 384 MiB
+  more); the PaTH core recomputes its internals in backward (activation checkpointing of that core only), so about one
+  layer's worth is live at a time. S005's own BASE at m8 peaked at 4.80 GiB reserved (its eager smoke).
+
+WHAT STAYS IDENTICAL  B1 otherwise (eager; every block flag on). LRs by the arm's g pick (B3); base2m8 at g 1.
+BUDGET  B1. LEARNING RATE  B3 (the new matrices with the block matrices, b and the conv taps with the scalars).
+
+SEEDS AND PAIRING  Seeds 101-105 (look 1); 106-110 only by the SEQUENTIAL RULE (base2m8 then runs them too). H1 pairs
+  s021_path with base2m8_s<seed>. Class NEW INIT (as S015 and S016): the new modules draw from the torch RNG and the
+  arm starts away from BASE's function, so C4's SIA loosening does not hold, and H1 is not in the pooled SIA check.
+  The init-isolation test is still required (every BASE parameter bitwise; the loop draws nothing after build): it
+  keeps the pairing's draws common. SD_ref sqrt(2) x sigma_init (df 4) with B4 (3)'s per-arm check.
+  OWN BASE CHECK: each base2m8_s<seed> is read beside batch 1's s005_base_s<seed> (the same keys: mask engine, micro
+  8 x accum 2) wherever that run exists, by B1's REPLAY GATE bar; outside the bar is a FLAG for S021 (no H1 verdict is
+  read until it is resolved in a dated entry), as B1. base2m8 - base2 per seed is reported, no rule (S005's check of
+  the engine assumption, free since both exist).
+  LOOK 2: seeds 101-105 are look 1 of SCREENS2's SEQUENTIAL RULE (B4 (5)), which governs every verdict below: F(CHAT)
+  at c1, the PROSE guard at t(0.975, df); a contrast INCONCLUSIVE at look 1 runs seeds 106-110 for its arm and its
+  reference and is read once more at k 10, final ("not resolved at 5M, k 10"); Tier 0 (B8) is read once on seeds
+  101-105 and paired with the final verdict only (TIER 0 UNDER TWO LOOKS). Before H1's first look-2 run, s021_path's
+  and base2m8's s101 replays (ARM REPLAYS).
+
+METRIC AND DECISION RULE (B5, B7 with the SEQUENTIAL RULE; the arm is "PaTH in place of RoPE in every layer, the
+released form, at the equal-total fit")
+  NOMINATE      lower chat bpb at 5M: a 5M loss candidate; PaTH is PROPOSED to PLAN 3d's P-020 pre-registration
+                beside stick-breaking (T001 R2's pick), which decides; nothing changes there on this alone. Its
+                behaviour test is P-020's (MQRAR capacity x1.5, +10 on corrections, latest-wins >= 0.8 on 4/5 seeds),
+                which this does not replace.
+  REJECT        higher chat bpb at 5M: recorded "PaTH in place of RoPE in every layer (the released form, MLP 465)
+                costs loss at 5M", never "PaTH failed" (P-020's win condition is behavioural; arch.md 1.4); reported to
+                PLAN 3d's P-020 pre-registration.
+  TIE           loss-neutral at 5M: nothing adopted; the reading goes to PLAN 3d's P-020 pre-registration with its
+                numbers.
+  GUARD-FAIL    as C7 (the PROSE guard at t(0.975, df) at each look, SEQUENTIAL RULE).
+  INCONCLUSIVE  only after look 2 (k 10): "not resolved at 5M, k 10".
+  OWN-SIZE (B7)  P-020's own test is its toy (2 layers, MQRAR), then a 5M/30M A/B with correction items. For PaTH the
+    toy reading was never run (T001's R2 was read over four variants), and correction items are post-lock behaviour,
+    so on every verdict this screen leaves P-020's own test for PaTH unrun: the bet is recorded "own-size test not run
+    (5M <verdict>)" and listed to Max (B7) with its cost (a PaTH mixer in T001's toy code; T001's runs took about 4
+    minutes each, 115 in 7.89 h) and what it would decide (whether PaTH meets R2's rule beside stick-breaking; R2's
+    pick is not re-opened by it, a new pre-registration decides what follows).
+  FOLLOW-UP (a proposal, not registered): if H1 reads NOMINATE, PaTH-FoX (PaTH with S005's forget gate, the paper's
+  best language-model variant) goes to Max as a 5M screen under its own pre-registration, read against S021's arm.
+
+DIAGNOSTICS (B6; reported)  IND curves and onset at matched LR (IND-only g 1 runs where the pick is not 1); HD, arm
+  minus base2m8 per seed, with S005's flag (an arm BETTER on CHAT with lower HD is flagged: a recency path can buy loss
+  by using less history); SINK on PaTH's own logits (attn_diag rebuilds them). Per layer and KV head at the final
+  checkpoint on the 200 CHAT windows: mean beta, the share of tokens with beta > 1 (a negative eigenvalue), and the
+  mean attended distance (sum over j of p_ij (i - j)) beside base2m8's; tok/s and F(CHAT) per GPU-hour beside the
+  verdict (compute is not matched).
+
+AFTER THE LOCK (B8)  Tier 0 margins on H1 as C8, read once on seeds 101-105 (TIER 0 UNDER TWO LOOKS). E004 held-out
+  items: first-vs-latest pick shares, arm vs base2m8 per seed, reported (P-020's own question, as S005).
+
+KNOWN RISKS
+  - Faithfulness: the harness's own PyTorch form, not the authors' Triton kernel (the same function; rounding differs);
+    three forms are tested against each other, and REGISTERED CHECKS binds the values read through summaries.
+  - PaTH is the only position signal; it was trained from scratch at 760M on 50B tokens in the paper, never at 5M or
+    250M slots. At init each H_t is close to a projection, so far keys start attenuated.
+  - bf16: the paper names instability of the cumulative product; the products run in fp32 here, and a divergence
+    scores +inf (C7), never dropped.
+  - Memory and speed are unmeasured: the T x T logits and the chunk scan in eager PyTorch are assumed x3 of base2m8's
+    time (S005's forget path, also a T x T fp32 term in eager PyTorch, measured x2.26 of its own BASE); the smoke
+    measures both.
+  - The equal-total fit narrows the MLP by 23 units (4.7%); the REJECT wording names it.
+  - P-020 says "in a few attention layers"; the released model puts PaTH in every layer with no RoPE, which is the form
+    tested here; a hybrid (PaTH in some layers, RoPE in the rest) is not tested.
+  - E3's SDs were measured in the varlen engine at micro 16; H1 runs the mask engine at micro 8 x accum 2 (S005's
+    risk; base2m8 - base2 is reported).
+  - NorMuon on PaTH's matrices (the harness's rule) where the authors used AdamW.
+  - Loss is not behaviour (arch.md 1.4); P-020 is decided by its behaviour test. Starter mix and tok_v0_8k only.
+
+HARNESS CODE NEEDED (default off; each test watched failing on its mutant; nothing written yet; written in the Build
+phase, after REGISTERED CHECKS)
+  - config.py: path_attn (bool; omitted from to_dict when false); refused with doc_attn varlen, with batch 1's
+    attention-side flags (canon, forget_gate, smear_key, qk_share, kv_tie) and with every batch 2 flag (no S021 arm
+    uses one).
+  - harness/path.py (new): the projections, the conv and beta; three forms of the logits: NAIVE (each pair's product
+    formed explicitly; tests only), RECURRENT (the released decoding step: each H_t applied to every earlier key, then
+    the new key appended; tests and KVDecoder) and CHUNKED (the training form: per chunk the paper's UT form of its
+    product, H_n ... H_1 = I - W^T T^-1 W with T^-1 = (I + strictLower(D W W^T))^-1 D and D = diag(beta); on
+    2026-10-19 a numpy check in this step's scratchpad (fp64, n 5, d 8, beta in (0, 2)) gave this form within 3e-16 of
+    the explicit product, and the RECURRENT order within 9e-16 of q_i^T H_i ... H_(j+1) k_j; keys moved to their
+    chunk's end and queries to their chunk's start; a right-to-left scan over key chunks that moves each query block
+    across one whole chunk per step; an explicit masked softmax; activation recompute of the core). The chunk size is
+    an implementation choice (64 assumed); every size computes the same function (a test).
+  - blocks.py Attention: with path_attn, RoPE skipped and PaTH's logits on the mask and doc=None paths, with the
+    document starts from the model (as S007's smear). model.py: the PaTH modules drawn in reset_parameters' last step.
+  - budget.py count_analytic: + n_layers x (2 x d x 32 + 3 x n_kv x hd + d x n_kv + n_kv), so 5,011,693 at mlp_hidden
+    465 (a test against the meta build). optim.py: the conv taps to "scalar" by name.
+  - decode.py KVDecoder: per effective layer, the cached keys updated in place by each new token's H, and the conv's
+    last 2 inputs; equal to the full forward. attn_diag.py and diag_runner: PaTH's logits rebuilt for SINK and IND, and
+    the flag check.
+  - Tests: off equals absent and the pre-flag commit (20 CPU steps, bitwise); NAIVE == RECURRENT == CHUNKED in fp64,
+    values and gradients (chunk sizes 1, 3 and 64, a length not a multiple of the chunk, beta near 0, 1 and 2); a
+    hand-computed 3-token case fixing the order; with every beta 0 the arm equals the same weights with no position
+    encoding; causality (a change at t moves no output before t); leak probes (mask, doc=None); doc=None equals the
+    packed slice; the conv reads zero across a document start; recompute gives bitwise equal gradients; init isolation;
+    resume 20 + 20 = 40; KV decode equals the full forward; varlen refused.
+  - Mutants: the own key transformed (product s = j..i); the order reversed (H_(j+1) next to q); RoPE still applied;
+    the conv crossing a document start; the conv centred (reads t+1); w not normalised; beta without the factor 2; the
+    products in bf16; the modules drawn before BASE's draws; the conv taps in "matrix"; PaTH only when doc is given
+    (bpb.py would score the arm without it); a chunk boundary off by one in the scan; the decode step transforming the
+    new key with its own H; varlen accepted.
+  - experiments/screens: the registry's S021 (arm path: model.path_attn true, model.mlp_hidden 465; cls new init;
+    ENGINE2 "S021.path" "m8" by a logged edit after the smoke), NAME2_RE and ORDER2 (s021), B7's 19-contrast Holm
+    family, the OWN-SIZE row, the own-BASE check against s005_base, the prereg text, analyze2's H1.
+
+COST (est., planning only; NO CAP)  s021_path 1.22 h per run (assumed x3 of base2m8), base2m8 0.41 h (S005's own BASE
+  eager smoke, 192,092 tok/s, by SCREENS2 HOURS' method): 3 g-check and 5 seed runs of the arm and 5 base2m8 runs,
+  about 11.8 h registered; up to 2.4 h of extensions, 6.1 h of IND-only runs and 8.1 h of look-2 seeds (the arm and
+  base2m8, 5 each), about 28.4 h with every conditional run.
