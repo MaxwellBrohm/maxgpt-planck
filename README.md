@@ -11,8 +11,8 @@ smallest size that still means something.
 Tiny chat models already exist: released models from 90M to 350M work as loose chat models, and
 hobby and lab models trained from scratch go down to about 5M. What no one has shown is a model
 under 150M passing a strict multi-turn test, and on our test's dev split none of the 13 released chat
-models we scored, from 90M to 2.6B, nor the 9 public small chat models from 5M to 31M we added, reaches
-any of its bars. Planck's bet is that
+models we scored, from 90M to 2.6B, nor the 11 smaller public chat models from 5M to 75M we added,
+reaches any of its bars. Planck's bet is that
 conversational skill is cheap in parameters and knowledge is what is expensive, so a model can
 keep facts outside its weights (in its context, in notes, in a lookup) and spend its parameters on
 the skill. The result we are after is a curve, not a single model: the same recipe at roughly
@@ -43,34 +43,62 @@ Every experiment, its pre-registered rule, its result and its independent audit 
 
 - **Research and idea ledger: done (Sep 23 2026).** Start with [`research/REPORT.md`](research/REPORT.md),
   section 1; every idea is ranked in [`LEDGER.md`](LEDGER.md).
-- **E001, E002, E004, E005: done (E002, E004 and E005 independently audited; E001's checks were built
-  into the run).** Below 2.6B, small instruct models keep the first value after a correction (E001). A 135M model fine-tuned for 400 steps passed E002's rule by a
-  wording shortcut; on E004's harder held-out test it failed the rule but learned an updating rule that
-  transfers to new wording, longer distances and more corrections. Name-based corrections and
-  end-of-turn stopping turned out to be missing data, not a size limit (E005). Keeping three objects
-  apart is still unsolved, and narrow training costs general chat and some knowledge.
-- **Running:** E003, the easy version of the correction test on public base models (TinyStories-1M to
-  Pythia-160M), on the laptop. No result is claimed until the queue finishes and its tables are checked;
-  the five smallest stayed near chance on E004's harder test.
-  E006 (three objects, and protecting general chat) is pre-registered and waits for the RTX 5070.
+- **E001 to E006: done (E002 to E006 independently audited; E001's checks were built into the run).**
+  Below 2.6B, small instruct models keep the first value after a correction (E001). A 135M model
+  fine-tuned for 400 steps passed E002's rule by a wording shortcut; on E004's harder held-out test it
+  failed the rule but learned an updating rule that transfers to new wording, longer distances and more
+  corrections. Name-based corrections and end-of-turn stopping turned out to be missing data, not a size
+  limit (E005). With E002's recipe, none of eight public base models from TinyStories-1M to Pythia-160M
+  passed even the easy version of the correction test (0 of 3 seeds each); it is not read as a capacity
+  limit, since only 400 steps were run and for five models the best learning rate was the lowest one tried
+  (E003). Keeping three objects apart is still unsolved: changing where the latest statement sits in
+  training did not restore it (INCONCLUSIVE, still below E004). Mixing human-written chat into training
+  about halved the replies that open with a training template and cut the knowledge loss, though the chat
+  label holds by a narrow margin (E006).
+- **Calibration (E2, E3): E2 done; E3 Parts 1 to 3 done.** For Planck's own models on the starter data,
+  the best learning rate at 5M (3e-3) holds at 20M within a factor of 2 (E2). Seed noise on held-out chat
+  bits per byte is about 0.25% at 5M, so a bet aimed at a 1% difference runs 2 seeds; varying only the
+  data order moved results more than varying only the initial weights, though not by a resolved margin
+  (E3). Ten more 5M seeds and the same weights-versus-order split at 20M were launched on Oct 12; no
+  reading of them is recorded yet.
+- **SCREENS batch 1, seven one-change bets at 5M: closed (Oct 11).** Two seeds each, decided on held-out
+  bits per byte, where a win only nominates a bet for later tests at 20-30M. Canon-AC layers (-0.9% chat
+  bits per byte) and a forget gate on attention (-1.2%, flagged by a pre-registered diagnostic) are
+  nominated; removing the value residual, AdamW in place of NorMuon and a t+2 prediction head each made
+  chat loss worse by about 1.5%; the other four changes tie. Nothing is adopted on a 5M loss result. A
+  five-seed robustness reading is pre-registered beside each verdict, and batch 2 (S009-S021) is a draft,
+  not frozen.
+- **T001, a 2-layer recall-with-updates toy: done (Oct 11).** Plain softmax attention never learned the
+  task; the arms that did all had a previous-token path or stick-breaking attention. By its pre-registered
+  picks, a gated delta-rule layer takes the must-run 30M architecture slot (a tie with Canon-AC, decided
+  by the registered default) and stick-breaking attention is the recency-path variant for its 30M test.
 - **RC-12, the 12-turn test:** built, mutation-tested and scored on dev for the public panel (13 released
-  chat models from 90M to 2.6B, plus 9 public small chat models from 5M to 31M; a 75M one did not finish
-  within its time cap). No Planck model is scored on any split. Three claims are pre-registered, each
-  worded "on our panel": Level A, a strict bar on corrections, binding and loops plus a blind human test;
-  Level R, a state score over seven state families whose 95% CI lower bound must reach 40 of 100, above
-  the 36.7 that a mix of fixed-rule shortcuts scores; and the LOOKUP claim, reading facts from old and
-  new tables supplied in the conversation (bar 0.60). Max changed Level R on Oct 4 from non-inferiority
-  to Qwen2.5-0.5B, which scores 2.3 on those families on dev, so a 5M model already met the old bar
-  mostly by not looping. No panel model reaches any of the three on dev: the best state score is 18.2
-  (LFM2-2.6B), the best LOOKUP 0.014.
-  OOD-H Part 1 (150 held-out conversations with human-written user turns) is built as a lock candidate
-  and waits for Max's review.
+  chat models from 90M to 2.6B, plus 11 smaller public chat models from 5M to 75M and three more
+  Falcon-H1-Tiny-90M chat checkpoints). No Planck model is scored on any split. Three claims are
+  pre-registered, each worded "on our panel": Level A, a strict bar on corrections, binding and loops plus
+  a blind human test; Level R, a state score over seven state families whose 95% CI lower bound must reach
+  40 of 100, above the 36.7 that a mix of fixed-rule shortcuts scores on dev; and the LOOKUP claim,
+  reading facts from old and new tables supplied in the conversation (bar 0.60). Max changed Level R on
+  Oct 4 from non-inferiority to Qwen2.5-0.5B, which scores 2.3 on those families on dev, so a 5M model
+  already met the old bar mostly by not looping. No panel model reaches any of the three on dev: the best
+  state score is 18.2 (LFM2-2.6B), the best LOOKUP 0.014, and no model below 90M scores above 2.1. OOD-H
+  Part 1 (150 held-out conversations with human-written user turns, 415 probes) is fixed for the lock: Max
+  reviewed a 30-thread sample on Oct 10 (85 of 85 probes looked right), then re-checked the 11 threads
+  that a third review had changed (11 of 11 conversations, 32 of 32 probes).
+- **The lock: not yet.** It was planned for Oct 11-14, and the pre-registration is still a draft. The lock
+  package (sealed-session kit, lock check, finalize step) was built and dry-run without any sealed content
+  on Oct 11-13. Left: settling the grader gaps the OOD-H reviews found (for example "You asked if X." is
+  graded wrong), building and encrypting the hidden split in a separate session, Max's approval, then the
+  lock commit and push.
 - **Toolchain:** tokenizer v0 is built (its 8k cut matches a separately trained 8k; no superword tokens),
-  the openly licensed starter corpus is tokenized (2.0B tokens), the learning-rate and seed-noise
-  calibration runs (E2, E3) are ready, three candidate teacher models are pinned, and two training speed-ups
-  are under verification.
-- **Next:** Max's OOD-H Part 1 review, the sealed split and the lock (planned Oct 11-14) before any
-  Planck model is scored on it; E2 and E3; the teacher pilot.
+  the openly licensed starter corpus is tokenized (2.0B tokens), the core v0 corpus is built and reviewed
+  (about 35.9B tokens at 8k), the two training speed-ups (a batched optimizer step and variable-length
+  attention for packed documents) are the GPU defaults, and the teacher pipeline has been through several
+  dry pilots with the three candidate teachers on stand-in data; the teacher pick waits for the first real
+  pilot.
+- **Next:** the lock steps above, before any Planck model is scored on RC-12; reading E3's two follow-ups;
+  the five-seed screen reruns and the batch 2 freeze; the 30M architecture tests T001 picked, each under
+  its own pre-registration; the first real teacher pilot.
 
 ## Ground rules
 
