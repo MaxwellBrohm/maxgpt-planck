@@ -15,8 +15,9 @@ models we scored, from 90M to 2.6B, nor the 11 smaller public chat models from 5
 reaches any of its bars. Planck's bet is that
 conversational skill is cheap in parameters and knowledge is what is expensive, so a model can
 keep facts outside its weights (in its context, in notes, in a lookup) and spend its parameters on
-the skill. The result we are after is a curve, not a single model: the same recipe at roughly
-10M, 30M, 60M and 150M total parameters, each compared against much larger models on the same test.
+the skill. The result we are after is a curve, not a single model: the same recipe at 5M, 10M, 20M,
+30M, 60M and 150M total parameters (and 3M if 5M passes a Level A family on dev), with most of the
+effort at 30M and under, each compared against much larger models on the same test.
 
 ## What is new here, and what is not
 
@@ -56,20 +57,23 @@ Every experiment, its pre-registered rule, its result and its independent audit 
   about halved the replies that open with a training template and cut the knowledge loss, though the chat
   label holds by a narrow margin (E006).
 - **Calibration (E2, E3): E2 done; E3 Parts 1 to 3 done.** For Planck's own models on the starter data,
-  the best learning rate at 5M (3e-3) holds at 20M within a factor of 2 (E2). Seed noise on held-out chat
-  bits per byte is about 0.25% at 5M, so a bet aimed at a 1% difference runs 2 seeds; varying only the
-  data order moved results more than varying only the initial weights, though not by a resolved margin
-  (E3). Ten more 5M seeds and the same weights-versus-order split at 20M were launched on Oct 12; no
+  E2's 5M learning-rate pick, 3e-3, holds at 20M within a factor of 2 (E2); E3 confirmed it against 1.5e-3
+  (worse on 7 of 7 re-check seeds) but did not resolve it against 6e-3. Seed noise on held-out chat bits
+  per byte is about 0.25% at 5M, so a bet aimed at a 1% difference runs 2 seeds (4 if it changes the data
+  stream); varying only the data order moved results more than varying only the initial weights, though
+  not by a resolved margin (E3). Ten more 5M seeds and the same weights-versus-order split at 20M were launched on Oct 12; no
   reading of them is recorded yet.
-- **SCREENS batch 1, seven one-change bets at 5M: closed (Oct 11).** Two seeds each, decided on held-out
-  bits per byte, where a win only nominates a bet for later tests at 20-30M. Canon-AC layers (-0.9% chat
+- **SCREENS batch 1, seven screens at 5M: closed (Oct 11).** Nine one-change arms (S002 tests three
+  removals separately), two seeds each, decided on held-out bits per byte, where a win only nominates a
+  bet for later tests at 20-30M. Canon-AC layers (-0.9% chat
   bits per byte) and a forget gate on attention (-1.2%, flagged by a pre-registered diagnostic) are
   nominated; removing the value residual, AdamW in place of NorMuon and a t+2 prediction head each made
   chat loss worse by about 1.5%; the other four changes tie. Nothing is adopted on a 5M loss result. A
   five-seed robustness reading is pre-registered beside each verdict, and batch 2 (S009-S021) is a draft,
   not frozen.
 - **T001, a 2-layer recall-with-updates toy: done (Oct 11).** Plain softmax attention never learned the
-  task; the arms that did all had a previous-token path or stick-breaking attention. By its pre-registered
+  task; on the verdict seeds, every arm that learned had a previous-token path or stick-breaking
+  attention. By its pre-registered
   picks, a gated delta-rule layer takes the must-run 30M architecture slot (a tie with Canon-AC, decided
   by the registered default) and stick-breaking attention is the recency-path variant for its 30M test.
 - **RC-12, the 12-turn test:** built, mutation-tested and scored on dev for the public panel (13 released
@@ -92,7 +96,8 @@ Every experiment, its pre-registered rule, its result and its independent audit 
   lock commit and push.
 - **Toolchain:** tokenizer v0 is built (its 8k cut matches a separately trained 8k; no superword tokens),
   the openly licensed starter corpus is tokenized (2.0B tokens), the core v0 corpus is built and reviewed
-  (about 35.9B tokens at 8k), the two training speed-ups (a batched optimizer step and variable-length
+  (about 35.9B tokens at 8k; a second near-duplicate pass over the cleaned text leaves about 35.4B), the
+  two training speed-ups (a batched optimizer step and variable-length
   attention for packed documents) are the GPU defaults, and the teacher pipeline has been through several
   dry pilots with the three candidate teachers on stand-in data; the teacher pick waits for the first real
   pilot.
@@ -116,6 +121,14 @@ Every experiment, its pre-registered rule, its result and its independent audit 
 
 | Path | What |
 |---|---|
+| `docs/EXPERIMENTS.md` | The lab notebook: every experiment, its pre-registered rule, its result and its audit |
+| `PLAN.md` | The project plan: phases, the size curve, machines, budget and Max's dated decisions |
+| `experiments/` | One folder per experiment (E001-E006, E2, E3, the S0xx screens, T001, Track K): notes, pre-registrations, audits and results |
+| `rc12/`, `prereg/RC-12.draft.txt` | The 12-turn test (generators, graders, runner, build notes, lock steps) and its draft pre-registration |
+| `oodh/` | OOD-H, the held-out set with human-written user turns: design, build code and published hashes (the items stay sealed) |
+| `CORPUS.md`, `corpus/`, `tokenizer/`, `data_prep/` | Corpus design and build, Planck's tokenizer, and tokenizing and bits-per-byte scoring |
+| `harness/` | Planck's from-scratch training code |
+| `models/` | The model registry and the rule for keeping trained weights |
 | `research/REPORT.md` | The final research report: verdict, landscape, probe results, limits map, levers, feasibility |
 | `research/lanes/`, `research/followup/`, `research/brainstorm/` | Every research track, each with a `.verify.md` fact-check next to it |
 | `research/diagnosis_*.md`, `research/CRITIQUE.md` | Three independent diagnoses and the adversarial review of the report |
