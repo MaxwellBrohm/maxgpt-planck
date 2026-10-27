@@ -57,25 +57,24 @@ Every experiment, its pre-registered rule, its result and its independent audit 
   about halved the replies that open with a training template and cut the knowledge loss, though the chat
   label holds by a narrow margin (E006).
 - **Calibration (E2, E3): E2 done; E3 Parts 1 to 3 done.** For Planck's own models on the starter data,
-  E2's 5M learning-rate pick, 3e-3, holds at 20M within a factor of 2 (E2); E3 confirmed it against 1.5e-3
-  (worse on 7 of 7 re-check seeds) but did not resolve it against 6e-3. Seed noise on held-out chat bits
-  per byte is about 0.25% at 5M, so a bet aimed at a 1% difference runs 2 seeds (4 if it changes the data
-  stream); varying only the data order moved results more than varying only the initial weights, though
-  not by a resolved margin (E3). Ten more 5M seeds and the same weights-versus-order split at 20M were launched on Oct 12; no
-  reading of them is recorded yet.
+  E2's 5M learning-rate pick, 3e-3, holds at 20M within a factor of 2 (E2); E3 confirmed it against
+  1.5e-3 (worse on 7 of 7 re-check seeds) but did not resolve it against 6e-3. Seed noise on held-out
+  chat bits per byte is about 0.25% at 5M, so a bet aimed at a 1% difference runs 2 seeds (4 if it
+  changes the data stream); varying only the data order moved results more than varying only the initial
+  weights, though not by a resolved margin (E3). Ten more 5M seeds and the same weights-versus-order
+  split at 20M were launched on Oct 12; no reading of them is recorded yet.
 - **SCREENS batch 1, seven screens at 5M: closed (Oct 11).** Nine one-change arms (S002 tests three
   removals separately), two seeds each, decided on held-out bits per byte, where a win only nominates a
-  bet for later tests at 20-30M. Canon-AC layers (-0.9% chat
-  bits per byte) and a forget gate on attention (-1.2%, flagged by a pre-registered diagnostic) are
-  nominated; removing the value residual, AdamW in place of NorMuon and a t+2 prediction head each made
-  chat loss worse by about 1.5%; the other four changes tie. Nothing is adopted on a 5M loss result. A
-  five-seed robustness reading is pre-registered beside each verdict, and batch 2 (S009-S021) is a draft,
-  not frozen.
+  bet for later tests at 20-30M. Canon-AC layers (-0.9% chat bits per byte) and a forget gate on
+  attention (-1.2%, flagged by a pre-registered diagnostic) are nominated; removing the value residual,
+  AdamW in place of NorMuon and a t+2 prediction head each made chat loss worse by about 1.5%; the other
+  four changes tie. Nothing is adopted on a 5M loss result. A five-seed robustness reading is
+  pre-registered beside each verdict, and batch 2 (S009-S021) is a draft, not frozen.
 - **T001, a 2-layer recall-with-updates toy: done (Oct 11).** Plain softmax attention never learned the
   task; on the verdict seeds, every arm that learned had a previous-token path or stick-breaking
-  attention. By its pre-registered
-  picks, a gated delta-rule layer takes the must-run 30M architecture slot (a tie with Canon-AC, decided
-  by the registered default) and stick-breaking attention is the recency-path variant for its 30M test.
+  attention. By its pre-registered picks, a gated delta-rule layer takes the must-run 30M architecture
+  slot (a tie with Canon-AC, decided by the registered default) and stick-breaking attention is the
+  recency-path variant for its 30M test.
 - **RC-12, the 12-turn test:** built, mutation-tested and scored on dev for the public panel (13 released
   chat models from 90M to 2.6B, plus 11 smaller public chat models from 5M to 75M and three more
   Falcon-H1-Tiny-90M chat checkpoints). No Planck model is scored on any split. Three claims are
