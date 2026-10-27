@@ -6,7 +6,7 @@ Version 2, 2026-09-24. It is built from the draft plan and its 28-item review, `
 **Changes from the draft**
 - **The 5070 now does almost all GPU work.** That covers scoring the baselines' generations, the teacher pilot, all bulk generation, the 5M screens and the SmolLM2 fine-tunes. The Mac drops from 600-1,000 GPU-hours to about 70-175 and never generates in bulk.
 - **One chat pool for every size.** It holds 300M accepted tokens, generated on the 5070 by Nov 22. Each model reads it at most 25 times, and that cap sets each size's chat share.
-- **The pre-registration locks Oct 11-14.** That is before any Planck model is scored on any RC-12 split, dev included. A bootstrap over conversations sizes the sealed split, and Level R now reports a human-written out-of-distribution set (OOD-H) beside the sealed score.
+- **The pre-registration locks Oct 11-14.** That is before any Planck model is scored on any RC-12 split, dev included. A bootstrap over conversations sizes the sealed split, and Level R now reports a human-written out-of-distribution set (OOD-H) beside the sealed score. (Update: the lock did not happen in that window. The pre-registration is still a draft, and the remaining steps are in `rc12/LOCK_STEPS.md`.)
 - **The curve starts at the Dec 4 freeze, with 3 seeds at every size that could carry the claim.** The 150M defaults to 75B tokens, with seeds 2-3 on the Titans in Jan-Feb. The Level A decision moves to Jan 31.
 - **New section 3 on unattended running.** It covers job queues on each machine, heartbeats pushed out to a status repo, disk guards, Windows update windows, and a Titan smoke test on Dec 7-10.
 - **D8 now covers every string that reaches training text.** Templates, slot pools and word lists come from human-written open sources or from the teacher, never from Claude.
@@ -25,7 +25,7 @@ Version 2, 2026-09-24. It is built from the draft plan and its 28-item review, `
 **Status and schedule changes, 2026-09-26** (details and sources in `docs/EXPERIMENTS.md`)
 - **Earlier than planned.**
   - *Tokenizer v0* (Phase 1, planned Oct 1-18) was trained on Sep 25 on a sample of the openly licensed starter corpus instead of the planned mix of pilot output, OASST2 and a FineWeb-Edu slice (the pilot has not run). P-098 held exactly, P-101 failed its 5% bar, P-097 was counted; P-100 waits for the teacher pick. v0 is provisional, and the starter corpus is tokenized with it at 8k (2.03B tokens).
-  - *OOD-H Part 1* (a lock item) was built on Sep 26: 150 threads, 417 probes, every gating check passing, hashes in `oodh/HASHES.txt`. It is a lock candidate awaiting Max's review.
+  - *OOD-H Part 1* (a lock item) was built on Sep 26: 150 threads, 417 probes, every gating check passing, hashes in `oodh/HASHES.txt`. It is a lock candidate awaiting Max's review. (Update: Max reviewed it on Oct 10, and Part 1 is fixed for the lock at 150 threads and 415 probes; see `docs/EXPERIMENTS.md`, RC-12.)
   - *Core v0 corpus* (CORPUS.md 7.1, planned Oct 19 - Nov 1) has started: its download manifest (790 files, about 130 GB) and tiered build script are written and its OCR filter is calibrated. That code is not committed yet, and the build's progress is not recorded in the repo.
   - *E006*, not in this plan: the three-object follow-up to E005 plus a general-chat replay arm, the first fine-tune on the 5070. Pre-registered and built, not scored.
   - *bench_micro on the Planck harness* (planned Oct 4-5) ran on the 5070 on Sep 25; its measured rates for the 5M-30M shapes replace this plan's throughput estimates. Two speed-ups (batched optimizer step, variable-length attention) are under verification: +16% to +34% on plain rows.
@@ -46,7 +46,7 @@ Version 2, 2026-09-24. It is built from the draft plan and its 28-item review, `
 - **CORPUS 7.4's eight edits applied:** the strict-open core replaces readability-filtered FineWeb-Edu (mix v0, the recipe, the tokenizer sample, the Lambda prep); FineWeb-Edu moves to excluded (Q5) in the D8 table; the teacher gate measures at realistic request lengths, with the extra arms; the chat pool is R0/R1/R2/RH with a growth rule, P-187 and a 350-hour generation cap; P-186's cost fix (above); new LEDGER rows E-sel-0 to E-sel-6, E-src and P-187, with P-083, P-161, P-164 and P-165 marked absorbed; the 5M and 20M curve points; the PC disk at 250-300 GB.
 - **Data bets:** the 30-60 h of 5M screening in Phase 3's compute is an estimate, never a cap on a must-run data bet; P-051's 0.5% density point is restored; the dose-response arm (P-188) is a LEDGER row and has a 3b slot; on an E4 no-signal reading, E8-E10 move to 20M under new pre-registrations instead of dropping.
 - **Seeds at 60M and 150M:** 3 seeds each, queued on the Titans; the claim rules (3 seeds at the claimed size) are unchanged.
-- **Sealed split:** 600 conversations (Max, Oct 2-4), not the 1,000-1,200 first expected.
+- **Sealed split:** 600 conversations (Max, Oct 2-4), not the 1,000-1,200 first expected. (Update, Oct 11-13: to be built in dev's exact layout of 640 records; see Phase 0's sealed split size.)
 - **Appendix B:** every one of the 106 ranked LEDGER bets that PLAN never placed gets a slot, a gate with its trigger, or a stated reason.
 
 ---
@@ -167,7 +167,7 @@ If OOD-H's paired point estimate is worse than -5 points, the claim is worded as
   - Loop, role-leak, self-copy and runaway diagnostics on every turn, with the loop detector's exact rule pre-registered.
   - Conversations designed to stay at or under about 1,800 Planck tokens at typical reply lengths.
   - A skeleton of the lookup battery LK1-LK10 (P-082).
-- **Sealed split size**: 600 conversations (Max, 2026-10-02, rc12/DECISIONS_FOR_MAX.md; kept when Level R moved to the S7 bar on Oct 4, because that bar barely depends on n: a true S7 of about 45.7, 45.1 and 44.6 is needed at 600, 700 and 900). The sizing rule below, which first expected 1,000-1,200, is kept as the record of how the number was first planned.
+- **Sealed split size**: 600 conversations (Max, 2026-10-02, rc12/DECISIONS_FOR_MAX.md; kept when Level R moved to the S7 bar on Oct 4, because that bar barely depends on n: a true S7 of about 45.7, 45.1 and 44.6 is needed at 600, 700 and 900). The sizing rule below, which first expected 1,000-1,200, is kept as the record of how the number was first planned. Since Oct 11-13 the sealed split is to be built in dev's exact layout, 640 records (608 twelve-turn conversations and 32 one-turn controls), decided by Claude under Max's standing permission and reversible before the lock (`rc12/LOCK_FOR_MAX.md`, prereg s9).
 
 *Sealed-split isolation (P-049, review 8)*
 - The sealed split is built from Claude-written templates and paraphrase banks. D8 allows Claude for gold sets, and no training teacher ever renders them.
@@ -913,8 +913,8 @@ All figures are estimates, from arithmetic on REPORT s7, loop.md, compute.md and
 
 | data | amount | source | ready by |
 |---|---|---|---|
-| RC-12 dev | ~600 conversations | Claude-written templates (D8 gold set) | Oct 2 |
-| RC-12 sealed | 600 conversations (Max, Oct 2-4; the sizing rule's first expectation was 1,000-1,200) | Claude-written banks, separate session, encrypted | Oct 11-14 |
+| RC-12 dev | 640 records (608 conversations + 32 one-turn controls) | Claude-written templates (D8 gold set) | Oct 2 |
+| RC-12 sealed | 640 records in dev's layout (600 conversations decided by Max on Oct 2-4, the sizing rule's first expectation 1,000-1,200; 640 since Oct 11-13, reversible before the lock) | Claude-written banks, separate session, encrypted | at the lock (planned Oct 11-14; not yet) |
 | OOD-H | 150 held-out OASST2 threads + 50-60 rater-written scripts | human-written user turns | lock / Jan 17 |
 | Human-test scripts | 150 | Claude-written (D8 gold set) | Jan 10 |
 | Teacher pilot | 600 conversations, ~0.2M tokens | 3 Apache-2.0 teachers on the 5070 | Oct 8 |
