@@ -19,6 +19,60 @@ the skill. The result we are after is a curve, not a single model: the same reci
 30M, 60M and 150M total parameters (and 3M if 5M passes a Level A family on dev), with most of the
 effort at 30M and under, each compared against much larger models on the same test.
 
+## Results so far (RC-12 dev split, graders as of 2026-11-03)
+
+Every public chat model we scored fails; two closed frontier models run the same way pass. S7 is the state score
+(0 to 100) over seven state families; Level R needs its 95% CI lower bound at 40 and PERSIST at 0.40. Template
+render, three sampling seeds each, every reply from the model's own history. The three extra Falcon-H1-Tiny-90M
+checkpoints we also scored (all under 3) are in [`rc12/logs/regrade_cap_20261103.jsonl`](rc12/logs/regrade_cap_20261103.jsonl),
+with every model under the graders before the two Nov 3 amendments; the calibration and both amendments are in
+[`rc12/FRONTIER.md`](rc12/FRONTIER.md), and one conversation side by side in
+[`rc12/examples`](rc12/examples/corr-014-lfm2-vs-claude-haiku.md).
+
+| model | S7 [95% CI] | PERSIST | Level R |
+|---|---|---|---|
+| Claude Sonnet 5.5 (closed, API) | **65.51** [61.95, 68.90] | 0.748 | **met** |
+| Claude Haiku 5.5 (closed, API) | **55.90** [51.78, 59.86] | 0.793 | **met** |
+| *bar* | *40* (CI lower bound) | *0.40* | |
+| *best mix of fixed-rule shortcuts (no model)* | *36.73* | | |
+| LFM2-2.6B | 23.09 [19.21, 27.08] | 0.832 | not met |
+| LFM2.5-350M | 12.93 [10.02, 15.98] | 0.575 | not met |
+| LFM2-1.2B | 12.24 [9.04, 15.67] | 0.432 | not met |
+| LFM2-700M | 10.35 [7.95, 12.97] | 0.261 | not met |
+| Qwen3-0.6B | 9.22 [6.67, 12.04] | 0.352 | not met |
+| Qwen3.5-0.8B | 6.67 [4.86, 8.54] | 0.334 | not met |
+| Falcon-H1-Tiny-90M-Instruct | 5.96 [4.07, 8.05] | 0.042 | not met |
+| SmolLM2-360M-Instruct | 4.32 [2.61, 6.24] | 0.137 | not met |
+| gemma-3-270m-it | 4.19 [2.48, 6.09] | 0.017 | not met |
+| LFM2.5-230M | 3.77 [2.23, 5.52] | 0.332 | not met |
+| Qwen2.5-0.5B-Instruct | 2.30 [1.06, 3.74] | 0.119 | not met |
+| Vertex-0.6-15M-Instruct | 2.09 [0.87, 3.62] | 0.029 | not met |
+| Swen-28M | 1.17 [0.30, 2.38] | 0.032 | not met |
+| SmolLM2-135M-Instruct | 1.14 [0.15, 2.54] | 0.018 | not met |
+| minimind-3 | 0.95 [0.30, 1.79] | 0.010 | not met |
+| cRia-LM-75M-Instruct | 0.75 [0.00, 1.86] | 0.038 | not met |
+| Veyra2-Mango-30M-Instruct | 0.46 [0.00, 1.13] | 0.005 | not met |
+| Veyra2-Mango-15M-Instruct | 0.30 [0.00, 0.89] | 0.009 | not met |
+| Doge-160M-Instruct | 0.25 [0.00, 0.81] | 0.018 | not met |
+| Loom-Spark-3.2 | 0.25 [0.00, 0.83] | 0.063 | not met |
+| Veyra2-Blueberry-5M-Instruct | 0.25 [0.00, 0.81] | 0.032 | not met |
+| Veyra2-Blueberry-10M-Instruct | 0.18 [0.00, 0.60] | 0.023 | not met |
+| BananaMind-2-Mini-Chat | 0.10 [0.00, 0.60] | 0.001 | not met |
+| BananaMind-2-Nano-Chat | 0.10 [0.00, 0.60] | 0.003 | not met |
+
+Check it without a GPU (CPU only, a few minutes each, from `rc12/`):
+
+```
+python -B mutation_graders.py      # 9,838 grader fixtures and 237 mutants: every mutant must be caught
+python -B validate_e2e.py          # the fake responders' gates G1-G4 and the 36.73 shortcut ceiling
+python -B validate_machinery.py    # the runner, renders, truncation and stop handling (12 groups)
+```
+
+Rescore a public model from scratch (GPU): `python runner.py --responder hf:<repo id> --seeds 1,2,3
+--hf-untested-ok --out <dir>`, plus the same with `--own-cf --families OWN --out <dir>_owncf`, then score both
+transcripts with `score.py`. The Claude rows: `python api_run.py --model claude-haiku-5-5 --seeds 1,2,3`. Stored
+transcripts are not in git (rc12/runs/ is ignored for size).
+
 ## What is new here, and what is not
 
 <!-- Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 15) -->
