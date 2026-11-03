@@ -5,13 +5,22 @@ can hold a conversation clear the bar of 40? If a frontier model fails too, "no 
 small models.
 
 **Answer.** Under the graders as they stood, Claude Haiku 5.5 scored S7 40.35 [36.59, 44.13]. That is 2.2 times
-the best panel model, but its CI lower bound fell short of the bar. Its transcripts showed the grader failing right
-answers that add context ("The banjo. Your nephew is the one with the trombone."). Max adopted an answer-first
-waiver the same day. It was built and checked against the 9,670 grader fixtures and 237 mutants, and every stored
-panel run was regraded. Under it:
+the best panel model, but its CI lower bound fell short of the bar. Claude Sonnet 5.5 scored only 21.6. Reading
+their transcripts showed two grader rules failing good answers:
 
-- **Claude Haiku 5.5** scores 55.70 [51.65, 59.60] and meets Level R's two bars (S7 lower bound and PERSIST).
-- **LFM2-2.6B** moves from 18.15 to 19.99.
+- **Context after the answer:** a reply that names another value after giving the answer failed `v3_other` ("The
+  banjo. Your nephew is the one with the trombone.").
+- **Long replies:** every reply cut at the 256-token cap counted as a runaway, however well-formed.
+
+Max changed both on Nov 3. The answer-first waiver lets a leading answer name the other values. The cap amendment
+counts a cut reply as degenerate only if it loops. Each change was checked against the grader fixtures and mutants,
+and every stored panel run was regraded.
+
+Under the current graders:
+
+- **Claude Sonnet 5.5** scores 66.09 [62.29, 69.88] and meets Level R.
+- **Claude Haiku 5.5** scores 55.90 [51.78, 59.86] and meets Level R.
+- **LFM2-2.6B**, the best public model, scores 23.09 [19.21, 27.08].
 - **No panel model** reaches the bar.
 - **The shortcut ceiling** stays at 36.73.
 
@@ -20,8 +29,8 @@ panel run was regraded. Under it:
 `api_run.py` plays the 640 dev conversations through `runner.run_one`, the same feedback loop as the panel: each
 model's own replies are its history. The responder calls the Anthropic Messages API. Rows are graded by the same
 graders and scored by `score.summarize`, with the `--own-cf` OWN twin for the OD1 b gate. The CI comes from
-`score_stats.s7_ci`. `frontier_report.py` regrades the stored transcripts (nothing replayed) before and after the
-waiver.
+`score_stats.s7_ci`. `frontier_report.py` regrades the stored transcripts (nothing replayed) under each grader
+version.
 
 Protocol differences, all forced by the API (recorded in each run's `meta.json`):
 
@@ -35,30 +44,25 @@ Protocol differences, all forced by the API (recorded in each run's `meta.json`)
 
 ## Results (S7 [95% CI]; Level R needs the lower bound at 40 and PERSIST at 0.40)
 
-| model | samples | before the waiver | after (current graders) | PERSIST | T0 | replies cut at 256 | Level R |
-|---|---|---|---|---|---|---|---|
-| Claude Haiku 5.5 | 3 | 40.35 [36.59, 44.13] | **55.70 [51.65, 59.60]** | 0.666 | 0.740 | 37% | **met** |
-| Claude Sonnet 5.5 | 1 | 21.67 [19.05, 24.45] | 62.43 [58.71, 66.04] | 0.356 | 0.865 | 52% | not met (PERSIST) |
-| LFM2-2.6B (best panel model) | 3 | 18.15 [14.73, 21.75] | 19.99 [16.29, 23.79] | 0.812 | 0.517 | 55% | not met |
-| shortcut ceiling (best fake per family) | | 36.73 | 36.73 | | | | |
+| model | samples | Oct graders | + waiver | current (+ cap amendment) | PERSIST | T0 | replies cut at 256 | Level R |
+|---|---|---|---|---|---|---|---|---|
+| Claude Sonnet 5.5 | 2 (3rd running) | 21.64 | 61.21 | **66.09 [62.29, 69.88]** | 0.739 | 0.885 | 52% | **met** |
+| Claude Haiku 5.5 | 3 | 40.35 | 55.70 | **55.90 [51.78, 59.86]** | 0.793 | 0.740 | 37% | **met** |
+| LFM2-2.6B (best panel model) | 3 | 18.15 | 19.99 | 23.09 [19.21, 27.08] | 0.832 | 0.542 | 55% | not met |
+| shortcut ceiling (best fake per family) | | 36.73 | 36.73 | 36.73 | | | | |
 
-Every panel model before and after is in `logs/regrade_first_20261103.jsonl`.
+Every panel model under all three grader versions is in `logs/regrade_cap_20261103.jsonl`, and the waiver step
+alone is in `logs/regrade_first_20261103.jsonl`. No panel model meets Level R under any of them.
 
-**Diagnostic: both clauses dropped.** With `v3_other` and `v3_shotgun` removed entirely (not a rule):
+**Why Sonnet failed before.** Before the cap amendment, Sonnet missed Level R only on PERSIST (0.363): most of its
+PERSIST failures were `f1_degen`. The reply followed the user's standing rule ("Greetings! Yes, a few habits ...")
+but ran past the 256-token cap. Counted on its text, its PERSIST is 0.739.
 
-- Haiku scores 63.43.
-- Sonnet scores 68.05.
-- LFM2-2.6B scores 25.14.
-- The SHOTGUN fake, which lists every candidate, scores 92.38. That is why the clauses stay and only the waiver was
-  added.
+**Diagnostic: both clauses dropped.** On the Oct graders, with `v3_other` and `v3_shotgun` removed entirely (not a
+rule), Haiku scores 63.43, Sonnet 65.79 and LFM2-2.6B 25.14. The SHOTGUN fake, which lists every candidate, scores
+92.38. That is why the clauses stay and only the waiver was added.
 
-**Sonnet 5.5 and PERSIST.** Sonnet misses Level R only on PERSIST. 132 of its PERSIST failures are `f1_degen`:
-the reply follows the user's standing rule ("Greetings! Yes, a few habits ...") but runs past the 256-token cap,
-which RC-12 counts as a runaway reply. The cap rule was written for small models that ramble or loop. Whether a
-well-formed reply cut at the cap should count is a separate decision (below). Sonnet's samples 2 and 3 were still
-running when this was written.
-
-## The rule (graders.answer_first, adopted 2026-11-03)
+## Rule 1: the answer-first waiver (graders.answer_first, adopted 2026-11-03)
 
 `v3_other` fails a reply that asserts any other in-context value, and `v3_shotgun` fails one that names every
 candidate. Both stop a model from listing candidates to hit the gold. The waiver drops the two clauses when all three
@@ -89,16 +93,33 @@ On Haiku's seed 1, a random 14 of the probes the waiver flipped were all right a
 attributed. Some examples: "Your nephew made sushi. Your grandmother made burritos."; "Your job interview is in
 Calgary. You first mentioned Hamburg, then switched to Calgary."
 
+## Rule 2: the cap amendment (grade_loop, adopted 2026-11-03)
+
+RUNAWAY (a reply stopped at the 256-token cap) stays a reported flag, so the panel still shows how often each model
+is cut. It is no longer degenerate on its own. A cut reply is graded on its text and fails only if it also loops,
+by the LOOP rule (a repeated 3-gram, an equal earlier reply, or a self-copy).
+
+How it was checked:
+
+- **Fixture suite: 9,838 fixtures, 0 misses.** `runaway` became the must-pass `runaway_ok`; a new `runaway_loop`
+  must fail.
+- **Mutants: 237 of 237 killed.** 3 are new for the amendment. 3 were dropped as equivalent, because a cut reply no
+  longer changes any verdict on its own: the clause `loop_RUNAWAY`, OFF `runaway`, and the cap-test edit.
+  `validate_machinery`'s CAPPER check still pins the RUNAWAY rate.
+- **`validate_machinery.py`: 12 of 12.** CAPPER, the IDEAL reply cut at the cap, now scores R 100.
+- **`validate_e2e.py`:** G1 to G4 pass, and the ceiling is 36.73.
+- **`dev_regrade.py --expect cap`:** 70,790 probes changed. Each one only lost a degenerate clause.
+
+The cap rule mattered most for models that write long answers. The pre-registered loop rule (SPEC s4) now carries
+a dated amendment in `grade_loop.py`.
+
 ## Limits
 
-- **Dev split only.** The waiver was designed after reading dev transcripts, before the lock, and no model has been
+- **Dev split only.** Both rules were designed after reading dev transcripts, before the lock, and no model has been
   scored on the sealed split.
-- **Sonnet is incomplete.** It has one sample here; seeds 2 and 3 were running.
-- **The 256-token cap counts a long, well-formed reply as a runaway.** This hits frontier models hardest (Sonnet:
-  52% of replies are cut).
-- **Haiku is behind on two measures.** It scores below LFM2-2.6B on PERSIST (0.666 vs 0.812) and misses T0's 0.9
-  claim bar. In 18 of the 24 T0 conversations where it lost credit (seed 1), the only failed clause is `v2_unsure`:
-  some replies add a caveat after a right answer, others hedge.
+- **Sonnet's third sample was still running** when this was written; the table shows two.
+- **Haiku misses T0's 0.9 claim bar (0.740).** On its seed 1, 18 of the 24 T0 conversations where it lost credit
+  failed only `v2_unsure`. Some replies add a caveat after a right answer, others hedge.
 
 ## Example
 
@@ -107,10 +128,7 @@ models, every reply verbatim. LFM2-2.6B gives the stale day; Claude Haiku 5.5 gi
 
 ## Still for Max
 
-1. **The cap rule.** Should a reply cut at the 256-token cap count as a runaway (`f1_degen`) when it is well-formed
-   and not looping? Recommended: keep the cap, but count a cut reply as degenerate only when it also trips a loop
-   rule. This would be a new waiver, checked the same way as this one.
-2. **The 18 `v2_unsure`-only T0 misses.** Read them before changing anything for that clause.
+1. **The 18 `v2_unsure`-only T0 misses.** Read them before changing anything for that clause.
 
 ## Reproduce
 
@@ -120,11 +138,11 @@ python -B frontier_report.py --root runs/frontier --ref <copy of ~/planck/runs/r
 python -B dev_regrade.py --src <regraded base copy> --dst <dir> --expect first   # then dev_panel.py on <dir>
 ```
 
-Cost: Claude Haiku 5.5, three samples plus the OWN twins, $2.85. Claude Sonnet 5.5's first sample plus twin was
-about $21.
+Cost: Claude Haiku 5.5, three samples plus the OWN twins, $2.85. Claude Sonnet 5.5 costs about $21 per sample plus
+twin.
 
 Transcripts are not in git, like every run (`rc12/runs/` is ignored). On the PC:
 
 - the Claude runs: `~/planck/runs/rc12_dev_frontier/`
-- the two regraded panel copies: `~/planck/runs/rc12_dev_rg_base/` and `rc12_dev_rg_af/`
-- their `dev_panel.py` outputs: `~/planck-af/panel_base/` and `panel_af/`
+- the three regraded panel copies: `~/planck/runs/rc12_dev_rg_base/`, `rc12_dev_rg_af/` and `rc12_dev_rg_cap/`
+- their `dev_panel.py` outputs: `~/planck-af/panel_base/`, `panel_af/` and `panel_cap/`

@@ -1,11 +1,14 @@
 """RC-12 frontier calibration report: Level R numbers for the Claude runs (api_run.py) beside a panel model, all
 regraded from the stored transcripts (CPU only, nothing replayed), under three rule sets (RULES):
 
-  before_waiver  graders.py with the answer-first waiver switched off (grade_text.OFF "first"): the graders until
-                 2026-11-03, which fail "The banjo. Your nephew is the one with the trombone." on v3_other.
-  current        graders.py as it stands (the waiver adopted 2026-11-03, rc12/FRONTIER.md).
-  no_v3          v3_other and v3_shotgun dropped from G-VAL: a probe of the grader, never a rule, since a list of
-                 every candidate passes it (the SHOTGUN fake scores 92 on it).
+  oct_graders    the graders until 2026-11-03: no answer-first waiver (grade_text.OFF "first"), so "The banjo. Your
+                 nephew is the one with the trombone." fails v3_other, and a reply cut at the cap is degenerate
+                 (grade_loop.REPORTED empty).
+  waiver_only    the answer-first waiver adopted, the cap rule as before.
+  current        graders.py as it stands: the waiver and the cap amendment (a cut reply fails only if it loops),
+                 both 2026-11-03, rc12/FRONTIER.md.
+  no_v3          the Oct graders with v3_other and v3_shotgun dropped from G-VAL: a probe of the grader, never a rule,
+                 since a list of every candidate passes it (the SHOTGUN fake scores 92 on it).
 
   python -B frontier_report.py --root runs/frontier --ref <dir with LFM2-2.6B/template/<seed>[_owncf]/> --out <json>
 Per model: seeds 1-3 where present (Claude Sonnet 5.5 has one sample: a single seed's CI is wider), each with its
@@ -14,6 +17,7 @@ import argparse
 import json
 import os
 
+import grade_loop as L
 import grade_text as T
 import graders as G
 import runner as RN
@@ -32,9 +36,11 @@ def g_val_no_v3(*a, **k):
     return out
 
 
-# (rule set, G-VAL, grade_text.OFF): the graders before the answer-first waiver (OFF "first"), as they stand, and
-# with both clauses dropped (a probe of the grader, never a rule: a shotgun list passes it)
-RULES = [("before_waiver", _g_val, {"first"}), ("current", _g_val, set()), ("no_v3", g_val_no_v3, {"first"})]
+# (rule set, G-VAL, grade_text.OFF, grade_loop.REPORTED): the graders of Oct 2026 (no answer-first waiver, a reply cut
+# at the cap degenerate), with the waiver only, as they stand (the waiver and the cap amendment, 2026-11-03), and the
+# Oct graders with both v3 clauses dropped (a probe of the grader, never a rule: a shotgun list passes it)
+RULES = [("oct_graders", _g_val, {"first"}, ()), ("waiver_only", _g_val, set(), ()),
+         ("current", _g_val, set(), ("RUNAWAY",)), ("no_v3", g_val_no_v3, {"first"}, ())]
 
 
 def runs(base, model):
@@ -77,16 +83,18 @@ def main():
     for model, base in todo:
         seeds, rows = runs(base, model)
         report[model] = {}
-        for rules, fn, off in RULES:
+        for rules, fn, off, reported in RULES:
             G.g_val = fn
             T.OFF.clear()
             T.OFF.update(off)
+            L.REPORTED = reported
             report[model][rules] = level(regrade(rows), seeds)
             r = report[model][rules]
             print(f"{model:20s} {rules:10s} seeds {','.join(seeds)}  S7 {r['S7']:.2f} [{r['ci'][0]:.2f}, {r['ci'][1]:.2f}]"
                   f"  PERSIST {r['PERSIST']:.3f}  T0 {r['T0']:.3f}  capped {r['cap_rate']:.0%}  {r['verdict']}", flush=True)
     G.g_val = _g_val
     T.OFF.clear()
+    L.REPORTED = ("RUNAWAY",)
     with open(args.out, "w") as f:
         json.dump(report, f, indent=1)
 
