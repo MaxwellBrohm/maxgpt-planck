@@ -5,7 +5,7 @@ can hold a conversation clear the bar of 40? If a frontier model fails too, "no 
 small models.
 
 **Answer.** Under the graders as they stood, Claude Haiku 5.5 scored S7 40.35 [36.59, 44.13]. That is 2.2 times
-the best panel model, but its CI lower bound fell short of the bar. Claude Sonnet 5.5 scored only 21.6. Reading
+the best panel model, but its CI lower bound fell short of the bar. Claude Sonnet 5.5 scored only 21.9. Reading
 their transcripts showed two grader rules failing good answers:
 
 - **Context after the answer:** a reply that names another value after giving the answer failed `v3_other` ("The
@@ -18,7 +18,7 @@ and every stored panel run was regraded.
 
 Under the current graders:
 
-- **Claude Sonnet 5.5** scores 66.09 [62.29, 69.88] and meets Level R.
+- **Claude Sonnet 5.5** scores 65.51 [61.95, 68.90] and meets Level R.
 - **Claude Haiku 5.5** scores 55.90 [51.78, 59.86] and meets Level R.
 - **LFM2-2.6B**, the best public model, scores 23.09 [19.21, 27.08].
 - **No panel model** reaches the bar.
@@ -46,7 +46,7 @@ Protocol differences, all forced by the API (recorded in each run's `meta.json`)
 
 | model | samples | Oct graders | + waiver | current (+ cap amendment) | PERSIST | T0 | replies cut at 256 | Level R |
 |---|---|---|---|---|---|---|---|---|
-| Claude Sonnet 5.5 | 2 (3rd running) | 21.64 | 61.21 | **66.09 [62.29, 69.88]** | 0.739 | 0.885 | 52% | **met** |
+| Claude Sonnet 5.5 | 3 | 21.86 | 60.57 | **65.51 [61.95, 68.90]** | 0.748 | 0.889 | 52% | **met** |
 | Claude Haiku 5.5 | 3 | 40.35 | 55.70 | **55.90 [51.78, 59.86]** | 0.793 | 0.740 | 37% | **met** |
 | LFM2-2.6B (best panel model) | 3 | 18.15 | 19.99 | 23.09 [19.21, 27.08] | 0.832 | 0.542 | 55% | not met |
 | shortcut ceiling (best fake per family) | | 36.73 | 36.73 | 36.73 | | | | |
@@ -54,12 +54,12 @@ Protocol differences, all forced by the API (recorded in each run's `meta.json`)
 Every panel model under all three grader versions is in `logs/regrade_cap_20261103.jsonl`, and the waiver step
 alone is in `logs/regrade_first_20261103.jsonl`. No panel model meets Level R under any of them.
 
-**Why Sonnet failed before.** Before the cap amendment, Sonnet missed Level R only on PERSIST (0.363): most of its
+**Why Sonnet failed before.** Before the cap amendment, Sonnet missed Level R only on PERSIST (0.364): most of its
 PERSIST failures were `f1_degen`. The reply followed the user's standing rule ("Greetings! Yes, a few habits ...")
-but ran past the 256-token cap. Counted on its text, its PERSIST is 0.739.
+but ran past the 256-token cap. Counted on its text, its PERSIST is 0.748.
 
 **Diagnostic: both clauses dropped.** On the Oct graders, with `v3_other` and `v3_shotgun` removed entirely (not a
-rule), Haiku scores 63.43, Sonnet 65.79 and LFM2-2.6B 25.14. The SHOTGUN fake, which lists every candidate, scores
+rule), Haiku scores 63.43, Sonnet 65.30 and LFM2-2.6B 25.14. The SHOTGUN fake, which lists every candidate, scores
 92.38. That is why the clauses stay and only the waiver was added.
 
 ## Rule 1: the answer-first waiver (graders.answer_first, adopted 2026-11-03)
@@ -117,7 +117,6 @@ a dated amendment in `grade_loop.py`.
 
 - **Dev split only.** Both rules were designed after reading dev transcripts, before the lock, and no model has been
   scored on the sealed split.
-- **Sonnet's third sample was still running** when this was written; the table shows two.
 - **Haiku misses T0's 0.9 claim bar (0.740).** On its seed 1, 18 of the 24 T0 conversations where it lost credit
   failed only `v2_unsure`. Some replies add a caveat after a right answer, others hedge.
 
@@ -138,8 +137,8 @@ python -B frontier_report.py --root runs/frontier --ref <copy of ~/planck/runs/r
 python -B dev_regrade.py --src <regraded base copy> --dst <dir> --expect first   # then dev_panel.py on <dir>
 ```
 
-Cost: Claude Haiku 5.5, three samples plus the OWN twins, $2.85. Claude Sonnet 5.5 costs about $21 per sample plus
-twin.
+Cost: Claude Haiku 5.5, three samples plus the OWN twins, $2.85. Claude Sonnet 5.5, three samples plus twins, about $64
+(two of the four runs stopped at a spend cap and resumed; nothing was replayed).
 
 Transcripts are not in git, like every run (`rc12/runs/` is ignored). On the PC:
 

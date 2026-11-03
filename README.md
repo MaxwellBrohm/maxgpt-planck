@@ -89,14 +89,14 @@ Every experiment, its pre-registered rule, its result and its independent audit 
   reviewed a 30-thread sample on Oct 10 (85 of 85 probes looked right), then re-checked the 11 threads
   that a third review had changed (11 of 11 conversations, 32 of 32 probes).
 - **Frontier calibration (Nov 3, dev):** Claude models run through the same loop and graders.
-  - **Before:** under the graders as they stood, Claude Haiku 5.5 scored S7 40.4 and Claude Sonnet 5.5 scored 21.6.
+  - **Before:** under the graders as they stood, Claude Haiku 5.5 scored S7 40.4 and Claude Sonnet 5.5 scored 21.9.
     Their transcripts showed two rules failing good answers: context named after the answer ("The banjo. Your nephew
     is the one with the trombone.") and long, well-formed replies cut at the 256-token cap.
   - **The rules:** Max adopted an answer-first waiver of `v3_other` and `v3_shotgun`, and a cap amendment (a cut
     reply is degenerate only if it loops).
   - **How they were checked:** 9,838 fixtures with 0 misses; 237 of 237 mutants killed; machinery 12 of 12; G1 to
     G4 pass. Every stored panel run was regraded, and each change only removed the clauses the rules target.
-  - **After:** Sonnet scores 66.1 [62.3, 69.9] and Haiku 55.9 [51.8, 59.9]; both meet Level R. LFM2-2.6B moves from
+  - **After:** Sonnet scores 65.5 [62.0, 68.9] and Haiku 55.9 [51.8, 59.9]; both meet Level R. LFM2-2.6B moves from
     18.2 to 23.1, no panel model passes, and the shortcut ceiling stays at 36.7.
   - **More:** [rc12/FRONTIER.md](rc12/FRONTIER.md), with one conversation side by side in
     [rc12/examples](rc12/examples/corr-014-lfm2-vs-claude-haiku.md).
