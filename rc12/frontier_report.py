@@ -1,12 +1,11 @@
-"""RC-12 frontier calibration report: Level R numbers for the Claude runs (api_run.py) beside a panel model, under
-the working-tree graders and under one ablation, all regraded from the stored transcripts (CPU only, nothing replayed).
+"""RC-12 frontier calibration report: Level R numbers for the Claude runs (api_run.py) beside a panel model, all
+regraded from the stored transcripts (CPU only, nothing replayed), under three rule sets (RULES):
 
-  rules "current":   graders.py as it stands.
-  rules "attributed": the same, with v3_other and v3_shotgun dropped from G-VAL. Those two fail a reply that names any
-                     other in-context value, which is how a frontier model answers ("The banjo. Your nephew is the one
-                     with the trombone."; "Saturday. It started on Wednesday, then moved to Friday ..."). The ablation
-                     is a probe of the grader, not a proposed rule: it also lets a shotgun list through, so it is read
-                     only as the gap it opens between models, never as a pass.
+  before_waiver  graders.py with the answer-first waiver switched off (grade_text.OFF "first"): the graders until
+                 2026-11-03, which fail "The banjo. Your nephew is the one with the trombone." on v3_other.
+  current        graders.py as it stands (the waiver adopted 2026-11-03, rc12/FRONTIER.md).
+  no_v3          v3_other and v3_shotgun dropped from G-VAL: a probe of the grader, never a rule, since a list of
+                 every candidate passes it (the SHOTGUN fake scores 92 on it).
 
   python -B frontier_report.py --root runs/frontier --ref <dir with LFM2-2.6B/template/<seed>[_owncf]/> --out <json>
 Per model: seeds 1-3 where present (Claude Sonnet 5.5 has one sample: a single seed's CI is wider), each with its
@@ -14,7 +13,6 @@ _owncf twin, pooled exactly as dev_panel.py pools them; S7 CI by score_stats.s7_
 import argparse
 import json
 import os
-import re
 
 import grade_text as T
 import graders as G
@@ -27,35 +25,16 @@ ABLATE = {"v3_other", "v3_shotgun"}
 _g_val = G.g_val
 
 
-def g_val_attributed(*a, **k):
+def g_val_no_v3(*a, **k):
     out = _g_val(*a, **k)
     out["fails"] = [f for f in out["fails"] if f not in ABLATE]
     out["ok"] = not out["fails"]
     return out
 
 
-FIRST = re.compile(r"[.!?\n]")
-
-
-def g_val_answer_first(reply, stop, prior, rec, probe, gold=None):
-    """v3_other and v3_shotgun are waived when the reply's first sentence asserts a gold and names no other value of
-    the probe, so "The banjo. Your nephew is the one with the trombone." passes and a list of every candidate does
-    not (the shortcut ceiling under these rules is in the report: a cheater has to know the gold to lead with it)."""
-    out = _g_val(reply, stop, prior, rec, probe, gold)
-    if not ABLATE & set(out["fails"]):
-        return out
-    text = T.norm(reply)
-    first = FIRST.split(text.strip(), maxsplit=1)[0]
-    gs = G.golds(probe, gold)
-    pool = G.pool_values(probe)
-    rest = [v for v in dict.fromkeys(list(probe.get("candidates") or []) + G.in_context(rec, probe, pool)) if v not in gs]
-    if any(T.asserted_hits(first, g, pool, gold=True) for g in gs) and not any(T.mentioned(first, v) for v in rest):
-        out["fails"] = [f for f in out["fails"] if f not in ABLATE]
-        out["ok"] = not out["fails"]
-    return out
-
-
-RULES = {"current": _g_val, "attributed": g_val_attributed, "answer_first": g_val_answer_first}
+# (rule set, G-VAL, grade_text.OFF): the graders before the answer-first waiver (OFF "first"), as they stand, and
+# with both clauses dropped (a probe of the grader, never a rule: a shotgun list passes it)
+RULES = [("before_waiver", _g_val, {"first"}), ("current", _g_val, set()), ("no_v3", g_val_no_v3, {"first"})]
 
 
 def runs(base, model):
@@ -98,13 +77,16 @@ def main():
     for model, base in todo:
         seeds, rows = runs(base, model)
         report[model] = {}
-        for rules, fn in RULES.items():
+        for rules, fn, off in RULES:
             G.g_val = fn
+            T.OFF.clear()
+            T.OFF.update(off)
             report[model][rules] = level(regrade(rows), seeds)
             r = report[model][rules]
             print(f"{model:20s} {rules:10s} seeds {','.join(seeds)}  S7 {r['S7']:.2f} [{r['ci'][0]:.2f}, {r['ci'][1]:.2f}]"
                   f"  PERSIST {r['PERSIST']:.3f}  T0 {r['T0']:.3f}  capped {r['cap_rate']:.0%}  {r['verdict']}", flush=True)
     G.g_val = _g_val
+    T.OFF.clear()
     with open(args.out, "w") as f:
         json.dump(report, f, indent=1)
 

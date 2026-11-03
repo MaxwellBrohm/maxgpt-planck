@@ -84,18 +84,23 @@ Every experiment, its pre-registered rule, its result and its independent audit 
   reading facts from old and new tables supplied in the conversation (bar 0.60). Max changed Level R on
   Oct 4 from non-inferiority to Qwen2.5-0.5B, which scores 2.3 on those families on dev, so a 5M model
   already met the old bar mostly by not looping. No panel model reaches any of the three on dev: the best
-  state score is 18.2 (LFM2-2.6B), the best LOOKUP 0.014, and no model below 90M scores above 2.1. OOD-H
+  state score is 20.0 (LFM2-2.6B; 18.2 before the Nov 3 answer-first waiver), the best LOOKUP 0.014, and no model below 90M scores above 2.1. OOD-H
   Part 1 (150 held-out conversations with human-written user turns, 415 probes) is fixed for the lock: Max
   reviewed a 30-thread sample on Oct 10 (85 of 85 probes looked right), then re-checked the 11 threads
   that a third review had changed (11 of 11 conversations, 32 of 32 probes).
-- **Frontier calibration (Nov 3, dev):** Claude Haiku 5.5, run through the same loop and graders, scores
-  S7 41.2 [36.7, 45.7], 2.3 times the best panel model, with its CI lower bound just under the bar. Its
-  transcripts show the grader failing right answers that add context ("The banjo. Your nephew is the one
-  with the trombone."). An answer-first waiver scores it 57.4 [52.9, 61.8] while LFM2-2.6B stays at 20.0
-  and every shortcut stays at 36.7, but the grader fixtures show that waiver also passes self-contradicting
-  replies, so a narrower form is proposed before the lock:
-  [rc12/FRONTIER.md](rc12/FRONTIER.md), with one conversation side by side in
-  [rc12/examples](rc12/examples/corr-014-lfm2-vs-claude-haiku.md).
+- **Frontier calibration (Nov 3, dev):** Claude models run through the same loop and graders.
+  - **Before:** under the graders as they stood, Claude Haiku 5.5 scored S7 40.4 [36.6, 44.1], with its CI lower
+    bound just under the bar. Its transcripts showed the grader failing right answers that add context ("The banjo.
+    Your nephew is the one with the trombone.").
+  - **The rule:** Max adopted an answer-first waiver of `v3_other` and `v3_shotgun`. The answer must lead, and no
+    other value may be pinned to the asked thing ("It is Thursday" still fails).
+  - **How it was checked:** 9,670 fixtures with 0 misses; 237 of 237 mutants killed; G1 to G4 pass. Every stored
+    panel run was regraded, and the only changes were lost `v3_other` and `v3_shotgun` clauses.
+  - **After:** Haiku scores 55.7 [51.7, 59.6] and meets Level R. LFM2-2.6B moves from 18.2 to 20.0, no panel model
+    passes, and the shortcut ceiling stays at 36.7. Claude Sonnet 5.5 (one sample) scores 62.4 but misses
+    PERSIST: half its replies run past the 256-token cap, which counts as a runaway. That rule is Max's next call.
+  - **More:** [rc12/FRONTIER.md](rc12/FRONTIER.md), with one conversation side by side in
+    [rc12/examples](rc12/examples/corr-014-lfm2-vs-claude-haiku.md).
 - **The lock: not yet.** It was planned for Oct 11-14, and the pre-registration is still a draft. The lock
   package (sealed-session kit, lock check, finalize step) was built and dry-run without any sealed content
   on Oct 11-13. Left: settling the grader gaps the OOD-H reviews found (for example "You asked if X." is
