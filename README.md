@@ -203,9 +203,7 @@ Every experiment, its pre-registered rule, its result and its independent audit 
 
 ## Credits
 
-MaxGPT-Planck is Max Brohm's project. The research phase was run with Claude (Anthropic) agents:
-literature review, fact-checking and the model probes were done by AI agents and reviewed by other
-agents, and every claim in the reports carries its source. Earlier models in the family: MaxGPT-1,
+MaxGPT-Planck is Max Brohm's project. Every claim in the reports carries its source. Earlier models in the family: MaxGPT-1,
 2, 3 and 3.5 (the OG series), MaxGPT-Mini and MaxGPT-Ultra (the Neo series).
 
 License: to be chosen before the first model release.
