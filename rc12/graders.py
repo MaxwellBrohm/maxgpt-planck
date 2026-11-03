@@ -24,6 +24,10 @@ G-VAL clauses (a reply is right only if none fails):
   v3_guess    a value of the probe's pool that is NOT in the conversation is mentioned at all (a guess)
   v3_shotgun  every candidate (2+) is mentioned (not COMPOSE, whose answer compares the two holders; shotgun_applies);
               a stale value named only in a change phrase, the gold asserted, is not counted (shotgun_named)
+  answer first  v3_other and v3_shotgun are waived for a reply that leads with the answer (answer_first; Max,
+              2026-11-03, rc12/FRONTIER.md): its first sentence asserts the gold and no other value, and no other
+              value is asserted where the reply binds it to the asked thing ("It is Thursday.", "but it's Thursday",
+              "Your bike is orange"), so "The banjo. Your nephew is the one with the trombone." passes
   v4_voice    user voice: the gold bound to the first person (E001 captures) or "my" + an object/holder word
               (E004 clause 7); for assistant-held facts (OWN, "What did I call you?") the reverse: the value
               given to the user ("You picked Quizzards", "Your name is Kestrel"). Report frames (grade_voice.py,
@@ -108,6 +112,37 @@ def shotgun_named(text, v, stale, gold_ok):
     return bool(hits)
 
 
+BIND_IT = re.compile(r"\b(?:it|that|this)(?:'s|\u2019s|\s+is|\s+will\s+be)\b[^.!?;\n]{0,20}$", re.I)
+
+
+def bind_your(phrases):
+    """"your <object words> is ..." just before a value: the reply gives the value to the asked thing itself."""
+    alts = "|".join(r"\s+".join(map(re.escape, ph.split())) for ph in phrases if ph.strip())
+    return re.compile(r"\byour\s+(?:" + alts + r")(?:'s|\u2019s|\s+is|\s+are|\s+will\s+be)\b[^.!?;\n]{0,20}$",
+                      re.I) if alts else None
+
+
+def answer_first(text, gs, pool, others, stale, gold_ok, phrases):
+    """the answer-first waiver of v3_other and v3_shotgun (docstring above): True when the first sentence asserts a gold,
+    no other value is asserted inside it, and no other value is asserted right after a binding frame (BIND_IT, or
+    "your <object words> is") in its own clause. Stale values in a change phrase are already exempt (stale_ok)."""
+    end = T.SENT_END.search(text)
+    first = end.start() if end else len(text)
+    if not any(T.asserted_hits(text[:first], g, pool, gold=True) for g in gs):
+        return False
+    your = bind_your(phrases)
+    for v in others:
+        for m in T.asserted_hits(text, v, pool):
+            if "stale" not in T.OFF and v in stale and gold_ok and stale_ok(text, m):
+                continue
+            if m.start() < first:
+                return False
+            before = text[T.sentence_span(text, m.start())[0]:m.start()]
+            if BIND_IT.search(before) or (your and your.search(before)):
+                return False
+    return True
+
+
 def g_val(reply, stop, prior, rec, probe, gold=None):
     text = T.norm(reply)
     gs = golds(probe, gold)
@@ -137,6 +172,9 @@ def g_val(reply, stop, prior, rec, probe, gold=None):
     if "shotgun" not in T.OFF and shotgun_applies(probe) and len(cands) >= 2 and \
             all(shotgun_named(text, v, stale, gold_ok) for v in cands):
         fails.append("v3_shotgun")
+    if "first" not in T.OFF and {"v3_other", "v3_shotgun"} & set(fails) and \
+            answer_first(text, gs, pool, others, stale, gold_ok, probe.get("object_words") or []):
+        fails = [f for f in fails if f not in ("v3_other", "v3_shotgun")]
     mode = GV.mode_of(probe)
     voice = any(GV.voice_error(g, text, mode) for g in gs)
     if mode not in ("given", "own"):

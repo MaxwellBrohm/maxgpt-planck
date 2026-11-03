@@ -17,6 +17,8 @@ change being regraded can make (--expect):
   t0gaps  (2026-10-04, notes STEP 11b: the T0 audit's two grader gaps, inflected values and the closing-quote
           sentence end) only probes, units and the role-leak scan moved, never the loop flags or the ack marks, and no
           probe gained or lost a degenerate, echo, unsure or format clause (those read neither values nor sentences)
+  first   (2026-11-03, rc12/FRONTIER.md: the answer-first waiver) every changed probe only lost v3_other and/or
+          v3_shotgun, nothing gained, only probes and units moved
 Writes <dst>/regrade.json; exit 1 if any change is not of that kind."""
 import argparse
 import json
@@ -48,7 +50,15 @@ def expected_t0gaps(c):
         x.startswith("loop_") or x.endswith(UNMOVED) for x in moved)
 
 
-EXPECT = {"item3": expected_item3, "t0gaps": expected_t0gaps}
+def expected_first(c):
+    """the answer-first waiver (2026-11-03, rc12/FRONTIER.md) only ever removes v3_other or v3_shotgun: every changed
+    probe lost some of those two and nothing else, gained nothing, and only probes and units moved."""
+    return set(c["fields"]) <= {"probes", "unit"} and c["probes"] and all(
+        set(p["old"]) - set(p["new"]) <= {"v3_other", "v3_shotgun"} and set(p["new"]) <= set(p["old"])
+        for p in c["probes"])
+
+
+EXPECT = {"item3": expected_item3, "t0gaps": expected_t0gaps, "first": expected_first}
 
 
 def run_dirs(src):

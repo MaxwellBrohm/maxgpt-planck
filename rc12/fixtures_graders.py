@@ -168,12 +168,22 @@ def vfix(rec, p, gold=None, ideal=None, avoid=()):
     if o:
         out += [fx(rec, p, "alt_or", f"{Gd} or {o}.", False), fx(rec, p, "alt_slash", f"It's {gold}/{o}.", False),
                 fx(rec, p, "wrong", sub_word(ideal, gold, o), False),
-                fx(rec, p, "other_too", f"{ideal} {cap(o)} is the other one.", False)]
+                fx(rec, p, "other_too_ok", f"{ideal} {cap(o)} is the other one.", True),
+                # the answer-first waiver (graders.answer_first; Max, 2026-11-03): the answer must lead, a second
+                # answer in the first sentence and a value bound to the asked thing still fail
+                fx(rec, p, "af_two_answers", f"{Gd} and {o}.", False),
+                fx(rec, p, "af_gold_not_first", f"Got it. {cap(o)} is the other one. {ideal}", False),
+                fx(rec, p, "af_it_rebound", f"{ideal} It is {o}.", False),
+                fx(rec, p, "af_far_frame_ok", f"{ideal} That's the one you picked, and {o} is the other one.", True)] + (
+               [fx(rec, p, "af_your_rebound", f"{ideal} Your {p['object_words'][0]} is {o}.", False)]
+               if p.get("object_words") else [])
     if len(cands) >= 3 and o:
         out += [fx(rec, p, "neg_other_ok", f"It's {gold}, not {o}.", True),
                 fx(rec, p, "than_other_ok", f"{ideal} It suits you better than {o}.", True)]
     if len(cands) >= 2 and gold in cands and not p.get("pool_values"):
-        out.append(fx(rec, p, "shotgun", ideal + " " + " ".join(f"Not {c}." for c in cands if c != gold), False))
+        out.append(fx(rec, p, "shotgun_answer_first_ok", ideal + " " + " ".join(f"Not {c}." for c in cands if c != gold),
+                      True))                  # Max, 2026-11-03: the answer leads (graders.answer_first)
+        out.append(fx(rec, p, "shotgun", " ".join(f"Not {c}." for c in cands if c != gold) + " " + ideal, False))
         out.append(fx(rec, p, "guess_list", "Could be any of these:\n" + "\n".join(f"- {c}" for c in cands), False))
     if outside:
         out.append(fx(rec, p, "guess_outside", f"{ideal} {cap(outside[0])} too.", False))
@@ -192,6 +202,16 @@ def vfix(rec, p, gold=None, ideal=None, avoid=()):
                 fx(rec, p, "stale_prior_ok", f"{ideal} (Prior plan: {s}.)", True),
                 fx(rec, p, "stale_recap_planted", f"{ideal} Initially I hesitated, but it is {s}.", False),
                 fx(rec, p, "stale_prior_swapped", f"It is {s} now; the prior plan said {gold}.", False)]
+        # the same exemptions with the answer NOT leading, so the answer-first waiver cannot stand in for them
+        # (2026-11-03: with only the fixtures above, the waiver hid the stale_ok and recap-word mutants)
+        out += [fx(rec, p, "stale_lead_ok", f"It moved from {s}. It is {gold} now.", True),
+                fx(rec, p, "stale_initially_lead_ok", f"Initially scheduled for {s}. It is {gold} now.", True),
+                fx(rec, p, "stale_previous_lead_ok", f"Previous: {s}. Updated: {gold}.", True),
+                fx(rec, p, "stale_prior_lead_ok", f"(Prior plan: {s}.) It is {gold} now.", True)]
+        o2 = next((v for v in others if v not in p["stale"]), None)
+        if o2:                                # a stale value in a change phrase after "it's" never blocks the waiver
+            out.append(fx(rec, p, "af_stale_then_other_ok", f"{ideal} It's changed from {s}. {cap(o2)} is the other one.",
+                          True))
     out += inflect_quote_fixtures(rec, p, gold, ideal, others, outside, obj, mode)
     if p.get("pool_values") and o:
         adj = p["question"].rstrip("?").split()[-1]
@@ -224,13 +244,14 @@ def inflect_quote_fixtures(rec, p, gold, ideal, others, outside, obj, mode):
             out.append(fx(rec, p, "inflect_voice", f"You know, I have {f} now.", False))
     o = next((v for v in others if inflects(v)), None)
     if o:
-        out.append(fx(rec, p, "inflect_other", f"{ideal} {cap(infl(o))} are nice too.", False))
+        out.append(fx(rec, p, "inflect_other_ok", f"{ideal} {cap(infl(o))} are nice too.", True))
     lo = next((v for v in others if v.islower() and inflects(v)), None)
     if lo:                                    # an inflected lowercase value offers an alternative ("X or Ys")
         out.append(fx(rec, p, "inflect_alt", f"the answer: {gold} or {infl(lo)}.", False))
     nc = next((v for v in others if v.islower() and not inflects(v)), None)
     if nc:                                    # a colour's or a job's plural is another word, never the value
         out.append(fx(rec, p, "noinflect_ok", f"{ideal} Lots of {infl(nc)} around here.", True))
+        out.append(fx(rec, p, "noinflect_lead_ok", f"Lots of {infl(nc)} around here. {ideal}", True))
     g = next((v for v in outside if inflects(v)), None)
     if g:
         out.append(fx(rec, p, "inflect_guess", f"{ideal} {cap(infl(g))} are nice too.", False))

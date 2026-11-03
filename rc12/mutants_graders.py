@@ -16,7 +16,7 @@ CLAUSES = ["v1_degen", "v2_gold", "v2_unsure", "v3_other", "v3_guess", "v3_shotg
 OFF = ["neg", "postneg", "question", "hedge", "hypo", "cond", "alt", "list", "than", "voc", "capture", "myobj",
        "assistrev", "unsure", "echo", "leak", "tri", "equal", "selfcopy", "runaway", "empty", "stale", "guess",
        "shotgun", "echo_contains", "cue", "absvalue", "absvoice", "short", "rule", "old", "source", "other", "assert",
-       "listvoice", "claim", "ownname", "self", "stuff", "inflect", "inflect_you"]
+       "listvoice", "claim", "ownname", "self", "stuff", "inflect", "inflect_you", "first"]
 
 PARAM = [("grade_text", "P", "neg_window", 1), ("grade_text", "P", "echo", 0.95), ("grade_text", "P", "alt_chars", 0),
          ("grade_loop", "LP", "tri_rep", 5), ("grade_loop", "LP", "selfcopy", 0.9),
@@ -208,4 +208,20 @@ SOURCE = [
     ("graders", "gold_ok = any(T.asserted_hits(text, g, pool, gold=True) for g in gs)",
      "gold_ok = any(T.asserted_hits(text, g, pool) for g in gs)"),
     ("grade_voice", "for m in T.value_hits(text, v):", "for m in [x for x in T.value_hits(text, v) if not T.inflected(x, v)]:"),
+    # the answer-first waiver (graders.answer_first; Max, 2026-11-03, rc12/FRONTIER.md); OFF "first" switches it off
+    # (other_too_ok, shotgun_answer_first_ok, inflect_other_ok). Each condition dropped: the gold need not lead
+    # (af_gold_not_first), a second answer in the first sentence (af_two_answers), the first sentence is the whole
+    # reply (other_too_ok), the "it is" / "your <object> is" frames (af_it_rebound, stale_asserted, af_your_rebound),
+    # the frame window (stale_asserted at 0, af_far_frame_ok unbounded), stale change phrases skipped
+    # (af_stale_then_other_ok), and the waiver dropping only one of its two clauses
+    ("graders", "if not any(T.asserted_hits(text[:first], g, pool, gold=True) for g in gs):", "if False:"),
+    ("graders", "if m.start() < first:", "if False:"),
+    ("graders", "first = end.start() if end else len(text)", "first = len(text)"),
+    ("graders", "if BIND_IT.search(before) or (your and your.search(before)):", "if your and your.search(before):"),
+    ("graders", "if BIND_IT.search(before) or (your and your.search(before)):", "if BIND_IT.search(before):"),
+    ("graders", r'\s+will\s+be)\b[^.!?;\n]{0,20}$", re.I)', r'\s+will\s+be)\b[^.!?;\n]{0,0}$", re.I)'),
+    ("graders", r'\s+will\s+be)\b[^.!?;\n]{0,20}$", re.I)', r'\s+will\s+be)\b[^.!?;\n]*", re.I)'),
+    ("graders", "if \"stale\" not in T.OFF and v in stale and gold_ok and stale_ok(text, m):", "if False:"),
+    ("graders", 'fails = [f for f in fails if f not in ("v3_other", "v3_shotgun")]', 'fails = [f for f in fails if f != "v3_other"]'),
+    ("graders", 'fails = [f for f in fails if f not in ("v3_other", "v3_shotgun")]', 'fails = [f for f in fails if f != "v3_shotgun"]'),
 ]
