@@ -88,6 +88,13 @@ Every experiment, its pre-registered rule, its result and its independent audit 
   Part 1 (150 held-out conversations with human-written user turns, 415 probes) is fixed for the lock: Max
   reviewed a 30-thread sample on Oct 10 (85 of 85 probes looked right), then re-checked the 11 threads
   that a third review had changed (11 of 11 conversations, 32 of 32 probes).
+- **Frontier calibration (Nov 3, dev):** Claude Haiku 5.5, run through the same loop and graders, scores
+  S7 41.2 [36.7, 45.7], 2.3 times the best panel model, with its CI lower bound just under the bar. Its
+  transcripts show the grader failing right answers that add context ("The banjo. Your nephew is the one
+  with the trombone."). An answer-first waiver scores it 57.4 [52.9, 61.8] while LFM2-2.6B stays at 20.0
+  and every shortcut stays at 36.7. Adopting that rule is Max's call before the lock:
+  [rc12/FRONTIER.md](rc12/FRONTIER.md), with one conversation side by side in
+  [rc12/examples](rc12/examples/corr-014-lfm2-vs-claude-haiku.md).
 - **The lock: not yet.** It was planned for Oct 11-14, and the pre-registration is still a draft. The lock
   package (sealed-session kit, lock check, finalize step) was built and dry-run without any sealed content
   on Oct 11-13. Left: settling the grader gaps the OOD-H reviews found (for example "You asked if X." is
