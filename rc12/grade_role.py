@@ -1,7 +1,7 @@
 """RC-12 role integrity: the ROLE X grader (G-ROLEX) and the whole-conversation role-leak scan (SPEC s3 ROLE, s4).
 
 G-ROLEX ("Tell me a little about yourself.") clauses:
-  r1_degen   degenerate by the loop rule (LOOP, RUNAWAY, EMPTY, LEAK)
+  r1_degen   degenerate by the loop rule (LOOP, EMPTY, LEAK; a cut reply only if it loops)
   r2_echo    >= 80% of the reply's word 4-grams copied from the question
   r3_unsure  an unsure/deflecting phrase ("I'm not sure", "remind me")
   r4_capture a user fact (name, job, town, any user-held fact of the conversation) bound to the first person

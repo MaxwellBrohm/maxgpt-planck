@@ -18,7 +18,7 @@ Each is IDEAL outside its own family, so it isolates one failure mode.
                template render must flag it as a LEAK)
     HISTCHECK  the IDEAL reply padded with whitespace; records every history that is not exactly the user turns
                plus its own earlier replies (stripped), in order, ending with the current user turn
-    CAPPER     the IDEAL reply with stop reason "cap" (RUNAWAY, never LOOP)
+    CAPPER     the IDEAL reply with stop reason "cap" (RUNAWAY, never LOOP; scores like IDEAL since 2026-11-03)
     SAMPLER    the IDEAL reply on greedy (seed None) and FIRST's reply on sampling seeds (seed plumbing test)
     FORGETFUL  IDEAL, but a probe whose needed turns (S C I O Q T before it, plus its src; defined HERE, not taken
                from runner.py, so it is an independent oracle) are missing from the history it was given gets

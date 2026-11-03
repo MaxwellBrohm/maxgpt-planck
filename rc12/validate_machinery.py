@@ -4,7 +4,8 @@ Each check returns a list of failure strings; main() writes logs/e2e_machinery.t
   history    HISTCHECK sees exactly the user turns plus its OWN earlier replies (stripped), plain and template,
              with and without truncation; IDEAL_ALT scores OWN 1.00 only because its replies are fed back
   stops      CONTINUER: plain render cuts the fake user turn (stop "role", IDEAL scores); template render keeps it
-             (LEAK on every reply, R = 0); CAPPER: RUNAWAY on every reply, loop rate 0, R = 0
+             (LEAK on every reply, R = 0); CAPPER: RUNAWAY on every reply, loop rate 0, R = 100 (since 2026-11-03
+             a reply cut at the cap that does not loop is graded on its text)
   trunc      ctx 556 (proxy budget 300): some probes fail "trunc"; a probe fails iff a needed turn was dropped;
              ctx 4096 gives the same rows as no limit
   seeds      SAMPLER: runs keep their seed; sampling seeds are scored by default, greedy only on request
@@ -111,7 +112,7 @@ def c_stops(recs):
     s = S.summarize(run(recs, "CONTINUER", "template"))
     check(s["R_ungated"] == 0 and s["degenerate_rates"]["LEAK"] == 1.0, "CONTINUER template: leak not flagged", out)
     s = S.summarize(run(recs, "CAPPER"))
-    check(s["R_ungated"] == 0 and s["loop_rate"] == 0 and s["degenerate_rates"]["RUNAWAY"] == 1.0,
+    check(s["R_ungated"] == 100 and s["loop_rate"] == 0 and s["degenerate_rates"]["RUNAWAY"] == 1.0,
           f"CAPPER: R {s['R_ungated']}, loop {s['loop_rate']}, runaway {s['degenerate_rates']['RUNAWAY']}", out)
     return out
 

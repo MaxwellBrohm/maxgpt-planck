@@ -11,10 +11,10 @@ CLAUSES = ["v1_degen", "v2_gold", "v2_unsure", "v3_other", "v3_guess", "v3_shotg
            "f1_degen", "f2_echo", "f3_short", "f4_rule", "f5_old",
            "d0_source", "d1_degen", "d2_gold", "d3_other", "d4_assert", "d5_unsure", "d6_voice",
            "r1_degen", "r2_echo", "r3_unsure", "r4_capture", "r5_name", "r6_own", "r7_self",
-           "loop_LOOP", "loop_RUNAWAY", "loop_EMPTY", "loop_LEAK", "loop_echo"]
+           "loop_LOOP", "loop_EMPTY", "loop_LEAK", "loop_echo"]
 
 OFF = ["neg", "postneg", "question", "hedge", "hypo", "cond", "alt", "list", "than", "voc", "capture", "myobj",
-       "assistrev", "unsure", "echo", "leak", "tri", "equal", "selfcopy", "runaway", "empty", "stale", "guess",
+       "assistrev", "unsure", "echo", "leak", "tri", "equal", "selfcopy", "empty", "stale", "guess",
        "shotgun", "echo_contains", "cue", "absvalue", "absvoice", "short", "rule", "old", "source", "other", "assert",
        "listvoice", "claim", "ownname", "self", "stuff", "inflect", "inflect_you", "first"]
 
@@ -53,7 +53,9 @@ SOURCE = [
     ("grade_text", "GC.ABS_MORE)", r'GC.ABS_MORE.replace(r"|\bskips\b", ""))'),
     ("grade_loop", "re.I | re.M)", "re.I)"),
     ("grade_loop", "any(ws == p for p in prior_ws)", "any(ws is p for p in prior_ws)"),
-    ("grade_loop", 'stop == "cap"', 'stop == "length"'),
+    # RUNAWAY is reported only since 2026-11-03 (grade_loop amendment): the clause loop_RUNAWAY, OFF "runaway" and the
+    # cap-test edit no longer change any verdict, so they are equivalent here and were dropped; validate_machinery's
+    # CAPPER check still pins the RUNAWAY rate (1.0). The amendment's own mutants are at the end of SOURCE.
     # OD6 (iii), 2026-09-25: equality charges only replies to asking turns (P X Q D); statement-turn repeats are
     # ack-repeats (killed by fixtures_more.lfix loop_request_* and the od6_* conversation tests)
     ("grade_loop", "equals_earlier(ws, equality_set(prior_ws, prior_kinds, kind))", "equals_earlier(ws, prior_ws)"),
@@ -103,7 +105,8 @@ SOURCE = [
      "return [p for p, k in zip(prior_ws, prior_kinds) if asks(k) and len(p) > 1]"),
     ("grade_loop", 'assert type(t.get("asks")) is bool, f"D turn u{t[\'i\']} has no asks annotation (F2)"',
      'if type(t.get("asks")) is not bool: return "D"'),
-    ("graders", 'return flags == ["LOOP"] and why == ["equal"]', 'return flags == ["LOOP"]'),
+    ("graders", '[f for f in flags if f not in L.REPORTED] == ["LOOP"] and why == ["equal"]',
+     '[f for f in flags if f not in L.REPORTED] == ["LOOP"]'),
     ("graders", 'if len(res["fails"]) != 1 or res["fails"][0] not in DEGEN_CLAUSES:',
      'if not res["fails"] or res["fails"][0] not in DEGEN_CLAUSES:'),
     ("graders", "eq_only=eq_only(res, *args))", "eq_only=False)"),
@@ -224,4 +227,10 @@ SOURCE = [
     ("graders", "if \"stale\" not in T.OFF and v in stale and gold_ok and stale_ok(text, m):", "if False:"),
     ("graders", 'fails = [f for f in fails if f not in ("v3_other", "v3_shotgun")]', 'fails = [f for f in fails if f != "v3_other"]'),
     ("graders", 'fails = [f for f in fails if f not in ("v3_other", "v3_shotgun")]', 'fails = [f for f in fails if f != "v3_shotgun"]'),
+    # the cap amendment (grade_loop, Max 2026-11-03): a cut reply charged again (runaway_ok), in the probe graders and
+    # in the LOOP family grader; a cut reply that loops still fails through LOOP (runaway_loop)
+    ("grade_loop", "return any(f not in REPORTED for f in classify(reply, stop, prior, kind, prior_kinds)[0])",
+     "return bool(classify(reply, stop, prior, kind, prior_kinds)[0])"),
+    ("grade_loop", 'REPORTED = ("RUNAWAY",)', "REPORTED = ()"),
+    ("graders", 'fails = [f"loop_{f}" for f in flags if f not in L.REPORTED]', 'fails = [f"loop_{f}" for f in flags]'),
 ]

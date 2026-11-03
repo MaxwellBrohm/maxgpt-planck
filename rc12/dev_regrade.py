@@ -19,6 +19,8 @@ change being regraded can make (--expect):
           probe gained or lost a degenerate, echo, unsure or format clause (those read neither values nor sentences)
   first   (2026-11-03, rc12/FRONTIER.md: the answer-first waiver) every changed probe only lost v3_other and/or
           v3_shotgun, nothing gained, only probes and units moved
+  cap     (2026-11-03, the cap amendment in grade_loop) every changed probe only lost degenerate clauses, nothing
+          gained, only probes and units moved
 Writes <dst>/regrade.json; exit 1 if any change is not of that kind."""
 import argparse
 import json
@@ -58,7 +60,18 @@ def expected_first(c):
         for p in c["probes"])
 
 
-EXPECT = {"item3": expected_item3, "t0gaps": expected_t0gaps, "first": expected_first}
+CAP_CLAUSES = {"v1_degen", "a1_degen", "f1_degen", "d1_degen", "r1_degen", "loop_RUNAWAY"}
+
+
+def expected_cap(c):
+    """the cap amendment (2026-11-03, grade_loop: a reply cut at the cap is degenerate only if it loops) only ever
+    removes a degenerate clause: every changed probe lost some of CAP_CLAUSES and nothing else, gained nothing, and
+    only probes and units moved (the flags still report RUNAWAY)."""
+    return set(c["fields"]) <= {"probes", "unit"} and c["probes"] and all(
+        set(p["old"]) - set(p["new"]) <= CAP_CLAUSES and set(p["new"]) <= set(p["old"]) for p in c["probes"])
+
+
+EXPECT = {"item3": expected_item3, "t0gaps": expected_t0gaps, "first": expected_first, "cap": expected_cap}
 
 
 def run_dirs(src):

@@ -13,7 +13,7 @@ that repeats an earlier reply of the model). Reported per family by score.py (eq
 measurement for strict case (d) and F3 (prereg draft s6, s17 OD6 follow-up (3); verifier 2026-09-25).
 
 G-VAL clauses (a reply is right only if none fails):
-  v1_degen    degenerate by the loop rule (LOOP, RUNAWAY, EMPTY, LEAK: grade_loop.py)
+  v1_degen    degenerate by the loop rule (LOOP, EMPTY, LEAK; a reply cut at the cap only if it loops: grade_loop.py)
   v2_gold     no mention of the gold is ASSERTED (grade_text.why_not_asserted: negated within 3 words before,
               negated right after, question, hedge, example, if-clause, "X or Y", bare list line, "than X",
               greeting vocative)
@@ -237,10 +237,10 @@ def g_abs(reply, stop, prior, rec, probe):
 
 def g_loop(reply, stop, prior, rec, probe):
     flags, why = L.classify(reply, stop, prior, probe["kind"], L.turn_kinds(rec)[:len(prior)])
-    fails = [f"loop_{f}" for f in flags]
+    fails = [f"loop_{f}" for f in flags if f not in L.REPORTED]   # RUNAWAY alone passes (grade_loop, 2026-11-03)
     if T.echo(T.norm(reply), probe["question"]):
         fails.append("loop_echo")
-    return dict(ok=not fails, fails=fails, lenient=not flags, why=why)
+    return dict(ok=not fails, fails=fails, lenient=not [f for f in flags if f not in L.REPORTED], why=why)
 
 
 DEGEN_CLAUSES = ("v1_degen", "a1_degen", "f1_degen", "d1_degen", "r1_degen", "loop_LOOP")
@@ -252,7 +252,7 @@ def eq_only(res, reply, stop, prior, rec, probe):
         return False
     earlier = L.turn_kinds(rec)[:len(prior)]
     flags, why = L.classify(reply, stop, prior, probe["kind"], earlier)
-    return flags == ["LOOP"] and why == ["equal"]
+    return [f for f in flags if f not in L.REPORTED] == ["LOOP"] and why == ["equal"]
 
 
 def grade_probe(rec, probe, replies, stops):

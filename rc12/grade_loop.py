@@ -4,10 +4,14 @@ answering user turn t, given the earlier replies:
   LOOP     some word 3-gram occurs >= 4 times in r (E001 battery.degenerate: WITHIN a turn); OR r, normalized, equals
            an earlier reply of its equality set, at any length (below); OR r has >= 12 words and >= 50% of its word
            4-grams occur in ONE earlier reply (self-copy: ACROSS turns, every earlier reply, whatever turn t is).
-  RUNAWAY  r stopped at the 256-token cap.   EMPTY  r has no word characters.
+  RUNAWAY  r stopped at the 256-token cap (reported; not degenerate on its own since 2026-11-03, below).
+  EMPTY    r has no word characters.
   LEAK     a role tag at the start of any line of r, or a chat-template marker anywhere in r (the reply speaks a
            user turn or continues into one).
-Degenerate = any of the four; the Level A loop criterion counts LOOP only (the rest are reported beside).
+Degenerate = LOOP, EMPTY or LEAK; the Level A loop criterion counts LOOP only (the rest are reported beside).
+  Amendment (Max, 2026-11-03, rc12/FRONTIER.md): RUNAWAY alone is no longer degenerate. A reply cut at the cap is
+  graded on its text and fails only if it also loops (LOOP); until then every cut reply failed, which charged a
+  frontier model's long, well-formed answers as runaways (Claude Sonnet 5.5: 52% of replies cut).
 Equality set (equality_set):
   turn t ASKS something (kind P, X, Q, or D with asks: true; LOOP requests are P): EVERY earlier reply of the
     conversation, whatever turn it answered (OD6 iii). So the same answer to two different questions is a LOOP, and so is a question
@@ -104,6 +108,9 @@ def equality_set(prior_ws, prior_kinds, kind):
     return [p for p, k in zip(prior_ws, prior_kinds) if asks(k)]
 
 
+REPORTED = ("RUNAWAY",)   # flags that are reported but never degenerate on their own (amendment 2026-11-03)
+
+
 def classify(reply, stop, prior, kind, prior_kinds):
     """flags (subset of LOOP, RUNAWAY, EMPTY, LEAK) and the LOOP sub-reasons (tri, equal, selfcopy). kind: the kind of
     the user turn r answers; prior_kinds: the kinds of the turns the prior replies answered (equality_set)."""
@@ -147,7 +154,7 @@ def answer_repeat(reply, prior, prior_kinds, kind):
 
 
 def degenerate(reply, stop, prior, kind, prior_kinds):
-    return bool(classify(reply, stop, prior, kind, prior_kinds)[0])
+    return any(f not in REPORTED for f in classify(reply, stop, prior, kind, prior_kinds)[0])
 
 
 def conversation_flags(replies, stops, kinds):

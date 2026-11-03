@@ -43,9 +43,11 @@ def earlier_turn(rec, p, avoid=()):
 
 
 def generic_degenerate(rec, p, good, avoid=()):
-    """empty, runaway, leak, loops (within, equal to an earlier reply, self-copy) around a reply that would pass."""
+    """empty, leak, loops (within, equal to an earlier reply, self-copy) around a reply that would pass, and that reply
+    cut at the cap (passes since 2026-11-03 unless it loops)."""
     out = [fx(rec, p, "empty", "", False), fx(rec, p, "empty_punct", " ... ", False),
-           fx(rec, p, "runaway", good, False, stop="cap"),
+           fx(rec, p, "runaway_ok", good, True, stop="cap"),          # cut at the cap, no loop (2026-11-03)
+           fx(rec, p, "runaway_loop", " ".join([good] * 4), False, stop="cap"),
            fx(rec, p, "leak_turn", good + "\nUser: Thanks! What else?", False),
            fx(rec, p, "leak_tag", "Assistant: " + good, False),
            fx(rec, p, "leak_marker", good + " <|im_start|>user", False),
