@@ -92,7 +92,8 @@ Every experiment, its pre-registered rule, its result and its independent audit 
   S7 41.2 [36.7, 45.7], 2.3 times the best panel model, with its CI lower bound just under the bar. Its
   transcripts show the grader failing right answers that add context ("The banjo. Your nephew is the one
   with the trombone."). An answer-first waiver scores it 57.4 [52.9, 61.8] while LFM2-2.6B stays at 20.0
-  and every shortcut stays at 36.7. Adopting that rule is Max's call before the lock:
+  and every shortcut stays at 36.7, but the grader fixtures show that waiver also passes self-contradicting
+  replies, so a narrower form is proposed before the lock:
   [rc12/FRONTIER.md](rc12/FRONTIER.md), with one conversation side by side in
   [rc12/examples](rc12/examples/corr-014-lfm2-vs-claude-haiku.md).
 - **The lock: not yet.** It was planned for Oct 11-14, and the pre-registration is still a draft. The lock

@@ -6,7 +6,7 @@ model passes" says little about small models.
 
 **Answer, in one line.** Claude Haiku 5.5 scores S7 41.2 under the current graders, 2.3 times LFM2-2.6B. Its 95% CI
 lower bound (36.7) sits just under the bar. Reading its transcripts shows the grader failing right answers. With one
-narrower rule (below), it scores 57.4 [52.9, 61.8], clearing the bar. LFM2-2.6B moves only from 18.2 to 20.0, and
+narrower rule (below; the fixture check further down shows it needs one more condition), it scores 57.4 [52.9, 61.8], clearing the bar. LFM2-2.6B moves only from 18.2 to 20.0, and
 the shortcut ceiling stays at 36.7.
 
 ## Method
@@ -79,12 +79,39 @@ earlier"), and the clause is right to fail those, so this one needs a case-by-ca
 [examples/corr-014-lfm2-vs-claude-haiku.md](examples/corr-014-lfm2-vs-claude-haiku.md): one dev conversation, both
 models, every reply verbatim. LFM2-2.6B gives the stale day; Claude Haiku 5.5 gives the right one.
 
+## The waiver against the grader fixtures (added later on Nov 3)
+
+Before adopting the waiver, the 9,075 grader fixtures (`mutation_graders.py`: 0 misses on the current graders) were
+run with it patched in. They show it is too loose. It changes 221 fixture verdicts in five groups:
+
+| fixture | count | example (all labeled "must fail") | verdict on the waiver |
+|---|---|---|---|
+| `stale_asserted` | 12 | "Your massage session is on Saturday. It is on Thursday." | **wrong to pass**: the reply contradicts itself |
+| `stale_recap_planted` | 12 | "... on Saturday. Initially I hesitated, but it is Thursday." | **wrong to pass** |
+| `other_too` | 88 | "Your bike is green. Orange is the other one." | judgment call: reads as a right answer |
+| `shotgun` | 84 | "Your bike is green. Not orange. Not black." | judgment call: reads as a right answer |
+| `inflect_other` | 25 | "You play the trombone. Ukuleles are nice too." | judgment call |
+
+On Haiku 5.5's seed 1 the waiver flips 84 of 1,404 probes to a pass. A random 14 of them were all right answers
+with the other values correctly attributed. Some examples: "Your nephew made sushi. Your grandmother made
+burritos."; "Your job interview is in Calgary. You first mentioned Hamburg, then switched to Calgary."; "You told
+me you get Sundays off from work. Your niece is off on Fridays, and your roommate has Saturdays off." None was a
+self-contradiction. So Haiku's 57.4 reflects real answers, but the rule as written would also pass a contradiction
+like the first two rows.
+
 ## Decision for Max
 
-Adopt the answer-first waiver in `graders.py` before the lock, rerun the mutation suites and the panel regrade, then
-report frontier calibration beside Level R. Read the 18 `v2_unsure`-only T0 misses before deciding anything for
-that clause. **Recommended: yes for the waiver.** It keeps every shortcut at 36.7 and stops the grader from failing the answers a
-capable model gives. Until then the current graders stand, and the site and README report them.
+1. **Do not adopt the waiver as written.** The `stale_asserted` and `stale_recap_planted` fixtures fail it.
+2. **Recommended instead:** the waiver plus one more condition: no later sentence may assert another value for the
+   asked object ("It is Thursday", "it's on Thursday", or the object's own words). Other values attributed to
+   another holder or to the history stay allowed. Build it with new fixtures and mutants, then rerun the
+   9,075-fixture suite and the mutation suite. Then regrade the panel on the PC, the frontier runs, and the shortcut
+   ceiling.
+3. **Your call:** whether the `other_too`, `shotgun` and `inflect_other` fixtures should flip from fail to pass.
+   They read as right answers to a person, and no shortcut can produce them without knowing the gold.
+4. Read the 18 `v2_unsure`-only T0 misses before deciding anything for that clause.
+
+Until then the current graders stand, and the site and README report them.
 
 ## Reproduce
 
