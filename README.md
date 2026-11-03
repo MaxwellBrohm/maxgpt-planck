@@ -70,8 +70,10 @@ python -B validate_machinery.py    # the runner, renders, truncation and stop ha
 
 Rescore a public model from scratch (GPU): `python runner.py --responder hf:<repo id> --seeds 1,2,3
 --hf-untested-ok --out <dir>`, plus the same with `--own-cf --families OWN --out <dir>_owncf`, then score both
-transcripts with `score.py`. The Claude rows: `python api_run.py --model claude-haiku-5-5 --seeds 1,2,3`. Stored
-transcripts are not in git (rc12/runs/ is ignored for size).
+transcripts with `score.py`. The Claude rows: `python api_run.py --model claude-haiku-5-5 --seeds 1,2,3`. Every stored
+transcript behind this table is public: [huggingface.co/datasets/MaxMillion404/rc12-dev-transcripts](https://huggingface.co/datasets/MaxMillion404/rc12-dev-transcripts)
+(27 public models and the two frontier models); unpack it and `python -B dev_panel.py --root <dir>` rebuilds the
+table from the stored replies, with no model and no GPU.
 
 ## What is new here, and what is not
 
