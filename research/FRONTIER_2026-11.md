@@ -3,7 +3,7 @@
 - **Date:** 2026-11-18. Written for Max while MaxGPT-Planck waits for NAIRR compute.
 - **Built from:** six lane reports (architecture, optimization, data, memory, post-training, systems) in this folder, then three verification passes that re-checked 312 claims against arXiv full text, official repos and docs, and the repo (read only). Every claim a verifier marked wrong is corrected or dropped below; section 7 lists what changed.
 - **Honesty markers:** (est.) means arithmetic, not a measurement. No H100 number in this file was measured; the first Start-Up job exists to replace them. "NEW SINCE" means first public after 2026-09-23 (the ledger date). "Older but missing" means published earlier but absent from LEDGER.md and research/.
-- **Next free ledger id:** P-189 (checked: LEDGER.md tops out at P-188, origin/main has no newer ledger edits, and no file in the repo uses P-189 or higher). The proposed rows are in `LEDGER_ADDITIONS.md` beside this file.
+- **Next free ledger id:** P-395 (updated 2026-11-19 with section 10). This line first read P-189 and pointed to a `LEDGER_ADDITIONS.md` beside this file; those rows and every later pass's rows are now in LEDGER.md itself, which holds P-189 to P-394.
 
 ---
 
@@ -567,3 +567,267 @@ A third, single-topic pass on the largest gap above: grokking and delayed genera
 Also checked and already covered: EntNet-style entity-keyed slots (P-022 update), TRADE's copy mechanism (P-238), fast weights (the delta-rule family), Tang et al. 2605.30233 (already in the files). Li et al. 2506.21551 tracks grokking through MoE routing only, so it does not apply to a dense model.
 
 Still unsearched after this pass: ICML 2026 main and the ICML and NeurIPS 2026 workshops, ACL 2026 main, TMLR 2026, a full read of arXiv listings from 2026-09-23 to 2026-10-14, NTM and DNC curricula, SUMBT, and kexue.fm. Yield by pass: round 1 kept 70, round 2 kept 33 (about four worth a slot), this pass six diagnostics. Another pass would most likely add diagnostics, not levers.
+
+---
+
+## 10. Round 3: verification, last sweep, scoop check, triage and NAIRR fit (2026-11-19)
+
+Max asked four things after section 9: reopen the OpenReview pages that section 9 left UNVERIFIED; say whether the list is now good enough to stop looking, and which items will actually make a difference; make sure nobody has already done what Planck is doing; and say whether the NAIRR request covers all of this. The work ran on 2026-11-18 and into the early hours of 2026-11-19 (US Eastern). No model was trained or run for this section.
+
+- **Where the evidence lives:** the session scratchpad, folder `frontier/r3/`. Verification: `verify_g0.md` to `verify_g4.md` and `verify_chrome.md`. Sweep: three rounds of finder reports and their critics. Scoop: `scoop_papers.md`, `scoop_models.md`, `scoop_web.md`, `scoop_benchmarks.md`, `hypA.md`, `hypB.md`, adjudicated in `scoop_verdict.md`. Triage: three independent judges (`triage_evidence.md`, `triage_mechanism.md`, `triage_decision.md`) merged in `triage_consensus.md`. NAIRR: `nairr_bottomup.md` and `nairr_topdown.md`, reconciled in `nairr_fit.md` with the arithmetic in `nairr_fit_calc.py`.
+- **Ledger changes:** verification results are applied in place to the rows and update entries they touch (each marked "verified 2026-11-18 via ...", "corrected", or "still UNVERIFIED"). The 260 kept sweep items are in LEDGER.md under "2026-11 round 3 additions": 105 new rows, **P-290 to P-394**, plus one-line update and watch entries. Consensus triage classes for every ledger id are under "2026-11 triage classes". The next free ledger id is **P-395**.
+- **Honesty markers:** as before, (est.) means arithmetic, not a measurement. No H100 number here was measured. "Cached OpenReview abstract" means a local copy of OpenReview abstracts pulled through its search API at about 19:16 on 2026-11-18, before the bot check started. The finders read from that same copy, so checking against it confirms our transcription, not the paper.
+
+### 10.1 Verification of the OpenReview-only claims
+
+**What happened in plain words.** Claude could not reopen OpenReview. In the Chrome pass, the one forum URL tried (FjlS13holE) redirected to "Verifying your browser. Complete the check below to continue". Per the rules the pass stopped there: no click, no solve, no second OpenReview page. Max's own Chrome tab on IoYBVmgSfD showed the paper's title, which suggests the page loads when he is the one at it (not tested); that tab was not read or touched. Every result below therefore comes from other routes: arXiv full text and abstracts, Semantic Scholar title match, OpenAlex, conference virtual-site poster pages (NeurIPS, ICLR, ICML), authors' GitHub repos and homepages, and, for transcription checks only, the cached OpenReview abstracts.
+
+**Scope.** Sections 9.1 and 9.4 spoke of "about 25 items" that depend on OpenReview. Those 25 are ledger items; together they cite **55 distinct OpenReview ids** (`frontier/or_ids.json`). All 55 were checked.
+
+| status | count | detail |
+|---|---|---|
+| VERIFIED | 18 | 9 on an independent full text (arXiv or proceedings); 6 on an independent abstract (a conference poster page or the author's repo); 3 only against the cached OpenReview abstract (0fPxp7a50O, 1v67gG7IE1, DlGhhMUJyv: a transcription check, not an independent copy) |
+| CORRECTED | 18 | at least one size, number, attribution, scope or date in our files was wrong; replacement wording applied in the ledger. 15 were corrected against a copy outside OpenReview; two of those (aZr3FJLVF9, TVa97w7bgA) were reached only in the Chrome pass, through author-owned copies found by GitHub repository and code search. 3 (32bXbTKcXx, 9vT48Lms48, BO2R94Ipk5) have no copy outside OpenReview and were corrected against the cached abstract alone (attribution and scope fixes) |
+| NOT_FOUND | 19 | no copy found outside OpenReview by any route tried; our claims match the cached abstract except where the cached abstract itself forces a correction, which was applied anyway |
+| REFUTED | 0 | no source turned out to say the opposite of what we cited |
+
+**What this changes.** No bet loses its reason to exist. The material changes:
+- **P-261 is now backed by a real, verified source** (Kalra and Patlolla, preprint and code on the authors' GitHub). But the "learns nothing in 600,000 updates" result is the arm where the previous-token circuit never formed or was reset, in a 0.69M attention-only model, not the training-only suppression arm. Pythia 160M-6.9B learn 2-18x later by rebuilding the circuit from backup heads. Section 1's item 1 ("slow, not unable") therefore holds only where a previous-token path exists or can be rebuilt; T002 gives every arm a previous-token path, so its design stands, but the reading does not cover arms without one.
+- **P-262's numbers rest on one abstract** (DlGhhMUJyv, cached abstract only; single runs; reviewer ratings 1, 2, 2 in the papercopilot mirror of ICLR 2027 reviews). HCM50lrJTb has no erasure measurement at all, and CMfu7lDk2j is about weight-decay timing under Muon, not erasure. A separate verified toy paper from the sweep (2610.05292) puts erasure at the same summed LR x WD of about 1.5. The free dose computation (P-262a) stays needed; the training arms (P-262b) stay B (low).
+- **P-263 now has a verified source.** StaleBench (Prause, "When Stale Facts Win", English v1 and the ICLR 2027 draft in the author's public repo; StaleBench covers 0.5B to 70B): in a causal audit of nine models from 0.5B to 14B the correction is the most-attended sentence, yet they answer with the stale value in 7-93% of documents; 0.5B-3B models follow position in 55-70% of position swaps; accuracy falls from 54% to 20% from one to four overwrites; short contexts are harder than long ones. Our "1B+" was wrong.
+- **P-190's update needed three fixes:** Everett and Qiu's sizes are 51M-253M, not up to 458M; their momentum cooldown was never tested on Muon-family optimizers and barely helped AdamW, so that arm moves to P-220 (ADANA); and their log-time weight decay harms Muon at high overtraining.
+- **P-022's update:** freeze the recurrent register early, for about the first 9% of tokens, not at 50% (aNcHQ9zdZM, corrected against arXiv 2610.26830: a 3.6M toy and 180M-1B hybrids).
+- **Attribution fixes:** "GRPO raises repetition" is kNdGD5BTog, not BO2R94Ipk5. The three seed-noise numbers in the P-193 update are not in hAZxes7EMV (arXiv 2608.11859), which instead argues for wide per-arm hyperparameter search at 4M. P-268 loses 9vT48Lms48 (router lock-in, not optimizer state). P-265's "56-69% at 1.4B" rests only on usnA2Fiw5e. P-120's learning-rate claim belongs only to WFIAiSr1dN.
+- **Side finding:** P-255 cites "van der Wal et al. 2606.25010 (PolyPythias)", but arXiv 2606.25010 is Baherwani et al., "Emergent Capabilities Arise Randomly from Learning Sparse Attention Patterns". The PolyPythias claim needs its own citation; flagged in the row.
+
+**Every id.** Route "OR abs" means the cached OpenReview abstract only.
+
+| id | title (short) | status | route | what changed |
+|---|---|---|---|---|
+| 0fPxp7a50O | Where You Put Attention Matters More Than How Much You Use | VERIFIED | OR abs | P-022: motivates layer placement only; the mirror case (one recurrent layer in an attention stack) is untested |
+| 1v67gG7IE1 | A Count, Not a Fraction | VERIFIED | OR abs | P-188 unchanged; the 10x invariance is from a pilot; counts hold when background loss is flat (SFT, anneal) |
+| 32bXbTKcXx | Same Count, Different Memorisation | CORRECTED | OR abs | P-120: constant LR, 3.2M-1B, canary leakage; the LR and 3M-151M claims belong to WFIAiSr1dN |
+| 3eCpXmHlq3 | Muon Learns Facts Better | CORRECTED | arXiv 2610.02798 | P-189: parametric facts, not contextual retrieval; now a counterweight to VB7IbTZPPR |
+| 4Dg0z4hCoY | Scaling Properties of Same-Family OPD | VERIFIED | arXiv 2609.32722 | P-196: Qwen2.5 0.5B-14B, math, single runs; bigger teachers stop helping |
+| 6d49LBQlIk | The Best Optimizer Depends on Batch Size | VERIFIED | arXiv 2610.08975 | P-190, P-207: 124M, 128K-2M batches, reversals of 0.004-0.021 nats |
+| 9vT48Lms48 | When Routing Must Be Right | CORRECTED | OR abs | removed from P-268: router lock-in in hybrids, not optimizer state |
+| BO2R94Ipk5 | Prior Reward Hacking Impairs Subsequent Learning | CORRECTED | OR abs | P-197: supports "start from hack-free checkpoints" only; not evidence for P-266 |
+| CMfu7lDk2j | Delayed Effects of Temporary WD in Muon Pretraining | VERIFIED | arXiv 2611.17876 | P-262, P-191: a WD window's effect reverses with timing at 162M-1.4B; not an erasure source |
+| DlGhhMUJyv | Kept, Hidden, Erased | VERIFIED | OR abs | P-262: numbers match; single runs; the 0.5B result is a pretrained LM |
+| DuYY0UuDGb | An Error in the Context Is a Demonstration | CORRECTED | NeurIPS 2026 poster page | P-266: contagion is flat from 0.36B to 3.2B, not "worse when smaller" |
+| EAy9tE5Br2 | Mixture of Convolutions | VERIFIED | author repo, Parameter Golf PR #966 | P-264: Transformer gain and init x LR sensitivity confirmed; GDN gain and sizes unreachable |
+| FjlS13holE | Associative-Retrieval Regime Entry Varies with Head Partition | NOT_FOUND | | P-256 keeps UNVERIFIED; verified counterweight Adler 2509.22840 added |
+| FnT1urzlSH | Stored Sampling Noise Changes Recall Learning in AdamW | NOT_FOUND | | P-268 keeps UNVERIFIED |
+| G2HBCKp9Bd | A Deafening Silence | CORRECTED | arXiv 2610.09835 | P-267: 39.4-67.9% over 7 stable settings, including a tied model; only 5.6-14.6% on in-distribution English SFT; Adam-only |
+| GPYH0UPouD | Does Muon's Pretraining Advantage Survive Fine-Tuning? | VERIFIED | NeurIPS 2026 OPT poster page | P-190's auxiliary-LR axis (Qwen3-4B, 1.8745 vs 1.8714 tuned) |
+| HCM50lrJTb | Scale Weight Decay and Train Better | CORRECTED | arXiv 2607.23777 | P-262: no erasure measurement; Muon-SW 21.7-29.4% faster on 72.7M-932M MoE, single runs; July 2026 |
+| HyuEyf9KQQ | Head Dimension Matters for Long-Context Retrieval | VERIFIED | arXiv 2610.32213 | P-256: 0.6B and 3B after 256K-context training; transfer to 5M untested |
+| IoYBVmgSfD | Multiple Task-State Descriptions Interfere | NOT_FOUND | | P-253, P-263: "1B+" not stated; verified neighbour CICM 2609.38866 carries the same use |
+| Jh8Y1gSYfN | Tied, Not Won | NOT_FOUND | | the P-193 exponent-difference test does not depend on it |
+| K45J4B4Yku | Works Where Calibrated, Fails Where Misused | NOT_FOUND | | P-193's three numbers stay UNVERIFIED; E3 independently supports the data-order point |
+| NXWLaiiJKm | Delta-Rule Memories Store More Than They Recall | NOT_FOUND | | P-022: "K ramped over 50%" is Planck's design; Boesch and Wee 2609.16183 is the verified neighbour |
+| OYQBr0EB84 | Sorted by Date | NOT_FOUND | | P-263: its 11.7-point result is labelled exploratory; "1B+" not stated |
+| P2VtelR5KS | Optimizer Memory Schedules | CORRECTED | arXiv 2609.04577 | P-190: 51M-253M; momentum cooldown moves to P-220; log-time WD harms Muon at high overtraining |
+| RG4cxb4sab | StateWise | CORRECTED (minor) | arXiv 2610.33766 | P-272, P-008: the relapse doubling is Llama-3.1-8B only; Qwen2.5-7B stayed flat |
+| SCKKNDxgUc | SIRRA | NOT_FOUND | | P-008 cell type stands; "1B+" not stated |
+| TVa97w7bgA | Structure Before Attention | CORRECTED | author homepage (Chrome pass) | P-264: the gain is mainly windowed (-2.1% vs -0.6% dense at 8k); 81M / 253M and the width-one claim stay OpenReview-only |
+| UUldzWxIL4 | Linear Attention lacks Incentive for Associative Recall | NOT_FOUND | | P-265: the methods "narrow", not "close much of", the gap; linear attention only |
+| VB7IbTZPPR | Optimizers Select Algorithms | VERIFIED | NeurIPS 2026 OPT poster page | P-189's RP-MQAR family drops UNVERIFIED |
+| VJFfO4tLMB | Recent Training is Protected by Adam's Second Moment | VERIFIED | NeurIPS 2026 OPT poster page | P-268: its knobs are beta2 and resetting v, not beta1 |
+| WFIAiSr1dN | Acquire, Then Retain | NOT_FOUND | | P-120 keeps UNVERIFIED |
+| WJgVOfL8UV | The Ephemeral Cost of Switching Optimizers | VERIFIED | arXiv 2610.22650 | P-190: 1.2B pretraining, SFT up to 14B, little mismatch penalty |
+| aNcHQ9zdZM | Competing Learning in Hybrid Architectures | CORRECTED | arXiv 2610.26830 | P-022: freeze the recurrence for the first ~9% of tokens, not at 50% |
+| aZr3FJLVF9 | When Stale Facts Win (StaleBench) | CORRECTED | author repo (Chrome pass) | P-263 now verified: 0.5B-70B, positional heuristic at 0.5-3B, overwrite dose |
+| dG86lHw2rk | Scaling Width and Scaling Compute Teach Different Algorithms | NOT_FOUND | | P-260: the numbers are for parity, not recall; narrower-and-longer wins all 21 equal-compute comparisons |
+| eYOSZZ9Fal | Information Abundance Paradox | VERIFIED | arXiv 2608.12218 | P-265: 20M-750M from scratch; context-rich training moves learning into attention |
+| g6ZGK1lKNf | Repeat or Retrieve? | NOT_FOUND | | P-266: the from-scratch reversal used 50% corruption; a 50% arm added |
+| gpL5ZAN98s | SF-DPO | NOT_FOUND | | P-008 update: about 0.5B-32B, not 1B+; four preference arms with chosen-response anchoring |
+| hAZxes7EMV | Small-Scale Experiments: Are We There Yet? | CORRECTED | arXiv 2608.11859 | P-193: the three numbers are not in it; it argues for wide per-arm HP search at 4M |
+| kNdGD5BTog | Tracing Repetitive Degeneration | NOT_FOUND | | P-197: the repetition citation moves here |
+| o6XoxYhaYs | The Many Faces of Short Convolutions | NOT_FOUND | | P-264: the LR-range benefit is credited to the filter, not the gain; a depthwise k=1 conv equals gain-only |
+| oUgyEOMOLU | KD During Mid-Training Favors Reasoning | VERIFIED | arXiv 2609.01532 | P-215: reverse KL on the 20% lowest-entropy tokens; a mid-training effect at 1B |
+| pD2TCZ6Zsq | Entity-Conditioned Addressing | NOT_FOUND | | P-022: needs an explicit entity id per write; the same codes as input tokens fail |
+| pkymKR1YiW | Decided While Reading | NOT_FOUND | | P-008 rule-after-fact cell stands; sizes not given |
+| q42Wqkwe3q | When Data Can Teach: Prerequisite Circuits | CORRECTED | authors' GitHub preprint | P-261 verified, scope corrected (above) |
+| qC88InjePl | What Is a Repeated Token Worth? | CORRECTED | arXiv 2610.05591 | P-187: half value at ~4-5 epochs up to 20 tok/param; "15 epochs at 127M" is a different quantity |
+| qjrIQXooV3 | K-Scaling | NOT_FOUND | | P-207 keeps UNVERIFIED; the decay-ratio axis stands on its own merits |
+| s5LDNAWhYk | LLMs Can Follow Instructions, But Not Many at Once | VERIFIED | arXiv 2608.12426 | P-008 k-constraint cell; quote v1 (15 models, 41% vs 5.7% at k=8) |
+| u5o84zeMEb | Anytime Pretraining | CORRECTED | arXiv 2602.03702 | P-218: 300M only to 16x Chinchilla; AdamW without WD; Feb 2026 |
+| uLDuoLNj9H | Pretraining with Masked Backstories in a Toy World | CORRECTED | ICLR 2026 Sci4DL poster page | P-265: named authors, April 2026; the 0.025% figure is in the 2027 abstract only |
+| usnA2Fiw5e | RAM: Routed Associative Memories | NOT_FOUND | | P-265: the 56-69% rests on this id alone and bears on P-022 more than P-265 |
+| vdMp4RjCed | Strong-to-Weak OPD against GRPO | CORRECTED | arXiv 2611.08453 | P-196: "50x" is the distillation stage at 1 rollout (about 6x at 8); students 1.7B-8B |
+| vzn9mvMuJq | You Changed Your Mind, The Model Didn't | VERIFIED | arXiv 2610.06496 | P-008 rejected-change cell confirmed; all models 4B+ |
+| yhRk81TgYO | State-Resolving (Sieve) Attention | VERIFIED | NeurIPS 2026 poster page | P-020 recency arm, abstract level |
+| yochffTF7t | muLM | VERIFIED | NeurIPS 2026 poster page | watch entry unchanged; no weights or full text |
+
+**NOT_FOUND: what was tried for each of the 19.**
+- Exact-title and abstract-keyword queries on the arXiv export API and on arxiv.org search (heavily rate-limited, HTTP 429 for long stretches).
+- Semantic Scholar title match ("Title match not found" for all 19 in pass 1; mostly HTTP 429 in the Chrome pass).
+- OpenAlex title search; GitHub repository and code search on titles and method names; Hugging Face search for some.
+- General web search on exact titles in pass 1. In the later passes the session's shared web-search budget was spent, so no more web searches ran.
+- The NeurIPS 2026 virtual site (it lists workshop papers; ICLR 2027 decisions are not out, so there are no ICLR 2027 poster pages yet) and papers.cool ("Not Found").
+- In the Chrome pass, one OpenReview forum URL, which hit the bot check.
+- All 19 are anonymous ICLR 2027 submissions; none of these routes found a public copy as of 2026-11-19.
+
+**What only Max can do.** Open these in his own browser (completing the check himself, or signed in). In this order:
+1. **99EZmxKpJh**, the full text of "Two Kinds of Nothing". It is not one of the 55; it is the only source of the new A-class LOOKUP row P-296, read so far from a workshop abstract.
+2. **DlGhhMUJyv**, the only source of P-262's numbers.
+3. **IoYBVmgSfD**, already open in his tab.
+4. **Heidi-3** (TMLR / CoLLAs 2026), the one open novelty question (10.3).
+5. The other 18 NOT_FOUND ids, then the round-3 sweep items that rest on OpenReview-only abstracts (listed in 10.6), as time allows.
+
+### 10.2 The last sweep
+
+Three more rounds, each aimed at the gaps the previous round's critic named. A verifier re-checked every item before it was kept, opening the source wherever it was reachable; where only an abstract, a mirror or nothing could be opened, the ledger row says so (abstract only or UNVERIFIED). Corrections are in the ledger rows.
+
+| round | what was searched | found | kept |
+|---|---|---|---|
+| 1 | ICML 2026 main (PMLR v306: 6,552 abstracts parsed, about 1,690 titles and 315 abstracts read, about 40 PDFs); all ICML and 32 topical NeurIPS 2026 workshops via the virtual sites (about 6,800 titles, 386 poster abstracts); ACL, EACL, AACL, TACL and CL 2026 (8,694 papers, about 1,800 titles, 160 abstracts); TMLR, JMLR, AISTATS and CoLLAs 2026 (about 1,090 titles, 79 abstracts); the arXiv cs listing for 2026-09-23 to 10-14 via OAI-PMH (11,928 records, about 2,930 titles, 156 abstracts, 26 full texts); pre-2022 from-scratch state tracking (26 full texts, 105 citing titles); Chinese sources (kexue.fm through its feeds and translation mirrors, MiniMind; Zhihu unreadable); lab and industry releases June-November 2026 (Hugging Face API over 42 orgs, 17 model cards, Liquid's blog) | 129 | 105 |
+| 2 | NeurIPS 2026 main, read in full this time (7,895 papers; 2,714 never-retrieved poster pages fetched; about 3,600 titles and 275 abstracts); ICLR 2026 main and 8 workshops (about 2,450 titles, 331 abstracts); the arXiv listing for 2026-05-15 to 09-22 (37,497 records, about 2,940 titles, 190 abstracts); OpenAlex forward citations of 16 anchor papers (1,775 citing works, 257 abstracts); Marin's open experiment logs (issue #9451 with 384 comments, 247 registry entries, 538 experiment issues) | 116 | 83 |
+| 3 | COLM 2026 workshops (18 workshops, 1,080 abstracts); the 2025 main tracks of ICML, NeurIPS, ICLR and COLM (13,790 entries, about 2,930 titles, 260 abstracts, 28 full texts); BabyLM 2023-2025 (101 abstracts) and the ICML and NeurIPS 2025 workshops on small models, tokenizers, optimization and multi-turn interaction (539 abstracts); the arXiv listing for 2026-01-01 to 05-14 after removing venue papers (28,219 records, about 1,980 titles, 150 abstracts, 25 full texts); the ICLR 2027 submissions the earlier keyword sweep never retrieved (27,386; four topical subsets, about 740 titles, 120 abstracts) | 114 | 72 |
+
+Found minus kept is 99, while the verifiers' own drop log counts 104; the files do not explain the difference of 5, probably merges logged as drops.
+
+**Kept items by consensus class** (classes defined in 10.4):
+
+| round | kept | A | B (strong) | B | B (low) | E | C (needed) | C | D |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | 105 | 1 | 2 | 9 | 10 | 4 | 22 | 17 | 40 |
+| 2 | 83 | 1 (merged into P-238) | 0 | 10 | 5 | 3 | 11 | 15 | 38 |
+| 3 | 72 | 0 | 0 | 6 | 13 | 3 | 12 | 15 | 23 |
+| total | 260 | 2 | 2 | 25 | 28 | 10 | 45 | 47 | 101 |
+
+**Where they went.** Every A, B, E and C (needed) item got its own ledger row (P-290 to P-394, 105 rows), except four exact duplicates folded into their twin's row and three items folded into an existing row (CPLM Plus into P-238, the Marin softcap ladder into P-246, MuonIO into P-217). The C (other) and D items are one-line update entries under their parent bet, or watch lines. Each line carries its round id (R1-01 to R3-72) so the triage list in the ledger can point at it.
+
+**Per-round yield.** The finders tagged 29, 22 and 24 items as levers or efficiency gains. By the three-judge consensus, items that are likely to matter (class A) went 1, then 0 new (round 2's one A was evidence for the existing CPLM row), then 0. Diagnostics and parks were 75%, 77% and 69% of each round's kept items. Round 1's critic expected 3-8 more lever-shaped items and round 2's critic expected the same; the rounds did find B-class arms (state lines in training data, dual objectives for the repeated pool, warmup-stable-only before SFT, value-path variants, recovery-turn supervision) but no new A after round 1. The one round-1 A item, the LOOKUP absence fix (P-296), is also the most practical find of the whole pass: a cheap data change, with a measured effect at Planck's own size.
+
+### 10.3 Has anyone done Planck since 2026-10-02?
+
+**Plain answer: no.** As of 2026-11-18, nobody has shown a from-scratch model below 150M passing a strict multi-turn state test (corrections, rule persistence, same-type binding, own-answer consistency, no loops, lookup), and nobody has published a measured minimum-size curve for those skills. The verifier re-opened every ranked candidate at its source except two that exist only on OpenReview (ZeroHero and Routing the Past, UNVERIFIED) and the gated BananaMind-3 previews (metadata only, terms not accepted); a few out-of-lane items (the BabyLM 2026 items, Chess-World-Model, Pearl-Chat, Homebrewed SLMs, Turnslide) rest on the finders' readings. Every new sub-150M multi-turn number found is small-n, self-reported, produced by a harness rather than the naked model, or a failure. Threat levels: none high, one medium, the rest low or none.
+
+**The most important correction: RC-12 is still not locked.** One finder file said three times that Planck's October lock predates the new releases. It does not. `prereg/RC-12.draft.txt` still says "DRAFT, NOT LOCKED" (DRAFT 0.1), PLAN.md says the lock slipped, the repo has no GitHub release, and neither Software Heritage nor the Wayback Machine holds a copy. So no third party holds a dated copy of RC-12's design, and Planck's priority currently rests on git dates, which can be rewritten.
+
+**Ranked threats** (all re-opened by the verifier unless marked):
+
+| # | candidate | first public | threat | what it is |
+|---|---|---|---|---|
+| 1 | pico-165m (Hugging Face fausap) | 2026-10-14 | medium (framing, not a scoop) | A notebook titled "The Parameter Floor for a Conversational LLM" asking Planck's question with rule-graded multi-turn probes and release gates. It says naked 100-150M models plateau at about 25-35% on its probes, but the notebook has no saved outputs, so that is prose only. Its good scores (0.68 and 0.81 vs SmolLM2-360M's 0.51 and 0.31) come from a two-model note-taking harness. No correction or own-answer families, nothing at 3-30M, no seeds, no sealed split. |
+| 2 | Textile Labs Loom-Weave-4 (55.6M) and the Loom-Planck ladder (300K-1.2M) | 2026-10-06 to 11-01 | low | Name collision; owns the loose "how small" headline. Weave 4: 42 of 44 long-conversation turns on target, but only 4 recall items; size is confounded with training time. |
+| 3 | KW5-230M Instruct (Kiswahili) | 2026-10-28 | low | Froze its bars before training, trained on changing lists and persistent instructions on purpose, and still missed: persistence 35% (n 20), changed-list answers 5% (n 40). |
+| 4 | Laghu 152M and Gargi 384M (Udgam Labs) | 2026-10 | low | Pre-registered, but its test is two-turn follow-ups only, and Falcon-H1-Tiny-90M beats it. |
+| 5 | NeuralAI Nae1 (100M) | 2026-10-07 / 11-11 | low | The only new sub-150M model trained on corrections; fails its own memory gate (corrections 3 of 4); 1,024 positions. |
+| 6 | ZeroHero (ICLR 2027 submission) | 2026 | low, UNVERIFIED | 5-10M executors from scratch on agent tasks with an LLM oracle; no size sweep in the cached abstract. |
+| 7 | r/LocalLLaMA thread and an unexecuted ~9M state-tracking recipe | 2026-10-25 | low | The idea is in the air; nobody trained it. |
+| 8 | StateWise (2610.33766) | 2026-10-24 | low | 7-8B; models track the state but do not obey it. Already P-272. |
+| 9 | The Capacity of In-Context Binding (NeurIPS 2026 workshop) | 2026 | low | 70M-2.8B; one word of question wording moves Pythia-410M recall from 0.226 to 0.896 (now P-304). |
+| 10 | tiny-rl on nanogpt-ladder-v3 (8M-64M SFT and RL checkpoints, no write-up) | 2026-11-11 to 11-15 | low, watch | An academic-grade small chat RL ladder with no card yet. |
+
+Also low or none: nico's unreleased 6.5M harness model (HN), StateLM (no model yet), the ELIZA mini-model wave (nothing trained), Routing the Past (UNVERIFIED), LM Playschool (smallest entry 0.8B), the new multi-turn benchmarks (smallest model 270M; the smallest correction test is Capitulation 2611.02318 at 0.5B), BananaMind-3 (gated, in training, the most likely next public sub-150M multi-turn table), HobbyLM, FCP, SmallTalkLLM (dormant), and MNN-Pocket-0.3B (no multi-turn state numbers).
+
+**Panel candidates for RC-12** (the lock has not happened, so they can still enter the panel properly):
+- **Tier 1, add before the lock** (little engine work; each protects a claim sentence): MNN-Pocket-0.3B (protects "no model at or below 0.6B passed"), Loom-Weave-4 (inside Planck's claim range; same engine path as Loom-Spark-3.2), LFM2-2.6B-Exp, Qwen3.5-2B and LFM2.5-1.2B-Instruct (test "everything up to 2.6B fails").
+- **Tier 2, only if the engine takes them cleanly**, otherwise list as known and unscored with the reason: Laghu; Nae1 (only if a 2K-position load is shown exact); SmolLM3-3B, granite-4.2-3b, Aion-1.0-Instruct-2.3B, MiniCPM5-2B, gemma-4-E2B-it.
+- **Thinking-first models, as labelled diagnostics after Max rules on thinking mode:** LFM3-1.7B, Raon-1 nano, LFM2.5-2.6B.
+- **After the lock, as a labelled harness row, never a naked panel member:** pico-165m.
+- Panel work must not delay the lock again.
+
+**What Planck should do:**
+1. **Get a third-party timestamp now, then lock.** A Software Heritage "save code now" of the public repo, optionally with a GitHub release, dates the RC-12 design today without touching sealed content. Both count as publishing, so each needs Max's explicit yes. Then finish `rc12/LOCK_STEPS.md`.
+2. **Cite the neighbours honestly** (pico, KW5, Laghu, Loom, StateWise, the binding poster, Capitulation 2611.02318), use "MaxGPT-Planck" in titles, and never claim the lock predates Loom-Planck.
+3. **Treat two results as warnings for the bet, not just citations.** KW5 trained on state data and still failed persistence and list updates, and pico reports a naked-model plateau at 100-150M. Both say SFT data alone may not buy persistence or corrections, which raises the value of relapse training (P-272), RL (P-197) and the update register (P-022). Pre-register the outcome "SFT gets RECALL but not PERSIST or CORR" so it reads as a finding. pico also shows note reading is a trained skill (SmolLM2 given the same notes scores 0.31, 0.42 with perfect notes), so P-005's gate must be measured on a checkpoint SFT'd with notes in context.
+4. **Add a post-lock wording check** for BIND and LOOKUP probes (P-304).
+
+**Our hypotheses that turned out to be published** (2 of 44 checked; the verifier re-opened both sources):
+- **HL (M14, data-order soups)** is published at 7B: OLMo 2 (2501.00656) Table 14 souped three mid-training runs on different data orders and "consistently equals or outperform[s]" the best single run over six mixes, with one exception (mix E GSM*, 43.0 vs 60.5). M14 / P-203 becomes a replication; read it per RC-12 family.
+- **P-241 (guided-policy self-distillation)** is published in another domain: Cideron et al. 2410.06084 (ICLR 2025, MusicLM) distilled CFG-augmented predictions into the plain model, with a diversity reward. P-241 is relabeled tweak-of-known in the ledger; the chat version (guidance from ablating a fact, rule or correction turn) is still untested, and its echo and loop kill rule stays hard.
+- **Close calls that change a test design** (from hypA and hypB; the verifier did not re-open these): an SFT-optimizer arm in M3 (already in P-190's 2x2); when the batch grows with tokens the co-tuned LR may need to rise (X7); compute-matched warm-ups never beat natural language and fade by 1B tokens (X1, now verified in the sweep as 2610.40051); a fade-to-zero arm for P-261, since abrupt scaffold removal failed (2609.10287); the induction lockout of P-282 disappears at 4+ layers; OPD evidence is mixed by skill (X6); CPLM's own mechanism predicts a smaller gain at Planck's vocab-to-width ratio (about 43); AdEMAMix showed no test gain under heavy repetition (HK).
+- **Coverage gap:** hypotheses HS to HAC (11 items in section 4a) were checked by neither prior-art file.
+
+### 10.4 Triage: what will make a difference and what will not
+
+**Method.** Three judges classed every item independently, each through a different lens: replicated small-scale evidence, whether the mechanism hits a known way a 3-30M model fails RC-12, and decision value per H100-hour. A consensus step merged them into 409 rows (the M, R and X items, P-237 to P-289 split where a judge split them, the update entries, and all 260 sweep items). 313 rows were unanimous; 78 were not (72 split 2-1, 4 three ways, 2 with only two votes). The majority was kept in every 2-1 split and every split is listed with each judge's reason in `triage_consensus.md`. RC-12 has never been run on a Planck checkpoint, so every "effect on RC-12" below is a forecast (est.).
+
+**The consensus top list: the items most likely to make a difference.**
+
+| rank | item | ledger | expected effect (est.) | confidence | cost (est.) | main risk |
+|---|---|---|---|---|---|---|
+| 1 | RL with program-checked rewards on the skeleton generator, with turn-level rewards, a horizon curriculum and a KL-anchored arm | P-197 (with P-198, P-291, P-325) | +10 to +30 points on RC-12 dev cells where SFT pass@16 is above 0; about 0 where it is 0; could move the passing size down one curve point if many failures are near misses | medium on dev, low on held-out | 20-40 H100-h at 5-10M (or 5070 time), about 50 at 30M, plus a 500-1,000-line batched sampler | reward hacking; a 5M student may start at 0 on 12-turn cells; evidence is from scratch at about 38M-360M on other tasks, never conversation state |
+| 2 | LOOKUP absence forms: train both "stated gap" and "silently missing" | P-296 | the LOOKUP X unit could move from near floor to near ceiling. In the source a model trained only on stated gaps read silence correctly 14% of the time; a 3.3% silent minority lifted both forms above 96%. The repo confirms the gap: the generator teaches only explicit "not found" tool results while RC-12's X unit asks for a silently missing key | medium on direction, low-medium on size (one-author workshop abstract; 14.4M, 16 seeds) | about 0.5-1.5 H100-h | narrow (one sub-cell), but one failing family blocks Level R |
+| 3 | Correction-data dose with held-out names | P-271b | 0 if Planck's share already sits in the source's 5-15% window; up to 15+ points on held-out-name corrections if not (0% never learned the override rule, 5-15% reached 0.90-0.91 held out, 30% fell to 0.757 held out) | medium | about 2-4 H100-h | one group, from scratch, 3 seeds |
+| 4 | Grow the chat pool instead of repeating it, with larger Apache-2.0 renderers | M24 (P-162, P-187), P-201, P-335 | size unknown; it targets the failures Planck has actually measured (E004's wording shortcuts, E005's alias gap). Outside evidence is loss-only: paraphrase beats repetition below about 50M | medium | tens of GPU-h of rendering plus 2-5 H100-h of arms | the pool may not be the binding limit at 5M; renderer voice |
+| 5 | Copy-Paste LM head, with the CPLM Plus arms | P-238 | 1.5-4% bpb at 5M if Marin's "gain halves per width doubling" continues below d512, which is outside the fit; possible retrieval gain (135M sliding-window needle 14.3 to 99.4, 3 seeds); RC-12 effect unproven | medium-low | about 1-1.5 H100-h plus T002 minutes; a KV-cache decode path | may copy the stale value or its own text; equal-time gains are much smaller |
+| 6 | On-policy distillation, same-size per-family RL specialists merged first, the 400M Planck teacher second, always against teacher-free and shuffled-teacher controls | P-196 (with P-333, P-390, P-391) | 0 to +15 points on cells with headroom; much of OPD's gain may be the student sharpening itself, which the controls will show | low | 15-25 H100-h for the same-size route; about 35 for the teacher plus 10-20 for arms | no chat OPD evidence below 1B; verified evidence says bigger teachers stop helping; needs Max's "from scratch" ruling |
+
+**Near misses** (B strong), each with the trigger that would make it A: loop-onset preference training (P-204) if the first RC-12 dev read shows loops binding at T 0.6; own-history SFT with program-corrected targets (P-067, with P-299's minimal edits) if golden-history and own-history scores differ a lot; new generator cell types (M18 and the P-008 cells) wherever the coverage audit shows RC-12 dev testing a cell the generator never teaches; the update register or dynamic conv (P-022, P-200) if T002 shows, from escape-time evidence (P-350), that plain attention cannot learn latest-wins at 3-5M; LR, weight decay, optimizer and decay at the real horizon (P-190, P-191), near-certain to move but worth 0.5-2% bpb, not a cell flip; relapse DPO on rule contrasts (P-272b) with the squeezing guard (P-376); same-size RL specialists plus MOPD (P-333).
+
+**The classes and how much falls in each** (409 consensus rows):
+
+| class | meaning | rows | share |
+|---|---|---|---|
+| A | likely to move RC-12 margins or the passing size | 8 (6 distinct items) | 2% |
+| B | small but real, or cheap and uncertain; worth a cheap screen. 10 rows are B (strong); 52 are B (low), expected to tie or move bpb by about one 5M seed SD (0.2-0.4%) | 107 | 26% |
+| E | saves hours or calendar, not quality | 13 | 3% |
+| C | does not improve the model; 67 of these are C (needed), without which some other result gets misread | 143 | 35% |
+| D | no measurable difference expected at 3-30M, or direct evidence against (8 matter only for the microcontroller release) | 138 | 34% |
+
+Small gains are real and they add up, but at 5M a 0.3-0.5% bpb gain is about one seed SD. Each B item needs 3-5 seeds and the multiplicity rules (M5) to be seen at all, so bank them in batched 5M screens of 10-20 arms, not one at a time. The free C (needed) items are the cheapest protection the project has: escape-time reads for T002 (P-350), fp32 scoring (P-313), the calibrated untrained-model null (P-307), the wording check (P-304), seed-distribution reporting (P-394), the teacher-free OPD control (P-390).
+
+**Should we stop looking? Yes, for broad sweeps.** All three judges said so independently, and the per-round numbers agree (10.2): items that matter went 1, 0, 0 per round while 69-77% of every round's kept items were diagnostics or parks. The architecture search in particular is done: Planck's own screens, Marin's roughly 250-idea ablation set and the Parameter Golf meta-analysis agree that single architecture or optimizer changes at this scale move loss by 0 to about 1.5%. The biggest measured effect in the whole project is a data fix (E005: alias-correction accuracy at 135M went from .10-.52 per seed to .88 or better once alias corrections were in the training data). The next A item is more likely to come from Planck's own first RC-12 dev read than from another paper.
+
+Keep three narrow searches open:
+1. **One failure-driven search after the first RC-12 dev read.** If aliases or references fail: entity-coreference data design. If loops dominate: loop training without decoding tricks. If LOOKUP fails: table-format curricula. If own-history drift dominates: exposure bias and scheduled sampling for small transformers, the one thread the mechanism judge flags as under-searched relative to an A item.
+2. **A monthly watch on small-model RL and OPD for multi-turn state** (arXiv cs.CL and cs.LG, the BabyLM interaction track), because item 1 gains most from a new result.
+3. **Generator data design for state tracking at small scale:** distractor design, distance distributions, interleaving families.
+
+Not worth funding: more full venue reads, more industry-report reads beyond MNN, Liquid and MiniCPM, inference-time methods (scaffolds under the locked rule), and the rest of the ICLR 2027 pool.
+
+**The most valuable next step** (cheap, on the 5070, as soon as a 5M SFT checkpoint exists): score RC-12 dev on 5M SFT checkpoints, together with the free failure splits (P-328's operation-vs-value split, P-240, P-242, P-271's repeated-lure probe, P-263's stale-twin and frequency-cheater audit, P-206's loop and echo rates, P-272's relapse score). That decides which near misses become A. Caveat found in review: the repo (origin/main) records no 5M Planck SFT checkpoint yet; the 5M checkpoints that exist are starter-mix pretrains without the chat pool (also noted by P-296's verifier), so this step first needs one short identical SFT on an existing 5M trunk, or it runs right after the pool build. Then, before the Nov 22 pool build or by dated amendment after it, add the silent-absence share (P-296) and set the correction dose with held-out names (P-271b): the two A items that live in the pool. Then lock RC-12 with a third-party dated copy.
+
+### 10.5 NAIRR fit
+
+**The reconciled answer.** The two independent estimates (bottom-up and top-down) were reconciled line by line; every disagreement above 25% was re-checked against the filed request, the Ultra runbook, the ledger and the measured 5070 rates.
+- **Ultra plus the curve as filed: covered.** Their real cost is about 1,400 of the 1,950 requested GPU-hours in the central case (1,036 to 2,342), leaving about 550 spare. At the request's own conservative rates (the high column) it runs about 390 over, so the week-1 benchmark decides whether there is any spare at all.
+- **The new research that truly needs a big GPU: covered by that spare**, about 230 GPU-hours with reruns (105 to 457): H100 calibration, a 400M Planck teacher, data renders with 31B-122B open models, and 30M arms. It fits only if the request's sentence about where saved hours go is widened to allow it.
+- **Everything together: not covered.** With the curve extensions (2 more seeds at 30M, 60M and 150M; 150M to 300B tokens; compute-multiplier fits) and conditional items, demand is about 3,200 NAIRR GPU-hours in the central case (2,300 to 6,850), about 1,250 more than the Start-Up allows (350 to 4,900). The 2,000-hour cap rules out a bigger Start-Up, so the rest needs a full research request.
+- **Max is right that the small models are cheap: cheap enough that they should not use NAIRR at all.** The 5M-20M research is about 1,500 RTX 5070-hours including 2 extra seeds per size (1,080 to 2,180). The 5070 has about 2,060-2,130 free hours between Dec 4 and Apr 5 once the 5M-20M curve has trained compiled. NAIRR hours go to Ultra (about 700), the 150M point (about 300, plus about 600 if it goes to 300B tokens) and the compute-multiplier fits (about 170 per nominated change).
+- **Two limits bind before hours do.** No NAIRR result can exist before the Dec 4 freeze (the request is paused; a decision takes 2-3 weeks and first use can come 2 weeks after that). And Anvil AI's `ai` queue averaged a 119.5-hour wait over the last 30 days with a 48-hour job cap, so Ultra's 4-job chain takes about 6.5 weeks of calendar, not the request's 4.
+
+| NAIRR GPU-hours (est.) | low | central | high |
+|---|---|---|---|
+| Ultra per its runbook (data builds, proxy A/B, launch test, 100B tokens, post-training) | 537 | 704 | 934 |
+| Filed Planck lines (30M / 60M / 150M with 3 seeds each, 150M extension, long budgets, dose-response, scoring, setup) | 450 | 571 | 1,018 |
+| Reruns | 49 | 128 | 390 |
+| **The Start-Up as filed, real cost** | **1,036** | **1,403** | **2,342** |
+| Spare inside 1,950 | 914 | 547 | -392 |
+| New research that needs an H100, with reruns | 105 | 226 | 457 |
+| Curve extensions, with reruns | 1,155 | 1,528 | 3,067 |
+| Conditional items (pool re-render with a 31B+ teacher, recipe-v2 curve, Ultra decay test) | 0 | 55 | 985 |
+| **Everything on NAIRR** | **2,296** | **3,211** | **6,852** |
+| **Beyond the 1,950 (needs a full request)** | **346** | **1,261** | **4,902** |
+| RTX 5070-hours, not NAIRR (5M-20M research, 2 extra seeds at 5M / 10M / 20M, a second dose budget at 20M) | 1,083 | 1,511 | 2,177 |
+| RTX 5070 free hours Dec 4 to Apr 5, after the compiled 5-20M curve | 2,128 | 2,092 | 2,056 |
+
+The low, central and high columns are named by demand: fast H100 and few reruns, middle rates and 10% reruns, and the filed request's own conservative rates with 20% reruns. H100 throughput is unmeasured in every column.
+
+**What to do.**
+- **On the RTX 5070:** the 5M, 10M and 20M curve from Dec 4 to about Dec 20 (about 357 h compiled); then the long-horizon optimizer and LR trunks first (about 650 h central), T002 and the toys, batch 2 screens and one-change arms, and the 5-10M RL and OPD students. Done around early March in the central case. The 30M points fit here as a fallback (about 21 days).
+- **In the Start-Up:** a week-1 benchmark that tells which column applies, then the filed scope, then the spare in this order: the 400M teacher (about 40), teacher pilot renders (about 30), 3x and 10x teachers (about 20), 30M arms (about 45), 30M RL (about 25), then 2 extra seeds at 30M and 60M (about 70). Keep about 10% unspent until Ultra's first job shows its real speed.
+- **In a full research request:** about 5,000 GPU-hours on Anvil AI for 12 months (up to 6,000). That is near the lower quartile of 2026 Anvil AI full awards (4,250 to 4,750 depending on the method) and well under the median of 10,800. File by Jan 15 with week-1 measured rates, or by Feb 15 if no job has run by then.
+- **Request text to change before the PI resubmits (Max's call):** widen the savings sentence so the spare can go to H100 calibration and H100-only experiments; recost the small-model lines at the compiled 5070 rate (the request used the old eager rate), which frees 171 hours to name Ultra's data and setup steps (about 55) and the H100-only research (about 115) at the same 1,950 total; replace "fully booked" and "cannot finish 30M", which the compiled numbers contradict; move Ultra pretraining to weeks 1-7; raise storage from 400 GB to about 1.5 TB; drop the under-18 checklist item, which no longer applies. PLAN.md Phase 4 is also stale: it still places 30M on the 5070 and 60M and 150M on the Titans, which are gone.
+- **Still UNVERIFIED:** whether the Start-Up's 3 months run from the award or from first use; whether several processes may share one GPU on Anvil; whether one project can hold a Start-Up and a full award at once.
+
+**Correction to section 5 (dated 2026-11-19).** Section 5 said its first-six-weeks plan, "about 270-360 H100-hours (est.)", fits "inside one 2,000-hour Start-Up". That is wrong as written. The Start-Up request as filed (paused; the PI will resubmit) asks for 1,950 GPU-hours, and its own lines already give those hours to Ultra and the filed Planck curve; recosted, they use about 1,400 in the central case and more than all of it (about 2,340) in the high case. Of section 5's list, only the part that needs an H100 (calibration, the 400M teacher, big-model renders; about 105-125 hours before reruns) fits in the central-case spare, and only if the savings sentence is widened. The 5M parts of section 5 (T002, the M3 and M4 trunks, warm-ups, soups, the sink logit, dynamic conv, 5-10M RL) belong on the RTX 5070. The rest of the Phase 3 and Phase 4 plan belongs in the full request. Section 1's "one Start-Up allocation is up to 2,000 GPU-hours" is still true of the program; it is not true of the hours left in Planck's own request.
+
+### 10.6 Coverage, honestly
+
+Searched in full or nearly in full across sections 9 and 10: the 2026 main tracks of ICML, NeurIPS, ICLR, COLM (keyword), ACL, EACL, AACL and EMNLP; TMLR, JMLR, AISTATS and CoLLAs 2026; the 2025 main tracks of ICML, NeurIPS, ICLR and COLM; BabyLM 2023-2026; ICML and NeurIPS 2025-2026 workshops in Planck's topics; COLM 2026 workshops; the arXiv cs listing from 2026-01-01 to 11-18 (filtered); OpenAlex forward citations of 16 anchors; Marin, modded-nanogpt, Parameter Golf and nanochat; lab and industry releases since June 2026.
+
+Still not searched, or only partly:
+- **OpenReview itself.** The 19 NOT_FOUND ids above, plus the round-3 items that rest on OpenReview-only abstracts: the full text behind P-296 (99EZmxKpJh); the ICLR 2027 items b6XZ4N7a1t (P-394), x69B4FgAMi, IyFVWqSUhl, Ab5IBmIQod and TOCCgXKudX (P-359), efE3h1yYRd, sROOqxHIiw, 1BC0eYN2uS, Rd0dxUJuas, 419qaAMpme; the COLM 2026 workshop papers j9bpNGbHDS, 4jNpOfbjIn, Mok4aix6LQ, 4FYHLEyGpQ (P-367), 8jASKvRXGv (P-368), A7HxTzTM6t, 2osVgHagpq, BNS6PoeEpZ; FdXB4u27LD; the TMLR papers V6X6OuDJ0f and eAMLpW74rV and Heidi-3 (P-322); ZeroHero and Routing the Past. Three more ICLR 2027 ids cited by sweep items were resolved to probable arXiv copies this round (DJOmNDQ2wH as 2611.08016, tA3ABOjQfn as 2609.24432, IkzBak1MYU as 2609.28145).
+- **Unread inside searched venues:** about 1,300 local NeurIPS 2026 abstracts and 1,049 fetched ones that a keyword filter dropped; the 2,016 off-topic NeurIPS 2026 papers beyond a title scan; NeurIPS 2026 domain workshops; 711 ICLR 2026 main-track abstracts judged by title only and 12 ICLR 2026 workshops beyond their titles; the ICML 2025 Long-Context Foundation Models workshop posters (OpenReview only); the rest of the ICLR 2027 pool beyond four subsets; cs.AI-only arXiv titles and low-scoring titles in every window; stat.ML-only papers beyond a scan.
+- **Sources that could not be read:** Zhihu (403 to every fetch); kexue.fm pages directly (403; read through its feeds and two unofficial translation mirrors); gated Hugging Face cards and data (BananaMind-3), which need Max's OK to accept.
+- **Tool limits during the pass:** the shared web-search budget ran out early in several passes, Semantic Scholar answered HTTP 429 most of the time, and the arXiv API throttled for long stretches. Some lookups therefore used arxiv.org pages directly, and a few searches simply did not run.
+- **Prior-art gaps:** hypotheses HS to HAC (11 items) never had a prior-art pass; the close calls in 10.3 rest on hypA and hypB without re-opening.
+- **What was not done at all:** no model was run for any claim in this section, no RC-12 score exists for any Planck checkpoint, and no H100 number was measured.
+
+Expected yield of more broad searching: low. Three rounds after the gap sweep produced one new A item. The critics after rounds 1 and 2 each forecast 3-8 more lever or efficiency items; the finders tagged 75 items that way, and by consensus 51 of them landed in B or B (low), 10 in E, 10 in C or D, 2 in B (strong) and 2 in A (the LOOKUP absence fix and the CPLM Plus arms folded into P-238). The searches worth keeping are the three narrow ones in 10.4.
