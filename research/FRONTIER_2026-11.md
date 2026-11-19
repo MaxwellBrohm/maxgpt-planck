@@ -453,3 +453,102 @@ Rough total for the first six weeks: about 270-360 H100-hours (est.), inside one
 - Kill conditions tightened: X1 and X5 are now killed by either part failing (they needed both), X6 and HR got concrete kill rules.
 - Restored two lane items that had been only partly carried: data idea 7's screening rules (no data arm adopted on bpb alone; per-arm LR for data arms; now in M5 and a ledger update) and post-train idea 9's compute split (RL from a plain-decay vs a P-058 anneal trunk; now in M7 and P-197).
 - Ledger ids re-checked after a fresh fetch: LEDGER.md and origin/main's LEDGER.md both end at P-188, and no tracked file on origin/main or in the working tree uses P-189 or above.
+
+---
+
+## 9. Gap sweep (2026-11-18)
+
+Asked after sections 1 to 7 (there is no section 8; this one is numbered 9 as requested): is this really everything worth trying? Two more search rounds aimed at venues and sources the six lanes never swept. The answer is no, it was not everything: the rounds found 126 candidates, kept 103 after verification, and merged them into 47 new ledger rows (P-237 to P-283) and 39 update entries for existing bets, proposed in a scratch `LEDGER_GAP.md` and now appended to LEDGER.md under "2026-11 frontier additions" (subsection "2026-11 gap sweep additions"). Most are diagnostics, controls and new arms on bets already listed. Only a handful change what should run first (section 9.4).
+
+**Ledger ids.** origin/main LEDGER.md (commit d71d447, 2026-11-18) now ends at P-236, because the section 3 rows were merged. The header's "next free id P-189" line is stale; the next free id after this section is P-284. The local checkout is behind origin and still ends at P-188.
+
+### 9.1 What was searched
+
+Per-gap source counts below are the writer's tally from the kept items (the sweep did not log per-gap totals), so treat them as approximate.
+
+**Round 1 (90 found, 70 kept).**
+- BabyLM 2026 proceedings, every abstract (about 10 kept: RecGPT, Relational Attention, the Parameter Golf meta-analysis, Miles' multi-epoch chain, MPO, retrieval exemplars, mention priming at 2.9M-33.5M, Attention Residuals).
+- ICLR 2027 submissions on OpenReview (about 25 kept). The verifier hit OpenReview's bot check on 2026-11-18, so 20 of these rest wholly on abstracts it could not reopen (marked UNVERIFIED) and about 5 more partly.
+- Practitioner leaderboards and repos (about 12): Parameter Golf PRs and records, modded-nanogpt Track 3 and PRs #178, #376, #378, #379, Slowrun PRs #92 and #98, nanochat issue #810.
+- Microcontroller ports (3): esp32-ai RESULTS.md, InsiderLLM P4 vs S3.
+- arXiv keyword search on the round's terms (about 20).
+
+**Round 2 (36 found, 33 kept), aimed at round 1's critic gaps.**
+- NeurIPS 2026 and COLM 2026 main tracks via the OpenReview search API (about 8 kept: entity-frequency phases, readout learning speed, Sieve attention, muLM, two retention papers, strong weight decay under repetition, Inside the Loop).
+- EMNLP 2026 main and Findings, BlackboxNLP 2026, CoNLL 2026 from the ACL Anthology (4: copy before suppress, the ChaCAL head cliff, serial position at 14-70M, State Integrity Collapse).
+- arXiv full listings cs.CL, cs.LG, cs.NE from 2026-10-15 to 2026-11-18 (about 13: StateWise, GatedV, four looping papers, DAMI, First Passage Attention, rival-value interference, data placement, GateFloor, onona, subliminal KD, perturbed-input KD, mixture-rollout OPD).
+- Interpretability write-ups and repos (about 8: gradient routing, patterning, copy suppression, LLC stages, mechanistic data attribution, an induction-lockout toy, Goodfire VPD, the EleutherAI subliminal blog). Two LessWrong posts could not be located and stay UNVERIFIED.
+
+### 9.2 New items ranked into the master list
+
+Each item names its proposed ledger row. "With" means where it sits relative to the existing M items.
+
+**Joins Tier A (free or nearly free, run while waiting for NAIRR).** These are inference or analysis on checkpoints that already exist, and they decide how later results are read.
+- **P-271 repeated-lure probe** (copy before suppress, Dahiya and Blondin, Findings EMNLP 2026). The strongest item of the sweep. Name-copying forms before the head that suppresses the repeated name, so accuracy on "A and B ... B gave it to [A]" falls below chance while loss keeps falling: Pythia-160M floor 0.317, nine PolyPythia-160M runs mean floor 27.7%. A below-chance dip that later recovers is direct evidence for R1's "slow, not unable"; a score that stays below chance is not (the paper's zero-injection toy stayed below chance and never learned the rule). Its dose result (3 seeds; 5% and 15% injected override data reach 0.903 and 0.910 on held-out names, 30% reaches 1.000 in distribution but only 0.757 held out) bears on P-009 and P-059. Probe with M1; dose screen in Tier B.
+- **P-240 corrective-gain split.** All six instruct models from 135M to 1.7B re-emit a failed value more after it is restated (-23.92 nats at 135M). Splits RC-12 CORR by whether the correction quotes the stale value. With M19.
+- **P-272 relapse score** (StateWise, 8B). Chat SFT on add / amend / withdraw dialogues roughly doubled relapse to revoked rules, and DPO on relapse contrasts cut it 8 to 22 points. The free part checks whether Planck's SFT raises relapse. Training part in Tier B.
+- **P-263 stale-value twin audit.** Check that RC-12 dev has cells where the stale value is mentioned last without being reasserted, and position-vs-time swaps. Add any missing ones by dated amendment before results exist. With M18.
+- **P-276 readout-speed confound** (31M, NeurIPS 2026). Readout LR alone moves loss 2 nats early and 0.06 at the end. Any arm touching the tied table (P-159, P-217, P-245, P-246) needs a long-branch read. With M22.
+- **Updates to M5 (P-193, P-209):** an exponent-difference test with reversal probability (UNVERIFIED audits).
+- **Updates to M1 (P-189):** the gate-init sweep (P-275), the acquisition fraction (P-255), and a load-bearing ablation on every onset claim (Bi-Induct, 0.13B: planted induction heads were less load-bearing).
+
+**Joins Tier B (high-value bets).**
+- **P-238 Copy-Paste LM head (CPLM).** 135M, 3 seeds: ppl 16.33 to 15.83, sliding-window NIAH 14.3 to 99.4. About 25k parameters at d192. It aims at the shared last step of RECALL, BIND, CORR and LOOKUP. Ranked just below M9 (dynamic conv): stronger evidence, but on a different axis.
+- **P-271 dose screen** and **P-272 SFT vs SFT+DPO on relapse contrasts.** These are the only new items aimed squarely at RC-12's correction and rule cells.
+- **M3 / P-190 update:** add SOAP-Muon (P-190 already has plain SOAP) and NorMuon + EMA-Nesterov, and tune NorMuon's auxiliary LR as its own axis. On Track 3 at 124M, NorMuon only ties tuned Muon (3250 vs 3250 steps) while record #44's SOAP-Muon stack reaches 2750 (a stack of several changes, so SOAP-Muon's own share is not isolated); the UNVERIFIED Qwen3-4B result says the Muon fine-tuning gap is mostly the untuned auxiliary LR. Adds about 25-40 H100-h.
+- **P-262 weight decay erasing unexercised skills.** Tier B only if its OpenReview sources check out. Planck stacks four stages under decoupled weight decay, and the reported (UNVERIFIED) 0.98 to 0.01 composition loss would be invisible in bpb.
+
+**Joins Tier C (strong supporting bets).**
+- **Toy-first arms:** P-237 NextLat, P-253 gold-pointer attention supervision, P-254 current-value restatement, P-273 imbalanced task curriculum, P-275 gate and decay init, P-260 width vs LR (UNVERIFIED), P-261 removable previous-token scaffold (UNVERIFIED), P-264 short-conv controls for S004 (UNVERIFIED).
+- **Cheap 5M screens:** P-278 GatedV (5 of 5 seeds at 2.33M), P-256 head partition, P-257 QK gain init, P-244 small-gamma init.
+- **Tokenizer:** P-243 CoBPE-lite. Its stage 0 is CPU-only and must land before the Dec 4 tokenizer freeze.
+- **Core-bet measurement:** P-279 gradient routing, the cleanest in-model test of "skills cheap, facts expensive".
+- **Post-training:** P-266 own-history error injection, P-267 Adam epsilon on the tied table in SFT (UNVERIFIED), P-274 entity-frequency phases.
+- **MCU release only:** P-250 low-bit skill retention and P-251 the MCU port benchmark.
+- **Updates:** P-187 (tail averaging, strong WD and masked-input regularization, meta-gradient in high-pass cells), P-196 (top-K support and mixture rollouts against loop-rewarding OPD), P-197 (end-of-turn gradient unit test; RL slope vs pretraining tokens from the 5M-1B chess study), P-022 (DAMI init, load curriculum, entity-keyed addressing), P-111 / P-150 (full BPTT, input injection, loop adapters, late onset), P-123 / P-183 (Linger and Lose: int4 retention 0.581 and ternary 0.090 at 25M; the collapse sits in the head and a WSD cooldown fixes it, which weakens P-183).
+
+**Joins Tier D (worth a slot, lower expected value).**
+- **New rows:** P-239 Golf mining, P-241 guided-policy self-distillation, P-242 span-constrained split, P-245 embed_wd 0, P-246 logit softcap, P-247 rare-tail gate, P-248 dual-route split, P-249 vocabulary grow-in, P-252 MCU KV, P-258 mention priming, P-259 Attention Residuals, P-265 recall incentive, P-268 optimizer-state plateaus, P-269 head balancing, P-270 emergence forecast, P-277 serial position, P-280 patterning knockout, P-281 copy suppression, P-282 fixed-offset lockout, P-283 LLC.
+- **Decoding, report-only under the locked rule:** P-076 (CFG at 124-160M: LAMBADA +12 to +15), P-077 (vote flip rate), P-078 (temperature-fragility gate), P-095 (NONE as a first-class grammar option).
+- **Table variants by size:** P-099, P-113, P-159 (frozen codes, onona, untie at 2/3, Leviathan, GateFloor).
+- **Small arms:** S010 (LeakyReLU^2), P-229 (all-layer XSA), P-210 (PR #378 form).
+
+**Checked, low value or watch.** muLM (abstract only), VPD decomposition (cost unknown, tens of GPU-hours), PLE (a loss under total-parameter counting), subliminal KD (only if KD is adopted), Erase-then-Delta (adds nothing beyond GDN-2), and every n-gram, PPM or TTT trick from Parameter Golf (evaluation-time, so a scaffold under the locked rule).
+
+### 9.3 New hypotheses
+
+- **CPLM gains more as size shrinks.** At 5M, a pointer head frees up 3 heads per layer (P-238).
+- **H1:** case and space factoring helps cross-form name recall more than bpb (P-243).
+- **H2:** rare-tail methods are null at an in-domain 8k vocab (P-247).
+- **H3:** a nested 2k-to-8k grow-in front-loads copy practice (P-249).
+- **Guided-policy self-distillation** moves CFG/CAD gains into the weights. This is the only route by which decode-time context amplification can count under the locked rule (P-241).
+- **Low-bit precision:** int4 keeps context-computed skills better than stored facts (P-250).
+- **MCU memory:** the KV cache, not the weights, binds a 12-turn chat on a microcontroller (P-252).
+- **Loops:** free-running loops are leftovers of incomplete induction formation and show hidden-state collapse first (P-255).
+- **Attention temperature:** part of T001's plain-softmax delay is waiting for attention to sharpen (P-257).
+- **Previous-token scaffold:** a previous-token path is needed to learn, not to run, so it can be removed after formation (P-261).
+- **Canon and smear** win partly by absorbing fixed-offset template shortcuts that would otherwise lock out induction (P-282).
+- **Plain attention** shows a per-layer slot cliff near heads = tracked properties, as ChaCAL does (P-189 update).
+
+### 9.4 What changed in the top recommendations
+
+1. **"The five things", item 1 (T001 measured speed):** strengthened and sharpened.
+   - The below-chance repeated-lure window is a new free signal of "slow".
+   - An UNVERIFIED OpenReview paper reports that a missing previous-token circuit blocks learning outright (600,000 updates, nothing learned). T002 already gives every arm a previous-token path, so the design stands, but R1's reading does not cover arms without one.
+   - The gate-init paper (2609.16540) predicts, from theory and Mamba toys rather than FoX itself, that P-189's "FoX at paper init" arm will plateau. If that carries over, the arm's expected sign flips; run it with the init sweep, not alone.
+2. **Item 2 (optimizer regime):** M3's arm list changes. SOAP-Muon and a tuned auxiliary LR join, at about 25-40 extra H100-hours. NorMuon's S003 margin over AdamW is now even less trustworthy.
+3. **"What to do first", step 2 (no GPU) grows by about a day of 5070 inference:** P-271 probe, P-240 split, P-272 relapse score, P-263 audit, P-258 mention priming, P-277 serial position, P-281 copy suppression, P-242 span split, the PR #376 copy mixture, PTQ of WSD vs averaged checkpoints (2510.06213), and S001 gate kurtosis. All run on existing checkpoints.
+4. **One new Tier B architecture bet:** CPLM (P-238), screened in T002 and at 5M with the loop guard.
+5. **Before acting on any UNVERIFIED row:** reopen its OpenReview page in a browser session that gets past the bot check. About 25 items depend on it, including P-260, P-261, P-262 and the M3 auxiliary-LR claim.
+6. **Unchanged:** the Tier A order, the NAIRR filing, the freeze rule and the D6 ruling. Of the five things that matter most, only item 4 (RL) gains a guard: the end-of-turn gradient unit test, and logging wrong-mode amplification.
+
+### 9.5 Coverage, honestly
+
+This is still not exhaustive. Round 2's critic listed five gaps that no round has searched yet:
+- **Grokking and delayed generalization.** Zero hits anywhere in the repo or these files, and this is the regime a chat pool read 100-200 times puts Planck in.
+- **Unswept venues:** ICML 2026 main and all ICML and NeurIPS 2026 workshops, ACL 2026 main and Findings, and TMLR 2026.
+- **arXiv full listings from 2026-09-23 to 2026-10-14.**
+- **Pre-2022 from-scratch state-tracking work:** EntNet, NTM and DNC curricula, fast weights, TRADE and SUMBT. Mine it for training-signal tricks.
+- **Chinese-language optimizer write-ups** (kexue.fm). Lower priority.
+
+Roughly a quarter of what was kept rests on OpenReview abstracts the verifier could not open. Round 2 still found about four items worth a slot, so another round would likely add a few more, mostly diagnostics rather than new levers.
