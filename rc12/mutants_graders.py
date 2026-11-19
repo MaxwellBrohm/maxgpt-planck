@@ -16,7 +16,9 @@ CLAUSES = ["v1_degen", "v2_gold", "v2_unsure", "v3_other", "v3_guess", "v3_shotg
 OFF = ["neg", "postneg", "question", "hedge", "hypo", "cond", "alt", "list", "than", "voc", "capture", "myobj",
        "assistrev", "unsure", "echo", "leak", "tri", "equal", "selfcopy", "empty", "stale", "guess",
        "shotgun", "echo_contains", "cue", "absvalue", "absvoice", "short", "rule", "old", "source", "other", "assert",
-       "listvoice", "claim", "ownname", "self", "stuff", "inflect", "inflect_you", "first"]
+       "listvoice", "claim", "ownname", "self", "stuff", "inflect", "inflect_you", "first",
+       "askedif", "rephedge", "repquest",    # lock step A2 (2026-10-19): grade_cues asked_if, reported_hedge, _question
+       "negform"]                            # A2 (v) (2026-11-19): grade_cues.neg_value_re
 
 PARAM = [("grade_text", "P", "neg_window", 1), ("grade_text", "P", "echo", 0.95), ("grade_text", "P", "alt_chars", 0),
          ("grade_loop", "LP", "tri_rep", 5), ("grade_loop", "LP", "selfcopy", 0.9),
@@ -47,7 +49,7 @@ SOURCE = [
     ("grade_text", '|likely|" + GC.HEDGE_MORE + r")', '|likely)'),
     ("grade_text", 'GC.HEDGE_MORE + r")', 'GC.HEDGE_MORE.replace("guess|", "") + r")'),
     ("grade_text", 'GC.HEDGE_MORE + r")', 'GC.HEDGE_MORE.replace("|as far as i (?:know|remember|recall|can tell)", "") + r")'),
-    ("grade_text", "(HEDGE.search(sent) or GC.near_hedge(text, s0, s1, HEDGE))", "HEDGE.search(sent)"),
+    ("grade_text", "or GC.near_hedge(text, s0, s1, HEDGE))", "or False)"),   # retargeted 2026-10-19 (A2 own_hedge)
     ("grade_text", 'r"|" + GC.ABS_MORE)', 'r"")'),
     ("grade_text", "GC.ABS_MORE)", 'GC.ABS_MORE.replace("(?:come up|been mentioned)", "(?:been mentioned)"))'),
     ("grade_text", "GC.ABS_MORE)", r'GC.ABS_MORE.replace(r"|\bskips\b", ""))'),
@@ -234,3 +236,6 @@ SOURCE = [
     ("grade_loop", 'REPORTED = ("RUNAWAY",)', "REPORTED = ()"),
     ("graders", 'fails = [f"loop_{f}" for f in flags if f not in L.REPORTED]', 'fails = [f"loop_{f}" for f in flags]'),
 ]
+
+from mutants_a2 import SOURCE_A2  # noqa: E402  lock step A2 (2026-10-19)
+SOURCE += SOURCE_A2

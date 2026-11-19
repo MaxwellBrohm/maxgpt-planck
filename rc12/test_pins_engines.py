@@ -10,14 +10,36 @@ rc12/engines.json. No model, no network: reads the two files only.
              has no chat template (plain render only) and the other three have one
   minimind-3 (STEP 13a, 14) pinned and out of "skipped"; vLLM at its float16 with its own parity (a family of one)
   shards     every "shards" an int >= 1; cRia's 10 with max_batch 32 (STEP 14X)
+  tier1      (STEP 16P, 2026-11-19) the five tier-1 rows named before the lock are pinned in pins.json "tier1" (full
+             revision, licence allowed here, every weights file with its sha256 and bytes) and in neither "models"
+             nor "skipped" (a row joins "models" with its dev numbers); the three with a family verdict have it in
+             engines.json (vLLM, the pinned dtype); the two that need their own parity have no engines.json entry
+             yet, so the queue writes NOENGINE for them and dev_batch cannot run them before that parity. The LFM
+             Open License v1.0 is allowed as the TII Falcon License is: the core panel's LFM2 and LFM2.5 models
+             carry it (Apache-2.0-based, royalty-free, not gated; commercial use above a revenue threshold is not
+             licensed, which an evaluation is not); since review r1 (2026-11-19) only on a LiquidAI/ repo, so it
+             widens no other pin
   python -B test_pins_engines.py [--pins F] [--engines F]   (exit 1 on any failure)"""
 import argparse
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LICENCES = {"apache-2.0", "mit", "other (falcon-llm-license)"}
+LFM = ("other (lfm1.0)", "LiquidAI/")      # the LFM Open License only on Liquid AI's own repos (STEP 16P; review r1)
+
+
+def licence_ok(m, lic):
+    """lic is allowed for model m: a LICENCES entry, or the LFM Open License v1.0 on a LiquidAI/ repo."""
+    return lic in LICENCES or (lic == LFM[0] and m.startswith(LFM[1]))
+
+
+TIER1 = {"taobao-mnn/MNN-Pocket-0.3B": None, "textilelabs/Loom-Weave-4": None,     # None: own parity first
+         "LiquidAI/LFM2-2.6B-Exp": "family verdict (LFM2-700M)",
+         "LiquidAI/LFM2.5-1.2B-Instruct": "family verdict (LFM2.5-230M)",
+         "Qwen/Qwen3.5-2B": "family verdict (Qwen3.5-0.8B)"}
 SIBS = ["tiiuae/Falcon-H1-Tiny-90M-Instruct-Curriculum", "tiiuae/Falcon-H1-Tiny-90M-Instruct-pre-DPO",
         "tiiuae/Falcon-H1-Tiny-90M-Instruct-Curriculum-pre-DPO", "tiiuae/Falcon-H1-Tiny-90M-Base"]
 NOT_RUN = ["HuggingFaceTB/smollm2-135M-SFT-Only", "SupraLabs/Supra2-Medium-Instruct"]
@@ -37,7 +59,7 @@ def check(pins, eng):
             fails.append(f"pairs: {m} engines dtype {e.get('dtype')} != pinned {p['checkpoint_dtype']}")
         if bool(e.get("trust_remote_code")) != bool(p["custom_code"]):
             fails.append(f"pairs: {m} trust_remote_code {e.get('trust_remote_code')} vs custom_code {p['custom_code']}")
-        if p["license"] not in LICENCES:
+        if not licence_ok(m, p["license"]):
             fails.append(f"licence: {m} {p['license']!r} is not an allowed licence")
     for m, e in em.items():
         par = e.get("parity", "")
@@ -79,6 +101,26 @@ def check(pins, eng):
     c = em.get(CRIA, {})
     if (c.get("shards"), c.get("max_batch")) != (10, 32):
         fails.append(f"shards: cRia shards {c.get('shards')} max_batch {c.get('max_batch')} (STEP 14X: 10 and 32)")
+    t1 = pins.get("tier1", {})                                       # STEP 16P
+    if sorted(t1) != sorted(TIER1):
+        fails.append(f"tier1: pinned {sorted(t1)} vs {sorted(TIER1)}")
+    for m, p in t1.items():
+        if m in pins["models"] or m in pins.get("skipped", {}):
+            fails.append(f"tier1: {m} is also in models or skipped (it joins models with its dev numbers)")
+        if not licence_ok(m, p.get("license")):
+            fails.append(f"tier1: {m} licence {p.get('license')!r} is not an allowed licence")
+        w = p.get("weights") or []
+        if not re.fullmatch(r"[0-9a-f]{40}", str(p.get("revision"))) or not w or any(
+                not re.fullmatch(r"[0-9a-f]{64}", str(x.get("sha256"))) or type(x.get("bytes")) is not int for x in w):
+            fails.append(f"tier1: {m} revision or weights not pinned in full")
+        e, want = em.get(m), TIER1.get(m)
+        if want is None and e is not None:
+            fails.append(f"tier1: {m} is in engines.json before its own parity (families are per recipe, STEP 13a)")
+        if want is not None and (e is None or (e.get("engine"), e.get("parity"), e.get("dtype")) !=
+                                 ("vllm", want, p.get("checkpoint_dtype"))
+                                 or bool(e.get("trust_remote_code")) != bool(p.get("custom_code"))):
+            fails.append(f"tier1: {m} engines entry {e and (e.get('engine'), e.get('parity'), e.get('dtype'))} vs "
+                         f"vllm, {want}, {p.get('checkpoint_dtype')}")
     return fails
 
 

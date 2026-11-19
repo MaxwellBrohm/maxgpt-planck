@@ -216,7 +216,9 @@ def t_g6_coverage(tmp):
                                                      for f in fx),                 # did would fail this, rightly)
           "G6: the assistant-name fixtures vanish when such records come after the first four of their cell")
     fx, index = MG.build(recs)
-    check((len(index), len(fx)) == (124, 9075), f"G6: dev's fixture set changed: {len(index)} records, {len(fx)}")
+    real = sum(not r.get("synthetic") for r in index.values())     # + A2 (v)'s 148 synthetic negation-gold copies
+    check((real, len(index), len(fx)) == (124, 272, 13466),     # 9,838 (Nov 3) + A2's 3,480 + A2 (v)'s 148 (r2)
+          f"G6: dev's fixture set changed: {real} records ({len(index)} with copies), {len(fx)}")
     mut = ("grade_fmt_dyn", "len(picked) != 1", "len(picked) < 1")      # a source turn with 2+ picks passes
     picks = [r for r in recs if (r["family"], r["cell"]) == ("OWN", "pick")]
     two = [dict(f, grader=p["grader"], family=r["family"]) for r in picks for p in MG.pick_probes(r)

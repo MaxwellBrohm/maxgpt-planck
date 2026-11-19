@@ -17,6 +17,13 @@ change being regraded can make (--expect):
   t0gaps  (2026-10-04, notes STEP 11b: the T0 audit's two grader gaps, inflected values and the closing-quote
           sentence end) only probes, units and the role-leak scan moved, never the loop flags or the ack marks, and no
           probe gained or lost a degenerate, echo, unsure or format clause (those read neither values nor sentences)
+  a2      (2026-10-19, lock step A2, notes STEP 16: "You asked if X", the new abstain cues, a hedge inside a report of
+          the user's words, a quoted question the user asked) only probes and units moved, never the loop flags, the
+          ack marks or the role-leak scan, and a probe gained or lost only clauses that read the assertion rule or the
+          abstain cue (A2_MOVED; v3_shotgun through the answer-first waiver below, which reads the assertion rule),
+          never GAINING v2_gold, a2_cue or d4_assert (A2_ONLY_LOST, review r1 2026-11-19: A2 only widens matching); a
+          probe whose OWN source parse flips is exempt from the clause rule, as in t0gaps; a change with no changed
+          probe (the unit alone) is refused, as in first and cap (review r2, 2026-11-19)
   first   (2026-11-03, rc12/FRONTIER.md: the answer-first waiver) every changed probe only lost v3_other and/or
           v3_shotgun, nothing gained, only probes and units moved
   cap     (2026-11-03, the cap amendment in grade_loop) every changed probe only lost degenerate clauses, nothing
@@ -52,6 +59,24 @@ def expected_t0gaps(c):
         x.startswith("loop_") or x.endswith(UNMOVED) for x in moved)
 
 
+# v3_shotgun since the merge onto the Nov 3 graders (2026-11-19): the answer-first waiver (graders.answer_first) asks
+# what the first sentence asserts, so an A2 change there grants or withdraws the waiver of v3_other and v3_shotgun
+A2_MOVED = {"v2_gold", "v3_shotgun", "v3_other", "a2_cue", "d4_assert"}
+# review r1 (2026-11-19): A2 only widens what counts as a mention, an assertion or an abstain cue, so these three can
+# only be lost; a gain is a regression (a gold no longer matched or asserted, a cue no longer seen)
+A2_ONLY_LOST = {"d4_assert", "a2_cue", "v2_gold"}
+
+
+def expected_a2(c):
+    if not c["probes"]:                          # review r2 (2026-11-19): the unit alone moved
+        return False
+    gained = {x for p in c["probes"] if "d0_source" not in set(p["old"]) ^ set(p["new"])
+              for x in set(p["new"]) - set(p["old"])}
+    moved = {x for p in c["probes"] if "d0_source" not in set(p["old"]) ^ set(p["new"])
+             for x in set(p["old"]) ^ set(p["new"])}
+    return set(c["fields"]) <= {"probes", "unit"} and moved <= A2_MOVED and not gained & A2_ONLY_LOST
+
+
 def expected_first(c):
     """the answer-first waiver (2026-11-03, rc12/FRONTIER.md) only ever removes v3_other or v3_shotgun: every changed
     probe lost some of those two and nothing else, gained nothing, and only probes and units moved."""
@@ -71,7 +96,8 @@ def expected_cap(c):
         set(p["old"]) - set(p["new"]) <= CAP_CLAUSES and set(p["new"]) <= set(p["old"]) for p in c["probes"])
 
 
-EXPECT = {"item3": expected_item3, "t0gaps": expected_t0gaps, "first": expected_first, "cap": expected_cap}
+EXPECT = {"item3": expected_item3, "t0gaps": expected_t0gaps, "first": expected_first, "cap": expected_cap,
+          "a2": expected_a2}
 
 
 def run_dirs(src):

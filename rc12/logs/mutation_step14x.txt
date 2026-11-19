@@ -2,16 +2,16 @@ baseline: pass
 KILLED    shards.py: parts concatenated | test_dev_batch_shards.py: FAIL equal in order: greedy files differ from one process
 KILLED    shards.py: contiguous slices | test_dev_batch_shards.py: IndexError: list index out of range
 KILLED    shards.py: config unchecked | test_dev_batch_shards.py: FAIL refuse: a part with another config was merged (0)
-KILLED    shards.py: parts left after the merge | test_dev_batch_shards.py: FAIL equal in order: left behind ['<tmp>/rc12_shards_uieea1lo/a/SAMPLER/plain
+KILLED    shards.py: parts left after the merge | test_dev_batch_shards.py: FAIL equal in order: left behind ['<tmp>/rc12_shards_x70_s0vg/a/SAMPLER/plain
 KILLED    shards.py: seconds of one | test_dev_batch_shards.py: FAIL equal in order: shard fields 3 [1.5, 2.25, 0.0]
 KILLED    shards.py: batches of one | test_dev_batch_shards.py: FAIL equal in order: shard fields 3 [1.5, 2.25, 0.0]
 KILLED    shards.py: N 1 accepted | test_dev_batch_shards.py: FAIL refuse: N 1 (0)
 KILLED    shards.py: a string shards value accepted | test_dev_batch_shards.py: TypeError: '>' not supported between instances of 'str' and 'int'
 KILLED    dev_batch.py: a cut run is never merged | test_dev_batch_shards.py: FAIL equal cut then merged: greedy files differ from one process
 KILLED    dev_batch.py: a sharded model runs without --shard | test_dev_batch_shards.py: FAIL refuse: no --shard (0)
-KILLED    dev_batch.py: a done part replayed | test_dev_batch_shards.py: OSError: [Errno 66] Directory not empty: '<tmp>/rc12_shards_qj0d9g2v/a/SAMPLE
+KILLED    dev_batch.py: a done part replayed | test_dev_batch_shards.py: OSError: [Errno 66] Directory not empty: '<tmp>/rc12_shards_xtmr7rcl/a/SAMPLE
 KILLED    dev_batch.py: twin merged on dev | test_dev_batch_shards.py: FAIL merge: shard 2 failed
-KILLED    dev_batch.py: the last part does not merge | test_dev_batch_shards.py: FileNotFoundError: [Errno 2] No such file or directory: '<tmp>/rc12_shards__2
+KILLED    dev_batch.py: the last part does not merge | test_dev_batch_shards.py: FileNotFoundError: [Errno 2] No such file or directory: '<tmp>/rc12_shards_oe
 KILLED    verify_dev_runs.py: C1 shards unchecked | test_dev_batch_shards.py: FAIL verify: C1 shards check (under e3 ok True, under e1 [])
 KILLED    shards.py: review M13: the merged meta drops max_batch | test_dev_batch_shards.py: FAIL equal in order: merged meta lacks ['max_batch']
 KILLED    engines.json: minimind-3 not at its float16 | test_pins_engines.py: FAIL pairs: jingyaogong/minimind-3 engines dtype bfloat16 != pinned float16
@@ -26,4 +26,16 @@ KILLED    dev_extras14.py: the Base scored on template | test_dev_extras14.py: F
 KILLED    dev_extras14.py: the Base not scored | test_dev_extras14.py: FAIL list: missing ['Falcon-H1-Tiny-90M-Base'], extra [], 14 entries
 KILLED    dev_extras14.py: PLAIN_ONLY ignored by jobs() | test_dev_extras14.py: FAIL jobs: [('Falcon-H1-Tiny-90M-Base', 'template')] differ
 KILLED    dev_extras14.py: the card row dropped | test_dev_extras14.py: FAIL jobs: card rows []
-MUTANTS killed 27/27
+KILLED    pins.json: 16P: a tier-1 row with a non-permissive licence | test_pins_engines.py: FAIL tier1: textilelabs/Loom-Weave-4 licence 'cc-by-nc-4.0' is not an allowed licence
+KILLED    pins.json: review r1: the LFM licence on a tier-1 row not Liquid AI's | test_pins_engines.py: FAIL tier1: textilelabs/Loom-Weave-4 licence 'other (lfm1.0)' is not an allowed licence
+KILLED    pins.json: review r1: the LFM licence on an extra not Liquid AI's | test_pins_engines.py: FAIL licence: jingyaogong/minimind-3 'other (lfm1.0)' is not an allowed licence
+KILLED    pins.json: 16P: a tier-1 row also in skipped | test_pins_engines.py: FAIL tier1: Qwen/Qwen3.5-2B is also in models or skipped (it joins models with its dev numbers)
+KILLED    pins.json: 16P: a tier-1 revision cut short | test_pins_engines.py: FAIL tier1: taobao-mnn/MNN-Pocket-0.3B revision or weights not pinned in full
+KILLED    pins.json: 16P: a weights shard's sha256 cut short | test_pins_engines.py: FAIL tier1: LiquidAI/LFM2-2.6B-Exp revision or weights not pinned in full
+KILLED    pins.json: 16P: a tier-1 row dropped | test_pins_engines.py: FAIL tier1: pinned ['LiquidAI/LFM2-2.6B-Exp', 'LiquidAI/LFM2.5-1.2B-Instruct', 'Qwen/Qwen3.5-2B', 'taobao-mnn/MNN-Pocket
+KILLED    engines.json: 16P: an engines entry before its own parity | test_pins_engines.py: FAIL tier1: taobao-mnn/MNN-Pocket-0.3B is in engines.json before its own parity (families are per recipe, STEP 13a)
+KILLED    engines.json: 16P: a family-verdict row off its pinned dtype | test_pins_engines.py: FAIL tier1: Qwen/Qwen3.5-2B engines entry ('vllm', 'family verdict (Qwen3.5-0.8B)', 'float32') vs vllm, family verdict (
+KILLED    engines.json: 16P: remote code on a row that ships none | test_pins_engines.py: FAIL tier1: Qwen/Qwen3.5-2B engines entry ('vllm', 'family verdict (Qwen3.5-0.8B)', 'bfloat16') vs vllm, family verdict 
+KILLED    engines.json: 16P: a family-verdict row without its engines entry | test_pins_engines.py: FAIL tier1: LiquidAI/LFM2.5-1.2B-Instruct engines entry None vs vllm, family verdict (LFM2.5-230M), bfloat16
+KILLED    engines.json: 16P: another line's verdict | test_pins_engines.py: FAIL family: LiquidAI/LFM2-2.6B-Exp LFM2/vllm vs LiquidAI/LFM2.5-230M LFM2.5/vllm
+MUTANTS killed 39/39

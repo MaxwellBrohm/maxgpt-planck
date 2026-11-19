@@ -3,6 +3,11 @@ RC-12 PRE-REGISTRATION: DRAFT, NOT LOCKED
 Status: DRAFT 0.1, written 2026-09-25. Nothing here binds anyone until Max approves it and it is pushed as the locked
 pre-registration (PLAN Phase 0, lock window Oct 11-14). Every number marked (proposal) may change before the lock and
 never after it. Items marked OPEN are listed again in s16; s17 holds the decisions that needed Max.
+MAX'S LOCK APPROVAL (2026-10-19; his answers verbatim, rc12/notes.txt STEP 16; rc12/LOCK_STEPS.md M2 and M3): to "Do
+you approve locking it with those?" (the bars still to be fixed at the push: 0.60 for the Level A content bars and the
+LOOKUP claim, 40 and 0.40 for Level R, 2% loops, 50% in the human test, the -5 OOD-H wording rule): "Yes, lock it
+(Recommended)". To the GitHub release and the Software Heritage snapshot (s13 S9): "Yes, do both (Recommended)". To
+how the hidden set is built: "One-click separate session (Recommended)". It binds once the lock is pushed.
 DECISIONS FOR MAX (s17), RULED 2026-09-25 (Max took every recommended pick): OD1 OWN counterfactual gate (b, AND
 of both runs); OD2 LOOP in the composite (a, kept); OD3 positional-abstain cells at 0.50 (a, accepted at the cell
 bar); OD4 PLAN F6-F8 (c, out of RC-12); OD5 program-written lookup lines under D8 (a, allowed with three
@@ -148,8 +153,15 @@ becomes training text). The two share the label D8 by accident.
     original Level R test is now reported beside, never claimed, s9).
     Level A only at a size with >= 3 training seeds (5 if seed lock-in is shown: seed pass rates on a pass/fail
     family spread by more than 0.3 at 30M). Any curve point with fewer seeds states its count. A note the model writes
-    and reads itself counts as the model; a harness-maintained state card is reported only as "Planck-{N}M + state
-    card (scaffold)". After the first sealed scoring, any recipe change is labeled post hoc.
+    and reads itself, inside its own conversation history, counts as the model; notes written by another model, or
+    kept outside the conversation history, filtered or replaced by the harness, are a scaffold; a harness-maintained
+    state card is reported only as "Planck-{N}M + state card (scaffold)". After the first sealed scoring, any recipe
+    change is labeled post hoc.
+    (Wording 2026-10-19, the pre-lock novelty recheck, research/NOVELTY_2026-10.md s7: it says what this paragraph
+    already implied and names the design of a two-model system published 2026-10-14, a note-taking model whose notes
+    the harness filters and replaces; no claim, bar or rule changes. Applied by Claude, lock track A, as that
+    section's optional proposal; not put to Max as a question of its own, kept under his 2026-11-19 "do what you
+    think is best".)
     Both levels score the bare model (the LOOKUP claim too): each reply is generated from the conversation's own
     history (the scripted user turns, including any table a user turn supplies, and the model's own earlier
     replies), with no retrieval, memory store, state card, repetition penalty or other help from the harness; the OWN
@@ -379,10 +391,12 @@ becomes training text). The two share the label D8 by accident.
 6. GRADERS (pure Python, no model; rc12/graders.py, grade_text.py, grade_cues.py, grade_voice.py, grade_fmt_dyn.py,
   grade_role.py)
   G-VAL, strict value grader (closed candidate set). Right only if ALL hold:
-    v1 non-empty, not degenerate (s7), stop reason is not the 256-token cap;
+    v1 non-empty, not degenerate (s7), stop reason is not the 256-token cap (until 2026-11-03; since then a reply cut
+       at the cap is graded on its text and is degenerate only if it loops, s7's cap amendment);
     v2 the gold is ASSERTED: some whole-word mention (lowercase values in any case, capitalized values as written,
        pools_vals.value_re; this said "case-insensitive" until 2026-10-04, wrong for capitalized values, found by the
-       T0 audit; E004's grey/gray and number-word variants have no value to match in the dev pools), or an inflected
+       T0 audit; E004's grey/gray and number-word variants have no value to match in the dev pools; a value that
+       holds a negation also in each other form of it since 2026-11-19, the A2 block (v)), or an inflected
        form (below) addressed to the user, sits in a sentence that is not a question, not negated (a cue among not,
        no, never, neither, nor, without, cannot, none, any n't word, instead of, rather than in the 3 word tokens
        before it, or a negated copula right
@@ -390,13 +404,20 @@ becomes training text). The two share the label D8 by accident.
        grade_cues.HEDGE_MORE and near_hedge: "I'd guess X", "X, if I recall correctly", "Maybe. It is X."), not in
        an example or an if-clause, not one side of "X or Y" (other side capitalized, a digit or a pool value), not a
        bare list line, not right after "than"; an unsure or deflecting phrase ("I'm not sure", "remind me") fails
-       the whole reply;
+       the whole reply (since 2026-10-19 the "if" of "You asked if X", a hedge inside a report of the user's words
+       and a quoted question the user asked are not reasons: the A2 block below);
     v3 no other candidate is asserted; a stale value of the asked object may appear only in a change phrase ("moved
        from X", "X was changed to", and a recap: "Initially scheduled for X", "the initial choice of X", "Previous:
        X", "prior plan: X": within 3 words after initial(ly), previous or prior; Max, 2026-10-02: took all
        recommendations in rc12/DECISIONS_FOR_MAX.md (item 3)) and only when the gold is asserted; any pool value NOT
        in the user turns up to the probe fails (a guess); a reply mentioning every candidate in any form fails
-       (shotgun; COMPOSE exempt, D11);
+       (shotgun; COMPOSE exempt, D11). ANSWER-FIRST WAIVER (Max, 2026-11-03; rc12/FRONTIER.md Rule 1,
+       graders.answer_first): the other-candidate and shotgun clauses are waived when the first sentence asserts a
+       gold and no other value, and no other value is asserted right after "it", "that" or "this" followed by "is",
+       "'s" or "will be" ("it is", "it's", "that's", "this is", "it will be" ...) or "your <object words>" followed by
+       "is", "are", "'s" or "will be", in its own clause (within 20 characters; graders.BIND_IT, bind_your): a
+       leading answer may name the other values ("The banjo. Your nephew is the one with the trombone."); a
+       contradiction ("It is on Saturday. It is on Thursday.") still fails;
     v4 assistant voice: the gold's sentence does not bind a user fact to the first person ("My cat is Biscuit",
        "I'm Marcus"; "my" within 3 words before an object or holder word). For assistant-held probes (OWN, "What
        did I call you?") the reverse is checked ("You picked X", "Your name is X"). Report frames (D23,
@@ -438,7 +459,8 @@ becomes training text). The two share the label D8 by accident.
        words or groups ("greens", "oranges", "mechanics", "pilots like yourself"), and inflecting them in a first
        regrade only charged false captures and guesses.
   G-ABS, abstain grader: an abstain cue (grade_text.ABS_CUE extended by grade_cues.ABS_MORE: "you haven't told me",
-    "I don't think you've told me that", "That hasn't come up yet", "That list skips Thursday") AND no pool value
+    "I don't think you've told me that", "That hasn't come up yet", "That list skips Thursday", and since 2026-10-19
+    "You never picked one", "You didn't specify", "No, you didn't": the A2 block below) AND no pool value
     mentioned at all. Lenient twin (reported): a value is allowed in a sentence that names its own correct holder. No
     echo clause (D12: no abstain question holds a cue, so the cue clause already fails every echo).
   G-FMT (PERSIST), 8 rules: caps (>= 90% upper case over >= 5 letters), lowercase (no capital, >= 5 letters), first
@@ -483,6 +505,135 @@ becomes training text). The two share the label D8 by accident.
     29 (mostly PERSIST). Obligation on the training pipeline: do not teach Planck terse restatements as
     acknowledgements. Self-copy is separate: RESTATE's 12+ word TOPIC sentences (27 of 48 TOPIC probes) fail by
     self-copy too, so they are not equality-only.
+  LOCK STEP A2 (2026-10-19, finished 2026-11-19 on the graders with the Nov 3 amendments; rc12/notes.txt STEP 16;
+    rc12/grade_cues.py, the A2 block): the grader findings of the OOD-H reviews (oodh/DESIGN.txt s14 and s15,
+    "Grader findings"), each a natural right reply the graders failed.
+    FIXED:
+    (i) "You asked if X", "You asked me if X", "You first asked if X": a condition word right after "you (first) asked
+       (me)" is the user's reported question, not an if-clause, as "You asked whether X" never was one. As with
+       "whether", the reported value counts as said in both directions: a reported OTHER candidate now counts against
+       the reply too (dev, the 380 VAL probes with another candidate that is not stale: "You asked if it's <other>, but
+       it's <gold>." passed 380 before and 0 after, and "You asked whether it's <other>, but it's <gold>." passes 0 both
+       times; 320 before on the graders of 2026-10-19, the answer-first waiver passing the 60 two-candidate probes since
+       2026-11-03). With the waiver, the reported frame binds the value it names: "<Gold>. You asked if it's <other>."
+       passed 380 before and 0 after, and "<Gold>. You asked whether it's <other>." passes 0 both times; 'It's <gold>.
+       You asked, "Is it <other>?"' and "<Gold>. You said it should be <other>." pass 380 both times (no "it's" right
+       before the other value; (viii) below), and "You asked if it's <gold>. <Other> is the other one." passes 380 after
+       (0 before). "They asked if X" and "I wonder if X" stay conditions; "I asked if X" also fails v4 (the model
+       speaking as the user).
+    (ii) abstain cues: a you-denial of gave, specify, provide, name, rate, pick, choose, order or decide ("You never
+       gave me that", "You didn't specify", "You never specified that", "You didn't provide that", "You never picked
+       one", "You haven't chosen one yet", "You didn't name one", "You didn't rate it", "You haven't ordered anything
+       yet", "You haven't decided yet"; "have not" and "did not" as well) and the bare "No, you didn't." (with or
+       without the comma); a value of the probe's pool named beside them still fails (a3). Like every abstain cue before
+       A2, a new cue counts wherever it stands, inside an if-clause too, and a guess that is not a pool value does not
+       fail a3 (dev, the 60 ABS probes: "If you didn't specify, I'd go with Buddy." and "In case you never picked one,
+       Buddy is a nice name." passed 0 before A2 and 60 after; "If you haven't told me yet, it might be something like
+       Buddy." passed 60 both times). Kept: a3 is scoped to the probe's pool values by design, and an if-clause or guess
+       guard on the new cues alone would treat them unlike the old ones (a guard on every cue would be a new rule). One
+       dev probe passes this way (REGRADE below).
+    (iii) a hedge inside a report of the user's words: "should be" or "seem(s)" after a v4 report frame ("You said",
+       "You told me", "You mentioned", "According to you") and before the value, with no comma, semicolon or "but"
+       between the frame and the value, is the user's wording reported back ("You said it should be X", "You said it
+       seems to be X"). Every other hedge counts as before: "You said it might be X", "You said maybe X", "It should
+       be X", "You said so, but it should be X", "You said X, and it seems right", "It should be X, you said" fail.
+       Since review r2 (2026-11-19) "so" is a break too ("You told me nothing so it should be X"), and the report
+       reads as the user's wording only when neither the frame nor the text from it to the value holds a negation
+       cue (s6 v2's list: "You never wrote it should be X", "You said you weren't sure it should be X") and no
+       first-person word follows the frame ("You said I should be X"); each of these failed before A2, passed on the
+       first version of (iii) (478 of the 478 user-mode dev VAL probes) and fails again. In a fact the user gave the
+       assistant ("You said I should be <name>") the first-person rule keeps the strictness of before A2.
+    (iv) a quoted question the user asked: a sentence that is one quoted question opened by "you asked" or "you
+       said" (optionally "me", a comma or a colon) is not a question for a value inside the quote ('You asked, "Is it
+       X?"'); 'Is it "X?"', 'They asked, "Is it X?"' and a value outside the quote stay questions. As in (i), a
+       reported other candidate inside such a quote now counts against the reply ('You asked, "Is it <other>?" It is
+       <gold>.': 320 of the 380 passed before, 0 after).
+    (v) a contraction of the user's own negation (recorded as a known limit on 2026-10-19, fixed 2026-11-19): a value
+       that holds a negation also matches with that negation in each other form of its group (grade_cues.neg_value_re:
+       "is not", "isn't", "'s not"; "are not", "aren't", "'re not"; "do not", "don't"; "does not", "doesn't"; "cannot",
+       "can not", "can't"; "will not", "won't", "'ll not"; "have not", "haven't", "'ve not"; and the was, were, did,
+       has, had, would, could, should, must, need and am forms), each form matched in any case, so a capitalized value
+       ("Can't Stop", "Not Today") also matches as written (the first version, before review r1 of 2026-11-19, matched
+       the forms in lowercase only, under the case-sensitive match of a capitalized value, so such a value matched in no
+       form at all), and a "not" that opens the value also as "n't" on the word before it ("It isn't spicy" for "not
+       spicy"). Only the value's own auxiliary: "It wasn't X" does not say "is not X". Every assertion rule applies to
+       the match as to any mention ("Maybe it isn't X" and "It isn't X?" fail). No dev value holds a negation (0 of the
+       257 distinct dev golds, accepted forms, candidates and pool values), so on dev value matching is exactly as
+       before. Nothing in s13 keeps a sealed value from holding one (S1 fixes shapes and separation, not words); such a
+       value is matched as written and in each other form of its negation, which is what (v) is for. On OOD-H matching
+       no longer hangs on the accepted forms listing each contraction (the reviews added such forms by hand, s14), and
+       oodh/a2_counts.py counts each accepted negation as written and in its other forms (B7). A contracted gold asserts
+       without a second-person word (it is the value itself, not an inflected form).
+    RECORDED, NOT FIXED (known limits):
+    (vi) on OOD-H the loop rule (s7) compares a probe reply with the fixed OASST2 history replies, which OOD-H plays
+       as the model's own earlier turns, so a reply of 12+ words that copies half its word 4-grams from a
+       volunteer's assistant turn is a LOOP (1 probe seen in the third review). Kept: s7 is pre-registered exactly,
+       one rule serves both tests, and OOD-H is a paired comparison, so the same rule charges both models; an OOD-H
+       exception would be a second loop rule.
+    (vii) v3_shotgun fails a contrastive "the new X instead of the old Y" on a 2-candidate probe whose Y is not the
+       stale value (2 OOD-H probes seen; when Y is the stale value the change-phrase exemption, shotgun_named, passes
+       it): the policy cost of STEP 14S. Exempting contrastive mentions would reopen the listing the clause closes
+       ("X, not Y" names every candidate of a 2-candidate probe).
+    (viii) the reported other candidate under the answer-first waiver ((i) above): "<Gold>. You asked if it's <other>."
+       fails, as "<Gold>. You asked whether it's <other>." always did, while 'It's <gold>. You asked, "Is it <other>?"'
+       and "<Gold>. You said it should be <other>." pass (dev, 380 probes each: 0, 0, 380 and 380). The waiver's binding
+       frame (v3: "it's", "it is" ... within 20 characters before the other value) is met only in the first two. Kept:
+       the binding frames are the rule Max approved on 2026-11-03, and reading reports into the waiver would be a new
+       rule written after the dev counts were seen. DECIDED 2026-11-19 by Claude under Max's "do what you think is
+       best" of that day (this was first left as a policy point for him; rc12/notes.txt STEP 16 and 16R2). Max may
+       overrule it before C (rc12/LOCK_STEPS.md M5); a change is a grader change and needs a new C.
+    (ix) the A2 abstain cues on VAL probes (review r2, 2026-11-19): the older "you never told me" cues count as unsure
+       on a VAL probe (v2_unsure), A2's new ones only as abstaining on ABS probes, so "You never told me, but it's
+       <gold>." fails while "You never picked one, but it's <gold>.", "You didn't specify, but it's <gold>." and "No,
+       you didn't. It's <gold>." pass (dev, 478 of 478 user-mode VAL probes each, before and after A2: the gap is
+       older than A2). Kept: the new cues are often true statements about something else in a right answer. In the
+       stored runs (graded with the lock's graders) 13 of the public models' VAL replies and 11 of the frontier
+       models' hold an A2 cue, no older unsure cue, and pass; among them "The newsletter is the one still unsettled.
+       You haven't decided on its tone or theme yet" (a TOPIC probe), so moving the cues into v2_unsure would fail
+       right answers; it would be a VAL change with its own audit.
+    With the Nov 3 amendments: the answer-first waiver reads the assertion rule, so (i) to (v) can grant or withdraw
+    it (the forms in (i) above); a contracted gold that leads the reply grants it as any gold does (370 user-voice
+    dev VAL probes with another candidate, the gold set to "is not <value>": "It isn't <value>. You also mentioned
+    <other>." passes 370 with the waiver and 0 without it; "... It's <other>." and the other value first fail
+    370). The cap amendment reads no value and no assertion.
+    Evidence (A2): 3,628 new fixtures (rc12/fixtures_a2.py): 3,480 on the 104 VAL and 16 ABS dev probes
+    mutation_graders picks, and 148 for (v) on copies of 4 dev VAL records whose gold becomes a negation phrase around
+    its own value (no dev gold holds one). Of the 1,476 that must pass, 1,464 fail on the graders before A2
+    (2026-11-19: the graders of origin/main e73db78, with only the new fixture files added; on 2026-10-19 the first
+    1,200 failed the same way on 8b482d1) and all pass after it; the other 12 are capitalized negation values said as
+    written, which origin/main matched literally and the first version of (v) lost (16 fixtures failed on that
+    version, all 16 pass since review r1). The 2,152 guards and every older fixture pass on origin/main's graders and
+    after; 512 of the guards (the review r2 forms in (iii)) passed wrongly on the graders of review r1 and fail since
+    r2. 88 new mutants (4 OFF switches, askedif, rephedge, repquest and negform, and 84 source edits,
+    rc12/mutants_a2.py), each killed: mutation_graders 325 of 325 over 13,466 fixtures, IDEAL on all 640 records 0
+    failures; the 23 added in review r1 (the end anchors of the "you asked" and quote frames, the break counted only
+    between frame and value, "have not", "did not" and the denial's optional comma, the case rule of (v) and the
+    contraction of each negation group) and the 9 added in review r2 (the frame before the hedge, "so", the negation
+    and first-person rules of (iii), and (v)'s boundaries around a mid-value negation and at the value's end and its
+    curly apostrophe) each survive the fixtures before their round and are killed by the fixture named beside it
+    (three r1-era break mutants, which the "so" rule left alive on fixtures that say "You said so", are killed again
+    by r2's "You said that" fixtures). audit_graders: 76 new paraphrase kinds (rc12/audit_a2.py; 30 VAL x 392 probes,
+    18 ABS x 60, and 28 for (v) on each VAL probe with its gold set to a negation phrase): 12,208 wrong verdicts on
+    the graders before A2, all on 43 of its 45 must-pass kinds (the other 2 are the capitalized values as written),
+    1,176 on the first version of (v) (its 3 capitalized kinds), 1,960 on the review r1 graders (the 5 r2 must-fail
+    kinds of (iii)), 0 wrong of 60,580 after. Cheater gates: validate_e2e's 41 fakes write byte-identical transcripts
+    and scores before and after (the s8 table, G1-G4 and the shortcut ceiling 36.73 / 40.00 unchanged), audit_rules
+    unchanged (GATE PASS), and the OOD-H gate on the synthetic OOD-H world of oodh/tests unchanged;
+    oodh/tests/test_a2_cues.py runs the fixes, (v) and the recorded limits on OOD-H-shaped probes (8 of 8; its
+    negation test fails on the graders before (v), and on the first version of (v) for a capitalized gold; its
+    a2_counts test of review r2 fails on the a2_counts before r2, which gave a later bare "not" an "isn't" form the
+    matcher rejects by design). REGRADE (dev_regrade.py --expect a2, 2026-11-19, from the public-model runs as already
+    regraded with the Nov 3 graders, rc12/FRONTIER.md): 440 runs, 151,360 rows: 2 rows changed, one probe each,
+    LFM2-2.6B and LFM2-700M, plain render, RECALL abstain, each losing a2_cue on a new abstain cue. LFM2-2.6B's (seed
+    1, rc12-dev-recall-058 turn 11) now passes on a cue inside an if-clause beside guesses outside the pool ("If you
+    haven't decided on a name yet ...", with "Buddy" and "Max" offered before it), the case (ii) records; LFM2-700M's
+    still fails on voice. No strict unit moved. The review r1 graders give the same copy byte for byte (the 440 public
+    runs), and so do the review r2 graders (the 440 public and the 12 frontier runs), and --expect a2 now also refuses
+    any probe that gains v2_gold, a2_cue or d4_assert (A2 only widens matching, so such a gain is a regression;
+    test_regrade_expect, mutation_regrade). The 12 frontier runs (4,128 rows): 0. Then dev_panel.py, dev_s11.py and
+    dev_extras14.py: one reported number moved, the lenient score of that LFM2-2.6B probe (its plain lenient RECALL,
+    0.250 to 0.255); no number of s9 to s12 moved by A2. Not regraded: the Vertex-0.6-15M card row (s12; its runs are
+    on the PC only). The OOD-H gate on Part 1 reads sealed/ (rc12/LOCK_STEPS.md B7).
   Evidence (2026-10-04, after the STEP 11b fixes; rc12/notes.txt STEP 11b): 504 new fixtures for the two T0 gaps;
     the 399 that test the fixes (inflect_you_ok, _other, _guess, _value, _alt, quote_*) failed on the graders before
     the fix and pass after it, and the 105 that guard against over-reach (inflect_generic, _you_after, _voice,
@@ -551,13 +702,16 @@ becomes training text). The two share the label D8 by accident.
   EQUALITY-ONLY (reported, never scored; strict case (d) of s6, F3) a probe that fails only through the equality
            clause (graders.eq_only: its one failing clause is its degenerate one and the only loop reason is
            equality); score.py equality_only gives per family [such probes, probes graded].
-  RUNAWAY  r stopped at the 256-token cap.
+  RUNAWAY  r stopped at the 256-token cap. CAP AMENDMENT (Max, 2026-11-03; rc12/FRONTIER.md Rule 2,
+           rc12/grade_loop.py): RUNAWAY stays a reported flag and is no longer degenerate on its own; a reply cut at
+           the cap is graded on its text and is degenerate only if it also loops (the LOOP rule above). Below,
+           "degenerate" is LOOP, EMPTY or LEAK, and RUNAWAY counts only with LOOP.
   EMPTY    r has no word characters.
   LEAK     a role tag (User, Assistant, Human, System, AI, Bot, Model) at the start of any line of r, or a chat
            template marker anywhere in r; for Planck, a role token that stopped generation.
-  Degenerate = any of the four. The Level A loop criterion counts LOOP only; RUNAWAY, EMPTY and LEAK rates are
-  reported beside it. LOOP family probes also fail an echo of their user turn (D7); that counts in the LOOP family
-  score only, never in the Level A loop rate.
+  Degenerate = any of the four until 2026-11-03; since then LOOP, EMPTY or LEAK (RUNAWAY above). The Level A loop
+  criterion counts LOOP only; RUNAWAY, EMPTY and LEAK rates are reported beside it. LOOP family probes also fail an
+  echo of their user turn (D7); that counts in the LOOP family score only, never in the Level A loop rate.
 
 8. CHEATERS, ITEM GATES AND THE FINAL CHEATER TABLE
   Fake responders (no model; rc12/fakes.py, fakes_family.py, fakes_audit.py). Generic cheaters play the right policy
@@ -709,9 +863,10 @@ becomes training text). The two share the label D8 by accident.
     36.6), and with OWN credited from its own history (the gate slipped: POS2 0.229) exactly 40.00 (39.86 from the
     table, the decision's 39.9). Figures from the decision's two analyses, not re-run here: the shortcut mix passes a
     point-estimate bar of 40 0.4% to 6% of the time (46% with OWN slipped) and the CI rule at most 1.7%; Planck needs
-    a true S7 of about 45 to 46 (an average state family of 0.45; LFM2-2.6B's is 0.18 on dev); no-skill PERSIST fakes
-    reach at most 0.25, and a true PERSIST of 0.50 passes 0.40 91% to 99% of the time. Re-run by the verifier's own
-    simulation (2026-10-05, rc12/notes.txt STEP 12 VERIFY; n 600, this rule, fixed rules giving identical runs):
+    a true S7 of about 45 to 46 (an average state family of 0.45; LFM2-2.6B's is 0.18 on dev, 0.23 under the lock's
+    graders, STEP 16); no-skill PERSIST fakes reach at most 0.25, and a true PERSIST of 0.50 passes 0.40 91% to 99%
+    of the time. Re-run by the verifier's own simulation (2026-10-05, rc12/notes.txt STEP 12 VERIFY; n 600, this rule,
+    fixed rules giving identical runs):
     the mix's S7 CI part passes 0.08% at 36.73 and 2.3% with OWN slipped (40.00), a point-estimate bar 9.6% and
     50.5%; with the PERSIST bar (no-skill 0.25) the whole rule passes 0.00% and 0.03%. A Planck at a true S7 of 45
     passes the CI part 43% to 82%, and 80% needs a true S7 of about 45 to 48, depending on how closely its runs agree
@@ -730,14 +885,17 @@ becomes training text). The two share the label D8 by accident.
     resample draws units within each family (stratified), with the SAME draw for both models (paired); training seeds
     resampled per model; sampling seeds resampled inside each drawn training seed (nested). Percentile 95% CI.
   Dev reading (template, mean of 3 sampling seeds, one training seed, so never claimable; rc12/dev_panel.py
-    rules.json level_r, 10,000 resamples, on the STEP 11b regraded runs; rc12/notes.txt STEP 12): no panel model meets
-    the Level R bars and none passes the s12 clause. S7 (95% CI) and PERSIST: LFM2-2.6B 18.15 (14.73 to 21.75),
-    0.812; LFM2.5-350M 12.10 (9.18 to 15.25), 0.559; Qwen3-0.6B 9.22 (6.67 to 12.04), 0.352; LFM2-1.2B 7.55 (5.11 to
-    10.20), 0.362; LFM2-700M 6.29 (4.33 to 8.65), 0.196; Qwen3.5-0.8B 4.98 (3.37 to 6.65), 0.282; SmolLM2-360M-Instruct
-    4.32 (2.61 to 6.24), 0.137; gemma-3-270m-it 4.19 (2.48 to 6.09), 0.017; Falcon-H1-Tiny-90M-Instruct 3.56 (1.90 to
-    5.47), 0.031; LFM2.5-230M 3.39 (1.87 to 5.14), 0.323; Qwen2.5-0.5B-Instruct 2.30 (1.06 to 3.74), 0.113;
-    SmolLM2-135M-Instruct 1.04 (0.00 to 2.53), 0.018; Doge-160M-Instruct 0.25 (0.00 to 0.81), 0.018. The item 14
-    extras: s12.
+    rules.json level_r, 10,000 resamples, on the runs regraded with the graders of the lock: the Nov 3 amendments, s6
+    v1 and v3 and s7, and lock step A2, s6; rc12/notes.txt STEP 16): no panel model meets the Level R bars and none
+    passes the s12 clause. S7 (95% CI) and PERSIST: LFM2-2.6B 23.09 (19.21 to 27.08), 0.832; LFM2.5-350M 12.93
+    (10.02 to 15.98), 0.575; LFM2-1.2B 12.24 (9.04 to 15.67), 0.432; LFM2-700M 10.35 (7.95 to 12.97), 0.261;
+    Qwen3-0.6B 9.22 (6.67 to 12.04), 0.352; Qwen3.5-0.8B 6.67 (4.86 to 8.54), 0.334; Falcon-H1-Tiny-90M-Instruct 5.96
+    (4.07 to 8.05), 0.042; SmolLM2-360M-Instruct 4.32 (2.61 to 6.24), 0.137; gemma-3-270m-it 4.19 (2.48 to 6.09),
+    0.017; LFM2.5-230M 3.77 (2.23 to 5.52), 0.332; Qwen2.5-0.5B-Instruct 2.30 (1.06 to 3.74), 0.119;
+    SmolLM2-135M-Instruct 1.14 (0.15 to 2.54), 0.018; Doge-160M-Instruct 0.25 (0.00 to 0.81), 0.018. On the STEP 11b
+    regraded runs (rc12/notes.txt STEP 12) LFM2-2.6B read 18.15 (14.73 to 21.75), 0.812, and LFM2.5-350M 12.10, 0.559:
+    the waiver and the cap amendment lifted the models that answer at length or add context after the answer;
+    lock step A2 moved none of these numbers. The item 14 extras: s12.
   Sensitivity row: the composite without the families where Qwen2.5-0.5B-Instruct is <= 0.05.
   Reported beside (never a claim): every cell; RECALL by d bin; CORR by reference form; PERSIST by rule; OWN
     source-fail rate; OWN from the own-history run alone and from the --own-cf run alone, and R_ungated (R with the
@@ -747,7 +905,8 @@ becomes training text). The two share the label D8 by accident.
     plain vs template render; greedy; K follow-up rate, control rate and gap; T0 failure list.
   T0 RESULT (DECISIONS item 5 audit, 2026-10-02, CPU only, rc12/runs/dev_panel/t0/; applied 2026-10-04, rc12/
     notes.txt STEP 11b). No tested model reached the 0.90 gate: after the STEP 11b regrade the best dev T0 of any
-    model, render or seed is 0.531 (LFM2-2.6B, template, seed 3; its mean of 3 seeds 0.517, 0.510 before), and the
+    model, render or seed is 0.531 (LFM2-2.6B, template, seed 3; its mean of 3 seeds 0.517, 0.510 before; under the
+    lock's graders, STEP 16, 0.542 on each of its seeds 1 to 3 and their mean), and the
     audit put LFM2-2.6B at most at 0.757 even if every failing reply that names its gold anywhere counted right. The
     audit (its figures are from before the regrade) read 88 failing probes of LFM2-2.6B, Qwen2.5-0.5B-Instruct and
     LFM2.5-350M in full: 68 real failures
@@ -828,7 +987,10 @@ becomes training text). The two share the label D8 by accident.
     below 0.60 even if every failing unit whose reply names its gold anywhere were counted right (0.479, 0.562,
     0.417, 0.322). So each of the four thresholds is 0.60 (above),
     and no tested model reached it: the best dev rate of any model, render or seed is 0.281 (CORR:U), 0.500
-    (C_noupd), 0.312 (C_twoslot), 0.133 (BIND).
+    (C_noupd), 0.312 (C_twoslot), 0.133 (BIND). Under the lock's graders (the Nov 3 amendments and lock step A2;
+    rc12/notes.txt STEP 16) LFM2-2.6B reads 0.292, 0.375, 0.333 and 0.133, still below 0.60, so the rule leaves each
+    threshold at 0.60; the best dev rate of any model, render or seed is 0.312 (CORR:U), 0.500 (C_noupd), 0.438
+    (C_twoslot), 0.200 (BIND).
 
 10b. THE LOOKUP CLAIM (score.py lookup_claim, BARS lookup; score_stats.lookup_ci; Max, 2026-10-04: LOOKUP is its own
   pre-registered headline claim, reported beside R and never folded into it)
@@ -865,16 +1027,20 @@ becomes training text). The two share the label D8 by accident.
     14 extras: rc12/dev_extras14.py). The s12 baseline clause applies: a LOOKUP claim at size N stands only if no
     public panel model at or below N reaches 0.60 (its point estimate pooled over its sampling seeds; the
     training-seed count is not asked of it).
-  Dev reading (template, mean of 3 sampling seeds, after the STEP 11b regrade; public models only, never a claim;
-    rc12/notes.txt STEP 11b): no model meets the bar. LOOKUP 0.014 (95% CI 0.000 to 0.042) Qwen2.5-0.5B-Instruct,
+  Dev reading (template, mean of 3 sampling seeds, under the lock's graders, rc12/notes.txt STEP 16; first read after
+    the STEP 11b regrade, STEP 11b, and the same then except P; public models only, never a claim): no model meets the
+    bar. LOOKUP 0.014 (95% CI 0.000 to 0.042) Qwen2.5-0.5B-Instruct,
     0.007 (0.000 to 0.028) LFM2-2.6B, 0.007 (0.000 to 0.042) Qwen3-0.6B, 0.000 for the other 10; the highest single
-    seed or render is 0.021 (Qwen2.5-0.5B-Instruct, template seed 2). The floor is the X probe: P is passed often
-    (Qwen3-0.6B 0.694, LFM2-2.6B 0.542, LFM2-700M 0.340, Qwen3.5-0.8B 0.333), X almost never (at most 0.097,
+    seed or render is 0.021, a four-way tie (template: Qwen2.5-0.5B-Instruct seeds 2 and 3, LFM2-2.6B seed 3,
+    Qwen3-0.6B seed 1). The floor is the X probe: P is passed often
+    (Qwen3-0.6B 0.694, LFM2-2.6B 0.653, LFM2-1.2B 0.493, Qwen3.5-0.8B 0.479, LFM2-700M 0.438; 0.542, 0.319,
+    0.333 and 0.340 on the STEP 11b graders), X almost never (at most 0.097,
     Qwen2.5-0.5B-Instruct; 0.007 LFM2-2.6B), because the models give the other table's value for the absent key
     (LFM2-2.6B 83%, s11). The item 14 extras (s12; 5M to 31M) sit at the same floor: LOOKUP 0.000 on every one
-    scored and on the Vertex card row (CI 0.000 to 0.000; P at most 0.007, X at most 0.069). So do the extras added
+    scored and on the Vertex card row (CI 0.000 to 0.000; P at most 0.007, X at most 0.069; the card row as
+    graded 2026-10-11, not regraded, s12). So do the extras added
     before the lock (s12: minimind-3, cRia-LM-75M-Instruct and the three P-144 chat checkpoints; rc12/notes.txt STEP
-    14N): LOOKUP 0.000 on each (CI 0.000 to 0.000; P at most 0.049, X at most 0.007).
+    14N, STEP 16): LOOKUP 0.000 on each (CI 0.000 to 0.000; P at most 0.083, X at most 0.007).
 
 11. HEADROOM RULE AND THE PERSIST BASE-RATE RULE (score_stats.headroom, persist_base_rates)
   After the dev baselines (core panel only, template render, mean of 3 seeds): a composite family or Level A key fails
@@ -930,6 +1096,17 @@ becomes training text). The two share the label D8 by accident.
     and G-FMT unchanged). The s9 sizing trios (Qwen2.5-0.5B-Instruct, SmolLM2-360M-Instruct, gemma-3-270m-it,
     Qwen3-0.6B) and every model s12 quotes have no composite unit changed, so the sizing result and the s12 CIs
     stand without a re-run.
+    REGRADED 2026-11-03 AND 2026-11-19 (the Nov 3 amendments, s6 v1 and v3 and s7, rc12/FRONTIER.md; lock step A2, s6;
+    rc12/notes.txt STEP 16; dev_panel.py and dev_s11.py on the copy regraded with the lock's graders): the headroom
+    rule still fails nothing, on the mean of 3 seeds and on each seed and greedy alone. OWN passes only through
+    LFM2-2.6B's 0.090; RECALL now with three core baselines above 0.05 (LFM2.5-350M 0.189, LFM2-2.6B 0.139,
+    Falcon-H1-Tiny-90M-Instruct 0.067), BIND with two. No ceiling failure, though LOOP now reaches 0.994
+    (Falcon-H1-Tiny-90M-Instruct) and 0.951 (LFM2.5-350M): the cap amendment stopped counting a cut LOOP-family reply
+    as degenerate; its lowest core baseline is 0.160 (Doge-160M-Instruct). LOOKUP, reported, is at the floor (max
+    0.014; LFM2-2.6B gives the other table's value on 83% of the X probes); the PERSIST base rates and the empty drop
+    list are unchanged (highest question_end 0.181 and one_sentence 0.175, SmolLM2-360M-Instruct). Lock step A2 alone
+    changed 2 probe verdicts and no unit. The s9 sizing rule was not re-run: it was written for the old
+    non-inferiority test and is kept as the record of how 600 was chosen (s9).
 
 12. BASELINE PANEL (dev first, then sealed; one harness, each model in its own template)
   Comparator: Qwen2.5-0.5B-Instruct.
@@ -955,28 +1132,35 @@ becomes training text). The two share the label D8 by accident.
     (RAML non-commercial licence, gated) is not included. Every extra counts as a public panel model for the
     baseline clause below and for the LOOKUP claim's comparison (s10b). An extra whose dev runs do not finish before
     the lock is listed with "not run" and the reason, and is not read by the clause.
-    Dev (rc12/dev_extras14.py, rc12/notes.txt STEP 11 ITEM 14 and STEP 11c; template, seeds 1-3, 9 families, every
-    stored row regraded, 10,000 resamples): every state family of every scored extra is at the floor (RECALL to ROLE
-    at most 0.069) and each extra's R comes mostly from LOOP (0.026 to 0.779). R (paired CI vs
-    Qwen2.5-0.5B-Instruct, R 5.68): Veyra2-Blueberry-5M-Instruct (4,984,192 parameters) 5.01 (-2.19 to +0.91, CI part
-    met), BananaMind-2-Nano-Chat 0.37 (-6.66 to -3.99), Veyra2-Blueberry-10M-Instruct 3.52 (-3.61 to -0.70),
-    Vertex-0.6-15M-Instruct 8.64 (+1.02 to +4.93, met; card row 6.77, -0.54 to +2.64, met), Veyra2-Mango-15M-Instruct
-    0.87 (-6.20 to -3.41), Loom-Spark-3.2 9.55 (+2.10 to +5.68, met), BananaMind-2-Mini-Chat 0.37 (-6.66 to
-    -4.00), Swen-28M 6.72 (-0.60 to +2.71, met), Veyra2-Mango-30M-Instruct 0.61 (-6.43 to -3.71). No scored extra
-    meets Level A. Every scored extra's LOOKUP is 0.000 (CI 0.000 to 0.000; P at most 0.007, X at most 0.069), the
-    card row included. S7 (95% CI) and PERSIST, the Level R reading since 2026-10-04 (rc12/notes.txt STEP 12, the same
-    script): Blueberry-5M 0.25 (0.00 to 0.81), 0.032; Nano 0.00 (0.00 to 0.00), 0.003; Blueberry-10M 0.18 (0.00 to
-    0.60), 0.023; Vertex-15M 2.09 (0.87 to 3.62), 0.029 (card row 0.93, 0.22 to 1.89, 0.010); Mango-15M 0.30 (0.00 to
-    0.89), 0.009; Loom-Spark-3.2 0.25 (0.00 to 0.83), 0.063; Mini 0.00 (0.00 to 0.00), 0.001; Swen-28M 1.17 (0.30 to
-    2.38), 0.032; Mango-30M 0.36 (0.00 to 1.07), 0.005. None passes the clause below. Re-scored 2026-10-11 from a
-    fresh pull (md5 manifest equal on both sides, 1,846 files) with a69c325's scorer and graders: every number in
-    this paragraph and the next is unchanged (rc12/notes.txt STEP 14N; logs/extras14_20261011.jsonl).
+    Dev (rc12/dev_extras14.py, rc12/notes.txt STEP 11 ITEM 14 and STEP 11c, re-recorded under the lock's graders in
+    STEP 16; template, seeds 1-3, 9 families, every stored row regraded, 10,000 resamples): every state family of
+    every scored extra is at the floor (RECALL to ROLE at most 0.069) and each extra's R comes mostly from LOOP (0.064
+    to 0.783). R (paired CI vs Qwen2.5-0.5B-Instruct, R 6.99): Veyra2-Blueberry-5M-Instruct (4,984,192 parameters)
+    5.06 (-3.51 to -0.35), BananaMind-2-Nano-Chat 0.82 (-7.58 to -4.81), Veyra2-Blueberry-10M-Instruct 3.52 (-4.99
+    to -1.99), Vertex-0.6-15M-Instruct 8.81 (-0.13 to +3.80, CI part met; card row 6.77, -0.54 to +2.64, met, against
+    R 5.68: graded 2026-10-11 and not regraded, its runs being on the PC only, rc12/LOCK_STEPS.md A2),
+    Veyra2-Mango-15M-Instruct 1.24 (-7.19 to -4.31), Loom-Spark-3.2 9.59 (+0.78 to +4.43, met),
+    BananaMind-2-Mini-Chat 1.47 (-7.00 to -4.04), Swen-28M 7.39 (-1.30 to +2.09, met), Veyra2-Mango-30M-Instruct
+    1.52 (-6.93 to -4.04). (On the graders before the Nov 3 amendments, against R 5.68, Veyra2-Blueberry-5M-Instruct
+    met the CI part, -2.19 to +0.91, and Swen-28M -0.60 to +2.71: the reading behind the Level R change, below.) No
+    scored extra meets Level A. Every scored extra's LOOKUP is 0.000 (CI 0.000 to 0.000; P at most 0.007, X at most
+    0.069), the card row included. S7 (95% CI) and PERSIST, the Level R reading since 2026-10-04 (rc12/notes.txt STEP
+    12, the same script): Blueberry-5M 0.25 (0.00 to 0.81), 0.032; Nano 0.10 (0.00 to 0.60), 0.003; Blueberry-10M
+    0.18 (0.00 to 0.60), 0.023; Vertex-15M 2.09 (0.87 to 3.62), 0.029 (card row 0.93, 0.22 to 1.89, 0.010);
+    Mango-15M 0.30 (0.00 to 0.89), 0.009; Loom-Spark-3.2 0.25 (0.00 to 0.83), 0.063; Mini 0.10 (0.00 to 0.60),
+    0.001; Swen-28M 1.17 (0.30 to 2.38), 0.032; Mango-30M 0.46 (0.00 to 1.13), 0.005. None passes the clause below.
+    Re-scored 2026-10-11 from a fresh pull (md5 manifest equal on both sides, 1,846 files) with a69c325's scorer and
+    graders (rc12/notes.txt STEP 14N; logs/extras14_20261011.jsonl), then re-recorded 2026-11-19 with the lock's
+    graders from the public transcripts dataset's copy of the same runs, as regraded with the Nov 3 graders (every
+    stored row regraded again, 0 differing; rc12/notes.txt STEP 16; logs/extras14_20261119.jsonl): the numbers in
+    this paragraph and the next are those, except the card row's (2026-10-11).
     Finished after the first reading (2026-10-04, the chain's DONE marker at 21:06; verify_dev_runs C1-C5 PASS on the
     PC, the run dirs pulled with an md5 manifest equal on both sides, 137 files; STEP 12): BananaMind-2-Mini-Chat,
-    both renders, and Swen-28M's plain render (R 4.53, S7 0.00; a diagnostic). cRia-LM-75M-Instruct: not run. Its
-    first two processes (template and plain greedy) were each killed at the 1,950 s process cap (exit 124, 1,951 s
-    under the GPU lock) before finishing a run, so 0 of its 16 runs exist and the clause does not read it. It is run
-    again, split, under the deviation below (rc12/notes.txt STEP 14X); it has been, and its numbers are below.
+    both renders, and Swen-28M's plain render (R 5.66, S7 0.00; a diagnostic), R 4.53 before the Nov 3 amendments.
+    cRia-LM-75M-Instruct: not run. Its first two processes (template and plain greedy) were each killed at the
+    1,950 s process cap (exit 124, 1,951 s under the GPU lock) before finishing a run, so 0 of its 16 runs exist and
+    the clause does not read it. It is run again, split, under the deviation below (rc12/notes.txt STEP 14X); it has
+    been, and its numbers are below.
     Added before the lock (rc12/notes.txt STEP 13, 13a and 14X; research/CUTS_AUDIT_2026-10.md S9 to S12), each at the
     revision pinned in rc12/pins.json, with the s4 decoding, template render primary and plain diagnostic:
     P-144, the Falcon-H1-Tiny-90M checkpoints other than Instruct: -Instruct-Curriculum, -Instruct-pre-DPO,
@@ -984,21 +1168,23 @@ becomes training text). The two share the label D8 by accident.
       Falcon-H1-Tiny-90M-Instruct's, Apache-2.0-based, commercial use allowed, not gated; bf16, the checkpoint's own;
       vLLM with Falcon-H1-Tiny-90M-Instruct's family verdict). Each runs in its own chat template; the pre-DPO pair's
       ships with its release and is used as shipped. The Base ships no chat template and lacks the chat tokens, so it
-      runs the plain render only, a diagnostic the clause never reads. Dev (2026-10-11, rc12/notes.txt STEP 14N;
-      as for every extra here: template, seeds 1-3, rc12/dev_extras14.py, R with its paired CI vs
-      Qwen2.5-0.5B-Instruct, S7 with its 95% CI; verify_dev_runs C1-C5 pass; 0 stored rows regrade differently):
-      -Instruct-Curriculum R 0.64 (-6.44 to -3.68), S7 0.61 (0.00 to 1.33), PERSIST 0.006, LOOKUP 0.000 (P 0.021, X
-      0.000); -Instruct-pre-DPO R 2.57 (-4.67 to -1.55), S7 1.90 (0.86 to 3.14), PERSIST 0.011, LOOKUP 0.000 (P
-      0.021, X 0.000); -Instruct-Curriculum-pre-DPO R 1.87 (-5.22 to -2.40), S7 0.77 (0.15 to 1.54), PERSIST 0.025,
-      LOOKUP 0.000 (P 0.049, X 0.007); -Base, plain only, R 2.90, S7 0.10. None meets the CI part, Level A, the
-      LOOKUP bar or the clause.
+      runs the plain render only, a diagnostic the clause never reads. Dev (2026-10-11, rc12/notes.txt STEP 14N,
+      re-recorded under the lock's graders in STEP 16; as for every extra here: template, seeds 1-3,
+      rc12/dev_extras14.py, R with its paired CI vs Qwen2.5-0.5B-Instruct, S7 with its 95% CI; verify_dev_runs C1-C5
+      pass; 0 stored rows regrade differently): -Instruct-Curriculum R 13.09 (+4.45 to +7.83), S7 2.48 (1.21 to 3.97),
+      PERSIST 0.006, LOOKUP 0.000 (P 0.083, X 0.007); -Instruct-pre-DPO R 5.40 (-3.19 to +0.00), S7 1.90 (0.86 to
+      3.14), PERSIST 0.011, LOOKUP 0.000 (P 0.028, X 0.000); -Instruct-Curriculum-pre-DPO R 4.53 (-3.96 to -1.00), S7
+      0.77 (0.15 to 1.54), PERSIST 0.025, LOOKUP 0.000 (P 0.049, X 0.007); -Base, plain only, R 2.94, S7 0.10.
+      -Instruct-Curriculum meets the CI part of the old test (reported beside; R 0.64, -6.44 to -3.68, before the Nov
+      3 amendments: its replies run long, and the cap amendment stopped counting a cut LOOP reply as degenerate);
+      none meets Level A, the LOOKUP bar or the clause.
     minimind-3 (jingyaogong/minimind-3; Max, 2026-10-07): Apache-2.0, 63,912,192 parameters, Qwen3ForCausalLM with
       its own 6,400-token tokenizer, float16 (the checkpoint's own; the panel's only float16 model), on vLLM after its
       own parity (NEAR_TIE: 228 of 240 turns identical, 0 prompt mismatches, every first difference at margin <= 0.031
       nats). Its training data are mostly Chinese while RC-12 is English; that is reported beside its scores, not
-      used to exclude it. Dev (2026-10-11, STEP 14N): minimind-3 R 2.30 (-4.87 to -1.91), S7 0.95 (0.30 to 1.79),
-      PERSIST 0.010, LOOKUP 0.000 (P 0.000, X 0.007); none of the bars met. Plain (diagnostic) R 0.09: 0.836 of its
-      plain replies have no word characters (EMPTY), 0.593 of all because it opens a new "User:" line at once and
+      used to exclude it. Dev (2026-10-11, STEP 14N; STEP 16): minimind-3 R 2.60 (-5.89 to -2.91), S7 0.95 (0.30 to
+      1.79), PERSIST 0.010, LOOKUP 0.000 (P 0.000, X 0.007); none of the bars met. Plain (diagnostic) R 0.11: 0.836
+      of its plain replies have no word characters (EMPTY), 0.593 of all because it opens a new "User:" line at once and
       the role cut leaves nothing.
     cRia-LM-75M-Instruct, deviation recorded 2026-10-10 before any of its runs exists: each run is played by 10
       processes, process i taking conversations i, i + 10, ... of the run (the seed's dev run and its own-cf twin),
@@ -1007,8 +1193,8 @@ becomes training text). The two share the label D8 by accident.
       parity is IDENTICAL (batched vs serial HF). A process of 64 conversations took 326.9 s in a smoke (peak 7.43
       GiB), against the whole run's 1,951 s and 9 of 12 turns before. Run 2026-10-11 (rc12/notes.txt STEP 14L): all
       80 processes exited 0, each gpu.lock hold 839 to 1,293 s, peak 7.55 GiB; verify_dev_runs C1-C5 pass. Dev
-      (STEP 14N): cRia-LM-75M-Instruct R 1.19 (-5.97 to -2.90), S7 0.75 (0.00 to 1.86), PERSIST 0.038, LOOKUP 0.000
-      (P 0.000, X 0.007); none of the bars met.
+      (STEP 14N; STEP 16): cRia-LM-75M-Instruct R 3.44 (-5.18 to -1.80), S7 0.75 (0.00 to 1.86), PERSIST 0.038,
+      LOOKUP 0.000 (P 0.000, X 0.007); none of the bars met.
     P-145 (SmolLM2-135M SFT-only vs Instruct): not run: no licence at the pinned revision
       (HuggingFaceTB/smollm2-135M-SFT-Only at 79528469cd11, read 2026-10-06: no licence in the card, the tags, a
       LICENSE file or the README; SmolLM2-135M-Instruct is Apache-2.0).
@@ -1020,6 +1206,41 @@ becomes training text). The two share the label D8 by accident.
     above; its row here is then rewritten with its numbers or that line before the lock. Status 2026-10-11
     (rc12/notes.txt STEP 14N): every extra in this list has run and is scored above except P-145 and MaxGPT-3
     (P-147), not run for the reasons given; no extra is running.
+    Tier 1, named before the lock (2026-11-19, rc12/notes.txt STEP 16P; the scoop check's tier 1,
+    research/FRONTIER_2026-11.md s10.3): five public chat models that test two claim sentences of s1, "no model at or
+    below 0.6B passed in our tests" (Level A) and "the best panel model, of any size up to 2.6B" (the LOOKUP claim).
+    Each is a reported extra, at the revision pinned in rc12/pins.json "tier1", in its checkpoint's dtype and its own
+    shipped chat template, with the s4 decoding (no card sampling, no repetition penalty), template render primary
+    and plain diagnostic:
+      textilelabs/Loom-Weave-4 (55,555,520 parameters; MIT; float32; Gemma3ForCausalLM, from scratch; its template is
+        the <user> / <loom> format with tools off that Loom-Spark-3.2 runs in, the same prompt on 480 dev histories).
+        Its own parity first (a Gemma-3 layout, not Loom-Spark-3.2's Llama): vLLM at float32 if vLLM starts it,
+        otherwise batched HF with eager attention after its own batched-vs-serial parity. It has one mode and shows
+        its working in <think> ... </think> on some replies; those tags are special tokens, stripped on decode as for
+        every model (s4), so the working stays in its reply and is graded as reply text: it can name other candidate
+        values (v3) and lengthen the reply. No row separates that effect out (a row without the working would change
+        what is scored, which needs Max's ruling); it is reported beside the row. Its card (at the pinned revision)
+        says its answers end in a confidence word, "(sure)", "(I think)" or "(not sure)", uncalibrated. Graded on dev
+        with no model, the IDEAL with the word appended to every reply (reviews r1 and r2, 2026-11-19): bare, every
+        probe passes; with "(sure)", 76 of the 216 PERSIST probes fail on the format rule (f4: all 32 closing-phrase,
+        22 bracket and 22 question-end probes, whose rule the trailing word breaks) and every other probe passes; with
+        "(I think)" or "(not sure)", all 552 VAL probes with a gold fail (the hedge rule, s6 v2, near_hedge), and so do
+        the 48 OWN (DYN) probes, 24 of the 48 ROLEX probes and 131 or 106 of the 216 PERSIST probes. So the word costs
+        this row on every family it reaches, "(sure)" included, by the rules as written; that is reported beside its
+        scores, as minimind-3's language is, not used to exclude it or to change how it is graded.
+      taobao-mnn/MNN-Pocket-0.3B (361,551,232; Apache-2.0; bfloat16; Qwen3ForCausalLM; a ChatML template with no
+        thinking mode). Its own parity first (families are per recipe, rc12/notes.txt STEP 13a).
+      LiquidAI/LFM2.5-1.2B-Instruct (1,170,340,608; bfloat16; non-thinking): LFM2.5-230M's family verdict.
+      Qwen/Qwen3.5-2B (2,274,069,824 with its vision encoder; Apache-2.0; bfloat16; non-thinking by default and run
+        with enable_thinking=False, as Qwen3.5-0.8B): Qwen3.5-0.8B's family verdict.
+      LiquidAI/LFM2-2.6B-Exp (2,569,272,320; bfloat16; LFM2-2.6B plus reinforcement learning, with LFM2-2.6B's
+        configuration, tokenizer and template): LFM2-700M's family verdict, as LFM2-2.6B.
+    The two LFM models carry the LFM Open License v1.0, as the core panel's LFM2 and LFM2.5 models do
+    (Apache-2.0-based, royalty-free, not gated; commercial use above a revenue threshold is not licensed), counted as
+    permissive here as the TII Falcon License is for P-144. Dev: not run as of 2026-11-19 (generation runs on the
+    5070 only, and the PC was not available to that step). Each row here is rewritten with its numbers, or with "not
+    run" and the reason, before the lock, under the rule above; until it has numbers the clause does not read it, and
+    the dev reading below covers only the models scored so far.
   Generation on the 5070 only (the Mac runs likelihood rows only). Every model: template render primary, plain render
   diagnostic, 3 sampling seeds, greedy secondary.
   Baseline clause (Max, 2026-10-02: took all recommendations in rc12/DECISIONS_FOR_MAX.md (item 7): widened to every
@@ -1035,7 +1256,8 @@ becomes training text). The two share the label D8 by accident.
     family score pooled over its sampling seeds >= 0.60 (template render, on sealed); the training-seed count is not
     asked of it. (This replaces PLAN's narrower "If LFM2.5-230M or Falcon-90M passes
     Level R, Planck's Level R claim moves to curve points below that model's size"; it covers the sub-30M public chat
-    models too.) On dev (rc12/dev_baseline_ci.py, 9 families, regraded, 10,000 resamples): LFM2.5-230M lower bound
+    models too.) On dev (rc12/dev_baseline_ci.py, 9 families, regraded, 10,000 resamples; 2026-10-04, the graders
+    before the Nov 3 amendments, not re-run since): LFM2.5-230M lower bound
     +1.08, gemma-3-270m-it -0.73, LFM2.5-350M +9.12, SmolLM2-360M-Instruct -1.71 meet the CI part;
     Falcon-H1-Tiny-90M-Instruct -4.26 (point -2.43), SmolLM2-135M-Instruct -5.86 and Doge-160M-Instruct -6.05 do not.
     So the core panel and the earlier extras alone put a Planck Level R claim below 230M on dev. With the item 14
@@ -1043,9 +1265,10 @@ becomes training text). The two share the label D8 by accident.
     5.0M up was left at which a Planck Level R claim stood; against a comparator at R 5.68 whose state families sit
     near the floor, the CI part was in effect a "does not loop" test among floor models. That reading is why Level R
     changed (decision 1, D; s1, s9, s18). Under the clause as it now reads, no public panel model passes on dev at any
-    size: the best S7 is LFM2-2.6B's 18.15 (PERSIST 0.812), the best at or below 0.6B LFM2.5-350M's 12.10 (PERSIST
-    0.559), every scored item 14 extra is at most 2.09 and every extra added before the lock at most 1.90
-    (Falcon-H1-Tiny-90M-Instruct-pre-DPO) (s9 dev reading; the extras above). No model meets Level A on dev, and none
+    size: under the lock's graders the best S7 is LFM2-2.6B's 23.09 (PERSIST 0.832; 18.15 and 0.812 before the Nov 3
+    amendments), the best at or below 0.6B LFM2.5-350M's 12.93 (PERSIST 0.575), every scored item 14 extra is at
+    most 2.09 and every scored extra added before the lock at most 2.48 (Falcon-H1-Tiny-90M-Instruct-Curriculum)
+    (s9 dev reading; the extras above). No model meets Level A on dev, and none
     meets the LOOKUP claim's bar (core panel at most 0.014, s10b; every scored extra 0.000).
   Known and unscored (Max, 2026-10-04: took all recommendations in rc12/DECISIONS_LEVEL_R_FOR_MAX.md (decision 5,
     b)): every claim is worded "on our panel" (s1, s10b), and these public small chat models are known and not on it:
@@ -1057,6 +1280,31 @@ becomes training text). The two share the label D8 by accident.
     row 76). cRia-LM-75M-Instruct, listed here until 2026-10-11 as on the panel but not run, has since run under the
     split deviation and is scored above. Every sub-30M model scored so far has an S7 of at most 2.09, so one of
     these reaching 40 is unlikely (the decision's judgment); none of them is read by the clause.
+    Added 2026-11-19 (rc12/notes.txt STEP 16P; the scoop check's tier 2 and its thinking-first models up to 2.6B,
+    research/FRONTIER_2026-11.md s10.3): udgamlabs/Laghu (151.8M, Apache-2.0; Gemma4ForCausalLM, which the PC's
+    engines have not been checked to load) and Subject-Emu-5259/NeuralAI-Nae1 (100.1M, Apache-2.0; its own model_type
+    nae1 with 1,024 positions, below what RC-12's conversations reach); microsoft/Aion-1.0-Instruct-2.3B (2.29B, MIT,
+    remote code); LiquidAI/LFM3-1.7B (1.73B, LFM Open License, remote code; reasoning on by default, and its card
+    calls turning it off inconsistent) and openbmb/MiniCPM5-2B (2.52B, Apache-2.0; thinking-first post-training,
+    whose off switch is the template's enable_thinking on a llama model_type, where the HF and vLLM paths render
+    different prompts). A thinking-on row for any of these would be a labelled diagnostic and needs Max's ruling
+    first. Also known and unscored (review r1, 2026-11-19; research/FRONTIER_2026-11.md s10.3's ranked threats, row 4,
+    names Gargi beside Laghu): udgamlabs/Gargi and udgamlabs/Udgam-384M-Chat (384,389,268 parameters each, different
+    weights; Apache-2.0, not gated, each ships a chat template; Gemma4ForCausalLM, as Laghu, which the PC's engines
+    have not been checked to load). Both are at or below 0.6B, so they are in the range of s1's "no model at or below
+    0.6B passed in our tests", which is worded "in our tests" for that reason.
+    Also known and unscored (review r2, 2026-11-19; each at or below 0.6B, so in the same range; parameter counts,
+    licences and model classes from the HF API that day): from the scoop check (research/FRONTIER_2026-11.md s10.3)
+    textilelabs/Loom-Planck-300k, -600k and -1.2m (313,920, 586,176 and 1,186,912 parameters; MIT; Gemma3ForCausalLM;
+    the ladder whose name collides with this project's), regnant-io/kw5-230M-instruct and KW5-230M-DPO (259,095,424
+    each; Apache-2.0; their own KW5V2ForCausalLM; Kiswahili) and the tiny-rl SFT and RL checkpoints on
+    nanogpt-ladder-v3 (8M to 64M by the scoop check's count; checkpoint repositories with no model card); from the
+    novelty check (research/NOVELTY_2026-10.md s7.2) sraivante/LMLM_97M_1 (97,536,768; Apache-2.0),
+    bench-labs/cagliostro-v3.5-chat (146,352,000; Apache-2.0; its own CagliostroForCausalLM), laskar-ks/alcyone-v1-dpo
+    (97,743,360; Apache-2.0; a 512-token context, below what RC-12's conversations reach) and mokshjain/pico
+    (48,234,516; MIT; a tool-calling agent). Left out for size, from the scoop check's tier 2 (the panel stops at 2.6B
+    and counts every parameter, as for Qwen3.5-2B above): google/gemma-4-E2B-it (5,123,178,051 parameters; "E2B" names
+    an effective 2B), HuggingFaceTB/SmolLM3-3B (3,075,098,624) and ibm-granite/granite-4.2-3b (3,659,737,600).
 
 13. SEALED SPLIT PROCEDURE (built later, in a separate session; PLAN Phase 0, P-049)
   S1 Author. One dedicated Claude session (the sealed session) writes NEW templates, value frames, fillers, paraphrase
@@ -1143,8 +1391,9 @@ becomes training text). The two share the label D8 by accident.
      (sealed_kit.py gates; at most 4 worker processes on the Mac): the build reproduced from the seed, test_gens,
      audit_rules (G10), audit_graders (G11), validate_e2e (G1-G4), validate_machinery, mutation_graders (G6),
      mutation_gens, mutation_audit (2 parts), mutation_e2e (8 parts); its table GATES.txt is archived, hashed in S5
-     and published as rc12/lock/SEALED_GATES.txt. OOD-H's gate (oodh/gate.py) is re-run in the same session for the
-     record (s14 (d)).
+     and published as rc12/lock/SEALED_GATES.txt. OOD-H's gate (oodh/gate.py) is re-run in the same session with
+     the lock's graders: its G1 must pass (s14 (e); the session stops otherwise) and its G2 rates are re-reported
+     (s14 (d)).
   S5 Hash. SHA-256 of every sealed file (items JSONL, pool and template modules, banks) and of the generator seed,
      written into the locked file. As built (sealed_pack.py): rc12/lock/SEALED_HASHES.txt holds the work
      copy's commit, the split and its S1 verdict, and the sha256 of the items (rc12_sealed.jsonl), the 11 content
@@ -1212,7 +1461,19 @@ becomes training text). The two share the label D8 by accident.
   Qwen3.5-0.8B (template CORR), each still failing on other clauses: no probe verdict, unit or score moves. The
   OOD-H gate was re-run with the clause on (oodh/DESIGN.txt s15, 2026-10-10, before shotgun_named): PASS on every
   gating check. shotgun_named only relaxes the clause, so no gating check can fail by it (G1 needs the IDEAL and
-  accepted replies to pass); a sealed session re-runs gate.py once more for the record and re-reports the G2 rates.
+  accepted replies to pass); a sealed session re-runs gate.py once more, with the lock's graders, where G1 must pass
+  again ((e) below) and the G2 rates are re-reported.
+  DECIDED 2026-10-19, FINISHED 2026-11-19 (lock step A2, rc12/notes.txt STEP 16; s6, the A2 block): (e) of the grader
+  limits the OOD-H reviews counted (oodh/DESIGN.txt s14 and s15, "Grader findings"), five are fixed in the RC-12
+  graders ("You asked if X"; the abstain cues; a hedge inside a report of the user's words; a quoted question the user
+  asked; and, since 2026-11-19, a contraction of the user's own negation, which before was handled per probe through
+  accepted forms only) and two are recorded as known limits (the loop rule against the fixed history replies;
+  v3_shotgun on a contrastive "new X instead of old Y"; s6 (vi) and (vii)). s6 (viii) and (ix) are limits of the A2
+  fixes themselves, found in their reviews, not OOD-H findings. The OOD-H gate reads sealed/oodh, so its re-run with
+  the A2 graders is the sealed session's (rc12/LOCK_STEPS.md B7): G1 must pass again (the fixes can count a reported
+  OTHER candidate against a reply, so an IDEAL that reports one is re-checked there) and the G2 rates are re-reported,
+  with oodh/a2_counts.py's counts of the A2 forms on Part 1, each negation an accepted form holds, as written and in
+  its other forms, among them (counts only; it gates nothing).
   Part 1 BUILT (2026-09-26, F1; oodh/DESIGN.txt s13, reviewed in s14; hashes in oodh/HASHES.txt; not committed,
   not locked). 150 threads: the 107 best-path threads plus 43 F1 threads (deepest usable path per reserved tree,
   sealed/oodh/batch_4.jsonl); the batch-4 pool was read in order until the 43rd usable thread, 8 dropped under KL2
@@ -1241,7 +1502,7 @@ becomes training text). The two share the label D8 by accident.
   not gating (c): G2 129 findings, G4 45 threads, type matchers 0.72-0.75, SHOTGUN 0.59, USERVOICE and ROLECAP 0.01,
   ECHO, DEFLECT and ABSTAIN 0.00; the 2+-value subset is 44 of 323 VAL probes. The review also counted grader
   limits on natural OOD-H replies without changing the graders (oodh/DESIGN.txt s15 "Grader findings"; their
-  handling before the lock: rc12/LOCK_STEPS.md).
+  handling before the lock: (e) above).
   Part 2, collected in January: 50-60 short scripts written by the human-test raters before they see any model
   output (6-12 user turns, 2+ personal facts, one correction, a later question; the rater marks the golds). Only the
   protocol is pre-registered (those scripts cannot have leaked into training).

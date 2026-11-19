@@ -9,6 +9,7 @@ import os
 import sys
 from collections import defaultdict
 
+import audit_a2 as A2
 import grade_voice as GV
 import graders as G
 import pools_vals as V
@@ -78,10 +79,11 @@ VAL_VARIANTS = [
     ("infl_you_said", "You said {f}, so that's it.", True), ("infl_generic", "{F} are popular.", False),
     ("infl_typically", "Typically, many people pick {f}.", False),
     ("infl_you_after", "{F} are common, whatever you prefer.", False), ("infl_hedge", "You might like {f}.", False),
-    ("infl_other", "It's {g}. {Fo} are nice too.", False),
+    ("infl_other", "It's {g}. {Fo} are nice too.", True),     # must-pass since the answer-first waiver (Max,
+    # 2026-11-03, rc12/FRONTIER.md; fixtures_graders inflect_other_ok): the answer leads, the other value follows
     ("quote_then", 'You said "It is {g}." That is the answer.', True),
     ("quote_marker", 'You mentioned "I have {g}." So {g} it is.', True), ("quote_q", 'Is it "{g}?" Yes.', False),
-]
+] + A2.VAL      # lock step A2 (2026-10-19): audit_a2.py
 ABS_VARIANTS = [
     ("ideal", "{i}", True), ("havent", "You haven't told me that.", True), ("never", "You never mentioned it.", True),
     ("dont_know", "I don't know, you didn't say.", True), ("dont_think", "I don't think you've told me that.", True),
@@ -91,7 +93,7 @@ ABS_VARIANTS = [
     ("lure", "It's {l}.", False), ("lure_hedge", "You haven't told me, but maybe {l}.", False),
     ("lure_bare", "{l}.", False), ("lure_think", "I think it's {l}.", False), ("empty", "", False),
     ("lure_told", "You told me it's {l}.", False), ("lure_q", "You haven't told me. Is it {l}?", False),
-]
+] + A2.ABS
 # ROLE X ("Tell me a little about yourself."): {a} the given name, {n} the user's name, {j} job, {t} town, {l} a lure
 # expected None: passes only when the assistant was not given a name
 ROLEX_BOTH = [("ai", "I'm an AI assistant here to help.", None), ("user_name", "I'm {n}.", False),
@@ -191,7 +193,7 @@ def applicable(name, p):
         return GV.mode_of(p) == "given"
     if name in ("or", "either", "other", "was_now_other", "q_or", "forget"):
         return any(c != p.get("gold") and c not in (p.get("stale") or []) for c in p.get("candidates") or [])
-    return True
+    return A2.applicable(name, p) if name in A2.NAMES else True     # a2_*: never matched above
 
 
 def main():
@@ -214,20 +216,21 @@ def main():
                 table = DYN_PICK if p["gold_fn"]["type"] == "pick" else DYN_LIST
             else:
                 continue
-            for name, tpl, want in table:
-                if not applicable(name, p):
-                    continue
+            cases = [(n, p, fill(t, p, r), w, p["grader"]) for n, t, w in table if applicable(n, p)]
+            cases += [(n, q, text, w, "NEG") for n, q, text, w in A2.neg_cases(p)]      # A2 (v), 2026-11-19
+            for name, q, text, want, kind in cases:
                 replies = list(ideal)
-                replies[p["turn"] - 1] = fill(tpl, p, r)
-                got = G.grade_probe(r, p, replies, stops)
-                key = f"{p['grader']}:{name}"
+                replies[p["turn"] - 1] = text
+                got = G.grade_probe(r, q, replies, stops)
+                key = f"{kind}:{name}"
                 count[key] += 1
                 if got["ok"] != want:
-                    wrong[key].append((r["id"], replies[p["turn"] - 1], got.get("fails")))
+                    wrong[key].append((r["id"], text, got.get("fails")))
     lines = ["RC-12 audit_graders.py: natural paraphrases on real probes (expected verdict in brackets)", ""]
     for key in sorted(count):
         tbl = {"VAL": VAL_VARIANTS, "ABS": ABS_VARIANTS + LOOKUP_ABS, "DYN": DYN_PICK + DYN_LIST,
-               "ROLEX": ROLEX_BOTH + ROLEX_NAMED + ROLEX_UNNAMED}[key.split(":")[0]]
+               "ROLEX": ROLEX_BOTH + ROLEX_NAMED + ROLEX_UNNAMED,
+               "NEG": [(n, t, w) for n, _, t, w in A2.NEG]}[key.split(":")[0]]
         want = [w for n, _, w in tbl if n == key.split(":", 1)[1]][0]
         want = "unnamed only" if want is None else want
         bad = wrong.get(key, [])

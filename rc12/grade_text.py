@@ -104,15 +104,17 @@ def forms(v):
 
 def value_hits(text, v):
     """match objects for every mention of pool value v (whole word; capitalized values case-sensitive), its
-    inflected forms included (forms), in text order."""
-    hits = list(V.value_re(v).finditer(text or ""))
+    inflected forms included (forms), in text order; a value holding a negation in each form of it (A2 (v),
+    2026-11-19: grade_cues.neg_value_re)."""
+    neg = None if "negform" in OFF else GC.neg_value_re(v, V.value_re(v).flags)
+    hits = list((neg or V.value_re(v)).finditer(text or ""))
     for f in forms(v):
         hits += list(V.value_re(f).finditer(text or ""))
     return sorted(hits, key=lambda m: m.start())
 
 
 def inflected(m, v):
-    return m.group(0).lower() != v.lower()
+    return m.group(0).lower() in {f.lower() for f in forms(v)}      # a negation form (value_hits) is v itself
 
 
 def addressed(text, m):
@@ -143,7 +145,8 @@ def in_condition(before):
         return False
     last = None
     for c in COND.finditer(before):
-        last = c
+        if "askedif" in OFF or not GC.asked_if(before, c):        # "You asked if X" (A2, 2026-10-19; grade_cues)
+            last = c
     return last is not None and not re.search(r",|\bthen\b", before[last.end():], re.I)
 
 
@@ -199,9 +202,11 @@ def why_not_asserted(text, m, altvals=()):
         return "neg"
     if negated_after(text, m.end()):
         return "postneg"
-    if "question" not in OFF and is_question(sent):
+    if "question" not in OFF and is_question(sent) and ("repquest" in OFF
+                                                         or not GC.reported_question(sent, m.start() - s0)):
         return "question"
-    if "hedge" not in OFF and (HEDGE.search(sent) or GC.near_hedge(text, s0, s1, HEDGE)):
+    if "hedge" not in OFF and (GC.own_hedge(sent, m.start() - s0, HEDGE, "rephedge" not in OFF)
+                               or GC.near_hedge(text, s0, s1, HEDGE)):
         return "hedge"
     if "hypo" not in OFF and HYPO.search(before):
         return "hypo"

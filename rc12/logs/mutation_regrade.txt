@@ -1,19 +1,48 @@
 baseline: pass
 KILLED    dev_regrade.py: renamed with no fsync | test_dev_regrade.py: FAIL files: greedy/transcripts.jsonl not fsynced before the .partial rename
-KILLED    dev_regrade.py: published by a copy, no rename | test_dev_regrade.py: FAIL /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmp8y9a3bz0/dst/IDEAL_ALT/plain/greedy: never renamed into place
+KILLED    dev_regrade.py: published by a copy, no rename | test_dev_regrade.py: FAIL <tmp>/dst/IDEAL_ALT/plain/greedy: never renamed into place
 KILLED    dev_regrade.py: a cut .partial not cleared | test_dev_regrade.py: FAIL leftover: a cut .partial or .old.partial made the regrade raise FileExistsError
 KILLED    dev_regrade.py: a cut .old.partial not cleared | test_dev_regrade.py: FAIL leftover: a cut .partial or .old.partial made the regrade raise OSError
-KILLED    dev_regrade.py: a rerun cannot replace | test_dev_regrade.py: FAIL checks raised OSError: [Errno 66] Directory not empty: '/var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmp92q9q41
+KILLED    dev_regrade.py: a rerun cannot replace | test_dev_regrade.py: FAIL checks raised OSError: [Errno 66] Directory not empty: '<tmp>/dst/IDEAL_ALT/plain/greedy.partial' -> '<tmp>/dst/I
 KILLED    dev_regrade.py: the earlier copy deleted in place (a cut can leave DONE without files) | test_dev_regrade.py: FAIL rerun: IDEAL_ALT/plain/greedy not moved aside in one rename before the publish (1 renames)
 KILLED    dev_regrade.py: the earlier copy left aside | test_dev_regrade.py: FAIL rerun: IDEAL_ALT/plain/greedy.old.partial left behind
-KILLED    dev_regrade.py: no DONE | test_dev_regrade.py: FAIL files: /var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/tmpu3fllut0/dst/IDEAL_ALT/plain/greedy/DONE missing
+KILLED    dev_regrade.py: no DONE | test_dev_regrade.py: FAIL files: <tmp>/dst/IDEAL_ALT/plain/greedy/DONE missing
 KILLED    dev_regrade.py: DONE written after the rename | test_dev_regrade.py: FAIL files: greedy/DONE not fsynced before the .partial rename
 KILLED    dev_regrade.py: regrade.json not fsynced | test_dev_regrade.py: FAIL json: regrade.json not fsynced before its rename into place
 KILLED    dev_regrade.py: an earlier regrade.json kept while a rerun runs | test_dev_regrade.py: FAIL json: the earlier regrade.json was still there when the rerun's runs began ([True])
 KILLED    dev_regrade.py: the earlier regrade.json's removal not fsynced | test_dev_regrade.py: FAIL json: the earlier regrade.json's removal was not fsynced before the rerun's runs began
 KILLED    dev_regrade.py: --dst not fsynced after regrade.json's rename | test_dev_regrade.py: FAIL json: --dst not fsynced after regrade.json's rename
-KILLED    dev_regrade.py: regrade.json in place | test_dev_regrade.py: FAIL rerun: main() over an existing --dst raised FileNotFoundError: [Errno 2] No such file or directory: '/var/folders/z
+KILLED    dev_regrade.py: regrade.json in place | test_dev_regrade.py: FAIL rerun: main() over an existing --dst raised FileNotFoundError: [Errno 2] No such file or directory: '<tmp>/dst/regr
 KILLED    dev_regrade.py: a .partial source read | test_dev_regrade.py: FAIL skip: a *.partial source dir is read as a run (['IDEAL_ALT/plain/greedy', 'IDEAL_ALT/plain/greedy.partial', 'IDEAL_
 KILLED    dev_regrade.py: meta.json not the source's | test_dev_regrade.py: FAIL content: IDEAL_ALT/plain/greedy/meta.json is not the source's
 KILLED    dev_regrade.py: a score line lost | test_dev_regrade.py: FAIL content: IDEAL_ALT/plain/greedy/scores.jsonl differs from the stored run (same graders)
-MUTANTS killed 17/17
+KILLED    dev_regrade.py: a2: a degenerate clause may move | test_regrade_expect.py: FAIL refuse v1_degen: got True, want False
+KILLED    dev_regrade.py: a2: v2_gold may not move | test_regrade_expect.py: FAIL lose v2_gold: got False, want True
+KILLED    dev_regrade.py: a2: v3_shotgun may not move (the answer-first waiver) | test_regrade_expect.py: FAIL gain v3_shotgun: got False, want True
+KILLED    dev_regrade.py: a2: v3_other may not move | test_regrade_expect.py: FAIL gain v3_other: got False, want True
+KILLED    dev_regrade.py: a2: a2_cue may not move | test_regrade_expect.py: FAIL lose a2_cue: got False, want True
+KILLED    dev_regrade.py: a2: d4_assert may not move | test_regrade_expect.py: FAIL lose d4_assert: got False, want True
+KILLED    dev_regrade.py: a2: the role-leak scan may move | test_regrade_expect.py: FAIL refuse field leaks: got True, want False
+KILLED    dev_regrade.py: a2: fields not checked | test_regrade_expect.py: FAIL refuse field flags: got True, want False
+KILLED    dev_regrade.py: a2: a flipped OWN source not exempt | test_regrade_expect.py: FAIL source flip may gain v2_gold: got False, want True
+KILLED    dev_regrade.py: a2: --expect a2 runs another rule | test_regrade_expect.py: FAIL a2 is not an --expect choice
+KILLED    dev_regrade.py: a2: a probe may gain v2_gold, a2_cue or d4_assert | test_regrade_expect.py: FAIL refuse gain v2_gold: got True, want False
+KILLED    dev_regrade.py: a2: d4_assert may be gained | test_regrade_expect.py: FAIL refuse gain d4_assert: got True, want False
+KILLED    dev_regrade.py: a2: a2_cue may be gained | test_regrade_expect.py: FAIL refuse gain a2_cue: got True, want False
+KILLED    dev_regrade.py: a2: v2_gold may be gained | test_regrade_expect.py: FAIL refuse gain v2_gold: got True, want False
+KILLED    dev_regrade.py: a2: losses read as gains | test_regrade_expect.py: FAIL lose v2_gold: got False, want True
+KILLED    dev_regrade.py: a2: a flipped OWN source not exempt from the gain rule | test_regrade_expect.py: FAIL source flip may gain v2_gold: got False, want True
+KILLED    dev_regrade.py: a2: a change with no probe passes | test_regrade_expect.py: FAIL refuse unit only, no probe: got True, want False
+KILLED    dev_regrade.py: first: a probe may gain a clause | test_regrade_expect.py: FAIL first: gain v3_other: got True, want False
+KILLED    dev_regrade.py: first: v2_gold may go | test_regrade_expect.py: FAIL first: lose v2_gold: got True, want False
+KILLED    dev_regrade.py: first: v3_shotgun may not go | test_regrade_expect.py: FAIL first: lose v3_shotgun: got False, want True
+KILLED    dev_regrade.py: first: a loop flag may move | test_regrade_expect.py: FAIL first: field flags: got True, want False
+KILLED    dev_regrade.py: first: a change with no probe passes | test_regrade_expect.py: FAIL first: unit only, no probe: got True, want False
+KILLED    dev_regrade.py: first: --expect first runs another rule | test_regrade_expect.py: FAIL first is not an --expect choice running its own rule
+KILLED    dev_regrade.py: cap: a probe may gain | test_regrade_expect.py: FAIL cap: gain v1_degen: got True, want False
+KILLED    dev_regrade.py: cap: v1_degen may not go | test_regrade_expect.py: FAIL cap: lose v1_degen: got False, want True
+KILLED    dev_regrade.py: cap: loop_RUNAWAY may not go | test_regrade_expect.py: FAIL cap: lose loop_RUNAWAY: got False, want True
+KILLED    dev_regrade.py: cap: v2_gold may go | test_regrade_expect.py: FAIL cap: lose v2_gold: got True, want False
+KILLED    dev_regrade.py: cap: a loop flag may move | test_regrade_expect.py: FAIL cap: field flags: got True, want False
+KILLED    dev_regrade.py: cap: --expect cap runs another rule | test_regrade_expect.py: FAIL cap is not an --expect choice running its own rule
+MUTANTS killed 46/46

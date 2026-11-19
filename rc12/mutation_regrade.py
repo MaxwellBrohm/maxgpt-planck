@@ -4,15 +4,18 @@ of rc12 (the *.py and *.json files and dev/), then the test runs there; KILLED =
 must pass; MALFORMED = the text is not found exactly once. No model.
   python3 -B mutation_regrade.py   (exit 1 unless the baseline passes and every mutant dies)"""
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+TMP = re.compile(r"(?:/private)?" + re.escape(os.path.realpath(tempfile.gettempdir()).replace("/private", "", 1))
+                 + r"/[^/\s:']+")
 E004 = os.path.join(HERE, "..", "experiments", "E004_general_updating", "code")   # text_e004's import, by path
 ENV = dict(os.environ, PYTHONPATH=os.pathsep.join(p for p in (E004, os.environ.get("PYTHONPATH")) if p))
-TESTS = ["test_dev_regrade.py"]
+TESTS = ["test_dev_regrade.py", "test_regrade_expect.py"]    # the second: --expect a2 (lock step A2, 2026-10-19)
 R = "dev_regrade.py"
 MUTANTS = [
     (R, "    DB.publish_run(tmp, out)\n", "    os.replace(tmp, out)\n", "renamed with no fsync"),
@@ -51,6 +54,56 @@ MUTANTS = [
      "open(os.path.join(tmp, \"meta.json\"), \"w\").write(\"{}\")", "meta.json not the source's"),
     (R, "        f.writelines(json.dumps(x) + \"\\n\" for x in S.score_lines(new_rows))",
      "        f.writelines(json.dumps(x) + \"\\n\" for x in S.score_lines(new_rows)[1:])", "a score line lost"),
+    # --expect a2 (lock step A2, 2026-10-19; killed by test_regrade_expect.py)
+    (R, '"a2_cue", "d4_assert"}', '"a2_cue", "d4_assert", "v1_degen"}', "a2: a degenerate clause may move"),
+    (R, 'A2_MOVED = {"v2_gold", ', "A2_MOVED = {", "a2: v2_gold may not move"),
+    (R, '"v2_gold", "v3_shotgun", ', '"v2_gold", ', "a2: v3_shotgun may not move (the answer-first waiver)"),
+    (R, '"v3_other", "a2_cue"', '"a2_cue"', "a2: v3_other may not move"),
+    (R, '"a2_cue", "d4_assert"}', '"d4_assert"}', "a2: a2_cue may not move"),
+    (R, ', "d4_assert"}', "}", "a2: d4_assert may not move"),
+    (R, 'return set(c["fields"]) <= {"probes", "unit"} and moved <= A2_MOVED',
+     'return set(c["fields"]) <= {"probes", "unit", "leaks"} and moved <= A2_MOVED', "a2: the role-leak scan may move"),
+    (R, 'return set(c["fields"]) <= {"probes", "unit"} and moved <= A2_MOVED', "return moved <= A2_MOVED",
+     "a2: fields not checked"),
+    (R, 'if "d0_source" not in set(p["old"]) ^ set(p["new"])\n             for x in set(p["old"]) ^ set(p["new"])}\n'
+        '    return set(c["fields"]) <= {"probes", "unit"} and',
+     'if True\n             for x in set(p["old"]) ^ set(p["new"])}\n    return set(c["fields"]) <= {"probes", "unit"} and',
+     "a2: a flipped OWN source not exempt"),
+    (R, '"a2": expected_a2}', '"a2": expected_t0gaps}', "a2: --expect a2 runs another rule"),
+    # review r1 (2026-11-19): v2_gold, a2_cue and d4_assert may only be lost (A2_ONLY_LOST; test_regrade_expect)
+    (R, " and not gained & A2_ONLY_LOST", "", "a2: a probe may gain v2_gold, a2_cue or d4_assert"),
+    (R, 'A2_ONLY_LOST = {"d4_assert", "a2_cue", "v2_gold"}', 'A2_ONLY_LOST = {"a2_cue", "v2_gold"}',
+     "a2: d4_assert may be gained"),
+    (R, 'A2_ONLY_LOST = {"d4_assert", "a2_cue", "v2_gold"}', 'A2_ONLY_LOST = {"d4_assert", "v2_gold"}',
+     "a2: a2_cue may be gained"),
+    (R, 'A2_ONLY_LOST = {"d4_assert", "a2_cue", "v2_gold"}', 'A2_ONLY_LOST = {"d4_assert", "a2_cue"}',
+     "a2: v2_gold may be gained"),
+    (R, '              for x in set(p["new"]) - set(p["old"])}', '              for x in set(p["old"]) - set(p["new"])}',
+     "a2: losses read as gains"),
+    (R, '    gained = {x for p in c["probes"] if "d0_source" not in set(p["old"]) ^ set(p["new"])\n',
+     '    gained = {x for p in c["probes"] if True\n', "a2: a flipped OWN source not exempt from the gain rule"),
+    # review r2 (2026-11-19): a change with no changed probe is refused (test_regrade_expect "refuse unit only")
+    (R, '    if not c["probes"]:                          # review r2', "    if False:  # review r2",
+     "a2: a change with no probe passes"),
+    # --expect first and --expect cap (the Nov 3 amendments; tested since 2026-11-19 by test_regrade_expect.py)
+    (R, '<= {"v3_other", "v3_shotgun"} and set(p["new"]) <= set(p["old"])', '<= {"v3_other", "v3_shotgun"}',
+     "first: a probe may gain a clause"),
+    (R, '<= {"v3_other", "v3_shotgun"} and', '<= {"v3_other", "v3_shotgun", "v2_gold"} and', "first: v2_gold may go"),
+    (R, '<= {"v3_other", "v3_shotgun"} and', '<= {"v3_other"} and', "first: v3_shotgun may not go"),
+    (R, 'return set(c["fields"]) <= {"probes", "unit"} and c["probes"] and all(\n        set(p["old"]) - set(p["new"]) '
+        '<= {"v3_other"', 'return set(c["fields"]) <= {"probes", "unit", "flags"} and c["probes"] and all(\n        '
+        'set(p["old"]) - set(p["new"]) <= {"v3_other"', "first: a loop flag may move"),
+    (R, 'and c["probes"] and all(\n        set(p["old"]) - set(p["new"]) <= {"v3_other"',
+     'and all(\n        set(p["old"]) - set(p["new"]) <= {"v3_other"', "first: a change with no probe passes"),
+    (R, '"first": expected_first,', '"first": expected_item3,', "first: --expect first runs another rule"),
+    (R, '<= CAP_CLAUSES and set(p["new"]) <= set(p["old"]) for p', "<= CAP_CLAUSES for p", "cap: a probe may gain"),
+    (R, 'CAP_CLAUSES = {"v1_degen", ', "CAP_CLAUSES = {", "cap: v1_degen may not go"),
+    (R, '"d1_degen", "r1_degen", "loop_RUNAWAY"}', '"d1_degen", "r1_degen"}', "cap: loop_RUNAWAY may not go"),
+    (R, '"r1_degen", "loop_RUNAWAY"}', '"r1_degen", "loop_RUNAWAY", "v2_gold"}', "cap: v2_gold may go"),
+    (R, 'return set(c["fields"]) <= {"probes", "unit"} and c["probes"] and all(\n        set(p["old"]) - set(p["new"]) '
+        '<= CAP', 'return set(c["fields"]) <= {"probes", "unit", "flags"} and c["probes"] and all(\n        '
+        'set(p["old"]) - set(p["new"]) <= CAP', "cap: a loop flag may move"),
+    (R, '"cap": expected_cap,', '"cap": expected_first,', "cap: --expect cap runs another rule"),
 ]
 
 
@@ -70,7 +123,8 @@ def run(src=None, old=None, new=None):
             r = subprocess.run([sys.executable, "-B", t], cwd=d, capture_output=True, text=True, timeout=300, env=ENV)
             if r.returncode != 0:
                 lines = [x for x in r.stdout.splitlines() if x.startswith("FAIL")] or r.stderr.splitlines()[-1:]
-                return "killed", f"{t}: {lines[0][:120] if lines else r.returncode}"
+                why = TMP.sub("<tmp>", lines[0])[:120] if lines else r.returncode     # no machine path in the log
+                return "killed", f"{t}: {why}"
         return "pass", ""
     finally:
         shutil.rmtree(d, ignore_errors=True)

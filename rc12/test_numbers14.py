@@ -1,7 +1,11 @@
-"""Pins the dev numbers recorded on 2026-10-11 (rc12/notes.txt STEP 14N): the extras (dev_extras14.py), the panel
-(dev_regrade.py + dev_panel.py) and the likelihood rows, as committed in logs/extras14_20261011.jsonl,
-logs/panel_20261011.jsonl and logs/lik_rows_20261011.jsonl.
-  A  the results agree with themselves: R = 100 x mean of the 9 families and S7 = 100 x mean of the 7 in every row;
+"""Pins the dev numbers recorded on 2026-10-11 (rc12/notes.txt STEP 14N) and re-recorded on 2026-11-19 under the graders
+of the lock (the Nov 3 amendments and lock step A2, notes STEP 16): the extras (dev_extras14.py), the panel
+(dev_regrade.py + dev_panel.py) and the likelihood rows, as committed in logs/extras14_20261119.jsonl,
+logs/panel_20261119.jsonl and logs/lik_rows_20261011.jsonl (tables14.FILES; the likelihood rows read no grader).
+  A  every row is graded by this tree's graders: a row carried from an earlier recording carries not_regraded and
+     fails here (2026-11-19: the Vertex card row, whose runs are on the PC only) unless --allow-not-regraded, which
+     mutation_numbers14 passes so that it tests the checks, not the data state;
+     the results agree with themselves: R = 100 x mean of the 9 families and S7 = 100 x mean of the 7 in every row;
      D = R - R_qwen, the CI part = lower bound >= -3, the s12 clause and the LOOKUP bar read their numbers; every
      pinned extra is there (the Base plain only); dev_extras14's comparator R equals the panel's Qwen2.5 R
   B  the likelihood rows: 12 models x 2 renders, LFM2-2.6B absent, every self-check passed in float32, and every
@@ -55,6 +59,10 @@ def close(a, b, tol=1e-9):
 
 
 def check_results(ex, pa, pins, fails):
+    for r in ex + pa:
+        if r.get("not_regraded") and not ARGS.allow_not_regraded:
+            fails.append(f"A {r.get('model')} {r['kind']} {r.get('render', '')} {r.get('seed', '')}: not regraded "
+                         f"({r['not_regraded']})")
     m3 = [r for r in ex + pa if r["kind"] in ("mean3", "per_seed")]
     for r in m3:
         R = 100 * sum(r["F_" + f] for f in NINE) / 9
@@ -126,7 +134,7 @@ def check_text(ex, pa, lk, prereg, notes, fails):
     mm = m3[("minimind-3", "plain")]
     want += [(s12, f"-Base, plain only, R {b['R']:.2f}, S7 {b['S7']:.2f}"),
              (s12, f"Plain (diagnostic) R {mm['R']:.2f}: {mm['EMPTY']:.3f} of its plain replies"),
-             (s12, f"every extra added before the lock at most {max(ci[m]['S7'] for m in NEW):.2f}"),
+             (s12, f"every scored extra added before the lock at most {max(ci[m]['S7'] for m in NEW):.2f}"),
              (s10b, f"P at most {max(ci[m]['lookup']['P'] for m in NEW):.3f}, X at most "
                     f"{max(ci[m]['lookup']['X'] for m in NEW):.3f}"),
              (s10b, f"P at most {max(ci[m]['lookup']['P'] for m in list(OLD) + [CARD]):.3f}, X at most "
@@ -214,6 +222,7 @@ def main():
     ap.add_argument("--prereg", default=PREREG)
     ap.add_argument("--notes", default=os.path.join(HERE, "notes.txt"))
     ap.add_argument("--pins", default=os.path.join(HERE, "pins.json"))
+    ap.add_argument("--allow-not-regraded", action="store_true")
     ARGS = ap.parse_args()
     ex, pa, lk = (T.load(w, ARGS.logs) for w in ("extras", "panel", "lik"))
     fails, n = [], 0

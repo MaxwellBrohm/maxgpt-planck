@@ -1,6 +1,9 @@
 """Mutation check of test_numbers14.py (rc12/notes.txt STEP 14N): each mutant breaks one recorded number, one
 text fragment or one rule of rederive14.py in a scratch copy, and test_numbers14.py must fail on it; the unmutated copy
 must pass. Mutants that need the raw copies run only when --raw, --panel and --lik are given (else "not run").
+Since 2026-11-19 (rc12/notes.txt STEP 16) the logs are the 2026-11-19 recording (tables14.FILES) and every run passes
+--allow-not-regraded, so the checks are tested whatever rows still wait for a regrade; the "gate:" mutants run without
+it on a copy whose not_regraded marks are removed: that copy must pass, and with one row marked it must fail.
   python3 -B mutation_numbers14.py [--raw R --panel P --lik L]   (exit 1: a mutant survived or the baseline failed)"""
 import argparse
 import json
@@ -12,7 +15,7 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 COPY = ["test_numbers14.py", "rederive14.py", "tables14.py", "notes.txt", "pins.json"]
-LOGS = ["extras14_20261011.jsonl", "panel_20261011.jsonl", "lik_rows_20261011.jsonl", "lik_tokcheck_pc.json"]
+LOGS = ["extras14_20261119.jsonl", "panel_20261119.jsonl", "lik_rows_20261011.jsonl", "lik_tokcheck_pc.json"]
 
 
 def jl(name, pred, fn):
@@ -57,17 +60,17 @@ def lik_is(model, render):
 
 
 MUTANTS = [
-    ("R off its families", jl("extras14_20261011.jsonl", is_("mean3", "minimind-3", "template"),
+    ("R off its families", jl("extras14_20261119.jsonl", is_("mean3", "minimind-3", "template"),
                                lambda r: setk(r, ["R"], r["R"] + 0.01)), False),
-    ("CI bound moved", jl("extras14_20261011.jsonl", is_("ci", "cRia-LM-75M-Instruct"),
+    ("CI bound moved", jl("extras14_20261119.jsonl", is_("ci", "cRia-LM-75M-Instruct"),
                           lambda r: setk(r, ["ci", "lo"], r["ci"]["lo"] + 0.01)), False),
-    ("CI part flag flipped", jl("extras14_20261011.jsonl", is_("ci", "Swen-28M"),
+    ("CI part flag flipped", jl("extras14_20261119.jsonl", is_("ci", "Swen-28M"),
                                 lambda r: setk(r, ["ci_part_met"], False)), False),
-    ("Base plain row dropped", jl("extras14_20261011.jsonl", is_("mean3", "Falcon-H1-Tiny-90M-Base", "plain"),
+    ("Base plain row dropped", jl("extras14_20261119.jsonl", is_("mean3", "Falcon-H1-Tiny-90M-Base", "plain"),
                                   lambda r: None), False),
-    ("new extra regrades differently", jl("extras14_20261011.jsonl", is_("mean3", "minimind-3", "plain"),
+    ("new extra regrades differently", jl("extras14_20261119.jsonl", is_("mean3", "minimind-3", "plain"),
                                           lambda r: setk(r, ["regraded_rows_differing"], 3)), False),
-    ("panel comparator R", jl("panel_20261011.jsonl", is_("mean3", "Qwen2.5-0.5B-Instruct", "template"),
+    ("panel comparator R", jl("panel_20261119.jsonl", is_("mean3", "Qwen2.5-0.5B-Instruct", "template"),
                               lambda r: setk(r, ["R"], r["R"] + 1e-6)), False),
     ("lik matched count", jl("lik_rows_20261011.jsonl", lik_is("Qwen/Qwen3-0.6B", "plain"),
                              lambda r: setk(r, ["families", "ROLE", "n_matched"], 34)), False),
@@ -76,15 +79,15 @@ MUTANTS = [
     ("lik model dropped", jl("lik_rows_20261011.jsonl", lik_is("LiquidAI/LFM2-700M", "plain"), lambda r: None), False),
     ("lik common foils", jl("lik_rows_20261011.jsonl", lik_is("SmallDoge/Doge-160M-Instruct", "template"),
                             lambda r: setk(r, ["vs_qwen", "TOPIC", "n_common"], 23)), False),
-    ("prereg s12 new extra R", tx("prereg/RC-12.draft.txt", "Curriculum R 0.64 (-6.44", "Curriculum R 0.65 (-6.44"),
+    ("prereg s12 new extra R", tx("prereg/RC-12.draft.txt", "Curriculum R 13.09 (+4.45", "Curriculum R 13.10 (+4.45"),
      False),
-    ("prereg s12 old extra CI", tx("prereg/RC-12.draft.txt", "0.87 (-6.20 to -3.41)", "0.87 (-6.21 to -3.41)"), False),
-    ("prereg s10b P bound", tx("prereg/RC-12.draft.txt", "P at most 0.049", "P at most 0.021"), False),
+    ("prereg s12 old extra CI", tx("prereg/RC-12.draft.txt", "1.24 (-7.19 to -4.31)", "1.24 (-7.20 to -4.31)"), False),
+    ("prereg s10b P bound", tx("prereg/RC-12.draft.txt", "P at most 0.083", "P at most 0.082"), False),
     ("prereg s4 LOOKUP row", tx("prereg/RC-12.draft.txt", "Qwen3-0.6B 0.74 against 0.22",
                                 "Qwen3-0.6B 0.73 against 0.22"), False),
-    ("prereg s12 clause max S7", tx("prereg/RC-12.draft.txt", "added before the lock at most 1.90",
-                                    "added before the lock at most 1.89"), False),
-    ("notes table cell", tx("rc12/notes.txt", "cRia-75M              1.19  0.75", "cRia-75M              1.19  0.76"),
+    ("prereg s12 clause max S7", tx("prereg/RC-12.draft.txt", "added before the lock at most 2.48",
+                                    "added before the lock at most 2.47"), False),
+    ("notes table cell", tx("rc12/notes.txt", "cRia-75M              3.44  0.75", "cRia-75M              3.44  0.76"),
      False),
     ("rederive: OWN ungated", tx("rc12/rederive14.py", 'and t["unit"] == 1.0 and r["unit"] == 1.0',
                                  'and r["unit"] == 1.0'), True),
@@ -101,11 +104,30 @@ MUTANTS = [
 ]
 
 
-def run(d, extra):
+def unmark(d):
+    """remove every not_regraded mark from the copy's logs (the "gate:" mutants' starting point)."""
+    for name in LOGS[:2]:
+        p = os.path.join(d, "logs", name)
+        rows = [json.loads(x) for x in open(p)]
+        for r in rows:
+            r.pop("not_regraded", None)
+        open(p, "w").writelines(json.dumps(r, sort_keys=True) + "\n" for r in rows)
+
+
+def mark(d):
+    unmark(d)
+    jl("extras14_20261119.jsonl", is_("ci", "minimind-3"), lambda r: setk(r, ["not_regraded"], "a mutant's mark"))(d)
+
+
+GATE = [("gate: no row marked passes", unmark, 0), ("gate: one row marked not regraded", mark, 1)]
+
+
+def run(d, extra, allow=True):
     p = subprocess.run([sys.executable, "-B", "test_numbers14.py", "--logs", os.path.join(d, "logs"),
                         "--prereg", os.path.join(d, "prereg", "RC-12.draft.txt"),
                         "--notes", os.path.join(d, "rc12", "notes.txt"), "--pins", os.path.join(d, "rc12", "pins.json")]
-                       + extra, cwd=os.path.join(d, "rc12"), capture_output=True, text=True, timeout=900)
+                       + extra + (["--allow-not-regraded"] if allow else []), cwd=os.path.join(d, "rc12"),
+                       capture_output=True, text=True, timeout=900)
     first = next((x for x in p.stdout.splitlines() if x.startswith("FAIL")), p.stdout.strip().splitlines()[-1:])
     return p.returncode, first
 
@@ -148,7 +170,16 @@ def main():
             ok = rc_m == 1
             killed, survived = killed + ok, survived + (not ok)
             print(f"{'KILLED' if ok else 'SURVIVED'} {name}: exit {rc_m}; {str(line)[:150]}")
-        print(f"mutation_numbers14: {killed} / {killed + survived} killed, {skipped} not run, baseline exit {rc}")
+        for name, fn, want in GATE:            # run without --allow-not-regraded
+            d = fresh(tmp)
+            fn(d)
+            rc_g, line = run(d, extra, allow=False)
+            ok = rc_g == want
+            killed, survived = killed + ok, survived + (not ok)
+            print(f"{'KILLED' if ok and want else 'PASSED' if ok else 'WRONG'} {name}: exit {rc_g} (want {want}); "
+                  f"{str(line)[:150]}")
+        print(f"mutation_numbers14: {killed} / {killed + survived} right ({len(GATE)} of them the gate's pass and fail), "
+              f"{skipped} not run, baseline exit {rc}")
         return 0 if rc == 0 and survived == 0 else 1
     finally:
         shutil.rmtree(tmp)

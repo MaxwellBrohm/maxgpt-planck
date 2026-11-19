@@ -19,6 +19,7 @@ from concurrent.futures import ProcessPoolExecutor
 import sys
 import time
 
+import fixtures_a2 as FA2
 import fixtures_graders as F1
 import fixtures_more as F2
 import grade_fmt_dyn as FD
@@ -30,7 +31,8 @@ import mutants_graders as M
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PER_CELL = 2 if "--quick" in sys.argv else 4
-MODS = {"grade_text": T, "grade_loop": L, "graders": G, "grade_fmt_dyn": FD, "grade_role": R, "grade_voice": G.GV}
+MODS = {"grade_text": T, "grade_loop": L, "graders": G, "grade_fmt_dyn": FD, "grade_role": R, "grade_voice": G.GV,
+        "grade_cues": T.GC}
 
 
 def load():
@@ -46,7 +48,8 @@ def pick_probes(rec):
     return ps
 
 
-BUILD = {"VAL": F1.vfix, "ABS": F1.afix, "FMT": F2.ffix, "LOOP": F2.lfix, "ROLEX": F2.rfix, "DYN": F2.dfix}
+BUILD = {"VAL": lambda r, p: F1.vfix(r, p) + FA2.val_a2(r, p), "ABS": lambda r, p: F1.afix(r, p) + FA2.abs_a2(r, p),
+         "FMT": F2.ffix, "LOOP": F2.lfix, "ROLEX": F2.rfix, "DYN": F2.dfix}    # FA2: lock step A2 (2026-10-19)
 
 
 def build(recs):
@@ -71,6 +74,9 @@ def build(recs):
             index[r["id"]] = r
             fixtures += new
             kinds |= {(f["label"], f["grader"]) for f in new}
+    neg, nfx = FA2.neg_records(index)         # A2 (v) (2026-11-19): synthetic negation golds, fixtures only
+    index.update(neg)
+    fixtures += [dict(f, grader="VAL", family=neg[f["rid"]]["family"]) for f in nfx]
     return fixtures, index
 
 
@@ -173,7 +179,7 @@ def evaluate(fixtures, index, drop=None):
         ok = not [c for c in res["fails"] if c != drop] if drop else res["ok"]
         if ok != f["expect"]:
             misses.append((f, res))
-    cm = [c for c in conv_tests(index) if c[1] != c[2]]
+    cm = [c for c in conv_tests({k: r for k, r in index.items() if not r.get("synthetic")}) if c[1] != c[2]]
     return misses, cm
 
 
@@ -253,7 +259,8 @@ def main():
         g = G.grade_conv(r, history(r, {}), ["eos"] * r["n_turns"])
         ideal_bad += sum(not x["ok"] for x in g["probes"]) + sum(map(bool, g["flags"])) + len(g["leaks"])
     fixtures, index = build(recs)
-    lines = [f"RC-12 mutation_graders.py  (records {len(index)}, fixtures {len(fixtures)}, "
+    lines = [f"RC-12 mutation_graders.py  (records {sum(not r.get('synthetic') for r in index.values())} + "
+             f"{sum(bool(r.get('synthetic')) for r in index.values())} synthetic, fixtures {len(fixtures)}, "
              f"must-pass {sum(f['expect'] for f in fixtures)}, must-fail {sum(not f['expect'] for f in fixtures)})",
              f"ABS questions holding an abstain cue (must be 0): {len(abs_q)}",
              f"IDEAL on all {len(recs)} records: failing probes + flagged replies + leak events (must be 0): {ideal_bad}"]

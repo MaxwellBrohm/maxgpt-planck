@@ -1,6 +1,7 @@
 """Mutation test of rc12/notes.txt STEP 14X (Max's rule: every test claim is watched failing): the shards (shards.py,
 dev_batch.py --shard, verify_dev_runs C1), the extras' configs (engines.json, pins.json against test_pins_engines.py)
-and dev_extras14.py's model list (test_dev_extras14.py). Each mutant replaces one text in a scratch copy of rc12 (the
+and dev_extras14.py's model list (test_dev_extras14.py); since STEP 16P (2026-11-19) also the tier-1 rows named
+before the lock (pins.json tier1 and their engines.json entries, test_pins_engines.py tier1). Each mutant replaces one text in a scratch copy of rc12 (the
 *.py and *.json files and dev/), then the three tests run there; KILLED = one of them exits non-zero. The unmutated
 copy must pass; MALFORMED = the text is not found exactly once. No model. The queue's shard and run-file mutants are
 in mutation_queue.py; the launcher's in extras/mut_rc12x.py.
@@ -52,6 +53,33 @@ MUTANTS = [
      '"Falcon-H1-Tiny-90M-Instruct-Curriculum-pre-DPO"]', "the Base not scored"),
     (X, 'if r == "plain" or m not in PLAIN_ONLY]', ']', "PLAIN_ONLY ignored by jobs()"),
     (X, "    if card_root:\n        out +=", "    if False:\n        out +=", "the card row dropped"),
+    # STEP 16P (2026-11-19): the tier-1 rows named before the lock (pins.json tier1, engines.json)
+    (P, '   "license": "mit",\n   "license_evidence": "card YAML license: mit; LICENSE file (MIT, Textile Labs) at '
+        'this revision;', '   "license": "cc-by-nc-4.0",\n   "license_evidence": "card YAML license: mit; LICENSE '
+        'file (MIT, Textile Labs) at this revision;', "16P: a tier-1 row with a non-permissive licence"),
+    (P, '   "license": "mit",\n   "license_evidence": "card YAML license: mit; LICENSE file (MIT, Textile Labs) at '
+        'this revision;', '   "license": "other (lfm1.0)",\n   "license_evidence": "card YAML license: mit; LICENSE '
+        'file (MIT, Textile Labs) at this revision;', "review r1: the LFM licence on a tier-1 row not Liquid AI's"),
+    (P, '"revision": "f92512d4cd6142fa9acc0d6022375049a8974bf6",\n   "license": "apache-2.0"',
+     '"revision": "f92512d4cd6142fa9acc0d6022375049a8974bf6",\n   "license": "other (lfm1.0)"',
+     "review r1: the LFM licence on an extra not Liquid AI's"),
+    (P, ' "skipped": {\n', ' "skipped": {\n  "Qwen/Qwen3.5-2B": "x",\n', "16P: a tier-1 row also in skipped"),
+    (P, '"revision": "48fae9c0be6ec505e80f36f69b8ba21097f9f822"', '"revision": "48fae9c0be"',
+     "16P: a tier-1 revision cut short"),
+    (P, '"sha256": "e818bab13c041a5df6ee67aaa70942b41805a5c315ba6dae8e326ece8973bd61"', '"sha256": "e818bab13c"',
+     "16P: a weights shard's sha256 cut short"),
+    (P, '"textilelabs/Loom-Weave-4": {', '"textilelabs/Loom-Weave-3": {', "16P: a tier-1 row dropped"),
+    (E, '  "Qwen/Qwen3.5-2B": {"engine": "vllm", "dtype": "bfloat16",', '  "taobao-mnn/MNN-Pocket-0.3B": {"engine": '
+        '"vllm", "dtype": "bfloat16", "family": "MNN"},\n  "Qwen/Qwen3.5-2B": {"engine": "vllm", "dtype": "bfloat16",',
+     "16P: an engines entry before its own parity"),
+    (E, '  "Qwen/Qwen3.5-2B": {"engine": "vllm", "dtype": "bfloat16",', '  "Qwen/Qwen3.5-2B": {"engine": "vllm", '
+        '"dtype": "float32",', "16P: a family-verdict row off its pinned dtype"),
+    (E, '  "Qwen/Qwen3.5-2B": {"engine": "vllm", "dtype": "bfloat16",', '  "Qwen/Qwen3.5-2B": {"engine": "vllm", '
+        '"dtype": "bfloat16", "trust_remote_code": true,', "16P: remote code on a row that ships none"),
+    (E, '"LiquidAI/LFM2.5-1.2B-Instruct": {', '"LiquidAI/LFM2.5-1.2B-Instruct-X": {',
+     "16P: a family-verdict row without its engines entry"),
+    (E, '"family": "LFM2", "parity": "family verdict (LFM2-700M)",\n   "reason": "Tier 1', '"family": "LFM2", '
+        '"parity": "family verdict (LFM2.5-230M)",\n   "reason": "Tier 1', "16P: another line's verdict"),
 ]
 
 

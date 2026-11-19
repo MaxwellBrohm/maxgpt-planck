@@ -63,7 +63,7 @@ with every model under the graders before the two Nov 3 amendments; the calibrat
 Check it without a GPU (CPU only, a few minutes each, from `rc12/`):
 
 ```
-python -B mutation_graders.py      # 9,838 grader fixtures and 237 mutants: every mutant must be caught
+python -B mutation_graders.py      # 13,466 grader fixtures and 325 mutants: every mutant must be caught
 python -B validate_e2e.py          # the fake responders' gates G1-G4 and the 36.73 shortcut ceiling
 python -B validate_machinery.py    # the runner, renders, truncation and stop handling (12 groups)
 ```
@@ -158,9 +158,11 @@ Every experiment, its pre-registered rule, its result and its independent audit 
     [rc12/examples](rc12/examples/corr-014-lfm2-vs-claude-haiku.md).
 - **The lock: not yet.** It was planned for Oct 11-14, and the pre-registration is still a draft. The lock
   package (sealed-session kit, lock check, finalize step) was built and dry-run without any sealed content
-  on Oct 11-13. Left: settling the grader gaps the OOD-H reviews found (for example "You asked if X." is
-  graded wrong), building and encrypting the hidden split in a separate session, Max's approval, then the
-  lock commit and push.
+  on Oct 11-13. The grader gaps the OOD-H reviews found (for example "You asked if X." was graded wrong) are
+  settled in lock step A2: five fixed, two recorded as known limits (prereg s6, which also records two limits
+  of the fixes themselves, found when they were reviewed). Left: the runs that need the
+  PC (the Vertex card row's regrade, the five comparison models named on Nov 19, a few PC-only checks), building
+  and encrypting the hidden split in a separate session, the lock commit and push (Max approved the lock on Oct 19).
 - **Toolchain:** tokenizer v0 is built (its 8k cut matches a separately trained 8k; no superword tokens),
   the openly licensed starter corpus is tokenized (2.0B tokens), the core v0 corpus is built and reviewed
   (about 35.9B tokens at 8k; a second near-duplicate pass over the cleaned text leaves about 35.4B), the

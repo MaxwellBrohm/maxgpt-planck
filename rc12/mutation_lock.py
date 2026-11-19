@@ -6,6 +6,7 @@ time.
 No model.
   python3 -B mutation_lock.py   (writes logs/mutation_lock.txt; exit 1 unless the baseline passes and all die)"""
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -15,6 +16,8 @@ from concurrent.futures import ProcessPoolExecutor
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 E004 = os.path.join("experiments", "E004_general_updating", "code")
+TMP = re.compile(r"(?:/private)?" + re.escape(os.path.realpath(tempfile.gettempdir()).replace("/private", "", 1))
+                 + r"/[^/\s:']+")         # a scratch copy's path, masked in the log (review r1, 2026-11-19)
 TESTS = ["test_lock.py", "test_lock_b.py", "test_lock_c.py", "test_lock_d.py"]
 SPC, CM, PV, PS, BD, TG, FL = ("split_content.py", "common.py", "pools_vals.py", "pools_slots.py", "build_dev.py",
                                "test_gens.py", "fam_role_lookup.py")
@@ -272,7 +275,7 @@ def run(m=None):
                                timeout=900, env=env)
             if r.returncode != 0:
                 lines = [x for x in r.stdout.splitlines() if x.startswith("FAIL")] or r.stderr.splitlines()[-1:]
-                return m, "killed", f"{t}: {lines[0][:110] if lines else r.returncode}"
+                return m, "killed", f"{t}: {TMP.sub('<tmp>', lines[0])[:110] if lines else r.returncode}"
         return m, "pass", ""
     finally:
         shutil.rmtree(d, ignore_errors=True)

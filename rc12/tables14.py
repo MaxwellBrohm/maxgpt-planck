@@ -1,6 +1,6 @@
-"""RC-12 STEP 14N tables (rc12/notes.txt): the dev panel and every extra side by side, and the likelihood rows,
-formatted from the committed results files (logs/panel_20261011.jsonl, logs/extras14_20261011.jsonl,
-logs/lik_rows_20261011.jsonl).
+"""RC-12 STEP 14N tables (rc12/notes.txt; re-recorded in STEP 16 under the graders of the lock): the dev panel and every
+extra side by side, and the likelihood rows, formatted from the committed results files (logs/panel_20261119.jsonl,
+logs/extras14_20261119.jsonl, logs/lik_rows_20261011.jsonl; the 2026-10-11 panel and extras files stay as the record).
 No model, no runs read. test_numbers14.py checks that notes.txt carries these lines verbatim.
   python3 -B tables14.py   (prints every table)"""
 import json
@@ -8,7 +8,7 @@ import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LOGS = os.path.join(HERE, "logs")
-FILES = dict(panel="panel_20261011.jsonl", extras="extras14_20261011.jsonl", lik="lik_rows_20261011.jsonl")
+FILES = dict(panel="panel_20261119.jsonl", extras="extras14_20261119.jsonl", lik="lik_rows_20261011.jsonl")
 FAMS = ["RECALL", "CORR", "BIND", "TWOHOP", "PERSIST", "OWN", "TOPIC", "ROLE", "LOOP"]
 LIKF = ["RECALL", "CORR", "BIND", "TWOHOP", "OWN", "TOPIC", "ROLE", "LOOKUP", "COMPOSE"]
 SHORT = {"Qwen2.5-0.5B-Instruct": "Qwen2.5-0.5B", "Falcon-H1-Tiny-90M-Instruct": "Falcon-H1-Tiny-90M",

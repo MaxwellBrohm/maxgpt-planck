@@ -282,5 +282,144 @@
    "checkpoint_dtype": "float16",
    "chat_template": "chat_template.jinja at this revision"
   }
+ },
+ "_tier1": "RC-12 tier-1 rows named before the lock (rc12/notes.txt STEP 16P, 2026-11-19; prereg s12): five public chat models from the scoop check's tier 1 (research/FRONTIER_2026-11.md s10.3) that test the claim sentences ('no model at or below 0.6B passed', 'the best panel model, of any size up to 2.6B'). Pinned from the Hugging Face API and the files at each revision on the Mac (card, config, tokenizer config, chat template, licence; no weights). Not in \"models\" until their dev runs are pulled and scored (then each moves there and into dev_extras14.EXTRAS14, as minimind-3 moved out of \"skipped\"); a row not run before the lock stays here and s12 says \"not run\" with the reason. engines.json holds the three with a family verdict; the two that need their own parity get their entry after it passes on the PC (rc12/test_pins_engines.py tier1).",
+ "tier1": {
+  "taobao-mnn/MNN-Pocket-0.3B": {
+   "step": "STEP 16P (2026-11-19, lock track A; research/FRONTIER_2026-11.md s10.3, the scoop check's tier 1): named before the lock; pinned from the HF API and the files at this revision on the Mac (no weights)",
+   "revision": "48fae9c0be6ec505e80f36f69b8ba21097f9f822",
+   "license": "apache-2.0",
+   "license_evidence": "card YAML license: apache-2.0 and its License section ('Released under the Apache License 2.0'); LICENSE.txt at this revision is the Apache License 2.0; HF API tag license:apache-2.0; not gated",
+   "created": "2026-09-23",
+   "last_modified": "2026-11-10",
+   "params": 361551232,
+   "weights": [
+    {
+     "file": "model.safetensors",
+     "dtype": "BF16 (HF API safetensors metadata)",
+     "bytes": 723137248,
+     "sha256": "24e182cebe433e9354dc35567d66c655888e7577ca7f6f71cea196a5b7da6276"
+    }
+   ],
+   "architecture": "Qwen3ForCausalLM",
+   "custom_code": false,
+   "ctx": 40960,
+   "checkpoint_dtype": "bfloat16",
+   "chat_template": "chat_template.jinja at this revision (ChatML <|im_start|> / <|im_end|>; no default system prompt; renders the same as a bare ChatML template on 480 dev prompts)",
+   "thinking": "none: the template has no thinking switch or think block and the card names no thinking mode (<think> and </think> are only in the vocabulary); model_type qwen3, so the responders pass enable_thinking=False (s4), which this template ignores",
+   "stops": "eos <|im_end|> (65512) plus <|endoftext|> (65510) from hf_responder.EOT_TOKENS; generation_config.json eos [65512, 65510], inside that list",
+   "engine_plan": "own parity first (families are per recipe, notes STEP 13a; no Qwen3 family verdict): parity_hf_vllm.py --dtype bfloat16 on vLLM; the engines.json entry follows a passing verdict",
+   "caveats": "the card's sampling (temperature 0.8, top_p 0.8, top_k 20) is not used (s4)"
+  },
+  "textilelabs/Loom-Weave-4": {
+   "step": "STEP 16P (2026-11-19, lock track A; research/FRONTIER_2026-11.md s10.3, the scoop check's tier 1): named before the lock; pinned from the HF API and the files at this revision on the Mac (no weights)",
+   "revision": "19e04fae8819c53d95903238124f7cf8227f7b94",
+   "license": "mit",
+   "license_evidence": "card YAML license: mit; LICENSE file (MIT, Textile Labs) at this revision; card 'Model: MIT. Training data keeps its original licences'; not gated",
+   "created": "2026-10-06",
+   "last_modified": "2026-10-06",
+   "params": 55555520,
+   "weights": [
+    {
+     "file": "model.safetensors",
+     "dtype": "F32 (HF API safetensors metadata)",
+     "bytes": 222256960,
+     "sha256": "c907d38f941cd6f0ef101e8a1879fe5c2bdd2a6d9215779be5a59218614083d9"
+    }
+   ],
+   "architecture": "Gemma3ForCausalLM (model_type gemma3_text: 20 sliding-window layers of 1,024 and 4 global, head_dim 64)",
+   "custom_code": false,
+   "ctx": 32768,
+   "checkpoint_dtype": "float32",
+   "chat_template": "tokenizer_config.json chat_template at this revision: '<tools:off>\\n', each user turn '<user>\\n{message}\\n<|eot|>\\n', each reply '<loom>\\n{reply}<|eot|>\\n', generation prompt '<loom>\\n'; renders the same as Loom-Spark-3.2's carried template (engines.json) on 480 dev prompts",
+   "thinking": "one mode, nothing to switch off: the card says it shows its working in <think> ... </think> on some replies; those tags are special tokens, so the decode strips them (s4) and the working stays in the reply and its history as plain text; card context 8,192 used in practice",
+   "stops": "eos <|eot|> (0); generation_config.json eos 0",
+   "engine_plan": "own parity first (a Gemma-3 layout, not Loom-Spark-3.2's Llama, so no Loom family verdict): vLLM at float32 if it starts (gemma-3-270m-it's fp32 did not: Triton shared memory, at head_dim 256), otherwise batched HF (hfb) with eager attention after its batched-vs-serial parity (HF sdpa was wrong on gemma-3-270m-it's long prompts, notes STEP 9b)",
+   "caveats": "the card's sampling (temperature 0.7, top_k 40) is not used (s4); replies end in a confidence word, (sure), (I think) or (not sure); from scratch, 55.6M, inside Planck's claim range"
+  },
+  "LiquidAI/LFM2-2.6B-Exp": {
+   "step": "STEP 16P (2026-11-19, lock track A; research/FRONTIER_2026-11.md s10.3, the scoop check's tier 1): named before the lock; pinned from the HF API and the files at this revision on the Mac (no weights)",
+   "revision": "2251c865342649ffb4a9f57d07ab2428bb552cf5",
+   "license": "other (lfm1.0)",
+   "license_evidence": "card YAML license: other, license_name: lfm1.0, license_link: LICENSE; the LICENSE file at this revision is the LFM Open License v1.0 (Apache-2.0-based; perpetual, royalty-free grant; Commercial Use by an entity at or above USD 10M annual revenue is not licensed; not gated); the core panel's LFM2-2.6B, LFM2-700M and LFM2-1.2B carry the same licence (rc12/test_pins_engines.py: allowed as the TII Falcon License is)",
+   "created": "2025-12-25",
+   "last_modified": "2026-08-05",
+   "params": 2569272320,
+   "weights": [
+    {
+     "file": "model-00001-of-00002.safetensors",
+     "dtype": "BF16 (HF API safetensors metadata)",
+     "bytes": 4998052624,
+     "sha256": "19c3ee29f3565505c3fe1faceb76079d5ba4c97f95212a0c8b4fd0ee9472edf7"
+    },
+    {
+     "file": "model-00002-of-00002.safetensors",
+     "dtype": "BF16 (HF API safetensors metadata)",
+     "bytes": 140522264,
+     "sha256": "e818bab13c041a5df6ee67aaa70942b41805a5c315ba6dae8e326ece8973bd61"
+    }
+   ],
+   "architecture": "Lfm2ForCausalLM",
+   "custom_code": false,
+   "ctx": 128000,
+   "checkpoint_dtype": "bfloat16",
+   "chat_template": "chat_template.jinja at this revision, byte-identical to LFM2-2.6B's (main 36ed799f, last modified 2026-08-05, before the panel's runs)",
+   "thinking": "none (no think block or switch in the template; the card names none)",
+   "stops": "eos <|im_end|> (7); generation_config.json eos 7",
+   "engine_plan": "family verdict (LFM2-700M), as LFM2-2.6B: config.json equal to LFM2-2.6B's but for the dtype key's spelling (dtype vs torch_dtype, both bfloat16) and transformers_version; tokenizer.json and chat template byte-identical",
+   "caveats": "LFM2-2.6B plus pure reinforcement learning (card); the card's sampling (temperature 0.3, min_p 0.15, repetition_penalty 1.05) is not used (s4)"
+  },
+  "LiquidAI/LFM2.5-1.2B-Instruct": {
+   "step": "STEP 16P (2026-11-19, lock track A; research/FRONTIER_2026-11.md s10.3, the scoop check's tier 1): named before the lock; pinned from the HF API and the files at this revision on the Mac (no weights)",
+   "revision": "b9d816ab510f9a28dca37cb182e9da8b0226e13c",
+   "license": "other (lfm1.0)",
+   "license_evidence": "card YAML license: other, license_name: lfm1.0, license_link: LICENSE; the LICENSE file at this revision is the LFM Open License v1.0 (Apache-2.0-based; perpetual, royalty-free grant; Commercial Use by an entity at or above USD 10M annual revenue is not licensed; not gated); the core panel's LFM2.5-230M and LFM2.5-350M carry the same licence (rc12/test_pins_engines.py: allowed as the TII Falcon License is)",
+   "created": "2026-01-06",
+   "last_modified": "2026-11-03",
+   "params": 1170340608,
+   "weights": [
+    {
+     "file": "model.safetensors",
+     "dtype": "BF16 (HF API safetensors metadata)",
+     "bytes": 2340697936,
+     "sha256": "1ba63d9adb03ae43581db0e136e4416febe0441aff7296397bd455fb6017f73a"
+    }
+   ],
+   "architecture": "Lfm2ForCausalLM",
+   "custom_code": false,
+   "ctx": 128000,
+   "checkpoint_dtype": "bfloat16",
+   "chat_template": "chat_template.jinja at this revision, byte-identical to LFM2.5-350M's at its main of 2026-11-03; renders the same as LFM2.5-230M's on 480 dev prompts",
+   "thinking": "none: a separate LFM2.5-1.2B-Thinking exists; the template has no thinking switch and adds a think block only for a message that carries one (none here)",
+   "stops": "eos <|im_end|> (7); generation_config.json eos 7",
+   "engine_plan": "family verdict (LFM2.5-230M): the LFM2.5 release (tokenizer.json byte-identical to LFM2.5-230M's and LFM2.5-350M's), on LFM2-1.2B's lfm2 layout (same parameter count, 16 layers)",
+   "caveats": "the card's sampling (temperature 0.1, top_k 50, repetition_penalty 1.05) is not used (s4)"
+  },
+  "Qwen/Qwen3.5-2B": {
+   "step": "STEP 16P (2026-11-19, lock track A; research/FRONTIER_2026-11.md s10.3, the scoop check's tier 1): named before the lock; pinned from the HF API and the files at this revision on the Mac (no weights)",
+   "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+   "license": "apache-2.0",
+   "license_evidence": "card YAML license: apache-2.0; LICENSE at this revision is the Apache License 2.0; HF API tag license:apache-2.0; not gated",
+   "created": "2026-02-28",
+   "last_modified": "2026-03-02",
+   "params": 2274069824,
+   "weights": [
+    {
+     "file": "model.safetensors-00001-of-00001.safetensors",
+     "dtype": "BF16 with 2,592 F32 (HF API safetensors metadata), as Qwen3.5-0.8B",
+     "bytes": 4548221488,
+     "sha256": "aa33250c4fc64891ddfaba3a314fd9542ea371843c387178b425fbcc5ed680b1"
+    }
+   ],
+   "architecture": "Qwen3_5ForConditionalGeneration (model_type qwen3_5; params include the vision encoder, the card's language model is 2B)",
+   "custom_code": false,
+   "ctx": 262144,
+   "checkpoint_dtype": "bfloat16",
+   "chat_template": "chat_template.jinja at this revision, byte-identical to Qwen3.5-0.8B's (main 2fc06364, last modified 2026-03-02)",
+   "thinking": "hybrid: 'Qwen3.5-2B operates in non-thinking mode by default' (card); run with enable_thinking=False (s4, Qwen3 family), where the template writes an empty think block, as for Qwen3.5-0.8B",
+   "stops": "eos <|im_end|> plus <|endoftext|> (hf_responder.EOT_TOKENS), as Qwen3.5-0.8B",
+   "engine_plan": "family verdict (Qwen3.5-0.8B): the same release, template and layout (24 layers, 3 Gated DeltaNet to 1 gated attention); no fp32 on vLLM 0.30's gated-delta-net kernel, as for 0.8B",
+   "caveats": "the card's non-thinking sampling (temperature 1.0, top_k 20, presence_penalty 2.0) is not used (s4)"
+  }
  }
 }

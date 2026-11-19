@@ -69,11 +69,13 @@ def shotgun_fails_on_oodh():
             if p["grader"] != "VAL" or len(p["candidates"]) < 2:
                 continue
             gold, others = p["gold"], [c for c in p["candidates"] if c != p["gold"]]
-            listing = p["ideal"] + " " + " ".join(f"Not {c}." for c in others)
+            listing = " ".join(f"Not {c}." for c in others) + " " + p["ideal"]    # denials first: the answer-first
+            # waiver (graders.answer_first, Max 2026-11-03) passes the listing when the answer leads
             res = grade_with(rec, p, listing)
             assert "v3_shotgun" in res["fails"] and not res["ok"], (rec["id"], p["turn"], res)
-            ideal = grade_with(rec, p, p["ideal"])
-            assert ideal["ok"] and "v3_shotgun" not in ideal["fails"], (rec["id"], p["turn"], ideal)
+            for txt in (p["ideal"], "Got it. " + p["ideal"]):      # the second: the answer not leading, so the
+                ideal = grade_with(rec, p, txt)                    # answer-first waiver cannot hide the clause
+                assert ideal["ok"] and "v3_shotgun" not in ideal["fails"], (rec["id"], p["turn"], txt, ideal)
             assert gold in p["candidates"]
             n += 1
     assert n >= 6, n
@@ -92,7 +94,8 @@ def change_phrase_is_not_a_shotgun():
     the right H-CORR answer passes on OOD-H as the same shape passes on RC-12 (shotgun_named)."""
     for rec, p in stale_probes():
         s, g = p["stale"][0], p["gold"]
-        for txt in (f"You changed it from {s} to {g}.", f"You settled on {g}; {s} was the first plan."):
+        for txt in (f"You changed it from {s} to {g}.", f"You settled on {g}; {s} was the first plan.",
+                    f"Got it. You changed it from {s} to {g}."):       # the answer not leading (answer-first waiver)
             res = grade_with(rec, p, txt)
             assert res["ok"] and not res["fails"], (rec["id"], p["turn"], txt, res)
 
@@ -113,8 +116,9 @@ def single_candidate_never_fires():
     for rec in oodh_recs():
         for p in rec["probes"]:
             if p["grader"] == "VAL" and len(p["candidates"]) == 1:
-                res = grade_with(rec, p, p["ideal"] + " " + p["ideal"])
-                assert "v3_shotgun" not in res["fails"], (rec["id"], p["turn"], res)
+                for txt in (p["ideal"] + " " + p["ideal"], "Got it. " + p["ideal"]):   # the second: the answer not
+                    res = grade_with(rec, p, txt)                                       # leading (answer-first waiver)
+                    assert "v3_shotgun" not in res["fails"], (rec["id"], p["turn"], txt, res)
 
 
 @test
@@ -148,8 +152,8 @@ def compose_keeps_its_exemption():
                 assert res["ok"] and "v3_shotgun" not in res["fails"], (rec["id"], p["turn"], res)
                 seen_c += 1
             elif not p.get("pool_values") and seen_v < 40:
-                res = G.g_val(f"{p['ideal']} " + " ".join(f"Not {c}." for c in p["candidates"] if c != p["gold"]),
-                              "eos", [], rec, p)
+                res = G.g_val(" ".join(f"Not {c}." for c in p["candidates"] if c != p["gold"]) + f" {p['ideal']}",
+                              "eos", [], rec, p)              # denials first (the answer-first waiver, 2026-11-03)
                 assert "v3_shotgun" in res["fails"], (rec["id"], p["turn"], res)
                 seen_v += 1
     assert seen_c == 16 and seen_v == 40, (seen_c, seen_v)
