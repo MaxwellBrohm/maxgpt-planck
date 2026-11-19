@@ -460,7 +460,7 @@ Rough total for the first six weeks: about 270-360 H100-hours (est.), inside one
 
 Asked after sections 1 to 7 (there is no section 8; this one is numbered 9 as requested): is this really everything worth trying? Two more search rounds aimed at venues and sources the six lanes never swept. The answer is no, it was not everything: the rounds found 126 candidates, kept 103 after verification, and merged them into 47 new ledger rows (P-237 to P-283) and 39 update entries for existing bets, proposed in a scratch `LEDGER_GAP.md` and now appended to LEDGER.md under "2026-11 frontier additions" (subsection "2026-11 gap sweep additions"). Most are diagnostics, controls and new arms on bets already listed. Only a handful change what should run first (section 9.4).
 
-**Ledger ids.** origin/main LEDGER.md (commit d71d447, 2026-11-18) now ends at P-236, because the section 3 rows were merged. The header's "next free id P-189" line is stale; the next free id after this section is P-284. The local checkout is behind origin and still ends at P-188.
+**Ledger ids.** origin/main LEDGER.md (commit d71d447, 2026-11-18) now ends at P-236, because the section 3 rows were merged. The header's "next free id P-189" line is stale; the next free id after section 9.6 is P-290. The local checkout is behind origin and still ends at P-188.
 
 ### 9.1 What was searched
 
@@ -545,10 +545,25 @@ Each item names its proposed ledger row. "With" means where it sits relative to 
 ### 9.5 Coverage, honestly
 
 This is still not exhaustive. Round 2's critic listed five gaps that no round has searched yet:
-- **Grokking and delayed generalization.** Zero hits anywhere in the repo or these files, and this is the regime a chat pool read 100-200 times puts Planck in.
+- **Grokking and delayed generalization.** Searched after this list was written; see 9.6.
 - **Unswept venues:** ICML 2026 main and all ICML and NeurIPS 2026 workshops, ACL 2026 main and Findings, and TMLR 2026.
 - **arXiv full listings from 2026-09-23 to 2026-10-14.**
-- **Pre-2022 from-scratch state-tracking work:** EntNet, NTM and DNC curricula, fast weights, TRADE and SUMBT. Mine it for training-signal tricks.
+- **Pre-2022 from-scratch state-tracking work:** partly checked in 9.6 (EntNet-style entity keys, TRADE copy and fast weights are already covered by P-022, P-238 and the delta-rule family). NTM and DNC curricula and SUMBT are still unsearched.
 - **Chinese-language optimizer write-ups** (kexue.fm). Lower priority.
 
 Roughly a quarter of what was kept rests on OpenReview abstracts the verifier could not open. Round 2 still found about four items worth a slot, so another round would likely add a few more, mostly diagnostics rather than new levers.
+
+### 9.6 Grokking pass (2026-11-18)
+
+A third, single-topic pass on the largest gap above: grokking and delayed generalization, the regime a chat pool read 100-200 times puts Planck in. It found six items, now ledger rows P-284 to P-289. All are diagnostics or data-design rules; none is a new lever that changes the top recommendations.
+
+- **P-284 grokking ratio rule** (high confidence it applies, medium that it matters). Rule circuits form through grokking, at a speed set by the ratio of inferred examples to memorizable facts, not by data size (Wang et al. 2405.15071). RC-12's BIND, CORR and RULE cells are comparison and retrieval shaped, the kind that generalized there, which supports the core bet. The risk is a generator whose names and values repeat enough to be memorized. Test: three pool diversities at a fixed episode count, 5M.
+- **P-285 long branch past the bpb plateau** (medium). Hierarchical generalization arrives long after in-domain loss flattens, with an inverted U in depth (Murty et al. 2305.18741). Nearly free when added to P-187 or P-189.
+- **P-286 logit-scale drift readout** (low-medium). Softmax collapse after overfitting (Prieto et al. 2501.04697). Free logging; a projection arm only if drift shows. NorMuon may already blunt it (untested).
+- **P-287 Grokfast** (low; mostly hype for language models). One T002 arm only.
+- **P-288 grokking diagnostics** (low, watch). Weight-decay regime scores and late "anti-grokking" collapse; both single-group, toy-task results.
+- **P-289 first-token vs continuation split** (medium, a scoring change). Two recall mechanisms form at different times (Daniels et al. 2507.01414).
+
+Also checked and already covered: EntNet-style entity-keyed slots (P-022 update), TRADE's copy mechanism (P-238), fast weights (the delta-rule family), Tang et al. 2605.30233 (already in the files). Li et al. 2506.21551 tracks grokking through MoE routing only, so it does not apply to a dense model.
+
+Still unsearched after this pass: ICML 2026 main and the ICML and NeurIPS 2026 workshops, ACL 2026 main, TMLR 2026, a full read of arXiv listings from 2026-09-23 to 2026-10-14, NTM and DNC curricula, SUMBT, and kexue.fm. Yield by pass: round 1 kept 70, round 2 kept 33 (about four worth a slot), this pass six diagnostics. Another pass would most likely add diagnostics, not levers.
