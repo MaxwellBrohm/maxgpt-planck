@@ -41,6 +41,9 @@ G-ABS clauses: a1_degen, a2_cue (an abstain cue), a3_value (no value of the prob
   a4_voice (user voice: "my" + object word, or a first-person-bound sentence about the object with no "you").
   No echo clause: no probe question contains an abstain cue (checked by mutation_graders.py), so a2_cue already
   fails every echo. Lenient ABS: cue, and every mentioned value sits in a sentence naming its own holder or table.
+  LOOKUP's X probe (A2b, 2026-11-19): grade_cues.lookup_cue is a cue too (the pipeline's not-found replies; off when
+  the question holds one), and a4 skips the frames "I couldn't find", "I found nothing" (grade_cues.FIND_FRAME); no
+  other family.
 FMT, DYN: grade_fmt_dyn.py. ROLEX and the role-leak scan: grade_role.py. LOOP probes: not degenerate and not an
 echo of the user turn (deviation D7 in notes.txt)."""
 import re
@@ -220,13 +223,14 @@ def g_abs(reply, stop, prior, rec, probe):
     fails = []
     if L.degenerate(reply, stop, prior, probe["kind"], L.turn_kinds(rec)[:len(prior)]):
         fails.append("a1_degen")
-    cue = "cue" in T.OFF or T.ABS_CUE.search(text) is not None
+    look = "lookabs" not in T.OFF and rec.get("family") == "LOOKUP"     # A2b (2026-11-19): LOOKUP's X probe
+    cue = "cue" in T.OFF or T.ABS_CUE.search(text) is not None or (look and T.GC.lookup_cue(text, rec, probe))
     if not cue:
         fails.append("a2_cue")
     named = [v for v in pool if T.mentioned(text, v)]
     if named and "absvalue" not in T.OFF:
         fails.append("a3_value")
-    if abs_voice(text, obj_words(probe)):
+    if abs_voice(T.GC.FIND_FRAME.sub(" ", text) if look else text, obj_words(probe)):
         fails.append("a4_voice")
     hold = holders_of(rec)
     bound = all(any(any(w in T.lwords(text[slice(*T.sentence_span(text, m.start()))]) for w in T.lwords(h))

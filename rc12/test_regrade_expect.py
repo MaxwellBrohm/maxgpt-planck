@@ -15,10 +15,15 @@ mutation_regrade.py (the a2 block).
 Since 2026-11-19 also --expect first and --expect cap (the Nov 3 amendments; untested until then): first lets a probe
 only LOSE v3_other and/or v3_shotgun, cap only LOSE degenerate clauses (dev_regrade.CAP_CLAUSES); each gains nothing,
 moves only probes and units, and refuses a change with no probe.
+Since 2026-11-19 also --expect a2b (lock step A2b, rc12/notes.txt STEP 16A2B): a changed probe must be a LOOKUP
+record's X probe (real dev ids: a RECALL X probe and LOOKUP's P probe are refused) that only lost a2_cue and/or
+a4_voice and gained nothing (pass to fail refused, another reason lost refused, a probe whose clauses did not move
+refused); only probes and units, no unit down, no change without a probe.
 Run: python3 -B test_regrade_expect.py   (exit 1 on any failure)"""
 import sys
 
 import dev_regrade as DR
+import runner as RN
 
 
 ALLOWED = ("v3_other", "v3_shotgun")                 # either way
@@ -73,16 +78,45 @@ def cases_cap():
     return out
 
 
+def cases_a2b():
+    recs = RN.load()
+    lk = next(r for r in recs if r["family"] == "LOOKUP")
+    rc = next(r for r in recs if r["family"] == "RECALL" and any(p["grader"] == "ABS" for p in r["probes"]))
+    x, pt = (next(p["turn"] for p in lk["probes"] if p["kind"] == k) for k in ("X", "P"))
+    rx = next(p["turn"] for p in rc["probes"] if p["kind"] == "X")
+
+    def ch(rec, turn, old, new, fields=("probes", "unit"), unit=(0.0, 1.0)):
+        return dict(id=rec["id"], family=rec["family"], cell=rec["cell"], fields=list(fields), unit=list(unit),
+                    probes=[dict(turn=turn, old=list(old), new=list(new))])
+    return [("a2b: X loses a2_cue", ch(lk, x, ["a2_cue"], []), True),
+            ("a2b: X loses a4_voice", ch(lk, x, ["a4_voice"], []), True),
+            ("a2b: X loses both", ch(lk, x, ["a2_cue", "a4_voice"], []), True),
+            ("a2b: X loses a2_cue, still a3_value, unit same", ch(lk, x, ["a2_cue", "a3_value"], ["a3_value"],
+                                                                     unit=(0.0, 0.0)), True),
+            ("a2b: refuse a non-LOOKUP probe (RECALL's X)", ch(rc, rx, ["a2_cue"], []), False),
+            ("a2b: refuse LOOKUP's P probe", ch(lk, pt, ["a2_cue"], []), False),
+            ("a2b: refuse pass to fail", ch(lk, x, [], ["a2_cue"]), False),
+            ("a2b: refuse a gain beside the loss", ch(lk, x, ["a2_cue"], ["a3_value"]), False),
+            ("a2b: refuse a3_value lost", ch(lk, x, ["a3_value"], []), False),
+            ("a2b: refuse a1_degen lost", ch(lk, x, ["a1_degen", "a2_cue"], []), False),
+            ("a2b: refuse clauses that did not move", ch(lk, x, ["a2_cue"], ["a2_cue"]), False),
+            ("a2b: refuse unit only, no probe", dict(ch(lk, x, [], [], ("unit",)), probes=[]), False),
+            ("a2b: refuse the unit going down", ch(lk, x, ["a2_cue"], [], unit=(1.0, 0.0)), False),
+            ("a2b: refuse field flags", ch(lk, x, ["a2_cue"], [], ("probes", "unit", "flags")), False),
+            ("a2b: refuse field leaks", ch(lk, x, ["a2_cue"], [], ("probes", "unit", "leaks")), False)]
+
+
 def main():
     fails = 0
     if "a2" not in DR.EXPECT or DR.EXPECT["a2"] is not DR.expected_a2:
         print("FAIL a2 is not an --expect choice")
         return 1
-    for mode, fn in (("first", DR.expected_first), ("cap", DR.expected_cap)):
+    for mode, fn in (("first", DR.expected_first), ("cap", DR.expected_cap), ("a2b", DR.expected_a2b)):
         if DR.EXPECT.get(mode) is not fn:
             print(f"FAIL {mode} is not an --expect choice running its own rule")
             return 1
     every = [("a2", x) for x in cases()] + [("first", x) for x in cases_first()] + [("cap", x) for x in cases_cap()]
+    every += [("a2b", x) for x in cases_a2b()]
     for mode, (name, c, want) in every:
         got = bool(DR.EXPECT[mode](c))
         if got != want:

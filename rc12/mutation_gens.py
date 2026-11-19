@@ -125,6 +125,24 @@ def m_lookup_absent_key(recs):
     x["key"] = main_p(r)["key"]
 
 
+def _lookup_x_question(recs, prefix):          # A2b content rule (fix round, 2026-11-19)
+    r = first(recs, "LOOKUP", "menu")
+    x = [q for q in r["probes"] if q["kind"] == "X"][0]
+    x["question"] = r["turns"][x["turn"] - 1]["text"] = prefix + x["question"]
+
+
+def m_lookup_q_find(recs):
+    _lookup_x_question(recs, "I can't see who that is on my copy. ")
+
+
+def m_lookup_q_only(recs):
+    _lookup_x_question(recs, "Only the other one has a full list. ")
+
+
+def m_lookup_q_on(recs):
+    _lookup_x_question(recs, "That day is only on the other one, I think. ")
+
+
 def m_k_ref_in_question(recs):
     r = first(recs, "K", "followup")
     p = main_p(r)
@@ -179,7 +197,8 @@ MUTANTS = [(m_gold_in_question, "question contains"), (m_gold_after_source, "rep
            (m_corr_dc, "dc 3 < 4"), (m_udiff_shares_word, "U-diff question shares"),
            (m_indirect_not_adjacent, "indirect correction not right after"), (m_echo_on_gold, "echo=False"),
            (m_persist_breaks_rule, "IDEAL breaks"), (m_persist_old_rule_kept, "old rule kept"),
-           (m_lookup_absent_key, "X key placement"), (m_k_ref_in_question, "K ref"),
+           (m_lookup_absent_key, "X key placement"), (m_lookup_q_find, "not-found cue"),
+           (m_lookup_q_only, "not-found cue"), (m_lookup_q_on, "not-found cue"), (m_k_ref_in_question, "K ref"),
            (m_knowledge_flag, "knowledge flag"), (m_placement, "main probes at u12"),
            (m_topic_names_gold, "question contains"), (m_loop_repeat_request, "repeat request"),
            (m_asks_flipped, "D asks differs"), (m_asks_dropped, "D turn without a bool asks"),

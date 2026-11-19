@@ -1,8 +1,13 @@
 """RC-12 DEV generator tests, part 3: ROLE, LOOKUP, LOOP and K layouts (split from test_gens_fam.py to keep
-files under 250 lines; failures go to test_gens_fam.F)."""
+files under 250 lines; failures go to test_gens_fam.F). Lock step A2b's content rule (fix round, 2026-11-19): no
+LOOKUP probe question holds a not-found cue (grade_cues.lookup_any: LOOKUP_ABS, LOOKUP_ONLY, LOOKUP_ON, negated or
+not), because G-ABS ignores those cues on a probe whose question holds one; it fails every draw of such content at
+test_gens, so B4's early stop sees it."""
 import re
 from collections import Counter, defaultdict
 
+import grade_cues as GC
+import grade_text as GT
 import pools_vals as V
 from test_gens_fam import check, fam, main_p, placement
 
@@ -40,6 +45,8 @@ def t_role_lookup(recs):
         check(f"{p['key']}: {p['gold']}" in tt[asked], f"{r['id']} gold not in the named table")
         check(x["key"] + ":" not in tt[asked] and x["key"] + ":" in tt[other], f"{r['id']} X key placement")
         check((x["turn"] < p["turn"]) == r["meta"]["x_first"] and min(x["turn"], p["turn"]) >= 6, f"{r['id']} X/P")
+        check(not any(GC.lookup_any(GT.norm(q["question"])) for q in r["probes"]),
+              f"{r['id']} LOOKUP question holds a not-found cue (A2b)")
 
 
 def t_loop_k(recs):

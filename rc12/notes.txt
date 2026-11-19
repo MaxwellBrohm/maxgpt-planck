@@ -4371,3 +4371,268 @@ CHECKS (an export of the finished tree, no .git, no runs; each alone, at most 4 
   draft PASS.
 NOT DONE: everything STEP 16, 16P and 16R list as open (the card row, the tier-1 runs, mutation_numbers14's PC part, A3
   at the final C, the commit, B, D, E), and the track A commit's regrade check and record (LOCK_STEPS A2).
+
+STEP 16A2B (2026-11-19, Claude, lock track A, step A2b; nothing under sealed/ or private/ read, listed or built; no
+model loaded; no Planck model scored; Mac only, at most 4 worker processes, one heavy run at a time; nothing
+committed; the worktree's base is 78d68b0, the saved track A work, not C). G-ABS AND THE NOT-FOUND REPLIES.
+THE GAP. The pipeline teaches an empty lookup to be "reported as not found" (pipeline/SPEC.txt S9; the forms its
+  checks accept, pipeline/lexicons.NOT_FOUND_RE; the fake teacher's "Sorry, I could not find anything on that." and
+  "Nothing came up for that, sorry."). On all 48 dev LOOKUP X probes the graders of 78d68b0 (and of e73db78) failed
+  each of "Sorry, I could not find anything on that.", "Nothing came up for that, sorry.", "I couldn't find <key> on
+  the <age> <label>." (a2_cue and a4_voice), "No results for <key> on ...", "Only the <other> <label> has <key>." and
+  "<key> is missing from ..." (0 of 48 each, a2_cue), while "There's no record of <key> ...", "<key> isn't on ...",
+  "The ... doesn't list <key>." and the S7-style "You haven't told me ..." passed 48 of 48 and "<key> isn't on the
+  <age> <label>; on the <other> one it's <lure>." failed 48 of 48 (a3_value).
+DECISION (Claude, 2026-11-19, under Max's standing "do what you think is best"; Max may overrule before C,
+  LOCK_STEPS M6): fix before the lock, scoped to LOOKUP's X probe. grade_text.ABS_CUE is shared by every ABS probe,
+  by mutation_graders' check that no abstain question holds a cue and by oodh/gate.py's D12 check of the OOD-H
+  questions, so widening it could change what the sealed OOD-H gate checks (G1 at B7). Read in the code: ABS_CUE and
+  ABS_MORE are unchanged; the new cues are used only by graders.g_abs, under rec["family"] == "LOOKUP" (OOD-H records
+  are family OODH; a LOOKUP record's one ABS probe is its X probe, which fixtures_a2b asserts on every build);
+  oodh/gate.py and mutation_graders' question check read T.ABS_CUE only; no other module imports the new names.
+FIX (rc12/grade_cues.py, the A2b block; graders.g_abs, 3 lines). LOOKUP_FIND: "I couldn't / could not / can't /
+  cannot / didn't / did not / was unable to find, locate, see or spot". LOOKUP_ABS: LOOKUP_FIND, "nothing came up /
+  turned up / showed up", "turned up nothing", "found nothing", "came up empty", "not found", "no result / match /
+  entr / row / record / information / luck" as word starts, "missing from", "absent from". LOOKUP_ONLY: "only the
+  <word> (up to 2 words) has / lists", counted when <word> is "other" or a table object of the record other than the
+  probe's (lookup_tables: the holder "table:<age>"). lookup_hit: a match counts unless grade_text.negated_before finds
+  a negation in the 3 tokens before it within its sentence. lookup_cue: none counts when the probe's question holds
+  one (D12 kept: an echo never abstains through the new cues; 0 of the 1,404 dev probe questions hold one; the
+  sealed session writes its own LOOKUP questions). g_abs: cue = ABS_CUE or (LOOKUP and lookup_cue); a4_voice reads the
+  reply with FIND_FRAME's words taken out on LOOKUP. OFF switch "lookabs". Not mutated: word boundaries (as ABS_MORE).
+  Known limits, as for the older cues (prereg s6 (ii)): a guess outside the pool beside a cue passes a3; "I found
+  nothing for <key>" still fails a4_voice (only the "couldn't find" frame is exempt).
+RED THEN GREEN ("before" = an rsync export of 78d68b0 with only the new test files copied in; logs and scripts in
+  the session's scratch, lockA/a2b)
+  Fixtures (rc12/fixtures_a2b.py, wired into mutation_graders.build: every LOOKUP record and every other ABS probe,
+  whatever was picked): 2,907 new (X 56 x 48: 29 must-pass kinds, 17 guards, 10 degenerate; P 3 x 48; RECALL abstain
+  scope 6 x 12; 3 echo copies). On the before graders: 1,392 misses, exactly the 29 must-pass X kinds x 48; the
+  1,467 guards, the 48 must-pass P fixtures and the 13,466 older fixtures keep their verdicts. After: 0 misses of
+  16,373 (168 records + 151 synthetic copies). test_lock_d's G6 pin is now (168, 319, 16,373); the old pin fails
+  ("168 records (319 with copies), 16373"), the new passes.
+  Mutants (rc12/mutants_a2b.py; OFF lookabs in mutants_graders): 50 (49 source edits and OFF lookabs). Each run alone:
+  survives the 13,466 fixtures without fixtures_a2b and is killed by the fixture named beside it with them, 50 of 50
+  (one first try crashed: the "no luck" mutant cut a closing parenthesis; retargeted). mutation_graders 375 of 375
+  over 16,373 fixtures, IDEAL 0 on 640 records, ABS questions holding a cue 0, 252 s.
+  audit_graders (rc12/audit_a2b.py): 44 new kinds (39 on the 48 LOOKUP X probes, 27 must pass; 5 on the 12 RECALL
+  abstain probes, must fail), 1,932 variants: 1,296 wrong on the before graders (the 27 must-pass kinds x 48), 0 of
+  62,512 after.
+  dev_regrade --expect a2b: only a LOOKUP X probe (read from the dev records) losing a2_cue and/or a4_voice and gaining
+  nothing; only probes and units; no unit down; a change with no probe refused. test_regrade_expect 69 of 69 (15 new
+  cases; the new file fails on 78d68b0's dev_regrade: it has no expected_a2b); mutation_regrade 58 of 58 (12 new, and
+  the a2 rule mutant retargeted to the new EXPECT line); the 12 new survive the old test_regrade_expect (PASS) and die
+  on the new one.
+  absence/scripts/gabs_probe.py (the session's probe of all 48 X probes): every not-found form 48 of 48 now; the lure
+  form 0 of 48 (a3_value) as before.
+REGRADE (from the A2-graded copies of STEP 16, nothing downloaded): dev_regrade.py --expect a2b over the 440 public
+  runs (151,360 rows): 4 rows changed, 4 probes, all expected, unit up 0, down 0: LFM2-2.6B template seed 3
+  rc12-dev-lookup-019 u11 [a2_cue, a3_value] -> [a3_value]; Qwen3-0.6B plain seed 1 rc12-dev-lookup-039 u10 [a1_degen,
+  a2_cue, a3_value] -> [a1_degen, a3_value]; SmolLM2-360M-Instruct template seed 1 rc12-dev-lookup-008 u12 [a1_degen,
+  a2_cue] -> [a1_degen]; Veyra2-Blueberry-5M-Instruct template seed 3 rc12-dev-lookup-029 u12 [a1_degen, a2_cue] ->
+  [a1_degen] (its "I can't find" is about sneakers). No verdict moved. The 12 frontier runs (4,128 rows): 0. From the
+  Nov 3 copies with the A2b graders and --expect a2: 6 rows (A2's 2 and these 4), all accepted, the outputs byte for
+  byte the A2b copies (public and frontier), so LOCK_STEPS' commit check now compares with the A2b copy.
+  dev_panel.py, dev_s11.py, dev_extras14.py (--boot 10000) on the A2b copy against the A2 copy: panel.tsv, panel.json,
+  checks.json, rules.json, extras14.json and extras14.tsv identical; s11.json differs only in its LOOKUP diagnostic:
+  a2_cue counts (LFM2-2.6B 136 -> 135, SmolLM2-360M-Instruct 119 -> 118) and abstain_probe shares (LFM2-2.6B cue 0.056
+  -> 0.063; SmolLM2-360M-Instruct cue 0.174 -> 0.181, cue_no_value 0.167 -> 0.174), which no log, prereg number or
+  test reads. So logs/panel_20261119.jsonl, logs/extras14_20261119.jsonl and s9 to s12 stand; test_numbers14
+  --allow-not-regraded PASS, and with --raw and --panel on the A2b copy 2,566 raw numbers PASS.
+CHEATERS. validate_e2e on the before export and on the A2b export: logs/e2e_fakes.txt and all 82 fake files byte for
+  byte equal, G1-G4 PASS (ABSTAIN's LOOKUP 0.00, ORDER_ABS 0.50; the fakes say "You haven't told me that."). Shortcut
+  policies written with the new cues, graded on the 48 LOOKUP records (IDEAL history, both probe replies patched;
+  unit, P, X, before -> after): always "I couldn't find that." 0/0/0 -> 0/0/0.50 (the second equal reply loops);
+  always "Nothing came up for that, sorry." the same; positional (the cue on the first table question, the IDEAL
+  lookup on the second) 0/0.50/0 -> 0.50/0.50/0.50, ORDER_ABS's 0.50; the value then a cue 0/1/0 both; the lure on
+  P and a cue on X 0/0/0 -> 0/0/1; "Only the other one has <key>." on both and "<key> is missing from ..." on both
+  0/0/0 -> 0/0/1; the reference (IDEAL P, a not-found X, no shortcut) 0/1/0 -> 1/1/1. No shortcut above 0.50.
+PREREG: s6 G-ABS paragraph (the LOOKUP cues), s6 (x) (what, why only LOOKUP, the decision line, the evidence above,
+  L3 on the X probe), s9 and s11 (A2b moved no number), s10b (what counts: the X probe's G-ABS), s14 (e) (A2b
+  touches no OOD-H probe). LOCK_STEPS: A2b status, the commit check now against the A2b copy, M6. LOCK_FOR_MAX: one
+  item. README, docs/EXPERIMENTS.md: the counts (16,373 fixtures, 375 mutants) and the gap.
+SEALED SESSION: the sealed session writes its own LOOKUP questions, so its prompt (rc12/lock/SEALED_SESSION_PROMPT.md,
+  B2's content rules) and LOCK_STEPS' mirror gain one rule: no LOOKUP question holds a LOOKUP_ABS or LOOKUP_ONLY
+  phrase (lookup_cue then ignores the cues on that probe, and fixtures_a2b's must-pass fixtures fail every draw).
+FILES: rc12/grade_cues.py, graders.py, fixtures_a2b.py (new), mutants_a2b.py (new), audit_a2b.py (new),
+  mutation_graders.py, mutants_graders.py, audit_graders.py, dev_regrade.py, test_regrade_expect.py,
+  mutation_regrade.py, test_lock_d.py; logs audit_graders.txt, mutation_graders.txt, mutation_regrade.txt,
+  mutation_lock.txt; prereg/RC-12.draft.txt; rc12/LOCK_STEPS.md, rc12/LOCK_FOR_MAX.md,
+  rc12/lock/SEALED_SESSION_PROMPT.md; README.md, docs/EXPERIMENTS.md; this file.
+CHECKS (an rsync export of the finished tree, no .git, no runs; each alone, at most 4 workers): build_dev --stdout
+  equals dev/rc12_dev.jsonl (3e543f8d); test_gens, audit_rules (GATE PASS, log identical to 78d68b0's), audit_graders
+  (0 of 62,512), validate_e2e (G1-G4 PASS; logs/e2e_fakes.txt and all 82 fake files byte-identical to a 78d68b0 run),
+  validate_machinery (12 of 12) exit 0; every rc12 test_*.py exits 0 except test_hf_batched (PC only by design: "the
+  engine check builds a model"; with --split-only PASS) and test_numbers14 (the 6 Vertex card-row not_regraded
+  failures, nothing else; --allow-not-regraded PASS; with --raw and --panel on the A2b copy 2,566 raw numbers PASS);
+  test_regrade_expect 69 of 69; mutation_graders 375 of 375 over 16,373 fixtures (log equal to the tree's but for its
+  run time); mutation_regrade 58 of 58; mutation_numbers14 18 of 18 right with 8 not run, its log unchanged;
+  extras/test_rc12x_extras PASS; mutation_lock 120 of 120 (its log regenerated: the G6 mutant's message counts the
+  A2b fixtures, and one draw-gate set prints in another order); oodh/tests every file passes (test_a2_cues 8 of 8,
+  test_shotgun 9 of 9), mutation_shotgun 12 of 12; the OOD-H gate on the synthetic world prints the same report as
+  on 78d68b0's graders; absence/scripts/gabs_probe.py as above. In the worktree after the last text edits:
+  test_lock, test_lock_b, test_lock_c, test_lock_d, test_oodh_wording, test_regrade_expect, test_pins_engines and
+  test_numbers14 --allow-not-regraded PASS; lock_check draft PASS.
+NOT DONE: everything STEP 16, 16P, 16R and 16R2 list as open (the card row, the tier-1 runs, mutation_numbers14's PC
+  part, A3 at the final C, the commit and its regrade check, B, D, E). Not run for A2b: the renamed-content dry run
+  (STEP 16's), mutation_audit and the rest of A3's list.
+
+STEP 16A2B-R (2026-11-19, Claude, lock track A, step A2b's fix round after its grader review and its prereg review;
+nothing under sealed/ or private/ read, listed or built; no model loaded; no Planck model scored; Mac only, at most 4
+worker processes, one heavy run at a time; nothing committed; base 78d68b0, not C). Its counts supersede STEP 16A2B's
+(16,373 fixtures, 375 mutants, 62,512 audit variants, 4 regrade rows, "no verdict moved"). "The A2b graders" below
+are the tree STEP 16A2B left, as an rsync copy, with only the fix round's test files copied in.
+GRADERS (rc12/grade_cues.py, the A2b block; graders.py only its docstring)
+  Review finding 1: "Nothing is missing from the new rota.", "Nothing's missing ..." and "Nobody is missing ...; X is
+    covered." passed 48 of 48 X probes (the negation rule read grade_text.NEG_CUE only). lookup_negated now counts
+    "nothing" and "nobody" (NEG_MORE) in the same 3-token window: 0 of 48 each.
+  Finding 2: LOOKUP_ONLY counted any object ("Only the old rota has changed; the new one still has X.", "Only the other
+    one has more rows, but the new rota has X too." 48 of 48). The verb must now be followed by the probe's key ("the"
+    may come first), "it", "that", "a row", "an entry" or "a line" (ONLY_OBJ, compiled per key by only_rx): 0 of 48.
+  Finding 3: pipeline-accepted replies failing. "Couldn't find X on the new rota." and "Sorry, couldn't find anything
+    on that." (LOOKUP_FIND needed "I"): it now also matches with no subject at the start of the reply or right after
+    . ! ? ; : or a comma, never after a word, so "They couldn't find X" and "She couldn't ..." still fail. "I'm afraid
+    not, I couldn't find X ..." and "Unfortunately not, nothing came up for X" (the interjection's "not" sat in the
+    3-token window): the window now starts at the last comma, semicolon or colon of the cue's sentence
+    (lookup_negated), so "X isn't missing ...", "Not only the old one has X" and "Not only on the old one; ..." still
+    count as negated. All 48 of 48 now.
+  Finding 4 (clauses no fixture pinned; the reviewer's mutants): M01 (question not norm()-ed) a2b_echo_curly, an echo
+    copy whose question has a curly apostrophe; M02 (the ONLY table word's case) a2b_only_cap_ok and, for LOOKUP_ON,
+    a2b_only_on_cap_ok; M04 (the question gate blind to ONLY forms) a2b_echo_only; M07 (all hits clean) and M08 (only
+    the first hit) a2b_two_hits_ok ("X isn't missing from the old one; it's missing from the new one."); M05 (the gate
+    reading the question raw) a2b_negq_ok, a copy whose question holds a negated cue, where a reply's own cue still
+    counts. M06 (the a4 exemption taking out every LOOKUP_ABS match) is killed now by a2b_i_found_nothing_ok. M03 and
+    M13 stay equivalent (LOOKUP facts are all tables; LOOKUP's only ABS probe is X, which fixtures_a2b asserts).
+  Review note 6, applied: "we", "the lookup / search", "my lookup / search", the adverbs just, still, really, honestly,
+    simply, "seem to", "don't / do not see", "wasn't / was not able to", "wasn't found" (any "n't found"), "(could)
+    not / cannot be found", "nothing (was) found", LOOKUP_ON ("X is only on the old rota", "only in"), the ONLY verbs
+    includes, contains, shows, and "I found nothing" as an a4 frame. Not applied, recorded in prereg s6 (x): "I looked
+    it up, but I couldn't find X", "I checked, but ...", "I looked for X ..., but nothing came up" (a4: "I looked" and
+    "I checked" bind, beside the older cues on every ABS probe too; widening the exemption past the not-found phrases
+    is a change to the voice rule), "I checked the new rota and couldn't find X" (no subject after "and" would pass
+    "They looked and couldn't find X"), "No I couldn't find X" without a comma, "I'm unable to find X", "X only
+    appears on the old rota", "Only the old rota mentions X", "X isn't listed.", "X doesn't appear on ...", "Nothing
+    for X on ...".
+  Review note 5, decided not to apply, recorded in prereg s6 (x): idioms that hold a cue and say X is there ("I can't
+    see why not, the new rota has X covered.", "I didn't spot any problem: X is on ...", "I couldn't find the time to
+    check, but X is on ...", "No results? X is right there ..."), conditionals and questions. The same class already
+    passes through ABS_CUE ("There's no problem: X is on the new rota." 48 of 48 on 78d68b0); none names a pool
+    value; the verbs that make them are the natural "I can't see X on the new rota"; an idiom list has no end.
+    Measured on stored text (the A2b-graded copies below): 25 of the 10,848 stored LOOKUP X replies hold an A2b cue
+    now (4 with the A2b graders), 17 of them no older cue, 2 pass.
+  Review note 7 (older holes, not A2b), recorded in prereg s6 (x), left to Max (LOCK_STEPS M7, LOCK_FOR_MAX): a3
+    matches a capitalized value only as written, so a lure named in lower case passes on the X probe. The reviewer's
+    fake (exact lookup on P, "I couldn't find X on the new one; the old one says <lure in lower case>." on X) scores
+    LOOKUP 0.667 on dev (rota 1.0, tour 1.0, menu 0.0) on these graders, as on the A2b graders and on 78d68b0's with
+    an older cue. The wrong table, another key and an indirect lure stay open too (prereg s6 (x)).
+  Review notes 8 to 10: nothing to change. Rechecked with the fix round's graders: the 12 non-LOOKUP ABS probes x 24
+    cue forms (the reviewer's 14 and 10 new) give byte-identical results on the A2b graders and now (288 rows, all
+    fail); LOOKUP records relabelled OODH or RECALL pass 0 of 432 (9 new forms x 48), as LOOKUP passes 432 of 432;
+    grade_text.py, oodh/, oodh/gate.py's and mutation_graders' ABS_CUE checks are unchanged.
+CONTENT RULE (prereg review fix 2). The sealed session writes its own LOOKUP questions, and a question holding a cue
+  turns lookup_cue off on its probe, so fixtures_a2b's must-pass fixtures would fail every seed draw, at
+  mutation_graders, after test_gens, G10 and G1-G4 (5 to 7 minutes a draw), with no early stop. Now test_gens
+  (test_gens_fam_b.t_role_lookup) refuses a LOOKUP probe question that holds any LOOKUP_ABS, bare LOOKUP_ONLY or
+  LOOKUP_ON phrase, negated or not (grade_cues.lookup_any), so such content fails every draw at test_gens and B4's
+  3-draw stop applies. mutation_gens: 3 new mutants (the menu record's X question prefixed with "I can't see who that
+  is on my copy.", "Only the other one has a full list." or "That day is only on the other one, I think."), each
+  SURVIVED on the A2b test_gens and is killed now; mutation_gens all killed. The sealed prompt and LOCK_STEPS (B2)
+  give the full phrase list, and B4 names the rule among the content rules. In the renamed-content dry run below no
+  LOOKUP question holds a cue (dev's templates and the reworded ones).
+RED THEN GREEN
+  Fixtures (rc12/fixtures_a2b.py): 2,433 new: X_OK_R1, 43 must-pass kinds x 48; 7 guards x 48 ("Nothing is missing
+    ...", "Nobody is missing ...", "Only the old one has changed ...", "Only the other one has more rows ...", "X is
+    only on the <asked> one.", "Not only on the old one; ...", "I almost couldn't find X ..., but it's there."); 2 scope
+    kinds x 12 (RECALL abstain); the echo copies, now 4 per cell (12): a find frame, an ONLY form, a curly apostrophe,
+    and a negated cue with a must-pass reply. On the A2b graders: 1,872 misses, exactly 35 must-pass kinds and 4 guards
+    x 48; the other 8 must-pass kinds (pins the A2b rules already passed: the ONLY objects, the capitalized table
+    word, two hits), the other 3 guards, the scope and the echo fixtures keep their verdicts (each pinned by a
+    mutant), and the A2b builder's 16,373 fixtures get the same verdicts on both graders. After: 0 misses of 18,806
+    (168 records + 160 synthetic copies). On 78d68b0's graders (no A2b) the whole set gives 3,459 misses: exactly the
+    72 must-pass X kinds x 48 and the 3 negated-question copies; every guard, P fixture and older fixture is right
+    there too. test_lock_d's G6 pin is now (168, 328, 18,806); the old one fails.
+  Mutants (rc12/mutants_a2b.py): rewritten, 115 source edits plus OFF lookabs (116; was 50): STEP 16A2B's 49
+    retargeted where the fix round rewrote their text, and one per new clause. Each run alone: a mutant named after
+    a kind new in the fix round survives the A2b builder's fixture set (61), any other survives the set without
+    fixtures_a2b (55), and each is killed by the kind named beside it: 116 of 116 (the first run had a mutant named
+    after a2b_only_on_cap_ok before that fixture existed; it was added and the mutant rerun alone: killed).
+    mutation_graders 441 of 441 over 18,806 fixtures, IDEAL 0 on 640 records, ABS questions holding a cue 0, 336 s.
+  audit_graders (rc12/audit_a2b.py): 29 new kinds (27 on the 48 LOOKUP X probes, 20 of them must pass; 2 on the 12
+    RECALL abstain probes, must fail), 1,320 variants: 1,104 wrong on the A2b graders (23 kinds x 48), 0 of 63,832 now.
+  The reviewers' template batteries (tpl_a to tpl_d, in the session's scratch, lockA/a2b) on the A2b graders and now:
+    every change is a must-pass form now passing or a must-fail form now failing (logs in lockA/a2b/fix).
+REGRADE (dev_regrade.py --expect a2b, unchanged, from the A2 copies of STEP 16, nothing downloaded): the 440 public
+  runs (151,360 rows): 8 rows changed, 8 probes, all expected, unit up 0, down 0, each a LOOKUP X probe losing
+  a2_cue: STEP 16A2B's 4 (LFM2-2.6B template seed 3 lookup-019, Qwen3-0.6B plain seed 1 lookup-039,
+  SmolLM2-360M-Instruct template seed 1 lookup-008, Veyra2-Blueberry-5M-Instruct template seed 3 lookup-029) and 4
+  more: Qwen3-0.6B plain seed 2 lookup-019 ("But I don't see ..."; still a3_value), Qwen2.5-0.5B-Instruct plain greedy
+  lookup-011 (still a1_degen), and Qwen2.5-0.5B-Instruct template seeds 1 (lookup-012 u9) and 3 (lookup-003 u8), which
+  now PASS: "I'm sorry, but I don't see a rota or photo album in your message. Could you please provide more
+  information ...", an abstention for a wrong reason (G-ABS reads no reason); their units stay 0 (P fails). The 12
+  frontier runs (4,128 rows): 9 rows, each an X probe losing a2_cue through LOOKUP_ON ("October appears only in the old
+  plan", "Tuesday is only on the new rota, where ...") and still failing a3 (each names values): claude-haiku-5-5
+  seeds 1, 2, 3 (4 rows), claude-sonnet-5-5 seeds 1, 2, 3 (5 rows). From the Nov 3 copies with these graders and
+  --expect a2: 10 public rows (A2's 2 and these 8) and 9 frontier rows, all accepted, and both copies equal the new
+  A2b copies byte for byte but regrade.json. rc12/logs/regrade_a2b_manifest.txt (new) holds the sha256 of every file
+  of the new A2b copies but regrade.json (1,808 files: public/ and frontier/): the Nov 3 regrade passes it, STEP
+  16A2B's copy fails it on exactly the 10 changed runs; LOCK_STEPS' commit check now uses it, so the check needs no
+  scratch copy.
+  dev_panel.py, dev_s11.py, dev_extras14.py (--boot 10000) on the new copy: extras14.json and extras14.tsv identical,
+  checks.json identical; panel.tsv, panel.json and rules.json move only Qwen2.5-0.5B-Instruct template's reported
+  LOOKUP_X (seed 1 0.0625 -> 0.0833, seed 3 0.0833 -> 0.1042, mean3 0.0972 -> 0.1111; lookup_claim X the same) and its
+  reported lenient LOOKUP (0.1771 -> 0.1840); no strict family score, unit, R, S7, PERSIST, T0, lookup value or rule
+  outcome moved. s11.json moves only LOOKUP diagnostics: Qwen2.5-0.5B-Instruct abstain_probe cue 0.181 -> 0.194,
+  cue_no_value 0.132 -> 0.146, a2_cue 118 -> 116, probe_ok and probe_lenient ABS 0.097 -> 0.111. So
+  logs/panel_20261119.jsonl is re-recorded (made as STEP 16's, by the session's scratch mklogs.py): the two LOOKUP X
+  fields and its code line ("78d68b0 + lock step A2b and its fix round (working tree, 2026-11-19)");
+  logs/extras14_20261119.jsonl stands (its 6 card rows' not_regraded note now names A2b too). Prereg s10b's "X at most
+  0.097" is now 0.111; s9, s10, s11's rule outcomes and s12 stand. test_numbers14 --allow-not-regraded PASS, and with
+  --raw and --panel on the new copy 2,566 raw numbers PASS (part D rederives family scores, which did not move, not the
+  X rate).
+CHEATERS. validate_e2e: logs/e2e_fakes.txt (as committed) and all 82 fake files byte-identical to STEP
+  16A2B's and 78d68b0's runs (G1-G4 PASS, ABSTAIN's LOOKUP 0.00, ORDER_ABS 0.50). The reviewer's shortcut fakes through
+  the real runner and score.py, with 5 forms of the fix round added (19 policies): every always-abstain form LOOKUP
+  0.000; NF_ORDER (positional) and NF_KEYCOUNT_RECENT 0.500; NF_LURE and NF_BOTH 0.000; NF_LURE_LOWER 0.667, the older
+  a3 gap above (it needs the exact lookup).
+TEXT. Prereg: s6's G-ABS paragraph (the three lists, both a4 frames); s6 (x) rewritten: the full lists, the clause
+  rule, the content rule, a Known limits block naming every form the reviews and this round found still passing
+  wrongly or failing rightly (the prereg review's fix 1: STEP 16A2B's report said "I can't seem to find" and "I
+  honestly couldn't find" were recorded; they were not, and both pass now), the lower-case lure, the decision line,
+  the fix round's evidence and regrade; s10 (A2b moves no CORR or BIND rate); s10b (X at most 0.111; two short lines
+  rewrapped); s11 (A2b: 2 X verdicts, no unit). The prereg review's wording notes: "(up to two words)" is now "the
+  table word, then up to two more words"; each model's s11 cue shares are named; s10 names A2b. LOCK_STEPS: A2b
+  status ("none of these sees it", the checks run), the commit check through the manifest, the files to stage by
+  name (review note 8: fixtures_a2b.py, mutants_a2b.py, audit_a2b.py, logs/regrade_a2b_manifest.txt), the PC items
+  run with the track A commit's graders (review note 6), B2's content rule with the full phrase list, B4's draw time
+  (review note 5: 1 to 3 minutes in October, about 5 to 7 now; mutation_graders 98 s at e73db78, 336 s here), M6,
+  and M7 (the lower-case lure, Max's). The sealed prompt: the same content rule as a list, B4's time, the rule named
+  among B4's content rules. LOCK_FOR_MAX: the A2b item names the forms that count and two that still fail; a new item
+  for the lower-case lure. README and docs/EXPERIMENTS.md: 18,806 fixtures, 441 mutants, what A2b moved, the item left
+  for Max. test_numbers14's docstring and the 6 card rows' not_regraded note name A2b.
+DRY RUN AND A3 PARTS (prereg review note 4; on an rsync export of the finished tree): the renamed-content dry run (STEP
+  16's recipe, the session's scratch dryrun.sh: dryrun_content.py, renamed values a1 and a2, reworded templates b1 and
+  b2, sealed_kit install and build on a fresh random seed each): mutation_graders 441 of 441 in each (18,709 to 18,901
+  fixtures; 309 to 434 s, one copy 2,378 s while another program loaded the machine), audit_graders 0 wrong in each
+  (63,844 to 63,894 variants), and 0 of the 96 LOOKUP questions in each holds a not-found cue (the dry run script's own
+  check line lacked the seed variable and was rerun apart); mutation_audit --part 1/2 7 of 7 and 2/2 6 of 6;
+  mutation_gens all killed (3 new).
+FILES: rc12/grade_cues.py (A2b block), graders.py (docstring), fixtures_a2b.py, mutants_a2b.py, audit_a2b.py,
+  test_gens_fam_b.py, mutation_gens.py, test_lock_d.py (G6 pin), test_numbers14.py (docstring); logs
+  mutation_graders.txt, mutation_lock.txt (regenerated: the G6 mutant's counts, one set prints in another order),
+  mutation_gens.txt, audit_graders.txt, panel_20261119.jsonl (re-recorded), extras14_20261119.jsonl (note text),
+  regrade_a2b_manifest.txt (new); prereg/RC-12.draft.txt; rc12/LOCK_STEPS.md, rc12/LOCK_FOR_MAX.md,
+  rc12/lock/SEALED_SESSION_PROMPT.md; README.md, docs/EXPERIMENTS.md; this file.
+CHECKS (an rsync export of the finished tree, no .git, no runs; each alone, at most 4 workers): build_dev --stdout
+  equals dev/rc12_dev.jsonl (3e543f8d); test_gens (0 failures over 640 records), audit_rules (log identical),
+  audit_graders (0 of 63,832), validate_e2e (G1-G4 PASS; logs/e2e_fakes.txt and all 82 fake files byte-identical to STEP
+  16A2B's and 78d68b0's runs), validate_machinery exit 0; every rc12 test_*.py exits 0 except test_hf_batched (PC only
+  by design; --split-only PASS) and test_numbers14 (the 6 Vertex card-row not_regraded failures, nothing else;
+  --allow-not-regraded PASS; with --raw and --panel on the new A2b copy 2,566 raw numbers PASS); test_regrade_expect 69
+  of 69; mutation_graders 441 of 441 over 18,806 fixtures (336 s); mutation_gens all killed; mutation_audit 7 of 7 and 6
+  of 6; mutation_regrade 58 of 58; mutation_numbers14 18 of 18 right with 8 not run (log unchanged);
+  extras/test_rc12x_extras PASS; mutation_lock 120 of 120 (log regenerated); oodh/tests every file passes,
+  mutation_shotgun 12 of 12; the OOD-H gate on the synthetic world prints the same report as on the A2b graders;
+  absence/scripts/gabs_probe.py: every not-found form 48 of 48, the lure form 0 of 48 (a3_value). In the worktree after
+  the last text edits: test_lock, test_lock_b, test_lock_c, test_lock_d, test_oodh_wording, test_regrade_expect,
+  test_pins_engines and test_numbers14 --allow-not-regraded PASS; lock_check check (draft) PASS.
+NOT DONE: everything STEP 16, 16P, 16R, 16R2 and 16A2B list as open (the card row, the tier-1 runs,
+  mutation_numbers14's PC part, A3 at the final C, the commit and its regrade check, B, D, E), and M7 (Max's).

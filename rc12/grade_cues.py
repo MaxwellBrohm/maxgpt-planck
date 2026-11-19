@@ -34,7 +34,34 @@ prereg s6). Each piece is pinned by a fixture (fixtures_a2.py) and a mutant (mut
               not"; "cannot", "can not", "can't" ...), and a "not" that opens the value also as "n't" on the word
               before it ("She isn't spicy" for "not spicy"). Only the auxiliary of the value's own negation: "wasn't
               X" is not "is not X". A value without a negation (every RC-12 value: one pool word or a holder) gets
-              None, so its matching is exactly V.value_re's. Assertion rules apply to the match as to any mention"""
+              None, so its matching is exactly V.value_re's. Assertion rules apply to the match as to any mention
+LOCK STEP A2b (2026-11-19; rc12/notes.txt STEP 16A2B; prereg s6 (x); fixtures_a2b.py, mutants_a2b.py, audit_a2b.py).
+LOOKUP's X probe only (graders.g_abs, on a LOOKUP record: its one ABS probe), never ABS_CUE, so none of these sees
+it: another family, an OOD-H probe, oodh/gate.py's D12 check, mutation_graders' question check:
+  LOOKUP_ABS  the not-found replies the Planck pipeline teaches (pipeline/SPEC.txt S9 "empty result reported as not
+              found"; its accepted forms, pipeline/lexicons.NOT_FOUND_RE): "I couldn't find X", "I could not / can't /
+              cannot / didn't / did not / don't / do not / was unable to / wasn't able to / was not able to (seem
+              to) find, locate, see or spot X" (LOOKUP_FIND; the subject "I", "we", "the lookup / search" or "my
+              lookup / search", then maybe one of just, still, really, honestly, simply; or no subject at a clause
+              start, the text's start or after . ! ? ; : or a comma: "Couldn't find X.", "Sorry, couldn't find
+              anything"), "Nothing came up / turned up / showed up", "nothing (was) found", "turned up nothing",
+              "found nothing", "came up empty", "not found", "wasn't found", "(could) not / cannot be found", "No
+              results / match / entry / row / record / information / luck" (a word start: "No matches", "No
+              entries"), "missing from", "absent from"
+  LOOKUP_ONLY "Only the <table> (up to 2 words) has / lists / includes / contains / shows" followed by the probe's
+              key ("the" may come first), "it", "that", "a row", "an entry" or "a line" (fix round, 2026-11-19: "Only
+              the old one has changed" says nothing about X), and "only on / in the <table>" ("X is only on the old
+              rota"); each counted only when <table> is "other" or a table of the record other than the one asked
+              (lookup_tables): "Only the new one has X" asked of the new table says X is there
+  lookup_cue  a match counts unless negated in the 3 word tokens before it within its clause (from the last comma,
+              semicolon or colon of its sentence: "I'm afraid not, I couldn't find X" is no negation of the cue;
+              lookup_negated reads grade_text.negated_before there: "X isn't missing from", "Not only the old one has
+              X"), "nothing" and "nobody" counting as negations too ("Nothing is missing from the new rota"), and none
+              counts when the probe's question holds one, so an echo of the question never abstains through them
+              (G-ABS has no echo clause, D12; test_gens refuses a LOOKUP question holding any of them)
+  FIND_FRAME  LOOKUP_FIND and "I found nothing" are taken out of the reply before a4_voice on LOOKUP ("I couldn't
+              find X" binds nothing): only the frame goes, so "I am on X myself" or "My X is free" beside it still
+              fails"""
 import re
 
 HEDGE_MORE = (r"guess|can't be (?:sure|certain)|cannot be (?:sure|certain)|if i (?:remember|recall)|if i'm not mistaken"
@@ -55,6 +82,21 @@ REPORT_BREAK = re.compile(r"[,;]|\bbut\b|\bso\b", re.I)
 QUOTE_FRAME = re.compile(r"\byou\s+(?:asked|said)(?:\s+me)?\s*[,:]?\s*$", re.I)
 QUOTED_Q = re.compile(r'(?P<pre>[^"]*)"(?P<q>[^"]*\?)"[\s.!]*')
 _FRAME = []
+LOOKUP_FIND = (r"(?:\b(?:i|we|(?:the|my) (?:lookup|search))(?: (?:just|still|really|honestly|simply))? "
+               r"|(?:^|(?<=[.!?;:,]))\s*)(?:couldn't|could not|can't|cannot|didn't|did not|don't|do not|was unable to"
+               r"|wasn't able to|was not able to)"
+               r"(?: seem to)? (?:find|locate|see|spot)\b")
+LOOKUP_ABS = (LOOKUP_FIND + r"|\bnothing (?:came|turned|showed) up\b|\bnothing (?:was )?found\b"
+              r"|\b(?:turned up|found) nothing\b|\bcame up empty\b|\b(?:not|cannot|\w+n't)(?: be)? found\b"
+              r"|\bno (?:result|match|entr|row|record|information|luck)|\b(?:missing|absent) from\b")
+LOOKUP_ONLY = r"\bonly the (\w+)(?: \w+){0,2} (?:has|lists|includes|contains|shows) "
+ONLY_OBJ = r"(?:it|that|a row|an entry|a line|(?:the )?KEY)\b"
+LOOKUP_ON = r"\bonly (?:on|in) the (\w+)\b"
+LOOKUP_FRAME = LOOKUP_FIND + r"|\bi found nothing\b"
+FIND_FRAME, _LOOKUP, _ON = (re.compile(x, re.I) for x in (LOOKUP_FRAME, LOOKUP_ABS, LOOKUP_ON))
+CLAUSE = re.compile(r"[,;:]")
+NEG_MORE = re.compile(r"\b(?:nothing|nobody)\b", re.I)
+_ONLY = {}
 NEG_GROUPS = (("is not", "isn't", "'s not"), ("are not", "aren't", "'re not"), ("am not", "'m not"),
               ("was not", "wasn't"), ("were not", "weren't"), ("do not", "don't"), ("does not", "doesn't"),
               ("did not", "didn't"), ("has not", "hasn't"), ("have not", "haven't", "'ve not"), ("had not", "hadn't"),
@@ -143,3 +185,49 @@ def reported_question(sent, pos):
     """sent is one quoted question ending in "?" that "you asked / said" opens, and the mention at pos is inside it."""
     m = QUOTED_Q.fullmatch(sent)
     return bool(m) and m.start("q") <= pos < m.end("q") and QUOTE_FRAME.search(m.group("pre")) is not None
+
+
+def lookup_tables(rec, probe):
+    """the record's tables other than the one the probe asks about (its holder "table:<name>"), lowercased."""
+    asked = str(probe.get("holder") or "").split(":", 1)[-1].lower()
+    objs = {f["object"].lower() for t in rec["turns"] for f in t.get("facts") or [] if f.get("role") == "table"}
+    return objs - {asked}
+
+
+def only_rx(key):
+    """LOOKUP_ONLY with its object (ONLY_OBJ, the key in any case), compiled once per key; no key: never matches."""
+    if key not in _ONLY:
+        _ONLY[key] = re.compile(LOOKUP_ONLY + ONLY_OBJ.replace("KEY", re.escape(key) if key else "(?!)"), re.I)
+    return _ONLY[key]
+
+
+def lookup_negated(text, pos):
+    """a negation (grade_text.negated_before, or "nothing" / "nobody") in the 3 word tokens before pos, read from the
+    last comma, semicolon or colon of its sentence (module docstring)."""
+    import grade_text as T                    # late, as report_frame: grade_text imports this module
+    s0 = T.sentence_span(text, pos)[0]
+    s0 = max([s0] + [c.end() for c in CLAUSE.finditer(text, s0, pos)])
+    window = " ".join(T.toks(text[s0:pos])[-T.P["neg_window"]:])
+    return T.negated_before(text, s0, pos) or ("neg" not in T.OFF and NEG_MORE.search(window) is not None)
+
+
+def lookup_hit(text, others, key):
+    """text holds a LOOKUP_ABS match, or a LOOKUP_ONLY (with its object) or LOOKUP_ON one naming "other" or a table
+    in others, not negated."""
+    ok = others | {"other"}
+    hits = list(_LOOKUP.finditer(text)) + [m for m in only_rx(key).finditer(text) if m.group(1).lower() in ok] \
+        + [m for m in _ON.finditer(text) if m.group(1).lower() in ok]
+    return any(not lookup_negated(text, m.start()) for m in hits)
+
+
+def lookup_any(text):
+    """any LOOKUP_ABS, LOOKUP_ON or bare LOOKUP_ONLY match, negated or not, whatever the table: test_gens' content
+    rule for LOOKUP questions (fix round, 2026-11-19)."""
+    return any(re.search(x, text, re.I) for x in (LOOKUP_ABS, LOOKUP_ONLY, LOOKUP_ON))
+
+
+def lookup_cue(text, rec, probe):
+    """the A2b abstain cue of a LOOKUP X reply (module docstring); text already norm()-ed."""
+    import grade_text as T
+    others, key = lookup_tables(rec, probe), probe.get("key")
+    return not lookup_hit(T.norm(probe.get("question")), others, key) and lookup_hit(text, others, key)

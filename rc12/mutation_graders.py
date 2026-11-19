@@ -5,7 +5,8 @@
    name, and the assistant-name fixtures that kill the "given" voice mutants vanished; STEP 15); every probe of a
    record (PERSIST and LOOP: the first probe and the one with the shortest question). Every fixture must get
    its stated verdict from the real graders (correct replies pass; empty, loop, copy, leak, cap, hedge, negation,
-   question, guess list, shotgun, user voice, wrong candidate, stale, echo fail).
+   question, guess list, shotgun, user voice, wrong candidate, stale, echo fail). Lock step A2b (2026-11-19):
+   fixtures_a2b adds every LOOKUP record (its X and P probes) and every other ABS probe, whatever was picked.
 2. Conversation tests: unit scores (mean / all), the role-leak scan and the OD6 (iii) loop / ack-repeat flags
    (fixtures_more.conv_loop_fixtures) on patched IDEAL conversations; the F3 measurement (graders.eq_only: a right
    answer repeating the model's own confirmation is equality-only, a looped wrong answer or a 3-gram stutter is
@@ -20,6 +21,7 @@ import sys
 import time
 
 import fixtures_a2 as FA2
+import fixtures_a2b as FA2B
 import fixtures_graders as F1
 import fixtures_more as F2
 import grade_fmt_dyn as FD
@@ -77,7 +79,10 @@ def build(recs):
     neg, nfx = FA2.neg_records(index)         # A2 (v) (2026-11-19): synthetic negation golds, fixtures only
     index.update(neg)
     fixtures += [dict(f, grader="VAL", family=neg[f["rid"]]["family"]) for f in nfx]
-    return fixtures, index
+    add, bfx = FA2B.records_and_fixtures(recs)   # A2b (2026-11-19): every LOOKUP record, every other ABS probe
+    for rid, r in add.items():
+        index.setdefault(rid, r)
+    return fixtures + bfx, index
 
 
 def history(rec, patch):

@@ -45,4 +45,16 @@ KILLED    dev_regrade.py: cap: loop_RUNAWAY may not go | test_regrade_expect.py:
 KILLED    dev_regrade.py: cap: v2_gold may go | test_regrade_expect.py: FAIL cap: lose v2_gold: got True, want False
 KILLED    dev_regrade.py: cap: a loop flag may move | test_regrade_expect.py: FAIL cap: field flags: got True, want False
 KILLED    dev_regrade.py: cap: --expect cap runs another rule | test_regrade_expect.py: FAIL cap is not an --expect choice running its own rule
-MUTANTS killed 46/46
+KILLED    dev_regrade.py: a2b: --expect a2b runs another rule | test_regrade_expect.py: FAIL a2b is not an --expect choice running its own rule
+KILLED    dev_regrade.py: a2b: a probe of any family and kind may move | test_regrade_expect.py: FAIL a2b: refuse a non-LOOKUP probe (RECALL's X): got True, want False
+KILLED    dev_regrade.py: a2b: an X probe of any family | test_regrade_expect.py: FAIL a2b: refuse a non-LOOKUP probe (RECALL's X): got True, want False
+KILLED    dev_regrade.py: a2b: LOOKUP's P probe | test_regrade_expect.py: FAIL a2b: refuse LOOKUP's P probe: got True, want False
+KILLED    dev_regrade.py: a2b: a2_cue may not go | test_regrade_expect.py: FAIL a2b: X loses a2_cue: got False, want True
+KILLED    dev_regrade.py: a2b: a4_voice may not go | test_regrade_expect.py: FAIL a2b: X loses a4_voice: got False, want True
+KILLED    dev_regrade.py: a2b: a3_value may go | test_regrade_expect.py: FAIL a2b: refuse a3_value lost: got True, want False
+KILLED    dev_regrade.py: a2b: a probe may gain (pass to fail) | test_regrade_expect.py: FAIL a2b: refuse pass to fail: got True, want False
+KILLED    dev_regrade.py: a2b: a probe whose clauses did not move passes | test_regrade_expect.py: FAIL a2b: refuse clauses that did not move: got True, want False
+KILLED    dev_regrade.py: a2b: a loop flag or the leak scan may move | test_regrade_expect.py: FAIL a2b: refuse field flags: got True, want False
+KILLED    dev_regrade.py: a2b: a change with no probe passes | test_regrade_expect.py: FAIL a2b: refuse unit only, no probe: got True, want False
+KILLED    dev_regrade.py: a2b: a unit may go down | test_regrade_expect.py: FAIL a2b: refuse the unit going down: got True, want False
+MUTANTS killed 58/58

@@ -18,7 +18,8 @@ OFF = ["neg", "postneg", "question", "hedge", "hypo", "cond", "alt", "list", "th
        "shotgun", "echo_contains", "cue", "absvalue", "absvoice", "short", "rule", "old", "source", "other", "assert",
        "listvoice", "claim", "ownname", "self", "stuff", "inflect", "inflect_you", "first",
        "askedif", "rephedge", "repquest",    # lock step A2 (2026-10-19): grade_cues asked_if, reported_hedge, _question
-       "negform"]                            # A2 (v) (2026-11-19): grade_cues.neg_value_re
+       "negform",                            # A2 (v) (2026-11-19): grade_cues.neg_value_re
+       "lookabs"]                            # A2b (2026-11-19): LOOKUP's X probe, grade_cues.lookup_cue
 
 PARAM = [("grade_text", "P", "neg_window", 1), ("grade_text", "P", "echo", 0.95), ("grade_text", "P", "alt_chars", 0),
          ("grade_loop", "LP", "tri_rep", 5), ("grade_loop", "LP", "selfcopy", 0.9),
@@ -238,4 +239,5 @@ SOURCE = [
 ]
 
 from mutants_a2 import SOURCE_A2  # noqa: E402  lock step A2 (2026-10-19)
-SOURCE += SOURCE_A2
+from mutants_a2b import SOURCE_A2B  # noqa: E402  lock step A2b (2026-11-19)
+SOURCE += SOURCE_A2 + SOURCE_A2B

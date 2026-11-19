@@ -69,7 +69,7 @@ MUTANTS = [
         '    return set(c["fields"]) <= {"probes", "unit"} and',
      'if True\n             for x in set(p["old"]) ^ set(p["new"])}\n    return set(c["fields"]) <= {"probes", "unit"} and',
      "a2: a flipped OWN source not exempt"),
-    (R, '"a2": expected_a2}', '"a2": expected_t0gaps}', "a2: --expect a2 runs another rule"),
+    (R, '"a2": expected_a2,', '"a2": expected_t0gaps,', "a2: --expect a2 runs another rule"),   # retargeted (A2b)
     # review r1 (2026-11-19): v2_gold, a2_cue and d4_assert may only be lost (A2_ONLY_LOST; test_regrade_expect)
     (R, " and not gained & A2_ONLY_LOST", "", "a2: a probe may gain v2_gold, a2_cue or d4_assert"),
     (R, 'A2_ONLY_LOST = {"d4_assert", "a2_cue", "v2_gold"}', 'A2_ONLY_LOST = {"a2_cue", "v2_gold"}',
@@ -104,6 +104,23 @@ MUTANTS = [
         '<= CAP', 'return set(c["fields"]) <= {"probes", "unit", "flags"} and c["probes"] and all(\n        '
         'set(p["old"]) - set(p["new"]) <= CAP', "cap: a loop flag may move"),
     (R, '"cap": expected_cap,', '"cap": expected_first,', "cap: --expect cap runs another rule"),
+    # --expect a2b (lock step A2b, 2026-11-19; killed by test_regrade_expect.py's a2b cases)
+    (R, '"a2b": expected_a2b}', '"a2b": expected_a2}', "a2b: --expect a2b runs another rule"),
+    (R, '        lookup_x(c["id"], p["turn"]) and set', "        set", "a2b: a probe of any family and kind may move"),
+    (R, 'rec["family"] == "LOOKUP" and p["kind"] == "X"', 'p["kind"] == "X"', "a2b: an X probe of any family"),
+    (R, 'rec["family"] == "LOOKUP" and p["kind"] == "X"', 'rec["family"] == "LOOKUP"', "a2b: LOOKUP's P probe"),
+    (R, 'A2B_LOST = {"a2_cue", "a4_voice"}', 'A2B_LOST = {"a4_voice"}', "a2b: a2_cue may not go"),
+    (R, 'A2B_LOST = {"a2_cue", "a4_voice"}', 'A2B_LOST = {"a2_cue"}', "a2b: a4_voice may not go"),
+    (R, 'A2B_LOST = {"a2_cue", "a4_voice"}', 'A2B_LOST = {"a2_cue", "a4_voice", "a3_value"}', "a2b: a3_value may go"),
+    (R, ' and set(p["new"]) < set(p["old"])\n', "\n", "a2b: a probe may gain (pass to fail)"),
+    (R, ' and set(p["new"]) < set(p["old"])\n', ' and set(p["new"]) <= set(p["old"])\n',
+     "a2b: a probe whose clauses did not move passes"),
+    (R, 'return set(c["fields"]) <= {"probes", "unit"} and bool(c["probes"]) and all(',
+     'return set(c["fields"]) <= {"probes", "unit", "flags", "leaks"} and bool(c["probes"]) and all(',
+     "a2b: a loop flag or the leak scan may move"),
+    (R, ' and bool(c["probes"]) and all(', " and all(", "a2b: a change with no probe passes"),
+    (R, '        for p in c["probes"]) and c["unit"][1] >= c["unit"][0]\n', '        for p in c["probes"])\n',
+     "a2b: a unit may go down"),
 ]
 
 

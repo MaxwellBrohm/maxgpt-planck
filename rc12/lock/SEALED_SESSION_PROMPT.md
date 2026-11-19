@@ -160,6 +160,15 @@ Then run **B7** (below) now, before B1. It reads only the code at `<C>` and `sea
 - **Unchanged:** every name, type, dict key, list length and `{placeholder}` (`split_content.shape_diff` refuses anything else), and the identifier fields of `split_content.PINS` (RECALL_SLOTS `key`/`vtype`, TWOHOP `vtype`, LOOKUP `keys`/`vals`, the K kind). Keys are free only where CONTENT marks a name with `*` (OWN_LIST, PROJECTS; PROJECTS keys equal the new PROJECT pool).
 - **Plural and singular forms.** No weekday, instrument, food or project value may have a plural or singular that is another common word. At least one instrument, food or project value ends in s, as dev's "drums" does. test_gens checks this: the grader's singular-form rule needs such a value.
 - **No hedge or alternative cue in OWN pick values** (the BOAT, PUPPY, BAND and QUIZTEAM pools): no "guess", "seems", "maybe", "or", "/" or "?". The grader never counts a name it reads as hedged, an alternative or a question as asserted. A G6 source fixture would then get the wrong verdict on any seed whose chosen OWN pick records use it.
+- **No not-found phrase in a LOOKUP question** (`q`), negated or not: none of `grade_cues.LOOKUP_ABS`, `LOOKUP_ONLY` or `LOOKUP_ON`. The full list:
+  - "couldn't", "could not", "can't", "cannot", "didn't", "did not", "don't", "do not", "was unable to", "wasn't able to" or "was not able to", maybe with "seem to", then "find", "locate", "see" or "spot". This counts after "I", "we", "the lookup", "the search", "my lookup" or "my search" (one of just, still, really, honestly, simply may follow the subject), and with no subject at the start of the text or after . ! ? ; : or a comma. So "I can't see", "Couldn't spot" and "Sorry, can't find" all count.
+  - "nothing came up", "nothing turned up", "nothing showed up", "nothing found", "nothing was found", "turned up nothing", "found nothing", "came up empty".
+  - "not found", "wasn't found" (any "n't found"), "not be found", "cannot be found".
+  - A word starting "no result", "no match", "no entr", "no row", "no record", "no information" or "no luck".
+  - "missing from", "absent from".
+  - "only the <word> (up to two more words) has / lists / includes / contains / shows"; "only on the", "only in the".
+
+  On a probe whose question holds one, the abstain grader ignores those cues (so an echo never abstains through them), and the A2b fixtures (`fixtures_a2b.py`) would then fail on every seed. test_gens refuses such a question, so every draw fails at test_gens and the early stop in B4 applies. The `abst` reply may use them.
 - Count your labels as q, r, s.
 
 **B3.** `$P -B rc12/sealed_kit.py install sealed/rc12_work sealed/rc12_content`, then `$P -B rc12/sealed_kit.py check sealed/rc12_work`. The check must print that the copy equals its commit.
@@ -170,9 +179,9 @@ Then run **B7** (below) now, before B1. It reads only the code at `<C>` and `sea
 $P -B rc12/sealed_search.py sealed/rc12_work --seed-file sealed/rc12_seed.txt --log sealed/rc12_draws.txt --expect-labels q,r,s --max 200
 ```
 
-The draw log lives outside the work copy and keeps every draw of every run. Each draw builds, then runs test_gens, G10, G1-G4, mutation_graders and mutation_audit, in that order (their detectors and fixtures depend on the items). It stops at the first failure and discards a failing seed; the first passing seed is kept. The cap is 200 draws per run. A new run on a log that already has draws (a restart, or a run after 200 failures) needs `--supersede`, and the log counts every draw. The dry run's searches took 1 to 20 draws, each 1 to 3 minutes. If the search exits 1 (no seed in 200), stop and write the report: what happens next is the main session's and Max's decision.
+The draw log lives outside the work copy and keeps every draw of every run. Each draw builds, then runs test_gens, G10, G1-G4, mutation_graders and mutation_audit, in that order (their detectors and fixtures depend on the items). It stops at the first failure and discards a failing seed; the first passing seed is kept. The cap is 200 draws per run. A new run on a log that already has draws (a restart, or a run after 200 failures) needs `--supersede`, and the log counts every draw. The dry run's searches took 1 to 20 draws, each 1 to 3 minutes in October. Since lock steps A2 and A2b a draw that reaches mutation_graders and mutation_audit takes about 5 to 7 minutes. If the search exits 1 (no seed in 200), stop and write the report: what happens next is the main session's and Max's decision.
 
-Watch the first draws. A content rule (test_gens `test_pools`, the fillers, the avoid lists) fails every seed the same way. So wait until the log holds this run's third `draw` line. If all three failed test_gens:
+Watch the first draws. A content rule (test_gens `test_pools`, the fillers, the avoid lists, a not-found phrase in a LOOKUP question) fails every seed the same way. So wait until the log holds this run's third `draw` line. If all three failed test_gens:
 1. Ctrl-C right away (see "Running commands here"). The third draw's gate logs stay only until the next build ends; the interrupted draw gets no line.
 2. Read `sealed/rc12_work/gate_logs/test_gens.txt`.
 3. Fix the content and reinstall (B3).

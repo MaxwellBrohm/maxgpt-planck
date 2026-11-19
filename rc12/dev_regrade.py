@@ -28,6 +28,10 @@ change being regraded can make (--expect):
           v3_shotgun, nothing gained, only probes and units moved
   cap     (2026-11-03, the cap amendment in grade_loop) every changed probe only lost degenerate clauses, nothing
           gained, only probes and units moved
+  a2b     (2026-11-19, lock step A2b, notes STEP 16A2B: the LOOKUP not-found cues and the a4 exemption) every changed
+          probe is a LOOKUP record's X probe (read from the dev records, not from the graders) that only lost a2_cue
+          and/or a4_voice and gained nothing, so none goes from pass to fail; only probes and units moved, no unit
+          went down, and a change with no changed probe is refused
 Writes <dst>/regrade.json; exit 1 if any change is not of that kind."""
 import argparse
 import json
@@ -96,8 +100,27 @@ def expected_cap(c):
         set(p["old"]) - set(p["new"]) <= CAP_CLAUSES and set(p["new"]) <= set(p["old"]) for p in c["probes"])
 
 
+A2B_LOST = {"a2_cue", "a4_voice"}
+
+
+def lookup_x(rid, turn):
+    """the probe at that turn of record rid is a LOOKUP X probe (the dev records, loaded here when not yet)."""
+    if not RECS:
+        RECS.update({r["id"]: r for r in RN.load()})
+    rec = RECS.get(rid)
+    p = next((p for p in rec["probes"] if p["turn"] == turn), None) if rec else None
+    return p is not None and rec["family"] == "LOOKUP" and p["kind"] == "X"
+
+
+def expected_a2b(c):
+    """A2b (2026-11-19, rc12/notes.txt STEP 16A2B): see the module docstring."""
+    return set(c["fields"]) <= {"probes", "unit"} and bool(c["probes"]) and all(
+        lookup_x(c["id"], p["turn"]) and set(p["old"]) - set(p["new"]) <= A2B_LOST and set(p["new"]) < set(p["old"])
+        for p in c["probes"]) and c["unit"][1] >= c["unit"][0]
+
+
 EXPECT = {"item3": expected_item3, "t0gaps": expected_t0gaps, "first": expected_first, "cap": expected_cap,
-          "a2": expected_a2}
+          "a2": expected_a2, "a2b": expected_a2b}
 
 
 def run_dirs(src):

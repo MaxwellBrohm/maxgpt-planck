@@ -462,7 +462,12 @@ becomes training text). The two share the label D8 by accident.
     "I don't think you've told me that", "That hasn't come up yet", "That list skips Thursday", and since 2026-10-19
     "You never picked one", "You didn't specify", "No, you didn't": the A2 block below) AND no pool value
     mentioned at all. Lenient twin (reported): a value is allowed in a sentence that names its own correct holder. No
-    echo clause (D12: no abstain question holds a cue, so the cue clause already fails every echo).
+    echo clause (D12: no abstain question holds a cue, so the cue clause already fails every echo). On the LOOKUP
+    family's abstain (X) probe, and on no other probe, since 2026-11-19 (lock step A2b, (x) below) the not-found
+    replies count as cues too (grade_cues.LOOKUP_ABS, LOOKUP_ONLY and LOOKUP_ON: "I couldn't find X", "Couldn't
+    find X", "Nothing came up", "No results for X", "X is missing from the new one", "Only the old one has X", "X
+    is only on the old one"), except when the question itself holds one, and the frames "I couldn't find" and "I
+    found nothing" bind nothing for the user-voice clause there.
   G-FMT (PERSIST), 8 rules: caps (>= 90% upper case over >= 5 letters), lowercase (no capital, >= 5 letters), first
     word, closing phrase (last words, trailing punctuation ignored), one sentence, ends with "?", include word,
     square brackets. Every reply must also be fresh (E001 battery fresh()), have >= 4 words and not echo the user
@@ -591,6 +596,114 @@ becomes training text). The two share the label D8 by accident.
        models' hold an A2 cue, no older unsure cue, and pass; among them "The newsletter is the one still unsettled.
        You haven't decided on its tone or theme yet" (a TOPIC probe), so moving the cues into v2_unsure would fail
        right answers; it would be a VAL change with its own audit.
+    FIXED AFTER A2 (lock step A2b, 2026-11-19; rc12/notes.txt STEP 16A2B and its fix round STEP 16A2B-R;
+    rc12/grade_cues.py, the A2b block; graders.g_abs):
+    (x) the not-found replies on LOOKUP's X probe. Planck's pipeline teaches an empty lookup to be "reported as not
+       found" (pipeline/SPEC.txt S9; the forms its checks accept, pipeline/lexicons.NOT_FOUND_RE; its fake teacher
+       says "Sorry, I could not find anything on that." and "Nothing came up for that, sorry."), and G-ABS failed
+       each such reply on all 48 dev X probes (a2_cue: no cue; "I couldn't find X on the new rota." also a4_voice,
+       although not finding a key binds nothing to the first person), while "X isn't on the new rota." passed. Now,
+       on a LOOKUP record's ABS probe (its X probe; graders.g_abs reads the record's family) and on no other probe,
+       G-ABS also counts three lists of grade_cues. LOOKUP_ABS: "couldn't / could not / can't / cannot / didn't /
+       did not / don't / do not / was unable to / wasn't able to / was not able to (seem to) find, locate, see or
+       spot X" after "I", "we", "the lookup / search" or "my lookup / search" (then maybe one of just, still,
+       really, honestly, simply), or with no subject at the start of the reply or after . ! ? ; : or a comma
+       ("Couldn't find X.", "Sorry, couldn't find anything on that."); "Nothing came up / turned up / showed up",
+       "nothing (was) found", "turned up nothing", "found nothing", "came up empty", "not found", "wasn't found",
+       "(could) not / cannot be found", "No results / match / entry / row / record / information / luck" (as a
+       word start: "No matches", "No entries"), "missing from", "absent from". LOOKUP_ONLY: "Only the <table> has /
+       lists / includes / contains / shows" (the table word, then up to two more words, before the verb), followed
+       by the probe's key ("the" may come first), "it", "that", "a row", "an entry" or "a line" ("Only the old one
+       has changed" says nothing about X, and fails). LOOKUP_ON: "only on / in the <table>" ("X is only on the old
+       rota"). An ONLY or ON form counts only when <table> is "other" or a table of the conversation other than the
+       one asked ("Only the new one has X" asked of the new table says X is there, and fails). A cue does not count
+       when a negation stands in the 3 words before it within its clause (from the last comma, semicolon or colon
+       of its sentence): s6 v2's negation cues, and "nothing" and "nobody" ("X isn't missing from the new one",
+       "Not only the old one has X", "Nothing is missing from the new rota", "Nobody is missing from it"); a
+       negation in an earlier clause does not reach it ("I'm afraid not, I couldn't find X" passes). None counts
+       when the probe's question holds one, read the same way, so an echo never abstains through them and G-ABS
+       still needs no echo clause (D12). The sealed session writes its own LOOKUP questions, so test_gens refuses a
+       LOOKUP question that holds any of these phrases, negated or not (a draw with one fails at its first gate).
+       The frames of the first list and "I found nothing" bind nothing for a4_voice on that probe, and only their
+       own words are taken out: "I couldn't find X. I am on X myself." and "... My X is free." still fail. A pool
+       value beside a cue still fails a3 ("I couldn't find X on the new one, but it's <lure>.", "No results, so
+       probably <lure>.", a guess list).
+       Why only LOOKUP: grade_text.ABS_CUE is shared by every ABS probe, by mutation_graders' check that no abstain
+       question holds a cue, and by oodh/gate.py's D12 check of the OOD-H questions; widening it could change what
+       the sealed OOD-H gate checks (G1 at B7), which no one may inspect outside the sealed session. The new cues
+       live apart (never in ABS_CUE or ABS_MORE), so none of these, no other family and no OOD-H probe (family
+       OODH) sees them; RECALL's 12 dev abstain probes keep their verdicts on the same replies (they fail).
+       Known limits (each measured on the 48 dev X probes; rc12/notes.txt STEP 16A2B-R). Passing though wrong or
+       empty, as for every cue before ((ii)): a guess that is not a pool value beside a cue (a3 reads pool values
+       only); a cue in an if-clause ("If I couldn't find X on the new one, I would ask you.") or asked as a
+       question ("Nothing came up for X?"); an idiom that holds a cue but says X is there ("I can't see why not,
+       the new rota has X covered.", "I didn't spot any problem: X is on the new rota.", "I couldn't find the time
+       to check, but X is on the new rota."), as "There's no problem: X is on the new rota." already passes through
+       ABS_CUE; a cue about the wrong table or another key ("I couldn't find X on the old rota."); the lure named
+       indirectly ("the same as <another key's value> on the new one"); a third person with no subject after a
+       comma ("They checked, couldn't find X"). Failing though right: "No I couldn't find X" (no comma, so "no"
+       reads as a negation of the cue); "I checked the new rota and couldn't find X" (no subject after "and"); "I
+       looked it up, but I couldn't find anything for X", "I checked, but I couldn't find X" and "I looked for X on
+       the new rota, but nothing came up" (a4_voice: "I looked" and "I checked" bind the first person, as they do
+       beside the older cues on every ABS probe); and forms in no list: "I'm unable to find X", "X only appears on
+       the old rota", "Only the old rota mentions X", "X isn't listed.", "X doesn't appear on the new rota",
+       "Nothing for X on the new rota." Older than A2b and not changed by it (a3, shared by every probe): a3
+       matches a capitalized value only as written, so a lure named in lower case ("the old one says hugo") passes
+       on the X probe; a fake that answers P by the exact table lookup and names the lure in lower case on X scores
+       LOOKUP 0.667 on dev (rota 1.0, tour 1.0, menu 0.0, whose values are lower-case words), above the claim's
+       0.60, with the same result on the graders before and after A2b. It needs the lookup skill, so it is no
+       skill-free shortcut; whether to close it before C is Max's call (rc12/LOCK_FOR_MAX.md).
+       DECIDED (Claude, 2026-11-19, under Max's standing permission; Max may overrule before C): fixed before the
+       lock, scoped to LOOKUP's X probe (rc12/LOCK_STEPS.md M6; a change is a grader change and needs a new C). The
+       same day, after a grader review and a prereg review, a fix round (rc12/notes.txt STEP 16A2B-R) refused the
+       negated "Nothing is missing" forms and an ONLY form with any object, and added the forms with no subject,
+       "we", "the lookup", the adverbs, "don't see", "wasn't able to", "wasn't found", "nothing (was) found", the
+       ONLY verbs and objects, LOOKUP_ON, the clause-scoped negation, the "I found nothing" frame and the content
+       rule above.
+       Evidence (A2b with its fix round): 5,340 new fixtures (rc12/fixtures_a2b.py) on every LOOKUP record (its 48
+       X and 48 P probes), the 12 RECALL abstain probes and 12 copies of a LOOKUP record (4 per cell, marked
+       synthetic) whose X question holds a cue (a find frame, an ONLY form, a curly apostrophe: the echo fails) or a
+       negated one (a reply's own cue still counts). On the graders before A2b (78d68b0, with only the first
+       fixture file added) the first round's 1,392 must-pass X fixtures (29 kinds x 48: each cue form alone, with
+       and without the key and the table, apologies before or after, the cut-at-the-cap copy) all fail and pass
+       after; on the A2b graders before the fix round, the fix round's 2,433 new fixtures give 1,872 wrong
+       verdicts (35 must-pass kinds and 4 guards x 48: "Nothing is missing ...", "Nobody is missing ...", "Only the
+       old one has changed ...", "Only the other one has more rows ...") and none after. Every other fixture keeps
+       its verdict throughout: the guards (a cue beside the lure or another pool value, a guess list, the cue
+       negated or reversed, "They couldn't find X", "Only the <asked> one has X", "X is only on the <asked> one",
+       "I almost couldn't find X ..., but it's there.", real user voice beside the frame, the degenerate replies,
+       the same cues on the RECALL abstain probes, the echo of a cue-holding question), the 48 must-pass P
+       fixtures (G-VAL reads no abstain cue) and the 13,466 older fixtures. 116 A2b mutants (OFF lookabs, the whole
+       LOOKUP extension, and 115 source edits in rc12/mutants_a2b.py: each alternative of each list, each mark of
+       the clause start and of the clause rule, the table rule and its case, the object rule, the negation rule
+       with "nothing" and "nobody", any clean hit, the question rule with its norm, its ONLY forms and its
+       negation, the scope and the a4 exemption), each surviving the fixtures without the kind named beside it and
+       killed by that kind: mutation_graders 441 of 441 over 18,806 fixtures, IDEAL on all 640 records 0
+       failures. audit_graders: 73 new paraphrase kinds (rc12/audit_a2b.py; 66 on the 48 LOOKUP X probes, 7 on the
+       12 RECALL abstain probes): 1,296 wrong verdicts on the graders before A2b, 1,104 on the A2b graders before
+       the fix round (23 of its 29 kinds x 48), 0 of 63,832 after. L3 still holds on the X probe: an empty reply, a
+       loop, a guess list, a reply in the user's voice, an in-pool value (the lure), a negated cue and an echo of
+       the question fail there (named fixtures above), and a correct natural not-found sentence passes. Cheater
+       gates: validate_e2e's 41 fakes write byte-identical transcripts and scores (the s8 table, G1-G4, ABSTAIN's
+       LOOKUP 0.00 and ORDER_ABS's 0.50 unchanged); of the shortcut policies written with the new cues (rc12/notes.txt
+       STEP 16A2B-R: 14 always-abstain forms, a positional abstain, a not-found sentence with the lure, the value
+       with a cue after it, a key-count rule that never reads the named table) the best reach 0.50 on the LOOKUP
+       unit (the positional abstain, as ORDER_ABS, and the key-count rule), an always-abstain one 0.00; the one
+       above 0.60 is the lower-case lure (0.667), the older a3 gap, which needs the exact lookup.
+       REGRADE (dev_regrade.py --expect a2b, which refuses any change that is not a LOOKUP X probe losing a2_cue or
+       a4_voice only, from the A2 copies): 440 public runs, 151,360 rows: 8 rows changed, each a LOOKUP X probe
+       losing a2_cue; 6 still fail (a3_value or a1_degen: LFM2-2.6B template seed 3, Qwen3-0.6B plain seeds 1 and
+       2, SmolLM2-360M-Instruct template seed 1, Veyra2-Blueberry-5M-Instruct template seed 3, Qwen2.5-0.5B-Instruct
+       plain greedy) and 2 now pass (Qwen2.5-0.5B-Instruct template seeds 1 and 3: "I'm sorry, but I don't see a
+       rota or photo album in your message ...": an abstention, for a wrong reason, and G-ABS reads no reason); no
+       unit moved (their P probes fail). The 12 frontier runs (4,128 rows): 9 rows (claude-haiku-5-5 4,
+       claude-sonnet-5-5 5), each an X probe losing a2_cue through "only on / in the <other> plan" and still failing
+       a3 (each names values). dev_extras14.py: every output identical. dev_panel.py: no strict number moved (no
+       family score, R, S7, PERSIST, unit or rule outcome); the reported LOOKUP X probe rate of
+       Qwen2.5-0.5B-Instruct template moved 0.097 to 0.111 (seeds 1 and 3: 0.062 to 0.083, 0.083 to 0.104; s10b)
+       and its reported lenient LOOKUP 0.177 to 0.184; dev_s11.py moves only its LOOKUP diagnostic cue shares (X
+       replies holding a cue: LFM2-2.6B 0.056 to 0.063; SmolLM2-360M-Instruct 0.174 to 0.181, and with no value
+       0.167 to 0.174; Qwen2.5-0.5B-Instruct 0.181 to 0.194, and with no value 0.132 to 0.146).
     With the Nov 3 amendments: the answer-first waiver reads the assertion rule, so (i) to (v) can grant or withdraw
     it (the forms in (i) above); a contracted gold that leads the reply grants it as any gold does (370 user-voice
     dev VAL probes with another candidate, the gold set to "is not <value>": "It isn't <value>. You also mentioned
@@ -895,7 +1008,7 @@ becomes training text). The two share the label D8 by accident.
     SmolLM2-135M-Instruct 1.14 (0.15 to 2.54), 0.018; Doge-160M-Instruct 0.25 (0.00 to 0.81), 0.018. On the STEP 11b
     regraded runs (rc12/notes.txt STEP 12) LFM2-2.6B read 18.15 (14.73 to 21.75), 0.812, and LFM2.5-350M 12.10, 0.559:
     the waiver and the cap amendment lifted the models that answer at length or add context after the answer;
-    lock step A2 moved none of these numbers. The item 14 extras: s12.
+    lock steps A2 and A2b (s6 (x)) moved none of these numbers. The item 14 extras: s12.
   Sensitivity row: the composite without the families where Qwen2.5-0.5B-Instruct is <= 0.05.
   Reported beside (never a claim): every cell; RECALL by d bin; CORR by reference form; PERSIST by rule; OWN
     source-fail rate; OWN from the own-history run alone and from the --own-cf run alone, and R_ungated (R with the
@@ -988,9 +1101,9 @@ becomes training text). The two share the label D8 by accident.
     0.417, 0.322). So each of the four thresholds is 0.60 (above),
     and no tested model reached it: the best dev rate of any model, render or seed is 0.281 (CORR:U), 0.500
     (C_noupd), 0.312 (C_twoslot), 0.133 (BIND). Under the lock's graders (the Nov 3 amendments and lock step A2;
-    rc12/notes.txt STEP 16) LFM2-2.6B reads 0.292, 0.375, 0.333 and 0.133, still below 0.60, so the rule leaves each
-    threshold at 0.60; the best dev rate of any model, render or seed is 0.312 (CORR:U), 0.500 (C_noupd), 0.438
-    (C_twoslot), 0.200 (BIND).
+    rc12/notes.txt STEP 16; lock step A2b, s6 (x), moves none of these rates) LFM2-2.6B reads 0.292, 0.375, 0.333 and
+    0.133, still below 0.60, so the rule leaves each threshold at 0.60; the best dev rate of any model, render or seed
+    is 0.312 (CORR:U), 0.500 (C_noupd), 0.438 (C_twoslot), 0.200 (BIND).
 
 10b. THE LOOKUP CLAIM (score.py lookup_claim, BARS lookup; score_stats.lookup_ci; Max, 2026-10-04: LOOKUP is its own
   pre-registered headline claim, reported beside R and never folded into it)
@@ -1012,11 +1125,12 @@ becomes training text). The two share the label D8 by accident.
   What counts: all 48 LOOKUP units (sealed: every LOOKUP conversation) in all three shape cells, each right only if
     BOTH its probes are right (unit "all", s5): P, a key of the named table answered with that table's value (G-VAL;
     the other table's value for the same key is the lure), and X, a key only the other table holds, answered by
-    abstaining (G-ABS). The abstain X probe is part of the claim, not a side report: a model that always reads the
-    named table but never abstains scores 0, as one that always abstains does. The P and X probe rates and the three
-    cells are reported beside it (score.lookup_claim P, X, cells). The s8 gates stay: the generic cheaters and the
-    audit value rules at <= 0.40 per family and <= 0.50 per cell, ORDER_ABS (a perfect lookup that abstains by probe
-    position) at the cell bar only (OD3 (a)), where it scores 0.50, under the claim's 0.60 (G3, s8).
+    abstaining (G-ABS; on this probe the not-found replies count too, s6 (x), lock step A2b). The abstain X probe
+    is part of the claim, not a side report: a model that always reads the named table but never abstains scores 0,
+    as one that always abstains does. The P and X probe rates and the three cells are reported beside it
+    (score.lookup_claim P, X, cells). The s8 gates stay: the generic cheaters and the audit value rules at <= 0.40 per
+    family and <= 0.50 per cell, ORDER_ABS (a perfect lookup that abstains by probe position) at the cell bar only
+    (OD3 (a)), where it scores 0.50, under the claim's 0.60 (G3, s8).
   Never in R: LOOKUP is not a COMPOSITE family (s9, s11) and the claim reads no composite family; it is reported
     beside R and Level A and never folded into either (c_scoring: only LOOKUP right gives R_ungated 0 and the claim
     met; LOOKUP 0 gives R_ungated 100 and the claim unmet). The s11 headroom rule does not apply to it: that rule
@@ -1034,8 +1148,8 @@ becomes training text). The two share the label D8 by accident.
     seed or render is 0.021, a four-way tie (template: Qwen2.5-0.5B-Instruct seeds 2 and 3, LFM2-2.6B seed 3,
     Qwen3-0.6B seed 1). The floor is the X probe: P is passed often
     (Qwen3-0.6B 0.694, LFM2-2.6B 0.653, LFM2-1.2B 0.493, Qwen3.5-0.8B 0.479, LFM2-700M 0.438; 0.542, 0.319,
-    0.333 and 0.340 on the STEP 11b graders), X almost never (at most 0.097,
-    Qwen2.5-0.5B-Instruct; 0.007 LFM2-2.6B), because the models give the other table's value for the absent key
+    0.333 and 0.340 on the STEP 11b graders), X almost never (at most 0.111, Qwen2.5-0.5B-Instruct, 0.097 before
+    lock step A2b, s6 (x); 0.007 LFM2-2.6B), because the models give the other table's value for the absent key
     (LFM2-2.6B 83%, s11). The item 14 extras (s12; 5M to 31M) sit at the same floor: LOOKUP 0.000 on every one
     scored and on the Vertex card row (CI 0.000 to 0.000; P at most 0.007, X at most 0.069; the card row as
     graded 2026-10-11, not regraded, s12). So do the extras added
@@ -1105,7 +1219,8 @@ becomes training text). The two share the label D8 by accident.
     as degenerate; its lowest core baseline is 0.160 (Doge-160M-Instruct). LOOKUP, reported, is at the floor (max
     0.014; LFM2-2.6B gives the other table's value on 83% of the X probes); the PERSIST base rates and the empty drop
     list are unchanged (highest question_end 0.181 and one_sentence 0.175, SmolLM2-360M-Instruct). Lock step A2 alone
-    changed 2 probe verdicts and no unit. The s9 sizing rule was not re-run: it was written for the old
+    changed 2 probe verdicts and no unit; lock step A2b (s6 (x)) 2 LOOKUP X probe verdicts (fail to pass, both
+    Qwen2.5-0.5B-Instruct template) and no unit. The s9 sizing rule was not re-run: it was written for the old
     non-inferiority test and is kept as the record of how 600 was chosen (s9).
 
 12. BASELINE PANEL (dev first, then sealed; one harness, each model in its own template)
@@ -1473,7 +1588,8 @@ becomes training text). The two share the label D8 by accident.
   the A2 graders is the sealed session's (rc12/LOCK_STEPS.md B7): G1 must pass again (the fixes can count a reported
   OTHER candidate against a reply, so an IDEAL that reports one is re-checked there) and the G2 rates are re-reported,
   with oodh/a2_counts.py's counts of the A2 forms on Part 1, each negation an accepted form holds, as written and in
-  its other forms, among them (counts only; it gates nothing).
+  its other forms, among them (counts only; it gates nothing). Lock step A2b (s6 (x)) acts on RC-12's LOOKUP records
+  only, so it changes no OOD-H verdict and nothing the gate checks.
   Part 1 BUILT (2026-09-26, F1; oodh/DESIGN.txt s13, reviewed in s14; hashes in oodh/HASHES.txt; not committed,
   not locked). 150 threads: the 107 best-path threads plus 43 F1 threads (deepest usable path per reserved tree,
   sealed/oodh/batch_4.jsonl); the batch-4 pool was read in order until the 43rd usable thread, 8 dropped under KL2
