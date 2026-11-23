@@ -143,6 +143,19 @@ def m_lookup_q_on(recs):
     _lookup_x_question(recs, "That day is only on the other one, I think. ")
 
 
+def m_lookup_q_missing(recs):                  # late review (2026-11-22): a LOOKUP_ABS form that is no find frame
+    _lookup_x_question(recs, "Is anyone missing from the other one? ")
+
+
+def m_lookup_q_curly(recs):                    # late review (2026-11-22): a curly apostrophe (test_gens norm()s it)
+    _lookup_x_question(recs, "I can\u2019t see who that is on my copy. ")
+
+
+def m_lookup_value_lower(recs):                # A2c content rule (2026-11-19, M7): a LOOKUP value as an ordinary word
+    r = first(recs, "LOOKUP", "rota")
+    t = next(t for t in r["turns"] if t["kind"] == "D")
+    t["ideal"] += " " + C.V.PERSON[0].lower() + " would know."
+
 def m_k_ref_in_question(recs):
     r = first(recs, "K", "followup")
     p = main_p(r)
@@ -198,7 +211,9 @@ MUTANTS = [(m_gold_in_question, "question contains"), (m_gold_after_source, "rep
            (m_indirect_not_adjacent, "indirect correction not right after"), (m_echo_on_gold, "echo=False"),
            (m_persist_breaks_rule, "IDEAL breaks"), (m_persist_old_rule_kept, "old rule kept"),
            (m_lookup_absent_key, "X key placement"), (m_lookup_q_find, "not-found cue"),
-           (m_lookup_q_only, "not-found cue"), (m_lookup_q_on, "not-found cue"), (m_k_ref_in_question, "K ref"),
+           (m_lookup_q_only, "not-found cue"), (m_lookup_q_on, "not-found cue"),
+           (m_lookup_q_missing, "not-found cue"), (m_lookup_q_curly, "not-found cue"),
+           (m_lookup_value_lower, "ordinary word (A2c)"), (m_k_ref_in_question, "K ref"),
            (m_knowledge_flag, "knowledge flag"), (m_placement, "main probes at u12"),
            (m_topic_names_gold, "question contains"), (m_loop_repeat_request, "repeat request"),
            (m_asks_flipped, "D asks differs"), (m_asks_dropped, "D turn without a bool asks"),
@@ -237,6 +252,18 @@ def filler_mutants():
     return out
 
 
+def content_mutants(recs):
+    """A2c's content rule also reads the content modules, whatever the draw: a city of a LOOKUP pool in lower case in
+    a content list no built record shows (pools_misc.LOOP_TOPICS) must fail it."""
+    import pools_misc as M
+    M.LOOP_TOPICS.append(f"a {C.V.CITY[0].lower()} in the snow")
+    try:
+        fails = TF.run(copy.deepcopy(recs))
+    finally:
+        M.LOOP_TOPICS.pop()
+    return [("content LOOKUP value lower", sum("ordinary word (A2c)" in f for f in fails))]
+
+
 def main():
     recs = [r for r in T.load()]
     clean = run_checks(copy.deepcopy(recs))
@@ -253,7 +280,7 @@ def main():
             status, n = f"CRASH {type(e).__name__}: {e}", 0
         ok &= status == "killed"
         print(f"  {m.__name__:28s} {status} ({n} failures)")
-    for name, n in filler_mutants():
+    for name, n in filler_mutants() + content_mutants(recs):
         ok &= n > 0
         print(f"  {name:28s} {'killed' if n else 'SURVIVED'} ({n} failures)")
     with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as f:

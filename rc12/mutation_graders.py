@@ -6,8 +6,12 @@
    record (PERSIST and LOOP: the first probe and the one with the shortest question). Every fixture must get
    its stated verdict from the real graders (correct replies pass; empty, loop, copy, leak, cap, hedge, negation,
    question, guess list, shotgun, user voice, wrong candidate, stale, echo fail). Lock step A2b (2026-11-19):
-   fixtures_a2b adds every LOOKUP record (its X and P probes) and every other ABS probe, whatever was picked.
-2. Conversation tests: unit scores (mean / all), the role-leak scan and the OD6 (iii) loop / ack-repeat flags
+   fixtures_a2b adds every LOOKUP record (its X and P probes) and every other ABS probe, whatever was picked; lock
+   step A2c (2026-11-19, M7) fixtures_a2c the same (a lure named in another case on LOOKUP's X probe).
+2. Conversation tests: unit scores (mean / all), the role-leak scan (leak_before_fact on a ROLE record whose name
+   fact comes after turn 1, one kept in the index: on a draw whose first ROLE record names the assistant at turn
+   1 the test was skipped and the grade_role turn-guard mutant survived; renamed-content dry run, 2026-11-21) and
+   the OD6 (iii) loop / ack-repeat flags
    (fixtures_more.conv_loop_fixtures) on patched IDEAL conversations; the F3 measurement (graders.eq_only: a right
    answer repeating the model's own confirmation is equality-only, a looped wrong answer or a 3-gram stutter is
    not); a D turn without its asks annotation is refused by the grader (F2; verifier 2026-09-25).
@@ -22,6 +26,7 @@ import time
 
 import fixtures_a2 as FA2
 import fixtures_a2b as FA2B
+import fixtures_a2c as FA2C
 import fixtures_graders as F1
 import fixtures_more as F2
 import grade_fmt_dyn as FD
@@ -82,7 +87,25 @@ def build(recs):
     add, bfx = FA2B.records_and_fixtures(recs)   # A2b (2026-11-19): every LOOKUP record, every other ABS probe
     for rid, r in add.items():
         index.setdefault(rid, r)
-    return fixtures + bfx, index
+    add, cfx = FA2C.records_and_fixtures(recs)   # A2c (2026-11-19, M7): the same, a value in another case
+    for rid, r in add.items():
+        index.setdefault(rid, r)
+    r = next((r for r in recs if late_name(r)), None)    # leak_before_fact's record (2026-11-22, conv_tests);
+    if r is not None and not any(late_name(x) for x in index.values()):     # none in the draw: conv_tests says so
+        index[r["id"]] = r
+        fixtures += [dict(f, grader=p["grader"], family=r["family"]) for p in pick_probes(r)
+                     for f in BUILD[p["grader"]](r, p)]
+    return fixtures + bfx + cfx, index
+
+
+def late_name(rec):
+    """(name, turn) of a real ROLE record whose name fact comes after turn 1 (the assistant is named later), else
+    None: leak_before_fact needs a turn before the fact."""
+    if rec["family"] != "ROLE" or rec.get("synthetic"):
+        return None
+    nf = next(((t["facts"][0]["value"], t["i"]) for t in rec["turns"] if t["facts"]
+               and t["facts"][0].get("role") == "name"), None)
+    return nf if nf and nf[1] > 1 else None
 
 
 def history(rec, patch):
@@ -140,8 +163,12 @@ def conv_tests(index):
     later = next(t["i"] for t in role["turns"] if t["i"] > name_turn and t["kind"] == "D")
     ev = R.role_leaks(role, history(role, {later: f"I'm {name}, and I love it here."}))
     out.append(("leak_capture", [(e["turn"], e["kind"]) for e in ev], [(later, "capture")]))
-    if name_turn > 1:
-        ev = R.role_leaks(role, history(role, {1: f"I'm {name}, hello."}))
+    late = next((r for r in index.values() if late_name(r)), None)   # not the first ROLE record: on a draw whose
+    if late is None:             # first one names the assistant at turn 1 the test was skipped (dry run, 2026-11-21);
+        out.append(("leak_before_fact", "no ROLE record named after turn 1", []))     # none at all: a named miss
+    else:
+        lname, _ = late_name(late)
+        ev = R.role_leaks(late, history(late, {1: f"I'm {lname}, hello."}))
         out.append(("leak_before_fact", ev, []))
     lure = next((t["i"], f) for t in twohop["turns"] for f in t["facts"] if f.get("role") == "lure")
     ev = R.role_leaks(twohop, history(twohop, {12: f"My {lure[1]['holder']}'s door is {lure[1]['value']}."}))

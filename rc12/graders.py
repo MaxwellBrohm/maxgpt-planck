@@ -43,7 +43,9 @@ G-ABS clauses: a1_degen, a2_cue (an abstain cue), a3_value (no value of the prob
   fails every echo. Lenient ABS: cue, and every mentioned value sits in a sentence naming its own holder or table.
   LOOKUP's X probe (A2b, 2026-11-19): grade_cues.lookup_cue is a cue too (the pipeline's not-found replies; off when
   the question holds one), and a4 skips the frames "I couldn't find", "I found nothing" (grade_cues.FIND_FRAME); no
-  other family.
+  other family. A2c (2026-11-19, M7; prereg s6 (xi)): on that probe a3 also counts a pool value named in any case
+  ("hugo", "HUGO", "hugo's": pools_vals.value_re(v, False)), so a lure in lower case fails as one as written does;
+  every other probe, G-VAL and the lenient twin's holder check still read a capitalized value only as written.
 FMT, DYN: grade_fmt_dyn.py. ROLEX and the role-leak scan: grade_role.py. LOOP probes: not degenerate and not an
 echo of the user turn (deviation D7 in notes.txt)."""
 import re
@@ -227,7 +229,8 @@ def g_abs(reply, stop, prior, rec, probe):
     cue = "cue" in T.OFF or T.ABS_CUE.search(text) is not None or (look and T.GC.lookup_cue(text, rec, probe))
     if not cue:
         fails.append("a2_cue")
-    named = [v for v in pool if T.mentioned(text, v)]
+    anycase = "lookcase" not in T.OFF and rec["family"] == "LOOKUP"       # A2c (2026-11-19, M7): a3 in any case
+    named = [v for v in pool if T.mentioned(text, v) or (anycase and V.value_re(v, False).search(text))]
     if named and "absvalue" not in T.OFF:
         fails.append("a3_value")
     if abs_voice(T.GC.FIND_FRAME.sub(" ", text) if look else text, obj_words(probe)):

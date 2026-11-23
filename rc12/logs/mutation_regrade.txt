@@ -57,4 +57,17 @@ KILLED    dev_regrade.py: a2b: a probe whose clauses did not move passes | test_
 KILLED    dev_regrade.py: a2b: a loop flag or the leak scan may move | test_regrade_expect.py: FAIL a2b: refuse field flags: got True, want False
 KILLED    dev_regrade.py: a2b: a change with no probe passes | test_regrade_expect.py: FAIL a2b: refuse unit only, no probe: got True, want False
 KILLED    dev_regrade.py: a2b: a unit may go down | test_regrade_expect.py: FAIL a2b: refuse the unit going down: got True, want False
-MUTANTS killed 58/58
+KILLED    dev_regrade.py: a2c: --expect a2c runs another rule | test_regrade_expect.py: FAIL a2c is not an --expect choice running its own rule
+KILLED    dev_regrade.py: a2c: a probe of any family and kind may move | test_regrade_expect.py: FAIL a2c: refuse a non-LOOKUP probe (RECALL's X): got True, want False
+KILLED    dev_regrade.py: a2c: another clause may be gained | test_regrade_expect.py: FAIL a2c: refuse another clause gained: got True, want False
+KILLED    dev_regrade.py: a2c: a clause may be lost beside the gain | test_regrade_expect.py: FAIL a2c: refuse a clause lost beside the gain: got True, want False
+KILLED    dev_regrade.py: a2c: a unit may go up | test_regrade_expect.py: FAIL a2c: refuse the unit going up: got True, want False
+KILLED    dev_regrade.py: a2c: a change with no probe passes | test_regrade_expect.py: FAIL a2c: refuse unit only, no probe: got True, want False
+KILLED    dev_regrade.py: a2c: a loop flag or the leak scan may move | test_regrade_expect.py: FAIL a2c: refuse field flags: got True, want False
+KILLED    dev_regrade.py: a2b_r2: --expect a2b_r2 runs another rule | test_regrade_expect.py: FAIL a2b_r2 is not an --expect choice running its own rule
+KILLED    dev_regrade.py: a2b_r2: a probe of any family and kind may move | test_regrade_expect.py: FAIL a2b_r2: refuse a non-LOOKUP probe (RECALL's X): got True, want False
+KILLED    dev_regrade.py: a2b_r2: another clause may move beside a2_cue | test_regrade_expect.py: FAIL a2b_r2: refuse a3_value moving beside a2_cue: got True, want False
+KILLED    dev_regrade.py: a2b_r2: another clause may move alone, or none | test_regrade_expect.py: FAIL a2b_r2: refuse a4_voice lost beside a2_cue: got True, want False
+KILLED    dev_regrade.py: a2b_r2: a change with no probe passes | test_regrade_expect.py: FAIL a2b_r2: refuse unit only, no probe: got True, want False
+KILLED    dev_regrade.py: a2b_r2: a loop flag or the leak scan may move | test_regrade_expect.py: FAIL a2b_r2: refuse field flags: got True, want False
+MUTANTS killed 71/71

@@ -32,6 +32,16 @@ change being regraded can make (--expect):
           probe is a LOOKUP record's X probe (read from the dev records, not from the graders) that only lost a2_cue
           and/or a4_voice and gained nothing, so none goes from pass to fail; only probes and units moved, no unit
           went down, and a change with no changed probe is refused
+  a2c     (2026-11-19, lock step A2c, notes STEP 16A2C, LOCK_STEPS M7: a3_value reads a pool value in any case on
+          LOOKUP's X probe) every changed probe is a LOOKUP record's X probe (read from the dev records) that only
+          GAINED a3_value and lost nothing, so a probe can go from pass to fail and never back; only probes and units
+          moved, no unit went up, and a change with no changed probe is refused (G-VAL and the P probe are unchanged)
+  a2b_r2  (2026-11-22, the late review of lock step A2b, notes STEP 16A2B-R2: the LOOKUP not-found cues narrowed
+          where they let wrong replies through and widened where they failed an answer word or an opening; run from
+          the A2c copies) every changed probe is a LOOKUP record's X probe (read from the dev records) whose only
+          moved clause is a2_cue, gained or lost (the a4 frame and every other clause are unchanged); only probes
+          and units moved, and a change with no changed probe is refused. The late review's second round (notes
+          STEP 16A2B-R3) moves the same clause only and is checked with the same rule
 Writes <dst>/regrade.json; exit 1 if any change is not of that kind."""
 import argparse
 import json
@@ -119,8 +129,27 @@ def expected_a2b(c):
         for p in c["probes"]) and c["unit"][1] >= c["unit"][0]
 
 
+def expected_a2c(c):
+    """A2c (2026-11-19, rc12/notes.txt STEP 16A2C): see the module docstring."""
+    if not c["probes"] or not set(c["fields"]) <= {"probes", "unit"} or c["unit"][1] > c["unit"][0]:
+        return False
+    return all(lookup_x(c["id"], p["turn"]) and set(p["new"]) - set(p["old"]) == {"a3_value"}
+               and set(p["old"]) < set(p["new"]) for p in c["probes"])
+
+
 EXPECT = {"item3": expected_item3, "t0gaps": expected_t0gaps, "first": expected_first, "cap": expected_cap,
           "a2": expected_a2, "a2b": expected_a2b}
+EXPECT["a2c"] = expected_a2c                     # lock step A2c (2026-11-19)
+
+
+def expected_a2b_r2(c):
+    """the late review of A2b (2026-11-22, rc12/notes.txt STEP 16A2B-R2): see the module docstring."""
+    moved = [set(p["old"]) ^ set(p["new"]) for p in c["probes"]]
+    return bool(moved) and set(c["fields"]).issubset({"probes", "unit"}) and all(
+        m == {"a2_cue"} and lookup_x(c["id"], p["turn"]) for m, p in zip(moved, c["probes"]))
+
+
+EXPECT["a2b_r2"] = expected_a2b_r2               # the late review of lock step A2b (2026-11-22)
 
 
 def run_dirs(src):

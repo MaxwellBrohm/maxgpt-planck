@@ -121,6 +121,31 @@ MUTANTS = [
     (R, ' and bool(c["probes"]) and all(', " and all(", "a2b: a change with no probe passes"),
     (R, '        for p in c["probes"]) and c["unit"][1] >= c["unit"][0]\n', '        for p in c["probes"])\n',
      "a2b: a unit may go down"),
+    # --expect a2c (lock step A2c, 2026-11-19, M7; killed by test_regrade_expect.py's a2c cases)
+    (R, 'EXPECT["a2c"] = expected_a2c', 'EXPECT["a2c"] = expected_a2b', "a2c: --expect a2c runs another rule"),
+    (R, "    return all(lookup_x(c[\"id\"], p[\"turn\"]) and set", "    return all(set",
+     "a2c: a probe of any family and kind may move"),
+    (R, 'set(p["new"]) - set(p["old"]) == {"a3_value"}', 'set(p["new"]) - set(p["old"]) <= {"a3_value", "a2_cue"}',
+     "a2c: another clause may be gained"),
+    (R, '               and set(p["old"]) < set(p["new"]) for p', "               for p",
+     "a2c: a clause may be lost beside the gain"),
+    (R, ' or c["unit"][1] > c["unit"][0]:', ":", "a2c: a unit may go up"),
+    (R, 'if not c["probes"] or not set(c["fields"])', 'if not set(c["fields"])',
+     "a2c: a change with no probe passes"),
+    (R, 'not set(c["fields"]) <= {"probes", "unit"} or c["unit"]',
+     'not set(c["fields"]) <= {"probes", "unit", "flags", "leaks"} or c["unit"]',
+     "a2c: a loop flag or the leak scan may move"),
+    # --expect a2b_r2 (the late review of lock step A2b, 2026-11-22; killed by test_regrade_expect.py's a2b_r2 cases)
+    (R, 'EXPECT["a2b_r2"] = expected_a2b_r2', 'EXPECT["a2b_r2"] = expected_a2c',
+     "a2b_r2: --expect a2b_r2 runs another rule"),
+    (R, ' and lookup_x(c["id"], p["turn"]) for m, p', " for m, p", "a2b_r2: a probe of any family and kind may move"),
+    (R, 'm == {"a2_cue"} and lookup_x', '{"a2_cue"} <= m and lookup_x',
+     "a2b_r2: another clause may move beside a2_cue"),
+    (R, 'm == {"a2_cue"} and lookup_x', 'm <= {"a2_cue", "a4_voice"} and lookup_x',
+     "a2b_r2: another clause may move alone, or none"),
+    (R, "    return bool(moved) and set(", "    return set(", "a2b_r2: a change with no probe passes"),
+    (R, 'set(c["fields"]).issubset({"probes", "unit"})',
+     'set(c["fields"]).issubset({"probes", "unit", "flags", "leaks"})', "a2b_r2: a loop flag or the leak scan may move"),
 ]
 
 

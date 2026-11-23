@@ -11,6 +11,7 @@ from collections import defaultdict
 
 import audit_a2 as A2
 import audit_a2b as A2B
+import audit_a2c as A2C
 import grade_voice as GV
 import graders as G
 import pools_vals as V
@@ -220,6 +221,7 @@ def main():
             cases = [(n, p, fill(t, p, r), w, p["grader"]) for n, t, w in table if applicable(n, p)]
             cases += [(n, q, text, w, "NEG") for n, q, text, w in A2.neg_cases(p)]      # A2 (v), 2026-11-19
             cases += [(n, p, text, w, "ABS") for n, text, w in A2B.cases(r, p)]          # A2b, 2026-11-19
+            cases += [(n, p, text, w, "ABS") for n, text, w in A2C.cases(r, p)]          # A2c, 2026-11-19
             for name, q, text, want, kind in cases:
                 replies = list(ideal)
                 replies[p["turn"] - 1] = text
@@ -230,7 +232,7 @@ def main():
                     wrong[key].append((r["id"], text, got.get("fails")))
     lines = ["RC-12 audit_graders.py: natural paraphrases on real probes (expected verdict in brackets)", ""]
     for key in sorted(count):
-        tbl = {"VAL": VAL_VARIANTS, "ABS": ABS_VARIANTS + LOOKUP_ABS + A2B.TABLE, "DYN": DYN_PICK + DYN_LIST,
+        tbl = {"VAL": VAL_VARIANTS, "ABS": ABS_VARIANTS + LOOKUP_ABS + A2B.TABLE + A2C.TABLE, "DYN": DYN_PICK + DYN_LIST,
                "ROLEX": ROLEX_BOTH + ROLEX_NAMED + ROLEX_UNNAMED,
                "NEG": [(n, t, w) for n, _, t, w in A2.NEG]}[key.split(":")[0]]
         want = [w for n, _, w in tbl if n == key.split(":", 1)[1]][0]

@@ -19,6 +19,9 @@ clean records: 0 failures
   m_lookup_q_find              killed (1 failures)
   m_lookup_q_only              killed (1 failures)
   m_lookup_q_on                killed (1 failures)
+  m_lookup_q_missing           killed (1 failures)
+  m_lookup_q_curly             killed (1 failures)
+  m_lookup_value_lower         killed (1 failures)
   m_k_ref_in_question          killed (1 failures)
   m_knowledge_flag             killed (1 failures)
   m_placement                  killed (2 failures)
@@ -34,5 +37,6 @@ clean records: 0 failures
   filler 5-gram                killed (1 failures)
   filler label 'statement' does not fit killed (1 failures)
   filler label 'question' does not fit killed (1 failures)
+  content LOOKUP value lower   killed (1 failures)
   m_file_differs               killed (1 failures)
 ALL MUTANTS KILLED

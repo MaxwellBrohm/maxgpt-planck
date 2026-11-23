@@ -4636,3 +4636,549 @@ CHECKS (an rsync export of the finished tree, no .git, no runs; each alone, at m
   test_pins_engines and test_numbers14 --allow-not-regraded PASS; lock_check check (draft) PASS.
 NOT DONE: everything STEP 16, 16P, 16R, 16R2 and 16A2B list as open (the card row, the tier-1 runs,
   mutation_numbers14's PC part, A3 at the final C, the commit and its regrade check, B, D, E), and M7 (Max's).
+
+STEP 16A2C (2026-11-19, 2026-11-21 and 2026-11-22, Claude, lock track A, step A2c, LOCK_STEPS M7; nothing under sealed/
+or private/ read, listed or built; no model loaded; no Planck model scored; Mac only, at most 4 worker processes, one
+heavy run at a time; nothing committed; the worktree's base is 59d0328, A2 and A2b saved, not C). G-ABS AND A VALUE
+NAMED IN ANOTHER CASE ON LOOKUP'S X PROBE. Built on 2026-11-19; that session ended on an expired login during its last
+dry run and suite. On 2026-11-21 a second session re-ran every check below from its own copies ("the A2b graders" = git
+archive 59d0328, with only the new test files copied in where a check needs them; the A2b regraded copies first checked
+against logs/regrade_a2b_manifest.txt: 0 FAILED), added one scope pin (OODH, below), corrected two statements in prereg
+s6 (xi) (the "porto" replies, the passing replies outside LOOKUP) and ran the suite on a fresh export; it stopped at a
+usage limit before its dry run. On 2026-11-22 a third session re-read every log of both, recounted the "porto" replies
+(42; two give the word an invented meaning, so s6 (xi)'s "never another sense" became "none an ordinary English use"),
+applied this entry and ran the full check order, the renamed-content dry run and gabs_probe on a fresh export of the
+finished tree (CHECKS). The numbers are the 2026-11-21 runs' unless CHECKS gives newer ones; where they repeat the first
+session's, its logs gave the same.
+THE GAP (A2b review, note 7; STEP 16A2B-R). a3_value matched a capitalized pool value only as written
+  (pools_vals.value_re, prereg s6 v2), so on the 48 dev LOOKUP X probes a lure named in lower case ("I couldn't find
+  Thursday on the new one; the old one says hugo."), in capitals, in mixed case, as "hugo's" or at the reply's start
+  passed on rota and tour (32 of 48: persons and cities are capitalized) and failed on menu (dishes are lower case, read
+  in any case since 2026-10-04). The review's fake (exact lookup on P, an older cue plus the lure in lower case on X)
+  and the fix round's NF_LURE_LOWER scored LOOKUP 0.667 (rota 1.0, tour 1.0, menu 0.0), above the 0.60 bar, on the
+  graders of 78d68b0 and of A2b (rerun on both: 0.667).
+DECISION (Claude, 2026-11-19, under Max's standing "do what you think is best"; Max may overrule before C,
+  LOCK_STEPS M7, recorded as M6 was): fix before the lock, LOOKUP's X probe only.
+CASE MAP (each grader that matches pool values; the session's scratch, lockA/a2c and lockA/a2c2, case_map):
+  pools_vals.value_re(v) is the one matcher: whole word (no letter or digit on either side), a capitalized value as
+  written, a lower-case value in any case; value_re(v, False) reads any case. grade_text.value_hits (value_re, the
+  inflected forms the same way, A2 (v)'s negation forms with value_re's flags) feeds mentioned, asserted_hits and
+  captures, so G-VAL's v2_gold (a gold in lower case or capitals fails on a capitalized value: 0 of 323
+  capitalized-gold VAL probes of the other families pass, LOOKUP P 16 of 48, menu only), v3_other (a lure in lower
+  case beside the right gold passes LOOKUP P on rota and tour, 32 of 48), v3_guess, v3_shotgun, the answer-first
+  waiver, v4's captures and G-ABS's a3 (the gap; RECALL's abstain probes pass a capitalized value in lower case beside
+  a cue, 6 of 12) and its lenient holder check; graders.in_context (which values the conversation holds) reads the
+  user turns the same way; G-ROLEX and the role-leak scan read names as written; grade_text.alternative compares the
+  other side of an "or" in lower case; G-DYN's list items and G-FMT's include word compare in lower case; oodh/gate.py's
+  has() (its static checks, not a grader of replies) reads values in any case. After A2c only one row changes: G-ABS's
+  a3 on a LOOKUP record (its one ABS probe, X) also reads value_re(v, False): the lure in lower case, capitals, mixed
+  case, possessive, at the start fail 48 of 48 (were 16).
+SCOPE. Kept to LOOKUP's X probe (graders.g_abs, rec["family"] == "LOOKUP", the A2b scope): value_hits and a3 are shared
+  by every probe and by OOD-H (family OODH), whose sealed Part 1 no one may inspect before the lock. Checked: the only
+  grader code change is the anycase line in g_abs; the 12 non-LOOKUP ABS probes x every value of their pools x 4 cases
+  x 3 forms (1,656 grades) get byte-identical results from the A2b graders and the A2c graders; the 48 LOOKUP X records
+  relabelled OODH or RECALL pass the lower-case and capital lure 64 of 96 before and after (under LOOKUP: 64 then 0);
+  grade_text.py, grade_cues.py and oodh/ untouched; the OOD-H gate on the synthetic world prints the same report
+  (CHECKS); the regrade (below) changes no row outside LOOKUP's X probe in 151,360 public and 4,128 frontier rows. G-VAL
+  not changed, P included: a lower-case gold failing P is s6 v2's rule for every VAL probe, and the lower-case lure
+  beside the right gold lifts nothing (P needs the gold as written; NF_P_RECENT_LOWER, the later table's value as
+  written and the earlier one in lower case, 0.500 before and after, as the key-count rule). A shared any-case rule
+  would reach right replies: in the 440 stored public runs (the A2b copies) 137 VAL and ABS replies outside LOOKUP hold
+  a pool value in another case, 24 pass: 23 through the gold itself in lower case (18 pet names, most of them ordinary
+  words: "pumpkin", "tofu", "biscuit", "domino", "juniper berries"; the assistant name "cosmo"; "bangkok", "hamburg",
+  "greek", "turkish"), one a right TWOHOP comparison listing "OsaKa".
+FALSE FAILS (measured before the rule was chosen; recounted 2026-11-21). LOOKUP's dev person and city values: none an
+  ordinary English word in lower case (web2: only "porto" has a lower-case entry; the 42 stored replies, at any turn,
+  that write "porto" in lower case name the city, in a hashtag or a sentence, or sit in degenerate or made-up text (two
+  give it an invented meaning: "a classic porto (a ... dish)", "a "porto" (a short falling drop)"), none an ordinary
+  English use, and the 3 on a LOOKUP X probe already fail; the first session's notes said "only in degenerate text", the
+  second's "never another sense", neither exact); the 12 dishes are lower-case words (web2 lists curry and goulash) and
+  already read in any case. IDEAL: 0 of the 96 dev LOOKUP IDEAL replies (0 of the 612 VAL and ABS IDEAL replies) holds a
+  pool value in another case. Stored: of 10,848 LOOKUP X replies (10,560 public, 288 frontier) 25 do (all public, all
+  failing already; 9 without a3_value, which they gain), 0 frontier; 23 LOOKUP P replies do, all failing. Menu, the cell
+  read in any case all along: 42 stored X replies fail on a3_value alone (27 name the lure), each naming dishes as
+  dishes, none an ordinary use. Sealed risk: a sealed person or city value that is an ordinary word would fail right
+  abstentions using it; of the 94 passing stored X replies 3 hold "may", 2 "will", 1 "summer" in lower case (of 79
+  name-like or city-like ordinary words tried). RULE: whole word, any case, every value of the probe's pool, no
+  ordinary-word exemption (no dev value needs one; an exemption list has no end), plus a content rule for the sealed
+  pools.
+FIX (rc12/graders.py, g_abs, 2 lines and the docstring): anycase = "lookcase" not in T.OFF and rec["family"] ==
+  "LOOKUP"; named = values mentioned as written, or (anycase and pools_vals.value_re(v, False) finds v). The lenient
+  twin's holder check, G-VAL and every other probe unchanged. OFF switch "lookcase" (mutants_graders.OFF).
+CONTENT RULE (prereg s6 (xi), LOCK_STEPS B2, the sealed prompt): no person or city value of the pools the LOOKUP tables
+  read (LOOKUP_SHAPES vals) is an ordinary English word in lower case. test_gens_fam_b.lookup_case refuses a
+  capitalized value of those pools written in lower case in any content string of sealed_kit.CONTENT_MODULES (read
+  from the modules, so it does not hang on the draw) or in any built turn or IDEAL reply; dev passes (0 of 28 values).
+  On dev's text it would refuse 14 of the 79 words tried ("will", "may", "hope", "rose", "river", "sky", "rain",
+  "winter", "nice", "reading", "bath", "split", "sale", "orange"), not "summer", so the prompt also asks the session to
+  read its lists. mutation_gens: m_lookup_value_lower (a D turn's IDEAL gains a person value in lower case) and a
+  content mutant (pools_misc.LOOP_TOPICS gains a city in lower case): each SURVIVED on the A2b test_gens (0 failures)
+  and is killed now; mutation_gens all killed.
+RED THEN GREEN
+  Fixtures (rc12/fixtures_a2c.py, wired into mutation_graders.build after fixtures_a2b): 780 new: X 13 kinds x 48 (10
+  must fail: a2c_lure_lower, _lure_lower_oldcue, _lure_upper, _lure_mixed, _lure_poss, _lure_start, _lure_quoted,
+  _caps_reply_lure, _other_lower, _guess_lower; 3 must pass: a2c_caps_ok, _lower_ok, _substring_ok, the last with the
+  lure inside a longer word built from it, "prehugox"), P 3 pins x 48 (a2c_p_gold_lower, _gold_upper: fail on
+  capitalized golds, pass on menu; a2c_p_lure_lower: passes on rota and tour, fails on menu), scope 6 + 3 + 3
+  (a2c_scope_lower_as_written: a capitalized value in lower case beside a cue still passes RECALL's abstain probe;
+  a2c_scope_relabelled and a2c_scope_relabelled_oodh: a copy of the first LOOKUP record of each cell relabelled RECALL
+  and one relabelled OODH, marked synthetic, pass the lure in lower case beside a cue (menu's dish fails, as before),
+  so the scope pins hold whatever a draw's RECALL pools hold). On the A2b graders: 320 misses, exactly the 10
+  must-fail kinds x the 32 rota and tour probes; the 18,806 older fixtures keep their verdicts. After: 0 misses of
+  19,586 (168 records + 166 synthetic copies). test_lock_d's G6 pin is now (168, 334, 19,586); A2b's pin and the first
+  session's (168, 331, 19,583) both fail on the tree ("168 records (334 with copies), 19586").
+  The OODH pin (2026-11-21): the first session's scope pins were RECALL only, so a mutant that widens the scope to
+  OOD-H's family alone (rec["family"] in ("LOOKUP", "OODH")) survived all 19,583 fixtures; with the 3 OODH copies it is
+  killed (2 misses: the rota and tour copies).
+  Mutants (rc12/mutants_a2c.py; OFF lookcase): 13 (12 source edits: the scope dropped, the scope widened to OODH, the
+  any-case flag, lower case only, lower case or capitals only, the possessive, quotes, the reply's start, an
+  all-capitals reply, the lure only, the conversation's values only, substrings). Each run alone (a2c_mutants_watch):
+  survives the 18,806 fixtures without fixtures_a2c, killed with them by the kind named beside it: 13 of 13. Not
+  mutated: the lenient twin (unchanged), the X probe alone (LOOKUP's one ABS probe is X, which fixtures_a2b asserts).
+  audit_graders (rc12/audit_a2c.py): 13 new kinds (12 on the 48 LOOKUP X probes, 9 must fail; 1 on the 6 RECALL
+  abstain probes whose pool holds a capitalized value, must pass): 288 wrong on the A2b graders (9 x 32), 0 of 64,414
+  now; every older line of logs/audit_graders.txt unchanged.
+  dev_regrade --expect a2c: every changed probe a LOOKUP X probe (read from the dev records) that only gained a3_value
+  and lost nothing; only probes and units, no unit up, no change without a probe (EXPECT["a2c"], so the older
+  mutants' targets stay unique). test_regrade_expect 84 of 84 (15 new cases; the new file fails on the A2b
+  dev_regrade, which has no expected_a2c); mutation_regrade 7 new mutants (65 in all), each passing the A2b
+  test_regrade_expect (69 of 69) and failing the new one.
+REGRADE (from the A2b copies of STEP 16A2B-R, nothing downloaded): dev_regrade.py --expect a2c over the 440 public runs
+  (151,360 rows): 9 rows changed, 9 probes, all expected, unit up 0, down 0, each a LOOKUP X probe that already failed
+  gaining a3_value: BananaMind-2-Nano-Chat template seed 2 lookup-028 u9; Loom-Spark-3.2 template seed 2 lookup-003 u8
+  ("The osaka is ..."), template greedy lookup-024 u12; Vertex-0.6-15M-Instruct template seed 1 lookup-027 u6 ("Ah,
+  aisha! ..."); Veyra2-Blueberry-5M-Instruct template seed 1 lookup-008 u12 ("I'm soraya, ..."), template seeds 2, 3 and
+  greedy lookup-032 u12, plain seed 2 lookup-043 u12. Only transcripts.jsonl of those 9 runs differ; every scores.jsonl
+  is identical. The 12 frontier runs (4,128 rows): 0 rows. From the Nov 3 copies with these graders and --expect a2: 19
+  public rows (A2's 2, A2b's 8, A2c's 9) and 9 frontier rows; the a2 rule accepts the frontier rows and 10 public rows
+  and refuses exactly A2c's 9 (checked row by row; a3_value gained is outside A2's rule), so that run exits 1 by design;
+  both copies equal the new A2c copies byte for byte but regrade.json. rc12/logs/regrade_a2c_manifest.txt (new, the A2b
+  recipe: sha256 of every file of the A2c copies but regrade.json, 1,808 files, 9 lines differ from the A2b manifest):
+  regenerated on 2026-11-21 it is byte-identical; the Nov 3 regrade passes it (0 FAILED), the A2b copies fail it on
+  exactly the 9 changed runs; LOCK_STEPS' commit check now uses it. The 2026-11-21 regrade equals the 2026-11-19 one
+  byte for byte (public and frontier, regrade.json aside).
+  dev_panel.py, dev_s11.py, dev_extras14.py (--boot 10000) on the A2c copy: panel.tsv, panel.json, checks.json,
+  rules.json, s11.json, extras14.json and extras14.tsv identical to the A2b copy's. So no number moved:
+  logs/panel_20261119.jsonl and logs/extras14_20261119.jsonl stand (only the 6 card rows' not_regraded note names A2c;
+  the Vertex card row stays not_regraded, its runs are on the PC), and prereg s9 to s12 and test_numbers14's pins stand.
+CHEATERS (the fix round's fakes plus the case forms, through the real runner and score.py, A2b graders -> now): every
+  always-abstain form 0.000 -> 0.000; NF_ORDER (positional) 0.500 -> 0.500; NF_KEYCOUNT_RECENT 0.500 -> 0.500; NF_LURE,
+  NF_BOTH 0.000 -> 0.000; NF_LURE_LOWER 0.667 -> 0.000 (P 1.0, X 0.667 -> 0.0); NF_LURE_UPPER, NF_LURE_MIXED,
+  NF_LURE_POSS, NF_LURE_LOWER_OLDCUE, NF_LURE_LOWER_FIRST 0.667 -> 0.000 each; NF_P_RECENT_LOWER 0.500 -> 0.500;
+  NF_ALL_LOWER (the right policy, every reply in lower case) 0.333 -> 0.333 (menu only: P's capitalized golds fail as
+  written). The review's own script (an older cue and the lure in lower case): 78d68b0 0.667, A2b 0.667, now 0.000.
+FINDINGS ON THE WAY (2026-11-19)
+  First suite run: mutation_graders crashed 1 of 453 mutants: A2b's scope mutant's target ('rec.get("family") ==
+  "LOOKUP"') occurred twice once A2c's line used the same words (a2c_mutants_watch ran only A2c's mutants, so it did
+  not see it). A2c's line now reads rec["family"] (every record has it); every SOURCE mutant's target occurs exactly
+  once; the regrade with the final text equals the first byte for byte.
+  First dry run (renamed values a1): mutation_graders 452 of 453, the substring mutant SURVIVED: the first
+  a2c_substring_ok used "wanders" and "scurry", which hold only dev's Anders and curry, so on new content no fixture
+  held a value inside a longer word and every sealed draw would have failed at mutation_graders. The fixture now builds
+  its word from the record's own lure ("pre<lure>x"), and the relabelled scope copies were added so the scope pin does
+  not hang on a draw's RECALL pools.
+  Second dry run (a1, a2, b1, b2 on fresh seeds; it finished, the suite after it did not start): a1, a2 and b2
+  mutation_graders 453 of 453; b1 452 of 453, the grade_role role-leak turn-guard mutant ('if i <= turn and
+  T.captures(v, text)' -> 'if T.captures(v, text)') SURVIVED. Not A2c's: the same work copy with the A2b graders
+  (59d0328's rc12, the same content and build) gives the same survivor. Cause: mutation_graders.conv_tests runs
+  leak_before_fact on the first ROLE record only and skips it when that record's name fact is at turn 1, which that
+  draw's was (38 other ROLE records had it later); in B4 such a draw fails at mutation_graders and is discarded. Left
+  open (NOT DONE). audit_graders 0 wrong in each; LOOKUP questions holding a not-found cue 0 of 96 in each; the A2c
+  content rule 0 failures in each.
+TEXT. Prereg: s6 G-ABS paragraph (the any-case clause on LOOKUP's X probe); s6 (x) (the older gap now closed by (xi);
+  the 0.667 fake now 0.000); s6 (xi) new (what, scope, the case map's parts, the false-fail counts and the rule, the
+  content rule, the DECIDED line, the evidence, the regrade); s9 (A2c moved no number); s10b what counts; s11 (A2c: no
+  verdict, no unit); s14 (A2b and A2c act on LOOKUP records only). LOCK_STEPS: A2b status points to A2c; A2c status
+  new; the files to stage (fixtures_a2c.py, mutants_a2c.py, audit_a2c.py, logs/regrade_a2c_manifest.txt); the commit
+  check through the A2c manifest (19 public rows from Nov 3, A2's rule refusing exactly A2c's 9, so exit 1 is expected
+  and the manifest is the check); B2's content rule and B4's list of content rules; M7 as decided, with Max's overrule.
+  The sealed prompt: the same content rule, and the rule named among B4's content rules. LOCK_FOR_MAX: the M7 item
+  rewritten as a decision he may reverse. README (19,586 fixtures, 454 mutants; the A2c line in the status) and
+  docs/EXPERIMENTS.md (454 of 454; the gap closed). test_numbers14's docstring and the 6 card rows' not_regraded note
+  name A2c.
+FILES: rc12/graders.py, fixtures_a2c.py (new), mutants_a2c.py (new), audit_a2c.py (new), mutation_graders.py,
+  mutants_graders.py, audit_graders.py, dev_regrade.py, test_regrade_expect.py, mutation_regrade.py, test_lock_d.py (G6
+  pin), test_gens_fam_b.py (lookup_case), mutation_gens.py, test_numbers14.py (docstring); logs audit_graders.txt,
+  mutation_graders.txt, mutation_gens.txt, mutation_regrade.txt, mutation_lock.txt, extras14_20261119.jsonl (note
+  text), regrade_a2c_manifest.txt (new); prereg/RC-12.draft.txt; rc12/LOCK_STEPS.md, rc12/LOCK_FOR_MAX.md,
+  rc12/lock/SEALED_SESSION_PROMPT.md; README.md, docs/EXPERIMENTS.md; this file.
+CHECKS (2026-11-22, the third session: an rsync export of the finished tree with this entry, no .git, no __pycache__, no
+  runs; each step alone under the shared heavy lock, at most 4 workers; logs in the session's scratch, lockA/a2c/fin):
+  build_dev --stdout equals dev/rc12_dev.jsonl (3e543f8d); test_gens 0 failures over 640 records; audit_rules GATE PASS;
+  audit_graders 0 wrong of 64,414; validate_e2e G1-G4 PASS, logs/e2e_fakes.txt and all 82 fake files byte-identical to
+  STEP 16A2B-R's export; validate_machinery 12 of 12 groups; every rc12 test_*.py exits 0 except test_hf_batched (PC
+  only by design; --split-only PASS) and test_numbers14 (exactly the 6 Vertex card-row not_regraded failures;
+  --allow-not-regraded PASS; with --raw and --panel on the A2c copy 2,566 raw numbers PASS); test_regrade_expect 84 of
+  84; mutation_graders 454 of 454 over 19,586 fixtures, IDEAL 0 (353 s); mutation_gens all killed (m_lookup_value_lower
+  and the content mutant among them); mutation_audit 7 of 7 and 6 of 6; mutation_regrade 65 of 65; mutation_numbers14 18
+  of 18 right, 8 not run (PC part); extras/test_rc12x_extras PASS; mutation_lock 120 of 120; oodh/tests every file
+  passes, mutation_shotgun 12 of 12; the OOD-H gate on the synthetic world prints the same report as on 59d0328's
+  graders; absence/scripts/gabs_probe.py every not-found form 48 of 48, the lure form 0 of 48 (a3_value); the A2c copies
+  against logs/regrade_a2c_manifest.txt 0 FAILED (1,808 lines). The regenerated logs differ from the worktree's only in
+  run times and in the order one set prints (mutation_lock), so the worktree's stand. The renamed-content dry run (STEP
+  16's recipe, 4 copies on fresh seeds: renamed values a1 and a2, reworded templates b1 and b2): audit_graders 0 wrong
+  in each (64,433 to 64,481 variants), 0 of the 96 LOOKUP questions in each holds a not-found cue, the A2c content rule
+  0 failures in each; mutation_graders 454 of 454 in a1 and a2 (19,506 and 19,541 fixtures), 453 of 454 in b1 and b2
+  (19,686 and 19,550): in both the survivor is the grade_role turn-guard mutant above, because each draw's first ROLE
+  record names the assistant at turn 1, so leak_before_fact is skipped; with 59d0328's graders on the same content,
+  build and seed it survives the same way (so not A2c's; NOT DONE). In the worktree after this entry's last edit:
+  test_lock, test_lock_b, test_lock_c, test_lock_d, test_oodh_wording, test_regrade_expect, test_pins_engines and
+  test_numbers14 --allow-not-regraded PASS; lock_check check (draft) PASS.
+NOT DONE: everything STEP 16, 16P, 16R, 16R2, 16A2B and 16A2B-R list as open (the card row, the tier-1 runs,
+  mutation_numbers14's PC part, A3 at the final C, the commit and its regrade check, B, D, E); the draw-dependent
+  leak_before_fact test above (a seed whose first ROLE record names the assistant at turn 1 fails mutation_graders: 3 of
+  the 8 A2c dry-run copies, all three with reworded templates, and none of STEP 16A2B-R's 4; B4 discards such a draw, so
+  the kept seed is also chosen by it; a fix would run the test on the first ROLE record whose name comes after turn 1);
+  A2b's own scope pins, like A2c's before the OODH copies, are RECALL only (a mutant that widens lookabs to OODH alone
+  survives all 19,586 fixtures, checked 2026-11-21; the 2026-11-19 scratch checks found no OODH verdict change).
+
+STEP 16A2B-R2 (2026-11-22, Claude, lock track A, the late review of lock step A2b's fix round, applied with A2c;
+nothing under sealed/ or private/ read, listed or built; no model loaded; no Planck model scored; Mac only, at most 4
+worker processes, one heavy run at a time under the shared lock; nothing committed; the worktree's base is 59d0328 with
+A2c on top, not C). A review of the fix round (STEP 16A2B-R) on a frozen copy of 59d0328 found 7 fixes and 6 notes
+(scratch lockA/a2c/review_late_result.txt). "Before" below is 59d0328 with A2c (the worktree when this round began);
+counts are passes of the 48 dev LOOKUP X probes unless said otherwise.
+FIXES (each a grader change on LOOKUP's X probe only, grade_cues.py's A2b block; each with its fixtures, a mutant per
+  clause and paraphrases):
+  1. The clause rule cancelled real negations set off by a mark ("Thursday isn't, honestly, missing from the new
+     rota.", "... is not, in fact, absent from ...", "... is never, ever, missing ...", "Not, mind you, only the old one
+     has Thursday; ...", "Thursday is not, as before, only on the old rota; ...", "Nobody, it seems, is missing ...",
+     "Nothing, as far as anyone can tell, is missing ...": 48 before, 0 now). The negation window is the 3 tokens
+     before the cue within its sentence again; only an opening at the sentence start or after a comma and followed by
+     a mark is blanked first (INTERJ: I'm / I am afraid not, afraid not, sadly not, unfortunately not, (I) guess not,
+     probably not, apparently not, (I) don't / do not think so, not really, not sure, not this time), so "I'm afraid
+     not, I couldn't find X", "Sorry, I'm afraid not, I couldn't find X", "Sadly not: no results for X" still pass and
+     "X is probably not, honestly, missing from it" fails. "I suppose not" was tried and dropped: "I suppose" binds the
+     first person (a4_voice) whatever follows. Cost: "Can't say, I couldn't find X" (a negation in an earlier clause
+     that is no listed opening) now fails (48 before, 0 now).
+  2. LOOKUP_ON ("only on / in the <other>") was not tied to the key ("The new rota has Thursday; the extra rows are
+     only on the old one.", "... the changes are only in the old one.", "... the crossed-out names are only on the other
+     one.": 48 before, 0 now). It now needs the key, "it" or "that" (maybe with "'s") and at most three more words with
+     no mark before "only"; its negation is read at "only" ("Thursday is not only on the old rota; ..." fails). Cost:
+     "Thursday, as far as I can tell, is only on the old rota." (a mark between) now fails. Past or former forms still
+     pass ("Thursday used to be only on the old rota, but ...", "... was only on the old rota before; ...").
+  3. ONLY's objects "it" and "that" referred to anything and "a row / an entry / a line" needed nothing after them
+     ("Only the old one has that problem; ...", "... has it wrong; ...", "... has a line crossed out; ...", "... has an
+     entry left blank; ...", "... shows it crossed out; ...", "... contains that typo; ...", "... includes it as a
+     holiday; ...": 48 before, 0 now). "it" / "that" now count only ending a clause (a mark or the end next; not
+     "it's"), the row forms only followed by "for" or "on" and the key.
+  4. The found forms read any "n't found" ("I haven't found any gap. The new rota has it covered.", "The office hasn't
+     found a gap; ...": 48 before, 0 now). Now only passive forms: "not found" (not after have, has, had, 've), "not be
+     found", "cannot be found", "wasn't / weren't / isn't / aren't found", "couldn't / can't / won't be found". Cost:
+     "We haven't found Thursday on the new rota." now fails (48 before, 0 now); "I haven't found ..." and "I have not
+     found ..." failed before too (a4_voice).
+  5. "I found nothing" (the a4 frame) also took the binding out of "I found nothing wrong: X is on the new rota." (48
+     before, 0 now). Applied on the cue, not the frame: "found nothing", "turned up nothing" and "nothing (was) found"
+     count only when "for", "on", "in", "about", a mark or the end of the reply comes next (END), which also closes the
+     forms with no first person the frame could not reach ("Found nothing wrong: ...", "Nothing was found wrong with
+     the new rota; ...", "Nothing found missing: ...": 48 before, 0 now). The frame stays as it was: changing it alone
+     left those open and failed right replies such as "I found nothing wrong with the new rota; X is missing from it."
+     (48 now).
+  6. "nothing" / "nobody" failed right replies that answer with the word and a dash ("Nobody - Thursday is missing
+     from the new rota.", with an en or em dash too: 0 before, 48 now; no stored X reply opens so). They now count only
+     when no mark follows the word (NEG_MORE), and as the subject of the cue with an aside or up to two words before
+     its verb (NEG_PHRASE: "Nobody, it seems, is missing ...", "None, it seems, are missing ...", "Nothing at all is
+     missing ..."); "Nobody, Thursday is missing from the new one." passes (48; before too).
+  7. Mutants without teeth (the reviewer's 13 meaningful survivors): each is pinned now, on the new code where the
+     code moved: R04 (subjects you / he / she / it: a2b_r2_she_couldnt), R02 (no subject after "and" / "but":
+     a2b_r2_and_couldnt), R03 (after a dash: a2b_r2_dash_couldnt), R10 (a passive auxiliary without n't:
+     a2b_r2_was_found), R12 ("nothing <word> found": a2b_r2_nothing_new_found), R14 (any ONLY verb:
+     a2b_r2_only_changed_it), R17 (object "a(n) <word>": a2b_r2_only_a_gap), R18 (this / those: closed by fix 3's clause
+     end; a2b_r2_only_this_problem is its guard), R19 (another preposition: a2b_r2_on_about), R07 (won't / wouldn't:
+     a2b_r2_wouldnt_see), R23 (the opening after a comma: a2b_r2_interj_after_comma_ok), R25 (NEG_MORE over the whole
+     sentence: a2b_r2_nothing_window_ok), R26 ("Nobody," as an answer: a2b_r2_nobody_comma_ok). test_gens' content rule:
+     two record mutants in mutation_gens (m_lookup_q_missing, a LOOKUP question holding "missing from";
+     m_lookup_q_curly, "I can't see" with a curly apostrophe), which kill the reviewer's G1 (lookup_any reads only the
+     find frames), G6 (no "missing / absent from") and G2 (test_gens skips norm()).
+NOTES:
+  8. No leak outside LOOKUP X: rechecked with the reviewer's scope tool on 119 reply templates (the review's 103 and
+     this round's 16): the 48 LOOKUP X probes relabelled RECALL and OODH, the 12 non-LOOKUP ABS probes and every VAL
+     probe give byte-identical results before and now (476 rows). Applied as a pin: A2b's scope had no OODH pin (a
+     mutant widening lookabs to OODH alone survived every fixture, STEP 16A2C NOT DONE); one copy per cell of a LOOKUP
+     record relabelled OODH now fails "No results for X on the new one." (a2b_scope_relabelled_oodh).
+  9. test_gens' refusal cannot fail draws at random (a question template trips it on every draw or none); kept as
+     strict as it is (lookup_any reads every list whatever the table: 2 of 36 hand-written natural question templates
+     are refused needlessly, which costs a rewrite, while a missed one would fail every seed at mutation_graders).
+     Applied: the phrase lists in LOCK_STEPS B2 and the sealed prompt now match the regexes (the passive found forms,
+     "couldn't / can't / won't be found", the "found nothing" ends, curly apostrophes).
+  10. Shortcut fakes: rerun through the real runner and score.py (the review's and the A2c finish's fakes): every
+     always-abstain form 0.000, positional 0.500, key-count 0.500, the lure forms 0.000, NF_P_RECENT_LOWER 0.500,
+     NF_ALL_LOWER 0.333, all as before. Idiom fakes with the exact lookup on P: those of fixes 1 to 5 1.000 -> 0.000
+     (6 fakes); "I don't see why not: X is on the new one.", "We couldn't find any problem: ...", "X was only on the old
+     one before; ..." and the older "There's no problem: ..." still 1.000. Recorded in prereg s6 (x)'s known limits:
+     against a reply that claims the key is there, the X probe rests on a3.
+  11. The idioms the widened subjects carry: recorded in s6 (x) (we, the lookup, my search, adverbs, no subject, "seem
+     to"; "wasn't found missing", "won't be found short", "can't be found wanting", "could not be found"), with the
+     wrong-key and wrong-table cues and a question followed by the key ("Couldn't find X? It's right there ...").
+  12. Stored replies: of the 10,848 stored LOOKUP X replies (440 public and 12 frontier runs) 3 change their cue flag,
+     all frontier, and 1 its clauses (claude-sonnet-5-5 template seed 1 lookup-006, "... December (Calgary) ... only on
+     the new plan" style, gains a2_cue beside a3_value); 102 pass before and after. The 2 Qwen2.5-0.5B-Instruct replies
+     that pass by denying the table exists ("I don't see a rota or photo album in your message") still pass; recorded.
+  13. Right replies still failing: added to s6 (x)'s known limits ("X has not been found on the new rota", "We looked,
+     but couldn't find X", "only on the older rota", "Only the first rota has X"), with this round's costs above.
+RED THEN GREEN
+  Fixtures (rc12/fixtures_a2b.py, X_OK_R2, X_FAIL_R2 and the OODH copies): 3,939 new: 38 must-pass and 44 must-fail X
+  kinds x 48, and one OODH copy per cell (3). On the graders before: 1,680 wrong verdicts, exactly 35 kinds x 48 (4
+  must-pass: the hyphen, en dash and em dash answers and the opening before a hyphen; 31 must-fail: the wrong passes of
+  fixes 1 to 6, the have / has / had / 've / haven't / hasn't found forms among them); the other 48 kinds are pins that
+  hold on both (the openings the clause rule already passed, the anchors, the passive forms, the reviewer's survivors).
+  After: 0 misses of 23,525 (168 records, 337 with copies; test_lock_d's G6 pin is now (168, 337, 23,525) and the A2c
+  pin fails on the tree). Four fixtures were reworded and one added after the first watch, which showed they could not
+  tell their mutant from the tree: "I have / I've not found any gap ..." fail a4_voice whatever the found rule ("We
+  have", "We've" now); "X isn't only on the old one ..." never reaches LOOKUP_ON (no anchor crosses "isn't"; "X is not
+  only on ..." now); "I do not think so, X is missing ..." has its negation outside the window ("I do not think so, no
+  results for X." now); and "Nobody's missing from the new one; X is covered." (new) pins NEG_MORE's "nobody", which
+  "Nobody is missing ..." cannot, since NEG_PHRASE catches it too.
+  Mutants (rc12/mutants_a2b.py): 115 -> 200 source edits plus OFF lookabs (201): the found forms, ONLY objects,
+  LOOKUP_ON, hit list and negation mutants retargeted to the new text, one per new clause added. Watch (scratch
+  r1fix/tools/watch_r2.py, 4 workers): a mutant named after a new kind must survive the fixtures before this round and
+  be killed by its kind; one named after an older kind must survive the fixtures without fixtures_a2b and fixtures_a2c
+  and be killed by its kind. First run 185 of 201 as required; of the 16 others 9 were the watch's own fault (its first
+  F0 kept fixtures_a2c, whose must-pass replies use A2b's cues) and 7 real (the 5 fixtures above, and two mutants of
+  "nothing" in NEG_MORE named after a2b_nothing_missing, which NEG_PHRASE also kills, now named after
+  a2b_r2_found_nothing_missing); after the fixes the 19 mutants with those names: 19 of 19 as required.
+  audit_graders (rc12/audit_a2b.py): 27 new kinds (26 on the 48 LOOKUP X probes, 1 on the 12 RECALL abstain probes):
+  480 wrong verdicts before (10 kinds x 48: 9 must-fail kinds and the must-pass a2b_r2_nobody_dash), 0 after.
+  mutation_gens: m_lookup_q_missing and m_lookup_q_curly; the reviewer's code mutants G1, G2 and G6 run through the real
+  mutation_gens: with the old mutation_gens each survives (ALL MUTANTS KILLED), with the new one each is killed (a
+  record mutant survives: G1 and G6 by m_lookup_q_missing, G2 by m_lookup_q_curly).
+  leak_before_fact: on the b1 work copy of the A2c dry run (its content, build and seed, 19,686 fixtures) the grade_role
+  turn-guard mutant SURVIVED with the old mutation_graders (leak_before_fact absent) and is KILLED with the new one
+  (leak_before_fact present, its only killer).
+  dev_regrade --expect a2b_r2: test_regrade_expect 97 of 97 (13 new cases); mutation_regrade 71 of 71: the 6 new
+  mutants each PASS the worktree's test_regrade_expect (65 of 71 killed there) and are killed by the new one.
+REGRADE (nothing downloaded; scratch r1fix/data). dev_regrade --expect a2b_r2 from the A2c copies: 440 public runs,
+  151,360 rows, 0 changed; 12 frontier runs, 4,128 rows, 1 changed, expected: claude-sonnet-5-5 template seed 1
+  lookup-006 u12 ("... December (Calgary) is only on the new plan."), which names the lure and failed a3_value, gains
+  a2_cue. --expect a2c from the A2b copies: public 9 rows (A2c's), all expected; frontier the same 1 row, refused
+  (a2_cue is outside A2c's rule), exit 1 by design. --expect a2 from the Nov 3 copies: public 19 rows, refusing exactly
+  A2c's 9 (exit 1 by design, as in STEP 16A2C); frontier 8 rows (A2b's 9 but the one above, now back to its Nov 3
+  verdict), all expected. The three copies are byte-identical but regrade.json. rc12/logs/regrade_a2c_manifest.txt
+  regenerated from them: 1,808 lines, 1 differs from A2c's (that run's transcripts.jsonl); the three copies pass it (0
+  FAILED), the copies of STEP 16A2C fail it on exactly that file. dev_panel.py, dev_s11.py, dev_extras14.py (--boot
+  10000) on the public copy: panel.tsv, panel.json, checks.json, rules.json, s11.json, extras14.json, extras14.tsv
+  identical to A2c's: no number moved; logs/panel_20261119.jsonl and logs/extras14_20261119.jsonl stand.
+CHEATERS (through the real runner and score.py, before -> now): the A2c finish's 26 fakes all unchanged (always-abstain
+  0.000; NF_ORDER 0.500; NF_KEYCOUNT_RECENT 0.500; NF_LURE, NF_BOTH and the 6 lower-case lure forms 0.000;
+  NF_P_RECENT_LOWER 0.500; NF_ALL_LOWER 0.333); the review's 25: the 15 shortcuts unchanged (best 0.500), the idiom
+  fakes with the exact lookup on P: IDIOM_ON_EXTRA_ROWS, _ONLY_THAT, _CLAUSE_ISNT_HONESTLY, _CLAUSE_NOBODY,
+  _HAVENT_FOUND, _I_FOUND_NOTHING_WRONG 1.000 -> 0.000; IDIOM_OLDCUE_NO_PROBLEM, _WE_PROBLEM, _DONT_SEE_WHY,
+  _ON_WAS_ONLY 1.000 (known limits). gabs_probe: every not-found form 48 of 48, the lure form 0 of 48.
+ALSO FROM STEP 16A2C's NOT DONE (applied here): (a) the draw-dependent leak_before_fact test: mutation_graders now runs
+  it on a ROLE record whose name fact comes after turn 1 (late_name) and build() keeps one such record in the index, so
+  a draw whose first ROLE record names the assistant at turn 1 still kills the grade_role turn-guard mutant. On the b1
+  work copy of the A2c dry run (its content, build and seed): with the old mutation_graders the mutant SURVIVED and
+  leak_before_fact was absent; with the new one it is KILLED (leak_before_fact
+  present, its only killer). On dev nothing changes (dev's first ROLE record is named
+  after turn 1, so it is the record used). (b) A2b's OODH scope pin (fix 8 above).
+TEXT. Prereg s6 (x): the rules (found forms, the "found nothing" ends, ONLY objects, LOOKUP_ON's anchor, the negation
+  rule with the openings, NEG_MORE's mark rule and NEG_PHRASE), the known limits (the idioms with every carrier, the
+  past "only on", "that" read as the key, the table-denial replies, X resting on a3 against a key-is-there reply, and
+  the costs and still-failing right forms), a LATE REVIEW paragraph with its evidence and regrade; (xi)'s counts marked
+  as of A2c. LOCK_STEPS: the A2b status sentence, the A2c status (dry-run gap fixed), B2's phrase list, the commit
+  check (the manifest now holds the copies with the late review; the frontier rows from Nov 3). The sealed prompt: the
+  phrase list (passive found forms, "found nothing" ends, curly apostrophes). LOCK_FOR_MAX: one sentence in the "I
+  couldn't find it" item. README (23,525 fixtures, 539 mutants; one sentence in the status), docs/EXPERIMENTS.md (539
+  of 539; one sentence).
+FILES: rc12/grade_cues.py, fixtures_a2b.py, mutants_a2b.py, audit_a2b.py, mutation_graders.py, mutation_gens.py,
+  dev_regrade.py, test_regrade_expect.py, mutation_regrade.py, test_lock_d.py (G6 pin: 168, 337, 23,525); logs
+  audit_graders.txt, mutation_graders.txt, mutation_gens.txt, mutation_regrade.txt, mutation_lock.txt,
+  regrade_a2c_manifest.txt; prereg/RC-12.draft.txt; rc12/LOCK_STEPS.md, rc12/LOCK_FOR_MAX.md,
+  rc12/lock/SEALED_SESSION_PROMPT.md; README.md, docs/EXPERIMENTS.md; this file. No new file.
+CHECKS (2026-11-22: an rsync export of the worktree after every code and text change above but this entry, no .git, no
+  __pycache__, no runs, no sealed or private; each step under the shared heavy lock (the light test files as one hold,
+  each logged), at most 4 workers; the Mac was shared with another workflow and swapping, so run times are long; logs in
+  the session's scratch, lockA/a2c/r1fix/fin): build_dev --stdout equals dev/rc12_dev.jsonl (3e543f8d); test_gens 0
+  failures over 640 records; audit_rules GATE PASS; audit_graders 0 wrong of 65,674; validate_e2e G1-G3 and G4 PASS;
+  validate_machinery 12 of 12 groups; every rc12 test_*.py (39) exits 0 except test_hf_batched (PC only by design;
+  --split-only PASS) and test_numbers14 (exactly the 6 Vertex card-row not_regraded failures; --allow-not-regraded PASS;
+  with --raw and --panel on this round's public copy 2,566 raw numbers PASS); test_regrade_expect 97 of 97; test_lock_d
+  PASS (G6 168, 337, 23,525); mutation_graders 539 of 539 over 23,525 fixtures (168 records + 169 synthetic copies),
+  IDEAL on all 640 records 0, ABS questions holding a cue 0 (467 s); mutation_gens all killed (m_lookup_q_missing and
+  m_lookup_q_curly among them); mutation_audit 7 of 7 and 6 of 6; mutation_regrade 71 of 71; mutation_numbers14 18 of 18
+  right, 8 not run (PC part); extras/test_rc12x_extras PASS; mutation_lock 120 of 120 (20,047 s: the Mac was swapping;
+  760 s when it was not); oodh/tests every file passes, mutation_shotgun 12 of 12; the OOD-H gate on the synthetic world
+  prints the same report as on 59d0328's graders; gabs_probe every not-found form 48 of 48, the lure form 0 of 48
+  (a3_value); this round's copies against the export's logs/regrade_a2c_manifest.txt 0 FAILED (1,808 lines). Logs
+  regenerated: audit_graders.txt, mutation_graders.txt, mutation_gens.txt and mutation_regrade.txt now in the tree, and
+  mutation_lock.txt (its G6 line: 640 records, 809 with copies, 78,609 fixtures; one set prints in another order); the
+  others differ only in run times, so the tree's stand. validate_e2e's 82 fake files and logs/e2e_fakes.txt are
+  byte-identical to the A2c finish's. The renamed-content dry run (STEP 16's recipe, 4 copies on fresh seeds: renamed
+  values a1 and a2, reworded templates b1 and b2; each copy under one hold of the lock): mutation_graders 539 of 539 in
+  each (23,446 to 23,515 fixtures), audit_graders 0 wrong in each (65,647 to 65,768 variants), 0 of the 96 LOOKUP
+  questions in each holds a not-found cue, the A2c content rule 0 failures in each; in b2 the first ROLE record names
+  the assistant at turn 1, the draw that left the turn-guard mutant alive before, and leak_before_fact ran on the second
+  ROLE record (named at turn 4). In the worktree after this entry: test_lock, test_lock_b, test_lock_c, test_lock_d,
+  test_oodh_wording, test_regrade_expect, test_pins_engines and test_numbers14 --allow-not-regraded PASS; lock_check
+  check (draft) PASS.
+NOT DONE: everything STEP 16, 16P, 16R, 16R2, 16A2B, 16A2B-R and 16A2C list as open (the card row, the tier-1 runs,
+  mutation_numbers14's PC part, A3 at the final C, the commit and its regrade check, B, D, E), but the two STEP 16A2C
+  items done here (the leak_before_fact draw dependence, A2b's OODH pin). Recorded, not changed: the idioms and the
+  other known limits in prereg s6 (x), the lenient twin reading values as written (s6 (xi)), lookup_any's strictness
+  (note 9). Max may overrule M6 or M7, this round with them, before C.
+STEP 16A2B-R3 (2026-11-22 and 2026-11-23, Claude, lock track A, the second round of the late review of lock step A2b,
+  applied with A2c; nothing under sealed/ or private/ read, listed or built; no model loaded; no Planck model scored;
+  Mac only, at most 4 worker processes, one heavy run at a time under the shared lock; nothing committed; the worktree's
+  base is 59d0328 with A2c and STEP 16A2B-R2 on top, not C). A review of STEP 16A2B-R2 on a frozen copy of the worktree
+  found 7 fixes and 4 notes. "Before" below is the worktree when this round began (59d0328 + A2c + STEP 16A2B-R2);
+  counts are passes of the 48 dev LOOKUP X probes unless said otherwise.
+FIXES (each a grader change on LOOKUP's X probe only, grade_cues.py's A2b block, with its fixtures and a mutant per
+  clause):
+  1. STEP 16A2B-R2's mark rule let a dash or bracket aside after "nothing" / "nobody" through ("Nothing - really - is
+     missing from the new rota; Thursday is on it.", the same with an en or em dash, "Nobody (really) is missing ...",
+     "Nobody - honestly - is absent from ...", '"Nothing" is missing ...': 0 at 59d0328, 48 before, 0 now). NEG_PHRASE
+     now reads an aside of commas, dashes or brackets after up to three words, on the sentence as written; NEG_MORE
+     reads past quotes ('"Nothing" is missing' fails, '"Nobody" - X is missing' passes); and the aside that ends the
+     text before the cue is taken out before the 3-token window (fix 2), so "Nothing - really - is missing" reads as
+     "Nothing is missing". This also closes what the reviewer's candidate fix left open ("Nothing at all, honestly, is
+     missing ...", "Nobody at all - really - is missing ...": 48 before, 0 now). Recorded, not closed: "Nothing! is
+     missing ..." and "Nothing... is missing ..." (the negation is in the sentence before; 48 at 59d0328 too).
+  2. A negation more than 3 tokens before the cue. drop_aside: an aside of commas, dashes or brackets that ends the text
+     before the cue, then at most two of be, been, is, are, was, were, found, is taken out ("X isn't, as far as I can
+     tell, missing ...", "X is not, from what I can see, absent ...", "X has never, in any version, been missing ...",
+     "X is not - as far as I can tell - missing ...", "X is not (as far as I can tell) missing ...", "Nothing - at all -
+     was found missing ...": 48 before, 0 now). NEG_PHRASE: the subjects "not a single", "not one", "no single", up to
+     three words, the verbs be and been, and "found" after the verb ("Not a single day is missing ...", "None of the
+     days is missing ...", "No single day ...", "Nothing was found to be missing ...", "Nobody at all has been missing
+     ...", "Nothing, honestly, was found missing ...": 48 before, 0 now). A comma aside leaves its comma, so an opening
+     before it is still one ("No, sadly, I couldn't find X" 48), and only those verbs may follow the aside ("X isn't
+     there, sadly, it's missing from the new one" 48). Side effect: "X, not others, is missing from the new one" (and
+     its plural "are" / "were" forms) 0 before, 48 now. Recorded, not closed: "X is not really at all missing ..." and
+     "Nothing from the old rota is missing from the new one" (a negation four words back with no mark; 48 both), and
+     NEG_PHRASE's cost "Nobody noticed X is missing from the new rota" (0, as before).
+  3. ONLY's key object now ends its clause as "it" / "that" do (CLAUSE_END: a mark, the end, or "and" / "but"), maybe
+     after "on / in it / there" or "listed" ("Only the old one has X crossed out; ...", "... lists X twice; ...", "...
+     has X in bold; ...", "... has the X slot crossed out; ...": 48 before, 0 now; "Only the old one has X on it.", "...
+     X listed.", "... X and the new one does not.", "... X but the new one skips it." 48). "the <key>" keeps one word
+     after it ("Only the old one has the X slot." 48); recorded: "Only the old one lists the X twice" passes (48, before
+     too). The row forms end their clause too; "Only the old one has a line; ..." fails.
+  4. The perfect with a word between ("The office has also not found a gap; ...", "We have honestly not found any
+     problem: ...", "... had really not ...", "We've also not ...": 48 before, 0 now): the passive "not (be) found"
+     counts unless have, has, had or 've and at most one word come before it, read in code (grade_cues.perfect, PERFECT:
+     a lookbehind must be fixed width). Cost: "We have still not found X on the new rota" 48 before, 0 now (recorded
+     with "We haven't found X"); "The X rows you have here are not found on the new one" (two words between) 48.
+  5. The reviewer's six surviving mutants, each now in mutants_a2b.py and killed by a fixture of its own: M02
+     LOOKUP_ON's leading boundary (a2b_r3_split_only), M05 TOKEN's apostrophe (a2b_r3_nobodys_ever), M06 END's word ends
+     (a2b_r3_found_nothing_inconsistent, a2b_r3_nothing_found_online), M08 NEG_MORE's colon (a2b_r3_nobody_colon_ok),
+     M13 a row form for any word (a2b_r3_row_for_other), M16 the NEG_MORE window (a2b_r3_nothing_seems). M11, M14 and
+     M15 are equivalent (mutants_a2b.py's docstring says why); M12 (any clitic after LOOKUP_ON's anchor) is equivalent
+     once "'ll" and "'d" count (fix 6); M17 (lookup_any without "only on / in the") through the real mutation_gens:
+     killed (the record mutant m_lookup_q_on survives it, so mutation_gens fails; with no mutation all are killed).
+  6. Right replies that STEP 16A2B-R2 moved from 48 to 0 or that failed before: closed where the rule keeps its shape
+     ("None, X is missing from the new rota", "None - X ...", "None <em dash> X ...", "No - X ...": the openings gain
+     "None" and "No"; "Xs are only on the old rota", "Only the old rota has Xs": the key may be plural; "It'll be only
+     on the old rota", "That'd be only on the old rota": the anchor takes "'ll" and "'d"; 0 before, 48 now), recorded in
+     s6 (x)'s failing-though-right list otherwise ("Only on the old one." and "X? Only on the old rota.": no anchor;
+     "Sorry - couldn't find X": no subject after a dash; "I couldnt find X"; "Nothing's found for X").
+  7. Stale numbers in STEP 16A2B-R2: README's 23,525 fixtures (not 23,477), test_lock_d's G6 pin (168, 337, 23,525), and
+     the audit's 480 wrong verdicts are 9 must-fail kinds and the must-pass a2b_r2_nobody_dash x 48.
+NOTES:
+  8. Recorded in s6 (x)'s known limits: "the other <word>" read as the other table ("X is only on the other side of the
+     new rota", "... only in the other column ..."), and an "it" cleft read as the key ("...; it's only on the old one
+     that the order differs"), as "that" already was; their idiom fakes score 1.000 (they need the exact lookup on P).
+  9. Applied: the draw timing in LOCK_STEPS B4 and the sealed prompt, from this round's measures (mutation_graders 563 s
+     on dev and 543 to 588 s on the four dry-run copies with 599 mutants, against 467 to 886 s with 539;
+     mutation_audit's two parts 53 s and 43 s here, 348 to 785 s under load before; a draw that reaches both now about
+     12 to 30 minutes, longer when the Mac is loaded).
+  10. Applied: LOCK_STEPS M6 names the late review, both rounds, as part of what Max may overrule.
+  11. Applied: mutation_graders no longer raises StopIteration when a draw has no ROLE record named after turn 1; the
+      conversation test leak_before_fact is then a named miss ("no ROLE record named after turn 1"), so the draw fails
+      by name. Watched with late_name patched to find none: the graders before crash (StopIteration), the new ones build
+      26,213 fixtures and report the miss.
+  ALSO: test_gens' content rule (lookup_any) reads "not found" anywhere (the perfect check is the grader's only), so it
+  is stricter than before by "have / has / had / 've (word) not found"; B2's phrase lists (LOCK_STEPS, the sealed
+  prompt) say so.
+RED THEN GREEN
+  Fixtures (rc12/fixtures_a2b.py, X_OK_R3 and X_FAIL_R3): 2,976 new, 23 must-pass and 39 must-fail X kinds x 48. On the
+  graders before: 2,016 wrong verdicts, exactly 42 kinds x 48 (10 must-pass: "None, X", "None - X", "None <em dash> X",
+  "No - X", "X, not others, is / are / were missing", "It'll be", "That'd be", the plural key on LOOKUP_ON and on ONLY;
+  32 must-fail: the wrong passes of fixes 1 to 4); the other 20 kinds are pins that hold on both (the guards of each new
+  clause and the killers of the reviewer's survivors). After: 0 misses of 26,501 (168 records, 337 with copies;
+  test_lock_d's G6 pin is now (168, 337, 26,501), and the previous pin fails on the tree: FAIL G6: dev's fixture set
+  changed: 168 records (337 with copies), 26501).
+  Mutants (rc12/mutants_a2b.py): 200 -> 260 source edits plus OFF lookabs (261): the mutants of the text this round
+  rewrote retargeted (the perfect, ONLY's objects, LOOKUP_ON's anchor, NEG_MORE, NEG_PHRASE, the hit list, the
+  negation's INTERJ line), one per new clause added, and the reviewer's six survivors kept. Watch (scratch
+  r2fix/tools/watch_r3.py, 4 workers; F0 without fixtures_a2b and fixtures_a2c, F1 the fixtures before this round): a
+  mutant named after a new kind must survive F1 and be killed by its kind; one named after an older kind must survive F0
+  and be killed by its kind. First run 251 of 260 as required; the 9 others were real: the aside rule made two older
+  fixtures blind ("Sorry, I'm afraid not, I couldn't find X" no longer needs INTERJ's after-comma clause:
+  a2b_r3_interj_comma_colon_ok, "Sorry, afraid not: no results for X", added; "No one, it seems, were missing" is now
+  read by the window, so "no one" and "were" in NEG_PHRASE need "No one at all, it seems, is missing" and "None of them,
+  it seems, were missing", added), NEG_PHRASE's "found" made the tail's count, "was" and "found" invisible to the
+  "Nothing ... was found missing" fixture ("X has not, as far as I know, been found missing", "No day, it seems, was
+  missing", "X was not, as far as I know, found missing", added), "Only the old one has X but the new one skips it"
+  passed through ABS_MORE's "skips" (reworded: "... does not"), the row-form mutant that dropped "for / on <key>" broke
+  older must-pass fixtures (rewritten: the key part optional), and NEG_PHRASE without its aside is killed by older kinds
+  (renamed a2b_r2_nobody_aside, with a comma-only aside mutant added for a2b_r3_nobody_words_dash). Rerun of the 16
+  mutants with those names: 16 of 16 as required.
+  audit_graders (rc12/audit_a2b.py): 20 new kinds (19 on the 48 LOOKUP X probes, 1 on the 12 RECALL abstain probes): 816
+  wrong verdicts before (17 kinds x 48: 7 must-pass, 10 must-fail), 0 after.
+  Scope: 229 reply templates (the reviewer's 127 and this round's 102) graded on the 12 non-LOOKUP abstain probes, the
+  48 LOOKUP X records relabelled RECALL and OODH, the 48 LOOKUP P probes and 60 other VAL probes: 49,464 grades,
+  byte-identical before and now.
+REGRADE (nothing downloaded; scratch r2fix/data). dev_regrade --expect a2b_r2 (its docstring now names this round) from
+  the late review's copies (STEP 16A2B-R2): 440 public runs, 151,360 rows, 0 changed; 12 frontier runs, 4,128 rows, 0
+  changed: no stored reply moved. From the A2c copies with --expect a2b_r2: public 0, frontier the late review's 1 row
+  (claude-sonnet-5-5 template seed 1, lookup-006). From the A2b copies with --expect a2c: public A2c's 9 rows, frontier
+  that 1 row, refused (exit 1 by design). From the Nov 3 copies with --expect a2: public 19 rows (refusing exactly A2c's
+  9, exit 1 by design), frontier 8 rows, all expected. All four give copies byte-identical to the late review's
+  (regrade.json aside); the regenerated manifest equals rc12/logs/regrade_a2c_manifest.txt (1,808 lines) and every
+  route's copies pass it. dev_panel.py, dev_s11.py, dev_extras14.py (--boot 10000): panel.tsv, panel.json, checks.json,
+  rules.json, s11.json, extras14.json, extras14.tsv identical to A2c's: no number moved.
+CHEATERS (through the real runner and score.py, before -> now): the A2c finish's 26 fakes and the late review's 25
+  unchanged; the second reviewer's 12: the five idioms of fixes 1 to 3 (IDIOM_R_DASH_ASIDE, _R_NOBODY_PAREN,
+  _LONG_ASIDE, _NOT_A_SINGLE, _ONLY_KEY_CROSSED) 1.000 -> 0.000, IDIOM_ON_OTHER_SIDE 1.000 (note 8), the shortcuts with
+  the dash aside: always-abstain 0.000 both, key-count and positional 0.500 -> 0.000; this round's 13: five more idioms
+  (has also not found, the slot crossed out, "Nothing, honestly, was found missing", "None of the days", the quoted
+  "Nothing") 1.000 -> 0.000, four open ones 1.000 (the "it" cleft, "not really at all", "Nothing from the old rota",
+  "the X twice": known limits), and the newly passing forms as shortcuts: always-abstain 0.000, key-count ("It'll be
+  only on the other one") and positional ("None, X is missing") 0.000 -> 0.500. Best shortcut 0.500.
+TEXT. Prereg s6 (x): the rules (the perfect with a word, ONLY's key object and its clause end, LOOKUP_ON's plural key
+  and clitics, the aside taken out before the window, NEG_MORE's quotes, NEG_PHRASE's subjects, words, asides, verbs and
+  "found", the openings "None" and "No"), the known limits (the far negations, the sentence before, "the other <word>",
+  the "it" cleft, "the <key>" and any word; the new costs and the still-failing right forms of finding 6), and a LATE
+  REVIEW, SECOND ROUND paragraph with its evidence and regrade; (xi)'s "as of A2c" counts. LOCK_STEPS: the A2b status
+  sentence, M6 (the late review, both rounds), B2's phrase list ("not found" anywhere), B4's draw timing, the commit
+  check (the manifest unchanged by this round). The sealed prompt: the phrase list and the draw timing. LOCK_FOR_MAX:
+  one sentence in the "I couldn't find it" item. README (26,501 fixtures, 599 mutants; one clause in the status),
+  docs/EXPERIMENTS.md (599 of 599; one sentence). STEP 16A2B-R2 above: the three stale numbers (fix 7).
+FILES: rc12/grade_cues.py, fixtures_a2b.py, mutants_a2b.py, audit_a2b.py, mutation_graders.py (note 11), dev_regrade.py
+  (docstring), test_lock_d.py (G6 pin: 168, 337, 26,501); logs audit_graders.txt, mutation_graders.txt,
+  mutation_lock.txt; prereg/RC-12.draft.txt; rc12/LOCK_STEPS.md, rc12/LOCK_FOR_MAX.md,
+  rc12/lock/SEALED_SESSION_PROMPT.md; README.md, docs/EXPERIMENTS.md; this file. No new file.
+CHECKS (2026-11-23: an rsync export of the worktree after every code and text change above but this entry, the three
+  regenerated logs and two text touches after it (prereg s6 (x)'s audit count, 66,598 not the 66,646 the export said,
+  with "20 new kinds"; mutants_a2b.py's docstring sentence on the unpinned tail mutant; B4's and the sealed prompt's
+  timing from this run); no .git, no __pycache__, no runs, no sealed or private; every heavy step under the shared lock
+  (the light test files as one hold, each logged), at most 4 workers; logs in the session's scratch,
+  lockA/a2c/r2fix/fin): build_dev --stdout equals dev/rc12_dev.jsonl (3e543f8d); test_gens 0 failures over 640 records;
+  audit_rules GATE PASS; audit_graders 0 wrong of 66,598; validate_e2e G1-G3 and G4 PASS, its 82 fake files and
+  logs/e2e_fakes.txt byte-identical to the A2c finish's; validate_machinery 12 of 12 groups; every rc12 test_*.py (39)
+  exits 0 except test_hf_batched (PC only by design; --split-only PASS) and test_numbers14 (exactly the 6 Vertex
+  card-row not_regraded failures; --allow-not-regraded PASS; with --raw and --panel on this round's public copy 2,566
+  raw numbers PASS); test_regrade_expect 97 of 97; test_lock_d PASS (G6 168, 337, 26,501), and the previous test_lock_d
+  (pin 23,525) fails on the export at G6 as it must; mutation_graders 599 of 599 over 26,501 fixtures (168 records + 169
+  synthetic copies), IDEAL on all 640 records 0, ABS questions holding a cue 0 (563 s); mutation_gens all killed;
+  mutation_audit 7 of 7 (53 s) and 6 of 6 (43 s); mutation_regrade 71 of 71; mutation_numbers14 18 of 18 right, 8 not
+  run (PC part); extras/test_rc12x_extras PASS; mutation_lock 120 of 120; oodh/tests every file passes, mutation_shotgun
+  12 of 12; the OOD-H gate on the synthetic world prints the same report as on 59d0328's graders; gabs_probe every
+  not-found form 48 of 48, the lure form 0 of 48 (a3_value); this round's copies against the export's
+  logs/regrade_a2c_manifest.txt 0 FAILED (1,808 lines); M17 through the real mutation_gens: m_lookup_q_on survives it,
+  so the code mutant is killed (no mutation: all killed). Logs regenerated into the tree: audit_graders.txt,
+  mutation_graders.txt and mutation_lock.txt (its G6 line: 640 records, 809 with copies, 81,585 fixtures; one set prints
+  in another order); mutation_audit_part1/2.txt and test_lockstep.txt differ only in run times, mutation_gens.txt and
+  mutation_regrade.txt not at all, so the tree's stand. The renamed-content dry run (STEP 16's recipe, 4 copies on fresh
+  seeds: renamed values a1 and a2, reworded templates b1 and b2; each copy under one hold of the lock): mutation_graders
+  599 of 599 in each (26,408 to 26,497 fixtures; 543 to 588 s), audit_graders 0 wrong in each (66,557 to 66,637
+  variants), 0 of the 96 LOOKUP questions in each holds a not-found cue, the A2c content rule 0 failures in each; in b2
+  the first ROLE record names the assistant at turn 1 and leak_before_fact ran on the third (named at turn 3). In the
+  worktree after this entry: test_lock, test_lock_b, test_lock_c, test_lock_d, test_oodh_wording, test_regrade_expect,
+  test_pins_engines and test_numbers14 --allow-not-regraded PASS; lock_check check (draft) PASS; git status unchanged by
+  the tests.
+NOT DONE: everything STEP 16, 16P, 16R, 16R2, 16A2B, 16A2B-R, 16A2C and 16A2B-R2 list as open (the card row, the tier-1
+  runs, mutation_numbers14's PC part, A3 at the final C, the commit and its regrade check, B, D, E). Recorded, not
+  changed: the idioms and the other known limits in prereg s6 (x) (this round's open ones among them: "the other
+  <word>", the "it" cleft, a negation four words back with no mark or in the sentence before, "the <key>" with any
+  word), the lenient twin reading values as written (s6 (xi)), lookup_any's strictness. Max may overrule M6 or M7, the
+  late review with both its rounds among them, before C.

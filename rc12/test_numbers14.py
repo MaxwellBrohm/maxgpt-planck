@@ -1,7 +1,8 @@
 """Pins the dev numbers recorded on 2026-10-11 (rc12/notes.txt STEP 14N) and re-recorded on 2026-11-19 under the graders
-of the lock (the Nov 3 amendments and lock steps A2 and A2b, notes STEP 16 and 16A2B): the extras (dev_extras14.py),
-the panel (dev_regrade.py + dev_panel.py) and the likelihood rows, as committed in logs/extras14_20261119.jsonl,
-logs/panel_20261119.jsonl and logs/lik_rows_20261011.jsonl (tables14.FILES; the likelihood rows read no grader).
+of the lock (the Nov 3 amendments and lock steps A2, A2b and A2c, notes STEP 16, 16A2B and 16A2C): the extras
+(dev_extras14.py), the panel (dev_regrade.py + dev_panel.py) and the likelihood rows, as committed in
+logs/extras14_20261119.jsonl, logs/panel_20261119.jsonl and logs/lik_rows_20261011.jsonl (tables14.FILES; the
+likelihood rows read no grader).
   A  every row is graded by this tree's graders: a row carried from an earlier recording carries not_regraded and
      fails here (2026-11-19: the Vertex card row, whose runs are on the PC only) unless --allow-not-regraded, which
      mutation_numbers14 passes so that it tests the checks, not the data state;
