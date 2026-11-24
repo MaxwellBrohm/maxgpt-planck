@@ -69,9 +69,8 @@ MUTANTS = [
     (P, '"sha256": "e818bab13c041a5df6ee67aaa70942b41805a5c315ba6dae8e326ece8973bd61"', '"sha256": "e818bab13c"',
      "16P: a weights shard's sha256 cut short"),
     (P, '"textilelabs/Loom-Weave-4": {', '"textilelabs/Loom-Weave-3": {', "16P: a tier-1 row dropped"),
-    (E, '  "Qwen/Qwen3.5-2B": {"engine": "vllm", "dtype": "bfloat16",', '  "taobao-mnn/MNN-Pocket-0.3B": {"engine": '
-        '"vllm", "dtype": "bfloat16", "family": "MNN"},\n  "Qwen/Qwen3.5-2B": {"engine": "vllm", "dtype": "bfloat16",',
-     "16P: an engines entry before its own parity"),
+    (E, '"family": "MNN-Pocket-0.3B", "parity": "bf16 NEAR_TIE",', '"family": "Qwen3", "parity": "family verdict '
+        '(Qwen3-0.6B)",', "16P2: an own-parity row given its architecture's family verdict"),
     (E, '  "Qwen/Qwen3.5-2B": {"engine": "vllm", "dtype": "bfloat16",', '  "Qwen/Qwen3.5-2B": {"engine": "vllm", '
         '"dtype": "float32",', "16P: a family-verdict row off its pinned dtype"),
     (E, '  "Qwen/Qwen3.5-2B": {"engine": "vllm", "dtype": "bfloat16",', '  "Qwen/Qwen3.5-2B": {"engine": "vllm", '

@@ -13,8 +13,9 @@ rc12/engines.json. No model, no network: reads the two files only.
   tier1      (STEP 16P, 2026-11-19) the five tier-1 rows named before the lock are pinned in pins.json "tier1" (full
              revision, licence allowed here, every weights file with its sha256 and bytes) and in neither "models"
              nor "skipped" (a row joins "models" with its dev numbers); the three with a family verdict have it in
-             engines.json (vLLM, the pinned dtype); the two that need their own parity have no engines.json entry
-             yet, so the queue writes NOENGINE for them and dev_batch cannot run them before that parity. The LFM
+             engines.json (vLLM, the pinned dtype); the two that needed their own parity carry exactly its verdict
+             (STEP 16P2, 2026-11-23: their engines.json rows came after it; a row named None here has no entry yet, so
+             the queue writes NOENGINE for it and dev_batch cannot run it before its parity). The LFM
              Open License v1.0 is allowed as the TII Falcon License is: the core panel's LFM2 and LFM2.5 models
              carry it (Apache-2.0-based, royalty-free, not gated; commercial use above a revenue threshold is not
              licensed, which an evaluation is not); since review r1 (2026-11-19) only on a LiquidAI/ repo, so it
@@ -36,7 +37,8 @@ def licence_ok(m, lic):
     return lic in LICENCES or (lic == LFM[0] and m.startswith(LFM[1]))
 
 
-TIER1 = {"taobao-mnn/MNN-Pocket-0.3B": None, "textilelabs/Loom-Weave-4": None,     # None: own parity first
+TIER1 = {"taobao-mnn/MNN-Pocket-0.3B": "bf16 NEAR_TIE",      # own parity (C2)
+         "textilelabs/Loom-Weave-4": "fp32 IDENTICAL",
          "LiquidAI/LFM2-2.6B-Exp": "family verdict (LFM2-700M)",
          "LiquidAI/LFM2.5-1.2B-Instruct": "family verdict (LFM2.5-230M)",
          "Qwen/Qwen3.5-2B": "family verdict (Qwen3.5-0.8B)"}

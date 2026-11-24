@@ -5548,3 +5548,45 @@ TESTS. test_numbers14 without --allow-not-regraded: PASS (it failed before the t
   for over 14 hours when this was committed. Command, from rc12/: python -B test_numbers14.py --raw <public copy>
   --panel <public copy> --lik <the 12 passed model folders of rc12_lik>, then python -B mutation_numbers14.py with the
   same three, and commit logs/mutation_numbers14.txt.
+
+
+STEP 16P2 (2026-11-23 and 24, Claude, lock track A, the tier-1 rows' own parity and commit C2; nothing under sealed/ or
+private/ read, listed or built; no model loaded on the Mac; no Planck model scored; the PC's GPU under gpu.lock, one
+hold per run). C1 = 0ec6bb4 (STEP 16P's files), shipped to the PC as rc12t1_0ec6bb4b (git archive, md5 equal on both
+sides); the five tier-1 downloads match their pins (refs/main and every weights file's sha256 and bytes).
+PARITY (parity_hf_vllm.py on the PC with C1's code, --n 20 --pick spread, 240 turns, vLLM 0.30.0, transformers 5.17,
+  torch 2.13.0+cu132; read turn by turn on the Mac from a copy, md5 equal on both sides):
+    model                run   verdict    ident   convs  over  max     stop disagreements
+    Loom-Weave-4         fp32  IDENTICAL  240/240 20/20  0     -       0   (vLLM at float32; HF with eager attention)
+    MNN-Pocket-0.3B      bf16  NEAR_TIE    46/240  0/20  0     0.500  10
+    MNN-Pocket-0.3B      fp32  no verdict: the HF fp32 half ran past its cap twice (1,980 s on 11-23, 3,600 s on 11-24, exit 124); the vLLM fp32 half finished (240 turns)
+  Loom-Weave-4: vLLM started it at float32 (Triton attention), so the batched-HF fallback (runbook step 3b) was not
+    run. Every turn equal on ids, stop and text; stops eos 175 and cap 65 on both; no empty reply, no special-token
+    text. HF ran with eager attention because HF's default sdpa was wrong on gemma-3-270m-it's long prompts (STEP 9b);
+    the dev runs are on vLLM, which takes no HF load option, so the row carries none (dev_batch refuses one on a vllm
+    row).
+  MNN-Pocket-0.3B bf16: 194 differing turns, none over 0.5 nats; the largest margin is exactly 0.500 (corr-001 t12,
+    token 44, vLLM's token HF's 2nd choice), then 0.375 (two turns); 75 turns at margin 0.000 (exact bf16 ties) and 52
+    at negative margins (HF's own one-pass forward ranks vLLM's token above the one HF generated: bf16 drift inside
+    HF); vLLM's token is HF's 1st choice on 127 turns, 2nd on 66, 3rd on 1; 0 prompt mismatches, 0 empty replies, no
+    special-token or <think> text, stops eos or cap only, every stop disagreement on a turn whose texts had already
+    split. NEAR_TIE passes by the rule (margin <= 0.5), but on the bound itself, and its nearest relative Qwen3-0.6B
+    was DIFFERS in bf16 (0.625) and NEAR_TIE in fp32 (227/240, STEP 9b's run). So MNN got the same fp32 check.
+  MNN-Pocket-0.3B fp32: two tries, no verdict. Not required: the runbook adds a row on NEAR_TIE; the fp32 run was
+    extra care because the bf16 margin sat on the bound. The row records the bf16 verdict and its reason says the fp32
+    check did not finish.
+ENGINES (C2): engines.json gains the two rows. Loom-Weave-4: vllm, float32 (the checkpoint's own), family
+  Loom-Weave-4 (a family of one), parity "fp32 IDENTICAL". MNN-Pocket-0.3B: vllm, bfloat16 (the checkpoint's own), family MNN-Pocket-0.3B (a family of one), parity "bf16
+  NEAR_TIE", its reason naming the two fp32 tries.
+  test_pins_engines.py: TIER1 carries the two verdict strings (no tier-1 row is None now); its docstring says so.
+  mutation_step14x.py: the mutant "16P: an engines entry before its own parity" inserted an MNN entry before
+  Qwen3.5-2B; with MNN's real row after it in the file, json keeps the later key and the inserted entry is never
+  read. Watched first: it survived on the tree with both rows (38 of 39 killed, this one PASS). Retargeted to the claim the test now makes, "16P2: an own-parity row given its
+  architecture's family verdict": MNN's row becomes family Qwen3 with "family verdict (Qwen3-0.6B)" (families are
+  per recipe, STEP 13a; the family check passes it, since Qwen3-0.6B is a vllm row of family Qwen3, so only the tier1
+  check can kill it). mutation_step14x: baseline pass, 39 of 39 killed (logs/mutation_step14x.txt).
+TESTS (Mac, ~/.venvs/planck, -B, on the tree before the commit): test_pins_engines, test_dev_extras14, test_dev_batch_shards, test_engine_patches, test_loom_template (72
+  histories), test_verify_dev_runs, test_queue, extras/test_rc12x_extras: all PASS.
+NOT DONE HERE: runbook steps 4b (the queue for these two rows on C2's code, after 4a), 5 (verify_dev_runs from C2's
+  code dir), 6 (pull with an md5 manifest) and 7 (dev_extras14 with the five, s12's tier-1 numbers, the
+  stop-and-tell check).

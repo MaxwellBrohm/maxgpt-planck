@@ -2,16 +2,16 @@ baseline: pass
 KILLED    shards.py: parts concatenated | test_dev_batch_shards.py: FAIL equal in order: greedy files differ from one process
 KILLED    shards.py: contiguous slices | test_dev_batch_shards.py: IndexError: list index out of range
 KILLED    shards.py: config unchecked | test_dev_batch_shards.py: FAIL refuse: a part with another config was merged (0)
-KILLED    shards.py: parts left after the merge | test_dev_batch_shards.py: FAIL equal in order: left behind ['<tmp>/rc12_shards_x70_s0vg/a/SAMPLER/plain
+KILLED    shards.py: parts left after the merge | test_dev_batch_shards.py: FAIL equal in order: left behind ['/var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_shards_vo388b97/a/SAMPLER/plain
 KILLED    shards.py: seconds of one | test_dev_batch_shards.py: FAIL equal in order: shard fields 3 [1.5, 2.25, 0.0]
 KILLED    shards.py: batches of one | test_dev_batch_shards.py: FAIL equal in order: shard fields 3 [1.5, 2.25, 0.0]
 KILLED    shards.py: N 1 accepted | test_dev_batch_shards.py: FAIL refuse: N 1 (0)
 KILLED    shards.py: a string shards value accepted | test_dev_batch_shards.py: TypeError: '>' not supported between instances of 'str' and 'int'
 KILLED    dev_batch.py: a cut run is never merged | test_dev_batch_shards.py: FAIL equal cut then merged: greedy files differ from one process
 KILLED    dev_batch.py: a sharded model runs without --shard | test_dev_batch_shards.py: FAIL refuse: no --shard (0)
-KILLED    dev_batch.py: a done part replayed | test_dev_batch_shards.py: OSError: [Errno 66] Directory not empty: '<tmp>/rc12_shards_xtmr7rcl/a/SAMPLE
+KILLED    dev_batch.py: a done part replayed | test_dev_batch_shards.py: OSError: [Errno 66] Directory not empty: '/var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_shards_x1dj4g3x/a/SAMPLE
 KILLED    dev_batch.py: twin merged on dev | test_dev_batch_shards.py: FAIL merge: shard 2 failed
-KILLED    dev_batch.py: the last part does not merge | test_dev_batch_shards.py: FileNotFoundError: [Errno 2] No such file or directory: '<tmp>/rc12_shards_oe
+KILLED    dev_batch.py: the last part does not merge | test_dev_batch_shards.py: FileNotFoundError: [Errno 2] No such file or directory: '/var/folders/zc/6s4k1c913s9ccydbdt_5nx1m0000gn/T/rc12_shards_5w
 KILLED    verify_dev_runs.py: C1 shards unchecked | test_dev_batch_shards.py: FAIL verify: C1 shards check (under e3 ok True, under e1 [])
 KILLED    shards.py: review M13: the merged meta drops max_batch | test_dev_batch_shards.py: FAIL equal in order: merged meta lacks ['max_batch']
 KILLED    engines.json: minimind-3 not at its float16 | test_pins_engines.py: FAIL pairs: jingyaogong/minimind-3 engines dtype bfloat16 != pinned float16
@@ -33,7 +33,7 @@ KILLED    pins.json: 16P: a tier-1 row also in skipped | test_pins_engines.py: F
 KILLED    pins.json: 16P: a tier-1 revision cut short | test_pins_engines.py: FAIL tier1: taobao-mnn/MNN-Pocket-0.3B revision or weights not pinned in full
 KILLED    pins.json: 16P: a weights shard's sha256 cut short | test_pins_engines.py: FAIL tier1: LiquidAI/LFM2-2.6B-Exp revision or weights not pinned in full
 KILLED    pins.json: 16P: a tier-1 row dropped | test_pins_engines.py: FAIL tier1: pinned ['LiquidAI/LFM2-2.6B-Exp', 'LiquidAI/LFM2.5-1.2B-Instruct', 'Qwen/Qwen3.5-2B', 'taobao-mnn/MNN-Pocket
-KILLED    engines.json: 16P: an engines entry before its own parity | test_pins_engines.py: FAIL tier1: taobao-mnn/MNN-Pocket-0.3B is in engines.json before its own parity (families are per recipe, STEP 13a)
+KILLED    engines.json: 16P2: an own-parity row given its architecture's family verdict | test_pins_engines.py: FAIL tier1: taobao-mnn/MNN-Pocket-0.3B engines entry ('vllm', 'family verdict (Qwen3-0.6B)', 'bfloat16') vs vllm, bf16 N
 KILLED    engines.json: 16P: a family-verdict row off its pinned dtype | test_pins_engines.py: FAIL tier1: Qwen/Qwen3.5-2B engines entry ('vllm', 'family verdict (Qwen3.5-0.8B)', 'float32') vs vllm, family verdict (
 KILLED    engines.json: 16P: remote code on a row that ships none | test_pins_engines.py: FAIL tier1: Qwen/Qwen3.5-2B engines entry ('vllm', 'family verdict (Qwen3.5-0.8B)', 'bfloat16') vs vllm, family verdict 
 KILLED    engines.json: 16P: a family-verdict row without its engines entry | test_pins_engines.py: FAIL tier1: LiquidAI/LFM2.5-1.2B-Instruct engines entry None vs vllm, family verdict (LFM2.5-230M), bfloat16
