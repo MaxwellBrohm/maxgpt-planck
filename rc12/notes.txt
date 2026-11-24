@@ -5517,3 +5517,34 @@ CHECKS (2026-11-23, the second agent: an rsync export of the worktree after ever
 NOT DONE: everything STEP 16A2D lists as open. Not closed and recorded in s6 (x): ON's qualifiers, a dash between "No"
   and "one", a quantifier or found-nothing cue with no predicate word, the other table's word third or later. No
   second review of this round was run. Max may overrule A2d and this round with it before C (M6).
+
+STEP 16CR (2026-11-23 and 24, Claude, lock track A, LOCK_STEPS A2's "still to run before C" items that needed the PC's
+copies: the Vertex card row regraded and mutation_numbers14's raw part; nothing under sealed/ or private/ read, listed
+or built; no model loaded; no Planck model scored; Mac only, run at 053876f's code, the graders of lock step A2d).
+DATA. The PC's rc12_dev_card (25 files) and rc12_lik (65 files) were pulled on 2026-11-23 with an md5 manifest of every
+  file on each side, equal (90 of 90). rc12_lik also holds LiquidAI__LFM2-2.6B.part (the bf16 self-check failure,
+  STEP 14N); part D reads the recorded rows' 12 models by name and never that folder, and it was left out of the --lik
+  copy all the same (a folder of the 12 passed model folders).
+THE CARD ROW. dev_extras14.py --root and --panel-root on the public copy regraded in STEP 16A2D-R (the 440 public
+  runs), --card-root on the card copy, --boot 10000: every extra and the comparator as recorded on 2026-11-19 (each
+  "0 of 2752 stored rows regrade differently"; stored scores.jsonl equal to score_lines for 119 of 119 runs; every
+  row of logs/extras14_20261119.jsonl but the card row's 6 byte-equal); the card row: 284 of its 2,064 stored rows
+  regrade differently (it was graded on 2026-10-11 with a69c325's graders, before the Nov 3 amendments and lock steps
+  A2 to A2d). Its numbers now (template, seeds 1 to 3, against Qwen2.5-0.5B-Instruct's R 6.99): R 11.81, CI vs Qwen2.5
+  +3.35 to +6.28 (the old CI part met; was 6.77, -0.54 to +2.64, against R 5.68), S7 1.03 (0.30 to 1.98; was 0.93,
+  0.22 to 1.89), PERSIST 0.010 (as before), LOOKUP 0.000 (P 0.000, X 0.042), LOOP 0.981 (was 0.534: the cap amendment
+  lifts LOOP here as it did for every model in STEP 16), TWOHOP 0.035 (was 0.028), T0 0.021 (was 0.017). The s12
+  clause fails (S7 far below 40), Level R not met, Level A not met, LOOKUP far below its bar; no bar is near (S7's
+  upper bound 1.98). s10b's "P at most 0.007, X at most 0.069" stands (the card row's X 0.042).
+  logs/extras14_20261119.jsonl: the card row's 6 rows replaced (their not_regraded mark gone) and its status line;
+  the meta line's code field now names 053876f. Prereg s6 (the A2 evidence), s10b and s12: the card row's numbers and
+  wording. The two table lines (tables14, as STEP 16's TABLE 1 and TABLE 2 print them):
+    Vertex-15M card row  11.81  1.03 0.000 0.005 0.011 0.035 0.010 0.000 0.000 0.021 0.981  0.000 0.021 0.007
+    Vertex-15M card row  11.81  +3.35 to +6.28 yes   1.03 (0.30 to 1.98)   0.010  0.000 0.000 0.042
+  STEP 16's tables keep the card row as of 2026-10-11, as dated there.
+TESTS. test_numbers14 without --allow-not-regraded: PASS (it failed before the text edits on exactly the card row's 2
+  prereg fragments and 2 notes lines). NOT RUN: part D (test_numbers14 --raw, --panel and --lik) and mutation_numbers14
+  with the raw copies (LOCK_STEPS A2's third item), because the Mac's shared heavy lock was held by another lane's run
+  for over 14 hours when this was committed. Command, from rc12/: python -B test_numbers14.py --raw <public copy>
+  --panel <public copy> --lik <the 12 passed model folders of rc12_lik>, then python -B mutation_numbers14.py with the
+  same three, and commit logs/mutation_numbers14.txt.
