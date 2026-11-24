@@ -42,6 +42,10 @@ change being regraded can make (--expect):
           moved clause is a2_cue, gained or lost (the a4 frame and every other clause are unchanged); only probes
           and units moved, and a change with no changed probe is refused. The late review's second round (notes
           STEP 16A2B-R3) moves the same clause only and is checked with the same rule
+  a2d     (2026-11-23, lock step A2d, notes STEP 16A2D: the LOOKUP not-found cues read fail closed) every changed
+          probe is a LOOKUP record's X probe (read from the dev records) that only GAINED a2_cue and lost nothing,
+          so a probe can go from pass to fail and never back; only probes and units moved, no unit went up, and a
+          change with no changed probe is refused
 Writes <dst>/regrade.json; exit 1 if any change is not of that kind."""
 import argparse
 import json
@@ -150,6 +154,17 @@ def expected_a2b_r2(c):
 
 
 EXPECT["a2b_r2"] = expected_a2b_r2               # the late review of lock step A2b (2026-11-22)
+
+
+def expected_a2d(c):
+    """lock step A2d (2026-11-23, rc12/notes.txt STEP 16A2D): see the module docstring."""
+    moved = [(set(p["new"]) - set(p["old"]), set(p["old"]) - set(p["new"])) for p in c["probes"]]
+    ok_fields = set(c["fields"]) <= {"probes", "unit"}
+    return len(moved) > 0 and ok_fields and c["unit"][1] <= c["unit"][0] and all(
+        g == {"a2_cue"} and not lost and lookup_x(c["id"], p["turn"]) for (g, lost), p in zip(moved, c["probes"]))
+
+
+EXPECT["a2d"] = expected_a2d                     # lock step A2d (2026-11-23)
 
 
 def run_dirs(src):

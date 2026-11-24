@@ -34,7 +34,7 @@ X_FAIL = [
     ("a2c_lure_lower", "I couldn't find {k} on the {a} one; the {o} one says {l}."),
     ("a2c_lure_lower_oldcue", "{k} isn't on the {a} one. On the {o} one it's {l}."),
     ("a2c_lure_upper", "No results for {k} on the {a} one. The {o} one has {U}."),
-    ("a2c_lure_mixed", "Nothing came up for {k}; maybe {M}?"),
+    ("a2c_lure_mixed", "Nothing came up for {k}. Maybe {M}?"),      # A2d: a cue in a question would not count
     ("a2c_lure_poss", "I couldn't find {k} on the {a} one, but it's {l}'s day on the {o} one."),
     ("a2c_lure_start", "{l} has it on the {o} one, but I couldn't find {k} on the {a} one."),
     ("a2c_lure_quoted", "The {o} one says \"{l}\", but {k} is missing from the {a} one."),

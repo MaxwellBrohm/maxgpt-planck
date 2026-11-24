@@ -47,46 +47,60 @@ it: another family, an OOD-H probe, oodh/gate.py's D12 check, mutation_graders' 
               anything"), "Nothing came up / turned up / showed up", "nothing (was) found", "turned up nothing",
               "found nothing" (these four only when "for", "on", "in", "about", a mark or the end of the text comes
               next, END: "Nothing found for X", not "I found nothing wrong" or "Nothing was found wrong with it"),
-              "came up empty", the passive found forms: "not found" (not after have, has, had or 've and at most one
-              word: "I have not found any gap" and "The office has also not found a gap" are no cue; PERFECT, read in
-              code), "not be found", "cannot be found", "wasn't / weren't / isn't / aren't found", "couldn't / can't
+              "came up empty", the passive found forms: "not found" (not with have, has, had, having or 've before it
+              in its sentence, A2d (d): "I have not found any gap" and "The office has also not found a gap" are no
+              cue), "not be found", "cannot be found", "wasn't / weren't / isn't / aren't found", "couldn't / can't
               / won't be found" ("I haven't found any gap" is no cue), "No results / match / entry / row / record /
-              information / luck" (a word start: "No matches", "No entries"), "missing from", "absent from"
-  LOOKUP_ONLY "Only the <table> (the table word, then up to 2 more words) has / lists / includes / contains / shows"
-              followed by "it" or "that" ending a clause (a mark or the end of the text next: "Only the old one has
-              it.", not "Only the old one has that problem"), or by the probe's key (maybe plural; or "the <key>" and
-              at most one more word: "the X slot"), or "a row", "an entry" or "a line" then "for" or "on" and the
-              key, these maybe followed by "on / in it / there" or "listed" and then ending a clause (a mark, the end,
-              or "and" / "but": CLAUSE_END; "Only the old one has X." and "... has X and the new one does not", not
-              "... has X crossed out", "... lists X twice" or "... a line crossed out"); LOOKUP_ON "only on / in the
-              <table>" after the key (maybe plural), "it" or "that" (maybe with "'s", "'ll" or "'d") and at most
-              three more words with no mark between ("X is only on the old rota", "It'll be only on the old one",
-              not "The new rota has X; the extra rows are only on the old one"), its negation read at "only" ("X
-              isn't only on the old one"); each counted only when <table> is "other" or a table of the record other
-              than the one asked (lookup_tables): "Only the new one has X" asked of the new table says X is there
-  lookup_cue  a match counts unless negated in the 3 word tokens before it within its sentence (lookup_negated), read
-              with the aside that ends that text taken out (drop_aside: commas, dashes or brackets round it, then at
-              most two of be, been, is, are, was, were, found; "X isn't, as far as I can tell, missing from" reads
-              as "X isn't, missing from"): s6 v2's negation cues (grade_text.negated_before: "X isn't missing from",
-              "X isn't, honestly, missing from", "Not only the old one has X"), "nothing" or "nobody" not set off by
-              a mark, quotes aside ("Nothing is missing from the new rota", '"Nothing" is missing ...'; "Nobody, X is
-              missing ..." and "Nobody - X is missing ..." answer with the word), and a "nothing / nobody / no one /
-              none / not a single / not one / no single" subject of the cue with up to three words and an aside of
-              commas, dashes or brackets before its verb (is, are, was, were, be, been; maybe "found" after it), read
-              on the sentence as written ("Nobody, it seems, is missing", "Nothing at all - really - is missing",
-              "None of the days is missing", "Nothing was found to be missing"; NEG_PHRASE); an opening at the
-              sentence start or after a comma, followed by a mark, is blanked (INTERJ: "I'm / I am afraid not",
-              "Afraid not", "Sadly not", "Unfortunately not", "(I) guess not", "Probably not", "Apparently not", "(I)
-              don't / do not think so", "Not really", "Not sure", "Not this time", "None", "No"), so "I'm afraid not,
-              I couldn't find X" and "None - X is missing from the new rota" count; none counts when the probe's
-              question holds one, so an echo of the question never abstains through them (G-ABS has no echo clause,
-              D12; test_gens refuses a LOOKUP question holding any of them). Late review (2026-11-22, rc12/notes.txt
-              STEP 16A2B-R2): the clause-scoped negation became the openings list, LOOKUP_ON gained its anchor, "it"
-              / "that" and the row forms their ends, the found forms became passive, the "found nothing" forms their
-              ends, "nothing" / "nobody" the mark rule and NEG_PHRASE; its second round (STEP 16A2B-R3): the aside
-              taken out before the window, NEG_PHRASE's subjects, words, asides and verbs, the quotes, "none" and
-              "no" as openings, the key object's clause end, the plural key, "'ll" and "'d", and the perfect with
-              a word between
+              information / luck" (a word start: "No matches", "No entries"; A2d (g) what may follow), "missing
+              from", "absent from" (A2d (j): not before the other table)
+  LOOKUP_ONLY "only the <table> (up to 2 more words) has / lists / includes / contains / shows " and ONLY_ON "only on /
+              in the": the broad forms, read only by lookup_any (test_gens' content rule for LOOKUP questions); the
+              grader reads the shapes of A2d below
+  lookup_cue  none counts when the probe's question holds one that counts (read as a reply is), so an echo of the
+              question never abstains through them (G-ABS has no echo clause, D12; test_gens refuses a LOOKUP question
+              holding any of them, lookup_any). The review rounds of 2026-11-22 and 23 (rc12/notes.txt STEP 16A2B-R2
+              and R3) read negations through a 3-word window, asides, subject phrases and a perfect check; A2d replaced
+              them
+LOCK STEP A2d (2026-11-23; rc12/notes.txt STEP 16A2D and its fix round STEP 16A2D-R; prereg s6 (x)). Each round of
+rules about how a negation voids a cue closed its findings and opened new wrong passes, and a grader that freezes at
+the lock should fail closed, so the cues are read by a rule a reader can check by eye (lookup_hit, cue_counts,
+voided):
+  (a) the reply is read with * _ and backticks taken out (EMPHASIS), and for (c) also with each of them read as a
+      space (fix round: "X is**not** missing", "X is not_really missing" are negated)
+  (b) openings at the very start of a sentence, one or more, each followed by a mark, are ignored (OPENERS: I'm / I
+      am afraid not, afraid not, sadly not, unfortunately not, (I) guess not, probably not, apparently not, (I) don't
+      / do not think so, not really, not sure, not this time, no, sorry); "None" is no opening ("None, it seems, are
+      missing" says nothing is). The mark is one of , ; : . en dash, em dash, ellipsis, or a hyphen that no letter
+      follows directly (fix round: "No-one is missing" is no opening; a quote or bracket is no opening's mark)
+  (c) a negation word anywhere in the cue's sentence before the cue voids it (LOOKUP_NEG: not, n't, no, never,
+      nothing, nobody, none, nowhere, neither, nor, without, cannot, hardly, scarcely, barely, far from, anything but,
+      instead of, rather than, and n't without its apostrophe after is, are, was, were, do, does, did, has, have, had,
+      ca, could, wo; fix round: noone, zero, nary, nada, naught, nothin, n't without its apostrophe after ai, should,
+      would, must, need, might, n't with an apostrophe look-alike (acute accent, modifier letter apostrophe, prime,
+      fullwidth apostrophe, reversed comma) and 'nt); the cue's own words do not count. A sentence ends at . ! or ?
+      followed by a space, a line break, a quote and a space, or the end, and at a line break, as grade_text.SENT_END
+      has it, but a run of dots does not end one (BREAK). A cue whose sentence holds a question mark anywhere (QMARK:
+      ?, the fullwidth one, the interrobang) does not count, and no cue counts in a reply that holds struck-through
+      text (STRIKE: ~, <del, <strike, in any case)
+  (d) have, has, had, having or 've anywhere before the passive "not (be) found" in its sentence voids it (HAVE)
+  (e) ONLY and ON in their simplest shape only: "only the <table> (up to two more words) has / lists / includes <the
+      key (maybe plural) / it / that>" (ONLY_SHAPE) and "<the key (maybe plural) / it> is / are / was / were / 's only
+      on / in the <table> (up to two more words)" (LOOKUP_ON), each followed by . ! ; a line break or the end
+      (SHAPE_END: not ? and not a comma, "and" or "but"), and <table> "other" or a table of the record other than the
+      one asked (lookup_tables: "Only the new one has X" asked of the new table says X is there)
+  (g) "no result / match / entr / row / record / information / luck" and "nothing came / turned / showed up" count only
+      when for, on, in, about, of, with, a mark or the end comes next, maybe after "found" (QUANT, QUANT_END: "No
+      results found for X"; not "No rows are missing", "Nothing came up missing"); and none of these, "nothing (was)
+      found", "turned up nothing" or "found nothing" (NONE_CUE) counts when is, are, was, were, missing, absent,
+      blank or wrong follows it in its sentence (PREDICATE, fix round: "No records on the new one are missing",
+      "Nothing found in the new one looks wrong")
+  (j) "missing from" / "absent from" with "other" or another table of the record as either of the next two words
+      (any spaces, marks, quotes or brackets around them) is no cue (FROM_TABLE: "X is missing from the old one"
+      asked of the new table; fix round: "... from the 'old' one", "... from (the old one)", "... from that old
+      one", "... from old one")
+  Right replies the rule fails are recorded in prereg s6 (x) (fixtures_a2b.X_CONSERVATIVE_A2D and its fix round's
+  X_CONSERVATIVE_A2D_FR: "Nobody - X is missing", "X, not others, is missing", "Only the old one has X on it", "It'll
+  be only on the old one", "No results for X; it is only on the old one" ...)
   FIND_FRAME  LOOKUP_FIND and "I found nothing" are taken out of the reply before a4_voice on LOOKUP ("I couldn't
               find X" binds nothing): only the frame goes, so "I am on X myself" or "My X is free" beside it still
               fails"""
@@ -120,25 +134,31 @@ LOOKUP_ABS = (LOOKUP_FIND + r"|\bnothing (?:came|turned|showed) up\b|\bnothing (
               r"|\b(?:(?P<nf>not)(?: be)?|cannot be|(?:was|were|is|are)n't"
               r"|(?:could|ca|wo)n't be) found\b"
               r"|\bno (?:result|match|entr|row|record|information|luck)|\b(?:missing|absent) from\b")
-PERFECT = re.compile(r"(?:\b(?:have|has|had)|'ve)(?:\s+\w+)?\s+$", re.I)
-LOOKUP_ONLY = r"\bonly the (\w+)(?: \w+){0,2} (?:has|lists|includes|contains|shows) "
-CLAUSE_END = r"(?=\s*(?:[^\w\s']|$)|\s+(?:and|but)\b)"
-ONLY_OBJ = (r"(?:(?:it|that)(?=\s*(?:[^\w\s']|$))|(?:(?:a row|an entry|a line) (?:for|on) KEY|(?:the KEY(?: \w+)?|KEY)"
-            r"(?:s)?(?: (?:on|in) (?:it|there)| listed)?)" + CLAUSE_END + ")")
+LOOKUP_ONLY = r"\bonly the (\w+)(?: \w+){0,2} (?:has|lists|includes|contains|shows) "   # lookup_any's broad form
 ONLY_ON = r"only (?:on|in) the"
-LOOKUP_ON = r"\b(?:KEY(?:s)?|it|that)\b(?:'s|'ll|'d)?(?:\s+\w+){0,3}?\s+(?P<o>" + ONLY_ON + r") (?P<t>\w+)\b"
 LOOKUP_FRAME = LOOKUP_FIND + r"|\bi found nothing\b"
 FIND_FRAME, _LOOKUP = (re.compile(x, re.I) for x in (LOOKUP_FRAME, LOOKUP_ABS))
-INTERJ = re.compile(r"(?:^|(?<=,))\s*(?:(?:(?:i'm |i am )?afraid|sadly|unfortunately|(?:i )?guess|probably"
-                    r"|apparently) not|(?:i )?(?:don't|do not) think so|not (?:really|sure|this time)|none|no)"
-                    r"\s*[^\w\s']", re.I)
-TOKEN = re.compile(r"[A-Za-z0-9']+")
-DASH = r"(?:\s+-{1,2}\s+|\s*[\u2013\u2014]\s*)"
-ASIDE = r"(?:\s*,[^,.;:!?]*,|" + DASH + r"[^.;:!?()\-\u2013\u2014]*?" + DASH + r"|\s*\([^()]*\))"
-ASIDE_END = re.compile(ASIDE + r"(?P<tail>(?:\s*\b(?:be|been|is|are|was|were|found)\b){0,2}\s*)$", re.I)
-NEG_MORE = re.compile(r"\b(?:nothing|nobody)\b(?![\s\x22]*[^\w\s'\x22])", re.I)
-NEG_PHRASE = re.compile(r"\b(?:nothing|nobody|no one|none|not a single|not one|no single)\b(?:\s+\w+){0,3}" + ASIDE
-                        + r"?\s*(?:is|are|was|were|be|been)(?:\s+found)?\s+$", re.I)
+SHAPE_END = r"(?=[ \t]*(?:[.!;\n]|$))"
+ONLY_SHAPE = r"\bonly the (\w+)(?: \w+){0,2} (?:has|lists|includes) (?:KEY(?:s)?|it|that)" + SHAPE_END
+LOOKUP_ON = r"\b(?:KEY(?:s)?|it)(?: (?:is|are|was|were)|'s) only (?:on|in) the (?P<t>\w+)(?: \w+){0,2}" + SHAPE_END
+EMPHASIS = re.compile(r"[*_`]")
+BREAK = re.compile(r"(?:(?<!\.)\.|[!?])(?=\s|[\"']\s|[\"']?$)|\n")
+QMARK = re.compile(r"[?\uff1f\u203d]")
+STRIKE = re.compile(r"~|</?(?:del|strike)\b", re.I)
+OPENERS = re.compile(r"(?:\s*(?:(?:(?:i'm |i am )?afraid|sadly|unfortunately|(?:i )?guess|probably|apparently) not"
+                     r"|(?:i )?(?:don't|do not) think so|not (?:really|sure|this time)|no|sorry)"
+                     r"\s*(?:[,;:.\u2013\u2014\u2026]|-(?![a-z])))+", re.I)
+LOOKUP_NEG = re.compile(r"\b(?:not|no|never|nothing|nobody|none|nowhere|neither|nor|without|cannot|hardly|scarcely"
+                        r"|barely|far from|anything but|instead of|rather than)\b|n't\b"
+                        r"|\b(?:is|are|was|were|do|does|did|has|have|had|ca|could|wo)nt\b"
+                        r"|\b(?:noone|zero|nary|nada|naught|nothin)\b|\b(?:ai|should|would|must|need|might)nt\b"
+                        r"|n[\u00b4\u02bc\u2032\uff07\u201b]t\b|'nt\b", re.I)
+HAVE = re.compile(r"\b(?:have|has|had|having)\b|'ve\b", re.I)
+QUANT = re.compile(r"no |nothing (?:came|turned|showed) up", re.I)
+QUANT_END = re.compile(r"\w*(?: found)?(?=\s*(?:for|on|in|about|of|with)\b|\s*[^\w\s']|\s*$)", re.I)
+NONE_CUE = re.compile(r"no |nothing |turned up nothing|found nothing", re.I)
+PREDICATE = re.compile(r"\b(?:is|are|was|were|missing|absent|blank|wrong)\b", re.I)
+FROM_TABLE = re.compile(r"[\W_]*(\w+)(?:[\W_]+(\w+))?")
 _ONLY, _ONR = {}, {}
 NEG_GROUPS = (("is not", "isn't", "'s not"), ("are not", "aren't", "'re not"), ("am not", "'m not"),
               ("was not", "wasn't"), ("were not", "weren't"), ("do not", "don't"), ("does not", "doesn't"),
@@ -238,59 +258,66 @@ def lookup_tables(rec, probe):
 
 
 def only_rx(key):
-    """LOOKUP_ONLY with its object (ONLY_OBJ, the key in any case), compiled once per key; no key: never matches."""
+    """ONLY_SHAPE with the key (in any case), compiled once per key; no key: "it" and "that" only."""
     if key not in _ONLY:
-        _ONLY[key] = re.compile(LOOKUP_ONLY + ONLY_OBJ.replace("KEY", re.escape(key) if key else "(?!)"), re.I)
+        _ONLY[key] = re.compile(ONLY_SHAPE.replace("KEY", re.escape(key) if key else "(?!)"), re.I)
     return _ONLY[key]
 
 
 def on_rx(key):
-    """LOOKUP_ON with its anchor (the key in any case, "it" or "that"), compiled once per key; no key: "it" and "that"
-    only."""
+    """LOOKUP_ON with the key (in any case), compiled once per key; no key: "it" only."""
     if key not in _ONR:
         _ONR[key] = re.compile(LOOKUP_ON.replace("KEY", re.escape(key) if key else "(?!)"), re.I)
     return _ONR[key]
 
 
-def drop_aside(before):
-    """before without the aside that ends it (ASIDE_END: commas, dashes or brackets round it, then at most two of be,
-    been, is, are, was, were, found): a comma aside leaves its comma, so an opening before it stays an opening; a dash
-    or bracket aside a space."""
-    m = ASIDE_END.search(before)
-    if m is None:
-        return before
-    return before[:m.start()] + ("," if m.group(0).lstrip().startswith(",") else " ") + m.group("tail")
+def sentence(t, s, e):
+    """(start, end) of the sentence holding t[s:e]: from the last BREAK before s to the first at or after e."""
+    s0 = max([b.end() for b in BREAK.finditer(t) if b.end() <= s], default=0)
+    b = BREAK.search(t, e)
+    return s0, (b.start() if b else len(t))
 
 
-def lookup_negated(text, pos):
-    """a negation in the 3 word tokens before pos within its sentence, the aside that ends that text taken out
-    (drop_aside) and then an opening (INTERJ) blanked: s6 v2's (grade_text.negated_before), "nothing" or "nobody" not
-    set off by a mark (NEG_MORE, quotes aside); or a "nothing / nobody / no one / none / not a single / not one / no
-    single" subject of the cue (NEG_PHRASE, read on the sentence as written) (module docstring)."""
+def cue_counts(t, m, ok):
+    """the rules of one LOOKUP_ABS match m (module docstring, A2d): (g) a "no <word>" or "nothing came / turned / showed
+    up" cue needs QUANT_END after it, and a NONE_CUE with a PREDICATE word after it in its sentence is no cue; (j)
+    "missing / absent from" with a table in ok as either of the next two words (FROM_TABLE) is no cue; (d) the
+    passive "not (be) found" with HAVE before it in its sentence is no cue."""
+    if QUANT.match(m.group(0)) and not QUANT_END.match(t, m.end()):
+        return False
+    if NONE_CUE.match(m.group(0)) and PREDICATE.search(t[m.end():sentence(t, m.start(), m.end())[1]]):
+        return False
+    f = FROM_TABLE.match(t, m.end())
+    words = {f.group(1).lower(), (f.group(2) or "").lower()} if f else set()
+    if m.group(0).lower().startswith(("missing", "absent")) and words & ok:
+        return False
+    return m.group("nf") is None or HAVE.search(t, sentence(t, m.start(), m.end())[0], m.start()) is None
+
+
+def voided(t, s, e, wide, at):
+    """the cue t[s:e] does not count (module docstring, A2d): its sentence holds a QMARK, the reply holds STRIKE, or a
+    LOOKUP_NEG word stands before the cue in its sentence once the openings at the sentence start (OPENERS) are taken
+    out, in t or in wide (the reply with each EMPHASIS character read as a space; at maps t's offsets to wide's)."""
     import grade_text as T                    # late, as report_frame: grade_text imports this module
-    s0 = T.sentence_span(text, pos)[0]
-    raw = text[s0:pos]
-    before = INTERJ.sub(lambda m: " " * len(m.group(0)), drop_aside(raw))
-    if T.negated_before(before, 0, len(before)):
+    s0, s1 = sentence(t, s, e)
+    if QMARK.search(t, s0, s1 + 1) or STRIKE.search(t):
         return True
-    w0 = ([m.start() for m in TOKEN.finditer(before)][-T.P["neg_window"]:] or [len(before)])[0]
-    return "neg" not in T.OFF and (NEG_MORE.search(before, w0) is not None or NEG_PHRASE.search(raw) is not None)
-
-
-def perfect(text, m):
-    """LOOKUP_ABS match m is the passive "not (be) found" after have, has, had or 've and at most one word: an active
-    perfect ("The office has also not found a gap"), no cue."""
-    return m.group("nf") is not None and PERFECT.search(text, 0, m.start()) is not None
+    before = t[s0:s]
+    o = OPENERS.match(before)
+    before = before[o.end():] if o else before
+    before += "\n" + wide[at[s - len(before)]:at[s]]
+    return "neg" not in T.OFF and LOOKUP_NEG.search(before) is not None
 
 
 def lookup_hit(text, others, key):
-    """text holds a LOOKUP_ABS match (not a perfect one), or a LOOKUP_ONLY (with its object) or LOOKUP_ON one naming
-    "other" or a table in others, not negated."""
-    ok = others | {"other"}
-    pos = [m.start() for m in _LOOKUP.finditer(text) if not perfect(text, m)] \
-        + [m.start() for m in only_rx(key).finditer(text) if m.group(1).lower() in ok] \
-        + [m.start("o") for m in on_rx(key).finditer(text) if m.group("t").lower() in ok]
-    return any(not lookup_negated(text, x) for x in pos)
+    """text (read without EMPHASIS) holds a cue that counts: a LOOKUP_ABS match (cue_counts), an ONLY_SHAPE or
+    LOOKUP_ON match naming "other" or a table in others, not voided."""
+    t, ok = EMPHASIS.sub("", text), others | {"other"}
+    wide, at = EMPHASIS.sub(" ", text), [i for i, c in enumerate(text) if not EMPHASIS.match(c)] + [len(text)]
+    pos = [m.span() for m in _LOOKUP.finditer(t) if cue_counts(t, m, ok)] \
+        + [m.span() for m in only_rx(key).finditer(t) if m.group(1).lower() in ok] \
+        + [m.span() for m in on_rx(key).finditer(t) if m.group("t").lower() in ok]
+    return any(not voided(t, s, e, wide, at) for s, e in pos)
 
 
 def lookup_any(text):

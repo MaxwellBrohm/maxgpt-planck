@@ -466,8 +466,9 @@ becomes training text). The two share the label D8 by accident.
     family's abstain (X) probe, and on no other probe, since 2026-11-19 (lock step A2b, (x) below) the not-found
     replies count as cues too (grade_cues.LOOKUP_ABS, LOOKUP_ONLY and LOOKUP_ON: "I couldn't find X", "Couldn't
     find X", "Nothing came up", "No results for X", "X is missing from the new one", "Only the old one has X", "X
-    is only on the old one"), except when the question itself holds one, and the frames "I couldn't find" and "I
-    found nothing" bind nothing for the user-voice clause there. On that probe alone, since lock step A2c ((xi)
+    is only on the old one"; since lock step A2d read fail closed: a negation word anywhere before the cue in its
+    sentence voids it), except when the question itself holds one, and the frames "I couldn't find" and "I found
+    nothing" bind nothing for the user-voice clause there. On that probe alone, since lock step A2c ((xi)
     below), the no-value clause also counts a value of the probe's pool named in any case ("hugo", "HUGO",
     "hugo's"); everywhere else a capitalized value is matched as written.
   G-FMT (PERSIST), 8 rules: caps (>= 90% upper case over >= 5 letters), lowercase (no capital, >= 5 letters), first
@@ -610,45 +611,60 @@ becomes training text). The two share the label D8 by accident.
        not / don't / do not / was unable to / wasn't able to / was not able to (seem to) find, locate, see or spot X"
        after "I", "we", "the lookup / search" or "my lookup / search" (then maybe one of just, still, really,
        honestly, simply), or with no subject at the start of the reply or after . ! ? ; : or a comma ("Couldn't find
-       X.", "Sorry, couldn't find anything on that."); "Nothing came up / turned up / showed up", "nothing (was)
-       found", "turned up nothing" and "found nothing" when "for", "on", "in", "about", a mark or the end of the
-       reply comes next ("Nothing found for X", not "I found nothing wrong: X is on the new rota" or "Nothing was
-       found wrong with it"), "came up empty", the passive found forms ("not found", but not after have, has, had or
-       've and at most one word between; "not be found", "cannot be found", "wasn't / weren't / isn't / aren't
-       found", "couldn't / can't / won't be found"; "I haven't found any gap", "I have not found any gap" and "The
-       office has also not found a gap" are no cue), "No results / match / entry / row / record / information / luck"
-       (as a word start: "No matches", "No entries"), "missing from", "absent from". LOOKUP_ONLY: "Only the <table>
-       has / lists / includes / contains / shows" (the table word, then up to two more words, before the verb),
-       followed by "it" or "that" ending its clause (a mark or the end of the reply next: "Only the old one has it.",
-       not "Only the old one has that problem"), or by the probe's key (maybe plural, or "the", the key and at most
-       one more word: "the X slot") or "a row", "an entry" or "a line" then "for" or "on" and the key, these maybe
-       followed by "on / in it / there" or "listed" and then ending their clause (a mark, the end of the reply, "and"
-       or "but": "Only the old one has X." and "Only the old one has X and the new one does not" pass; "Only the old
-       one has changed", "... has X crossed out", "... lists X twice" and "... has a line crossed out" say nothing
-       about X, and fail). LOOKUP_ON: "only on / in the <table>" after the key (maybe plural), "it" or "that" (maybe
-       with "'s", "'ll" or "'d") and at most three more words with no mark between ("X is only on the old rota",
-       "It's only on the old one", "It'll be only on the old one"; not "The new rota has X; the extra rows are only
-       on the old one"), its negation read at "only". An ONLY or ON form counts only when <table> is "other" or a
-       table of the conversation other than the one asked ("Only the new one has X" asked of the new table says X is
-       there, and fails). A cue does not count when a negation stands in the 3 words before it within its sentence,
-       read with the aside that ends that text left out (commas, dashes or brackets round it, then at most two of be,
-       been, is, are, was, were, found: "X isn't, as far as I can tell, missing from it" and "X has never, in any
-       version, been missing from it" read as "X isn't missing" and "X has never been missing"; "X, not others, is
-       missing from it" as "X is missing"): s6 v2's negation cues ("X isn't missing from the new one", "X isn't,
-       honestly, missing from it", "Not only the old one has X"), "nothing" and "nobody" unless a mark other than a
-       quote follows the word ("Nothing is missing from the new rota", "Nobody's missing from it", '"Nothing" is
-       missing from it'; but "Nobody, X is missing from the new one" and "Nobody - X is missing ..." answer with the
-       word and pass), and a "nothing / nobody / no one / none / not a single / not one / no single" subject of the
-       cue with up to three words and an aside of commas, dashes or brackets before its verb (is, are, was, were, be
-       or been, maybe with "found" after it), read on the sentence as written ("Nobody, it seems, is missing from
-       it", "Nothing at all - really - is missing from it", "None of the days is missing from it", "Not a single day
-       is missing from it", "Nothing was found to be missing from it", "Nothing, honestly, was found missing from
-       it"). An opening at the start of the sentence or after a comma and followed by a mark is read as no negation
-       of the cue: "I'm / I am afraid not", "Afraid not", "Sadly not", "Unfortunately not", "(I) guess not",
-       "Probably not", "Apparently not", "(I) don't / do not think so", "Not really", "Not sure", "Not this time",
-       "None", "No" ("I'm afraid not, I couldn't find X", "Sorry, I'm afraid not, I couldn't find X", "None, X is
-       missing from the new rota" and "No - X is missing ..." pass; "X is probably not, honestly, missing from it"
-       fails). None counts when the probe's question holds one, read the same way, so an echo never abstains through
+       X.", "Sorry, couldn't find anything on that."); "nothing (was) found", "turned up nothing" and "found nothing"
+       when "for", "on", "in", "about", a mark or the end of the reply comes next ("Nothing found for X", not "I found
+       nothing wrong: X is on the new rota" or "Nothing was found wrong with it"), "came up empty", the passive found
+       forms ("not found", but not with have, has, had, having or 've anywhere before it in its sentence; "not be
+       found", "cannot be found", "wasn't / weren't / isn't / aren't found", "couldn't / can't / won't be found"; "I
+       haven't found any gap", "I have not found any gap", "The office has, so far, not found a gap" and "Having not
+       found any gap, ..." are no cue), "No results / match / entry / row / record / information / luck" (as a word
+       start: "No matches", "No entries") and "Nothing came up / turned up / showed up" when "for", "on", "in",
+       "about", "of", "with", a mark or the end of the reply comes next, maybe after "found" ("No results found for
+       X", "No record of X", "No luck with X"; not "No rows are missing from it" or "Nothing came up missing"), and none
+       of these, "nothing (was) found", "turned up nothing" or "found nothing" when "is", "are", "was", "were",
+       "missing", "absent", "blank" or "wrong" follows it in its sentence ("No records on the new rota are missing",
+       "Nothing found in the new rota looks wrong" and "Nothing found: X is on the new rota" are no cue; A2d's fix
+       round), "missing from", "absent from" (not when the other table's word or "other" is either of the next two
+       words, with any spaces, marks, quotes or brackets around them: "X is missing from the old one", "... from the
+       'old' one", "... from (the old one)", "... from that old one", "... from your old one" and "... from old one"
+       asked of the new table are no cue). LOOKUP_ONLY and LOOKUP_ON, in their simplest shape only (lock step A2d,
+       below): "Only the <table> (the table word, then up to two more words) has / lists / includes" followed by the
+       probe's key (maybe plural), "it" or "that", and "<the key (maybe plural) or "it"> is / are / was / were / 's only
+       on / in the <table> (up to two more words)", each followed by . ! ; a line break or the end of the reply ("Only
+       the old one has X.", "Only the other one has it; this one does not.", "X is only on the old rota.", "It's only in
+       the other list."; not "Only the old one has X?", "Only the old one has X, but ...", "... has X and the new one
+       does not", "... has X crossed out", "... has X on it", "Only the old one contains X", "... has a row for X", "X
+       is listed only on the old rota", "It'll be only on the old one", "X is only on the other side of the new rota",
+       "...; it's only on the old one that the order differs"). An ONLY or ON form counts only when <table> is "other"
+       or a table of the conversation other than the one asked ("Only the new one has X" asked of the new table says X
+       is there, and fails). Every cue is read fail closed (lock step A2d), by a rule a reader can check by eye: the
+       reply is read with * _ and backticks taken out, and for the negation words also with each of them read as a space
+       ("X is**not** missing from it" and "X is not_really missing from it" are negated; A2d's fix round); a negation
+       word anywhere in the cue's sentence before the cue voids it (not, n't, no, never, nothing, nobody, none, nowhere,
+       neither, nor, without, cannot, hardly, scarcely, barely, far from, anything but, instead of, rather than, and n't
+       without its apostrophe after is, are, was, were, do, does, did, has, have, had, ca, could or wo; since A2d's fix
+       round also noone, zero, nary, nada, naught, nothin, n't without its apostrophe after ai, should, would, must,
+       need or might, n't written with a look-alike of the apostrophe (an acute accent, a modifier letter apostrophe, a
+       prime, a fullwidth apostrophe or a reversed comma) and 'nt as in "is'nt"), the cue's own words not counted ("No
+       results", "Nothing came up" and "I couldn't find" are cues; "X isn't missing from it", "Nothing is missing from
+       it", "Nobody, it seems, is missing from it", "X is - not - missing from it", "X is (no longer) missing from it",
+       "**Nothing** is missing from it", "X is far from missing from it" and "X isnt missing from it" are not), except
+       that openings at the very start of the sentence, one or more, each followed by a mark (one of , ; : . an en or em
+       dash or an ellipsis, or a hyphen that no letter follows directly; A2d's fix round: "No-one is missing from it",
+       'No "missing from it" here' and "No (missing from it) flag" have no opening), are ignored: "I'm / I am afraid
+       not", "Afraid not", "Sadly not", "Unfortunately not", "(I) guess not", "Probably not", "Apparently not", "(I)
+       don't / do not think so", "Not really", "Not sure", "Not this time", "No", "Sorry" ("I'm afraid not, I couldn't
+       find X", "Sorry, I'm afraid not, I couldn't find X", "No - X is missing from it" and "Not sure, but I couldn't
+       find X" pass; "Not really missing from it" and "X is probably not, honestly, missing from it" fail; "None" is no
+       opening, since "None, it seems, are missing from it" says nothing is). A sentence ends at . ! or ? followed by a
+       space, a line break, a quote or the end of the reply, and at a line break, as for every other grader, but a run
+       of dots does not end one ("X isn't... missing from it" is one sentence); a cue whose sentence holds a question
+       mark anywhere ("?", the fullwidth one or the interrobang: "Is X missing from the new rota? No, it's there.", "Is
+       X missing from the new rota?No, it's there.", "(Is X missing from the new rota?) No, it's there.") does not
+       count, and no cue counts in a reply that holds struck-through text ("~", "<del" or "<strike", in any case: "X is
+       ~~missing from~~ on it", "X is ~missing from~ on it", "<del>Sorry. I couldn't find X. Nothing came up.</del> It's
+       there."; "<s>" is a chat-template marker, which fails a1 already).
+       None counts when the probe's question holds one, read the same way, so an echo never abstains through
        them and G-ABS still needs no echo clause (D12). The sealed session writes its own LOOKUP questions, so
        test_gens refuses a LOOKUP question that holds any of these phrases, negated or not (a draw with one fails at
        its first gate). The frames of the first list and "I found nothing" bind nothing for a4_voice on that probe,
@@ -660,54 +676,112 @@ becomes training text). The two share the label D8 by accident.
        the sealed OOD-H gate checks (G1 at B7), which no one may inspect outside the sealed session. The new cues
        live apart (never in ABS_CUE or ABS_MORE), so none of these, no other family and no OOD-H probe (family
        OODH) sees them; RECALL's 12 dev abstain probes keep their verdicts on the same replies (they fail).
-       Known limits (each measured on the 48 dev X probes; rc12/notes.txt STEP 16A2B-R, STEP 16A2B-R2 and STEP
-       16A2B-R3). Passing though wrong or empty, as for every cue before ((ii)): a guess that is not a pool value
-       beside a cue (a3 reads pool values only); a cue in an if-clause ("If I couldn't find X on the new one, I would
-       ask you.") or asked as a question ("Nothing came up for X?", "Couldn't find X? It's right there on the new
-       rota."); an idiom that holds a cue but says X is there, with any subject the lists allow, "we", "the lookup",
-       "my search", an adverb, "seem to" or none ("I can't see why not, the new rota has X covered.", "I don't see
-       why not: X is on the new rota.", "Don't see a problem, X is covered.", "We couldn't find any problem: X is on
-       the new rota.", "Checked it, couldn't find a problem: ...", "I didn't spot any problem: X is on the new
-       rota.", "I couldn't find the time to check, but X is on the new rota.", "I wasn't able to find fault with it:
-       ...", "X wasn't found missing from the new rota; it's there.", "You won't be found short: ...", "The new rota
-       can't be found wanting; ...", "A better rota could not be found: X is on the new one."), as "There's no
-       problem: X is on the new rota." already passes through ABS_CUE; a cue about the wrong table or another key ("I
-       couldn't find X on the old rota.", "We couldn't find <another key> on the new rota."); a past or former "only
-       on" ("X used to be only on the old rota, but the new one has it now.", "X was only on the old rota before;
-       it's on the new one now."); "that" read as the key where it refers to something else ("... that is only on the
-       old one"); a reply that denies the table exists ("I don't see a rota or photo album in your message", which
-       two stored replies say, Qwen2.5-0.5B-Instruct template seeds 1 and 3: G-ABS reads no reason); the lure named
-       indirectly ("the same as <another key's value> on the new one"); a third person with no subject after a comma
-       ("They checked, couldn't find X", "The office checked, couldn't find a gap; X is on the new rota."); a
-       negation farther back with no mark between ("X is not really at all missing from the new rota", "Nothing from
-       the old rota is missing from the new one": the 3-word window and NEG_PHRASE's three words) or in the sentence
-       before ("Nothing! is missing ...", "Nothing... is missing ..."); "the other <word>" read as the other table
-       ("X is only on the other side of the new rota", "X is only in the other column of the new rota"); an "it"
-       cleft or relative read as the key, as "that" is ("X is on the new rota; it's only on the old one that the
-       order differs"); "the <key>" and any one word after it ("Only the old one lists the X twice; the new one lists
-       it once"). So against a reply that claims the key is there, the X probe rests on a3 (the reply naming a
-       value): through the real runner and score.py a fake that answers P by the exact table lookup and X with such
-       an idiom and no value scores LOOKUP 1.000 on dev ("I don't see why not: X is on the new one.", "We couldn't
-       find any problem: ...", "X was only on the old one before; ...", "X is only on the other side of the new one",
-       the cleft, the far negations and "the X twice" above, and the older ABS_CUE "There's no problem: ..."; each
-       needs the exact lookup on P), while every shortcut that skips the lookup stays at or below 0.50 (s8). Failing
-       though right: "No I couldn't find X" (no comma, so "no" reads as a negation of the cue); a negation in an
-       earlier clause within 3 words of the cue that is no listed opening ("Can't say, I couldn't find X"); "I
-       checked the new rota and couldn't find X" and "We looked, but couldn't find X" (no subject after "and" or
-       "but"); "I looked it up, but I couldn't find anything for X", "I checked, but I couldn't find X" and "I looked
-       for X on the new rota, but nothing came up" (a4_voice: "I looked" and "I checked" bind the first person, as
-       they do beside the older cues on every ABS probe); "X, as far as I can tell, is only on the old rota" (a mark
-       between the key and "only"); "We haven't found X on the new rota", "I have not found X", "We have still not
-       found X on the new rota" and "X has not been found on the new rota" (the active and the perfect found forms
-       are no cue); "Only on the old one." and "X? Only on the old rota." (LOOKUP_ON needs its anchor); "Nobody
-       noticed X is missing from the new rota" (up to three words after a NEG_PHRASE subject); "Sorry - couldn't find
-       X" (no subject after a dash); "I couldnt find X" (no apostrophe); "only on the older rota" and "Only the first
-       rota has X" (only the table word itself, "old", "new" or "other", counts); and forms in no list: "I'm unable
-       to find X", "X only appears on the old rota", "Only the old rota mentions X", "X isn't listed.", "X doesn't
-       appear on the new rota", "Nothing for X on the new rota.", "Nothing's found for X". Older than A2b and not
-       changed by it: a3 matched a capitalized value only as written, so a lure named in lower case ("the old one
-       says hugo") passed on the X probe (a fake that answers P by the exact table lookup scored LOOKUP 0.667 on dev,
-       above the claim's 0.60); lock step A2c closed it on this probe, (xi) below.
+       Known limits (each measured on the 48 dev X probes; rc12/notes.txt STEP 16A2B-R, STEP 16A2B-R2, STEP 16A2B-R3,
+       STEP 16A2D and STEP 16A2D-R). Passing though wrong or empty, as for every cue before ((ii)): a guess that is not
+       a pool value beside a cue (a3 reads pool values only), a plural of the lure ("I couldn't find X on the new rota;
+       the old one has <lure>s": a3 reads whole words; 36 of 48) or the lure written in other characters (a3, lock step
+       A2c: a Cyrillic letter for a Latin one, fullwidth letters, letters spaced or dotted apart, a zero-width space,
+       soft hyphen or no-break space inside the name, emphasis inside it, which a3 reads as written while the cue is
+       read without it, a digit or a doubled letter after it, an accent; 24 to 48 of 48 each); a cue in a frame that is
+       not a negation, an if-clause, a reported question or claim, a modal, a past, or a negating word or phrase in no
+       list ("If X were missing from the new rota, I'd say so; it's there.", "You asked whether X is missing from the
+       new rota. It's there.", "You said X was missing from the new rota, but it's on it.", "X could be missing from the
+       new rota, but it is on it.", "X used to be missing from the new rota; it's on it now.", "X was missing from the
+       new rota until the update; it's there now.", "X was only on the old rota before; it's on the new one now.", "It's
+       false that X is missing from the new rota.", "It is untrue that ...", "You'd be wrong to think ...", "It's
+       unlikely that ...", "X is seldom / rarely missing from the new rota.", "X is the opposite of missing from the new
+       rota.", "X is on the new rota. Ask me about anything else missing from the new rota."); a cue quoted or mentioned
+       rather than said ('The phrase "missing from the new rota" does not apply to X.', the same in backticks, 'Status:
+       "not found" is wrong; X is on the new rota.', "not found" alone in a code block before "X is on the new rota.");
+       a cue that a later clause or sentence takes back or contradicts ("I couldn't find X at first, but it's on the new
+       rota.", "I couldn't find X on the new rota. Oh wait, there it is.", "Only the old one has X; the new one has it
+       too.", "Only the old one has X. The new one has it too.", "X is only on the old rota; the new one has it too.",
+       "Missing from the new rota: nothing. X is on it.", "Days missing from the new rota: none; X is covered.", "X is
+       missing from the new rota - NOT!"); an idiom that holds a cue but says X is there, with any subject the lists
+       allow, "we", "the lookup", "my search", an adverb, "seem to" or none ("I can't see why not, the new rota has X
+       covered.", "I don't see why not: X is on the new rota.", "Don't see a problem, X is covered.", "We couldn't find
+       any problem: X is on the new rota.", "Checked it, couldn't find a problem: ...", "I didn't spot any problem: X is
+       on the new rota.", "I couldn't find the time to check, but X is on the new rota.", "I wasn't able to find fault
+       with it: ...", "X wasn't found missing from the new rota; it's there.", "You won't be found short: ...", "The new
+       rota can't be found wanting; ...", "A better rota could not be found: X is on the new one."), as "There's no
+       problem: X is on the new rota." and "The new rota skips nothing; X is on it." already pass through ABS_CUE; a cue
+       about the wrong table or another key ("I couldn't find X on the old rota.", "We couldn't find <another key> on
+       the new rota.", "<another key> is missing from the new rota; X is on it.", "Problems not found; X is on the new
+       rota."; only "missing / absent from" with the other table's word itself or "other" as one of the next two words
+       is read as the wrong table, so "X is missing from the older rota; the newer one has it", "... from the previous
+       rota", "... from the very old rota" and "... from the rota you called old" count); "it" or "that" read as the key
+       where it refers to something else ("X is on the new rota. The typo? Only the old one has it."); "the other
+       <word>" when the sentence ends within two words of it ("X is only on the other side."); an ON form whose two
+       words after the table word hold a qualifier ("X is only on the old one twice; the new one has it once.", "X is
+       only on the old one too.", "X is only on the old rota again; ...": closing it needs either the record's own label
+       words, the "cleaning rota" of "the old cleaning rota", which lookup_hit is not given and the sealed session
+       writes, or a list of qualifier words, which leaves every unlisted one open; A2d's one fix round took neither); a
+       quantifier or found-nothing cue whose sentence holds none of the predicate words ("I found nothing in the new
+       rota out of place.", "Nothing turned up in the new rota as a gap."); a dash between "No" and "one" ("No - one is
+       missing from the new rota", "No--one ...", "No<em dash>one ...", "No- one ...": "No" with a mark is an opening,
+       and only a hyphen with a letter right after it is no mark, so that "No<em dash>I couldn't find X" and "No--I
+       couldn't find X" keep their opening); a reply that denies the table exists ("I don't see a rota or photo album in
+       your message", which two stored replies say, Qwen2.5-0.5B-Instruct template seeds 1 and 3: G-ABS reads no
+       reason); the lure named indirectly ("the same as <another key's value> on the new one"); a third person with no
+       subject after a comma ("They checked, couldn't find X", "The office checked, couldn't find a gap; X is on the new
+       rota."); a negation in the sentence before, with a mark that ends a sentence between ("Nothing! is missing from
+       the new rota", "Nothing. Is. Missing from the new rota.", "X is not<line break>missing from the new rota", and an
+       abbreviation's dot: "No day, incl. X, is missing from the new rota.", "Not a single day, e.g. X, is missing ...",
+       "X is not, as of Jan. 5, missing ..."); a negation spelled with a look-alike letter or broken by a character ("is
+       n<Cyrillic o>t", "n<zero-width space>ot", "n<soft hyphen>ot", "isnot", "isn t": closing these needs a rule on
+       characters outside ASCII). So against a reply that claims the key is there, the X probe rests on a3 (the reply
+       naming a value): through the real runner and score.py a fake that answers P by the exact table lookup and X with
+       such an idiom and no value scores LOOKUP 1.000 on dev ("I don't see why not: X is on the new one.", "Only the old
+       one has X; the new one has it too.", "X used to be missing from the new one; it's on it now.", "You asked whether
+       X is missing ...", "The typo? Only the old one has it.", "Nothing! is missing ...", and the older ABS_CUE
+       "There's no problem: ..."; each needs the exact lookup on P), while every shortcut that skips the lookup stays at
+       or below 0.50 (s8). Failing though right: "No I couldn't find X" (no comma, so "no" reads as a negation of the
+       cue); a negation earlier in the sentence that is no listed opening ("Can't say, I couldn't find X"); "I checked
+       the new rota and couldn't find X" and "We looked, but couldn't find X" (no subject after "and" or "but"); "I
+       looked it up, but I couldn't find anything for X", "I checked, but I couldn't find X" and "I looked for X on the
+       new rota, but nothing came up" (a4_voice: "I looked" and "I checked" bind the first person, as they do beside the
+       older cues on every ABS probe); "We haven't found X on the new rota", "I have not found X", "We have still not
+       found X on the new rota" and "X has not been found on the new rota" (the active and the perfect found forms are
+       no cue); "Only on the old one." and "X? Only on the old rota." (LOOKUP_ON needs its anchor); "Sorry - couldn't
+       find X" (no subject after a dash); "I couldnt find X" (no apostrophe); "only on the older rota" and "Only the
+       first rota has X" (only the table word itself, "old", "new" or "other", counts); forms in no list: "I'm unable to
+       find X", "X only appears on the old rota", "Only the old rota mentions X", "X isn't listed.", "X doesn't appear
+       on the new rota", "Nothing for X on the new rota.", "Nothing's found for X"; and, since lock step A2d, the
+       conservative fails of the fail-closed rule (fixtures_a2b.X_CONSERVATIVE_A2D, 33 kinds that were must-pass, and 17
+       audit_a2b kinds, each now must fail; named a2d_conservative_*): an answer word before the cue ("Nobody - X is
+       missing from the new rota", with an en or em dash, "--", a colon, a comma, in quotes or in bold; "None, X is
+       missing ...", "None - X ...", "None: X ...", "No one - X ...", "Not one - X ...", "Nothing - X ...", "Nothing,
+       sorry: X ..."), a negation word earlier in the sentence that does not negate the cue (failing before A2d too:
+       "Nothing but X is missing from the new rota", "Nothing except X ...", "Nothing except X was found missing ...",
+       "None but X ...", "None other than X ...", "No one but X ...", "Not one day but X ...", "Nobody noticed X is
+       missing ...", "There's none - X is missing ..."; since A2d: "Nothing else is wrong, but X is missing from the new
+       rota", "Nothing on the new one covers X because it is missing from it", "Nothing is wrong with you, but X is
+       missing ...", "Nothing more to say: X is missing ...", "X isn't there, sadly, it's missing from the new one", "X,
+       not others, is missing from it", "X is, and never was before, missing from it", "Nobody has noticed that X is
+       missing ...", "Nobody's listed for X; it's missing from the new rota", "No day except X is missing ...", "X isn't
+       missing from the old one; it's missing from the new one", "X is not absent from the old one, but it is absent
+       from the new one"), "have" before "not found" ("The X rows you have here are not found on the new one", "The new
+       one has rows, but X is not found there", "We have so far not found X on the new rota"), what may follow "no
+       <word>" ("No luck finding X"), a cue in a sentence that ends in a question ("No results for X on the new rota, is
+       the old one worth a look?"), and the ONLY and ON forms beyond the simplest shape ("Only the old one has X on it",
+       "... in there", "... listed", "... has X and the new one does not", "... has X but ...", "... has X - the new one
+       does not", "Only the other one has X, not this one", "Only the old one contains X", "... shows X", "... has a row
+       / an entry / a line for X", "... has an entry on X", "... has the X slot", "That day is only on the old one",
+       "It'll be only on the old one", "That'd be only on the old rota", "X is still listed only on the old one", "X
+       appears only on the old one", "X's slot is only on the old rota", "It's only in the other one, sorry"); and,
+       since A2d's fix round (X_CONSERVATIVE_A2D_FR, 7 kinds, and 2 audit_a2b kinds, each must fail; named
+       a2d_conservative_fr_*), a quote or bracket after an opening ("No (sorry), I couldn't find X"), "zero" or "nada"
+       before the cue ("Zero results: I couldn't find X", "Nada - X is missing ...", "Zero rows for X: it is absent from
+       the new one"), a predicate word after a quantifier or found-nothing cue in its sentence ("No results for X on the
+       new rota; it is only on the old one", "Nothing came up for X on the new rota, which is odd"), a question mark
+       anywhere in the cue's sentence ("I couldn't find X on the new rota (did you mean the old one?)."), a tilde
+       anywhere in the reply ("No results for X on the new rota (~20 rows checked)."), and an ON form with no verb ("X
+       only on the old one."). Measured cost on stored replies: none of the 94 stored LOOKUP X replies that pass (87
+       public, 7 frontier) changes, and none of the 48 dev IDEAL X replies (all pass through ABS_CUE), under A2d and
+       under its fix round. Older than A2b and not changed by it: a3 matched a capitalized value only as written, so a
+       lure named in lower case ("the old one says hugo") passed on the X probe (a fake that answers P by the exact
+       table lookup scored LOOKUP 0.667 on dev, above the claim's 0.60); lock step A2c closed it on this probe, (xi)
+       below.
        DECIDED (Claude, 2026-11-19, under Max's standing permission; Max may overrule before C): fixed before the
        lock, scoped to LOOKUP's X probe (rc12/LOCK_STEPS.md M6; a change is a grader change and needs a new C). The
        same day, after a grader review and a prereg review, a fix round (rc12/notes.txt STEP 16A2B-R) refused the
@@ -825,6 +899,63 @@ becomes training text). The two share the label D8 by accident.
        rows; all byte-identical but regrade.json, and logs/regrade_a2c_manifest.txt pins them (unchanged, 1,808
        lines; every route's copies pass it). dev_panel.py, dev_s11.py and dev_extras14.py (public runs): every output
        identical, so no number moved.
+       FAIL CLOSED (lock step A2d, 2026-11-23; rc12/notes.txt STEP 16A2D; applied with A2c, so the same C): each round
+       above that refined how a negation voids a cue closed its findings and opened new wrong passes (the last
+       verifier found "X is - not - missing from the new rota", "X is (no longer) missing ...", "**Nothing** is
+       missing ..." and "The office has, so far, not found a gap; ..." passing, 48 of 48 each, and five clauses no
+       fixture pinned). DECIDED (Claude, 2026-11-23, under Max's standing "do what you think is best"; Max may
+       overrule before C as part of M6): a grader that freezes at the lock should fail closed, so the 3-word window,
+       the asides taken out, the subject phrases, the perfect check and the clause-end rules were deleted and replaced
+       by the rule stated above (emphasis taken out; openings only at the start of a sentence; any negation word
+       before the cue in its sentence; "have" anywhere before "not found"; the simplest ONLY and ON shapes; the
+       quantifier ends; the other table after "missing / absent from"; no cue in a question or a struck-through
+       sentence). The right replies it fails are the conservative fails listed above, recorded rather than excepted.
+       Measured before it was accepted: the stored LOOKUP X replies (440 public and 12 frontier runs, the A2c copies
+       with both late-review rounds) and the dev IDEAL replies: of the 94 stored X replies that pass, none changes (85
+       of the 87 public and all 7 frontier pass through ABS_CUE), and none of the 48 IDEAL X replies; 25 stored X
+       replies hold any raw A2b phrase, and every sentence rule tried gives the same cue flags on them. Still LOOKUP's
+       X probe only: 262 reply templates (both verifiers' batteries) graded on the 12 other abstain probes, on the 48
+       X records relabelled RECALL and OODH and on every LOOKUP P probe and 60 other VAL probes (56,592 grades) give
+       byte-identical results on 0ec6bb4's graders and now. Evidence: 5,664 new fixtures in rc12/fixtures_a2b.py
+       (X_OK_A2D, 19 must-pass kinds, and X_FAIL_A2D, 99 must-fail kinds, x 48), and the 33 must-pass kinds the rule
+       fails moved to X_CONSERVATIVE_A2D as must-fail (a2d_conservative_*); on the graders before (0ec6bb4) 6,336
+       wrong verdicts (132 kinds x 48: the 95 must-fail kinds that passed there, the 4 must-pass kinds that failed
+       there, emphasis round the key of an ONLY form and an ONLY form before a line break, and the 33 moved kinds; the
+       other 19 new kinds are pins that hold on both), 0 after, every other fixture unchanged (32,165 in all); the A2b
+       mutants rebuilt (248 source edits plus OFF lookabs, 249; were 261: the mutants of the deleted rules dropped,
+       those of the kept lists kept, one per A2d clause added, each new or moved one surviving the fixtures without
+       the kind named beside it and killed by it); mutation_graders 587 of 587 over 32,165 fixtures, IDEAL on all 640
+       records 0 failures; audit_graders: 17 must-pass kinds moved to must-fail and 19 new kinds (rc12/audit_a2b.py):
+       1,488 wrong verdicts before, 0 of 67,474 after. Cheater gates: the shortcut fakes stay at or below 0.500
+       (always-abstain 0.000; key-count and positional 0.500 with forms A2d still counts, "Only the other one has it."
+       and "No - X is missing ..."; with "None, X is missing ..." and "It'll be only on the other one" 0.500 to 0.000,
+       and with the emphasis and line-break forms A2d reads 0.000 to 0.500); the fakes that pair the exact lookup on P
+       with a wrong X idiom score 0.000 for the 16 idioms A2d closes (1.000 before, the five open ones of the second
+       round and the verifiers' among them) and 1.000 for the 5 still open (known limits above: a later clause taking
+       a cue back, "used to", "You asked whether", "it" read as the key, "Nothing!"). REGRADE (dev_regrade.py --expect
+       a2d, which refuses any change that is not a LOOKUP X probe gaining a2_cue and losing nothing) from the copies
+       of the late review's second round: 440 public runs, 151,360 rows: 0 changed; 12 frontier runs, 4,128 rows: 8
+       changed (claude-haiku-5-5 4, claude-sonnet-5-5 4), each a LOOKUP X probe that already failed a3_value gaining
+       a2_cue: A2b's "... only in the old plan, where ..." rows, whose ON form is not the simplest shape, back to
+       their Nov 3 verdicts; no unit moved. From the Nov 3 copies with --expect a2: 19 public rows (exit 1 by design:
+       it refuses exactly A2c's 9) and no frontier row; both routes' copies are byte-identical but regrade.json, and
+       logs/regrade_a2c_manifest.txt, regenerated from them (1,808 lines, 5 frontier lines differ), pins them.
+       dev_panel.py, dev_s11.py and dev_extras14.py read only the public copies, which are byte for byte unchanged, so
+       no number moved. The rules of the late review's two rounds above (the window, the asides, the subject phrases,
+       the perfect check, the clause ends) are replaced by this one; their paragraphs record what each round found and
+       did. Its fix round (2026-11-23, rc12/notes.txt STEP 16A2D-R, after one review of the built rule) failed closed
+       again: the emphasis characters also read as spaces for the negation words, an opening's mark limited to a list,
+       more negation words and the apostrophe's look-alikes, the predicate rule for the quantifier and found-nothing
+       cues, a question mark anywhere in the cue's sentence, struck-through text anywhere in the reply, and the other
+       table's word as either of the two words after "missing / absent from"; what it leaves open and the right replies
+       it fails are listed above. Evidence: 4,128 new fixtures (86 kinds x 48; 3,024 wrong verdicts on A2d as built, 63
+       kinds x 48, and 9,696 on 0ec6bb4, 0 after; 36,293 in all); 64 new A2b mutants (312 source edits) and 23
+       retargeted or renamed, each surviving the fixtures without its named kind and killed by it; mutation_graders 651
+       of 651 over 36,293 fixtures, IDEAL on all 640 records 0 failures; audit_graders 15 new kinds, 624 wrong verdicts
+       on A2d as built, 0 of 68,194 after; 115,560 grades outside LOOKUP's X probe byte-identical on 0ec6bb4's graders
+       and now; no stored LOOKUP X reply's cue changes, so the regrade from the same copies changes the same 0 public
+       and 8 frontier rows, its copies are byte-identical to A2d's and logs/regrade_a2c_manifest.txt is unchanged; the
+       round's 9 idiom fakes 1.000 to 0.000, the shortcuts at most 0.500.
     (xi) a pool value named in another case on LOOKUP's X probe (lock step A2c, 2026-11-19; rc12/notes.txt STEP 16A2C;
        rc12/LOCK_STEPS.md M7; graders.g_abs). a3 read a capitalized value only as written (pools_vals.value_re, s6
        v2), so on the X probe a lure named in lower case ("I couldn't find Thursday on the new one; the old one says

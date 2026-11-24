@@ -146,6 +146,17 @@ MUTANTS = [
     (R, "    return bool(moved) and set(", "    return set(", "a2b_r2: a change with no probe passes"),
     (R, 'set(c["fields"]).issubset({"probes", "unit"})',
      'set(c["fields"]).issubset({"probes", "unit", "flags", "leaks"})', "a2b_r2: a loop flag or the leak scan may move"),
+    # --expect a2d (lock step A2d, 2026-11-23; killed by test_regrade_expect.py's a2d cases)
+    (R, 'EXPECT["a2d"] = expected_a2d', 'EXPECT["a2d"] = expected_a2b_r2', "a2d: --expect a2d runs another rule"),
+    (R, ' and not lost and lookup_x(c["id"], p["turn"]) for (g, lost)', ' and not lost for (g, lost)',
+     "a2d: a probe of any family and kind may move"),
+    (R, '        g == {"a2_cue"} and not lost', '        {"a2_cue"} <= g and not lost', "a2d: another clause may be gained"),
+    (R, '        g == {"a2_cue"} and not lost', '        g <= {"a2_cue"} and not lost', "a2d: a2_cue may be lost, or nothing move"),
+    (R, ' and not lost and lookup_x(', ' and lookup_x(', "a2d: a clause may be lost beside the gain"),
+    (R, "    return len(moved) > 0 and ok_fields", "    return ok_fields", "a2d: a change with no probe passes"),
+    (R, '    ok_fields = set(c["fields"]) <= {"probes", "unit"}\n',
+     '    ok_fields = set(c["fields"]) <= {"probes", "unit", "flags", "leaks"}\n', "a2d: a loop flag or the leak scan may move"),
+    (R, ' and c["unit"][1] <= c["unit"][0] and all(', ' and all(', "a2d: a unit may go up"),
 ]
 
 

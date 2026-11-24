@@ -63,7 +63,7 @@ with every model under the graders before the two Nov 3 amendments; the calibrat
 Check it without a GPU (CPU only, a few minutes each, from `rc12/`):
 
 ```
-python -B mutation_graders.py      # 26,501 grader fixtures and 599 mutants: every mutant must be caught
+python -B mutation_graders.py      # 36,293 grader fixtures and 651 mutants: every mutant must be caught
 python -B validate_e2e.py          # the fake responders' gates G1-G4 and the 36.73 shortcut ceiling
 python -B validate_machinery.py    # the runner, renders, truncation and stop handling (12 groups)
 ```
@@ -166,7 +166,10 @@ Every experiment, its pre-registered rule, its result and its independent audit 
   other table written in lower case ("hugo") was not caught; it now is (prereg s6 (xi)). A later review of the
   sixth fix (Nov 22) closed idioms its widened forms let through ("Thursday isn't, honestly, missing from the new
   rota.") and passes a few right replies it failed; its second round (Nov 22-23) closed a few more ("Not a
-  single day is missing from the new rota."). Left: the runs that need the
+  single day is missing from the new rota."); since each round opened new holes, an eighth step (A2d, Nov 23)
+  replaced those rules with one that fails closed (any negation word before the cue voids it) and records the
+  few right replies it fails; a review of it the same day found nine more kinds of wrong reply, and its fix round
+  closed eight the same way and recorded the ninth and what two others left open. Left: the runs that need the
   PC (the Vertex card row's regrade, the five comparison models named on Nov 19, a few PC-only checks), building
   and encrypting the hidden split in a separate session, the lock commit and push (Max approved the lock on Oct 19).
 - **Toolchain:** tokenizer v0 is built (its 8k cut matches a separately trained 8k; no superword tokens),

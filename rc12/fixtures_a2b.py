@@ -41,6 +41,25 @@ of another family; mutation_graders.build adds the records it did not pick (reco
               subjects, words, asides and verbs ("no one" and "were" where the window cannot read them), an adverb
               inside the active perfect, a key or "the <key> <word>" or a row form that does not end its clause, and
               the second reviewer's survivors must fail
+  X_OK_A2D, X_FAIL_A2D, X_CONSERVATIVE_A2D  lock step A2d (2026-11-23, notes STEP 16A2D: the cues read fail closed,
+              grade_cues' module docstring): the forms it keeps (emphasis taken out, each sentence break, any clean
+              cue, what may follow "no <word>", the ends and words of the ONLY and ON shapes) must pass; the wrong
+              replies it closes (a negation inside or after an aside, in emphasis, farther back, each LOOKUP_NEG word
+              and n't without its apostrophe, have / has / having before "not found" past a word or an aside, ONLY
+              followed by ?, a comma, "and" or "but", ON with a predicate or more words, "no <word>" or "nothing came
+              up" as a subject, "missing / absent from the <other table>", a cue asked as a question, an ellipsis, a
+              struck-through cue) must fail; and the right replies it fails, moved from the must-pass lists under
+              new names (a2d_conservative_<old name without a2b_ and _ok>), must fail and are recorded in prereg s6 (x)
+  X_OK_A2D_FR, X_FAIL_A2D_FR, X_CONSERVATIVE_A2D_FR  A2d's fix round (2026-11-23, notes STEP 16A2D-R): the forms it
+              keeps (emphasis round an opening, each mark an opening may take, a predicate word before the cue or in
+              the next sentence, a question in the next sentence) must pass; the wrong replies it closes (a negation
+              joined to a word by emphasis, a hyphen or quote or bracket after "No", each new LOOKUP_NEG word, n't
+              without its apostrophe after the new auxiliaries, each apostrophe look-alike and 'nt, each predicate
+              word after a quantifier or found-nothing cue, a question mark anywhere in the sentence, each strike
+              mark and its reach, the other table's word as either of the two words after "missing / absent from",
+              with any spacing, quote or bracket, a far "have") and the older quantifier and END rules with no
+              predicate word to hide them must fail; and the right replies its closures fail (a2d_conservative_fr_*)
+              must fail and are recorded in prereg s6 (x)
   echo        copies of the first LOOKUP record of each cell whose X question itself holds a not-found cue (marked
               synthetic; the conversation tests skip them): echoing that question fails (lookup_cue ignores the
               LOOKUP cues when the question holds one, so G-ABS still needs no echo clause, D12), for a find frame,
@@ -112,20 +131,13 @@ X_OK_R1 = [                                   # fix round (2026-11-19): forms th
     ("a2b_only_on_ok", "{k} is only on the {o} one."),
     ("a2b_only_in_ok", "{k} is only in the {o} list."),
     ("a2b_only_includes_ok", "Only the {o} one includes {k}."),
-    ("a2b_only_contains_ok", "Only the {o} one contains {k}."),
-    ("a2b_only_shows_ok", "Only the {o} list shows {k}."),
     ("a2b_only_has_it_ok", "Only the {o} one has it."),
     ("a2b_only_has_that_ok", "Only the {o} one has that."),
-    ("a2b_only_a_row_ok", "Only the {o} one has a row for {k}."),
-    ("a2b_only_an_entry_ok", "Only the {o} one has an entry for {k}."),
-    ("a2b_only_a_line_ok", "Only the {o} one has a line for {k}."),
-    ("a2b_only_the_key_ok", "Only the {o} one has the {k} slot."),
     ("a2b_only_cap_ok", "Only the {O} one has {k}."),                                # the table word in any case
     ("a2b_only_on_cap_ok", "{k} is only on the {O} one."),
     ("a2b_afraid_not_comma_ok", "I'm afraid not, I couldn't find {k} on the {a} one."),  # a negation in the clause
     ("a2b_dont_think_semi_ok", "I don't think so; nothing came up for {k}."),            # before, not in the cue's
     ("a2b_sadly_not_colon_ok", "Sadly not: no results for {k}."),
-    ("a2b_two_hits_ok", "{k} isn't missing from the {o} one; it's missing from the {a} one."),   # any clean hit
 ]
 X_FAIL = [
     ("a2b_find_lure", "I couldn't find {k} on the {a} one, but it's {lure}."),
@@ -169,18 +181,9 @@ X_OK_R2 = [                                   # late review (2026-11-22, notes S
     ("a2b_r2_interj_after_comma_ok", "Sorry, I'm afraid not, I couldn't find {k} on the {a} one."),
     ("a2b_r2_interj_dash_ok", "I'm afraid not - I couldn't find {k} on the {a} one."),
     ("a2b_r2_prev_sentence_ok", "Sorry, it isn't there. No results for {k} on the {a} one."),
-    ("a2b_r2_nobody_comma_ok", "Nobody, {k} is missing from the {a} one."),           # an answer word set off
-    ("a2b_r2_nobody_em_ok", "Nobody {em} {k} is missing from the {a} one."),
-    ("a2b_r2_nothing_en_ok", "Nothing {en} {k} is missing from the {a} one."),
-    ("a2b_r2_nobody_hyphen_ok", "Nobody - {k} is missing from the {a} list."),
-    ("a2b_r2_nothing_window_ok", "Nothing on the {a} one covers {k} because it is missing from it."),
-    ("a2b_r2_phrase_end_ok", "Nothing else is wrong, but {k} is missing from the {a} one."),
     ("a2b_r2_on_it_ok", "It is only on the {o} one."),                                 # LOOKUP_ON's anchors
-    ("a2b_r2_on_that_ok", "That day is only on the {o} one."),
     ("a2b_r2_on_key_s_ok", "{k}'s only on the {o} one."),
-    ("a2b_r2_on_three_words_ok", "{k} is still listed only on the {o} one."),
     ("a2b_r2_only_it_end_ok", "Only the {o} one has it"),                              # ONLY objects
-    ("a2b_r2_only_entry_on_ok", "Only the {o} one has an entry on {k}."),
     ("a2b_r2_could_not_be_found_ok", "{k} could not be found on the {a} one."),        # the passive found forms
     ("a2b_r2_werent_found_ok", "Entries for {k} weren't found on the {a} one."),
     ("a2b_r2_isnt_found_ok", "{k} isn't found on the {a} list."),
@@ -240,29 +243,12 @@ X_FAIL_R2 = [
     ("a2b_r2_wouldnt_see", "I wouldn't see why not: {k} is on the {a} one."),
 ]
 X_OK_R3 = [                                   # late review round 2 (2026-11-22, notes STEP 16A2B-R3)
-    ("a2b_r3_none_comma_ok", "None, {k} is missing from the {a} one."),               # an answer word set off (INTERJ)
     ("a2b_r3_no_dash_ok", "No - {k} is missing from the {a} one."),
-    ("a2b_r3_none_em_ok", "None {em} {k} is missing from the {a} one."),
     ("a2b_r3_no_sadly_ok", "No, sadly, I couldn't find {k} on the {a} one."),         # an aside keeps its comma
     ("a2b_r3_interj_comma_colon_ok", "Sorry, afraid not: no results for {k}."),       # an opening after a comma
-    ("a2b_r3_tail_word_ok", "{k} isn't there, sadly, it's missing from the {a} one."),  # only verbs after an aside
-    ("a2b_r3_not_others_is_ok", "{k}, not others, is missing from the {a} one."),
-    ("a2b_r3_not_others_are_ok", "{k}s, not others, are missing from the {a} one."),
-    ("a2b_r3_not_others_were_ok", "{k}s, not others, were missing from the {a} one."),
-    ("a2b_r3_nobody_quote_ok", '"Nobody" - {k} is missing from the {a} one.'),         # NEG_MORE: quotes, marks
-    ("a2b_r3_nobody_colon_ok", "Nobody: {k} is missing from the {a} one."),
-    ("a2b_r3_nobody_noticed_ok", "Nobody has noticed that {k} is missing from the {a} one."),  # NEG_PHRASE's words
     ("a2b_r3_has_gone_missing_ok", "{k} has gone missing from the {a} one."),         # the perfect: "not found" only
-    ("a2b_r3_have_here_ok", "The {k} rows you have here are not found on the {a} one."),
-    ("a2b_r3_on_itll_ok", "It'll be only on the {o} one."),                           # LOOKUP_ON's anchor
-    ("a2b_r3_on_thatd_ok", "That'd be only on the {o} one."),
     ("a2b_r3_on_plural_ok", "{k}s are only on the {o} one."),
     ("a2b_r3_only_plural_ok", "Only the {o} one has {k}s."),                          # ONLY's key and its end
-    ("a2b_r3_only_on_it_ok", "Only the {o} one has {k} on it."),
-    ("a2b_r3_only_in_there_ok", "Only the {o} one has {k} in there."),
-    ("a2b_r3_only_listed_ok", "Only the {o} one has {k} listed."),
-    ("a2b_r3_only_and_ok", "Only the {o} one has {k} and the {a} one does not."),
-    ("a2b_r3_only_but_ok", "Only the {o} one has {k} but the {a} one does not."),
 ]
 X_FAIL_R3 = [
     ("a2b_r3_nothing_dash_aside", "Nothing - really - is missing from the {a} one; {k} is on it."),   # asides
@@ -305,6 +291,257 @@ X_FAIL_R3 = [
     ("a2b_r3_nothing_found_online", "Nothing found online; {k} is on the {a} one."),
     ("a2b_r3_nothing_seems", "Nothing really seems missing from the {a} one; {k} is on it."),
 ]
+X_OK_A2D = [                                  # A2d (2026-11-23, notes STEP 16A2D): the forms the rule keeps
+    ("a2d_md_star_ok", "Only the {o} one has **{k}**."),                         # (a) * _ and backticks taken out
+    ("a2d_md_under_ok", "Only the {o} one has _{k}_."),
+    ("a2d_md_tick_ok", "Only the {o} one has `{k}`."),
+    ("a2d_bang_ok", "Sadly, it isn't there! No results for {k} on the {a} one."),      # the sentence ends
+    ("a2d_newline_ok", "Not there\nNo results for {k} on the {a} one."),
+    ("a2d_q_break_ok", "Isn't it on the {a} one? No, {k} is missing from it."),
+    ("a2d_quote_break_ok", 'It said "not here." No results for {k} on the {a} one.'),
+    ("a2d_two_hits_ok", "Missing from the {a} one? Yes, {k} is missing from the {a} one."),   # any clean cue
+    ("a2d_no_results_found_ok", "No results found for {k} on the {a} one."),     # (g) what may follow "no <word>"
+    ("a2d_no_entry_in_ok", "No entry in the {a} one for {k}."),
+    ("a2d_no_info_about_ok", "No information about {k} on the {a} one."),
+    ("a2d_no_results_mark_ok", "Sorry, no results."),
+    ("a2d_no_results_end_ok", "{k} on the {a} one: no results"),
+    ("a2d_only_bang_ok", "Only the {o} one has {k}!"),                           # (e) the shapes' ends and words
+    ("a2d_only_semi_ok", "Only the {o} one has {k}; the {a} one does not."),
+    ("a2d_only_newline_ok", "Only the {o} one has {k}\nSorry about that."),
+    ("a2d_on_was_ok", "{k} was only on the {o} one."),
+    ("a2d_on_were_ok", "{k}s were only on the {o} one."),
+    ("a2d_on_two_words_ok", "{k} is only on the {o} one there."),
+]
+X_FAIL_A2D = [
+    ("a2d_dash_not", "{k} is - not - missing from the {a} one."),                 # (c) a negation inside an aside
+    ("a2d_paren_not", "{k} is (not) missing from the {a} one."),
+    ("a2d_paren_definitely_not", "{k} is (definitely not) missing from the {a} one."),
+    ("a2d_em_definitely_not", "{k} is{em}definitely not{em}missing from the {a} one; it's there."),
+    ("a2d_paren_no_longer", "{k} was (no longer) missing from the {a} one."),
+    ("a2d_dash_isnt_now", "{k} was - but isn't now - missing from the {a} one."),
+    ("a2d_em_not_anymore", "{k} is{em}not anymore{em}missing from the {a} one."),
+    ("a2d_used_to_isnt", "{k} used to be, but isn't now, missing from the {a} one."),
+    ("a2d_was_no_longer_is", "{k} was, but no longer is, missing from the {a} one."),
+    ("a2d_comma_not", "{k} is, not, missing from the {a} one."),
+    ("a2d_stacked_paren_comma", "{k} isn't (as far as I know), honestly, missing from the {a} one."),
+    ("a2d_stacked_dash_comma", "{k} isn't - as far as I can tell - honestly, missing from the {a} one."),
+    ("a2d_stacked_three", "{k} isn't, I think, honestly, really, missing from the {a} one."),
+    ("a2d_dd_nothing", "Nothing--really--is missing from the {a} one; {k} is on it."),
+    ("a2d_dd_isnt", "{k} isn't--as far as I can tell--missing from the {a} one."),
+    ("a2d_bracket_isnt", "{k} isn't [as far as I can tell] missing from the {a} one."),
+    ("a2d_hyphen_nothing", "Nothing-really-is missing from the {a} one; {k} is on it."),
+    ("a2d_not_really_at_all", "{k} is not really at all missing from the {a} one."),
+    ("a2d_nothing_from_other", "Nothing from the {o} one is missing from the {a} one; {k} is there."),
+    ("a2d_md_bold_nothing", "**Nothing** is missing from the {a} one; {k} is on it."),       # (a) emphasis
+    ("a2d_md_ital_nothing", "*Nothing* is missing from the {a} one; {k} is on it."),
+    ("a2d_md_under_nothing", "_Nothing_ is missing from the {a} one; {k} is on it."),
+    ("a2d_md_bold_nobody", "**Nobody** is missing from the {a} one; {k} is covered."),
+    ("a2d_md_bold_not_single", "**Not a single** day is missing from the {a} one; {k} is on it."),
+    ("a2d_md_bold_none_of", "**None** of the days is missing from the {a} one; {k} is on it."),
+    ("a2d_nowhere", "Nowhere is {k} missing from the {a} one."),                   # (c) each word of the list
+    ("a2d_neither", "Neither of them is missing from the {a} one; {k} is on it."),
+    ("a2d_nor", "The next day is there, nor is {k} missing from the {a} one."),
+    ("a2d_without", "{k} is on the {a} one without anything missing from it."),
+    ("a2d_cannot", "{k} cannot be missing from the {a} one."),
+    ("a2d_hardly", "{k} is hardly missing from the {a} one; it's right there."),
+    ("a2d_scarcely", "{k} is scarcely absent from the {a} one."),
+    ("a2d_barely", "{k} is barely missing from the {a} one; it's right there."),
+    ("a2d_far_from", "{k} is far from missing from the {a} one."),
+    ("a2d_anything_but", "{k} is anything but missing from the {a} one."),
+    ("a2d_instead_of", "Instead of {k}, the next day is missing from the {a} one."),
+    ("a2d_rather_than", "The next day rather than {k} is missing from the {a} one."),
+    ("a2d_isnt", "{k} isnt missing from the {a} one."),                           # n't without the apostrophe
+    ("a2d_arent", "{k}s arent missing from the {a} one."),
+    ("a2d_wasnt", "{k} wasnt missing from the {a} one."),
+    ("a2d_werent", "{k}s werent missing from the {a} one."),
+    ("a2d_dont", "{k}s dont go missing from the {a} one."),
+    ("a2d_doesnt", "{k} doesnt go missing from the {a} one."),
+    ("a2d_didnt", "{k} didnt go missing from the {a} one."),
+    ("a2d_hasnt", "{k} hasnt gone missing from the {a} one."),
+    ("a2d_havent", "{k}s havent gone missing from the {a} one."),
+    ("a2d_hadnt", "{k} hadnt gone missing from the {a} one."),
+    ("a2d_cant", "{k} cant be missing from the {a} one."),
+    ("a2d_couldnt", "{k} couldnt be missing from the {a} one."),
+    ("a2d_wont", "{k} wont be missing from the {a} one."),
+    ("a2d_has_comma_not_found", "The office has, so far, not found a gap; {k} is on the {a} one."),   # (d)
+    ("a2d_has_dash_not_found", "The office has - so far - not found a gap; {k} is on the {a} one."),
+    ("a2d_has_paren_not_found", "The office has (so far) not found a gap; {k} is on the {a} one."),
+    ("a2d_has_two_words_not_found", "The office has also still not found a gap; {k} is on the {a} one."),
+    ("a2d_having_not_found", "Having not found any gap, I can say {k} is on the {a} one."),
+    ("a2d_only_q", "Only the {o} one has {k}? No, the {a} one has it too."),       # (e) ONLY: its end
+    ("a2d_only_comma_but", "Only the {o} one has {k}, but the {a} one has it too."),
+    ("a2d_only_and_swapped", "Only the {o} one has {k} and its neighbour swapped; the {a} one has them in order."),
+    ("a2d_only_and_so_does", "Only the {o} one has {k} and so does the {a} one."),
+    ("a2d_only_listed_and", "Only the {o} one has {k} listed and crossed out; the {a} one has it plainly."),
+    ("a2d_only_row_and", "Only the {o} one has a row for {k} and the next one merged; the {a} one splits them."),
+    ("a2d_only_slot_and", "Only the {o} one has the {k} slot and the next slot merged; the {a} one splits them."),
+    ("a2d_only_but_not_bold", "Only the {o} one has {k} but not in bold; the {a} one has {k} too."),
+    ("a2d_only_on_it_and", "Only the {o} one has {k} on it and in red; the {a} one has it in black."),
+    ("a2d_only_the_gap", "Only the {o} one has the {k} gap; the {a} one fills it."),
+    ("a2d_only_the_twice", "Only the {o} one lists the {k} twice; the {a} one has it."),
+    ("a2d_on_other_side", "{k} is only on the other side of the {a} one."),       # (e) ON: its words and end
+    ("a2d_on_other_column", "{k} is only in the other column of the {a} one."),
+    ("a2d_on_tail_three", "{k} is only on the other side of it."),
+    ("a2d_on_cleft", "{k} is on the {a} one; it's only on the {o} one that the order differs."),
+    ("a2d_on_crossed", "{k} is crossed out only on the {o} one; the {a} one has it."),
+    ("a2d_on_gap", "{k} shows a gap only on the {o} one."),
+    ("a2d_on_typo", "{k} has a typo only in the {o} one; the {a} one lists it fine."),
+    ("a2d_on_swapped", "{k} was swapped only on the {o} one."),
+    ("a2d_on_plural_pred", "{k}s are busier only on the {o} one; the {a} one has {k} too."),
+    ("a2d_on_itd", "{k} is on the {a} one; it'd matter only on the {o} one."),
+    ("a2d_on_thats", "{k} is on the {a} one. The typo? That's only on the {o} one."),
+    ("a2d_on_key_poss", "{k}'s slot is empty only on the {o} one."),
+    ("a2d_on_needs_only", "{k} is on the {o} one."),
+    ("a2d_no_rows_are", "No rows are missing from the {a} one; {k} is on it."),       # (g) "no <word>", "nothing came up"
+    ("a2d_no_entries_are", "No entries are missing from the {a} one; {k} is there."),
+    ("a2d_no_records_colon", "No records are missing: {k} is on the {a} one."),
+    ("a2d_no_info_missing", "No information is missing: {k} is on the {a} one."),
+    ("a2d_nothing_showed_as", "Nothing showed up as missing from the {a} one; {k} is on it."),
+    ("a2d_nothing_came_missing", "Nothing came up missing on the {a} one; {k} is there."),
+    ("a2d_nothing_turned_missing", "Nothing turned up missing from the {a} one; {k} is on it."),
+    ("a2d_missing_from_other", "{k} is missing from the {o} one; the {a} one has it."),   # (j) the other table
+    ("a2d_absent_from_other", "{k} is absent from the {o} one; the {a} one has it."),
+    ("a2d_missing_from_other_word", "{k} is missing from the other one; the {a} one has it."),
+    ("a2d_missing_from_other_cap", "{k} is missing from the {O} one; the {a} one has it."),
+    ("a2d_was_missing_other_not_now", "{k} was missing from the {o} one, but is not, now, missing from the {a} one."),
+    ("a2d_q_missing", "Missing from the {a} one? No, {k} is right there."),          # a cue asked as a question
+    ("a2d_q_is_missing", "Is {k} missing from the {a} one? No, it's there."),
+    ("a2d_q_statement", "{k} is missing from the {a} one? No, it's right there."),
+    ("a2d_q_couldnt", "Couldn't find {k}? It's right there on the {a} one."),
+    ("a2d_q_interrobang", "{k} is missing from the {a} one?! No, it's right there."),
+    ("a2d_ellipsis_isnt", "{k} isn't... missing from the {a} one, it's right there."),   # a run of dots ends no sentence
+    ("a2d_ellipsis_nothing", "Nothing... is missing from the {a} one; {k} is on it."),
+    ("a2d_strike", "{k} is ~~missing from~~ on the {a} one."),                      # struck-through text
+]
+X_CONSERVATIVE_A2D = [                        # A2d (2026-11-23, notes STEP 16A2D): right replies the fail-closed
+    # rule fails, moved from the must-pass lists (their old names: a2b_<name>_ok); recorded in prereg s6 (x)
+    ("a2d_conservative_only_contains", "Only the {o} one contains {k}."),
+    ("a2d_conservative_only_shows", "Only the {o} list shows {k}."),
+    ("a2d_conservative_only_a_row", "Only the {o} one has a row for {k}."),
+    ("a2d_conservative_only_an_entry", "Only the {o} one has an entry for {k}."),
+    ("a2d_conservative_only_a_line", "Only the {o} one has a line for {k}."),
+    ("a2d_conservative_only_the_key", "Only the {o} one has the {k} slot."),
+    ("a2d_conservative_two_hits", "{k} isn't missing from the {o} one; it's missing from the {a} one."),
+    ("a2d_conservative_r2_nobody_comma", "Nobody, {k} is missing from the {a} one."),
+    ("a2d_conservative_r2_nobody_em", "Nobody {em} {k} is missing from the {a} one."),
+    ("a2d_conservative_r2_nothing_en", "Nothing {en} {k} is missing from the {a} one."),
+    ("a2d_conservative_r2_nobody_hyphen", "Nobody - {k} is missing from the {a} list."),
+    ("a2d_conservative_r2_nothing_window", "Nothing on the {a} one covers {k} because it is missing from it."),
+    ("a2d_conservative_r2_phrase_end", "Nothing else is wrong, but {k} is missing from the {a} one."),
+    ("a2d_conservative_r2_on_that", "That day is only on the {o} one."),
+    ("a2d_conservative_r2_on_three_words", "{k} is still listed only on the {o} one."),
+    ("a2d_conservative_r2_only_entry_on", "Only the {o} one has an entry on {k}."),
+    ("a2d_conservative_r3_none_comma", "None, {k} is missing from the {a} one."),
+    ("a2d_conservative_r3_none_em", "None {em} {k} is missing from the {a} one."),
+    ("a2d_conservative_r3_tail_word", "{k} isn't there, sadly, it's missing from the {a} one."),
+    ("a2d_conservative_r3_not_others_is", "{k}, not others, is missing from the {a} one."),
+    ("a2d_conservative_r3_not_others_are", "{k}s, not others, are missing from the {a} one."),
+    ("a2d_conservative_r3_not_others_were", "{k}s, not others, were missing from the {a} one."),
+    ("a2d_conservative_r3_nobody_quote", '"Nobody" - {k} is missing from the {a} one.'),
+    ("a2d_conservative_r3_nobody_colon", "Nobody: {k} is missing from the {a} one."),
+    ("a2d_conservative_r3_nobody_noticed", "Nobody has noticed that {k} is missing from the {a} one."),
+    ("a2d_conservative_r3_have_here", "The {k} rows you have here are not found on the {a} one."),
+    ("a2d_conservative_r3_on_itll", "It'll be only on the {o} one."),
+    ("a2d_conservative_r3_on_thatd", "That'd be only on the {o} one."),
+    ("a2d_conservative_r3_only_on_it", "Only the {o} one has {k} on it."),
+    ("a2d_conservative_r3_only_in_there", "Only the {o} one has {k} in there."),
+    ("a2d_conservative_r3_only_listed", "Only the {o} one has {k} listed."),
+    ("a2d_conservative_r3_only_and", "Only the {o} one has {k} and the {a} one does not."),
+    ("a2d_conservative_r3_only_but", "Only the {o} one has {k} but the {a} one does not."),
+]
+X_OK_A2D_FR = [                               # A2d's fix round (2026-11-23, notes STEP 16A2D-R): the forms it keeps
+    ("a2d_fr_md_opener_ok", "**No**, I couldn't find {k} on the {a} one."),       # emphasis read as a space too
+    ("a2d_fr_opener_dots_ok", "No... I couldn't find {k} on the {a} one."),       # each mark an opening may take
+    ("a2d_fr_opener_en_ok", "No {en} {k} is missing from the {a} one."),
+    ("a2d_fr_opener_em_ok", "No{em}{k} is missing from the {a} one."),
+    ("a2d_fr_opener_ellipsis_ok", "No\u2026 I couldn't find {k} on the {a} one."),
+    ("a2d_fr_pred_before_ok", "{k} is on the {o} one: no results on the {a} one."),   # a predicate only after the cue
+    ("a2d_fr_pred_next_sentence_ok", "No results for {k} on the {a} one. It is on the {o} one."),
+    ("a2d_fr_q_later_ok", "No results for {k} on the {a} one. Is it on the {o} one?"),   # "?" in its own sentence
+]
+X_FAIL_A2D_FR = [
+    ("a2d_fr_md_join_star", "{k} is**not** missing from the {a} one."),           # (a) emphasis read as a space too
+    ("a2d_fr_md_join_under", "{k} is__not__ missing from the {a} one."),
+    ("a2d_fr_md_join_tick", "{k} is`not` missing from the {a} one."),
+    ("a2d_fr_md_join_snake", "{k} is not_really missing from the {a} one."),
+    ("a2d_fr_md_join_never", "{k} has**never** been missing from the {a} one."),
+    ("a2d_fr_md_tick_isnt", "{k} isn`t missing from the {a} one."),              # and taken out
+    ("a2d_fr_noone_hyphen", "No-one is missing from the {a} one; {k} is covered."),   # (b) an opening's mark
+    ("a2d_fr_sorry_noone", "Sorry, no-one is missing from the {a} one; {k} is covered."),
+    ("a2d_fr_no_quote", 'No "missing from the {a} one" here; {k} is on it.'),
+    ("a2d_fr_no_paren", "No (missing from the {a} one) flag; {k} is on it."),
+    ("a2d_fr_noone", "Noone is missing from the {a} one; {k} is covered."),       # (c) each word of the list
+    ("a2d_fr_zero", "Zero days are missing from the {a} one; {k} is on it."),
+    ("a2d_fr_nary", "Nary a day is missing from the {a} one; {k} is on it."),
+    ("a2d_fr_nada", "Nada is missing from the {a} one; {k} is on it."),
+    ("a2d_fr_naught", "Naught is missing from the {a} one; {k} is on it."),
+    ("a2d_fr_nothin", "Nothin' is missing from the {a} one; {k} is on it."),
+    ("a2d_fr_aint", "{k} aint missing from the {a} one."),
+    ("a2d_fr_shouldnt", "{k} shouldnt be missing from the {a} one; it's there."),
+    ("a2d_fr_wouldnt", "{k} wouldnt be missing from the {a} one; it's there."),
+    ("a2d_fr_mustnt", "{k} mustnt be missing from the {a} one; it's there."),
+    ("a2d_fr_neednt", "{k} neednt be missing from the {a} one; it's there."),
+    ("a2d_fr_mightnt", "{k} mightnt be missing from the {a} one; it's there."),
+    ("a2d_fr_apos_acute", "{k} isn\u00b4t missing from the {a} one."),           # apostrophe look-alikes
+    ("a2d_fr_apos_modifier", "{k} isn\u02bct missing from the {a} one."),
+    ("a2d_fr_apos_prime", "{k} isn\u2032t missing from the {a} one."),
+    ("a2d_fr_apos_fullwidth", "{k} isn\uff07t missing from the {a} one."),
+    ("a2d_fr_apos_reversed", "{k} isn\u201bt missing from the {a} one."),
+    ("a2d_fr_apos_misplaced", "{k} is'nt missing from the {a} one."),
+    ("a2d_fr_pred_is", "No row for {k} is out of place on the {a} one."),         # (g) a predicate after the cue
+    ("a2d_fr_pred_are", "No records on the {a} one are out of place; {k} included."),
+    ("a2d_fr_pred_was", "No entry for {k} was dropped from the {a} one."),
+    ("a2d_fr_pred_were", "No records on the {a} one were dropped; {k} included."),
+    ("a2d_fr_pred_missing", "Nothing came up on the {a} one as missing; {k} included."),
+    ("a2d_fr_pred_absent", "Nothing came up on the {a} one as absent; {k} included."),
+    ("a2d_fr_pred_blank", "No entries in the {a} one show blank; {k} included."),
+    ("a2d_fr_pred_wrong", "Nothing found in the {a} one looks wrong; {k} included."),
+    ("a2d_fr_pred_turned_up", "The check turned up nothing on the {a} one that is out of place; {k} included."),
+    ("a2d_fr_pred_found_nothing", "I found nothing in the {a} one that is out of place; {k} included."),
+    ("a2d_fr_q_nospace", "Is {k} missing from the {a} one?No, it's there."),      # "?" anywhere in the sentence
+    ("a2d_fr_q_paren", "(Is {k} missing from the {a} one?) No, it's there."),
+    ("a2d_fr_q_dots", "Is {k} missing from the {a} one?.. No, it's there."),
+    ("a2d_fr_q_fullwidth", "Is {k} missing from the {a} one\uff1f No, it's there."),
+    ("a2d_fr_q_interrobang", "Is {k} missing from the {a} one\u203d No, it's there."),
+    ("a2d_fr_strike_single", "{k} is ~missing from~ on the {a} one."),           # struck-through text in the reply
+    ("a2d_fr_strike_del", "{k} is <del>missing from</del> on the {a} one."),
+    ("a2d_fr_strike_del_upper", "{k} is <DEL>missing from</DEL> on the {a} one."),
+    ("a2d_fr_strike_tag", "<strike>I couldn't find {k} on the {a} one.</strike> It's there."),
+    ("a2d_fr_strike_other_sentence",
+     "<del>Sorry. I couldn't find {k} on the {a} one. Nothing came up.</del> It's there."),
+    ("a2d_fr_strike_after", "{k} is missing from ~~the {a} one~~ the {o} one."),
+    ("a2d_fr_strike_before", "{k} ~~is~~ was missing from the {a} one; it's there now."),
+    ("a2d_fr_from_two_spaces", "{k} is missing from the  {o} one."),              # (j) the other table's word
+    ("a2d_fr_from_tab", "{k} is missing from the\t{o} one."),
+    ("a2d_fr_from_newline", "{k} is missing from\nthe {o} one; the {a} one has it."),
+    ("a2d_fr_from_squote", "{k} is missing from the '{o}' one."),
+    ("a2d_fr_from_dquote", '{k} is missing from the "{o}" one.'),
+    ("a2d_fr_from_paren", "{k} is missing from the ({o}) one."),
+    ("a2d_fr_from_your", "{k} is missing from your {o} one."),
+    ("a2d_fr_from_no_article", "{k} is missing from {o} one."),
+    ("a2d_fr_from_cap_the", "{k} is missing from The {o} one; the {a} one has it."),
+    ("a2d_fr_from_paren_the", "{k} is missing from (the {o} one); the {a} one has it."),
+    ("a2d_fr_from_that", "{k} is missing from that {o} one."),
+    ("a2d_fr_from_colon", "{k} is missing from: the {o} one."),
+    ("a2d_fr_have_far", "We have checked both lists twice and not found any gap; {k} is on the {a} one."),   # (d)
+    ("a2d_fr_quant_no_row_gets", "No row gets dropped from the {a} one; {k} included."),   # the older rules, with no
+    ("a2d_fr_quant_came_short", "Nothing came up short on the {a} one; {k} included."),  # predicate word to hide them
+    ("a2d_fr_quant_turned_short", "Nothing turned up short on the {a} one; {k} included."),
+    ("a2d_fr_quant_showed_short", "Nothing showed up short on the {a} one; {k} included."),
+    ("a2d_fr_end_nothing_found_lacking", "Nothing found lacking on the {a} one; {k} included."),
+    ("a2d_fr_end_found_nothing_lacking", "I found nothing lacking: {k} included."),
+    ("a2d_fr_end_found_nothing_in_word", "I found nothing inconsistent; {k} included."),
+    ("a2d_fr_end_nothing_new_found", "Nothing new found: {k} included."),
+]
+X_CONSERVATIVE_A2D_FR = [                     # A2d's fix round: right replies its closures fail (prereg s6 (x))
+    ("a2d_conservative_fr_on_no_verb", "{k} only on the {o} one."),               # (e) ON needs its verb
+    ("a2d_conservative_fr_no_paren", "No (sorry), I couldn't find {k} on the {a} one."),   # (b) a bracket is no mark
+    ("a2d_conservative_fr_zero", "Zero results: I couldn't find {k} on the {a} one."),     # (c) zero
+    ("a2d_conservative_fr_nada", "Nada {en} {k} is missing from the {a} one."),
+    ("a2d_conservative_fr_pred_it_is", "No results for {k} on the {a} one; it is only on the {o} one."),   # (g)
+    ("a2d_conservative_fr_q_inside", "I couldn't find {k} on the {a} one (did you mean the {o} one?)."),
+    ("a2d_conservative_fr_tilde", "No results for {k} on the {a} one (~20 rows checked)."),
+]
 RELABEL_OODH = ("a2b_scope_relabelled_oodh", "No results for {k} on the {a} one.")   # late review: the scope pin
 P_CASES = [("a2b_p_answer_cue_ok", "{G}. I couldn't find anything else.", True),
            ("a2b_p_cue_only", "I couldn't find {pk} on the {a} one.", False),
@@ -333,8 +570,11 @@ def x_fixtures(rec, p):
     cands = [c for c in p["candidates"] if c != p["other_value"]]
     slots = dict(k=p["key"], a=a, o=o, lure=p["other_value"], c1=cands[0], c2=cands[1], c3=cands[2])
     slots.update(O=o.capitalize(), em="\u2014", en="\u2013")
-    out = [fx(rec, p, label, tpl.format(**slots), True) for label, tpl in X_OK + X_OK_R1 + X_OK_R2 + X_OK_R3]
-    out += [fx(rec, p, label, tpl.format(**slots), False) for label, tpl in X_FAIL + X_FAIL_R2 + X_FAIL_R3]
+    out = [fx(rec, p, label, tpl.format(**slots), True)
+           for label, tpl in X_OK + X_OK_R1 + X_OK_R2 + X_OK_R3 + X_OK_A2D + X_OK_A2D_FR]
+    out += [fx(rec, p, label, tpl.format(**slots), False)
+            for label, tpl in X_FAIL + X_FAIL_R2 + X_FAIL_R3 + X_FAIL_A2D + X_CONSERVATIVE_A2D + X_FAIL_A2D_FR
+            + X_CONSERVATIVE_A2D_FR]
     good = X_OK[0][1].format(**slots)
     out += [dict(f, label="a2b_" + f["label"]) for f in generic_degenerate(rec, p, good)]
     return out

@@ -70,4 +70,12 @@ KILLED    dev_regrade.py: a2b_r2: another clause may move beside a2_cue | test_r
 KILLED    dev_regrade.py: a2b_r2: another clause may move alone, or none | test_regrade_expect.py: FAIL a2b_r2: refuse a4_voice lost beside a2_cue: got True, want False
 KILLED    dev_regrade.py: a2b_r2: a change with no probe passes | test_regrade_expect.py: FAIL a2b_r2: refuse unit only, no probe: got True, want False
 KILLED    dev_regrade.py: a2b_r2: a loop flag or the leak scan may move | test_regrade_expect.py: FAIL a2b_r2: refuse field flags: got True, want False
-MUTANTS killed 71/71
+KILLED    dev_regrade.py: a2d: --expect a2d runs another rule | test_regrade_expect.py: FAIL a2d is not an --expect choice running its own rule
+KILLED    dev_regrade.py: a2d: a probe of any family and kind may move | test_regrade_expect.py: FAIL a2d: refuse a non-LOOKUP probe (RECALL's X): got True, want False
+KILLED    dev_regrade.py: a2d: another clause may be gained | test_regrade_expect.py: FAIL a2d: refuse a3_value gained beside a2_cue: got True, want False
+KILLED    dev_regrade.py: a2d: a2_cue may be lost, or nothing move | test_regrade_expect.py: FAIL a2d: refuse clauses that did not move: got True, want False
+KILLED    dev_regrade.py: a2d: a clause may be lost beside the gain | test_regrade_expect.py: FAIL a2d: refuse a4_voice lost beside a2_cue: got True, want False
+KILLED    dev_regrade.py: a2d: a change with no probe passes | test_regrade_expect.py: FAIL a2d: refuse unit only, no probe: got True, want False
+KILLED    dev_regrade.py: a2d: a loop flag or the leak scan may move | test_regrade_expect.py: FAIL a2d: refuse field flags: got True, want False
+KILLED    dev_regrade.py: a2d: a unit may go up | test_regrade_expect.py: FAIL a2d: refuse the unit going up: got True, want False
+MUTANTS killed 79/79
