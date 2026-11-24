@@ -1,0 +1,19 @@
+# K0-smoke, probe-off replay (kconfig.py)
+extends: k_base.yaml
+name: k0_smoke_rep_s200
+out_dir: ../../../planck_root/runs/K/k0_smoke_rep_s200
+seed: 200
+optim: {"lr": 0.003, "embed_lr": 0.003, "scalar_lr": 0.003}
+train: {total_steps: 306}
+data:
+  sources:
+    - {"name": "skill", "kind": "chat", "share": 0.25, "shuffle": false, "paths": ["../../../planck_root/data/k/skill/skill-*.jsonl"]}
+    - {"name": "fact_bio", "kind": "tokens", "eot_id": 1, "share": 0.421053, "shuffle": false, "paths": ["../../../planck_root/data/k/FH/fact_bio/fact_bio-*.bin"]}
+    - {"name": "fact_qa", "kind": "chat", "share": 0.078947, "shuffle": false, "paths": ["../../../planck_root/data/k/FH/fact_qa/fact_qa-*.jsonl"]}
+    - {"name": "cccc", "kind": "tokens", "share": 0.10356, "paths": ["../../../planck_root/data/shards/starter_v0_8k/cccc/cccc-*.bin"], "eot_id": 1}
+    - {"name": "dolly", "kind": "chat", "share": 0.004, "paths": ["../../../planck_root/data/shards/starter_v0_8k/dolly/dolly-*.jsonl"]}
+    - {"name": "gutenberg", "kind": "tokens", "share": 0.036979, "paths": ["../../../planck_root/data/shards/starter_v0_8k/gutenberg/gutenberg-*.bin"], "eot_id": 1}
+    - {"name": "irc", "kind": "tokens", "share": 0.010001, "paths": ["../../../planck_root/data/shards/starter_v0_8k/irc/irc-*.bin"], "eot_id": 1}
+    - {"name": "oasst2", "kind": "chat", "share": 0.003, "paths": ["../../../planck_root/data/shards/starter_v0_8k/oasst2/oasst2-*.jsonl"]}
+    - {"name": "stackexchange", "kind": "tokens", "share": 0.055481, "paths": ["../../../planck_root/data/shards/starter_v0_8k/stackexchange/stackexchange-*.bin"], "eot_id": 1}
+    - {"name": "wikimedia", "kind": "tokens", "share": 0.036979, "paths": ["../../../planck_root/data/shards/starter_v0_8k/wikimedia/wikimedia-*.bin"], "eot_id": 1}

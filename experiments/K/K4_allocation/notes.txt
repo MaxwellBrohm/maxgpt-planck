@@ -36,9 +36,12 @@ THE ONE MANIPULATION
   and left depth to E9. Attention width h x 64 exceeds d from 4 heads up (256-448 vs 192); that is part of the arm.
 
 PER-ARM LEARNING RATE (PLAN 5 and SCREENS C3: a shape bet gets its own LR)
-  Each new shape: g in {0.5, 1, 2} x LR5 (ratio r_5 kept), the FH mix, 125M full schedule, seed 200, picked exactly
-  as K0-g (argmin K-DEV NLL, ties to the lower LR, one extension beyond an edge if the cap allows). BASE's g_K comes
-  from K0-g, the same protocol, so all four are picked alike. If K0-g carries LENGTH-RISK, so does K4.
+  Each new shape: g in {0.5, 1, 2} x LR5 (ratio r_5 kept), the FH mix, [G-1] 250M full schedule (the K runs' own;
+  125M until G-1), [G-2] seeds 199 and 200 (seed 200 until G-2), picked exactly as K0-g (argmin over g of the K-DEV
+  NLL's mean over the two seeds, ties to the lower LR, one extension beyond an edge pick at both seeds; [S16] until
+  S16 "if the cap allows"). BASE's g_K comes from K0-g, the same protocol at the same length,
+  so all four are picked alike. [G-1] LENGTH-RISK is retired with the 125M grid (K1 notes K0-g; until G-1 the shapes'
+  g-checks ran at 250M only if it fired, [S16], and before S16 "If K0-g carries LENGTH-RISK, so does K4").
   New modules: none; every parameter is an existing matrix at its harness init and LR group.
 
 ARMS AND SEEDS
@@ -63,7 +66,7 @@ READINGS (KR, SPEC 10; per arm vs BASE; SD_ref per metric pooled over the three 
   more-than-1.5x at 100 exposures with no MLP; H7 keeps 30% of BASE's MLP width).
   Monotone check (reported): S_ID and stored bits against r across BASE, H4, H6, H7.
 
-K4b (conditional, SPEC 13 order)
+K4b (SPEC 13 order; [S16] always run, conditional on hours until S16)
   BASE shape, K1 FH mix, g_K, with the MLP matrices' weight decay x4 (0.4 instead of 0.1, cautious; attention,
   embeddings and scalars unchanged). Singh et al. (https://arxiv.org/abs/2311.08360): weight decay on MLP layers kept
   ICL from fading, on attention did not; Anand et al. (https://arxiv.org/abs/2406.00053): L2 did not keep structural
@@ -85,7 +88,7 @@ KNOWN RISKS
   - More heads also means a wider attention (h x 64 > d): the arm changes attention width and head count together;
     a head_dim change instead would move RoPE and QK-norm geometry, a worse confound.
   - At about 100 exposures the MLP-sensitive regime inflates any fact cost relative to the 1000-exposure ceiling.
-  - 125M g-checks applied to 250M runs (LENGTH-RISK).
+  - [G-1: retired; every g-check runs at 250M] 125M g-checks applied to 250M runs (LENGTH-RISK).
   - df 6 from three arms' residuals mixes noise across shapes; a shape much noisier than the others inflates every
     threshold (each arm's own residual SD is reported).
   - bpb is not behaviour (SCREENS, citing research/lanes/arch.md 1.4); Bian's optimum is on loss, at 1B/3B.
@@ -95,8 +98,10 @@ DEPENDENCIES
   No new harness code for H4-H7 (shape keys only; the C2 generator diff allows n_heads, n_kv_heads, mlp_hidden).
   K4b needs a per-group weight-decay flag with tests (default off, bit-identical off).
 
-GPU HOURS (SPEC 13): 4.73 = 3 shapes x (3 x 125M g-check + 3 x 250M) x 0.31-per-250M x 1.13 (assumed attention
-  overhead; the smoke of each shape replaces it); K4b 0.93 if reached under the cap.
+GPU HOURS (SPEC 13, estimates only [G-1]): 9.46 [G-2] = 3 shapes x (3 x 250M g-check at 2 seeds + 3 x 250M) x
+  0.31-per-250M x 1.13 (assumed attention overhead; the smoke of each shape replaces it; 6.31 with one g-check seed
+  until G-2, 4.73 with 125M g-checks until G-1); K4b 0.93, [S16] always run (until S16 "if reached under the cap");
+  an edge pick's extension 0.70 per shape at 2 seeds [G-2] (0.35 at one seed [G-1]).
 
 CHANGES AFTER CRITIQUE (2026-09-27, adversarial critic; no model loaded. Run: the per-layer parameter arithmetic
   of the four shapes, which reproduces count_analytic's totals and r values above)

@@ -18,6 +18,11 @@ ROUND = {"R": 5, "U": 5, "B": 3, "F": 3, "A": 2, "P": 2}       # blocks per roun
 BLOCK = 512
 OOD = ("DFAR", "KMANY", "ENTS", "VALH", "ATTH", "PLONG")
 OOD_FAMS = {"DFAR": "RU", "KMANY": "U", "ENTS": "R", "VALH": "RUBFAP", "ATTH": "RUBFAP", "PLONG": "P"}
+A_CTX = [("R", .375), ("U", .625)]  # A both-items' contexts. K3 round 6: R 1/2 put A at 1/4 of R's items with a free
+                                    # entity and 3 holders, a tie with each holder's value, which the gate broke to
+                                    # " none" (A 0.542-0.567 on fresh sets); at 1/4 R-like cells read 0.13-0.14
+                                    # (0.18 on a 37-item cell; diag_a3.py, K3 ROUND 6). K3 round 7: R 3/8 (1/4
+                                    # left U-like cells at a tie on the attribute-blind side, fams.fam_A)
 MAX_TOKENS, D_MAX = 2048, 12
 
 
@@ -109,22 +114,13 @@ def block_flags(fam: str, n: int, r, ncube: int | None = None) -> list[dict]:
     """Exact per-block design flags. ncube (B eval blocks with groups, BD-26): that many cube items among n, the
     question frame split exactly within the cube items and within the others (a cube item carries 3 copies)."""
     fl = [{"qform": q} for q in balanced(n, [(0, .5), (1, .5)], r)]
-    if fam in ("R", "P"):       # P's statements follow R's design (SPEC 4 leaves P's value structure open); K3 round
-        cs = balanced(n, [("f1", .5), ("f0", .3), ("nofoil", .2)] if fam == "R" else [("f1", .5), ("f0", .5)], r)
-        # 4: P has a foil in every item, follow in 1/2 (with R's no-foil fifth P's gate read 0.649-0.670 on gen.py
-        # samples against a limit of 0.666: the fifth is free and 5/8 of foil items put the key's latest first)
-        ks = [0] * n            # K3 round 4: k (foil items 2-4, the rest 1-4; P one more, its bystander) and the
-        for foil, opts in ((True, (2, 3, 4)), (False, (1, 2, 3, 4))):     # intro rank exact per block (drawn per
-            idx = [i for i, c in enumerate(cs) if (c != "nofoil") == foil]  # item, one K-EVAL-sized R block read
-            for i, k in zip(idx, balanced(len(idx), [(k, 1 / len(opts)) for k in opts], r)):   # k 3 rank 1 at
-                ks[i] = k + (fam == "P")                                    # 0.506, 3.3 SE)
-        for f, c, k, x in zip(fl, cs, ks, ranks(ks, r)):
-            f.update(follow=c == "f1", foil=c != "nofoil", k=k, rank=x)
-    elif fam == "U":            # K3: noupd (key 1, foil 2, follow) mirrored by upd "one" (2, 1, no follow); upd
-        var = nested(n, [("upd", .5), ("noupd", .25), ("twoslot", .25)],       # "sym" and twoslot: follow in 1/2
+    if fam in ("R", "P"):       # K3 round 6 (REVIEW 7a S-1): R's main component holds 2-4 entities (P one more, its
+        ks = [k + (fam == "P") for k in balanced(n, [(2, 1 / 3), (3, 1 / 3), (4, 1 / 3)], r)]    # bystander), k and
+        for f, k, x in zip(fl, ks, ranks(ks, r)):       # the intro rank exact per block (K3 round 4); no foil or
+            f.update(k=k, rank=x)                       # follow flag: under fams.fam_R's one law they are natural
+    elif fam == "U":            # K3: noupd (the single statement of a (1, 2) pair) and upd "one" (its double); K3
+        var = nested(n, [("upd", .5), ("noupd", .25), ("twoslot", .25)],       # round 6: recency is natural
                      lambda v: [("one", .5), ("sym", .5)] if v == "upd" else [("-", 1.)], r)
-        free = [i for i, (v, s) in enumerate(var) if v == "twoslot" or s == "sym"]
-        fol = dict(zip(free, balanced(len(free), [(True, .5), (False, .5)], r)))
         # (k, intro rank) exact too: drawn in fam_U, the K-EVAL-ID draw read k 4 rank 2 at 0.147 (n 163, 3 SE).
         # K3 round 4 (REVIEW 5a S-2): the foil's intro rank with the key's, the (key, foil) rank pair uniform over the
         # k (k - 1) ordered pairs, exact per block: the foil, a big entity, kept an early intro (the holder introduced
@@ -135,8 +131,8 @@ def block_flags(fam: str, n: int, r, ncube: int | None = None) -> list[dict]:
             idx = [i for i, x in enumerate(ks) if x == k]
             for i, p in zip(idx, rank_pairs(len(idx), k, r)):
                 kr[i] = (k, p)
-        for i, (f, (v, s), (k, (rk, fk))) in enumerate(zip(fl, var, kr)):
-            f.update(var=v, sub=s, follow=fol[i] if i in fol else v == "noupd", k=k, rank=rk, frank=fk)
+        for f, (v, s), (k, (rk, fk)) in zip(fl, var, kr):
+            f.update(var=v, sub=s, k=k, rank=rk, frank=fk)
     elif fam == "B":            # BD-1: B's order is uniform, so its follow rate is chance (1 - 1/k), not 1/2.
         share = .75 if ncube is None else ncube / n
         sk = nested(n, [(True, share), (False, 1 - share)],     # BD-22: the cube (k 8) in 3/4, k 2-4 of it in 1/4,
@@ -163,13 +159,32 @@ def block_flags(fam: str, n: int, r, ncube: int | None = None) -> list[dict]:
             f.update(kref=x, klate=bool(kl), kstale=bool(kst), follow=bool(w), fref=x, fstale=bool(fs), k=k, rank=rk)
     elif fam == "A":            # K3 round 4: a both-item's context kind (R or U) exact too; drawn per item, the
         lu = nested(n, [("both", .5), ("ent", .25), ("attr", .25)],      # contexts that fail more (R's with no
-                    lambda v: [("R", .5), ("U", .5)] if v == "both" else [("-", 1.)], r)    # bystander) were redrawn
-        for f, (c, x) in zip(fl, lu):                                   # into U contexts (93 R vs 163 U of 256)
+                    lambda v: A_CTX if v == "both" else [("-", 1.)], r)  # bystander) were redrawn into U contexts
+        for f, (c, x) in zip(fl, lu):                                   # (93 R vs 163 U of 256)
             f.update(lure=c, ctx=x)
     return fl
 
 
-def _questions(turns, final: I.Qn, n_extra: int, lure_key, r, skip=frozenset()) -> list:
+def component(turns, ents) -> set:
+    """The entities joined to any of `ents` through shared attributes (statements of the item, definitions aside)."""
+    by_attr, by_ent = {}, {}
+    for t in turns:
+        for s in t:
+            if s.kind != "def":
+                by_attr.setdefault(s.attr, set()).add(s.ent)
+                by_ent.setdefault(s.ent, set()).add(s.attr)
+    out, todo = set(), list(ents)
+    while todo:
+        e = todo.pop()
+        if e in out:
+            continue
+        out.add(e)
+        todo += [x for a in by_ent.get(e, ()) for x in by_attr[a] if x not in out]
+    return out
+
+
+def _questions(turns, final: I.Qn, n_extra: int, lure_key, r, skip=frozenset(), comp: bool = False,
+               place: bool = False) -> list:
     """Earlier questions at random turn ends (never between an ellipsis and its antecedent), each asking a key stated
     so far. None asks the final question's attribute (K3 R-4: an earlier answer of that attribute named the gold, a
     copy, or excluded a foil's value), except U's lure: the final key itself, asked only where a later statement
@@ -177,9 +192,24 @@ def _questions(turns, final: I.Qn, n_extra: int, lure_key, r, skip=frozenset()) 
     the final entity or any holder of the final attribute (a bystander's key only; U's lure aside). Drawn from every
     stated key, whether and how often the final name was asked told the asked entity's size (it states another
     attribute), and the holders' sizes are read off the statements (QFIT R 0.683, P 0.707). skip: entities never
-    asked either (make_item: the bystander R and U items reserve)."""
+    asked either (make_item: the bystander R and U items reserve). comp (K3 round 6, REVIEW 7a S-1's "+eq"; R, U, P
+    and A's R and U contexts): none names an entity of the final entity's or a holder's component (entities joined by
+    a shared attribute), so no earlier question's attribute is one of the final entity's or the holders' (a rule
+    blind to the question's attribute read an earlier question of a bystander's key as "not this one of the asked
+    entity's keys": P 0.83-0.87 with it), and the rule is the same whichever key of the component is asked.
+    place (P; K3 round 6 final): the turn ends are drawn among those where a key is askable, so no P item is
+    redrawn for its question count. Drawn among every turn end, a late bystander left fewer than 2 questions
+    and the redraw kept bystanders introduced early (k 4: the last rank 0.184-0.215 against 0.25), so the main
+    entities came late beside the asked one's exact rank (P.exch_intro 290.5 on 27 df on 40,960 fresh items)."""
     hold = {s.ent for t in turns for s in t if s.attr == final.attr and s.kind != "def"} | {final.ent} | set(skip)
+    if comp:
+        hold |= component(turns, hold - set(skip))
     ok = [j for j in range(len(turns)) if j + 1 >= len(turns) or turns[j + 1][0].kind != "ell"]
+    if place:
+        st = set()
+        for j, t in enumerate(turns):
+            st |= {(s.ent, s.attr) for s in t if s.kind != "def"}
+            ok = ok if any(a != final.attr and e not in hold for e, a in st) else [x for x in ok if x != j]
     at = sorted(r.choice(ok, min(n_extra, len(ok)), replace=False).tolist()) if n_extra else []
     ex, stated = [], []
     for j, t in enumerate(turns):
@@ -201,7 +231,10 @@ def _questions(turns, final: I.Qn, n_extra: int, lure_key, r, skip=frozenset()) 
 def _pad(ex, key, names_k, g, r, target):
     """DFAR: insert one-statement exchanges after the asked key's latest statement until d = target. A pad states the
     asked attribute only for an entity that already does (K3 round 4: a bystander made a holder could be one an
-    earlier question asked, or leave every remaining bystander asked, which _questions and make_item never make)."""
+    earlier question asked, or leave every remaining bystander asked, which _questions and make_item never make).
+    G-2 (2026-10-11, REVIEW 12b T-4): nor a key that joins an earlier question's entity to the final key's
+    component (SPEC 4 [K3r6], every item): a pad's random entity and attribute did so on 10 of 2,048 DFAR U items
+    (U.b0.i87 of gen.py's K-EVAL-OOD); such a draw is redrawn uniformly among the pads that join nothing."""
     hold = {s.ent for k, b in ex if k == "S" for s in b if s.attr == key[1] and s.kind != "def"}
     last = max(i for i, (k, b) in enumerate(ex) if k == "S" and any((s.ent, s.attr) == key for s in b))
     if last + 1 < len(ex) and ex[last + 1][0] == "S" and ex[last + 1][1][0].kind == "ell":
@@ -210,6 +243,11 @@ def _pad(ex, key, names_k, g, r, target):
     used = {s.val for k, b in ex if k == "S" for s in b}
     free = [int(v) for v in g.vpool if int(v) not in used]
     vals = [int(v) for v in r.choice(free, max(0, target - d), replace=False)]
+    asked = {b.ent for k, b in ex if k == "Q" and (b.ent, b.attr) != key}     # G-2: earlier questions' entities
+    sts, seeds = [s for k, b in ex if k == "S" for s in b], hold | {key[0]}
+
+    def joins(e, a):        # G-2: the pad (e, a) puts an asked entity in the final key's component
+        return bool(component([sts + [I.St("full", e, a, -1)]], seeds) & asked)
     pads = []
     for v in vals:
         e, a = int(r.integers(0, names_k)), int(r.choice(g.attrs))
@@ -218,7 +256,12 @@ def _pad(ex, key, names_k, g, r, target):
             a = a if (e, a) != key else int(r.choice([x for x in g.attrs.tolist() if x != key[1]]))
         if a == key[1] and e not in hold:
             a = int(r.choice([x for x in g.attrs.tolist() if x != key[1]]))
+        if asked and joins(e, a):
+            ok = [(x, y) for x in range(names_k) for y in g.attrs.tolist()
+                  if (x, y) != key and (y != key[1] or x in hold) and not joins(x, y)]
+            e, a = ok[int(r.integers(0, len(ok)))]
         pads.append(("S", [I.St(Fm._form(r), e, a, v)]))
+        sts.append(pads[-1][1][0])
     return ex[:last + 1] + pads + ex[last + 1:]
 
 
@@ -250,7 +293,9 @@ def make_item(g: Gen, fam: str, fl: dict, r, one_q: bool = False) -> I.Item | No
     if fam in ("R", "U"):
         free = sorted({s.ent for u in order for s in u} - {s.ent for u in order for s in u if s.attr == key[1]})
         skip = {int(r.choice(free))} if free else set()
-    ex = _questions(turns, I.Qn(key[0], key[1], fl["qform"]), n_extra, key if fam == "U" else None, r, skip)
+    comp = fam in ("R", "U", "P") or "rctx" in meta     # K3 round 6: questions outside the final key's component
+    ex = _questions(turns, I.Qn(key[0], key[1], fl["qform"]), n_extra, key if fam == "U" else None, r, skip, comp,
+                    place=fam == "P")     # K3 round 6 final: no P redraw for its question count
     if fam == "P" and sum(k == "Q" for k, _ in ex) < (5 if ood == "PLONG" else 2):
         return None             # P: 2-4 questions (PLONG 5-7) though earlier ones skip the final attribute
     if ood == "DFAR":
@@ -278,8 +323,8 @@ def _in_range(it: I.Item, ood) -> bool:
         return False
     d = rec["qs"][-1]["d"]
     lo, hi = (16, 24) if ood == "DFAR" else (0, D_MAX)
-    if "rctx" in it.meta:       # an A both-item keeps its R or U context's range: that key's d (fams.fam_A)
-        a = [b for k, b in it.ex if k == "Q"][-1].attr
+    if "rctx" in it.meta:       # an A both-item keeps its R or U context's range: that key's d (fams.fam_A; K3
+        a = it.meta["cattr"]    # round 7: the context's attribute, which the asked entity, slot 0, states)
         last = max(xi for xi, (k, b) in enumerate(it.ex) if k == "S" and any((s.ent, s.attr) == (0, a) for s in b))
         d = len(it.ex) - 1 - last - 1
     if (it.fam != "A" or "rctx" in it.meta) and not lo <= d <= hi:

@@ -312,3 +312,74 @@ CHANGES BEFORE FIRST RUN (2026-09-27; no K run has started, so this is a pre-reg
      kept set leaves out is listed). The prereg is unchanged: lam is set on seed 201's SPLIT A from {4, 6, 10} and
      frozen only if the fixture sweep on seeds 32-51 (both floor conventions, 2 restarts) finds every set at the pick
      (M1); otherwise the grid value nearest the pick that does is used, logged as a deviation (M1's words).
+  K2-j Mask fit, fresh-seed check (K3 round 5, 2026-10-02; the round-4 tests lens re-run; Mac CPU, tiny fixture model;
+     code/notes.txt K3 ROUND 5). No fit or default changed. Fresh seeds 500-519, never used to choose or check
+     (tests/mask_sweep.py OUT --seeds 500 ... 519 --floors k2 default --procs 3; fit's defaults: 2,000 steps, lam 6 per
+     budget unit, init 0.0, 2 restarts; 400 fits): 400 of 400 planted sets found on both floor conventions; single runs
+     798 of 800 (MX-SF seed 519 on the default floors missed in its first run, MX-SS seed 500 on K2's in its second; the
+     other run kept each time); planted units 0.598 or more on K2's floors and 0.589 on the default ones; other units at
+     most 0.175 on K2's floors. On the default floors one unplanted unit passed P(closed) 0.5: MX-SF seed 504, the
+     shared unit X (fact F5 and skill S3) at 0.598 against F4's 0.619, both runs hardening the planted set (SF 4.015). X
+     is the unit SF's selectivity rests on (K2-e), so the hardened set held but its margin over X was 0.021; K2 reports
+     the hardened top-b set, M1's freeze rule reads found sets, and M3's single-unit scan lists X's own effects, so no
+     rule changes (0.598 is the highest unplanted P(closed) any sweep has reported; 0.375 before, K2-h). On never-used
+     seeds (160-179, 300-319, 400-411, 500-519) fits with 2 restarts found 1,440 of 1,440 sets and single runs missed 9
+     of 2,880 (0.31%); the documented miss rate stays the single-run one squared for independent restarts, M3's
+     single-unit scan the stated backstop. The prereg is unchanged: lam set on seed 201's SPLIT A from {4, 6, 10},
+     frozen only if the fixture sweep on seeds 32-51 (both floors, 2 restarts) finds every set at the pick (M1), else
+     the nearest grid value that does, logged as a deviation; the fixture reads lam on SPLIT A's scale because the
+     penalty is per budget unit (K2-f).
+  K2-k Mask fit, fresh-seed check (K3 round 6, 2026-10-03; Mac CPU, tiny fixture model; code/notes.txt K3 ROUND 6).
+     No fit or default changed. Fresh seeds 940-959, never used to choose or check (tests/mask_sweep.py OUT --seeds
+     940 ... 959 --floors k2 default --procs 2; fit's defaults: 2,000 steps, lam 6 per budget unit, init 0.0, 2
+     restarts; 400 fits, 1,670 s, median fit 8.1-8.3 s): 400 of 400 planted sets found on both floor conventions; single
+     runs 796 of 800 (each a second run: KF4 and MX-KF seed 948 and MX-KF seed 956 on the default floors, MX-SS seed
+     940 on K2's; the first run kept each time); planted units 0.588 or more on K2's floors and 0.590 on the default
+     ones; other units at most 0.173 on K2's floors and 0.278 on the default ones, none over 0.5. The round-6 draft's
+     sweep on seeds 900-919 was stopped at 356 of 400 fits: 356 found, 1 single-run miss (KF4 seed 900, default
+     floors, first run). On never-used seeds (160-179, 300-319, 400-411, 500-519, REVIEW 7b's 801-820, 940-959) fits
+     with 2 restarts found 2,240 of 2,240 sets and single runs missed 16 of 4,480 (0.36%); the documented miss rate
+     stays the single-run one squared for independent restarts (about 1 in 80,000), M3's single-unit scan the stated
+     backstop. The prereg is unchanged: lam set on seed 201's SPLIT A from {4, 6, 10}, frozen only if the fixture
+     sweep on seeds 32-51 (both floors, 2 restarts) finds every set at the pick (M1), else the nearest grid value
+     that does, logged as a deviation; the fixture reads lam on SPLIT A's scale because the penalty is per budget
+     unit (K2-f), so the tuned value is checked on the fixture at that same value. K3 round 6 changed the R, U, P and
+     A skill items (SPEC 4: one law for every key), so K2-A's and K2-B's skill records are new; K2's method, splits'
+     sizes and seeds did not change.
+  K2-l Mask fit, fresh-seed check (K3 round 7, 2026-10-04; Mac CPU, tiny fixture model; code/notes.txt K3 ROUND 7).
+     No fit or default changed. Fresh seeds 1311-1330, never used to choose or check (tests/mask_sweep.py OUT --seeds
+     1311 ... 1330 --floors k2 default --procs 2; fit's defaults: 2,000 steps, lam 6 per budget unit, init 0.0, 2
+     restarts; 400 fits, 2,088 s, median fit 9.3 s on K2's floors and 8.6 s on the default ones): K2's floors 200 of
+     200 sets, 400 of 400 runs, planted units 0.549 or more, other units at most 0.184; default floors 199 of 200
+     sets: MX-KF seed 1320 missed with both restarts (planted unit at P(closed) 0.0003, unit (0, 1) taken instead of
+     (2, 5), other units up to 0.355), and single runs missed MX-KS seeds 1325 and 1330 (first run; the second kept),
+     so 396 of 400 runs; found planted units 0.542 or more, other units at most 0.392. The first full miss on a
+     never-used seed. The same fit with 4 restarts found the set at restarts 3 and 4 (planted 0.907, others at most
+     0.083); with 4,000 steps and 2 restarts it missed again (P(closed) 0.0), so the miss is a start that both default
+     restarts share, not too few steps. The two restarts are therefore not independent and "the single-run rate
+     squared, about 1 in 80,000" (K2-k) is withdrawn. The documented rate is the observed one: on never-used seeds
+     (160-179, 300-319, 400-411, 500-519, 801-820, 940-959, REVIEW 8b's 1231-1250, 1311-1330) 3,039 of 3,040 sets
+     with 2 restarts (0.03%; 0 of 1,520 on K2's floors, 1 of 1,520 on the default ones, MX-KF), single runs missed
+     27 of 6,080 (0.44%). M3's single-unit scan stays the stated backstop for any mask miss (a unit M3 ranks in the
+     top b that the SF or KF set leaves out is listed). The prereg is unchanged: lam set on seed 201's SPLIT A from
+     {4, 6, 10}, frozen only if the fixture sweep on seeds 32-51 (both floors, 2 restarts) finds every set at the
+     pick (M1), else the nearest grid value that does, logged as a deviation; the fixture reads lam on SPLIT A's
+     scale (the penalty is per budget unit, K2-f). Raising the default to 4 restarts would have found this set; it
+     doubles every mask fit's cost and was not adopted without a sweep of its own. K3 round 7 changed A's both-items
+     only (SPEC 4 A: A_CTX R 3/8; U contexts' asked entity), so K2-A's and K2-B's A records are new; K2's method,
+     splits' sizes and seeds did not change.
+  K2-m Mask fit, fresh-seed check (K3 round 8, 2026-10-04; Mac CPU, tiny fixture model; code/notes.txt K3 ROUND 8).
+     No fit or default changed. Fresh seeds 2101-2120, never used to choose or check (tests/mask_sweep.py OUT --seeds
+     2101 ... 2120 --floors k2 default --procs 2; fit's defaults: 2,000 steps, lam 6 per budget unit, init 0.0, 2
+     restarts; 400 fits, 1,731 s wall, median fit 8.1 s on K2's floors and 8.4 s on the default ones): 400 of 400
+     planted sets found (200 of 200 on each floor convention). Single runs: 400 of 400 on K2's floors, 397 of 400 on
+     the default ones (MX-KF seeds 2105 and 2106 and MX-KS seed 2113 missed their first run; the second run was kept
+     each time). Planted units 0.592 or more (K2's floors) and 0.581 (default), other units at most 0.145 and 0.282,
+     none over 0.5. With the never-used seeds before (K2-l's list and REVIEW 9b's 1661-1680): 3,839 of 3,840 sets
+     with 2 restarts (0.03%: 0 of 1,920 on K2's floors, 1 of 1,920 on the default ones, MX-KF seed 1320), single runs
+     missed 33 of 7,680 (0.43%). The documented rate and the backstop stand as K2-l states them (M3's single-unit
+     scan lists any unit it ranks in the top b that an SF or KF set leaves out); the prereg's lam rule is unchanged
+     (set on seed 201's SPLIT A from {4, 6, 10}, frozen only if the fixture sweep on seeds 32-51 finds every set at
+     the pick, the fixture reading lam on SPLIT A's per-budget scale). K3 round 8 changed F's items only (SPEC 4 F:
+     the key's and the foil's antecedents of one attribute on ellipsis items), so K2-A's and K2-B's F records are new;
+     K2's method, splits' sizes and seeds did not change.

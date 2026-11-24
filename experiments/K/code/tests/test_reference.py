@@ -63,6 +63,39 @@ def test_reference_oracles_on_handmade_items():
     assert pat == (("E", "O"), 0)
 
 
+
+def test_o7_and_o8_on_handmade_items():
+    """K3 round 14 (REVIEW 15b T-7): O7 (the value most frequent in the prompt, ties to the latest) and O8 (the
+    statement before the last) pinned by hand; no handmade item read them before (mutants r15_o7_tie_earliest,
+    r15_o8_reads_last, r14_o7_reads_last). N0 a0 v0, N1 a0 v1, N0 a1 v0, N1 a1 v1, asking N0 a1: v0 and v1 tie at 2,
+    v1 occurs last, so O7 is v1; O8 is v0, the third statement. Then v2 twice and v0, v1 once each, v1 last: O7 v2."""
+    n0, n1, (a0, a1), v, _ = _tok()
+    it = I.Item("F", [n0, n1], [("S", [St("full", 0, a0, v[0]), St("full", 1, a0, v[1])]),
+                                ("S", [St("full", 0, a1, v[0]), St("full", 1, a1, v[1])]), ("Q", Qn(0, a1, 0))])
+    ans, _, gold = _answers(it)
+    assert (gold, ans["O7"], ans["O8"]) == (v[0], v[1], v[0]), (ans["O7"], ans["O8"], v[:3])
+    it = I.Item("F", [n0, n1], [("S", [St("full", 0, a0, v[2]), St("full", 1, a0, v[0])]),
+                                ("S", [St("full", 1, a1, v[2]), St("full", 0, a1, v[1])]), ("Q", Qn(0, a1, 0))])
+    ans, _, gold = _answers(it)
+    assert (gold, ans["O7"], ans["O8"]) == (v[1], v[2], v[2]), (ans["O7"], ans["O8"], v[:3])
+
+
+def test_o6_on_a_handmade_item():
+    """K3 round 15 (REVIEW 16b T-5): O6 (the last statement of the last statement turn) by hand, REVIEW 15b T-7's
+    class (mutant r16_o6_first_of_turn reads that turn's first statement). N0 a0 v0 | N1 a0 v1, N0 a1 v2, N1 a1 v3,
+    asking N0 a1: O6 is v3, the turn's first statement v1; one statement per turn gives v1 too."""
+    n0, n1, (a0, a1), v, _ = _tok()
+    it = I.Item("F", [n0, n1], [("S", [St("full", 0, a0, v[0])]),
+                                ("S", [St("full", 1, a0, v[1]), St("full", 0, a1, v[2]), St("full", 1, a1, v[3])]),
+                                ("Q", Qn(0, a1, 0))])
+    ans, _, gold = _answers(it)
+    assert (gold, ans["O6"]) == (v[2], v[3]), (ans["O6"], v[:4])
+    it = I.Item("F", [n0, n1], [("S", [St("full", 0, a0, v[0]), St("full", 0, a1, v[2])]),
+                                ("S", [St("full", 1, a0, v[1])]), ("Q", Qn(0, a1, 0))])
+    ans, _, gold = _answers(it)
+    assert (gold, ans["O6"]) == (v[2], v[1]), (ans["O6"], v[:4])
+
+
 def test_surf_is_cross_fitted():
     alt = [{"pat": ("E", "A"), "gidx": i % 2} for i in range(8)]
     assert U.surf(alt) == 0.0                      # an in-sample fit would score 0.5 here
@@ -358,3 +391,122 @@ def test_f_ante_reported_oracle_on_a_handmade_item():
                                 ("S", [St("full", 1, a1, v[2]), St("ell", 1, a0, v[3])]), ("Q", Qn(0, a0, 0))])
     ans, _, gold = _answers(it)
     assert gold == v[5] and ans["O11"] == v[3] and ans["F-ANTE"] == v[5] and "F-ANTE" not in O.TH
+
+
+def _antesize_item(foil_ante=None, key_a1=True, foil_pre=None):
+    """K3 round 8 (REVIEW 9a G-1): a stale named key statement, then the key's ellipsis after a statement of a2 and the
+    foil's after one of a1 (foil_ante: another attribute there); the key states a1 too unless key_a1 is False. K3
+    round 10 (REVIEW 11b T-4, T-5): foil_pre, an attribute the foil states once more, right after the stale one."""
+    n0, n1, _, v, _ = _tok()
+    a0, a1, a2 = (int(x) for x in pools()["A"][:3])
+    ex = [("S", [St("full", 0, a0, v[5])])] + ([("S", [St("full", 1, foil_pre, v[6])])] if foil_pre else []) + (
+        [("S", [St("full", 0, a1, v[0])])] if key_a1 else []) + [
+        ("S", [St("full", 0, a2, v[1]), St("ell", 0, a0, v[2])]),
+        ("S", [St("full", 1, foil_ante or a1, v[3]), St("ell", 1, a0, v[4])]), ("Q", Qn(0, a0, 0))]
+    return I.render(I.Item("F", [n0, n1], ex), "F.b0.i0"), v
+
+
+def test_f_antesize_on_handmade_items():
+    """K3 round 8 (REVIEW 9a G-1): F-ANTESIZE, barred on F at SURF's 0.65 (an F ceiling row, check_k): with c the
+    statements of the attribute of the statement before each ellipsis, the smaller c when the asked name states two
+    or more other attributes, the larger with one; ties a tuple. Key's antecedent a2 (1 statement), foil's a1 (2):
+    the asked name states a1 and a2, so the key's (the gold); without the key's a1 statement it states a2 only and c
+    ties (1 and 1); with both antecedents of a2 (BD-48's design) c ties. K3 round 10 (REVIEW 11b T-4): the branch
+    for one other attribute decides on unequal counts: the asked name states a2 only and the foil states a2 (the
+    key's antecedent's c 2 against 1: the key's) or a1 (1 against 2: the foil's) once more (mutant
+    m11_antesize_smaller_only: always the smaller c)."""
+    rec, v = _antesize_item()
+    st, qs, _ = O.parse(rec, lex())
+    ans = O.answers(st, qs[-1], O.prompt_of(rec, qs[-1]["turn"]), lex())
+    assert qs[-1]["gold"] == v[2] and ans["F-ANTESIZE"] == v[2] and O.TH["F-ANTESIZE"] == ("F", .65), ans
+    for kw in ({"key_a1": False}, {"foil_ante": int(pools()["A"][2])}):
+        rec, v = _antesize_item(**kw)
+        st, qs, _ = O.parse(rec, lex())
+        assert O.answers(st, qs[-1], O.prompt_of(rec, qs[-1]["turn"]), lex())["F-ANTESIZE"] == (v[2], v[4]), kw
+    a0, a1, a3 = (int(x) for x in pools()["A"][[0, 1, 3]])
+    rec, v = _antesize_item(foil_ante=a3)       # foil's antecedent a3 (1 statement): c ties again (1 and 1)
+    st, qs, _ = O.parse(rec, lex())
+    assert O.answers(st, qs[-1], O.prompt_of(rec, qs[-1]["turn"]), lex())["F-ANTESIZE"] == (v[2], v[4])
+    a2 = int(pools()["A"][2])       # K3 round 10 (REVIEW 11b T-4): one other attribute (a2), unequal counts
+    for pre, want in ((a2, 2), (a1, 4)):        # c(a2) 2 > c(a1) 1: the key's; c(a2) 1 < c(a1) 2: the foil's
+        rec, v = _antesize_item(key_a1=False, foil_pre=pre)
+        st, qs, _ = O.parse(rec, lex())
+        S_, q = st[:qs[-1]["n"]], qs[-1]
+        assert {s["attr"] for s in S_ if s["name"] == q["name"] and s["attr"] != q["attr"]} == {a2}, pre
+        assert q["gold"] == v[2] and O.answers(st, q, O.prompt_of(rec, q["turn"]), lex())["F-ANTESIZE"] == v[want], (
+            pre, want, O.answers(st, q, O.prompt_of(rec, q["turn"]), lex())["F-ANTESIZE"], v)
+
+
+def test_f_antecedents_state_one_attribute(monkeypatch):
+    """K3 round 8 (REVIEW 9a G-1, BD-48): on F's ellipsis items the key's and the foil's antecedents state one
+    attribute, from tokens (purity's per-item rule), so F-ANTESIZE ties on every reference item and reads the design's
+    0.625 exactly (O4's late quarter, a coin elsewhere). Round 7's draw (antecedent attributes drawn apart,
+    tests/oldfams.fam_F_r7) fails the rule, and F-ANTESIZE decides there on reference items (0.636 on 81,920 fresh
+    items in REVIEW 9a; mutants f_ante_apart, f_ante_rule_off)."""
+    import fams as Fm
+    import oldfams
+
+    def run(seed):
+        recs = [I.render(it, f"F.b{b}.i{i}") for b in range(2)
+                for i, it in enumerate(S.block(S.Gen(pools(), "train"), "F", 512, (91, ord("F"), seed + b)))]
+        facts = [U.item_facts(r, lex()) for r in recs]
+        decided = sum(not isinstance(f["ans"]["F-ANTESIZE"], tuple) for f in facts if not f["key_named"])
+        return U.accept(recs, pools(), "train", lex(), block=512), facts, decided
+    rep, facts, decided = run(40)
+    ell = [f for f in facts if f["ante_same"] is not None]
+    assert rep["fails"] == [] and len(ell) == 512 and all(f["ante_same"] for f in ell), rep["fails"]
+    assert rep["oracles"]["F"]["F-ANTESIZE"] == 0.625 and decided == 0, (rep["oracles"]["F"], decided)
+    monkeypatch.setattr(Fm, "fam_F", oldfams.fam_F_r7)
+    rep, facts, decided = run(40)
+    assert any("F items: the two ellipses' antecedents state different attributes" in x for x in rep["fails"]), (
+        rep["fails"])
+    assert decided > 100, decided
+
+
+def test_f_ante_rule_fails_one_planted_item(monkeypatch):
+    """K3 round 9 (REVIEW 10b T-3): BD-48's per-item rule fails a block on one breaking item, as SPEC 5 asks of each
+    check, not only on round 7's whole draw. A 512-item block of the current draw with one item replaced by round 7's
+    item at the same place (tests/oldfams.fam_F_r7; skill.block draws the block's flags before any item, so the item
+    carries the same flags) whose two ellipses' antecedents state different attributes fails purity.accept with that
+    rule's line alone (mutant f_ante_rule_rate: the rule fails only past 1/8 of the checked items)."""
+    import fams as Fm
+    import oldfams
+    seed = (91, ord("F"), 40)
+    cur = [I.render(it, f"F.b0.i{i}") for i, it in enumerate(S.block(S.Gen(pools(), "train"), "F", 512, seed))]
+    monkeypatch.setattr(Fm, "fam_F", oldfams.fam_F_r7)
+    old = [I.render(it, f"F.b0.i{i}") for i, it in enumerate(S.block(S.Gen(pools(), "train"), "F", 512, seed))]
+    monkeypatch.undo()
+    j = next(i for i, r in enumerate(old) if U.item_facts(r, lex())["ante_same"] is False)
+    assert U.item_facts(cur[j], lex())["ante_same"] is True and old[j]["meta"] == cur[j]["meta"], j
+    rep = U.accept(cur[:j] + [old[j]] + cur[j + 1:], pools(), "train", lex(), block=512)
+    assert rep["fails"] == ["1 F items: the two ellipses' antecedents state different attributes"], (j, rep["fails"])
+    # K3 round 14 (REVIEW 15b T-8): the same item in an OOD-sized set (256 records around it) read with rules off,
+    # as gen.py check reads the OOD columns: the per-item rule fails it there too (mutant
+    # r15_ood_rules_skip_ellipsis_ante reads BD-48 only on sets over 300 records)
+    lo = min(max(0, j - 128), 512 - 256)
+    ood = cur[lo:j] + [old[j]] + cur[j + 1:lo + 256]
+    assert len(ood) == 256 and U.accept(cur[lo:lo + 256], pools(), "train", lex(), rules=False)["fails"] == []
+    rep = U.accept(ood, pools(), "train", lex(), rules=False)
+    assert rep["fails"] == ["1 F items: the two ellipses' antecedents state different attributes"], (j, rep["fails"])
+
+
+def test_oracle_bars_are_spec_5s():
+    """K3 round 16 (2026-11-21, REVIEW 17b): oracles.TH, every barred rule's families and bar, against SPEC 5's
+    Thresholds paragraph read line by line (and [K3r2] to [K3r8]); GROUP_TH is the B cube-group bar. Six bars had no
+    pin of their own: loosening O2, O1, O4, O6-O8, O9/O10 or B's O3 bars survived test_reference.py on the ported
+    tree (mutants r17_o2_bar_loose, r17_o1_bar_loose, r17_o4_bar_loose, r17_o678_bars_loose, r17_o9_bars_loose,
+    r17_o3_bars_loose; r17_o2_bar_loose survived its five named files too, REVIEW 17b on 2026-10-12).
+    test_reference_thresholds already caught r17_o13_bars_loose, r17_o14e_bar_loose and r17_surfa_bar_loose (corrected
+    2026-11-22). The key set is pinned too: a new barred rule enters here on purpose."""
+    want = {**{o: ("RUBFAP", .50) for o in ("O2", "O6", "O7", "O8")}, "O1": ("U", .50),
+            **{o: ("RUFP", .65) for o in ("T", "TA-SHARE", "TA-REP", "TA-CNT", "TA-SHREP")},
+            **{o: ("A", .50) for o in ("O9", "O10", "O9|10")}, "O4": ("F", .35),
+            **{o: ("RUBFAP", .65) for o in ("O5_1", "O5_2", "O5_3")},
+            **{o: ("B", .65) for o in ("O3_1", "O3_2", "O3_3", "O3_12", "O3_13", "O3_23")},
+            **{o: ("F", .50) for o in ("O11", "O11|2", "O12", "O12p")}, "O13e": ("F", .75), "O13a": ("F", .75),
+            **{o: ("F", .65) for o in ("O14e", "O14a", "SURF", "F-INTRO", "F-DEFX", "F-ANTESIZE")},
+            "SURFe": ("F", .85), "SURFa": ("F", .85),
+            **{o: ("B", .65) for o in ("B-CENTER", "B-TOKFREQ", "B-MAJOR", "B-ADAPT", "B-FRAME", "B-SURPRISE")},
+            "R-POST": ("RP", .65), "U-TIGHTSPAN": ("RUP", .65)}
+    assert O.TH == want, {k: (O.TH.get(k), want.get(k)) for k in set(O.TH) | set(want) if O.TH.get(k) != want.get(k)}
+    assert O.GROUP_TH == .125

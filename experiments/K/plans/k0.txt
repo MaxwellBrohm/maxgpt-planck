@@ -1,0 +1,11 @@
+train k0_smoke_s200
+train k0_smoke_off_s200
+train k0_smoke_rep_s200
+wait_mark K K0-smoke passed
+train k0g_g0p5_s199
+train k0g_g1_s199
+train k0g_g2_s199
+train k0g_g0p5_s200
+train k0g_g1_s200
+train k0g_g2_s200
+mark K0-g grid done: read k0read.py, then k0x or k1

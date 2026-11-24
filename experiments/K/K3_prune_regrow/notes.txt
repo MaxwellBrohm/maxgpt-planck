@@ -15,7 +15,8 @@ WHY
   - Removal mostly blocks access: fine-tuning on some facts recovers at least 88% of the rest at 8B (Deeb and Roger,
     https://arxiv.org/abs/2410.08827), hence the relearning probe below.
   - Unlearning costs small models more (Jang et al., ACL 2023, GPT-Neo 125M-2.7B, arXiv 2210.01504), and removal in
-    4 sequential chunks hurt far less than all at once; K3 prunes once (a staged prune is not an arm here).
+    4 sequential chunks hurt far less than all at once; K3 prunes once (a staged prune is not an arm here; [G-2]
+    K3-X's P-F4 is).
   - Resetting parts of a network can restore plasticity: embedding resets every 1000 steps (Chen et al.,
     https://arxiv.org/abs/2307.01163) keep structural ICL where L2 does not (Anand et al.,
     https://arxiv.org/abs/2406.00053), so part of any gain may be generic re-initialization: the P-R arm.
@@ -82,7 +83,8 @@ EXTRA REPORTS (descriptive)
     the facts were hidden, not freed. Reported as numbers; R2 accuracy at zero is not taken as removal.
   5 Weight movement: the norm of each reset unit's rows at the end, P-F against P-R (did the freed units get used?).
 
-K3-R (conditional, SPEC 13 order: route-then-cut, the training-time version of Max's idea)
+K3-R (SPEC 13 order; [S16] always run, conditional on hours until S16: route-then-cut, the training-time version
+  of Max's idea)
   From scratch with the FH config plus train.grad_route: 25% of each layer's MLP units (the last 122 of 488) are a
   reserved block. Tokens whose target comes from a FACT-source item (bio docs; fact QA answers) send MLP gradient
   only through the reserved block, all other tokens only through the rest (per-token stop-gradient masks, gradient
@@ -92,9 +94,67 @@ K3-R (conditional, SPEC 13 order: route-then-cut, the training-time version of M
   with KR (delta 3): R-cut EQUAL or HIGHER than F0-cont reads ROUTING-MATCHES-NEVER-FACT. The retain cost scales
   with the routed share (Cloud et al.), so R-cut's pre-cut S_ID against FH's is reported.
 
+K3-X ([G-2] 2026-10-11, written before any K run: no K config, data file, smoke, queue or result exists. The four
+  arm sets that NOT IN K3 left out only because the cap had no room, research/CUTS_AUDIT_2026-10.md row 132, under
+  Max's rule that no bet is dropped for budget alone. Registered as K3's arms are: always run, seeds 201-203, rule
+  KR, each with its consequence; not conditional on K3's readings (row 132's LATER trigger, "K3's P-F reads a gain",
+  was a scheduling choice under the cap). SPEC 13 order: after K4b.)
+  ARMS. P-F4, P-M and P-SP continue from that seed's K1 FH final with K3's CONTINUATION (62.5M slots, schedule, LR,
+  fresh optimizer state, files, stream seed s + 1000) and P-F's count n_p per layer (K2 HANDOFF).
+  P-F4   staged reset (Jang et al.: removal in 4 sequential chunks hurt far less than all at once): P-F's units dealt
+         into 4 chunks, each layer's units in a seeded order (generator seed 7800 + s) dealt round-robin; chunk i
+         reset at continuation step 477 i (0, 477, 954, 1,431; 1,908 / 4) as RESET AND REGROW (generator seed 7700 +
+         s, chunks in order), the reset units' slices of every optimizer state set to zero.
+  P-M    magnitude prune (Jin et al.'s baseline, research/localize.md 2.3): in each layer the n_l units of least
+         magnitude, n_l = P-F's count in that layer, magnitude = the product of the L2 norms of the unit's W_gate row,
+         W_up row and W_down column on the FH final checkpoint (ties to the lower index); reset as P-F. Matched per
+         layer, not global, so C6 differs from P-F only in which units of a layer are chosen.
+  P-SP   shrink-and-perturb of the whole model (Ash and Adams, localize.md 2.6: the plasticity control): every matrix
+         model.py draws (Linear and Embedding weights) becomes (1 - p) x W + p x W', W' a fresh draw of its harness
+         init (generator seed 7900 + s); norms and scalars unchanged. One p per seed, set so the change's Frobenius
+         norm over all matrices equals P-F's reset at that seed (p = ||change of P-F|| / ||W' - W||): a perturbation
+         as large as P-F's, spread over the model instead of placed on fact units. No p is tuned.
+  R-per  periodic resets during training (active forgetting: Anand et al. reset the embedding matrix every 1,000
+         steps, a period chosen there from 100, 1,000 and 5,000, after Chen et al.; capacity.md 3): K3-R's run (FH
+         config plus train.grad_route, the reserved last 122 units per layer) with the reserved block reset every
+         1,000 steps (steps 1,000 to 7,000: 7 resets) as RESET AND REGROW (generator seed 8000 + s, resets in
+         order), its optimizer slices zeroed, then K3-R's cut and continuation. Max's overwrite done repeatedly
+         during training, on a block that holds the facts by construction.
+  READINGS (KR, SPEC 10, on S_ID after the continuation; contrasts C5-C8, SD_ref pooled over them, df 8; delta 3
+  points; Holm over every K contrast as SPEC 10; K3's C1-C4 and their pool are unchanged. K3 round 14,
+  2026-10-11, REVIEW 15b N-1: C5-C8 enter that Holm reading, so every K contrast's printed Holm line is taken over
+  them too; raw verdicts decide, so no decision moves)
+  Q4 Does staging the fact-unit reset change skill? C5 P-F4 - P-F: STAGED-HELPS (HIGHER), STAGED-HURTS (LOWER),
+     STAGED-EQUAL (EQUAL), else UNRESOLVED. P-F4 - P-0 is reported. Consequence: STAGED-HELPS says a one-shot reset
+     understates the method and any Planck use of fact-unit regrowth stages it; STAGED-EQUAL or STAGED-HURTS leaves
+     the one-shot reset as registered.
+  Q5 Does K2's fact selection beat the classic magnitude criterion? C6 P-F - P-M: SELECTION-WINS (HIGHER),
+     MAGNITUDE-WINS (LOWER), SELECTION-EQUAL (EQUAL), else UNRESOLVED. Step-0 guard as K3-a, both ways: C6 is read
+     only if P-M's step-0 S_ID is within 3 points of P-F's (mean over seeds), else STEP0-CONFOUND and reported.
+     Consequence: SELECTION-WINS says K2's localization earns its cost; SELECTION-EQUAL or MAGNITUDE-WINS says a
+     cheap criterion does as well, so a Planck version of the idea needs no fact localization.
+  Q6 Is a gain from the target or from the perturbation's size? C7 P-F - P-SP: TARGET-WINS (HIGHER), PERTURB-WINS
+     (LOWER), TARGET-EQUAL (EQUAL), else UNRESOLVED; the same step-0 guard. Consequence: TARGET-WINS supports a
+     fact-unit mechanism beyond plasticity (with C2's random units, a second control); TARGET-EQUAL or PERTURB-WINS
+     reads the gain as plasticity from a perturbation of that size (Ash and Adams' account), which a Planck model
+     would get from whole-model shrink-and-perturb without K2.
+  Q7 Does forgetting the fact block repeatedly during training add to cutting it once? C8 R-per - R-cut:
+     REPEAT-HELPS (HIGHER), REPEAT-HURTS (LOWER), REPEAT-EQUAL (EQUAL), else UNRESOLVED; R-per against F0-cont is
+     reported with ROUTING-MATCHES-NEVER-FACT's rule. Consequence: REPEAT-HELPS says a Planck route-then-cut resets
+     its fact block periodically; else one cut stands.
+  EXTRA REPORTS: K3's 1-5 for P-F4, P-M and P-SP (P-F4's step 0 is its first chunk's); for R-per, K3-R's pre-cut
+  S_ID against FH's and BIO_acc before and after each reset.
+  CODE before K3-X's first run (SPEC 14 [G-2]): a reset hook in ktrain.py's k: block, prune.py's magnitude selection
+  and shrink-and-perturb, each with tests watched failing on mutants.
+  KNOWN RISKS: P-F4's last chunk retrains for 477 steps, 382 of them in the decay, so STAGED-HURTS may be a
+  short-retraining effect (K-PROBE curves show it); a norm-matched p is small when n_p is small, so P-SP may be a
+  weak perturbation (p is reported per seed); R-per's resets inside the decay (7,000 of 7,630) leave the block 630
+  steps before the cut.
+
 NOT IN K3, WITH REASON
-  Staged prunes (Jang's 4 chunks), shrink-and-perturb of the whole model (Ash and Adams), magnitude pruning (Jin et
-  al.'s baseline) and periodic resets during training: each is one more arm set; the cap (SPEC 13) has no room.
+  [G-2: the staged prunes, shrink-and-perturb, magnitude pruning and periodic resets listed here until G-2 ("each is
+  one more arm set; the cap (SPEC 13) has no room"; S16 and G-1 left them for their own pre-registration) are K3-X
+  above.]
   Head resets: K2 may name fact heads, but a head reset changes a whole attention slice; K3 stays on MLP units.
 
 KNOWN RISKS
@@ -110,8 +170,11 @@ DEPENDENCIES
   prune.py (tests: a reset unit's output is exactly zero at step 0; untouched parameters bitwise equal; the same seed
   gives the same draws; mutant: W_down left non-zero) and the weights-only start with fresh optimizer state.
 
-GPU HOURS (SPEC 13): 15 continuations x 0.10 (62.5M plus scoring) + relearning probes 0.15 = 1.65; K3-R 1.30 if
-  reached under the cap (3 x (0.31 x 1.05 from scratch + 0.10 continuation), speed factor assumed).
+GPU HOURS (SPEC 13): 15 continuations x 0.10 (62.5M plus scoring) + relearning probes 0.15 = 1.65; K3-R 1.30
+  (3 x (0.31 x 1.05 from scratch + 0.10 continuation) = 1.28, speed factor assumed), [S16] always run; until S16
+  "if reached under the cap".
+  [G-2] K3-X 2.27: P-F4, P-M, P-SP 9 continuations x 0.10 + 9 relearning probes x 0.01 = 0.99; R-per 3 x (0.31 x
+  1.05 + 0.10) = 1.28 (K3-R's formula). Estimates only.
 
 CHANGES AFTER CRITIQUE (2026-09-27, adversarial critic; no model loaded, nothing run for these edits)
   Fairness checked: P-0, P-F, P-R, P-S and F0-cont get the same continuation (62.5M slots, schedule, LR, fresh

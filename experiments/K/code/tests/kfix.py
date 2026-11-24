@@ -35,7 +35,7 @@ def tiny_model(seed: int = 0, vocab: int = 97, scramble: bool = True, **kw):
     return m.eval()
 
 
-def old_questions(turns, final, n_extra, lure_key, r, skip=()):
+def old_questions(turns, final, n_extra, lure_key, r, skip=(), comp=False, place=False):
     """skill._questions before K3 round 4: every stated key of another attribute, holders and the final entity
     included (REVIEW 5a S-1's QFIT: R 0.683, P 0.707). For planted-break tests (test_skill, test_cues)."""
     import items as I

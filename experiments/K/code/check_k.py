@@ -13,6 +13,9 @@ import purity as U
 
 EVAL_SPLIT = {"k_eval_id": "eval", "k_eval_s": "evals", "k_dev": "eval", "k_probe": "eval", "k2_a": "eval",
               "k2_b": "eval"}
+CHECK_CODE = ("check_k.py", "cuegate.py", "cues.py", "purity.py", "oracles.py", "pools.py", "world.py", "kcommon.py")
+#   K3 round 15 (2026-10-12, REVIEW 16b N-1): check.json records the sha256 of every module the check runs, so a pass
+#   names the gate that produced it (check_k, cuegate and cues were in no manifest); no rule reads it
 
 
 def fact_purity(root: str, pl) -> dict:
@@ -69,6 +72,31 @@ def fact_purity(root: str, pl) -> dict:
     return rep
 
 
+MARKS = ("O13e", "O13a", "O14e", "O14a", "SURFe", "SURFa")     # F's one-kind rules: skill marks, not cheap readers
+
+
+def ceilings(out: dict) -> dict:
+    """K3 round 7 (REVIEW 8a G-1): SPEC 9 reads each family's LIK against its ceiling, the largest of the fitted models
+    (the gate's name-blind ceiling and the attribute-blind TA model's) and of the cheap rules barred on that family
+    (oracles.TH, but MARKS, which resolve one of F's reference kinds) on the same set. U-TIGHTSPAN read about 0.60 on
+    U against the gate's 0.555 (REVIEW 8a), so a fitted ceiling alone could sit under a rule's reading. -> {fam: {set:
+    {"value", "from", "gate", "ta", "rule", "rule_value"}}} for the training stream ("train") and every eval set."""
+    import oracles as O
+    gate = out["cue_gate"]
+    res = {}
+    for fam, row in gate["ceiling"].items():
+        for sn, g in row.items():
+            tab = out["sets"].get("skill_train" if sn == "train" else sn, {}).get("oracles", {}).get(fam, {})
+            rules = [o for o, (fs, _) in O.TH.items() if fam in fs and o not in MARKS and o in tab]
+            best = max(rules, key=lambda o: tab[o], default=None)
+            ta = gate.get("ta_model", {}).get("ceiling", {}).get(fam, {}).get(sn)
+            cands = [("gate", g)] + ([("ta", ta)] if ta is not None else []) + ([(best, tab[best])] if best else [])
+            top = max(cands, key=lambda c: c[1])
+            res.setdefault(fam, {})[sn] = {"value": top[1], "from": top[0], "gate": g, "ta": ta, "rule": best,
+                                           "rule_value": tab.get(best)}
+    return res
+
+
 def run(root: str, block: int = 512, cues: bool = True) -> dict:
     pl = P.get()
     lex = P.Lex(pl)
@@ -98,6 +126,7 @@ def run(root: str, block: int = 512, cues: bool = True) -> dict:
         import cuegate as G
         out["cue_gate"] = G.run(skill, evsets, lex)
         out["fails"] += [f"cue_gate: {x}" for x in out["cue_gate"]["fails"]]
+        out["ceilings"] = ceilings(out)         # K3 round 7 (REVIEW 8a G-1): SPEC 9's ceiling per family and set
     p = os.path.join(root, "evals", "k_eval_ood.jsonl")
     if os.path.exists(p):
         recs = K.read_jsonl(p)
@@ -109,5 +138,6 @@ def run(root: str, block: int = 512, cues: bool = True) -> dict:
     out["fact_purity"] = fact_purity(os.path.join(root), pl)
     out["fails"] += [f"fact {arm}: {k} {v}" for arm, b in out["fact_purity"].items() for k, v in b.items() if v]
     out["pass"] = not out["fails"]
+    out["code_sha256"] = {c: K.sha256_file(os.path.join(K.HERE, c)) for c in CHECK_CODE}
     K.write_json(os.path.join(root, "check.json"), out)
     return out

@@ -30,16 +30,24 @@ THE ONE MANIPULATION
   stream positions as in FH (SPEC 3, 11). SKILL and LANG tokens, every format, the FACT token count, shape, LR,
   schedule and seeds are identical across arms.
 
-STAGE 0 (K0; shared by K1-K5; seed 200, selection only)
+STAGE 0 (K0; shared by K1-K5; selection only: [G-2] K0-g at seeds 199 and 200, K0-cap at seed 200; seed 200 alone
+  until G-2)
   K0-smoke  The FH config at a tiny budget, labelled smoke, never read: mem_fit ok; tok/s (replaces T in SPEC 13);
             drawn shares within one item per source; drawn FB exposures per probe entity equal E; FACT stream draw
             inside its written length; the K-PROBE hook's bitwise hook-off equality on this data.
-  K0-g      The FH config at g in {0.5, 1, 2} x LR5 (ratio r_5 kept), 125M slots as a full schedule (3,815 steps,
-            warmup 76, linear decay over the last 763: E2's 125M length). g_K = argmin over g of the mean NLL on
-            K-DEV, skill answer tokens and FB value tokens weighted equally; ties at 4 decimals go to the lower LR;
-            one more factor-2 point beyond an edge pick, at most one. g_K serves K1, K3 and K5. 125M, not 250M,
-            is a budget choice: E2 Q3 reports how its optimum moves between 125M and 250M, and if it moves by a
-            full grid step K0-g is labelled LENGTH-RISK in every K report (no rerun: the cap does not allow it).
+  K0-g      The FH config at g in {0.5, 1, 2} x LR5 (ratio r_5 kept), [G-1] 250M slots as a full schedule (7,630
+            steps, warmup 76, linear decay over the last 1,526: SPEC 7's B, the K runs' own length), [G-2] each g
+            at seeds 199 and 200. The objective is the mean NLL on K-DEV, skill answer tokens and FB value tokens
+            weighted equally; [G-2] g_K = argmin over g of its mean over the two seeds; ties at 4 decimals of that
+            mean go to the lower LR; a g diverged at either seed is never picked (SPEC 10 DIVERGENCE); one more
+            factor-2 point beyond an edge pick, at most one, run at both seeds and picked by the same rule; each
+            seed's own argmin is reported, SEED-SPLIT when they differ (analyze_k.pick_g; until G-2 one seed, 200,
+            and the argmin of its NLL). g_K serves K1, K3 and K5. [G-1] Until G-1 (SPEC 16) K0-g ran at 125M
+            (3,815 steps, decay over the last 763: E2's 125M length), "a budget choice", with a 250M rerun only
+            if E2 Q3's optimum moved by a full grid step between 125M and 250M (LENGTH-RISK; [S16] the rerun,
+            before S16 a label "the cap does not allow" a rerun for); E2's Q3 read -0.18 per doubling and the
+            argmin 3e-3 at both lengths, not fired. Under PLAN's policy of 2026-10-11 (the thorough option wins
+            over hours) the pick is made at the length it serves, and LENGTH-RISK is retired with the 125M grid.
   K0-cap    FACT share 1.0 (no SKILL, no LANG), N_cap = 124,000 entities (FB_high plus 62,000 more drawn by the
             same rules), E 100, g_K, 250M, seed 200. R_cap = (expressed value bits + name term, SPEC 9 [C1]) /
             P_used (SPEC 7, P_used about 3.92M), estimated on FB-PROBE plus 4,096 of the extra entities.
@@ -49,6 +57,34 @@ STAGE 0 (K0; shared by K1-K5; seed 200, selection only)
                          at least 50K steps). Every K reading then carries the label and speaks only of the load
                          reached.
             K0-cap decides nothing about skill; it sets the load words every K report may use.
+  [K3r16] 2026-11-21 (K3 ROUND 16, code/notes.txt; written before any K run: no K run is recorded anywhere, the PC
+  was last looked at for K files by REVIEW 16b on 2026-10-12 (none), and no PC access was used this round). How
+  STAGE 0 runs, as built:
+    K0-smoke  three runs of the FH config at g 1, seed 200, 306 steps (two probe readings and a checkpoint):
+              k0_smoke_s200 (probe on), k0_smoke_off_s200 and k0_smoke_rep_s200 (probe off, the second a replay;
+              kconfig.py). DEVIATION K-D1 (numbered, before the run it affects): "bitwise hook-off equality" stays
+              the rule wherever the run repeats; CUDA eager is not bitwise repeatable (SCREENS: two identical runs
+              drift without deterministic algorithms), so when the two probe-off runs differ, the hook passes if
+              every data and schedule field of the log (steps, tokens, drawn per source, lr factor, phase) is equal
+              across the three runs and the probe pair's largest loss gap is at most twice the replay pair's
+              (k0smoke.py). The other lines, each checked: GPU memory (the queue's maximum, at most 11,000 MiB), drawn
+              shares within one item per source, the FACT draw projected to 7,630 steps inside 95% to 100% of each
+              FACT source's written tokens (every FB exposure drawn once, none twice), tok/s and the projected hours
+              of a 7,630-step run with its 50 probe readings (SPEC 13's T; "51" until 2026-11-22, when the port
+              review found the schedule gives 49 multiples of 153 plus step 7,630, as k0smoke.py computes). Never
+              read for science.
+              [2026-11-22, REVIEW 17b] SPEC 13's precondition "the K smoke run passed" is enforced: plans/k0.txt
+              waits after the three smoke runs (queue_k.sh wait_mark, no GPU lock held) for the mark k0smoke.py
+              writes only on a pass (runs/K/marks/K0_smoke_passed); a failing smoke leaves the K0-g grid unstarted.
+    K0-g      the objective as k0read.py computes it: per run, the mean full-vocabulary NLL (nats) of the scored
+              answer token over K-DEV's 1,024 skill items (one per item: its final question's gold) and the same
+              mean over K-DEV's 1,024 FB value prompts, averaged with weight 1/2 each; a diverged run is None, never
+              picked. If "skill answer tokens" was meant as every supervised answer token of an item (earlier
+              questions' answers and acks too), this line is where to say so, before K0-g runs. Configs
+              k0g_g<g>_s<seed>; the pick is analyze_k.pick_g, appended to results/readings.jsonl; K0-cap's and K1's
+              g_K is read by kconfig.py k1 from that file only (never typed in), and only from a final pick.
+              [2026-11-22, REVIEW 17b] A K0-g run is scored on K-DEV alone (SPEC 8: K-DEV is for g picks), so no
+              selection run puts a K-EVAL, FB-PROBE or CONFLICT number on disk; bpb (E2 METRIC) is still scored.
 
 ARMS (paired seeds 201, 202, 203; g_K; B = 250.0M; SPEC 7 mix)
   F0  FACT stream all filler                               nominal 0
@@ -91,14 +127,23 @@ READINGS (KR, SPEC 10; contrasts FH - F0 and FL - F0 on S_ID; SD_ref pooled over
   located in U or B (REPORT limits #1 and #2) or in F shows where it lives. F's LIK is read against its marks
   [K1-e]: 0.625 resolves no reference (its full-form quarter is name matching), 0.81 one reference kind, 1.00
   both; and per reference kind of the key (K-EVAL-ID 256 each): 0.625 without that kind resolved, 1.00 with it.
-  On the ellipsis half, F-ANTE (reported, SPEC 5) reads about 0.66-0.70 through an ellipsis's antecedent's attribute
-  and the asked name's other statements, a partial resolution: a half between 0.625 and about 0.70 may be that [K1-h].
-  Every family's LIK is printed beside its fitted cue-model ceiling on the same file [K1-f to K1-i] (K-EVAL-ID, K3
-  round 4: R 0.65, U 0.59, B 0.20, F 0.65, A 0.50, P 0.60): a LIK at or under it is no evidence of the family's
-  skill. B's LIK
-  is read beside its cube and 2-4 name parts and its cube-group accuracy (all 4 questions of a group right; every
+  On the ellipsis half, F-ANTE (reported, SPEC 5) read about 0.66-0.70 through an ellipsis's antecedent's attribute
+  and the asked name's other statements, a partial resolution [K1-h]. Since K3 round 8 the key's and the foil's
+  antecedents state one attribute, so F-ANTE reads that half whole (it is the ellipsis link itself: K1-e's one-kind
+  mark, about 0.81 on F) and its count shadow F-ANTESIZE, now an F ceiling row, reads the design's 0.625 [K1-m].
+  Every family's LIK is printed beside its ceiling on the same file [K1-f to K1-m]: K3 round 7, check.json
+  "ceilings", the largest of the fitted models (blind to the question's name or to its attribute, A's side with
+  " none") and of the cheap rules barred on the family (K-EVAL-ID, K3 round 8: R 0.45, U 0.59 from U-TIGHTSPAN, B
+  0.63 from its partial keys, F 0.625 from F-INTRO, A 0.50, P 0.47; R's and P's design ceilings about 0.43 and 0.41,
+  U's 0.50 and 0.45, F's 0.625) [K1-k to K1-m]: a LIK at or under it is no evidence of the family's skill. F's
+  ceiling leaves out rules that read names in an ellipsis's turn (part of the ellipsis link, which F tests); the
+  best such rule, F-TURNK (0.67), is printed beside it, so an F LIK between the ceiling and it may be that partial
+  link (on the ellipsis half: 0.61-0.63 where 0.50 is chance between the two references) [K1-l, K1-m]. B's LIK is
+  read beside its cube and 2-4 name parts and its cube-group accuracy (all 4 questions of a group right; every
   partial-key and name-blind rule and the gate 0.00 there, bar 0.125) [K1-h], A's beside its single-holder split
-  (SPEC 9) [K1-g].
+  (SPEC 9) [K1-g] and A-CNTJOIN's cell (SPEC 9): comparing the asked attribute's statement count with the asked
+  name's keys' answers about half of A's both-items, a lossy binding SPEC 5 rules skill, so an A gain over 0.50 on
+  that cell alone may be counts, and a gain on the other cell needs token binding [K1-m].
   Transience: TRANSIENT(arm) if the K-PROBE LIK peak minus the final value (both smoothed, SPEC 9) >= 3 points on 2
   of 3 seeds [K1-d]; the peak step is reported. A final-checkpoint verdict next to a TRANSIENT label says so.
 
@@ -154,7 +199,10 @@ DEPENDENCIES
   F0 and FH final checkpoints (all 3 seeds, kept until K3 reads); K4 reuses FH as its base arm.
 
 GPU HOURS (SPEC 13 estimates)
-  K0 0.83 (smoke 0.05, K0-g 0.47, K0-cap 0.31); K1 2.79 (9 runs x 0.31); K1-X 1.24 if triggered and under the cap.
+  K0 2.22 [G-2] (smoke 0.05, K0-g 1.86 at 250M and 2 seeds, K0-cap 0.31; 1.29 with K0-g at one seed until G-2,
+  0.83 with K0-g's 0.47 at 125M until G-1; K0-g's extension 0.62 at 2 seeds); K1 2.79
+  (9 runs x 0.31); K1-X 1.24 if triggered ([S16] never cut for hours; until S16 "and under the cap"). [G-1] Estimates
+  only: no cap, budget or flag (SPEC 13).
 
 CHANGES AFTER CRITIQUE (2026-09-27, adversarial critic, before any K code, data or run; no model loaded. Run: a
   tokenizer vocab count (CAP 778, LOW 3,913, frame ids as SPEC 1), python for name bits, oracle noise, K5 filler
@@ -175,7 +223,9 @@ CHANGES AFTER CRITIQUE (2026-09-27, adversarial critic, before any K code, data 
   C4 C held only the asked attribute's values, so an attribute-blind copier (the value after the asked entity's
      latest mention, oracle T) could never pick a wrong candidate and LIK could not see it. C now holds every item
      value; T gets a threshold on R, U, F (on R it sits near 0.61 if 1-3 attributes are uniform: mean of 1, 1/2,
-     1/3); a new wrong-pick class counts another attribute's value.
+     1/3); a new wrong-pick class counts another attribute's value. (K3 round 6: the asked attribute was not uniform
+     among the asked entity's attributes to a reader blind to it, and T's class beat 0.65 on R, U and P; every key
+     is now built by one law, T's bar covers P and its class has rules and a fitted model, K1-k.)
   C5 O2 is right exactly when no foil of the asked attribute follows, which the balance rule sets to 1/2, and the
      threshold was <= 0.50: the check would fail about half the time on noise alone (SE 0.022 at n 512). Rates now
      pass at t + 3 SE and the 1/2 rules hold exactly per 512-item block.
@@ -286,3 +336,80 @@ CHANGES BEFORE FIRST RUN (2026-09-27; no K run has started. Mac CPU only, no lan
      longer R's design, so K1 compares P's LIK with its own ceiling and reads P for persistence (the marker) as
      before. F's marks (0.625 / 0.81 / 1.00) hold (F rules 0.614-0.635 on the fresh sets). Every K-EVAL record is new
      (questions and flags); S_ID's size and the eval seeds did not change; no GPU hours.
+  K1-j Shortcut ceilings, fifth pass (REVIEW 6a; ../SPEC.txt section 16 K3 round 5, code/notes.txt K3 ROUND 5). R: the
+     build kept orders in which the key had the block's intro rank and follow status, so a question-blind posterior read
+     0.67-0.68 and the gate's own columns, fitted on 40,960 R items alone, 0.66-0.68. Now the key is the holder the
+     follow flag picks among symmetric holders, and a rule blind to the question's name can know only the follow share:
+     R-POST, the design ceiling, 0.641 on R (0.2 for the no-foil fifth, 5/8 on two holders, 3/8 on three or more) and
+     0.50 on P; it reads 0.636-0.650 on R's sets. K1 reads R's LIK against 0.641 as the line under which R shows no
+     skill, and against its fitted ceiling as before. B: the asked name is the one at the flagged rank of a uniform
+     order (a partial key with a rank-for-size tie-break read 0.68 on training B, now 0.62-0.63, B-ADAPT's level). T on
+     R rose to 0.635-0.645, under its 0.65 bar (the rule that takes the asked entity's latest statement of any attribute
+     reads that much of R). Ceilings (gen.py check, 92,160 training items, pooled, family-alone and F models; train /
+     K-EVAL-ID / K-EVAL-S): R 0.634 / 0.654 / 0.644, U 0.559 / 0.574 / 0.617, B 0.186 / 0.195 / 0.223 (groups 0.000 /
+     0.000), F 0.630 / 0.641 / 0.660, A 0.502 / 0.500 / 0.500, P 0.510 / 0.504 / 0.527, each within its bar's C5
+     tolerance. F's marks (0.625 / 0.81 / 1.00) hold (EXCL 0.625, LASTSKIP 0.602-0.662). R, P, B and A records are new;
+     U's and F's turns are not; S_ID's size and the eval seeds did not change; no GPU hours.
+  K1-k Shortcut ceilings, sixth pass (REVIEW 7a and 7b; ../SPEC.txt section 16 K3 round 6, code/notes.txt K3 ROUND 6).
+     Every check before this one read the question's name only one way: blind to it. A tracker that reads the name as
+     T does and never the attribute (T's class, C4) beat T's 0.65 on R, U and P because SPEC 4 built the asked key
+     unlike the asked entity's other keys (R, P: its attribute held by 2 or more entities in every foil item; U:
+     restated 2-4 times with a foil): TA-SHARE 0.73-0.76 on R, TA-CNT 0.69-0.75 on U, TA-SHARE 0.71-0.72 on P, a
+     fitted model 0.75-0.94; T on P 0.66-0.68 had no bar. Now R, U and P build every key by one law and ask a key
+     drawn uniformly over the item's keys (R: 2-4 entities stating 2-3 of 3 attributes; U: every attribute a pair of
+     holders with one count law; P: R's design and a bystander of its own, its questions placed so no P item is
+     redrawn), with intro ranks drawn apart from the structure. Design ceilings (from tokens, 40,960 fresh items
+     each): blind to the question's name, the mean of 1/m over the asked attribute's m holders (R 0.432, P 0.434, U
+     0.500; R-POST 0.641 before); blind to its attribute, the mean of 1/n over the asked entity's n keys (R 0.406, P
+     0.406, U 0.451). U's fitted ceilings sit above those by its lure (13.4% of U items ask the final key earlier; the
+     copy reads them). The attribute-blind side is carried by TA-SHARE, TA-REP, TA-CNT, TA-SHREP and T (bar 0.65 on
+     R, U, F, P), the exch_attr rules and an attribute-blind fitted model in the gate. Ceiling-relative scoring (a
+     score counting only the margin over the ceiling) was allowed this round and not taken: the class was removable
+     without changing what R, U and P test, so K1 reads LIK in absolute units as registered.
+     Ceilings (gen.py check, 92,160 training items; train / K-EVAL-ID / K-EVAL-S; name-blind = the largest of the
+     pooled, alone and F models, attribute-blind = the TA model): R 0.434 / 0.435 / 0.488 and 0.412 / 0.434 / 0.469,
+     U 0.555 / 0.549 / 0.648 and 0.547 / 0.568 / 0.562, B 0.190 / 0.197 / 0.184 (groups 0.000 / 0.000), F 0.633 /
+     0.641 / 0.688 and 0.621 / 0.613 / 0.621, A 0.502 / 0.500 / 0.500, P 0.442 / 0.457 / 0.453 and 0.411 / 0.434 /
+     0.426, each within its bar's C5 tolerance. R's and P's ceilings are now far under their bars: a LIK between
+     the larger ceiling (about 0.44-0.49) and 0.65 is above every cheap reader measured here, which round 5's design
+     could not show for any LIK under 0.65; it is not by itself proof of the join (an unmeasured cue could sit there),
+     so K1 reports it as above the measured ceiling, not as skill. F's marks (0.625 / 0.81 / 1.00) hold (F is
+     unchanged: EXCL 0.625, LASTSKIP 0.602-0.662). A's both-items come from R contexts in 1/4 (1/2 before; at 1/2
+     the gate broke a tie to " none" on R-like items: A 0.542-0.548 cross-fitted, up to 0.567 on an eval split). R,
+     U, P and A records are new (items about 10% longer: 92.1 tokens per stream item against 83.3, so a fixed SKILL
+     token share holds about 9% fewer items); B's and F's are not; S_ID's size and the eval seeds did not change; no
+     GPU hours.
+  K1-l Shortcut ceilings, seventh pass (REVIEW 8a and 8b; ../SPEC.txt section 16 K3 round 7, code/notes.txt K3 ROUND 7).
+     A: a reader of the asked name's side alone (A-ONEKEY3: " none" where the asked name states one attribute among 3
+     names) beat A's 0.50 and gained in the mix, because a U both-item asked a small non-holder where U items ask an
+     entity by its size. A U context's asked entity is now uniform among the context's k entities, the context
+     redrawn while that entity lacks nothing [wording corrected K3 round 8, REVIEW 9b D-1], R contexts take 3/8 of
+     both-items, and A's attribute-blind side is a gate model (" none" against the keys of R, U
+     and P at the stream's shares): A 0.503 / 0.500 / 0.500 on gen.py's sets (bar 0.50). U: U-TIGHTSPAN (the lure's
+     copy, else the tightest holder) reads 0.602 / 0.595 / 0.650 against the gate's 0.550 / 0.549 / 0.625, so U's LIK
+     is read against U-TIGHTSPAN's; every family's ceiling is now the largest of its models and its barred rules
+     (B's item ceiling 0.62-0.63 from its partial keys, not the gate's 0.19: B's skill stays read on its groups).
+     Ceilings (gen.py check, 92,160 training items; train / K-EVAL-ID / K-EVAL-S; check.json "ceilings"): R 0.455 /
+     0.453 / 0.500, U 0.602 / 0.595 / 0.650, B 0.628 / 0.629 / 0.621 (groups 0.000 / 0.000), F 0.631 / 0.643 / 0.660
+     (F-TURNK beside it 0.674 / 0.669 / 0.684), A 0.503 / 0.500 / 0.500, P 0.457 / 0.463 / 0.453, each within its
+     bar's C5 tolerance. A's records are new (training and eval); R's, U's, B's, F's and P's items did not change
+     (P's K-EVAL records drew their 3 out-of-item candidates again); S_ID's size and the eval seeds did not change; no
+     GPU hours.
+  K1-m Shortcut ceilings, eighth pass (REVIEW 9a and 9b; ../SPEC.txt section 16 K3 round 8, code/notes.txt K3 ROUND 8).
+     F: a rule reading only the frequency of each ellipsis's antecedent attribute and the asked name's attribute
+     count (F-ANTESIZE) read F 0.636 fresh and 0.638 on gen.py's stream, over the printed F ceiling (0.631), because
+     the key never restated its own antecedent's attribute. The key's and the foil's antecedents now state one
+     attribute on ellipsis items, F-ANTESIZE reads the design's 0.625 on every set and is an F ceiling row, and the F
+     model carries its columns. K1-e's marks hold: 0.625 resolves nothing (F-INTRO, F-ANTESIZE, LASTSKIP and EXCL
+     0.62-0.63), 0.81 one kind (SURFe, SURFa, and now F-ANTE, which reads the ellipsis half whole), 1.00 both. A
+     fitted reader that places the asked name's first mention against a reference's turn still reads about 0.64
+     (ellipsis half 0.53): that is the partial link F-TURNK measures (0.68), so an F LIK between F's ceiling and
+     F-TURNK stays "may be that partial link". A: a reader comparing the asked attribute's statement count with the
+     asked name's keys (A-CNTJOIN, A 0.73-0.77, mix +0.023 to +0.027) is ruled skill (SPEC 5: A's binding, lossy), so
+     A's ceiling stays the one-sided readers' 0.50 and A's LIK is read per A-CNTJOIN cell (the reading rules above).
+     Ceilings (gen.py check, 92,160 training items; train / K-EVAL-ID / K-EVAL-S; check.json "ceilings"): R 0.455 /
+     0.453 / 0.500, U 0.602 / 0.595 / 0.650, B 0.628 / 0.629 / 0.621 (groups 0.000 / 0.000), F 0.632 / 0.625 / 0.641
+     (F-TURNK beside it 0.676 / 0.681 / 0.680), A 0.503 / 0.500 / 0.500, P 0.457 / 0.473 / 0.453, each within its
+     bar's C5 tolerance. F's records are new (training and eval); R's, U's, B's, A's and P's items did not change (A's
+     and P's K-EVAL records drew their 3 out-of-item candidates again); S_ID's size and the eval seeds did not change;
+     no GPU hours.

@@ -3,7 +3,8 @@
 parse() walks a chat record's turns with the pool classes of pools.Lex: a statement starts with a position-1 name
 token (full "F M L a v" or definition "F M L = X"), an attribute (reord "a F M L v" or ellipsis "a v") or an alias
 ("X a v"); a user turn ending in " ?" is a question. Nothing here reads the generator's structures.
-Every oracle returns a token id or -1 (no answer, always wrong). Only IDEAL, O9, O10 and O9|10 can say " none".
+Every oracle returns a token id or -1 (no answer, always wrong), or a tuple (a tie, oracles.credit shares it). Only
+IDEAL, O9, O10, O9|10 and the reported A rules (A1H, A-MANYFREE, A-QNEW, A-QREPEAT, A-CNTJOIN) can say " none".
 """
 from __future__ import annotations
 
@@ -17,18 +18,24 @@ SUBSETS = [s for n in (1, 2) for s in itertools.combinations(range(3), n)]      
 O3 = {"O3_" + "".join(str(i + 1) for i in s): s for s in SUBSETS}
 REFS = ["O11", "O11|2", "O12", "O12p", "O13e", "O13a", "O14e", "O14a"]     # reference shortcuts (review R-1)
 BCUE = ["B-CENTER", "B-TOKFREQ", "B-MAJOR"]     # K3 round 2: name structure, blind to the question's name
-BPART = ["B-ADAPT", "B-FRAME"]                  # K3 round 3: partial keys with order-free tie-breaks (REVIEW 4a S-1)
+BPART = ["B-ADAPT", "B-FRAME", "B-SURPRISE"]    # K3 round 3: partial keys with order-free tie-breaks (REVIEW 4a S-1);
+                                                # round 5: B-SURPRISE's tie-break reads rank and size (REVIEW 6a S-2)
 FINTRO = ["F-INTRO", "F-DEFX"]                  # K3 round 2: introduction order, no reference resolved
-REPORTED = ["A1H", "A-MANYFREE", "A-QNEW", "A-QREPEAT", "F-ANTE"]      # reported, no bar (K3 rounds 2 and 3)
-NAMES = ["IDEAL", "O1", "O2", *O3, "O4", "O5_1", "O5_2", "O5_3", "O6", "O7", "O8", "T", "O9", "O10", "O9|10", *REFS,
-         *BCUE, *BPART, *FINTRO, *REPORTED]
+REPORTED = ["A1H", "A-MANYFREE", "A-QNEW", "A-QREPEAT", "F-ANTE", "F-TURNK",       # reported, no bar (K3 rounds
+            "A-CNTJOIN"]                                                            # 2, 3, 7 and 8)
+TA = ["TA-SHARE", "TA-REP", "TA-CNT", "TA-SHREP"]   # K3 round 6 (REVIEW 7a S-1): T's class, blind to the attribute
+NAMES = ["IDEAL", "O1", "O2", *O3, "O4", "O5_1", "O5_2", "O5_3", "O6", "O7", "O8", "T", *TA, "O9", "O10", "O9|10",
+         *REFS, *BCUE, *BPART, *FINTRO, "R-POST", "U-TIGHTSPAN", "F-ANTESIZE", *REPORTED]
 ALL = "RUBFAP"
 TH = {"O2": (ALL, .50), "O6": (ALL, .50), "O7": (ALL, .50), "O8": (ALL, .50), "O1": ("U", .50),
-      "T": ("RUF", .65), "O9": ("A", .50), "O10": ("A", .50), "O9|10": ("A", .50), "O4": ("F", .35),
+      "T": ("RUFP", .65), **{o: ("RUFP", .65) for o in TA},    # K3 round 6 (REVIEW 7a S-1, S-2): T's bar on P too
+      "O9": ("A", .50), "O10": ("A", .50), "O9|10": ("A", .50), "O4": ("F", .35),
       "O5_1": (ALL, .65), "O5_2": (ALL, .65), "O5_3": (ALL, .65), **{o: ("B", .65) for o in O3},
       **{o: ("F", .50) for o in REFS[:4]}, "O13e": ("F", .75), "O13a": ("F", .75), "O14e": ("F", .65),
       "O14a": ("F", .65), "SURF": ("F", .65), "SURFe": ("F", .85), "SURFa": ("F", .85),
-      **{o: ("B", .65) for o in BCUE + BPART}, **{o: ("F", .65) for o in FINTRO}}
+      **{o: ("B", .65) for o in BCUE + BPART}, **{o: ("F", .65) for o in FINTRO}, "R-POST": ("RP", .65),
+      "U-TIGHTSPAN": ("RUP", .65),     # K3 round 7 (REVIEW 8a G-1): a ceiling row too (check_k)
+      "F-ANTESIZE": ("F", .65)}        # K3 round 8 (REVIEW 9a G-1): SURF's bar, a ceiling row (check_k)
 # A1H (A-ONEHOLDER, REVIEW 3a): " none" when O9|10's cues fire or one name states the asked attribute among 3 or
 # more names, else O4. Reported only: on A alone it beats 0.50, but it says " none" on R, U and P items too and
 # loses in the mix (K3 round 2; SPEC 9 splits A's LIK by that context). A-MANYFREE, A-QNEW, A-QREPEAT (REVIEW 4a,
@@ -37,6 +44,12 @@ TH = {"O2": (ALL, .50), "O6": (ALL, .50), "O7": (ALL, .50), "O8": (ALL, .50), "O
 # S-3, F-ANTEATTR): O4's quarter, else drop an ellipsis whose antecedent's attribute the asked name states in another
 # named statement, then the latest reference left; it reads the ellipsis's antecedent and a question-to-statement
 # name match, the two pieces of the resolution, so it is reported, not barred.
+# F-ANTESIZE (K3 round 8, REVIEW 9a G-1, its f_ante9.py): F-ANTE's count shadow, barred with SURF's bar and so a
+# ceiling row (check_k): it reads the statement before each ellipsis for its attribute's frequency only and the asked
+# name's statements for a count, no name against a reference. A-CNTJOIN (K3 round 8, REVIEW 9a O-1, its A9-CNTJOIN):
+# " none" when O9|10's cues fire or no key of the asked name (T's join) has the asked attribute's statement count in
+# the item, else O4. It compares the question's attribute with the asked name's keys through a count, a lossy form
+# of A's binding, so SPEC 5 rules it skill: reported, and SPEC 9 splits A's LIK by the cell where it fires.
 # SURF, SURFe, SURFa: purity.surf (a fit needs the whole checked set); SURFr (SURF on the items whose gold is a
 # reference statement) is reported only: SURF <= 0.65 already holds it to 0.533, the named quarter being O4's.
 VIEWS = {"SURF": ("pat", None), "SURFe": ("pat_e", "ell"), "SURFa": ("pat_a", "alias")}
@@ -73,6 +86,7 @@ def parse(rec: dict, lex) -> tuple[list[dict], list[dict], list[tuple]]:
             ans = turns[ti + 1]["ids"]
             qs.append({"name": name, "attr": attr, "form": form, "toks": ids[:-1], "gold": ans[-1],
                        "n": len(st), "turn": ti + 1, "ex": ex, "defs": list(defs), "prev": [p["name"] for p in qs],
+                       "prevq": [(p["name"], p["attr"], p["gold"]) for p in qs],
                        "dex": list(dex)})
             prev_ent = prev_tent = None
             continue
@@ -143,6 +157,7 @@ def answers(st: list[dict], q: dict, prompt_ids: list[int], lex) -> dict:
     out["O7"] = max(reversed(vals), key=lambda v: cnt[v]) if vals else -1
     out["O8"] = S[-2]["val"] if len(S) >= 2 else -1
     out["T"] = _last(S, lambda s: s["tent"] == nm)
+    out.update(_topic_attr(S, q))
     no_attr = not any(s["attr"] == a for s in S)
     no_name = not any(s["name"] == nm for s in S) and nm not in _defs(prompt_ids, lex)
     out["O9"] = K.NONE if no_attr else out["O4"]
@@ -159,6 +174,7 @@ def answers(st: list[dict], q: dict, prompt_ids: list[int], lex) -> dict:
         out["O14" + o[-1]] = _last(S, lambda s: s["attr"] == a and s["kind"] != blind and s["ent"] == nm)
     out.update(_name_structure(S, q))
     out.update(_partial_keys(S, q))
+    out["R-POST"] = _r_post(S, q)
     out.update(_intro_order(S, q, out["O4"]))
     holders = {s["name"] for s in S if s["attr"] == a and s["name"] is not None}
     names = {s["name"] for s in S if s["name"] is not None} | {d[1] for d in q.get("defs", [])}
@@ -169,7 +185,34 @@ def answers(st: list[dict], q: dict, prompt_ids: list[int], lex) -> dict:
                    ("A-QREPEAT", nm in prev)):
         out[o] = K.NONE if (absent or cue) else out["O4"]
     out["F-ANTE"] = _ante_attr(S, q, out["O4"])
+    out["F-ANTESIZE"] = _ante_size(S, q, out["O4"])
+    out["A-CNTJOIN"] = K.NONE if (absent or _cnt_join(S, q)) else out["O4"]
+    out["U-TIGHTSPAN"] = _u_tightspan(S, q)
+    out["F-TURNK"] = _f_turnk(S, q)
     return out
+
+
+def _topic_attr(S: list[dict], q: dict) -> dict:
+    """TA-SHARE, TA-REP, TA-CNT, TA-SHREP (K3 round 6; REVIEW 7a S-1, its rules_ta.py): T's class, blind to the
+    question's attribute. The asked entity's statements are T's (by name or ellipsis adjacency); of its keys TA-SHARE
+    takes the one whose attribute the most holders state (an alias statement counts as a holder of its own), TA-REP
+    the one the entity states most (then holders), TA-CNT the one with the most statements in the item, TA-SHREP
+    holders then the entity's count; ties to the key stated latest; the answer is that key's latest value. Round 5's
+    R and P gave the asked attribute 2 or more holders and U restated the asked key 2-4 times, unlike the entity's
+    other keys: 0.69-0.76 against T's 0.65."""
+    E = [s for s in S if s["tent"] == q["name"]]
+    if not E:
+        return {o: -1 for o in TA}
+    hold, lat, X = {}, {}, []
+    for i, s in enumerate(S):
+        hold.setdefault(s["attr"], set()).add(s["tent"] if s["tent"] else ("ref", i))
+    for i, s in enumerate(E):
+        lat[s["attr"]] = i
+        X += [s["attr"]] if s["attr"] not in X else []
+    own, tot = Counter(s["attr"] for s in E), Counter(s["attr"] for s in S)
+    key = {"TA-SHARE": lambda x: (len(hold[x]),), "TA-REP": lambda x: (own[x], len(hold[x])),
+           "TA-CNT": lambda x: (tot[x],), "TA-SHREP": lambda x: (len(hold[x]), own[x])}
+    return {o: E[lat[max(X, key=lambda x: (*f(x), lat[x]))]]["val"] for o, f in key.items()}
 
 
 def _partial_keys(S: list[dict], q: dict) -> dict:
@@ -184,10 +227,86 @@ def _partial_keys(S: list[dict], q: dict) -> dict:
     best = min(([u for u in hold if all(u[i] == q["name"][i] for i in sub)] for sub in SUBSETS),
                key=lambda m: len(m) if m else 99)
     if not best:
-        return {"B-ADAPT": -1, "B-FRAME": -1}
+        return {"B-ADAPT": -1, "B-FRAME": -1, "B-SURPRISE": -1}
     want = "full" if q["form"] == 0 else "reord"
     fr = [u for u in best if hold[u]["kind"] == want] or best
-    return {"B-ADAPT": min(hold[u]["val"] for u in best), "B-FRAME": min(hold[u]["val"] for u in fr)}
+    intro = []
+    for s in S:
+        if s["name"] is not None and s["name"] not in intro:
+            intro.append(s["name"])
+
+    def surprise(u):            # K3 round 5 (REVIEW 6a S-2): how unexpected u's intro rank is for its statement count
+        x = intro.index(u) / max(1, len(intro) - 1)
+        return x if sum(s["name"] == u for s in S) >= 2 else 1 - x
+    top = max(surprise(u) for u in best)
+    return {"B-ADAPT": min(hold[u]["val"] for u in best), "B-FRAME": min(hold[u]["val"] for u in fr),
+            "B-SURPRISE": min(hold[u]["val"] for u in best if surprise(u) == top)}
+
+
+def _r_post(S: list[dict], q: dict) -> int:
+    """R-POST (K3 round 5, REVIEW 6a S-1): the round-5 R design's posterior pick, blind to the question's name. Holders
+    (names with a named statement of the asked attribute) in the order they state it: one holder, its value; two, the
+    first's (the key is followed in 5/8 of R's foil items); three or more, the last's (3/8 against at most 5/16 for
+    each followed one). That was round 5's design ceiling, about 0.64 (P 0.50). K3 round 6: fams.fam_R draws the
+    asked key uniformly over the item's keys, so every holder is equally likely and this reads E[1/m], about 0.43
+    (purity.exch_stats checks the uniform place on every set); kept with its bar."""
+    order = []
+    for s in S:
+        if s["attr"] == q["attr"] and s["name"] is not None and s["name"] not in order:
+            order.append(s["name"])
+    if not order:
+        return -1
+    pick = order[0] if len(order) <= 2 else order[-1]
+    return _last(S, lambda s: s["attr"] == q["attr"] and s["name"] == pick)
+
+
+def _latest_named(S, u, a) -> int:
+    return _last(S, lambda s: s["name"] == u and s["attr"] == a)
+
+
+def _u_tightspan(S: list[dict], q: dict):
+    """U-TIGHTSPAN (K3 round 7, REVIEW 8a G-1, its rules_rup8.py), blind to the question's name but for question-to-
+    question identity: an earlier question identical to the final one (U's lure) is copied (its answer's statement's
+    name, that name's latest value of the attribute: the copy SPEC 5 carries on purpose); else, of the names with a
+    named statement of the asked attribute, the one whose statements of it span the fewest user turns, ties sharing
+    credit (a tuple). Where no lure was drawn in a key's span its holder is likelier the key (skill._questions: a
+    lure at a turn end inside it with 1/2), so this reads U's lure-absence tilt: about 0.60 against the gate's 0.555
+    on gen.py's stream in K3 round 6 (U-BAYES, the exact posterior, reads the same). A ceiling row (check_k)."""
+    a = q["attr"]
+    same = [g for u, x, g in q.get("prevq", []) if u == q["name"] and x == a]
+    src = [s["name"] for s in S if same and s["val"] == same[-1] and s["name"] is not None]
+    if src:
+        return _latest_named(S, src[0], a)
+    span = {}
+    for s in S:
+        if s["attr"] == a and s["name"] is not None:
+            lo, hi = span.get(s["name"], (s["turn"], s["turn"]))
+            span[s["name"]] = (min(lo, s["turn"]), max(hi, s["turn"]))
+    if not span:
+        return -1
+    best = min(hi - lo for lo, hi in span.values())
+    top = tuple(_latest_named(S, u, a) for u, (lo, hi) in span.items() if hi - lo == best)
+    return top[0] if len(top) == 1 else top
+
+
+def _f_turnk(S: list[dict], q: dict):
+    """F-TURNK (K3 round 7, REVIEW 8a N-1, its f_foilturn8.py; reported, no bar): O4's quarter (a named statement of the
+    asked key after the first reference statement of the attribute); else, of the two reference statements, the one
+    sharing its user turn with a named statement of the asked name is the key's (both or neither: a tie, a tuple).
+    It reads names in an ellipsis's turn (an ellipsis's antecedent is the statement just before it, often in the
+    same turn), so it rebuilds part of the ellipsis link, the class SPEC 5 keeps out of F's ceiling: 0.669-0.684
+    (ellipsis items 0.61-0.63, alias items 0.48-0.53) on K3 round 6's sets. Reported beside F's ceiling."""
+    a, nm = q["attr"], q["name"]
+    refs = [i for i, s in enumerate(S) if s["attr"] == a and s["kind"] in REF_KINDS]
+    named = [i for i, s in enumerate(S) if s["attr"] == a and s["name"] == nm]
+    if len(refs) != 2:
+        return _last(S, lambda s: s["attr"] == a)
+    if named and named[-1] > refs[0]:
+        return S[named[-1]]["val"]
+    has = [any(S[y]["turn"] == S[x]["turn"] and S[y]["name"] == nm for y in range(len(S)) if y != x) for x in refs]
+    if has[0] == has[1]:
+        return (S[refs[0]]["val"], S[refs[1]]["val"])
+    return S[refs[0] if has[0] else refs[1]]["val"]
 
 
 def _ante_attr(S: list[dict], q: dict, o4: int) -> int:
@@ -199,6 +318,42 @@ def _ante_attr(S: list[dict], q: dict, o4: int) -> int:
     keep = [i for i in refs if not (S[i]["kind"] == "ell" and i > 0 and any(
         s["name"] == nm and s["attr"] == S[i - 1]["attr"] for j, s in enumerate(S) if j != i - 1))]
     return S[(keep or refs)[-1]]["val"]
+
+
+def _ante_size(S: list[dict], q: dict, o4: int):
+    """F-ANTESIZE (K3 round 8, REVIEW 9a G-1): O4's quarter; else, with two ellipses as the asked attribute's reference
+    statements and c(x) the item's statements of the attribute of the statement just before ellipsis x (read for its
+    frequency, never its name), the ellipsis with the larger c when the asked name states one attribute besides the
+    asked one in named statements, the smaller when it states two or more; ties, alias items and an asked name with no
+    other attribute a tie of the two (a tuple). With the antecedents' attributes drawn apart it read F 0.636 (the key
+    never restates its own antecedent's attribute, the foil's is one the key states in 0.20-0.40 of items); since
+    BD-48 both antecedents state one attribute, so every ellipsis item is a tie and it reads the design's 0.625."""
+    nm, a = q["name"], q["attr"]
+    refs = [i for i, s in enumerate(S) if s["attr"] == a and s["kind"] in REF_KINDS]
+    named = [i for i, s in enumerate(S) if s["attr"] == a and s["name"] == nm]
+    if not refs or (named and named[-1] > refs[0]):
+        return o4
+    if len(refs) != 2:
+        return S[refs[-1]]["val"]
+    tie = (S[refs[0]]["val"], S[refs[1]]["val"])
+    if any(S[i]["kind"] != "ell" or i == 0 for i in refs):
+        return tie
+    cnt = Counter(s["attr"] for s in S)
+    ci, cj = (cnt[S[i - 1]["attr"]] for i in refs)
+    nma = len({s["attr"] for s in S if s["name"] == nm and s["attr"] != a})
+    if ci == cj or nma == 0:
+        return tie
+    return S[refs[0] if (ci > cj) == (nma == 1) else refs[1]]["val"]
+
+
+def _cnt_join(S: list[dict], q: dict) -> bool:
+    """A-CNTJOIN's cell (K3 round 8, REVIEW 9a O-1): the asked name has keys (T's join: named statements and ellipsis
+    adjacency) and none of them has the asked attribute's statement count in the item. It never holds where the asked
+    key is a named statement or an ellipsis, that key's count being the asked attribute's (R, U, P; on F it holds
+    where the key is an alias, which T does not join)."""
+    keys = {s["attr"] for s in S if s["tent"] == q["name"]}
+    cnt = Counter(s["attr"] for s in S)
+    return bool(keys) and cnt[q["attr"]] not in {cnt[x] for x in keys}
 
 
 def _name_structure(S: list[dict], q: dict) -> dict:
@@ -267,6 +422,11 @@ def candidates(rec: dict, gold: int, lex, r) -> list[int]:
     pool = sorted(v for v in lex.v_only if v not in set(inside))
     extra = [int(x) for x in r.choice(pool, 3, replace=False)]
     return [gold] + [v for v in inside if v != gold] + extra + ([K.NONE] if gold != K.NONE else [])
+
+
+def credit(ans, gold) -> float:
+    """An oracle's credit: 1 or 0, or a tie's share when it answers a tuple (U-TIGHTSPAN, F-TURNK; K3 round 7)."""
+    return ans.count(gold) / len(ans) if isinstance(ans, tuple) else float(ans == gold)
 
 
 def rate_ok(rate: float, t: float, n: int) -> bool:

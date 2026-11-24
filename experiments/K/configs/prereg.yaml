@@ -1,0 +1,25 @@
+# Track K pre-registration for the harness gate (train.py refuses a run without it; the K queue passes
+# --require-committed, so it must be committed unchanged). The full pre-registration is experiments/K/SPEC.txt and
+# the K1-K5 notes AT THE SAME COMMIT (amendments S16, G-1, G-2 included); where this summary and those files differ,
+# they govern. Written 2026-11-21; no K run is recorded (code/notes.txt K3 ROUND 16).
+id: K
+hypothesis: >-
+  Track K (SPEC.txt): at E2's 5M shape and SCREENS' 250M-slot schedule, whether a memorized fact load near the
+  100-exposure capacity crowds out held-out in-context skill (K1), where facts and skill live (K2), whether resetting
+  fact units and regrowing them on skill data raises skill (K3, K3-R, K3-X), how a fixed parameter budget split
+  between attention and MLP moves skill and facts (K4, K4b), and how a lookup line changes what is memorized (K5).
+  STAGE 0 (K0, K1 notes) only selects: K0-smoke is never read, K0-g picks g_K, K0-cap labels the load.
+metric: >-
+  SPEC 9: S_ID = LIK pooled over K-EVAL-ID (3,072 final questions; candidates C = gold, every V value of the item,
+  3 V values outside it and " none"), reported with S_ID-S, per family beside its check.json ceiling, CE_C and strict
+  GEN; stored bits (Physics 3.3 value term, expressed and latent) on FB-PROBE; CONFLICT rates; F(CHAT) and F(PROSE)
+  by data_prep/bpb.py at E2's invocation on the final checkpoint. K0-g's objective: the mean NLL on K-DEV, skill
+  answer tokens and FB value tokens weighted equally, at seeds 199 and 200.
+decision_rule: >-
+  SPEC 10 rule KR: d_s = arm - reference at paired seeds 201, 202, 203; SD_ref pooled over the experiment's listed
+  contrasts; thr = t(0.975, df) SD_ref / sqrt(k); HIGHER needs dbar > thr, every d_s > 0 and dbar >= delta, LOWER the
+  mirror image, EQUAL |dbar| + thr < delta, else UNRESOLVED; delta S_ID 3 points, GEN 5, stored bits 10% of the
+  reference mean, rates 10 points; a skill verdict needs CE_C to move the same way (else CE-DISAGREE); a diverged arm
+  seed scores the worst value; WORSE_bpb labels GENERAL-LANGUAGE COST and decides nothing; raw verdicts decide, a
+  Holm reading over every K contrast is printed beside them. Each experiment's readings are its notes'; K0-g's pick
+  is analyze_k.pick_g (least mean over seeds 199 and 200, ties to the lower LR, one factor-2 extension at an edge).

@@ -1,0 +1,9 @@
+# Track K base (SPEC 7; K1 notes STAGE 0; written by kconfig.py). Every K run config extends this file and sets
+# only name, out_dir, seed, its LRs (LR5 x g), its data sources (gen.py data_block of its arm) and its k: block
+# (ktrain.py). The model, data ids, optimizer and engine are E2's base5m.yaml (E2 5M shape, 5,010,133 params);
+# schedule and length are SCREENS C1's (7,630 steps x 32,768 slots, warmup 76, linear decay over the last 20%,
+# ckpt_every 153); every K run is eager (code/notes.txt K COMPILE DECISION: SCREENS C1-b's engine values).
+extends: ../../E2_lr_transfer/configs/base5m.yaml
+engine_fixed: "2026-10-03 f314eb7 SCREENS C1-b (K COMPILE DECISION, 2026-10-11)"
+schedule: {mode: full, decay_frac: 0.2}
+train: {total_steps: 7630, ckpt_every: 153, compile: false}

@@ -165,3 +165,19 @@ def test_random_sets_are_matched():
     q = lambda j: int(np.searchsorted(np.quantile(np.arange(24.0), [.2, .4, .6, .8]), j, side="left"))  # noqa: E731
     assert sorted(q(j) for j in rq[0]) == sorted(q(j) for j in chosen[0])
     assert M.random_matched(chosen, 24, seed=7611) == r
+
+
+def test_reset_draws_from_its_own_seed():
+    """K3 round 16 (2026-11-22, REVIEW 17b; mutant r17_reset_seed_ignored survived): the reset's draws are
+    torch.Generator().manual_seed(seed)'s, W_gate's row then W_up's per unit, layer and unit ascending (K3 notes RESET
+    AND REGROW: seed 7700 + s), so another seed gives other rows. Re-derived here by hand for one layer."""
+    m = tiny_model()
+    A.reset_units(m, {0: [2, 9]}, seed=7701)
+    g = torch.Generator().manual_seed(7701)
+    std, mlp = m.cfg.init_std, m.blocks[0].mlp
+    for j in (2, 9):
+        for w in (mlp.gate_proj.weight, mlp.up_proj.weight):
+            assert torch.equal(w[j], (torch.randn(w.shape[1], generator=g) * std).to(w)), j
+    m2 = tiny_model()
+    A.reset_units(m2, {0: [2, 9]}, seed=7702)
+    assert not torch.equal(m2.blocks[0].mlp.gate_proj.weight[2], mlp.gate_proj.weight[2])

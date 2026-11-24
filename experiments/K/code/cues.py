@@ -18,7 +18,8 @@ model (f_item_features, REVIEW 3a GATE-F-BLIND): its candidates are the asked at
 read the asked name, but only as the N or O form of the attribute's named statements (O4's and SURF's cue), the
 reference statements' place against the asked name's first mention and definition (F-INTRO's and F-DEFX's cues)
 and the asked name's intro rank; no per-entity column and no asked-name count near a statement (an ellipsis refers
-to the statement just before it, so either rebuilds the resolution: REVIEW 3a read F 0.75-1.00 with them).
+to the statement just before it, so either rebuilds the resolution: REVIEW 3a read F 0.75-1.00 with them). K3 round
+8 (REVIEW 9a G-1): the attribute counts of the statement before each candidate and the asked name's attribute count.
 The ceiling covers these columns only. Chained full-name identity (an earlier question with the final name, its
 answer's statement, that statement's name: REVIEW 3a LINK) is not a column: it joins the final question's name to a
 statement, the skill itself (SPEC 5).
@@ -26,6 +27,10 @@ K3 round 4 (REVIEW 5a S-1; SPEC 5's ruling on name identity): question-to-questi
 among earlier questions' names) and statement-to-statement grouping (entity sizes) make no such join, so both are
 cheap; _q_cols adds the first (the second was in since round 1). No column compares a candidate's name with any
 question's name.
+K3 round 6 (REVIEW 7a S-1): ta_item_features, the attribute-blind side (T's class): candidates the asked entity's keys,
+the question's name read as T reads it, its attribute never (cuegate.ta_run fits it per family with T's bar).
+K3 round 7 (REVIEW 8a S-1): ta_item_features(none=True) adds " none" as a last candidate whose columns are the asked
+name's side and the item's structure (_ta_side), for A's attribute-blind side (cuegate.ta_a_run).
 """
 from __future__ import annotations
 
@@ -201,7 +206,7 @@ def _window(s, i, nm, D, gaps, nearest) -> list:
                ("y_gaprank", float(al and i == nearest))])
 
 
-F_ITEM = ("q_rank", "k", "nst", "npq", "a_N", "a_O", "form", "y_")     # the F model's item columns (prefixes)
+F_ITEM = ("q_rank", "k", "nst", "npq", "a_N", "a_O", "form", "y_", "q_nattr")     # the F model's item columns
 
 
 def f_item_features(rec: dict, lex) -> dict:
@@ -217,7 +222,10 @@ def f_item_features(rec: dict, lex) -> dict:
     K3 round 3 (REVIEW 4a S-2): the alias-window columns y_* (REVIEW 4a feats4.f_extra): per alias, its exchange gap
     after the asked name's definition (raw and one-hot 0-11), inside that definition's 1-10 window, inside another
     definition's window (flag, count), the nearest preceding definition is the asked name's, the nearer of the
-    references after the asked definition; per item the definitions, the asked one and its exchange, exchanges."""
+    references after the asked definition; per item the definitions, the asked one and its exchange, exchanges.
+    K3 round 8 (REVIEW 9a G-1, F9-ANTESIZE): per candidate the statement just before it, read for its attribute's
+    statements and holders in the item (pv_cnt, pv_hold: never its name, so an ellipsis's antecedent is read only as
+    a frequency), and per item the asked name's other attributes in named statements (q_nattr, a count)."""
     st, qs, intro = O.parse(rec, lex)
     q = qs[-1]
     S, a, nm = st[:q["n"]], q["attr"], q["name"]
@@ -229,7 +237,10 @@ def f_item_features(rec: dict, lex) -> dict:
     dk = [d[0] for d in D if d[2] == nm]
     gaps = {i: S[i]["ex"] - dk[0] for i in A if S[i]["kind"] in O.REF_KINDS and dk}
     nearest = min((g, i) for i, g in gaps.items() if g >= 1)[1] if any(g >= 1 for g in gaps.values()) else -1
+    acnt = Counter(s["attr"] for s in S)
+    ahold = {x: len({s["name"] for s in S if s["attr"] == x and s["name"] is not None}) for x in acnt}
     item = (_oh("q_rank", min(intro.index(nm), 3) if nm in intro else 4, 5) + _oh("k", min(len(intro), 5) - 1, 5)
+            + _oh("q_nattr", min(len({s["attr"] for s in S if s["name"] == nm and s["attr"] != a}), 3), 4)
             + _oh("nst", _b(n, (4, 8, 12, 16)), 5) + _oh("npq", min(len(qs) - 1, 3), 4)
             + _oh("a_N", min(sum(S[i]["name"] == nm for i in A), 2), 3)
             + _oh("a_O", min(sum(S[i]["name"] not in (None, nm) for i in A), 2), 3) + _oh("form", q["form"], 2)
@@ -255,9 +266,123 @@ def f_item_features(rec: dict, lex) -> dict:
                + [("pre_intro", float(ref and i < first)),
                   ("pre_def", float(s["kind"] == "alias" and bool(ndef) and i < ndef[0]))]
                + [(c, v * ref) for c, v in _oh("gap", _b(gap, (1, 2, 4, 8, 98)), 6)]
+               + _oh("pv_cnt", min(acnt[S[i - 1]["attr"]], 4) if i else 0, 5)
+               + _oh("pv_hold", min(ahold[S[i - 1]["attr"]], 3) if i else 0, 4)
                + _window(s, i, nm, D, gaps, nearest))
         rows.append(row + item)
         gold = j if s["val"] == q["gold"] else gold
     assert rows and gold >= 0, rec.get("id")
     return {"fam": rec["fam"], "grp": -1, "gold": gold, "id": rec.get("id"), "cheap_absent": False,
             "names": [c for c, _ in rows[0]], "X": np.array([[v for _, v in r] for r in rows], dtype=np.float32)}
+
+
+TA_ITEM = ("k", "form", "npq", "qn", "e_rank", "nx")     # the TA model's item columns (prefixes)
+TA_KEY = ([f"share{i}" for i in range(5)] + [f"cnt{i}" for i in range(6)] + [f"ecnt{i}" for i in range(4)]
+          + ["e_last", "e_first", "item_last", "in_last_turn", "frame", "ell", "h_first", "h_last", "x_last_stmt"]
+          + [f"erank{i}" for i in range(5)] + [f"rev{i}" for i in range(9)] + [f"dist{i}" for i in range(9)]
+          + [f"hpos{i}" for i in range(4)] + [f"{p}_{c}" for p in ("sh", "ec", "ct") for c in ("max", "umax")]
+          + ["vrank", "osize", "e_span", "eq", "eq2", "after_qn", "qn_at"])     # the per-key columns, in order
+
+
+def _ta_side(S: list[dict], nm, X: list) -> list:
+    """K3 round 7 (REVIEW 8a S-1): the " none" row's item columns, the asked name's side as T reads it and the item's
+    structure, whichever key is asked: the item's attributes (1-6+), its statements by the asked entity (1-6+),
+    the item's attributes the entity does not state (0-3+), every attribute held by exactly two names with no
+    reference statement (U's structure: A-ONEKEY3's cell), the entity's least and most stated key (1-3+)."""
+    attrs = {s["attr"] for s in S}
+    hold = {}
+    for s in S:
+        hold.setdefault(s["attr"], set()).add(s["name"])
+    own = Counter(s["attr"] for s in S if s["tent"] == nm)
+    ulike = all(s["name"] is not None for s in S) and all(len(h) == 2 for h in hold.values())
+    return (_oh("aq", min(len(attrs), 6) - 1, 6) + _oh("e_n", min(sum(own.values()), 6) - 1, 6)
+            + _oh("e_miss", min(len(attrs - set(X)), 3), 4) + [("ulike", float(ulike))]
+            + _oh("e_min", min(min(own.values(), default=1), 3) - 1, 3)
+            + _oh("e_max", min(max(own.values(), default=1), 3) - 1, 3))
+
+
+def ta_item_features(rec: dict, lex, none: bool = False) -> dict:
+    """K3 round 6 (REVIEW 7a S-1, its ta_fit.py): the attribute-blind fitted model, T's class (SPEC 5 C4: a tracker
+    that reads the question's name, never its attribute). Candidates: the asked entity's keys, the attributes of its
+    statements by name or ellipsis adjacency (T's join); per key only statistics read between statements: its
+    attribute's holders (an alias statement a holder of its own), its statements in the item and by the entity, the
+    entity's keys, whether its latest is the entity's last or first key, the item's last statement, in the last
+    turn, in the question's frame, an ellipsis, the entity first or last to state the attribute, the attribute's
+    latest statement, its rank from the entity's end, recency and exchange distance, the entity's place among the
+    attribute's holders; the unique or tied maximum of holders, of the entity's count and of the item's count among
+    the keys (TA-SHARE's, TA-REP's, TA-CNT's flags); its value's id rank; the holders' mean size; the exchanges
+    between the entity's first and latest statement of it; an earlier question naming another entity asked the
+    attribute ("+eq", how often); the entity states it after the latest earlier question naming the final name (U's
+    lure, read by its place); an earlier question naming the final name asked it (K3 round 6 final: U's lure asks the
+    final key itself, the copy cue, as the name-blind side's ans_same_q; an earlier question's attribute is not the
+    final question's, so the rule TA-QN read U 0.48-0.53 with it). Per item: names, the question's frame, earlier
+    questions, the final name asked earlier, the entity's intro rank and keys. The final question's attribute token
+    is read nowhere (tests/test_cues.py swaps it). Gold: the key whose latest value is the gold; -1 when none is (an
+    alias gold in F, " none" in A: the item counts as missed)."""
+    st, qs, intro = O.parse(rec, lex)
+    q, prev = qs[-1], qs[:-1]
+    S, nm = st[:q["n"]], q["name"]
+    E = [i for i, s in enumerate(S) if s["tent"] == nm]
+    X = []
+    for i in E:
+        X += [S[i]["attr"]] if S[i]["attr"] not in X else []
+    base = {"fam": rec["fam"], "grp": -1, "id": rec.get("id"), "cheap_absent": False}
+    if none:        # O9|10's cue, read only into this flag (the A reading credits it, cuegate.ta_a_run), never a column
+        base["cheap_absent"] = nm not in intro or not any(s["attr"] == q["attr"] for s in S)
+    if not X and not none:
+        return {**base, "gold": -1, "X": None, "names": []}
+    n = len(S)
+    hold = {}
+    for i, s in enumerate(S):
+        h = hold.setdefault(s["attr"], [])
+        u = s["tent"] if s["tent"] else ("ref", i)
+        h += [u] if u not in h else []
+    size = Counter(s["tent"] for s in S if s["tent"])
+    eq = Counter(p["attr"] for p in prev if p["name"] != nm)
+    qn = [p for p in prev if p["name"] == nm]
+    lure_at = qn[-1]["n"] if qn else None
+    ex = {x: [i for i in E if S[i]["attr"] == x] for x in X}
+    share, ecnt = {x: len(hold[x]) for x in X}, {x: len(ex[x]) for x in X}
+    cnt = {x: sum(s["attr"] == x for s in S) for x in X}
+    vals = sorted(S[ex[x][-1]]["val"] for x in X)
+    item = (_oh("k", min(len(intro), 6) - 1, 6) + _oh("form", q["form"], 2) + _oh("npq", min(len(prev), 3), 4)
+            + _oh("qn", min(len(qn), 2), 3) + _oh("e_rank", min(intro.index(nm), 4) if nm in intro else 5, 6)
+            + _oh("nx", min(len(X), 4) - 1, 4))
+    rows, gold = [], -1
+    for x in X:
+        lt, hx = ex[x][-1], hold[x]
+        oth = [size[u] for u in hx if u != nm and u[0] != "ref"]     # G-2 (REVIEW 12b D-1): "not isinstance(u,
+        #   tuple)" dropped every holder (a name is a tuple too), so osize read 0 on every item until G-2
+
+        def top(d):
+            return [("max", float(d[x] == max(d.values()))), ("umax", float(sorted(d.values())[-1:] == [d[x]] and
+                                                                             list(d.values()).count(d[x]) == 1))]
+        row = (_oh("share", min(share[x], 5) - 1, 5) + _oh("cnt", min(cnt[x], 6) - 1, 6)
+               + _oh("ecnt", min(ecnt[x], 4) - 1, 4)
+               + [("e_last", float(lt == E[-1])), ("e_first", float(ex[x][0] == E[0])),
+                  ("item_last", float(lt == n - 1)),
+                  ("in_last_turn", float(S[lt]["turn"] == S[-1]["turn"])),
+                  ("frame", float((S[lt]["kind"], q["form"]) in (("full", 0), ("reord", 1)))),
+                  ("ell", float(S[lt]["kind"] == "ell")), ("h_first", float(hx[0] == nm)),
+                  ("h_last", float(hx[-1] == nm)),
+                  ("x_last_stmt", float(max(i for i, s in enumerate(S) if s["attr"] == x) == lt))]
+               + _oh("erank", min(len(E) - 1 - E.index(lt), 4), 5) + _oh("rev", min(n - 1 - lt, 8), 9)
+               + _oh("dist", min(q["ex"] - S[lt]["ex"] - 1, 8), 9) + _oh("hpos", min(hx.index(nm), 3), 4)
+               + [(f"sh_{c}", v) for c, v in top(share)] + [(f"ec_{c}", v) for c, v in top(ecnt)]
+               + [(f"ct_{c}", v) for c, v in top(cnt)]
+               + [("vrank", vals.index(S[lt]["val"]) / max(1, len(vals) - 1)),
+                  ("osize", (sum(oth) / len(oth) if oth else 0.0) / 6.0),
+                  ("e_span", min(S[lt]["ex"] - S[ex[x][0]]["ex"], 12) / 12.0),
+                  ("eq", float(eq[x] > 0)), ("eq2", float(eq[x] > 1)),
+                  ("after_qn", float(lure_at is not None and any(i >= lure_at for i in ex[x]))),
+                  ("qn_at", float(any(p["attr"] == x for p in qn)))])
+        rows.append(row + item)
+        gold = len(rows) - 1 if S[lt]["val"] == q["gold"] else gold
+    if none:        # K3 round 7 (REVIEW 8a S-1): " none" competes, last, with the asked name's side as its columns
+        side = _ta_side(S, nm, X)
+        rows = [[("is_none", 0.0)] + r + side for r in rows] + [
+            [("is_none", 1.0)] + [(c, 0.0) for c in TA_KEY] + item + side]
+        gold = len(rows) - 1 if q["gold"] == K.NONE else gold
+    assert not rows or [c for c, _ in rows[0]][1 if none else 0:][:len(TA_KEY)] == TA_KEY
+    return {**base, "gold": gold, "names": [c for c, _ in rows[0]],
+            "X": np.array([[v for _, v in r] for r in rows], dtype=np.float32)}
